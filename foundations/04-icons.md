@@ -60,3 +60,21 @@ Frame sizing follows the documentation-layout role and content. Required outline
 - layer naming and construction best practices;
 - avoiding fragile boolean construction when unnecessary;
 - how to extend the icon library.
+
+## Mandatory visible notes/documentation
+
+The long-form icon documentation must be rendered visibly on the Figma canvas.
+
+An icon grid alone is not documentation.
+
+The notes must explain:
+- the selected icon language/library;
+- recognizability and label pairing;
+- icon-only action constraints;
+- optical sizing and stroke consistency;
+- accessibility/accessible-name expectations;
+- how to extend the icon set;
+- product-specific examples using the generated icons;
+- do/don't examples for arbitrary scaling, mixed styles, and unclear metaphors.
+
+An Icons page without visible notes fails QA.
