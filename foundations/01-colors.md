@@ -82,7 +82,19 @@ Each swatch shows:
 - source or resolved color value;
 - contrast/accessibility annotation when useful.
 
-# 3. Gradients overview
+## Raw color values are never the specimen
+
+A color family or brand color must never be documented as text-only metadata.
+
+For every color shown in this page:
+- render a visible color specimen;
+- bind the specimen to its variable when one exists;
+- show the token/variable name prominently;
+- show hex/RGB/HSL/CMYK/Pantone only as secondary metadata;
+- do not treat colored hex text as a swatch.
+
+A card such as `Crimson Red / #DC143C / Primary identity` with no visible color block fails QA.
+
 
 Required groups:
 - Neutral gradients
