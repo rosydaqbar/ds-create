@@ -193,10 +193,75 @@ bg-success-solid
 
 Actual output names are translated through the selected naming convention.
 
-Each group must have:
-- 720 px Design note with `Variables` badge;
-- four-column table: Name / Light mode / Dark mode / Usage;
-- complete usage copy for every row.
+Each group must use this exact structure:
+
+```text
+Content group                         2368
+layout: vertical
+clip content: false
+
+├─ Design note                         720
+│  ├─ title + Variables badge
+│  └─ family description
+├─ gap                                  64
+└─ Variable table                     2368
+   layout: horizontal
+   clip content: false
+   ├─ Name column                      400
+   ├─ Light mode column                212
+   ├─ Dark mode column                 213
+   └─ Usage column                    1543
+```
+
+Critical:
+- the **Design note alone** is 720 px;
+- never make the group or table 720 px;
+- never clip the table;
+- construct the table from four vertical columns, not 720 px horizontal rows.
+
+Table cell rhythm:
+- header: 34 px;
+- header separator: 12 px;
+- data row: 80 px;
+- semantic subgroup separator: 12 px;
+- row divider: subtle 1 px.
+
+Name column:
+- render semantic tokens as bordered token badges;
+- show parent/child relationships with indentation and connector lines;
+- modifiers such as `_hover`, `_alt`, `_on-brand`, `_subtle`, and `_solid` should visually belong to their parent token where applicable;
+- actual naming syntax comes from the selected token naming preset.
+
+Light/Dark columns:
+- render aliases as visual chips;
+- each chip includes resolved color swatch + primitive/alias token name;
+- never use plain alias text for color variables.
+
+Usage column:
+- visible at all times;
+- must contain specific per-token guidance;
+- do not generate generic sentence templates.
+
+Example usage quality:
+
+```text
+text-primary
+Primary text such as page headings.
+
+text-primary_on-brand
+Primary text when used on solid brand-color backgrounds.
+
+text-secondary
+Secondary text such as labels and section headings.
+
+text-secondary_hover
+Secondary text in interactive hover states.
+
+text-placeholder
+Placeholder and empty-input hint text.
+```
+
+Every Text, Border, Foreground, and Background token must have its own purpose-driven usage sentence.
 
 # 5. Color utility variables
 
@@ -239,3 +304,92 @@ Required outline:
 - Choosing/updating the gray palette
 
 Use rich text, screenshots/examples, and inline resources.
+
+
+# 7. Color-variable hard QA
+
+Before the Color variables frame can be considered complete, validate all of the following:
+
+## Geometry
+
+- frame width = `2528`;
+- Section horizontal padding = `80`;
+- visible content width = `2368`;
+- every semantic group container = `2368` wide;
+- every Design note = `720` wide;
+- note-to-table gap = `64`;
+- every variable table = `2368` wide;
+- table clip content = `false`;
+- group clip content = `false`.
+
+## Columns
+
+- Name = `400`;
+- Light mode = `212`;
+- Dark mode = `213`;
+- Usage = `1543`;
+- total = `2368`;
+- all four columns are visible inside the frame.
+
+## Documentation cells
+
+- header cell = `34` high;
+- header separator = `12`;
+- data cell = `80`;
+- semantic subgroup separator = `12` where required;
+- token-name cell uses a token badge;
+- mode cells use color alias chips with swatches;
+- Usage cell contains bespoke copy.
+
+## Visual hierarchy
+
+At minimum, preserve visual grouping for token families such as:
+
+```text
+text-primary
+  _on-brand
+
+text-secondary
+  _hover
+  _on-brand
+
+text-tertiary
+  _hover
+  _on-brand
+
+border-secondary
+  _alt
+
+border-error
+  _subtle
+
+fg-secondary
+  _hover
+
+fg-tertiary
+  _hover
+
+bg-primary
+  _alt
+  _hover
+  -solid
+```
+
+The exact groups follow the final semantic inventory, but child modifiers must not appear as unrelated flat rows.
+
+## Copy quality
+
+Fail QA if Usage contains mechanically generated filler such as:
+- `where this hierarchy or state applies`;
+- `use for this token`;
+- `used for primary content` without a concrete UI example.
+
+Usage copy must explain a real interface purpose.
+
+## Screenshot sanity check
+
+At 100% page inspection:
+- Name, Light mode, Dark mode, and Usage must all be visible;
+- the table must span nearly the full documentation content width;
+- token chips and color previews must be visually apparent;
+- the page must not resemble a narrow article column with a truncated table.
