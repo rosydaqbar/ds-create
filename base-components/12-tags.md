@@ -1,6 +1,6 @@
 # Tags
 
-# Canvas inventory
+# Canvas region order
 
 Private helpers appear left of the public Tag set.
 
