@@ -1,6 +1,6 @@
 # Getting Started Guidance
 
-When Getting Started is in scope, create all five required documentation frames. They are part of the page specification, not an optional add-on.
+When the Getting Started Figma Page is in scope, create all five required top-level documentation Frames. They are defined by this Markdown specification and are not optional add-ons.
 
 Required frames:
 
@@ -44,6 +44,6 @@ Hard rules:
 - do not color the hex string and treat that as the swatch;
 - a white card containing only a color name, a colored hex string, and description **fails QA**.
 
-This rule applies even when the color summary is not on the dedicated Colors page.
+This rule applies even when the color summary is not on the dedicated Colors Figma Page.
 
-Do not merge, summarize, or replace these five topics with one short setup page. Preserve every topic and its required examples/resources.
+Do not merge, summarize, or replace these five topics with one short setup Frame. Preserve every topic and its required examples/resources.
