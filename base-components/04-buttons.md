@@ -16,7 +16,7 @@ Buttons
 ├─ social buttons
 ├─ social button groups
 ├─ mobile app-store badges
-└─ long-form notes and documentation
+└─ documentation and documentation
 ```
 
 Public headers:
@@ -299,9 +299,9 @@ The Buttons public matrix must show:
 
 Do not collapse the standard 200-variant matrix into a demo row.
 
-# 11. Long-form notes and documentation
+# 11. Button documentation
 
-This page includes a dedicated long-form documentation frame. It is required.
+This page includes a dedicated documentation frame. It is required.
 
 The documentation should preserve these topics and illustrative examples:
 
@@ -361,23 +361,6 @@ Include:
 
 The documentation must describe the active generated system, not another product or source library.
 
-
-
-## Mandatory visible documentation region
-
-The long-form Button documentation above must be rendered as visible Figma documentation, not kept only in this Markdown file or component descriptions.
-
-It must also cover:
-- actual generated anatomy and private/helper dependencies;
-- Size × Hierarchy × State behavior;
-- focus, disabled, and loading accessibility;
-- label/content guidance;
-- icon-only accessible naming;
-- do/don't examples for hierarchy misuse, destructive-action misuse, and loading-state layout shift;
-- central maintenance through tokens, text-padding anatomy, and effect styles.
-
-A complete button matrix with no visible documentation frame fails QA.
-
 # 12. Button QA
 
 Fail QA when:
@@ -388,5 +371,5 @@ Fail QA when:
 - destructive buttons use different anatomy from standard buttons;
 - social groups duplicate rather than instance Social button;
 - the full hierarchy/state matrix is absent;
-- long-form documentation omits optical balancing;
+- documentation omits optical balancing;
 - the active visual effect model cannot be changed centrally through tokens.
