@@ -149,7 +149,7 @@ Column counts and breakpoints come from the actual product.
 
 Do not force reference viewport widths or grid counts.
 
-# 8. Long-form documentation
+# 8. Spacing, radius & grid documentation
 
 Required outline:
 - why a spacing system is necessary;
@@ -162,22 +162,3 @@ Required outline:
 - practical Figma nudge/grid configuration tips.
 
 The documentation should explain the user's actual spacing/grid model, not a copied numeric system.
-
-## Mandatory visible notes/documentation
-
-The long-form spacing/grid documentation must be visible on the Figma canvas.
-
-Primitive tables, radius specimens, and grid diagrams do not replace explanatory documentation.
-
-The notes must explain:
-- the selected spacing model and why;
-- primitive versus semantic dimension usage;
-- exceptions and optical adjustments;
-- radius logic;
-- content/container width behavior;
-- paragraph measure;
-- responsive grid behavior and breakpoint intent;
-- Figma nudge/grid guidance;
-- how to maintain dimensions centrally.
-
-A Spacing, Radius & Grids page without visible notes fails QA.
