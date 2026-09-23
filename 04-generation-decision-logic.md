@@ -93,33 +93,63 @@ For every generated page verify:
 
 # 6. Hard validation for variable documentation
 
-Variable pages require structural validation, not just content validation.
+Variable pages require structural validation, not universal fixed dimensions.
 
-For every 2528 px semantic-variable frame:
+The audited measurements are **reference baselines**.
+
+Validate these relationships:
 
 ```text
-Section content width = 2368
-Design note width = 720
-Table width = 2368
-Columns = 400 / 212 / 213 / 1543
+Section
+└─ Variable group                     Fill container
+   ├─ Design note                     constrained reading width
+   └─ Variable table                  Fill container
+      ├─ Name                         preferred / expandable
+      ├─ Mode(s)                      content-driven / expandable
+      └─ Usage                        Fill
 ```
 
 The generation step must reject and repair the frame when:
-- the 720 px Design note width is inherited by the table;
-- table or group `clipsContent` is true;
-- the Usage column extends beyond the visible table bounds;
-- a row-based construction causes columns to overflow;
-- Light/Dark aliases are rendered as plain text instead of visual alias chips;
-- semantic token names are rendered as unstructured plain text instead of token badges/hierarchy;
-- Usage content is generic templated filler.
+- the Design note width is inherited by the table;
+- the table or group clips content;
+- Usage is not visible;
+- a row-based construction pushes columns outside the visible table;
+- additional modes are omitted to preserve an arbitrary reference width;
+- long token names or aliases are truncated instead of allowing their column/frame to grow;
+- row content overlaps because a baseline row height is treated as fixed;
+- Light/Dark/theme aliases are rendered as plain text when a visual alias chip is appropriate;
+- semantic token hierarchy is flattened;
+- Usage copy is generic templated filler.
 
-For color-variable tables specifically, the final visual QA must verify:
-1. four visible columns;
-2. full-width table;
-3. token badges in Name;
-4. swatch + alias chips in mode columns;
-5. explicit per-token Usage copy;
-6. hierarchy connectors/indentation for modifiers;
-7. 80 px data-row rhythm and 12 px subgroup separators.
+For color-variable tables specifically, final visual QA must verify:
+1. every required column is visible;
+2. table fills the available documentation width;
+3. token badges are used in Name;
+4. swatch + alias chips appear in color-mode columns;
+5. every token has explicit usage copy;
+6. hierarchy connectors/indentation are preserved;
+7. rows grow when content requires it;
+8. additional modes expand the table/frame rather than compressing the existing layout.
 
 Do not mark Color variables complete until this validation passes.
+
+# 7. Reference measurements are not constraints
+
+Whenever this package records observed pixels, treat them as one of:
+
+- baseline composition;
+- preferred minimum;
+- measured reference rhythm.
+
+They are **not universal maximums** unless a component specification explicitly says a dimension is functionally fixed.
+
+For documentation layouts, prefer:
+- Fill container;
+- Hug contents;
+- semantic spacing tokens;
+- constrained reading widths;
+- content-driven columns;
+- minimum sizes;
+- expandable canvases.
+
+A large brand/system is allowed to produce a larger documentation canvas while keeping the same visual grammar.
