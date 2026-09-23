@@ -1,11 +1,11 @@
 # Inputs
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private `_Mega input field base`
-x≈2800    Input field + textarea matrices (wide zone)
-x≈9368    Verification code inputs
+Private `_Mega input field base`
+Input field + textarea matrices (wide zone)
+Verification code inputs
 ```
 
 | Component set | Variant / property axes |
