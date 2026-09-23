@@ -1,10 +1,10 @@
 # Button Groups
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private `_Button group base`
-x≈2800    Public `Button group`
+Private `_Button group base`
+Public `Button group`
 ```
 
 | Component set | Variant / property axes |
