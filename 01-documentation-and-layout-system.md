@@ -196,7 +196,48 @@ Rules:
 - accessibility annotations appear directly on or near the specimen when useful;
 - a large palette expands the specimen region rather than shrinking swatches to fit an arbitrary page width.
 
-# 6. Variable-table pattern
+## 5.1 Color representation is always visual
+
+Across **all documentation pages**, any UI element that explains, summarizes, compares, or references a color must include an actual visual color specimen.
+
+This includes:
+- palette swatches;
+- brand-translation cards;
+- brand color summaries;
+- semantic-token summaries;
+- accessibility examples;
+- gradient/source annotations;
+- Getting Started color sections;
+- component documentation that calls out a specific color role.
+
+Required behavior:
+- show a real swatch, filled surface, preview strip, or equivalent specimen;
+- bind the specimen to the appropriate Figma variable when the variable exists;
+- show the token/variable name as the primary technical identifier;
+- raw values such as hex, RGB, HSL, CMYK, or Pantone may appear only as secondary metadata;
+- never use colored text containing the raw value as a substitute for a specimen;
+- never return a text-only color card.
+
+Forbidden example:
+
+```text
+Crimson Red
+#DC143C
+Primary identity and actions
+```
+
+Required equivalent:
+
+```text
+Crimson Red
+├─ [visible Crimson swatch]
+├─ brand/crimson/50
+├─ #DC143C
+└─ Primary identity and actions
+```
+
+The exact card composition may adapt to the page, but the visible specimen is mandatory.
+
 
 Semantic variable pages use a full-width documentation table.
 
