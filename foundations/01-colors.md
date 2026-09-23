@@ -423,3 +423,20 @@ At normal inspection:
 - token badges and value previews are visually apparent;
 - hierarchical lines are visible;
 - page does not resemble a narrow article column with a truncated table.
+
+## Mandatory visible notes/documentation
+
+The long-form color documentation above must be generated as visible Figma documentation, not left only in this Markdown specification.
+
+The page is incomplete if it contains only palettes, gradients, token tables, or swatches.
+
+At minimum, visible documentation must explain:
+- how the active brand palette maps into product UI roles;
+- primitive versus semantic color usage;
+- accessibility and contrast;
+- how to choose error/warning/success/informational colors;
+- how to change the brand/gray palette safely;
+- how alpha/utility colors should be used;
+- real examples from the generated system.
+
+A Colors page without this documentation frame fails QA.
