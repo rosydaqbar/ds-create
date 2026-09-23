@@ -264,3 +264,72 @@ Fail QA when:
 - add button is duplicated rather than using the private helper;
 - image/placeholder/initial states are separate unrelated components;
 - avatar-management documentation is missing.
+
+# 12. Visual documentation modules
+
+The Avatar notes require real editor/component examples, not prose alone.
+
+## 12.1 Shared avatar asset model
+
+Create a visual showing:
+- one shared avatar image source/helper;
+- multiple Avatar / Avatar label / Avatar group instances consuming it.
+
+Use connector arrows or dependency labels to make propagation obvious.
+
+## 12.2 Changing an avatar source
+
+Create an editor-style before/after sequence:
+1. select the shared avatar image/helper;
+2. replace the image/fill;
+3. preserve mask/crop;
+4. show all dependent avatar instances updated.
+
+The sequence should use the generated Avatar components.
+
+## 12.3 Editing avatar image fill
+
+Show the actual image-fill editing workflow used by the generated library.
+
+Do not use a screenshot from another system.
+
+Annotate:
+- image layer/helper;
+- crop/fill mode;
+- any shared style/asset relationship.
+
+## 12.4 Changing placeholder imagery
+
+Create a before/after example for placeholder/avatar fallback content.
+
+Show:
+- image avatar;
+- placeholder icon/initial state;
+- centralized replacement mechanism if placeholder imagery is shared.
+
+## 12.5 Changing placeholder/background colors
+
+Create a visual sequence:
+- original placeholder background;
+- semantic background token/style selected;
+- replacement value;
+- multiple placeholder instances updated.
+
+The background treatment must use the active brand palette.
+
+## 12.6 Source/licensing note
+
+If externally sourced avatar photography is included, show a compact metadata/example block with:
+- source;
+- approved usage note;
+- ownership/license field.
+
+Do not claim rights the user did not provide.
+
+## 12.7 Avatar visual QA
+
+Fail QA when:
+- avatar maintenance is described without editor examples;
+- source replacement does not demonstrate propagation;
+- placeholder/background changes are not shown using real generated tokens;
+- the documentation uses unrelated stock screenshots.
