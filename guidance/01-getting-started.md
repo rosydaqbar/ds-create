@@ -1,6 +1,6 @@
 # Getting Started Guidance
 
-When Getting Started documentation is requested, create five separate the system-defined value long-form frames arranged horizontally at the system-defined value intervals.
+When Getting Started is in scope, create all five required documentation frames. They are part of the page specification, not an optional add-on.
 
 Required frames:
 
@@ -11,7 +11,7 @@ Required frames:
 5. **Master Auto Layout** — explains responsive component behavior, flex-like layout logic, and shows an interactive component example.
 
 Each frame uses:
-- standard long-form header;
+- standard documentation header;
 - one the system-defined value `Rich text` column inside an the system-defined value-padded Section;
 - `Content item` blocks for headings/paragraphs;
 - the system-defined value documentation images where relevant;
@@ -46,18 +46,4 @@ Hard rules:
 
 This rule applies even when the color summary is not on the dedicated Colors page.
 
-Do not merge these five topics into one short setup page.
-
-## Mandatory visible notes/documentation
-
-Getting Started is itself a documentation surface. The five required long-form frames must be generated as visible Figma content whenever Getting Started is in scope.
-
-Do not replace them with:
-- a short dashboard;
-- a few summary cards;
-- one compact “system direction” section;
-- component descriptions stored only in metadata.
-
-The generated canvas must visibly explain the actual generated system: file organization, setup, libraries, variants, Auto Layout, active brand translation, and how to work with the system.
-
-A Getting Started page without the required long-form documentation frames fails QA.
+Do not merge, summarize, or replace these five topics with one short setup page. Preserve every topic and its required examples/resources.
