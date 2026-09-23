@@ -7,7 +7,7 @@ Base Component pages are not generic component galleries. Each page is a **compl
 - the full variant matrix rather than a few examples;
 - anatomy that preserves the actual nested construction;
 - related examples or composed groups when they exist;
-- long-form notes/documentation when the page includes them.
+- a dedicated notes/documentation region for **every published Base Component page**.
 
 Page order:
 
@@ -129,8 +129,11 @@ Component documentation must contain, where relevant:
 9. optical/alignment rules;
 10. semantic/destructive rules;
 11. examples in use;
-12. long-form notes when observed;
-13. QA checks.
+12. a dedicated notes/documentation region;
+13. accessibility and interaction guidance;
+14. do/don't or misuse guidance where relevant;
+15. implementation/maintenance notes;
+16. QA checks.
 
 The page Markdown file is responsible for specifying these details.
 
@@ -154,15 +157,31 @@ Allow:
 
 Do not hard-code a page to one absolute size if its content needs to grow.
 
-# 7. Long-form notes
+# 7. Notes and documentation are mandatory on every Base Component page
 
-When a Base Component page contains a dedicated long-form documentation frame, preserve it as part of the page family.
+Every Base Component page must include a dedicated documentation region. Documentation is not optional and must not be replaced by the page header or the component matrix.
 
-Observed in-scope long-form component documentation exists for:
-- Avatars;
-- Buttons.
+The documentation region must explain the generated component family itself. At minimum include:
 
-These frames use the shared 1600-wide long-form documentation grammar, but their prose width and page size may expand through the global documentation rules.
+1. **Overview / when to use** — what problem the component solves and when it is appropriate.
+2. **Anatomy** — the actual generated layer structure, including private-helper dependencies.
+3. **Variants and properties** — what each public axis changes and which combinations matter.
+4. **States and interaction** — Default/Hover/Focus/Pressed/Selected/Disabled/Error/Loading behavior as applicable.
+5. **Sizing and layout behavior** — Hug/Fill/Fixed relationships, wrapping, alignment, responsive behavior, and content growth.
+6. **Content guidance** — labels, supporting text, icon usage, truncation/wrapping, and semantic wording constraints.
+7. **Accessibility** — focus visibility, keyboard/touch behavior, non-color cues, labeling, and target-size considerations where applicable.
+8. **Do / don't** — at least one concrete misuse to avoid when the component has a common failure mode.
+9. **Implementation / maintenance note** — which variables, styles, private helpers, or nested instances should be edited centrally.
+10. **Example in context** — a small composed example when it materially clarifies usage.
+
+Rules:
+- write notes from the actual generated anatomy and active token system;
+- do not generate generic filler that could be pasted onto any component;
+- do not merely restate variant names;
+- documentation must sit visibly on the canvas as Figma frames/text, not only inside Markdown or component descriptions;
+- documentation uses the shared long-form documentation grammar and may expand vertically/horizontally with content.
+
+Avatars and Buttons retain their additional page-specific long-form requirements defined in their page specs.
 
 # 8. Completion criteria
 
@@ -173,6 +192,6 @@ A Base Component page fails QA when:
 - component properties are omitted;
 - variant matrices are reduced to samples;
 - page-level description is missing;
-- long-form notes are omitted where required;
+- the dedicated notes/documentation region is missing;
 - anatomy is described only conceptually rather than layer-by-layer;
 - generated components do not preserve the intended optical/layout relationships.
