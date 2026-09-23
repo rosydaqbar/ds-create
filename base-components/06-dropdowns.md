@@ -1,11 +1,11 @@
 # Dropdowns
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private menu helpers
-x≈2800    Dropdown menu families
-x≈5600    Context menus
+Private menu helpers
+Dropdown menu families
+Context menus
 ```
 
 | Component set | Variant / property axes |
