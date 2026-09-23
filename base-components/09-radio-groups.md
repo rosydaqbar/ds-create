@@ -109,7 +109,7 @@ Group matrix:
 
 
 
-## Mandatory notes/documentation region
+# Documentation
 
 The Figma page must visibly document:
 - single-choice radio semantics and when checkbox-style multi-select is intentionally appropriate;
@@ -125,7 +125,7 @@ The Figma page must visibly document:
 The full matrix does not replace this guidance.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - single-choice radio semantics and when checkbox-style multi-select is intentionally appropriate;
