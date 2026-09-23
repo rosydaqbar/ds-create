@@ -110,6 +110,23 @@ Show:
 - Supporting text on/off;
 - Default / Hover / Focused / Disabled.
 
+
+
+## Mandatory notes/documentation region
+
+The Figma page must visibly document:
+- checkbox versus radio semantics and when each is appropriate;
+- unchecked, checked, and indeterminate behavior;
+- why indeterminate is not a product end-state for radio controls;
+- control → label → supporting-text anatomy and top alignment for multi-line copy;
+- size and interaction states including Focused and Disabled;
+- label/content guidance and click/tap target expectations;
+- keyboard/focus and non-color selection cues;
+- do/don't examples for using checkboxes for single-choice tasks, centering against multi-line copy, and hiding labels;
+- which private base and semantic state tokens should be edited centrally.
+
+The component matrix does not replace these notes.
+
 # 6. QA
 
 Fail QA when:
