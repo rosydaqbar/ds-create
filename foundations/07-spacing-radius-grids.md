@@ -1,6 +1,6 @@
 # Spacing, Radius & Grids
 
-This is one Foundation page containing several related documentation regions.
+This is one Foundation Figma Page containing several related documentation regions.
 
 # Canvas region order
 
@@ -259,7 +259,7 @@ work together.
 
 ### Required visual documentation
 
-Create at least one responsive page/container grid specimen with measurement labels.
+Create at least one responsive product-page/container grid specimen with measurement labels.
 
 Use the actual grid values produced by the initiator.
 
