@@ -1,11 +1,11 @@
 # Text Editors
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private toolbar/icon family
-x≈2800    Toolbar, tooltip, highlight, editor
-x≈5600    Desktop/modal usage example
+Private toolbar/icon family
+Toolbar, tooltip, highlight, editor
+Desktop/modal usage example
 ```
 
 | Component set | Variant / property axes |
