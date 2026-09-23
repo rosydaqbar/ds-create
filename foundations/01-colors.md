@@ -193,73 +193,65 @@ bg-success-solid
 
 Actual output names are translated through the selected naming convention.
 
-Each group must use this exact structure:
+Each group must use this structural relationship:
 
 ```text
-Content group                         2368
+Variable group                         Fill container
 layout: vertical
 clip content: false
 
-├─ Design note                         720
+├─ Design note                         constrained reading width
 │  ├─ title + Variables badge
 │  └─ family description
-├─ gap                                  64
-└─ Variable table                     2368
+├─ documentation section gap
+└─ Variable table                      Fill container
    layout: horizontal
    clip content: false
-   ├─ Name column                      400
-   ├─ Light mode column                212
-   ├─ Dark mode column                 213
-   └─ Usage column                    1543
+   ├─ Name column                      preferred width, expandable
+   ├─ Mode column                      content-driven
+   ├─ Mode column                      content-driven
+   ├─ Additional mode columns          when required
+   └─ Usage column                     Fill remaining width
 ```
 
-Critical:
-- the **Design note alone** is 720 px;
-- never make the group or table 720 px;
-- never clip the table;
-- construct the table from four vertical columns, not 720 px horizontal rows.
+The audited dimensions are reference baselines only.
 
-Table cell rhythm:
-- header: 34 px;
-- header separator: 12 px;
-- data row: 80 px;
-- semantic subgroup separator: 12 px;
-- row divider: subtle 1 px.
+At the reference scale the composition is approximately:
+- available table/content width: 2368;
+- Design note: 720;
+- Name: 400;
+- first mode: 212;
+- second mode: 213;
+- Usage: remaining width.
+
+Do **not** hard-code these as universal dimensions.
+
+Adaptive behavior:
+- longer token names → expand Name;
+- longer aliases → expand that mode column;
+- additional themes/modes → add columns and expand the frame;
+- longer Usage copy → wrap and increase row height;
+- more tokens → grow vertically;
+- very large systems → split into logical semantic subsections while retaining the same table grammar.
+
+The table must always remain wider than the Design note when its content requires it.
 
 Name column:
 - render semantic tokens as bordered token badges;
 - show parent/child relationships with indentation and connector lines;
-- modifiers such as `_hover`, `_alt`, `_on-brand`, `_subtle`, and `_solid` should visually belong to their parent token where applicable;
-- actual naming syntax comes from the selected token naming preset.
+- hierarchy spacing comes from documentation spacing tokens;
+- actual naming syntax comes from the selected naming preset.
 
-Light/Dark columns:
+Mode columns:
 - render aliases as visual chips;
-- each chip includes resolved color swatch + primitive/alias token name;
-- never use plain alias text for color variables.
+- include resolved color swatch + primitive/alias token name;
+- column width is driven by the largest chip in that column.
 
-Usage column:
-- visible at all times;
-- must contain specific per-token guidance;
-- do not generate generic sentence templates.
-
-Example usage quality:
-
-```text
-text-primary
-Primary text such as page headings.
-
-text-primary_on-brand
-Primary text when used on solid brand-color backgrounds.
-
-text-secondary
-Secondary text such as labels and section headings.
-
-text-secondary_hover
-Secondary text in interactive hover states.
-
-text-placeholder
-Placeholder and empty-input hint text.
-```
+Usage:
+- must remain visible;
+- receives remaining horizontal space;
+- contains specific per-token guidance;
+- wraps instead of clipping.
 
 Every Text, Border, Foreground, and Background token must have its own purpose-driven usage sentence.
 
@@ -312,31 +304,31 @@ Before the Color variables frame can be considered complete, validate all of the
 
 ## Geometry
 
-- frame width = `2528`;
-- Section horizontal padding = `80`;
-- visible content width = `2368`;
-- every semantic group container = `2368` wide;
-- every Design note = `720` wide;
-- note-to-table gap = `64`;
-- every variable table = `2368` wide;
+Validate relationships rather than one fixed canvas size:
+
+- semantic group = Fill available documentation width;
+- Design note = constrained reading width;
+- table = Fill available documentation width;
+- table is never constrained to Design-note width;
 - table clip content = `false`;
-- group clip content = `false`.
+- group clip content = `false`;
+- documentation frame may grow horizontally for longer names, aliases, or additional modes;
+- documentation frame grows vertically with token count and wrapped copy.
 
 ## Columns
 
-- Name = `400`;
-- Light mode = `212`;
-- Dark mode = `213`;
-- Usage = `1543`;
-- total = `2368`;
-- all four columns are visible inside the frame.
+Required behavior:
+- Name column has a preferred baseline width but may expand;
+- each mode column is wide enough for its largest alias chip;
+- additional modes create additional columns;
+- Usage fills the remaining width;
+- no required column may be hidden, clipped, or compressed solely to preserve a baseline frame width.
 
 ## Documentation cells
 
-- header cell = `34` high;
-- header separator = `12`;
-- data cell = `80`;
-- semantic subgroup separator = `12` where required;
+- header, separator, and row measurements follow the audited visual rhythm as baseline values;
+- data rows use the reference rhythm as a minimum, then grow when content wraps;
+- semantic subgroup separators remain visually consistent through documentation spacing tokens;
 - token-name cell uses a token badge;
 - mode cells use color alias chips with swatches;
 - Usage cell contains bespoke copy.
