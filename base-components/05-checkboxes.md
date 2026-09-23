@@ -1,8 +1,8 @@
 # Checkboxes
 
-Checkboxes allow one or more selections; radio controls allow one selection from a set. This page deliberately shares a common base for checkbox and radio visual controls.
+Checkboxes allow one or more selections; radio controls allow one selection from a set. This Figma Page deliberately shares a common base for checkbox and radio visual controls.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private
@@ -114,7 +114,7 @@ Show:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - checkbox versus radio semantics and when each is appropriate;
 - unchecked, checked, and indeterminate behavior;
 - why indeterminate is not a product end-state for radio controls;
@@ -130,7 +130,7 @@ The component matrix does not replace these notes.
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - Checkbox versus Radio semantics and when each is appropriate;
 - unchecked, checked, and indeterminate states;
 - why indeterminate is not a meaningful product end-state for Radio;
