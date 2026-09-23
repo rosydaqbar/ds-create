@@ -2,7 +2,7 @@
 
 Toggles (switches) represent two mutually exclusive states such as on/off and are especially useful for settings.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private
@@ -104,7 +104,7 @@ Show:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use Toggle for an immediate binary setting versus Checkbox for form submission;
 - private track/thumb base → labeled public Toggle anatomy;
 - Pressed, Hover, Focus, and Disabled behavior;
