@@ -13,7 +13,7 @@ Private swatch helpers
 → Long-form color documentation
 ```
 
-Major regions use the horizontal canvas grammar from `01-documentation-and-layout-system.md` and expand according to content.
+Major regions use the horizontal canvas grammar from `SYSTEM.md` and expand according to content.
 
 # 1. Private swatch helpers
 
