@@ -1,27 +1,29 @@
 # Colors
 
-The Colors page is a multi-frame canvas. It must not be reduced to a palette grid.
+The Colors page is a multi-region Foundation canvas. It must not be reduced to a palette grid or constrained to one fixed canvas size.
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0        private swatch helper components
-x≈2800     Colors overview                2848 wide
-x≈6240     Gradients overview             2856 wide
-x≈9496     Color variables                2528 wide
-x≈12424    Color utility variables        2528 wide
-x≈15352    Long-form color documentation  1600 wide
+Private swatch helpers
+→ Colors overview
+→ Gradients overview
+→ Color variables
+→ Color utility variables
+→ Long-form color documentation
 ```
+
+Major regions use the horizontal canvas grammar from `01-documentation-and-layout-system.md` and expand according to content.
 
 # 1. Private swatch helpers
 
 Create reusable internal helpers for:
-- standard color swatch (`160 × 156`);
-- gradient swatch (`280 × 276`).
+- standard color swatch;
+- gradient swatch.
+
+Their dimensions come from documentation specimen tokens rather than hard-coded values.
 
 # 2. Colors overview
-
-Frame width: `2848`.
 
 Required sections:
 
@@ -29,11 +31,13 @@ Required sections:
 
 - major Design note: `Base colors`;
 - row: `Base` — white, black, transparent;
-- row: `Brand` — the active brand scale.
+- row: `Brand` — active brand scale.
 
 ## Extended palettes
 
-Show the complete palette families supplied/selected by the initiator. The observed system includes these categories:
+Show the palette families supplied by the existing system or selected through the initiator.
+
+A system may include categories such as:
 
 ```text
 Red
@@ -64,22 +68,21 @@ Mist
 Olive
 ```
 
-Brand-agnostic rule:
-- do not force these exact hues if the user already has a palette;
-- preserve the row layout and explanatory-note behavior;
-- identify the default brand, error, warning, success, and gray families with compact badges;
-- alternative families receive a concise “can replace default …” usage note where applicable.
+This list describes supported presentation, not a requirement to generate every hue.
 
-Each row uses `480 note + 64 gap + swatches`.
+Rules:
+- preserve existing brand palette when present;
+- identify default brand, error, warning, success, and gray families with compact badges;
+- alternative families receive concise usage notes;
+- row composition remains `Design note → specimen region`;
+- specimen region expands for larger palettes.
 
-Each swatch should show:
-- scale name/value;
-- hex or source value;
-- contrast ratio / AA / AAA annotation when relevant.
+Each swatch shows:
+- scale/value label;
+- source or resolved color value;
+- contrast/accessibility annotation when useful.
 
 # 3. Gradients overview
-
-Frame width: `2856`.
 
 Required groups:
 - Neutral gradients
@@ -87,11 +90,11 @@ Required groups:
 - Linear gradients
 - Mesh gradients
 
-Keep the same note-left / specimen-right row logic.
+Use the same note-left / specimen-right composition as palette rows.
+
+The specimen region expands with gradient count and brand complexity.
 
 # 4. Color variables
-
-Frame width: `2528`.
 
 Required variable groups:
 
@@ -193,129 +196,118 @@ bg-success-solid
 
 Actual output names are translated through the selected naming convention.
 
-Each group must use this structural relationship:
+## Variable-group structure
 
 ```text
-Variable group                         Fill container
+Variable group
+width: Fill
+height: Hug
 layout: vertical
 clip content: false
 
-├─ Design note                         constrained reading width
-│  ├─ title + Variables badge
-│  └─ family description
-├─ documentation section gap
-└─ Variable table                      Fill container
+├─ Design note
+│  width: doc.measure.reading
+│  ├─ Title + Variables badge
+│  └─ Family description
+│
+├─ documentation group gap
+│
+└─ Variable table
+   width: Fill
+   height: Hug
    layout: horizontal
    clip content: false
-   ├─ Name column                      preferred width, expandable
-   ├─ Mode column                      content-driven
-   ├─ Mode column                      content-driven
-   ├─ Additional mode columns          when required
-   └─ Usage column                     Fill remaining width
+   ├─ Name
+   ├─ one column per mode
+   └─ Usage
 ```
 
-The audited dimensions are reference baselines only.
+Column behavior:
+- Name uses a preferred/minimum measure and expands for long names;
+- mode columns are content-driven;
+- additional modes add columns;
+- Usage fills remaining space;
+- the entire documentation region may expand horizontally.
 
-At the reference scale the composition is approximately:
-- available table/content width: 2368;
-- Design note: 720;
-- Name: 400;
-- first mode: 212;
-- second mode: 213;
-- Usage: remaining width.
+## Name hierarchy
 
-Do **not** hard-code these as universal dimensions.
-
-Adaptive behavior:
-- longer token names → expand Name;
-- longer aliases → expand that mode column;
-- additional themes/modes → add columns and expand the frame;
-- longer Usage copy → wrap and increase row height;
-- more tokens → grow vertically;
-- very large systems → split into logical semantic subsections while retaining the same table grammar.
-
-The table must always remain wider than the Design note when its content requires it.
-
-Name column:
-- render semantic tokens as bordered token badges;
-- render parent/child relationships as a visible tree, not indentation alone;
-- hierarchy spacing comes from documentation spacing tokens;
-- actual naming syntax comes from the selected naming preset.
-
-Required hierarchy treatment:
+Parent/child relationships must render as a visible tree.
 
 ```text
-Parent badge
+text-primary
 │
-├── Child badge
-└── Child badge
+└── _on-brand
+
+text-secondary
+│
+├── _hover
+└── _on-brand
 ```
 
-Figma layers for every hierarchical family:
+Figma construction uses real connector layers:
+- vertical branch;
+- elbow per child;
+- indented child badge;
+- final branch terminates at final child;
+- connectors adapt to row height;
+- indentation alone fails QA.
+
+## Mode aliases
+
+Color aliases use visual chips containing:
+- resolved swatch;
+- primitive/alias name.
+
+Do not display color aliases as plain strings only.
+
+## Usage
+
+Every token has purpose-driven usage copy.
+
+Examples:
 
 ```text
-Hierarchy / <parent token>
-├─ Parent row
-│  └─ Token badge / Parent
-└─ Children
-   ├─ Child row
-   │  ├─ Connector / Vertical
-   │  ├─ Connector / Elbow
-   │  └─ Token badge / Child
-   └─ Child row
-      ├─ Connector / Vertical
-      ├─ Connector / Elbow
-      └─ Token badge / Child
+text-primary
+Primary text such as page headings.
+
+text-primary_on-brand
+Primary text when used on solid brand-color backgrounds.
+
+text-secondary
+Secondary text such as labels and section headings.
+
+text-secondary_hover
+Secondary text in interactive hover states.
+
+text-placeholder
+Placeholder and empty-input hint text.
 ```
 
-Rules:
-- vertical connector begins beneath the parent relationship point;
-- vertical connector continues through the child stack;
-- every child gets a horizontal elbow connector;
-- the final child's vertical segment terminates at that child;
-- elbows align with the vertical center of child badges;
-- connector uses a subtle documentation-border semantic token;
-- child indentation is tokenized and content-adaptive;
-- connector positioning derives from layout, not fixed canvas coordinates;
-- when there is one child, still render the connector;
-- when there are no children, render no connector layers;
-- do not use text glyphs such as `├`, `└`, or `│` as the actual Figma connector.
-
-Mode columns:
-- render aliases as visual chips;
-- include resolved color swatch + primitive/alias token name;
-- column width is driven by the largest chip in that column.
-
-Usage:
-- must remain visible;
-- receives remaining horizontal space;
-- contains specific per-token guidance;
-- wraps instead of clipping.
-
-Every Text, Border, Foreground, and Background token must have its own purpose-driven usage sentence.
+Do not generate generic sentence templates.
 
 # 5. Color utility variables
-
-Frame width: `2528`.
 
 Required groups:
 
 ## Alpha colors
 
-```text
-alpha-white-10 … alpha-white-100
-alpha-black-10 … alpha-black-100
-```
+Preserve the scale and naming already established by the system.
+
+If no alpha system exists, generate one only when the product needs transparency roles.
 
 ## Utility colors
 
-Use utility roles only when the semantic layer is insufficient, especially for multicolor UI such as badges and data-visualization accents.
+Use utility roles when the semantic layer is insufficient, especially for:
+- multicolor badges;
+- charts;
+- visualization accents;
+- special-purpose state colors.
 
-Document their actual intended usage; do not expose raw palette aliases without explanation.
+Document actual intended usage.
+
+Do not expose raw palette aliases without explanation.
 
 # 6. Long-form color documentation
-
-Frame width: `1600`.
 
 Required outline:
 - Getting colors right
@@ -336,46 +328,37 @@ Required outline:
 
 Use rich text, screenshots/examples, and inline resources.
 
-
 # 7. Color-variable hard QA
-
-Before the Color variables frame can be considered complete, validate all of the following:
 
 ## Geometry
 
-Validate relationships rather than one fixed canvas size:
-
-- semantic group = Fill available documentation width;
-- Design note = constrained reading width;
-- table = Fill available documentation width;
+Validate relationships:
+- semantic group fills the available documentation width;
+- Design note uses a constrained reading measure;
+- table fills the available documentation width;
 - table is never constrained to Design-note width;
-- table clip content = `false`;
-- group clip content = `false`;
-- documentation frame may grow horizontally for longer names, aliases, or additional modes;
-- documentation frame grows vertically with token count and wrapped copy.
+- table and group do not clip content;
+- documentation canvas may grow horizontally and vertically.
 
 ## Columns
 
-Required behavior:
-- Name column has a preferred baseline width but may expand;
-- each mode column is wide enough for its largest alias chip;
+Validate behavior:
+- Name expands when required;
+- each mode column fits its largest alias chip;
 - additional modes create additional columns;
-- Usage fills the remaining width;
-- no required column may be hidden, clipped, or compressed solely to preserve a baseline frame width.
+- Usage remains visible and fills remaining width;
+- no column is hidden or compressed solely to preserve one canvas size.
 
-## Documentation cells
+## Rows
 
-- header, separator, and row measurements follow the audited visual rhythm as baseline values;
-- data rows use the reference rhythm as a minimum, then grow when content wraps;
-- semantic subgroup separators remain visually consistent through documentation spacing tokens;
-- token-name cell uses a token badge;
-- hierarchical token-name cells include visible vertical + elbow connector lines;
-- mode cells use color alias chips with swatches;
-- Usage cell contains bespoke copy.
+- rows use the documentation row rhythm as a minimum;
+- rows grow when content wraps;
+- dividers align across columns;
+- subgroup separators use documentation spacing roles.
 
 ## Visual hierarchy
 
-At minimum, preserve visual grouping for token families such as:
+At minimum, preserve grouping for families such as:
 
 ```text
 text-primary
@@ -407,29 +390,23 @@ bg-primary
   -solid
 ```
 
-The exact groups follow the final semantic inventory, but child modifiers must not appear as unrelated flat rows.
-
-Every family above with children must visibly show:
+Every family with children must visibly show:
 - parent badge;
 - vertical connector;
-- horizontal elbow connector for each child;
+- elbow for each child;
 - indented child badge.
-
-Indentation without connector lines fails QA.
 
 ## Copy quality
 
-Fail QA if Usage contains mechanically generated filler such as:
-- `where this hierarchy or state applies`;
-- `use for this token`;
-- `used for primary content` without a concrete UI example.
+Fail QA if Usage contains mechanically generated filler.
 
-Usage copy must explain a real interface purpose.
+Usage must explain a real interface purpose.
 
 ## Screenshot sanity check
 
-At 100% page inspection:
-- Name, Light mode, Dark mode, and Usage must all be visible;
-- the table must span nearly the full documentation content width;
-- token chips and color previews must be visually apparent;
-- the page must not resemble a narrow article column with a truncated table.
+At normal inspection:
+- Name, every active mode, and Usage are visible;
+- table spans the intended documentation content region;
+- token badges and value previews are visually apparent;
+- hierarchical lines are visible;
+- page does not resemble a narrow article column with a truncated table.
