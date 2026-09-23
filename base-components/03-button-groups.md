@@ -2,7 +2,7 @@
 
 Button groups combine adjacent actions into toolbars, split-button patterns, or compact view selectors.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private
@@ -102,7 +102,7 @@ Public group:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when a Button group is appropriate versus tabs, radio groups, or independent buttons;
 - the private-base → published-group anatomy;
 - Current versus Hover/Focused behavior;
@@ -117,7 +117,7 @@ A matrix alone fails documentation QA.
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when Button group is appropriate versus tabs, radio groups, or independent buttons;
 - private base → published group anatomy;
 - Size, Icon, Current, Hover, Focused, and Disabled behavior;
