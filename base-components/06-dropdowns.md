@@ -198,6 +198,23 @@ Context menu:
 - Simple / Advanced;
 - closed/open.
 
+
+
+## Mandatory notes/documentation region
+
+The Figma page must visibly document:
+- when to use Dropdown menu versus Context menu;
+- menu trigger/open-state relationship;
+- private list-item, inset-icon, header, footer, and account-item anatomy;
+- alignment behavior across rows with and without leading content;
+- selected/check/checkbox/dot/avatar cases;
+- keyboard navigation, focus, escape/close expectations, and menu labeling;
+- destructive or high-risk action placement when applicable;
+- do/don't examples for clipping menus, hand-building rows, and mixing unrelated alignment systems;
+- which private list-item/helper families and semantic tokens should be maintained centrally.
+
+A menu matrix without visible usage/anatomy notes fails QA.
+
 # 10. QA
 
 Fail QA when:
