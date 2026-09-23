@@ -51,3 +51,21 @@ Required outline:
 - updating shadow/effect variables.
 
 Do not copy reference shadow values, blur radii, or fixed card dimensions unless they already exist in the user's system.
+
+## Mandatory visible notes/documentation
+
+The long-form effects documentation must be generated visibly in Figma.
+
+Shadow/focus/blur specimen cards alone are not sufficient.
+
+The notes must explain:
+- the active elevation model;
+- when shadows are appropriate;
+- focus-ring behavior and accessibility;
+- combined focus + shadow treatment;
+- backdrop-blur constraints;
+- how to remove or change depth globally;
+- which styles/tokens are maintained centrally;
+- do/don't examples for decorative overuse and low-contrast translucent surfaces.
+
+An Effect Styles page without visible notes fails QA.
