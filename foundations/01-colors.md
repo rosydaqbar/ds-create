@@ -95,6 +95,7 @@ For every color shown in this page:
 
 A card such as `Crimson Red / #DC143C / Primary identity` with no visible color block fails QA.
 
+# 3. Gradients overview
 
 Required groups:
 - Neutral gradients
