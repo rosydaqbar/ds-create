@@ -1,6 +1,6 @@
 # Variables Guidance
 
-Create five separate long-form documentation frames using the long-form frame role from the documentation system.
+Create all five required Variables documentation sections using the reading-oriented documentation composition from the documentation system.
 
 ## 1. Introduction to variables
 
@@ -49,21 +49,4 @@ Must cover:
 - accessibility/contrast implications;
 - how to add/use transparent shades.
 
-Use the long-form documentation layout and do not compress these into a single FAQ card.
-
-## Mandatory visible notes/documentation
-
-The Variables page must include visible long-form documentation on the Figma canvas in addition to token collections/tables.
-
-It must explain the actual generated variable architecture:
-- primitive → semantic/alias → component/utility relationship;
-- naming convention used by this system;
-- active collections and modes;
-- how designers should choose variables in product UI;
-- when primitive values may or may not be used directly;
-- how themes, sizing, spacing, transparency, and accessibility are handled;
-- concrete examples using the generated variables.
-
-Do not treat the variable table or collection list as sufficient documentation.
-
-A Variables page without visible explanatory notes fails QA.
+Use the reading-oriented documentation composition and do not compress, merge, or summarize these sections into a single FAQ card.
