@@ -268,7 +268,37 @@ The complete child-family inventory is defined by the corresponding Markdown spe
 - Match existing
 - Custom
 
-# 9. Token naming preset
+# 9. Collection naming
+
+For new systems, collection names use the canonical domain grammar from `02-token-and-naming-contract.md`.
+
+Default generated labels:
+
+```text
+Primitives
+Color
+Typography
+Spacing
+Sizing
+Radius
+Motion
+Components
+```
+
+Only create domains that are actually required.
+
+For existing systems, ask:
+
+**Collection naming action**
+- Keep existing collection names
+- Normalize collection names
+- Custom collection names
+
+Do not expose architectural prefixes such as `Ref`, `Sys`, or `Comp` as the default generated collection grammar.
+
+Product-specific concepts remain groups inside the relevant collection unless the user explicitly defines a separate collection architecture.
+
+# 10. Token naming preset
 
 - Keep existing naming
 - Atlassian-style semantic naming
@@ -280,7 +310,7 @@ The complete child-family inventory is defined by the corresponding Markdown spe
 
 If the user supplies an existing library, default to `Keep existing naming`.
 
-# 10. Documentation depth
+# 11. Documentation depth
 
 The **top-level composition on the Figma Page canvas is fixed**. This selector only controls optional explanatory depth.
 
@@ -294,7 +324,7 @@ Selectable extras:
 
 Do not remove required region/header Instances, Design notes, variable Usage columns, or component matrices.
 
-# 11. Confirmation summary
+# 12. Confirmation summary
 
 Before generation, present:
 - product/brand summary;
@@ -303,6 +333,7 @@ Before generation, present:
 - selected Foundation Figma Pages/Frames/regions;
 - selected Base Component Figma Pages/families;
 - token architecture;
+- collection naming action;
 - token naming preset;
 - output formats;
 - optional documentation depth.
