@@ -492,3 +492,177 @@ Before marking a page complete, confirm:
 - aliases include visual previews where appropriate;
 - no generic dashboard replaces the required documentation composition;
 - no raw reference canvas dimensions are used as layout constraints.
+
+
+# 11. Base Component page documentation standard
+
+Base Component pages use a **family canvas** rather than the long-form Foundation-table pattern.
+
+The documentation model has three layers:
+
+```text
+Page-level explanation
+        ↓
+Full component-set matrices
+        ↓
+Optional long-form notes/documentation
+```
+
+## 11.1 Page/family header
+
+Every family region begins with a large documentation header.
+
+Required content:
+
+```text
+Base components → <Page>
+<Family title>
+<Specific description of what the family does and when it is useful>
+```
+
+The description must be component-specific.
+
+Examples of acceptable specificity:
+- explain that input fields are used for user-entered data in forms/dialogs;
+- explain that dropdown menus group secondary actions in compact subviews;
+- explain that radio-group cards allow more supporting information without clutter;
+- explain that video players are for realistic playback-preview mockups.
+
+Forbidden:
+- “A component used in UI.”
+- “Use this for actions.”
+- generic copy repeated across every page.
+
+## 11.2 Private construction header
+
+When a page contains private helpers, the private region receives its own header.
+
+Required message:
+- these are internal/unpublished building blocks;
+- edit/reuse them to propagate changes to published components;
+- they should not be used directly in product composition.
+
+The private header may include neutral resource links for:
+- component authoring;
+- Figma component/property guidance.
+
+Do not retain source-specific product URLs, names, or promotional copy.
+
+## 11.3 Component matrices are documentation
+
+The full component set itself is a major documentation artifact.
+
+Do not place a small showcase above a hidden master set.
+
+The matrix must make these relationships inspectable:
+- size;
+- hierarchy/type;
+- state;
+- selected/current/pressed conditions;
+- icon/content compositions;
+- breakpoint/theme/provider dimensions when applicable.
+
+The visual grouping of the matrix should make property axes obvious even without opening the right sidebar.
+
+## 11.4 Anatomy fidelity
+
+Generated components must follow the nested anatomy defined by their page Markdown file.
+
+A visual match is not sufficient when the internal hierarchy differs.
+
+Examples of anatomy that must be preserved:
+- Button label wrapped in a dedicated optical Text-padding frame;
+- Dropdown rows built from private list-item and inset-icon helpers;
+- Input label/control/hint stack with a flexible inner Content frame;
+- Select open states composed from private menu-item sets;
+- Toggle public component instancing a private track/thumb base;
+- Video actions bar composed from reusable action-button and volume-slider helpers.
+
+The generator must not flatten these structures to reduce layer count.
+
+## 11.5 Notes and documentation frames
+
+Only create a dedicated long-form notes frame where the page spec requires one.
+
+In the audited Base Component scope, dedicated long-form notes are required for:
+- Avatars;
+- Buttons.
+
+Do not invent a 1600-wide long-form page for every component merely for symmetry.
+
+For other Base Component pages, the page/family header plus full matrix is the primary documentation surface unless the user's existing system already contains additional notes.
+
+## 11.6 Buttons long-form documentation
+
+The Buttons notes frame is substantial and must not be summarized into one paragraph.
+
+Required topic blocks:
+1. buttons should look actionable;
+2. button hierarchy;
+3. destructive actions;
+4. optical button balance;
+5. icon live-area/padding explanation;
+6. the label Text-padding wrapper and compensation logic;
+7. optional depth/effect treatment;
+8. how the effect treatment can be globally removed/changed.
+
+Use:
+- 30 px-level section headings at the reference scale;
+- 18/28 body rhythm at the reference scale;
+- documentation images/examples placed directly after the related explanation;
+- dividers between major conceptual topics.
+
+The active brand/system values may change, but the educational structure remains.
+
+## 11.7 Avatar long-form documentation
+
+Required topics:
+1. image-source strategy;
+2. centrally managed/shared avatar assets;
+3. replacing avatar images;
+4. changing placeholder images;
+5. changing placeholder/background fills centrally.
+
+The generated text must describe the actual generated system mechanism.
+
+## 11.8 Examples in use
+
+When the page contains an explicit examples region, preserve it.
+
+Observed example region:
+- Text editors.
+
+Examples are composed instances showing how the base components work together. They are not new public component masters.
+
+# 12. Anatomy documentation inside Markdown specs
+
+Every Base Component Markdown file must include:
+
+```text
+Purpose
+Page regions
+Published/private families
+Property inventory
+Representative anatomy tree
+Auto Layout relationship
+Flexible vs fixed children
+Matrix requirements
+Component-specific notes
+QA
+```
+
+For complex pages, document each component family separately.
+
+A file that only lists component-set names and variant axes is incomplete.
+
+# 13. Component-page QA
+
+A component page fails generation QA if:
+- its Markdown file contains no anatomy tree;
+- a private helper exists in the source pattern but the generated family duplicates its layers;
+- the page header description is generic;
+- required long-form notes are missing;
+- the full component matrix is replaced by samples;
+- a known optical/layout helper is omitted;
+- examples-in-use are missing where specified;
+- brand styling was copied as structure rather than mapped to the active brand tokens.
