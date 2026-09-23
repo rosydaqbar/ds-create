@@ -98,7 +98,7 @@ Standalone helper component where needed.
 
 Use repeated ~the system-defined value header zones arranged horizontally. Each family should be positioned beneath its corresponding header, not inside a generic vertical card stack.
 
-## Mandatory visible notes/documentation
+# Documentation
 
 Every Misc Icons page must include a visible documentation region describing which asset families are actually in scope and why.
 
@@ -110,4 +110,4 @@ The notes must explain:
 - when to add a new family instead of generating unused library weight;
 - product-specific examples where useful.
 
-A collection of asset grids with no explanatory notes fails QA.
+QA: a collection of asset grids without this explanatory documentation is incomplete.
