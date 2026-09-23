@@ -1,6 +1,6 @@
 # Observed Figma Page Inventory
 
-This is a compact routing index for the completed source audit. It is not a runtime copy of the documentation content.
+This is audit provenance only. **Do not load this file during normal generation.** The selected guidance already lives in the canonical page-specific specifications.
 
 ## Integrated long-form guidance
 
