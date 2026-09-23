@@ -297,25 +297,6 @@ Additionally document:
 - how tag-based fields grow;
 - how verification cells reuse the private base.
 
-
-
-## Mandatory visible documentation region
-
-The documentation requirements above must be rendered as a dedicated Figma notes frame.
-
-It must include:
-- when to use each major input Type;
-- label → control → hint anatomy and required/help relationships;
-- Placeholder, Focused, Filled, Disabled, and Error behavior;
-- Destructive versus interaction State;
-- leading/trailing adornment behavior and Fill/Hug relationships;
-- textarea growth, tag-field growth, OTP/verification grouping, and mobile text-size considerations;
-- validation and accessibility guidance including labels, errors, focus, and keyboard/input modes;
-- do/don't examples for placeholder-only labeling, flattened special types, and detached verification cells;
-- central maintenance notes for the shared field base and semantic tokens.
-
-A header-only explanation does not satisfy this requirement.
-
 # 9. QA
 
 Fail QA when:
