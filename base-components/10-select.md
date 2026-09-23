@@ -173,6 +173,23 @@ Multi-select:
 - checkbox menu items;
 - empty search state.
 
+
+
+## Mandatory notes/documentation region
+
+The Figma page must visibly document:
+- when to use Select versus Multi-select;
+- trigger → menu anatomy and private option-row reuse;
+- Default/Hover/Focused/Disabled/Error/open behavior as represented by the generated family;
+- icon/avatar/dot/leading-content alignment;
+- selected-value growth, wrapping, and multi-select checkbox behavior;
+- search, empty-state, and scrollbar behavior when present;
+- keyboard navigation, focus, labeling, and announced selected values;
+- do/don't examples for detached dropdowns, hand-built menu items, and clipping long selected values;
+- which private item helpers, scrollbar helper, and semantic tokens should be maintained centrally.
+
+A component matrix alone fails documentation QA.
+
 # 8. QA
 
 Fail QA when:
