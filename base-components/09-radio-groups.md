@@ -111,7 +111,7 @@ Group matrix:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - single-choice radio semantics and when checkbox-style multi-select is intentionally appropriate;
 - Radio group item → Radio group composed anatomy;
 - selected versus Focused behavior;
@@ -127,7 +127,7 @@ The full matrix does not replace this guidance.
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - single-choice radio semantics and when checkbox-style multi-select is intentionally appropriate;
 - Radio group item → Radio group composed anatomy;
 - Selected versus Focused behavior;
