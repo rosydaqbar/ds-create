@@ -1,10 +1,10 @@
 # Video Players
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private video-control helpers
-x≈3020    Public 16:9 video player
+Private video-control helpers
+Public 16:9 video player
 ```
 
 | Component set | Variant / property axes |
