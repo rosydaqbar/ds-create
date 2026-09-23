@@ -1,10 +1,10 @@
 # Badges
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private close-X helper
-x≈2800    Badge + Badge group matrices
+Private close-X helper
+Badge + Badge group matrices
 ```
 
 | Component set | Variant / property axes |
