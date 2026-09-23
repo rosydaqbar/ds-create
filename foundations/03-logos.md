@@ -38,7 +38,7 @@ Use a separate component set when press/media logo assets are needed.
 Observed axis:
 - Company/publication
 
-# Long-form logo documentation
+# Logo documentation
 
 Required outline:
 - logo assets as reusable image/style resources;
@@ -49,19 +49,3 @@ Required outline:
 - important usage notes.
 
 Brand-agnostic rule: preserve the layout and component model while using only assets supplied or approved by the user.
-
-## Mandatory visible notes/documentation
-
-The Logos page must include visible documentation in addition to logo assets/component sets.
-
-The notes must cover:
-- masterbrand/product relationship;
-- approved supplied assets and source limitations;
-- clear-space and proportional-scaling rules;
-- background/contrast selection;
-- when each approved variation is used;
-- placeholder/source replacement workflow;
-- licensing/approval constraints for partner and press marks;
-- do/don't examples based on the supplied brand rules.
-
-A logo asset grid by itself fails documentation QA.
