@@ -2,7 +2,7 @@
 
 Tags (chips) are compact interactive/content elements used for selections, filtering, removable values, counts, and metadata—especially inside multi-value inputs.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private
@@ -154,7 +154,7 @@ Show:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use Tag versus Badge, filter control, or Button;
 - leading visual, text, close/count action, and checkbox/selectable anatomy;
 - removable versus selectable behavior;
