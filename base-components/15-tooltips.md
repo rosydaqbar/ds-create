@@ -109,6 +109,21 @@ Help icon:
 - supporting text on/off;
 - cursor on/off where documented.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when Tooltip is appropriate and what information must remain directly visible in the UI;
+- tooltip surface/text/arrow anatomy;
+- Help icon → Tooltip composition;
+- placement variants and collision/adaptation expectations in implementation;
+- concise title/supporting-text guidance;
+- hover, focus, keyboard, and touch considerations;
+- do/don't examples for essential instructions hidden only in tooltips, long paragraphs, and inaccessible hover-only triggers;
+- central maintenance through the Tooltip family rather than duplicated tooltip anatomy inside Help icon.
+
+A placement matrix alone fails documentation QA.
+
 # 6. QA
 
 Fail QA when:
