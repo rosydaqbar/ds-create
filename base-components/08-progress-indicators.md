@@ -81,7 +81,7 @@ Progress circle:
 
 
 
-## Mandatory notes/documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use a Progress bar versus Progress circle;
@@ -96,7 +96,7 @@ The Figma page must visibly document:
 A variant matrix without these notes fails QA.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use Progress bar versus Progress circle;
