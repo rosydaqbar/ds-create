@@ -95,6 +95,21 @@ The Figma page must visibly document:
 
 A variant matrix without these notes fails QA.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when to use Progress bar versus Progress circle;
+- determinate progress versus indeterminate loading;
+- value-driven construction and label placement;
+- why progress indicators must not represent network signal strength;
+- percent/value labeling and when numeric progress should be exposed;
+- motion/reduced-motion and screen-reader progress semantics;
+- do/don't examples for fake precision, unrelated per-value shapes, and progress used as a status badge;
+- central maintenance through shared track/progress construction and semantic tokens.
+
+A matrix alone fails documentation QA.
+
 # 5. QA
 
 Fail QA when:
