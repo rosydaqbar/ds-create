@@ -1,6 +1,6 @@
 # Sliders
 
-# Canvas inventory
+# Canvas region order
 
 ```text
 private `_Control handle`
