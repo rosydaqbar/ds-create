@@ -1,6 +1,6 @@
 # Inputs
 
-Input fields allow users to enter data. The page must document the complete field family, not only a generic text field.
+Input fields allow users to enter data. The Figma Page must document the complete field family, not only a generic text field.
 
 Important product note:
 - mobile text-entry controls should use a text size that avoids unwanted browser zoom behavior;
@@ -284,7 +284,7 @@ Verification:
 
 # 8. Documentation requirements
 
-The page header must explain:
+The required region/family header must explain:
 - purpose of text inputs;
 - form/dialog usage;
 - mobile text-size consideration;
