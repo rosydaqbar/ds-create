@@ -383,26 +383,64 @@ Badge behavior:
 
 ### Hierarchical token relationships
 
-Related modifiers/states must read as a hierarchy.
+Related modifiers/states must render as an explicit **tree**, not indentation alone.
 
 Example:
 
 ```text
 text-primary
-└─ _on-brand
+└── _on-brand
 
 text-secondary
-├─ _hover
-└─ _on-brand
+├── _hover
+└── _on-brand
 ```
 
-Presentation:
-- parent token starts at the column origin;
-- child token is indented using a documentation spacing token;
-- subtle connector line visually links child to parent;
-- hierarchy indentation increases only when hierarchy depth increases.
+#### Required Figma construction
 
-Do not calculate hierarchy from arbitrary fixed x coordinates.
+```text
+Hierarchy group
+layout: vertical
+width: Fill
+
+├─ Parent row
+│  └─ Parent token badge
+│
+└─ Children stack
+   layout: vertical
+   position: relative to parent
+   ├─ Child row
+   │  ├─ Connector / vertical
+   │  ├─ Connector / elbow
+   │  └─ Child token badge
+   └─ Child row
+      ├─ Connector / vertical
+      ├─ Connector / elbow
+      └─ Child token badge
+```
+
+Connector behavior:
+- draw a visible vertical branch from the parent relationship point through the child stack;
+- draw a horizontal elbow from that branch to every child badge;
+- stop the vertical branch at the final child;
+- align each elbow to the vertical center of its child badge;
+- use a subtle semantic documentation-border token;
+- use the same stroke weight family as documentation dividers;
+- connector geometry must be generated from Auto Layout/child positions, not hard-coded absolute coordinates;
+- connector lines are decorative documentation layers and must not alter token naming or variable structure.
+
+Indentation behavior:
+- parent token starts at the normal Name-column origin;
+- first-level children are indented by one documentation hierarchy step;
+- deeper hierarchy adds one step per depth;
+- indentation alone is insufficient: **connector lines are mandatory whenever child tokens exist**.
+
+Child badge labels:
+- may show the full token name;
+- or may show only the modifier suffix such as `_hover`, `_on-brand`, `_alt`, `_subtle`, or `_solid` when the parent relationship is visually unambiguous.
+
+Do not render hierarchical tokens as flat sibling badges.
+Do not fake hierarchy using spaces, text characters, or indentation-only layout.
 
 ## 6.8 Mode alias cells
 
@@ -472,6 +510,9 @@ A semantic-variable group fails QA if:
 - token badges truncate unnecessarily;
 - alias chips are plain text with no resolved-value preview where a preview is useful;
 - hierarchy is flattened;
+- hierarchical children are merely indented without visible connector lines;
+- connector elbows do not align to child badges;
+- the vertical branch does not terminate at the final child;
 - Usage copy is missing or generic;
 - row content overlaps because a reference row height was treated as fixed.
 
