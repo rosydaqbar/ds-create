@@ -10,7 +10,7 @@ The confirmed questionnaire is only one part of the contract. Generation must co
 - the current Figma/library state;
 - global documentation/layout rules;
 - token/naming rules;
-- every in-scope page specification;
+- every in-scope Figma Page and its corresponding Markdown specification;
 - dependencies between foundations, assets, components, and examples.
 
 Before editing Figma, build a completeness checklist from all of those sources. Do not narrow a complex request to the last defect mentioned by the user.
@@ -18,7 +18,7 @@ Before editing Figma, build a completeness checklist from all of those sources. 
 A local correction means:
 1. fix the local defect;
 2. preserve every existing requirement not explicitly removed;
-3. re-check connected pages/components/tokens/documentation;
+3. re-check connected Figma Pages/Frames/components/tokens/documentation;
 4. update dependent examples and notes when the underlying system changed;
 5. run complete QA again.
 
@@ -27,27 +27,27 @@ Fail the generation if any detailed source requirement was replaced by a shorter
 # 1. Inspect first
 
 Before changing Figma:
-- inventory pages;
+- inventory Figma Pages and their top-level Frames/Component Sets;
 - inventory variables and modes;
 - inventory local styles;
 - inventory component sets and public properties;
 - identify existing naming patterns;
-- identify which observed page families already exist.
+- identify which observed Figma Page families already exist.
 
-# 2. Page actions
+# 2. Figma Page actions
 
 ## Keep
-- retain page/canvas structure;
+- retain the Figma Page and its top-level canvas structure;
 - use existing assets as dependencies;
 - do not rename variables or public properties.
 
 ## Audit
-- compare against the corresponding page Markdown file;
+- compare against the corresponding Markdown specification;
 - report missing sections, matrices, properties, states, usage copy, or documentation;
 - do not mutate until allowed by build strategy.
 
 ## Improve
-- preserve page identity and public API;
+- preserve Figma Page identity and public component/token API;
 - fill missing documentation or variants without unnecessary structural churn.
 
 ## Refactor
@@ -55,7 +55,7 @@ Before changing Figma:
 - private anatomy and bindings may change.
 
 ## Rebuild
-- reconstruct the page using its exact page-family spec;
+- reconstruct the page using its exact Markdown specification for that Figma Page;
 - migrate approved brand values and reusable assets.
 
 ## Replace
@@ -63,7 +63,7 @@ Before changing Figma:
 - archive/remove superseded items only after migration.
 
 ## Build
-- create the missing page/family using the exact page spec.
+- create the missing Figma Page/family using its exact Markdown specification.
 
 ## Skip
 - create nothing.
@@ -97,14 +97,14 @@ Before changing Figma:
 24. Video players
 ```
 
-# 4. Never replace page-family structure with generic component taxonomy
+# 4. Never replace Figma Page family structure with generic component taxonomy
 
-If a component belongs to a Base Component page family, keep it on that page. Example: verification inputs belong to `Inputs`, not a separate page.
+If a component belongs to a Base Component Figma Page family, keep it on that Figma Page. Example: verification inputs belong to `Inputs`, not a separate page.
 
 # 5. Required validation
 
-For every generated page verify:
-- page-family width/zone positioning;
+For every generated Figma Page verify:
+- top-level Frame/Component-Set region sizing and relative canvas positioning;
 - header and section layout;
 - every required section/family exists;
 - full component-property matrix coverage;
@@ -135,7 +135,7 @@ This validation applies globally, including Getting Started, Foundation pages, c
 
 # 6. Hard validation for variable documentation
 
-Variable pages require structural validation, not universal fixed dimensions.
+Variable documentation Frames require structural validation, not universal fixed dimensions.
 
 The audited measurements are **reference baselines**.
 
@@ -231,27 +231,27 @@ Fail generation if:
 
 # 9. Base Component deep-anatomy validation
 
-Before generating or refactoring any Base Component page:
+Before generating or refactoring any Base Component Figma Page:
 
-1. read the full page Markdown file;
+1. read the full corresponding Markdown specification;
 2. build private helpers first;
 3. build published masters from those helpers;
 4. construct the complete property matrix;
-5. add page/family documentation headers;
-6. render every page-specific note, diagram, example, and guidance item defined by the page specification;
+5. add required region/family header Instances;
+6. render every page-specific note, diagram, example, and guidance item defined by the corresponding Markdown specification;
 7. validate that no detailed requirement was compressed into a generic substitute;
-8. validate that documentation is visible on canvas in the composition required by that page;
+8. validate that documentation is visible on canvas in the composition required on that Figma Page;
 9. validate internal layer anatomy, not only screenshot appearance.
 
-A Base Component page must be rejected and rebuilt if:
+A Base Component Figma Page must be rejected and rebuilt if:
 - its dedicated notes/documentation region is missing;
 - its notes contain only generic prose that could describe another component;
 - documentation exists only in Markdown/component descriptions but not visibly on the Figma canvas;
 - its master hierarchy differs from the documented anatomy;
 - private helpers are missing or duplicated inline;
 - a component property is omitted because it produces a large matrix;
-- the page is represented by a few “nice examples” instead of the real matrix;
-- page descriptions are generic;
+- the Figma Page is represented by a few “nice examples” instead of the real matrix;
+- required region descriptions are generic;
 - Buttons omit the optical Text-padding wrapper;
 - Dropdowns omit reusable list-item/inset-icon helpers;
 - Inputs flatten label/control/hint into one frame;
@@ -259,7 +259,7 @@ A Base Component page must be rejected and rebuilt if:
 - Text-editor toolbars draw icons individually rather than using the icon set;
 - Video-player controls are individually authored inside the player.
 
-# 10. Documentation validation by page
+# 10. Documentation validation by Figma Page
 
 ## Avatars
 Require:
@@ -285,38 +285,38 @@ Require:
 - Text highlight;
 - examples-in-use region.
 
-## Every Base Component page
+## Every Base Component Figma Page
 Require:
-- every region defined by that page's specification;
-- page-specific header;
+- every region defined by that Figma Page's Markdown specification;
+- required region/family header;
 - private region when specified;
 - all component sets;
 - exact property axes;
-- anatomy defined in the page spec;
+- anatomy defined in the Markdown specification;
 - full matrices;
-- every page-specific note, rule, diagram, example, accessibility requirement, content rule, and maintenance instruction defined in that page file.
+- every page-specific note, rule, diagram, example, accessibility requirement, content rule, and maintenance instruction defined in that Markdown file.
 
-Do not impose one universal notes-frame structure. Generation is incomplete until the **entire page specification** is represented visibly and structurally in Figma.
+Do not impose one universal notes-frame structure. Generation is incomplete until the **entire Markdown specification** is represented visibly and structurally in Figma.
 
 # Notes & Documentation selection workflow
 
-Before generating documentation for any page with long-form notes:
+Before generating documentation for any Figma Page with long-form notes:
 
-1. review the complete audited Notes & Documentation inventory for that page;
+1. review the complete audited Notes & Documentation inventory for that Figma Page;
 2. classify each topic by whether it directly helps create, maintain, audit, or evolve the current agnostic system;
 3. discard topics that are promotional, source-specific, marketplace/resource catalogs, or outside the selected design-system scope;
 4. for every selected topic, preserve the full explanation depth;
 5. identify every relevant visual example used to teach that topic;
 6. recreate those visuals using the generated system itself;
 7. place the visuals immediately after the related explanation;
-8. validate that the selected page is not prose-only.
+8. validate that the selected documentation Frame is not prose-only.
 
 Selection happens at the **topic + visual module** level.
 
 Never perform this incorrect workflow:
 
 ```text
-Audit page
+Audit Figma Page
 → extract headings
 → paraphrase headings into Markdown
 → omit diagrams/images/examples
@@ -331,10 +331,10 @@ Audit page
 → select relevant topic
 → preserve full written depth
 → recreate relevant demonstration
-→ integrate into the same page spec
+→ integrate into the same Markdown specification
 ```
 
-## Current audited long-form Notes pages
+## Current audited long-form Notes Figma Pages
 
 The audited file contains long-form Notes/Documentation for:
 - Variables;
