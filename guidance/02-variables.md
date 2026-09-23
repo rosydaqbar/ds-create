@@ -23,7 +23,7 @@ Must explain the system goals:
 
 Must explain one consistent naming structure and how names communicate hierarchy, purpose, and modifiers.
 
-The actual naming syntax is resolved from the initiator preset; the page explains the selected convention rather than forcing one preset.
+The actual naming syntax is resolved from the initiator preset; the Variables Figma Page explains the selected convention rather than forcing one preset.
 
 ## 4. Types of variables
 
@@ -195,7 +195,7 @@ A “Mobile / Tablet / Desktop” variable mode must not imply that responsivene
 
 ### Required visual documentation
 
-Show a responsive component/page example with:
+Show a responsive component/product-page example with:
 - desktop composition;
 - tablet composition;
 - mobile composition;
