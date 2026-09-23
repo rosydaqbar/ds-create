@@ -2,13 +2,13 @@
 
 The Logos page is an asset canvas with multiple horizontal zones.
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Product logo / logomark zone     2400 header
-x≈2800    Partner/company logo zone         2400 header
-x≈5600    Press/featured logo zone          2400 header
-x≈8400    Long-form documentation           1600 frame
+Product logo / logomark zone     2400 header
+Partner/company logo zone         2400 header
+Press/featured logo zone          2400 header
+Long-form documentation           1600 frame
 ```
 
 # Product identity
