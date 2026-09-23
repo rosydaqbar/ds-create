@@ -1,6 +1,6 @@
 # Foundations
 
-Foundation child pages must remain in this order:
+Foundation child Figma Pages must remain in this order:
 
 1. Colors
 2. Typography
@@ -10,6 +10,6 @@ Foundation child pages must remain in this order:
 6. Effect styles
 7. Spacing, radius & grids
 
-Do not split `Spacing`, `Sizing`, `Radius`, `Borders`, and `Grid` into separate Figma pages. They belong to the same page family.
+Do not split `Spacing`, `Sizing`, `Radius`, `Borders`, and `Grid` into separate Figma Pages. They belong to the same Figma Page family.
 
-Do not add unrelated Foundation pages unless the user explicitly asks for them.
+Do not add unrelated Foundation Figma Pages unless the user explicitly asks for them.
