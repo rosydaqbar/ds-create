@@ -114,6 +114,21 @@ The Figma page must visibly document:
 
 A matrix alone fails documentation QA.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when Button group is appropriate versus tabs, radio groups, or independent buttons;
+- private base → published group anatomy;
+- Size, Icon, Current, Hover, Focused, and Disabled behavior;
+- connected-edge border merging and outer-corner logic;
+- text, leading-icon, and icon-only composition;
+- keyboard/focus behavior for each item;
+- do/don't examples for multiple Current items, doubled borders, and rounded interior corners;
+- central maintenance through the private base, border token, radius token, and state tokens.
+
+A matrix alone fails documentation QA.
+
 # 5. QA
 
 Fail QA when:
