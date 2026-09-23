@@ -216,10 +216,14 @@ Before generating or refactoring any Base Component page:
 3. build published masters from those helpers;
 4. construct the complete property matrix;
 5. add page/family documentation headers;
-6. add required long-form notes/examples;
-7. validate internal layer anatomy, not only screenshot appearance.
+6. add the mandatory notes/documentation region and examples;
+7. validate that the documentation is component-specific and visible on canvas;
+8. validate internal layer anatomy, not only screenshot appearance.
 
 A Base Component page must be rejected and rebuilt if:
+- its dedicated notes/documentation region is missing;
+- its notes contain only generic prose that could describe another component;
+- documentation exists only in Markdown/component descriptions but not visibly on the Figma canvas;
 - its master hierarchy differs from the documented anatomy;
 - private helpers are missing or duplicated inline;
 - a component property is omitted because it produces a large matrix;
@@ -258,11 +262,15 @@ Require:
 - Text highlight;
 - examples-in-use region.
 
-## Other Base Component pages
+## Every Base Component page
 Require:
 - page-specific header;
 - private region when specified;
 - all component sets;
 - exact property axes;
 - anatomy defined in the page spec;
-- full matrices.
+- full matrices;
+- a visible notes/documentation frame covering overview, anatomy, variants/properties, states, layout behavior, content guidance, accessibility, do/don't guidance, and implementation/maintenance;
+- a context example when it materially clarifies use.
+
+Generation is incomplete until the documentation frame exists. A component matrix by itself does not satisfy documentation QA.
