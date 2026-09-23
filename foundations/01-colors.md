@@ -238,9 +238,48 @@ The table must always remain wider than the Design note when its content require
 
 Name column:
 - render semantic tokens as bordered token badges;
-- show parent/child relationships with indentation and connector lines;
+- render parent/child relationships as a visible tree, not indentation alone;
 - hierarchy spacing comes from documentation spacing tokens;
 - actual naming syntax comes from the selected naming preset.
+
+Required hierarchy treatment:
+
+```text
+Parent badge
+│
+├── Child badge
+└── Child badge
+```
+
+Figma layers for every hierarchical family:
+
+```text
+Hierarchy / <parent token>
+├─ Parent row
+│  └─ Token badge / Parent
+└─ Children
+   ├─ Child row
+   │  ├─ Connector / Vertical
+   │  ├─ Connector / Elbow
+   │  └─ Token badge / Child
+   └─ Child row
+      ├─ Connector / Vertical
+      ├─ Connector / Elbow
+      └─ Token badge / Child
+```
+
+Rules:
+- vertical connector begins beneath the parent relationship point;
+- vertical connector continues through the child stack;
+- every child gets a horizontal elbow connector;
+- the final child's vertical segment terminates at that child;
+- elbows align with the vertical center of child badges;
+- connector uses a subtle documentation-border semantic token;
+- child indentation is tokenized and content-adaptive;
+- connector positioning derives from layout, not fixed canvas coordinates;
+- when there is one child, still render the connector;
+- when there are no children, render no connector layers;
+- do not use text glyphs such as `├`, `└`, or `│` as the actual Figma connector.
 
 Mode columns:
 - render aliases as visual chips;
@@ -330,6 +369,7 @@ Required behavior:
 - data rows use the reference rhythm as a minimum, then grow when content wraps;
 - semantic subgroup separators remain visually consistent through documentation spacing tokens;
 - token-name cell uses a token badge;
+- hierarchical token-name cells include visible vertical + elbow connector lines;
 - mode cells use color alias chips with swatches;
 - Usage cell contains bespoke copy.
 
@@ -368,6 +408,14 @@ bg-primary
 ```
 
 The exact groups follow the final semantic inventory, but child modifiers must not appear as unrelated flat rows.
+
+Every family above with children must visibly show:
+- parent badge;
+- vertical connector;
+- horizontal elbow connector for each child;
+- indented child badge.
+
+Indentation without connector lines fails QA.
 
 ## Copy quality
 
