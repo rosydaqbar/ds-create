@@ -204,6 +204,23 @@ Text editor:
 - Default/Floating toolbar;
 - scroll bar/hint variations.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when to use Text editor rather than a simple textarea;
+- editor → toolbar → private command-icon anatomy;
+- Simple versus Advanced toolbar behavior;
+- Default/Hover/Current formatting-command states;
+- floating/contextual toolbar and Text highlight behavior;
+- content, scrolling, resizing, hint, and rich-text constraints;
+- keyboard navigation, focus, accessible command names, and selected/current-state communication;
+- do/don't examples for hand-built toolbar icons, excessive formatting options, and hiding essential actions in floating UI;
+- central maintenance through the command icon set, toolbar, tooltip, and editor tokens;
+- at least one composed example in use.
+
+The notes and example must be visible on the Figma canvas.
+
 # 9. QA
 
 Fail QA when:
