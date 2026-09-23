@@ -105,3 +105,14 @@ When a page includes selected long-form guidance, the builder must generate both
 The complete audited selection and exclusions are tracked in `05-observed-page-inventory.md`.
 
 Do not treat Notes & Documentation as prose-only Markdown.
+
+
+## Variable collection naming
+
+Collection naming is deterministic and domain-based.
+
+For greenfield systems, use the canonical domain labels defined in `02-token-and-naming-contract.md` rather than inventing prefixes or feature-specific collection names per run.
+
+Token naming presets and variable collection names are separate concerns.
+
+Existing collection names are preserved unless normalization is explicitly selected.
