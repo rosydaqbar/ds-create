@@ -361,6 +361,23 @@ Include:
 
 The documentation must describe the active generated system, not another product or source library.
 
+
+
+## Mandatory visible documentation region
+
+The long-form Button documentation above must be rendered as visible Figma documentation, not kept only in this Markdown file or component descriptions.
+
+It must also cover:
+- actual generated anatomy and private/helper dependencies;
+- Size × Hierarchy × State behavior;
+- focus, disabled, and loading accessibility;
+- label/content guidance;
+- icon-only accessible naming;
+- do/don't examples for hierarchy misuse, destructive-action misuse, and loading-state layout shift;
+- central maintenance through tokens, text-padding anatomy, and effect styles.
+
+A complete button matrix with no visible documentation frame fails QA.
+
 # 12. Button QA
 
 Fail QA when:
