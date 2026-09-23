@@ -2,7 +2,7 @@
 
 Text editors are rich-text/WYSIWYG controls used when users need formatting without writing markup.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private
@@ -19,7 +19,7 @@ Examples
 └─ composed editor usage
 ```
 
-The page includes:
+The Figma Page includes:
 - a public Text editors header;
 - a private-base header;
 - an Examples in use header.
@@ -181,7 +181,7 @@ Use for demonstrating contextual formatting after text selection.
 
 # 7. Examples in use
 
-The page must include at least one composed editor example showing:
+The Text editors Figma Page must include at least one composed editor example showing:
 - toolbar attached to an editor;
 - rich text content;
 - scrolling/resizing behavior;
@@ -207,7 +207,7 @@ Text editor:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use Text editor rather than a simple textarea;
 - editor → toolbar → private command-icon anatomy;
 - Simple versus Advanced toolbar behavior;
