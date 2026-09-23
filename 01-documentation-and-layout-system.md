@@ -1,6 +1,19 @@
 # Documentation and Layout System
 
-This file defines the visual and structural grammar for all generated pages.
+# 0. Terminology contract
+
+This file uses Figma object types literally:
+
+- **Figma Page** = top-level `PAGE` node. It has an infinite canvas and therefore no finite page width/height.
+- **Frame** = `FRAME` node with finite geometry and optional Auto Layout.
+- **Top-level Frame** = Frame directly on a Figma Page.
+- **Region / zone** = conceptual grouping on a Figma Page; it may contain direct Component Sets and header Instances and does not require a wrapper Frame.
+- **Documentation Frame** = Frame used for a foundation overview, variable table, long-form notes, or another documentation composition.
+- **Markdown specification** = repository file that defines requirements. It is not a Figma object.
+
+Geometry terms such as width, height, padding, clipping, Fill, Hug, and Auto Layout apply to Frames/components, not to Figma Pages unless the text explicitly discusses arrangement **on the Page canvas**.
+
+This file defines the visual and structural grammar for generated Frames, component regions, and their arrangement on Figma Page canvases.
 
 The documentation system follows a fixed **composition model**, not fixed canvas measurements.
 
@@ -13,7 +26,7 @@ Use logical documentation roles rather than hard-coded dimensions.
 Recommended logical roles:
 
 ```text
-doc.space.page
+doc.space.frame
 doc.space.header
 doc.space.section
 doc.space.group
@@ -27,7 +40,7 @@ doc.measure.specimen
 
 doc.radius.surface
 doc.border.subtle
-doc.surface.page
+doc.surface.base
 doc.surface.header
 ```
 
@@ -35,7 +48,7 @@ These names are logical references only. Translate them through the token naming
 
 ## Frame families
 
-Use these page behaviors:
+Use these Frame/region behaviors:
 
 | Purpose | Sizing behavior |
 | --- | --- |
@@ -47,7 +60,7 @@ Use these page behaviors:
 
 Do not normalize every frame to one width.
 
-Do not derive page size from one brand or one amount of content.
+Do not derive a fixed Frame size from one brand or one amount of content.
 
 # 2. Documentation header
 
@@ -58,7 +71,7 @@ Every finished documentation frame begins with a reusable header block.
 - width: Fill owning frame;
 - height: Hug contents;
 - layout: vertical;
-- padding: `doc.space.page`;
+- padding: `doc.space.frame`;
 - background: page surface;
 - contains one rounded inner Content frame.
 
@@ -84,12 +97,12 @@ Structure:
 
 ```text
 Header row
-├─ Identity and page title
+├─ Identity and Figma Page title
 │  ├─ System / brand mark
 │  └─ Breadcrumb
 │     ├─ Parent section
 │     ├─ Arrow
-│     └─ Page title
+│     └─ Figma Page title
 └─ Optional source/product link
 ```
 
@@ -198,7 +211,7 @@ Rules:
 
 ## 5.1 Color representation is always visual
 
-Across **all documentation pages**, any UI element that explains, summarizes, compares, or references a color must include an actual visual color specimen.
+Across **all documentation Frames and regions**, any UI element that explains, summarizes, compares, or references a color must include an actual visual color specimen.
 
 This includes:
 - palette swatches;
@@ -236,11 +249,11 @@ Crimson Red
 └─ Primary identity and actions
 ```
 
-The exact card composition may adapt to the page, but the visible specimen is mandatory.
+The exact card composition may adapt to the owning Frame/region, but the visible specimen is mandatory.
 
 # 6. Variable-table pattern
 
-Semantic variable pages use a full-width documentation table.
+Semantic-variable documentation Frames use a full-width documentation table.
 
 The table must preserve the visual structure while adapting to token length, additional modes, localization, and documentation volume.
 
@@ -447,7 +460,7 @@ Reading-oriented frame
 └─ Footer
 ```
 
-Use long-form pages for explanatory guidance, not token matrices.
+Use long-form documentation Frames for explanatory guidance, not token matrices.
 
 Rules:
 - headings use documentation typography roles;
@@ -469,7 +482,7 @@ Rules:
 
 # 9. Base Component canvas grammar
 
-Base Component pages are horizontal canvas regions, not one vertical dashboard.
+Base Component Figma Pages use horizontally arranged canvas regions, not one vertical dashboard.
 
 Default relationship:
 
@@ -493,7 +506,7 @@ Do not place regions using fixed absolute x coordinates.
 
 ## Private base region
 
-When a page has private construction components:
+When a Figma Page has private construction components:
 - keep them in the first region;
 - explain their internal purpose;
 - visually separate them from published families.
@@ -522,9 +535,9 @@ Only retain a fixed dimension when it is intrinsic to the actual component being
 
 # 11. Documentation completeness
 
-Before marking a page complete, confirm:
+Before marking a Figma Page complete, confirm:
 
-- every required page-family section exists;
+- every required top-level Frame/region exists;
 - every component-set family exists or is intentionally skipped;
 - every variant/property axis in scope exists;
 - private and public families are visually separated;
@@ -536,28 +549,28 @@ Before marking a page complete, confirm:
 - no raw reference canvas dimensions are used as layout constraints.
 
 
-# 11. Base Component page documentation standard
+# 11. Base Component Figma Page documentation standard
 
-Base Component pages use a **family canvas** rather than the reading-oriented Foundation-table pattern.
+Base Component Figma Pages use a **family canvas** rather than the reading-oriented Foundation-table pattern.
 
 The documentation model has three layers:
 
 ```text
-Page-specific explanation and notes
+Figma-Page-specific explanation and notes
         ↓
 Full component-set matrices
         ↓
-Required examples/guidance defined by that page's specification
+Required examples/guidance defined by that Figma Page's Markdown specification
 ```
 
-## 11.1 Page/family header
+## 11.1 Region/family header
 
 Every family region begins with a large documentation header.
 
 Required content:
 
 ```text
-Base components → <Page>
+Base components → <Figma Page>
 <Family title>
 <Specific description of what the family does and when it is useful>
 ```
@@ -573,11 +586,11 @@ Examples of acceptable specificity:
 Forbidden:
 - “A component used in UI.”
 - “Use this for actions.”
-- generic copy repeated across every page.
+- generic copy repeated across every Figma Page.
 
 ## 11.2 Private construction header
 
-When a page contains private helpers, the private region receives its own header.
+When a Figma Page contains private helpers, the private region receives its own header.
 
 Required message:
 - these are internal/unpublished building blocks;
@@ -608,7 +621,7 @@ The visual grouping of the matrix should make property axes obvious even without
 
 ## 11.4 Anatomy fidelity
 
-Generated components must follow the nested anatomy defined by their page Markdown file.
+Generated components must follow the nested anatomy defined by the corresponding Markdown specification.
 
 A visual match is not sufficient when the internal hierarchy differs.
 
@@ -622,11 +635,11 @@ Examples of anatomy that must be preserved:
 
 The generator must not flatten these structures to reduce layer count.
 
-## 11.5 Page-specific notes, guidance, and examples
+## 11.5 Figma-Page-specific notes, guidance, and examples
 
-Do not force every Base Component page into one universal documentation frame.
+Do not force every Base Component Figma Page into one universal documentation Frame.
 
-Each page must render **all documentation content explicitly required by its own Markdown specification**. Depending on the page, that can include:
+Each Figma Page must render **all documentation content explicitly required by its corresponding Markdown specification**. Depending on the page, that can include:
 - the family header;
 - private-helper explanation;
 - anatomy diagrams;
@@ -637,19 +650,19 @@ Each page must render **all documentation content explicitly required by its own
 - examples in use;
 - accessibility guidance;
 - maintenance guidance;
-- dedicated reading-oriented documentation sections where that page explicitly defines them.
+- dedicated reading-oriented documentation sections where that Markdown specification explicitly defines them.
 
 The component matrix and the documentation composition are complementary. A large matrix does not permit omission of notes, and a large note section does not permit omission of the matrix.
 
 Rules:
-- preserve every page-specific topic and example;
+- preserve every Figma-Page-specific topic and example;
 - do not summarize a detailed requirement into a generic paragraph;
 - show diagrams/specimens/instances where the specification calls for them;
 - write from the actual generated anatomy, properties, variables, and brand values;
 - documentation must exist visibly on the Figma canvas, not only in source Markdown or component descriptions;
-- if the user changes one part of a page, revalidate the entire page specification and its dependencies.
+- if the user changes one region on a Figma Page, revalidate the entire corresponding Markdown specification and its dependencies.
 
-Avatars and Buttons keep their additional page-specific documentation topics below; other pages keep the documentation topics defined in their own files.
+Avatars and Buttons keep their additional Figma-Page-specific documentation topics below; other Figma Pages keep the documentation topics defined in their corresponding Markdown files.
 
 ## 11.6 Buttons reading-oriented documentation
 
@@ -686,7 +699,7 @@ The generated text must describe the actual generated system mechanism.
 
 ## 11.8 Examples in use
 
-When the page contains an explicit examples region, preserve it.
+When the Figma Page contains an explicit examples region, preserve it.
 
 Observed example region:
 - Text editors.
@@ -699,7 +712,7 @@ Every Base Component Markdown file must include:
 
 ```text
 Purpose
-Page regions
+Figma Page regions
 Published/private families
 Property inventory
 Representative anatomy tree
@@ -710,16 +723,16 @@ Component-specific notes
 QA
 ```
 
-For complex pages, document each component family separately.
+For complex Figma Pages, document each component family separately.
 
 A file that only lists component-set names and variant axes is incomplete.
 
-# 13. Component-page QA
+# 13. Component Figma Page QA
 
-A component page fails generation QA if:
+A component Figma Page fails generation QA if:
 - its Markdown file contains no anatomy tree;
 - a private helper exists in the source pattern but the generated family duplicates its layers;
-- the page header description is generic;
+- a required region header description is generic;
 - the mandatory notes/documentation frame is missing or contains only generic filler;
 - the full component matrix is replaced by samples;
 - a known optical/layout helper is omitted;
@@ -728,7 +741,7 @@ A component page fails generation QA if:
 
 # Visual teaching is part of documentation
 
-Long-form Notes & Documentation are not prose pages.
+Long-form Notes & Documentation are not prose-only Frames.
 
 When a selected relevant topic is taught through a visual example in the audited reference, the generated system must preserve the **teaching mechanism** using the generated system's own components, tokens, variables, and brand values.
 
@@ -904,11 +917,11 @@ Do not:
 - shorten a selected topic into a one-line rule;
 - create a separate parallel notes directory.
 
-Relevant Notes & Documentation live inside the page specification they belong to.
+Relevant Notes & Documentation live inside the corresponding Markdown specification and are rendered into the appropriate Frame/region on that Figma Page.
 
 ## Visual documentation QA
 
-A long-form page fails QA when:
+A long-form documentation Frame fails QA when:
 - the source topic was selected as relevant but its visual teaching example is missing;
 - prose replaces a required diagram/comparison;
 - visuals use fake/unrelated token names;
