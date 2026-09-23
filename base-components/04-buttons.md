@@ -373,3 +373,165 @@ Fail QA when:
 - the full hierarchy/state matrix is absent;
 - documentation omits optical balancing;
 - the active visual effect model cannot be changed centrally through tokens.
+
+# 13. Visual documentation modules
+
+The Button long-form documentation is not complete without the visual comparisons that explain the design decisions.
+
+## 13.1 Buttons should look actionable
+
+Create two versions of the same action context.
+
+**Example A — clear affordance**
+- selected Button component treatment;
+- visible hierarchy/state;
+- obvious click target.
+
+**Example B — too visually ambiguous**
+- remove enough container/border/depth cues that the control starts to resemble static text.
+
+Keep:
+- label;
+- placement;
+- surrounding content
+
+the same.
+
+The comparison should demonstrate affordance rather than merely label one “good” and one “bad.”
+
+## 13.2 Button hierarchy
+
+Create a realistic action group showing:
+- Primary;
+- Secondary;
+- Tertiary;
+- Link/quiet treatment where the system uses it.
+
+Then create a second version where all actions have equal emphasis.
+
+The content and number of actions remain identical.
+
+Annotate:
+- which action should be noticed first;
+- why equal-emphasis actions increase scanning/decision effort.
+
+## 13.3 Destructive-action comparisons
+
+Use a modal/dialog scenario.
+
+Create three documentation examples:
+
+1. **Overly aggressive**
+   - a secondary/cancel-like action uses destructive styling unnecessarily.
+
+2. **Neutral alternative**
+   - use Secondary/Tertiary treatment where the action is not itself destructive.
+
+3. **True destructive primary action**
+   - deletion/removal/irreversible action uses the destructive family appropriately.
+
+The examples should use actual Button and Modal/dialog primitives available to the generated system. If a Modal component is outside current scope, build a documentation-only composition from generic surface/text/button instances rather than introducing a new published component.
+
+## 13.4 Icon live area / anatomy
+
+Create an annotated diagram showing:
+- icon component frame;
+- visible glyph bounds;
+- invisible live-area space;
+- label baseline;
+- resulting perceived gap when a raw icon frame sits beside text.
+
+This diagram must use the generated icon family.
+
+## 13.5 Button icon-padding problem
+
+Create a Button using:
+- leading icon;
+- bare text;
+- mathematically equal outer padding.
+
+Annotate why it looks optically unbalanced.
+
+Show measurement guides for:
+- outer padding;
+- icon frame;
+- visible glyph;
+- gap to text.
+
+## 13.6 Padding accumulation
+
+Create a diagram that breaks down the total perceived left/right spacing in an icon + label Button.
+
+Show:
+- root padding;
+- icon live area;
+- explicit item gap;
+- label bounds.
+
+The point is to show why simply using the same numeric outer padding on both sides can feel wrong.
+
+## 13.7 Corrected Text-padding anatomy
+
+Create the corrected Button construction:
+
+```text
+Button
+├─ Leading icon
+├─ Text padding
+│  ├─ optical inset
+│  ├─ Text
+│  └─ optical inset
+└─ Trailing icon
+```
+
+Show:
+- Label only;
+- Leading icon + label;
+- Label + trailing icon;
+- Leading + trailing icons.
+
+Place them side by side and verify their labels appear optically centered.
+
+This is a core anatomy explanation, not optional decoration.
+
+## 13.8 Optional depth/effect treatment
+
+Only include this module when the generated system uses non-flat elevation/depth.
+
+Show:
+- flat Button;
+- selected depth treatment;
+- effect-stack annotation.
+
+Do not show a tactile/skeuomorphic style when the brand direction selected Flat.
+
+## 13.9 Effect-stack anatomy
+
+When effects are used, create a zoomed visual showing:
+- border/stroke;
+- outer shadow;
+- inner highlight/inset effect where applicable;
+- focus effect where applicable;
+- effect token/style names.
+
+## 13.10 Removing/changing effects globally
+
+Create a before/after editor workflow:
+- shared effect token/style selected;
+- effect disabled/changed;
+- multiple Button hierarchies updating.
+
+The example must demonstrate centralized maintenance.
+
+## 13.11 Button visual QA
+
+Fail QA when:
+- long-form Button documentation is prose-only;
+- actionable vs ambiguous comparison is missing;
+- hierarchy comparison is missing;
+- destructive-action comparison is missing;
+- icon live-area diagram is missing;
+- incorrect-padding and corrected-padding examples are missing;
+- Text-padding wrapper is not shown visually;
+- effect examples are generated even when the selected visual direction is flat;
+- visuals use different anatomy from the published Button master.
