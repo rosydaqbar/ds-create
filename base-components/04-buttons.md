@@ -1,12 +1,12 @@
 # Buttons
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Primary/private button families
-x≈2800    Social buttons
-x≈6970    Mobile app-store buttons
-x≈9770    Long-form button documentation
+Primary/private button families
+Social buttons
+Mobile app-store buttons
+Long-form button documentation
 ```
 
 Published and helper families:
