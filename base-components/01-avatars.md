@@ -2,7 +2,7 @@
 
 Avatars represent people or profiles through images, initials, placeholders, presence/status, verification, and grouped-user patterns.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private region
@@ -21,7 +21,7 @@ Published region
 Long-form notes and documentation
 ```
 
-The page includes:
+The Figma Page includes:
 - a private-base header;
 - an avatar-user/image-resource header;
 - an Avatars public header;
@@ -228,7 +228,7 @@ Do not replace these matrices with a row of avatar examples.
 
 # 10. Avatar documentation
 
-This page requires a dedicated long-form frame.
+The Avatars Figma Page requires a dedicated long-form documentation Frame.
 
 Required topics:
 
