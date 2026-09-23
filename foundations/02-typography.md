@@ -1,16 +1,16 @@
 # Typography
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       private `_Type scale base` helper
-x≈2800    Typography overview       2400 wide
-x≈5600    Long-form documentation   1600 wide
+Private type-scale helper
+→ Typography overview
+→ Long-form typography documentation
 ```
 
-# 1. Typography overview
+Use the horizontal documentation-canvas grammar. Region sizes are content-driven.
 
-Frame width: `2400`.
+# 1. Typography overview
 
 Header contains:
 - Foundation breadcrumb;
@@ -20,41 +20,54 @@ Header contains:
 
 Content begins with a typeface specimen:
 - active family name;
-- large `Ag` sample;
-- alphabet, numbers, and punctuation specimen.
+- large character sample;
+- alphabet;
+- numerals;
+- punctuation specimen.
 
 ## Type scale
 
-Show all 11 rows.
+Show every typography role in the active system.
 
-| Scale | Size / line height | Weights |
-| --- | --- | --- |
-| Display 2xl | 72 / 90, -2% tracking | Regular, Medium, Semibold, Bold |
-| Display xl | 60 / 72, -2% tracking | Regular, Medium, Semibold, Bold |
-| Display lg | 48 / 60, -2% tracking | Regular, Medium, Semibold, Bold |
-| Display md | 36 / 44, -2% tracking | Regular, Medium, Semibold, Bold |
-| Display sm | 30 / 38 | Regular, Medium, Semibold, Bold |
-| Display xs | 24 / 32 | Regular, Medium, Semibold, Bold |
-| Text xl | 20 / 30 | Regular, Medium, Semibold, Bold |
-| Text lg | 18 / 28 | Regular, Medium, Semibold, Bold |
-| Text md | 16 / 24 | Regular, Medium, Semibold, Bold |
-| Text sm | 14 / 20 | Regular, Medium, Semibold, Bold |
-| Text xs | 12 / 18 | Regular, Medium, Semibold, Bold |
+Recommended presentation columns:
+
+| Role | Font family | Size | Line height | Tracking | Weight(s) |
+| --- | --- | --- | --- | --- | --- |
+
+If the system uses roles such as these, preserve them:
+
+```text
+Display 2xl
+Display xl
+Display lg
+Display md
+Display sm
+Display xs
+Text xl
+Text lg
+Text md
+Text sm
+Text xs
+```
+
+These are role examples, not mandatory numeric values.
 
 Brand-agnostic rule:
-- preserve this presentation and metadata structure;
-- replace family, values, weights, and scale only when the initiator or existing system requires it.
+- never import a reference type scale as the generated brand scale;
+- resolve family, size, line height, tracking, and weights from the existing brand/system first;
+- when missing, derive a coherent scale from the initiator answers and product density;
+- preserve the documentation presentation regardless of the chosen values.
+
+The specimen must visibly show each supported weight for each role.
 
 # 2. Long-form typography documentation
 
-Frame width: `1600`.
-
 Required outline:
 - Good typography
-- What “display” text means
-- Base font size
-- Line height
-- Letter spacing for display text
+- What display text means
+- Base text role
+- Line-height principles
+- Letter-spacing principles
 - Choosing typefaces
 - Minimum useful weight coverage
 - Keeping font choices simple
@@ -67,4 +80,6 @@ Required outline:
 - Typography-variable notes
 - Font-resource recommendations
 
-Use 720 px rich text and relevant specimen images.
+Use constrained rich text and relevant specimen images.
+
+Do not hard-code reference font sizes or reading widths into generated output.
