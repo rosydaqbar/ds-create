@@ -634,3 +634,203 @@ At normal inspection:
 - token badges and value previews are visually apparent;
 - hierarchical lines are visible;
 - page does not resemble a narrow article column with a truncated table.
+
+# 8. Visual documentation modules
+
+The Colors notes are not complete as prose alone. The generated long-form documentation must include visual examples built from the generated system.
+
+Only visual modules relevant to constructing or maintaining the color system are included.
+
+## 8.1 Palette-system overview
+
+Create a large specimen that visually groups:
+- neutral palette;
+- brand palette;
+- semantic feedback palettes;
+- approved accent/supporting palettes.
+
+For each family show:
+- tonal progression;
+- primitive token names;
+- resolved values;
+- contrast information where meaningful.
+
+The goal is to communicate the entire palette architecture at a glance.
+
+Do not reproduce decorative palettes that the generated product does not need.
+
+## 8.2 Raw color usage vs system-bound color usage
+
+Create a before/after component example.
+
+Use one realistic component such as:
+- date picker;
+- form field;
+- card;
+- segmented control.
+
+**Before**
+- layers use direct/raw color values.
+
+**After**
+- the same layers bind to semantic tokens/styles.
+
+Add annotations showing:
+- raw value;
+- semantic role;
+- primitive resolution.
+
+This visual explains why the system exists better than text alone.
+
+## 8.3 Contrast example
+
+Create an in-context accessibility specimen using actual generated semantic tokens.
+
+Show at minimum:
+- a passing text/background pair;
+- a failing or weak pair;
+- contrast result/indicator;
+- token names involved.
+
+Use generated components/surfaces rather than isolated colored rectangles only.
+
+Do not embed a screenshot advertising a specific contrast plugin.
+
+## 8.4 Primitive → semantic mapping
+
+Create a diagram showing how primitive colors resolve into semantic roles.
+
+Example structure:
+
+```text
+Primitive palette
+├─ neutral-900
+├─ neutral-700
+├─ brand-600
+└─ error-600
+
+        ↓ aliases
+
+Semantic roles
+├─ text-primary
+├─ text-secondary
+├─ bg-brand-solid
+└─ border-error
+
+        ↓ bindings
+
+Components
+├─ Button
+├─ Input
+└─ Alert
+```
+
+Use the actual naming convention selected by the initiator.
+
+## 8.5 Color-variable editing workflow
+
+When variables are used, create workflow visuals based on the generated file itself:
+
+1. open/select the primitive collection;
+2. switch to the relevant collection/mode;
+3. edit one primitive palette value;
+4. show semantic aliases referencing it;
+5. show dependent components updating.
+
+The documentation must use actual collection/mode names from the generated system.
+
+If variables are not used, replace this module with the actual style/token maintenance workflow rather than pretending variables exist.
+
+## 8.6 Brand-palette replacement
+
+Create a before/after brand update specimen.
+
+Keep:
+- component structure;
+- semantic token names;
+- content.
+
+Change only the primitive brand palette.
+
+Show:
+- previous primitive ramp;
+- replacement ramp;
+- same primary/selected/focus components after propagation.
+
+This demonstrates that semantics remain stable while brand values change.
+
+## 8.7 Neutral-palette character comparison
+
+Create three copies of the same small UI composition:
+- neutral/desaturated;
+- cooler/tinted;
+- warmer/tinted.
+
+Keep brand color and component anatomy unchanged.
+
+Annotate how neutral choice affects:
+- text;
+- borders;
+- surfaces;
+- overall visual character.
+
+When the generated brand already defines one neutral direction, highlight it as the selected direction.
+
+## 8.8 Neutral-palette update workflow
+
+Create a before/after visual showing:
+- old neutral ramp;
+- updated neutral ramp;
+- same semantic roles;
+- same component examples.
+
+Include at least:
+- page background;
+- card/elevated background;
+- primary/secondary text;
+- border/divider;
+- disabled state.
+
+## 8.9 Effect-color dependency
+
+Create a compact visual linking Color and Effect Styles.
+
+Show one component using:
+- shadow/elevation;
+- focus ring;
+- overlay/tint if applicable.
+
+Annotate which effect values depend on color tokens.
+
+Then show what must be revalidated after a palette change.
+
+Do not duplicate the entire Effect Styles documentation; link the concepts visually.
+
+## 8.10 Visual-module layout
+
+Each visual module follows the long-form documentation grammar:
+
+```text
+Section heading
+Body explanation
+Visual example
+Optional caption/annotation
+```
+
+The visual block:
+- uses the full reading-column width;
+- grows vertically with content;
+- is placed directly after the explanation it demonstrates;
+- uses generated components/tokens rather than generic placeholder art.
+
+## 8.11 Color visual QA
+
+Fail QA when:
+- Color notes contain only text;
+- no raw-vs-system example exists;
+- no contrast specimen exists;
+- no primitive → semantic mapping exists;
+- a palette-change workflow is described without before/after component evidence;
+- neutral-palette guidance has no same-UI comparison;
+- screenshots show source-system names or irrelevant plugin promotion;
+- visual examples use token names different from the generated system.
