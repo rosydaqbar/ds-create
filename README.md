@@ -27,24 +27,6 @@ This package defines how to **audit, extend, or generate** the Foundation and Ba
 
 The system is brand-agnostic in values, but **not open-ended in documentation structure**. Page hierarchy, canvas composition, documentation layout, table anatomy, specimen presentation, and component-matrix behavior are fixed by this package. Brand-specific values are resolved later from the initiator answers.
 
-## Runtime files
-
-Only these root specifications are required during generation:
-
-```text
-README.md
-01-documentation-and-layout-system.md
-02-token-and-naming-contract.md
-03-initiator-and-generation.md
-```
-
-Everything page-specific lives under:
-- `guidance/`;
-- `foundations/`;
-- `base-components/`.
-
-Do not create separate audit ledgers, manifests, page maps, or duplicated decision files unless they are required by an external workflow.
-
 ## Scope
 
 The supported source structure is intentionally limited to:
@@ -89,7 +71,7 @@ Treat the user's request, supplied brand/source material, current Figma state, g
 
 Do not solve one visible defect by narrowing the task to that defect.
 
-1. Read `03-initiator-and-generation.md`.
+1. Read `03-initiator-questionnaire.md`.
 2. Inspect the user's existing Figma library and codebase.
 3. Read `01-documentation-and-layout-system.md` and `02-token-and-naming-contract.md`.
 4. Read the exact specification for **every in-scope Figma Page and its corresponding Markdown specification before generation begins**.
@@ -119,6 +101,8 @@ Documentation is integrated into the page composition. Depending on the page, it
 When a page includes selected long-form guidance, the builder must generate both:
 - the written explanation; and
 - the visual example/diagram/comparison that teaches it.
+
+The complete audited selection and exclusions are tracked in `05-observed-page-inventory.md`.
 
 Do not treat Notes & Documentation as prose-only Markdown.
 
