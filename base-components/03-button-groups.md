@@ -100,7 +100,7 @@ Public group:
 
 
 
-## Mandatory notes/documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when a Button group is appropriate versus tabs, radio groups, or independent buttons;
@@ -115,7 +115,7 @@ The Figma page must visibly document:
 A matrix alone fails documentation QA.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when Button group is appropriate versus tabs, radio groups, or independent buttons;
