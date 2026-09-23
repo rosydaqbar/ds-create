@@ -96,4 +96,4 @@ Standalone helper component where needed.
 
 # Canvas rhythm
 
-Use repeated ~2400 px header zones arranged horizontally. Each family should be positioned beneath its corresponding header, not inside a generic vertical card stack.
+Use repeated ~the system-defined value header zones arranged horizontally. Each family should be positioned beneath its corresponding header, not inside a generic vertical card stack.
