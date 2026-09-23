@@ -297,3 +297,75 @@ Require:
 - every page-specific note, rule, diagram, example, accessibility requirement, content rule, and maintenance instruction defined in that page file.
 
 Do not impose one universal notes-frame structure. Generation is incomplete until the **entire page specification** is represented visibly and structurally in Figma.
+
+# Notes & Documentation selection workflow
+
+Before generating documentation for any page with long-form notes:
+
+1. review the complete audited Notes & Documentation inventory for that page;
+2. classify each topic by whether it directly helps create, maintain, audit, or evolve the current agnostic system;
+3. discard topics that are promotional, source-specific, marketplace/resource catalogs, or outside the selected design-system scope;
+4. for every selected topic, preserve the full explanation depth;
+5. identify every relevant visual example used to teach that topic;
+6. recreate those visuals using the generated system itself;
+7. place the visuals immediately after the related explanation;
+8. validate that the selected page is not prose-only.
+
+Selection happens at the **topic + visual module** level.
+
+Never perform this incorrect workflow:
+
+```text
+Audit page
+→ extract headings
+→ paraphrase headings into Markdown
+→ omit diagrams/images/examples
+```
+
+Required workflow:
+
+```text
+Audit page
+→ understand each topic
+→ inspect how it is visually demonstrated
+→ select relevant topic
+→ preserve full written depth
+→ recreate relevant demonstration
+→ integrate into the same page spec
+```
+
+## Current audited long-form Notes pages
+
+The audited file contains long-form Notes/Documentation for:
+- Variables;
+- Colors;
+- Typography;
+- Logos;
+- Icons;
+- Effect styles;
+- Spacing/radius/grids;
+- Avatars;
+- Buttons;
+- Portfolio mockups;
+- Empty states;
+- Tables.
+
+For the current Foundation + Base Component builder:
+
+### Selected/integrated
+- Variables;
+- Colors;
+- Typography;
+- Logos when brand/logo scope is enabled;
+- Icons;
+- Effect styles;
+- Spacing/radius/grids;
+- Avatars when Avatar scope is enabled;
+- Buttons when Button scope is enabled.
+
+### Audited but not generated in the current scope
+- Portfolio mockups — presentation workflow, not Foundation/Base Component construction.
+- Empty states — Application Component/UX guidance.
+- Tables — Application Component/data-display guidance.
+
+If the builder scope later includes those component families, their audited Notes & Documentation must be revisited and integrated at that time rather than re-audited from scratch.
