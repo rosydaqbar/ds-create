@@ -2,6 +2,28 @@
 
 The confirmed questionnaire becomes the generation contract.
 
+# 0. Integrated generation rule
+
+The confirmed questionnaire is only one part of the contract. Generation must combine:
+- the user's full current request;
+- supplied source/brand material;
+- the current Figma/library state;
+- global documentation/layout rules;
+- token/naming rules;
+- every in-scope page specification;
+- dependencies between foundations, assets, components, and examples.
+
+Before editing Figma, build a completeness checklist from all of those sources. Do not narrow a complex request to the last defect mentioned by the user.
+
+A local correction means:
+1. fix the local defect;
+2. preserve every existing requirement not explicitly removed;
+3. re-check connected pages/components/tokens/documentation;
+4. update dependent examples and notes when the underlying system changed;
+5. run complete QA again.
+
+Fail the generation if any detailed source requirement was replaced by a shorter generic substitute.
+
 # 1. Inspect first
 
 Before changing Figma:
@@ -216,9 +238,10 @@ Before generating or refactoring any Base Component page:
 3. build published masters from those helpers;
 4. construct the complete property matrix;
 5. add page/family documentation headers;
-6. add the mandatory notes/documentation region and examples;
-7. validate that the documentation is component-specific and visible on canvas;
-8. validate internal layer anatomy, not only screenshot appearance.
+6. render every page-specific note, diagram, example, and guidance item defined by the page specification;
+7. validate that no detailed requirement was compressed into a generic substitute;
+8. validate that documentation is visible on canvas in the composition required by that page;
+9. validate internal layer anatomy, not only screenshot appearance.
 
 A Base Component page must be rejected and rebuilt if:
 - its dedicated notes/documentation region is missing;
@@ -243,7 +266,7 @@ Require:
 - private base region;
 - avatar-user asset region;
 - published avatar families;
-- long-form avatar-management notes.
+- avatar-management documentation.
 
 ## Buttons
 Require:
@@ -251,7 +274,7 @@ Require:
 - utility/close/loading helpers;
 - social buttons/groups;
 - app-store badges;
-- long-form notes including hierarchy, destructive usage, optical balancing, and effect treatment.
+- page-specific documentation including hierarchy, destructive usage, optical balancing, and effect treatment.
 
 ## Text editors
 Require:
@@ -264,13 +287,13 @@ Require:
 
 ## Every Base Component page
 Require:
+- every region defined by that page's specification;
 - page-specific header;
 - private region when specified;
 - all component sets;
 - exact property axes;
 - anatomy defined in the page spec;
 - full matrices;
-- a visible notes/documentation frame covering overview, anatomy, variants/properties, states, layout behavior, content guidance, accessibility, do/don't guidance, and implementation/maintenance;
-- a context example when it materially clarifies use.
+- every page-specific note, rule, diagram, example, accessibility requirement, content rule, and maintenance instruction defined in that page file.
 
-Generation is incomplete until the documentation frame exists. A component matrix by itself does not satisfy documentation QA.
+Do not impose one universal notes-frame structure. Generation is incomplete until the **entire page specification** is represented visibly and structurally in Figma.
