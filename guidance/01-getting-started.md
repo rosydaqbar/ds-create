@@ -47,3 +47,17 @@ Hard rules:
 This rule applies even when the color summary is not on the dedicated Colors page.
 
 Do not merge these five topics into one short setup page.
+
+## Mandatory visible notes/documentation
+
+Getting Started is itself a documentation surface. The five required long-form frames must be generated as visible Figma content whenever Getting Started is in scope.
+
+Do not replace them with:
+- a short dashboard;
+- a few summary cards;
+- one compact “system direction” section;
+- component descriptions stored only in metadata.
+
+The generated canvas must visibly explain the actual generated system: file organization, setup, libraries, variants, Auto Layout, active brand translation, and how to work with the system.
+
+A Getting Started page without the required long-form documentation frames fails QA.
