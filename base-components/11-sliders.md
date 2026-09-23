@@ -84,6 +84,22 @@ Show:
 - handle Default/Hover/Focused;
 - single-value-like and range examples.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when Slider is appropriate and when a discrete control is clearer;
+- single-value versus range use;
+- track, progress line, and reusable handle anatomy;
+- label modes: none, bottom, and top-floating/tooltip;
+- min/max/value communication and logical handle positioning;
+- keyboard interaction, focus visibility, touch target, and accessible value naming;
+- why sliders should not be used to display measured signal strength;
+- do/don't examples for unlabeled ranges, shifting handles when labels appear, and unrelated per-value drawings;
+- central maintenance through the handle helper, track tokens, and state tokens.
+
+A matrix alone fails documentation QA.
+
 # 6. QA
 
 Fail QA when:
