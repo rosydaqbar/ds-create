@@ -348,83 +348,116 @@ Final actions:
 
 ---
 
+---
+
 # Part B — Generation Decision Logic
 
 The confirmed questionnaire becomes the generation contract.
 
-# 0. Integrated generation rule
+# 0. Mandatory specification loading
+
+Before implementation, load the complete applicable specification set.
+
+Always load:
+
+```text
+README.md
+SYSTEM.md
+INITIATOR.md
+```
+
+Then:
+
+- Getting started selected → load `guidance/01-getting-started.md`
+- Variables selected → load `guidance/02-variables.md`
+- Any Foundation selected → load `foundations/00-foundations.md` **and every selected Foundation Page file**
+- Any Base Component selected → load `base-components/00-base-components.md` **and every selected Base Component Page file**
+
+The exact Page → file mapping is defined in `README.md`.
+
+**Root-only implementation is forbidden.**
+
+Do not inspect, generate, modify, or mark complete an in-scope Foundation/Base Component Page from `README.md`, `SYSTEM.md`, or questionnaire answers alone.
+
+If any required specification file has not been loaded, stop implementation and load it first.
+
+# 1. Integrated generation rule
 
 Generation combines:
 - the user's current request;
 - supplied brand/source material;
 - current Figma/library state;
-- the exact Page hierarchy in `SYSTEM.md`;
-- global documentation/layout rules in `SYSTEM.md`;
-- token/naming rules in `SYSTEM.md`;
-- every in-scope page-specific Markdown specification.
+- the exact Page hierarchy and global grammar in `SYSTEM.md`;
+- the confirmed decisions in this file;
+- `foundations/00-foundations.md` when Foundations are in scope;
+- `base-components/00-base-components.md` when Base Components are in scope;
+- every selected Page-specific Markdown specification.
 
 A local correction does not cancel unrelated approved requirements.
 
-# 1. Inspect first
+# 2. Inspect first
 
-Before changing Figma:
+Only after mandatory specifications are loaded:
 - inventory Figma Pages and top-level Frames/Component Sets;
 - inventory variables, modes, and local styles;
 - inventory component sets and public properties;
 - identify current naming patterns;
-- map existing content to the exact Page hierarchy.
+- map existing content to the exact Page hierarchy;
+- map each selected Figma Page to its loaded Markdown specification.
 
-# 2. Figma Page actions
+# 3. Figma Page actions
 
 ## Keep
 Retain the Page, public API, and approved content.
 
 ## Audit
-Compare against its page-specific Markdown specification without mutating unless the build strategy permits it.
+Compare against its complete loaded Page specification without mutating unless the build strategy permits it.
 
 ## Improve
-Preserve identity/public API and fill missing approved requirements.
+Preserve identity/public API and fill missing approved requirements from the complete loaded specification.
 
 ## Refactor
-Preserve behavior/public meaning; private anatomy may change.
+Preserve behavior/public meaning; private anatomy may change only where its specification permits.
 
 ## Rebuild
-Reconstruct from the full page-specific Markdown specification while migrating approved brand values/assets.
+Reconstruct from the complete loaded Page specification while migrating approved brand values/assets.
 
 ## Replace
 Create the replacement first; remove/archive superseded content only after migration.
 
 ## Build
-Create the missing Page/family from its exact specification.
+Create the missing Page/family from its complete loaded specification.
 
 ## Skip
 Create nothing. Never infer Skip merely because an item was not mentioned in the latest prompt.
 
-# 3. Collection naming
+# 4. Collection naming
 
 Before generating variables:
 1. inspect existing collection names;
 2. resolve Keep / Normalize / Custom;
 3. resolve required domains;
 4. apply the deterministic collection grammar in `SYSTEM.md`;
-5. keep product-specific concepts inside the appropriate domain unless a separate collection is explicitly required.
+5. apply all variable requirements in `guidance/02-variables.md` when Variables are in scope;
+6. keep product-specific concepts inside the appropriate domain unless a separate collection is explicitly required.
 
-Token naming presets affect variable paths, not the collection naming grammar.
-
-# 4. Generation order
+# 5. Generation order
 
 ```text
-1. Getting started / Variables
-2. Foundations in the order defined by SYSTEM.md
-3. Base Components in the order defined by SYSTEM.md
-4. Notes, examples, and documentation required by each Page specification
+1. Load all mandatory specifications
+2. Getting started / Variables
+3. Foundations using foundations/00-foundations.md + selected Foundation specs
+4. Base Components using base-components/00-base-components.md + selected Base Component specs
+5. Notes & Documentation, examples, diagrams, matrices, and QA required by each loaded spec
 ```
 
-Do not substitute a different component taxonomy. A component stays on the Figma Page family defined by the Page map and its Markdown specification.
+Do not substitute a different component taxonomy.
 
-# 5. Build completeness
+# 6. Build completeness
 
-Before editing, build a checklist containing every in-scope:
+Build the completeness checklist from the **loaded specifications**, not from root summaries.
+
+For every selected Page capture:
 - Figma Page;
 - required Frame/region;
 - variable/token family;
@@ -437,28 +470,30 @@ Before editing, build a checklist containing every in-scope:
 - accessibility/content/usage rule;
 - QA requirement.
 
-Resolve every checklist item to Keep / Audit / Improve / Refactor / Rebuild / Replace / Build / Skip.
+Resolve every item to Keep / Audit / Improve / Refactor / Rebuild / Replace / Build / Skip.
 
-# 6. Validation
+# 7. Validation
 
-Run validation in this order:
-
-1. **Page hierarchy** — use `SYSTEM.md`.
-2. **Global documentation/layout** — use `SYSTEM.md`.
-3. **Token/naming** — use `SYSTEM.md`.
-4. **Page-specific completeness** — run the complete QA in every in-scope file under `guidance/`, `foundations/`, and `base-components/`.
-
-Do not duplicate detailed validation here.
-
-Generation fails when:
+Validation fails immediately if:
+- any required folder-level specification was not loaded;
+- any selected Page specification was not loaded;
+- generation relied only on root files;
 - required Pages are merged, renamed, flattened, or reordered;
 - required Frames/regions are missing;
-- a component matrix is reduced to showcase samples;
-- documented component anatomy is flattened;
-- required Notes & Documentation exist only as prose when a visual example is required;
-- page-specific requirements are replaced with generic substitutes;
+- component matrices are reduced to showcase samples;
+- documented anatomy is flattened;
+- required Notes & Documentation or visual examples are missing;
 - approved requirements disappear during a local fix.
 
-# 7. Completion rule
+Then run:
+1. global hierarchy/layout/token validation from `SYSTEM.md`;
+2. Foundation-family validation from `foundations/00-foundations.md` when applicable;
+3. Base Component-family validation from `base-components/00-base-components.md` when applicable;
+4. complete QA from every selected Page-specific specification.
 
-Do not mark generation complete until every checklist item has a resolved state and every applicable canonical QA source passes.
+# 8. Completion rule
+
+Do not mark generation complete until:
+- every required spec is confirmed loaded;
+- every checklist item is resolved;
+- every applicable global, family-level, and Page-specific QA rule passes.
