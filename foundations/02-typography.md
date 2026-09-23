@@ -1,127 +1,70 @@
-# ↳ Typography
+# Typography
 
-
-> **Initiator gate:** Execute this specification only when this Foundation is in scope. If it already exists, apply the confirmed action (`Keep`, `Audit`, `Improve`, `Refactor`, `Rebuild`, or `Replace`) before changing anything. Actual token names must follow the naming system selected in the initiator; token names shown here are logical roles.
-
-
-## Figma documentation layout
-
-Document this Foundation using the complete documentation-frame system in `01-documentation-system.md`.
-
-Use a `2848 px` overview frame when the topic is primarily visual/specimen-based, a `2528 px` specification frame when it is primarily variable/table-based, and an optional `1600 px` notes frame only when deeper guidance is genuinely useful.
-
-Every major section starts with a `720 px` Design note followed by the relevant specimen/table after `64 px`.
-
-Do not generate separate `Source`, `Matrices`, or `QA` utility boards as the primary presentation.
-
-## Variable collection
-
-`Foundation / Typography`
-
-Required variables:
+# Canvas inventory
 
 ```text
-font.family.body
-font.family.display
-font.family.mono
-
-font.weight.regular
-font.weight.medium
-font.weight.semibold
-font.weight.bold
-
-font.size.12
-font.size.14
-font.size.16
-font.size.18
-font.size.20
-font.size.24
-font.size.30
-font.size.36
-font.size.48
-font.size.60
-
-line-height.16
-line-height.20
-line-height.24
-line-height.28
-line-height.30
-line-height.32
-line-height.40
-line-height.44
-line-height.56
-line-height.72
+x≈0       private `_Type scale base` helper
+x≈2800    Typography overview       2400 wide
+x≈5600    Long-form documentation   1600 wide
 ```
 
-Typeface values are brand-configured.
+# 1. Typography overview
 
-## Required text styles
+Frame width: `2400`.
 
-```text
-Display / XL
-Display / LG
-Display / MD
-Heading / LG
-Heading / MD
-Heading / SM
-Body / LG / Regular
-Body / LG / Medium
-Body / MD / Regular
-Body / MD / Medium
-Body / MD / Semibold
-Body / SM / Regular
-Body / SM / Medium
-Body / SM / Semibold
-Label / MD
-Label / SM
-Code / MD
-```
+Header contains:
+- Foundation breadcrumb;
+- `Typography` H1;
+- short description;
+- optional resources.
 
-### Scaffold defaults
+Content begins with a typeface specimen:
+- active family name;
+- large `Ag` sample;
+- alphabet, numbers, and punctuation specimen.
 
-| Style | Size | Line height | Weight |
-|---|---:|---:|---|
-| Display / XL | 60 | 72 | Semibold |
-| Display / LG | 48 | 56 | Semibold |
-| Display / MD | 36 | 44 | Semibold |
-| Heading / LG | 30 | 40 | Semibold |
-| Heading / MD | 24 | 32 | Semibold |
-| Heading / SM | 20 | 30 | Semibold |
-| Body / LG | 18 | 28 | Regular |
-| Body / MD | 16 | 24 | Regular |
-| Body / SM | 14 | 20 | Regular |
-| Label / MD | 14 | 20 | Medium |
-| Label / SM | 12 | 16 | Medium |
-| Code / MD | 14 | 20 | Regular |
+## Type scale
 
-Brands may replace the scale, but component mappings use style roles rather than raw sizes.
+Show all 11 rows.
 
-## Text behavior rules
+| Scale | Size / line height | Weights |
+| --- | --- | --- |
+| Display 2xl | 72 / 90, -2% tracking | Regular, Medium, Semibold, Bold |
+| Display xl | 60 / 72, -2% tracking | Regular, Medium, Semibold, Bold |
+| Display lg | 48 / 60, -2% tracking | Regular, Medium, Semibold, Bold |
+| Display md | 36 / 44, -2% tracking | Regular, Medium, Semibold, Bold |
+| Display sm | 30 / 38 | Regular, Medium, Semibold, Bold |
+| Display xs | 24 / 32 | Regular, Medium, Semibold, Bold |
+| Text xl | 20 / 30 | Regular, Medium, Semibold, Bold |
+| Text lg | 18 / 28 | Regular, Medium, Semibold, Bold |
+| Text md | 16 / 24 | Regular, Medium, Semibold, Bold |
+| Text sm | 14 / 20 | Regular, Medium, Semibold, Bold |
+| Text xs | 12 / 18 | Regular, Medium, Semibold, Bold |
 
-- body and supporting text wrap;
-- interactive labels are single-line unless the component explicitly permits wrapping;
-- tab labels are single-line;
-- button labels are single-line;
-- form labels may wrap to two lines;
-- validation messages wrap freely;
-- truncation is documented per component and never assumed.
+Brand-agnostic rule:
+- preserve this presentation and metadata structure;
+- replace family, values, weights, and scale only when the initiator or existing system requires it.
 
-## Overview specimen content
+# 2. Long-form typography documentation
 
-Show:
-1. typeface roles;
-2. weight set;
-3. type scale;
-4. paragraph examples;
-5. truncation and wrapping specimens;
-6. numeric alignment specimen;
-7. monospace specimen.
+Frame width: `1600`.
 
-## QA
+Required outline:
+- Good typography
+- What “display” text means
+- Base font size
+- Line height
+- Letter spacing for display text
+- Choosing typefaces
+- Minimum useful weight coverage
+- Keeping font choices simple
+- Discovering new typefaces
+- Why fewer families are usually better
+- Changing text styles
+- Managing typography through variables
+- Opening the variables editor
+- Editing the typography collection
+- Typography-variable notes
+- Font-resource recommendations
 
-- available font styles match declared weights;
-- no missing font;
-- 200% text specimens remain legible;
-- line-height does not clip diacritics;
-- mixed Latin/numeric specimen aligns correctly;
-- fallback font behavior is documented.
+Use 720 px rich text and relevant specimen images.
