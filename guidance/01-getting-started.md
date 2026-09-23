@@ -1,6 +1,6 @@
 # Getting Started Guidance
 
-When Getting Started documentation is requested, create five separate 1600 px long-form frames arranged horizontally at 2000 px intervals.
+When Getting Started documentation is requested, create five separate the system-defined value long-form frames arranged horizontally at the system-defined value intervals.
 
 Required frames:
 
@@ -12,10 +12,10 @@ Required frames:
 
 Each frame uses:
 - standard long-form header;
-- one 720 px `Rich text` column inside an 80 px-padded Section;
+- one the system-defined value `Rich text` column inside an the system-defined value-padded Section;
 - `Content item` blocks for headings/paragraphs;
-- 720 px documentation images where relevant;
+- the system-defined value documentation images where relevant;
 - resource links immediately after the relevant content;
-- standard 386 px footer.
+- standard the system-defined value footer.
 
 Do not merge these five topics into one short setup page.
