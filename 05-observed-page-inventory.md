@@ -1,6 +1,6 @@
-# Observed Page Inventory
+# Observed Figma Page Inventory
 
-This file records the audited content-bearing pages and long-form documentation coverage used to construct this brand-agnostic initiator.
+This file records the audited content-bearing Figma Pages and long-form documentation coverage used to construct this brand-agnostic initiator.
 
 It is an audit index, not a second documentation system.
 
@@ -9,8 +9,8 @@ It is an audit index, not a second documentation system.
 The current initiator directly builds:
 - Getting Started / initiation guidance;
 - Variables guidance;
-- Foundation pages;
-- Base Component pages.
+- Foundation Figma Pages;
+- Base Component Figma Pages.
 
 Application/Marketing component families remain outside the current build scope unless explicitly added later.
 
@@ -311,7 +311,7 @@ If Tables are added later, this audit must be used.
 
 # Audit rule
 
-A page being “audited” does not mean all its notes are copied into the builder.
+A Figma Page being “audited” does not mean all its notes are copied into the builder.
 
 The required sequence is:
 
@@ -321,7 +321,7 @@ Audit all
 → select only builder-relevant topics
 → preserve selected topics in full
 → recreate selected visual teaching mechanisms
-→ integrate into the page they belong to
+→ integrate into the corresponding Markdown specification and render into the correct Frame/region
 ```
 
 There is no separate Notes directory.
