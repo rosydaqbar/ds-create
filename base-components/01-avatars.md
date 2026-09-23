@@ -195,7 +195,38 @@ _Avatar add button
 
 Keep it as a reusable helper used by Avatar group.
 
-# 9. Long-form notes and documentation
+# 9. Matrix requirements
+
+Avatar:
+- all six sizes;
+- border false/true;
+- image / placeholder icon / placeholder text treatments;
+- status icon on/off.
+
+Status icon:
+- Offline / Online / Avatar / Verified tick / Count.
+
+Avatar label group:
+- sm / md / lg;
+- supporting text on/off.
+
+Avatar profile photo:
+- sm / md / lg;
+- placeholder/text combinations;
+- verified on/off.
+
+Avatar group:
+- xs / sm / md;
+- More users on/off;
+- Add more button on/off.
+
+Private helpers:
+- both _Avatar image types;
+- all add-button sizes and states.
+
+Do not replace these matrices with a row of avatar examples.
+
+# 10. Long-form notes and documentation
 
 This page requires a dedicated long-form frame.
 
@@ -224,7 +255,7 @@ Include:
 
 The documentation must describe the generated library's actual mechanism.
 
-# 10. QA
+# 11. QA
 
 Fail QA when:
 - status icons push layout instead of overlaying;
