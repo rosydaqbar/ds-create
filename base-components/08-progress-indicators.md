@@ -83,7 +83,7 @@ Progress circle:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use a Progress bar versus Progress circle;
 - determinate progress versus indeterminate/loading patterns;
 - value-driven construction and label-placement behavior;
@@ -98,7 +98,7 @@ A variant matrix without these notes fails QA.
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use Progress bar versus Progress circle;
 - determinate progress versus indeterminate loading;
 - value-driven construction and label placement;
