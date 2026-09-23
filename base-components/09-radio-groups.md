@@ -124,6 +124,22 @@ The Figma page must visibly document:
 
 The full matrix does not replace this guidance.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- single-choice radio semantics and when checkbox-style multi-select is intentionally appropriate;
+- Radio group item → Radio group composed anatomy;
+- Selected versus Focused behavior;
+- simple, card, icon, avatar, and richer option types;
+- supporting-text, badge, and leading-visual alignment;
+- mobile versus desktop/breakpoint behavior;
+- keyboard navigation, group labeling, and non-color selected cues;
+- do/don't examples for multiple selected radio items, focus used as selection, and desktop merely scaled down for mobile;
+- central maintenance through the item family, breakpoint behavior, and semantic tokens.
+
+A matrix alone fails documentation QA.
+
 # 6. QA
 
 Fail QA when:
