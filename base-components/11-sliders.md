@@ -1,15 +1,93 @@
 # Sliders
 
-# Canvas region order
+Sliders let users select one value or a range along a continuous/discrete axis and are useful for dynamic filtering.
+
+# 1. Page regions
 
 ```text
-private `_Control handle`
-public `Slider`
+Private
+└─ _Control handle
+
+Published
+└─ Slider
 ```
 
-| Component set | Variant / property axes |
-| --- | --- |
-| `_Control handle` | State: Default / Hover / Focused; Type: False / Text / Tooltip |
-| `Slider` | Label: False / Bottom / Top floating; Left control: 0% / 25% / 50% / 75%; Right control: 25% / 50% / 75% / 100% |
+# 2. Slider
 
-Keep range combinations visible enough to understand the dual-handle model.
+Published set: `Slider`
+
+Observed:
+- 30 variants.
+
+Properties:
+- Label: False / Bottom / Top floating
+- Right control: 25% / 50% / 75% / 100%
+- Left control: 0% / 25% / 50% / 75%
+
+Anatomy:
+
+```text
+Slider
+positioned composition
+├─ Background track
+└─ Progress
+   ├─ Progress line
+   ├─ _Control handle                  left
+   └─ _Control handle                  right
+```
+
+The Progress region spans from left-control value to right-control value.
+
+Do not draw every range variant as unrelated shapes.
+
+# 3. Control handle
+
+Private set: `_Control handle`
+
+Observed:
+- 9 variants.
+
+Properties:
+- State: Default / Hover / Focused
+- Type: False / Text / Tooltip
+
+Anatomy:
+
+```text
+_Control handle
+├─ Handle
+└─ Value presentation                  type-driven
+   ├─ Text
+   └─ Tooltip
+```
+
+Handle stays centered on its logical value position.
+
+# 4. Label positioning
+
+False:
+- only handles/track.
+
+Bottom:
+- value labels below.
+
+Top floating:
+- floating tooltip/value above the active handle.
+
+Label treatment changes presentation only; slider range geometry remains the same.
+
+# 5. Matrix requirements
+
+Show:
+- supported left/right combinations;
+- all label types;
+- handle Default/Hover/Focused;
+- single-value-like and range examples.
+
+# 6. QA
+
+Fail QA when:
+- range endpoints are not reusable handle instances;
+- changing label type shifts the logical value position;
+- progress line does not start/end at handles;
+- focus state is missing.
