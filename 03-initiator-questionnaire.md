@@ -102,7 +102,7 @@ Pick up to four:
 
 ## Foundations
 
-For each page, mark `Existing`, `Partial`, `Missing`, or `Not needed`:
+For each Figma Page, mark `Existing`, `Partial`, `Missing`, or `Not needed`:
 
 ```text
 Colors
@@ -114,7 +114,7 @@ Effect styles
 Spacing, radius & grids
 ```
 
-## Base Component pages
+## Base Component Figma Pages
 
 ```text
 Avatars
@@ -135,11 +135,11 @@ Tooltips
 Video players
 ```
 
-For any existing page, allow a second-level inventory of the component sets inside that page.
+For any existing Figma Page, allow a second-level inventory of the component sets inside that page.
 
 # 4. Action per existing item
 
-Each existing page/component family must resolve to one action:
+Each existing Figma Page/component family must resolve to one action:
 
 - Keep
 - Audit
@@ -149,23 +149,23 @@ Each existing page/component family must resolve to one action:
 - Replace
 - Skip
 
-Each missing page/component family resolves to:
+Each missing Figma Page/component family resolves to:
 - Build
 - Skip
 
 # 5. Build strategy
 
-- Build only selected pages
+- Build only selected Figma Pages
 - Audit first, then ask before changes
-- Preserve existing pages and fill missing families
+- Preserve existing Figma Pages and fill missing families
 - Rebuild inconsistent parts only
 - Complete Foundation + Base Component system
 
-Default for existing systems: `Preserve existing pages and fill missing families`.
+Default for existing systems: `Preserve existing Figma Pages and fill missing families`.
 
 # 6. Foundation scope
 
-Allow selection at page level, then section level.
+Allow selection at Figma Page level, then Frame/region/component-family level.
 
 ## Colors
 
@@ -237,7 +237,7 @@ Optional sections:
 
 # 7. Base Component scope
 
-For each selected page, allow child-family selection.
+For each selected Figma Page, allow child-family selection.
 
 Examples:
 
@@ -259,7 +259,7 @@ Inputs
   Verification code input field
 ```
 
-The complete child-family inventory is defined by the corresponding page Markdown file.
+The complete child-family inventory is defined by the corresponding Markdown specification.
 
 # 8. Token architecture
 
@@ -282,7 +282,7 @@ If the user supplies an existing library, default to `Keep existing naming`.
 
 # 10. Documentation depth
 
-The **page composition itself is fixed**. This selector only controls optional explanatory depth.
+The **top-level composition on the Figma Page canvas is fixed**. This selector only controls optional explanatory depth.
 
 Selectable extras:
 - Long-form guidance
@@ -292,7 +292,7 @@ Selectable extras:
 - Developer notes
 - QA notes
 
-Do not remove required page headers, Design notes, variable Usage columns, or component matrices.
+Do not remove required region/header Instances, Design notes, variable Usage columns, or component matrices.
 
 # 11. Confirmation summary
 
@@ -300,8 +300,8 @@ Before generation, present:
 - product/brand summary;
 - platforms/modes;
 - existing-page actions;
-- selected Foundation pages/sections;
-- selected Base Component pages/families;
+- selected Foundation Figma Pages/Frames/regions;
+- selected Base Component Figma Pages/families;
 - token architecture;
 - token naming preset;
 - output formats;
