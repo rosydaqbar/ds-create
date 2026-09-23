@@ -19,13 +19,52 @@ Must explain the system goals:
 - aesthetics;
 - scalability.
 
-## 3. Variable naming
+## 3. Collection naming consistency
+
+The Variables Figma Page must document the actual generated collection structure.
+
+For new systems:
+- use plain domain collection names;
+- keep collection naming deterministic;
+- do not mix technical tier prefixes with domain names;
+- do not create feature-specific collections when the values belong to an existing domain;
+- show only collections that actually exist.
+
+Example structure:
+
+```text
+Primitives
+Color
+Typography
+Spacing
+Sizing
+Radius
+Components
+```
+
+This is an agnostic structural example, not a mandatory list. `Components` appears only when component-level tokens exist; `Motion` appears only when motion variables exist.
+
+Product-specific roles are nested inside the relevant collection.
+
+Example:
+
+```text
+Color
+└─ signal/
+   ├─ excellent
+   ├─ good
+   └─ poor
+```
+
+For an existing system using Keep/Audit/Improve, preserve its collection names unless normalization was explicitly selected.
+
+## 4. Variable naming
 
 Must explain one consistent naming structure and how names communicate hierarchy, purpose, and modifiers.
 
 The actual naming syntax is resolved from the initiator preset; the Variables Figma Page explains the selected convention rather than forcing one preset.
 
-## 4. Types of variables
+## 5. Types of variables
 
 Must cover, as separate sections:
 - primitive variables;
@@ -35,7 +74,7 @@ Must cover, as separate sections:
 
 Each section should include explanatory text and visual examples.
 
-## 5. Additional notes
+## 6. Additional notes
 
 Must cover:
 - whether variables are mandatory;
