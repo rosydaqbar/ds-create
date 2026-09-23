@@ -2,7 +2,7 @@
 
 Badges communicate compact secondary information such as status, notification, category, or metadata. The page includes both standalone badges and composed badge groups.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private helpers
@@ -171,7 +171,7 @@ Do not reduce the 666-variant Badge matrix to a color swatch row.
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use a Badge versus a Tag or ordinary text;
 - Badge versus Badge group anatomy and nested-instance relationship;
 - Type, Color, Icon, Size, and removable-action behavior;
@@ -187,7 +187,7 @@ A header plus matrix is not sufficient documentation.
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use a Badge versus Tag, text label, or Button;
 - Badge anatomy: optional dot/icon → text → optional close;
 - Badge group anatomy and nested Badge reuse;
