@@ -112,7 +112,7 @@ Help icon:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when Tooltip is appropriate and what information must remain directly visible in the UI;
 - tooltip surface/text/arrow anatomy;
 - Help icon → Tooltip composition;
