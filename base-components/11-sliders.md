@@ -2,7 +2,7 @@
 
 Sliders let users select one value or a range along a continuous/discrete axis and are useful for dynamic filtering.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private
@@ -87,7 +87,7 @@ Show:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when Slider is appropriate and when a discrete control is clearer;
 - single-value versus range use;
 - track, progress line, and reusable handle anatomy;
