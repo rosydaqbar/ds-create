@@ -478,7 +478,7 @@ Private/internal base region
 → Public component family
 → Related public component family
 → Additional family/families
-→ Optional long-form documentation
+→ Mandatory notes/documentation region
 ```
 
 Use a semantic canvas-region gap between major regions.
@@ -624,15 +624,37 @@ The generator must not flatten these structures to reduce layer count.
 
 ## 11.5 Notes and documentation frames
 
-Only create a dedicated long-form notes frame where the page spec requires one.
+Every Base Component page requires a dedicated notes/documentation frame in addition to the family header and full matrix.
 
-In the audited Base Component scope, dedicated long-form notes are required for:
-- Avatars;
-- Buttons.
+The matrix documents **what exists**. The notes frame documents **how and why to use it**. Neither replaces the other.
 
-Do not invent a 1600-wide long-form page for every component merely for symmetry.
+Minimum structure:
 
-For other Base Component pages, the page/family header plus full matrix is the primary documentation surface unless the user's existing system already contains additional notes.
+```text
+<Component> documentation
+├─ Overview / when to use
+├─ Anatomy
+│  └─ generated layer tree / helper relationships
+├─ Variants & properties
+├─ States & interaction
+├─ Sizing / layout behavior
+├─ Content guidance
+├─ Accessibility
+├─ Do / don't
+├─ Implementation / maintenance
+└─ Example in context                    when useful
+```
+
+Rules:
+- documentation copy must be component-specific;
+- write from the actual generated component anatomy and active token bindings;
+- show diagrams/specimens/instances when prose alone is insufficient;
+- do not use a generic repeated template sentence across pages;
+- do not omit documentation because the component matrix is large;
+- allow the documentation region to grow instead of shrinking it to one reference canvas;
+- documentation must exist as visible Figma content, not only as component descriptions or source Markdown.
+
+Avatars and Buttons additionally keep their specialized long-form topic requirements below.
 
 ## 11.6 Buttons long-form documentation
 
@@ -703,7 +725,7 @@ A component page fails generation QA if:
 - its Markdown file contains no anatomy tree;
 - a private helper exists in the source pattern but the generated family duplicates its layers;
 - the page header description is generic;
-- required long-form notes are missing;
+- the mandatory notes/documentation frame is missing or contains only generic filler;
 - the full component matrix is replaced by samples;
 - a known optical/layout helper is omitted;
 - examples-in-use are missing where specified;
