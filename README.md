@@ -72,3 +72,13 @@ Do not reduce requirements:
 - do not remove an existing requirement unless the user explicitly removes it.
 
 Documentation is integrated into the page composition. Depending on the page, it may be expressed through headers, Design notes, usage columns, diagrams, examples, guidance sections, reading-oriented documentation frames, or page-specific notes. The exact form comes from that page's specification; no single documentation format is universal.
+
+## Notes & Documentation are visual specifications
+
+When a page includes selected long-form guidance, the builder must generate both:
+- the written explanation; and
+- the visual example/diagram/comparison that teaches it.
+
+The complete audited selection and exclusions are tracked in `05-observed-page-inventory.md`.
+
+Do not treat Notes & Documentation as prose-only Markdown.
