@@ -1,10 +1,10 @@
 # Checkboxes
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private `_Checkbox base`
-x≈2800    Public `Checkbox`
+Private `_Checkbox base`
+Public `Checkbox`
 ```
 
 | Component set | Variant / property axes |
