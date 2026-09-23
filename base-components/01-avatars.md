@@ -1,30 +1,235 @@
 # Avatars
 
-# Canvas region order
+Avatars represent people or profiles through images, initials, placeholders, presence/status, verification, and grouped-user patterns.
+
+# 1. Page regions
 
 ```text
-Private avatar helpers
-Published avatar components
-Avatar-user image library
-Long-form avatar documentation
+Private region
+├─ _Avatar image
+└─ _Avatar add button
+
+Avatar-user assets / image-style region
+
+Published region
+├─ Avatar
+├─ Status icon
+├─ Avatar label group
+├─ Avatar profile photo
+└─ Avatar group
+
+Long-form notes and documentation
 ```
 
-Private/public families:
+The page includes:
+- a private-base header;
+- an avatar-user/image-resource header;
+- an Avatars public header;
+- a dedicated long-form notes/documentation frame.
 
-| Component set | Variant / property axes |
-| --- | --- |
-| `_Avatar image` | Type: Square / Portrait; source visibility boolean |
-| `_Avatar add button` | Size: xs / sm / md; State: Default / Hover / Focus / Disabled |
-| `Status icon` | Type: Offline / Online / Avatar / Verified tick / Count |
-| `Avatar` | Size: xs / sm / md / lg / xl / 2xl; Border; Placeholder icon; Placeholder text; Status icon boolean |
-| `Avatar group` | Size: xs / sm / md; More users boolean; Add-more boolean |
-| `Avatar label group` | Size: sm / md / lg; Supporting text boolean |
-| `Avatar profile photo` | Size: sm / md / lg; Placeholder; Text; Verified boolean |
+# 2. Avatar
 
-The avatar-user library is a separate large image-style/specimen region and should not be collapsed into the component matrix.
+Published set: `Avatar`
 
-Long-form documentation should cover:
-- image licensing/source policy appropriate to the user's assets;
-- avatar image styles/assets;
-- replacing avatars globally;
-- changing colored backgrounds.
+Observed:
+- 36 variants.
+
+Properties:
+- Status icon: Boolean
+- Size: xs / sm / md / lg / xl / 2xl
+- Border: False / True
+- Placeholder icon: False / True
+- Placeholder text: False / True
+
+Anatomy:
+
+```text
+Avatar
+├─ Avatar surface
+│  ├─ image
+│  ├─ placeholder icon                 conditional
+│  └─ initials/text                    conditional
+└─ Status icon                         optional overlay
+```
+
+The root remains square. Image, icon placeholder, and text placeholder are alternate content treatments inside the same avatar frame.
+
+Status is an overlay; it must not push the avatar's intrinsic size.
+
+# 3. Status icon
+
+Published set: `Status icon`
+
+Types:
+- Offline
+- Online
+- Avatar
+- Verified tick
+- Count
+
+Anatomy:
+
+```text
+Status icon
+└─ Icon / visual
+```
+
+Status visuals scale with the avatar size they are paired with.
+
+# 4. Avatar label group
+
+Published set: `Avatar label group`
+
+Properties:
+- Supporting text: Boolean
+- Size: sm / md / lg
+
+Anatomy:
+
+```text
+Avatar label group
+layout: Horizontal
+gap: compact
+
+├─ Avatar
+└─ Text and supporting text
+   layout: Vertical
+   ├─ Text
+   └─ Supporting text
+```
+
+Observed md baseline:
+- avatar around 40;
+- root gap around 8;
+- primary and supporting text stack with no artificial spacer.
+
+The text stack expands; avatar remains fixed.
+
+# 5. Avatar profile photo
+
+Published set: `Avatar profile photo`
+
+Properties:
+- Verified: Boolean
+- Placeholder: False / True
+- Text: False / True
+- Size: sm / md / lg
+
+Anatomy:
+
+```text
+Avatar profile photo
+├─ Outer wrapper
+│  └─ Avatar wrapper
+│     └─ Avatar content
+└─ Status / verified icon overlay
+```
+
+Large profile-photo treatment uses a nested wrapper so border/ring treatment can change without rebuilding the image content.
+
+# 6. Avatar group
+
+Published set: `Avatar group`
+
+Properties:
+- More users: Boolean
+- Add more button: Boolean
+- Size: xs / sm / md
+
+Anatomy:
+
+```text
+Avatar group
+layout: Horizontal
+├─ Avatars
+│  layout: Horizontal
+│  gap: negative overlap
+│  ├─ Avatar
+│  ├─ Avatar
+│  ├─ Avatar
+│  └─ More-count avatar                optional
+└─ _Avatar add button                  optional
+```
+
+Observed xs:
+- individual avatars around 24;
+- overlap uses a small negative gap;
+- “+N” count is represented with the same avatar footprint;
+- add button stays outside the overlapping avatar stack.
+
+# 7. Private avatar image helper
+
+Private set: `_Avatar image`
+
+Types:
+- Square
+- Portrait
+
+Anatomy:
+
+```text
+_Avatar image
+├─ Image
+└─ Text and supporting text
+   ├─ Name
+   └─ Source
+```
+
+This helper supports managing/replacing the shared avatar image source set.
+
+# 8. Private add button
+
+Private set: `_Avatar add button`
+
+Properties:
+- Size: xs / sm / md
+- State: Default / Hover / Focus / Disabled
+
+Anatomy:
+
+```text
+_Avatar add button
+└─ Content
+   └─ plus icon
+```
+
+Keep it as a reusable helper used by Avatar group.
+
+# 9. Long-form notes and documentation
+
+This page requires a dedicated long-form frame.
+
+Required topics:
+
+## Avatar image usage
+Explain the image-source strategy and licensing/source requirements in generic project terms. Do not retain source-specific providers unless the generated system actually uses them.
+
+## Avatar image styles/assets
+Explain how shared avatar images are stored so one source update can propagate to existing designs.
+
+## How to change avatars
+Document the workflow for replacing an avatar image source without detaching components.
+
+Include an image/example showing avatar replacement.
+
+## How to change placeholder images
+Explain how placeholder/avatar-image fills are changed centrally.
+
+## How to change colored backgrounds
+Explain how placeholder color backgrounds are token/style-driven so the system can update them globally.
+
+Include:
+- placeholder example;
+- fill/style update example.
+
+The documentation must describe the generated library's actual mechanism.
+
+# 10. QA
+
+Fail QA when:
+- status icons push layout instead of overlaying;
+- grouped avatars use positive gaps instead of overlap;
+- count avatar has a different footprint from peers;
+- add button is duplicated rather than using the private helper;
+- image/placeholder/initial states are separate unrelated components;
+- long-form avatar-management documentation is missing.
