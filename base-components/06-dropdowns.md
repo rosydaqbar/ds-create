@@ -200,7 +200,7 @@ Context menu:
 
 
 
-## Mandatory notes/documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use Dropdown menu versus Context menu;
@@ -216,7 +216,7 @@ The Figma page must visibly document:
 A menu matrix without visible usage/anatomy notes fails QA.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - Dropdown menu versus Context menu use;
