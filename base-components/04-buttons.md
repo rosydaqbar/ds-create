@@ -1,6 +1,6 @@
 # Buttons
 
-Buttons communicate actions users can take. This page is a complete action-component family, not a single button component.
+Buttons communicate actions users can take. This Figma Page is a complete action-component family, not a single button component.
 
 # 1. Canvas regions
 
@@ -301,7 +301,7 @@ Do not collapse the standard 200-variant matrix into a demo row.
 
 # 11. Button documentation
 
-This page includes a dedicated documentation frame. It is required.
+The Buttons Figma Page includes a dedicated long-form documentation Frame. It is required.
 
 The documentation should preserve these topics and illustrative examples:
 
