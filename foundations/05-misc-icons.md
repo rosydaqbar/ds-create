@@ -97,3 +97,17 @@ Standalone helper component where needed.
 # Canvas rhythm
 
 Use repeated ~the system-defined value header zones arranged horizontally. Each family should be positioned beneath its corresponding header, not inside a generic vertical card stack.
+
+## Mandatory visible notes/documentation
+
+Every Misc Icons page must include a visible documentation region describing which asset families are actually in scope and why.
+
+The notes must explain:
+- which families are included versus intentionally skipped;
+- intended use for featured icons, checks, dots, emoji, social icons, cursors, flags, and any additional generated family;
+- accessibility/non-color meaning requirements;
+- asset-source/licensing constraints for third-party marks;
+- when to add a new family instead of generating unused library weight;
+- product-specific examples where useful.
+
+A collection of asset grids with no explanatory notes fails QA.
