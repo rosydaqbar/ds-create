@@ -91,7 +91,26 @@ For every generated page verify:
 - no detached generic QA/source dashboard was introduced.
 
 
-# 6. Hard validation for variable documentation
+# 5.1 Hard validation for color presentation
+
+Color documentation fails generation when color is represented only by raw text values.
+
+Reject and repair any frame/card/row where:
+- a hex/RGB/HSL/CMYK/Pantone value is the only color representation;
+- the raw value is merely colored to resemble the source color;
+- a brand-translation card contains name + hex + description but no swatch/fill specimen;
+- a color variable exists but the visual specimen is recreated as an unbound raw paint;
+- the token/variable name is omitted while only a raw color value is shown.
+
+Required repair:
+1. add a visible swatch, filled surface, strip, or equivalent color specimen;
+2. bind that specimen to the real variable when available;
+3. show the token/variable name as the primary technical label;
+4. keep the raw value only as secondary metadata when useful;
+5. re-run screenshot QA at normal inspection size.
+
+This validation applies globally, including Getting Started, Foundation pages, component documentation, examples, and custom brand-summary sections.
+
 
 Variable pages require structural validation, not universal fixed dimensions.
 
