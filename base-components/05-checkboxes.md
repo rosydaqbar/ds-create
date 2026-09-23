@@ -112,7 +112,7 @@ Show:
 
 
 
-## Mandatory notes/documentation region
+# Documentation
 
 The Figma page must visibly document:
 - checkbox versus radio semantics and when each is appropriate;
@@ -128,7 +128,7 @@ The Figma page must visibly document:
 The component matrix does not replace these notes.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - Checkbox versus Radio semantics and when each is appropriate;
