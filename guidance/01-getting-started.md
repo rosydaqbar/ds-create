@@ -18,4 +18,32 @@ Each frame uses:
 - resource links immediately after the relevant content;
 - standard the system-defined value footer.
 
+
+## Brand/color summaries inside Getting Started
+
+If Getting Started includes a **Brand translation**, **Brand colors**, **Color direction**, **Palette summary**, or any equivalent color-bearing summary, color must be shown visually.
+
+Required card anatomy:
+
+```text
+Brand color card
+├─ Visible color specimen / swatch / filled surface
+├─ Color name
+├─ Variable or token name
+├─ Source value (optional secondary metadata)
+└─ Usage / meaning
+```
+
+Hard rules:
+- never represent a color with a hex/RGB/HSL/Pantone string alone;
+- raw values are metadata, not the visual specimen;
+- every documented color must have a visible swatch or filled surface;
+- when variables already exist, bind the specimen to the actual Figma variable rather than recreating the color as a raw paint;
+- prefer the token/variable name as the primary technical label;
+- source values such as `#DC143C` may appear only as secondary supporting metadata;
+- do not color the hex string and treat that as the swatch;
+- a white card containing only a color name, a colored hex string, and description **fails QA**.
+
+This rule applies even when the color summary is not on the dedicated Colors page.
+
 Do not merge these five topics into one short setup page.
