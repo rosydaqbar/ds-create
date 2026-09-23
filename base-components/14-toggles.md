@@ -101,6 +101,21 @@ Show:
 - Text false/true;
 - supporting text variations.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when to use Toggle for an immediate binary setting versus Checkbox for form submission;
+- private track/thumb base → labeled public Toggle anatomy;
+- Pressed, Hover, Focus, and Disabled behavior;
+- Default versus Slim construction;
+- label and supporting-text placement;
+- keyboard/focus behavior and accessible state naming;
+- do/don't examples for ambiguous labels, toggles used for multi-choice tasks, and duplicated switch mechanics in the public component;
+- central maintenance through the private base and semantic state tokens.
+
+A matrix alone fails documentation QA.
+
 # 6. QA
 
 Fail QA when:
