@@ -39,7 +39,7 @@ Use these page behaviors:
 
 | Purpose | Sizing behavior |
 | --- | --- |
-| Long-form documentation | Constrained reading-oriented frame; grows vertically with content |
+| Reading-oriented documentation | Constrained reading-oriented frame; grows vertically with content |
 | Standard Foundation / Base Component region | Wide specimen/documentation frame; grows with matrices and examples |
 | Variable documentation | Full-width table frame; expands horizontally for modes/content |
 | Palette overview | Extra-wide specimen frame; expands with palette size |
@@ -428,12 +428,12 @@ When the system is larger than the reference:
 
 Do not reduce type size, truncate meaningful names, or compress the table solely to preserve one reference width.
 
-# 7. Long-form documentation pattern
+# 7. Reading-oriented documentation pattern
 
-Long-form documentation uses a constrained reading composition:
+Reading-oriented documentation uses a constrained reading composition:
 
 ```text
-Long-form frame
+Reading-oriented frame
 ├─ Header
 ├─ Section
 │  └─ Rich text
@@ -538,16 +538,16 @@ Before marking a page complete, confirm:
 
 # 11. Base Component page documentation standard
 
-Base Component pages use a **family canvas** rather than the long-form Foundation-table pattern.
+Base Component pages use a **family canvas** rather than the reading-oriented Foundation-table pattern.
 
 The documentation model has three layers:
 
 ```text
-Page-level explanation
+Page-specific explanation and notes
         ↓
 Full component-set matrices
         ↓
-Optional long-form notes/documentation
+Required examples/guidance defined by that page's specification
 ```
 
 ## 11.1 Page/family header
@@ -622,41 +622,36 @@ Examples of anatomy that must be preserved:
 
 The generator must not flatten these structures to reduce layer count.
 
-## 11.5 Notes and documentation frames
+## 11.5 Page-specific notes, guidance, and examples
 
-Every Base Component page requires a dedicated notes/documentation frame in addition to the family header and full matrix.
+Do not force every Base Component page into one universal documentation frame.
 
-The matrix documents **what exists**. The notes frame documents **how and why to use it**. Neither replaces the other.
+Each page must render **all documentation content explicitly required by its own Markdown specification**. Depending on the page, that can include:
+- the family header;
+- private-helper explanation;
+- anatomy diagrams;
+- matrix labels and property explanations;
+- inline Design notes;
+- content rules;
+- state/interaction notes;
+- examples in use;
+- accessibility guidance;
+- maintenance guidance;
+- dedicated reading-oriented documentation sections where that page explicitly defines them.
 
-Minimum structure:
-
-```text
-<Component> documentation
-├─ Overview / when to use
-├─ Anatomy
-│  └─ generated layer tree / helper relationships
-├─ Variants & properties
-├─ States & interaction
-├─ Sizing / layout behavior
-├─ Content guidance
-├─ Accessibility
-├─ Do / don't
-├─ Implementation / maintenance
-└─ Example in context                    when useful
-```
+The component matrix and the documentation composition are complementary. A large matrix does not permit omission of notes, and a large note section does not permit omission of the matrix.
 
 Rules:
-- documentation copy must be component-specific;
-- write from the actual generated component anatomy and active token bindings;
-- show diagrams/specimens/instances when prose alone is insufficient;
-- do not use a generic repeated template sentence across pages;
-- do not omit documentation because the component matrix is large;
-- allow the documentation region to grow instead of shrinking it to one reference canvas;
-- documentation must exist as visible Figma content, not only as component descriptions or source Markdown.
+- preserve every page-specific topic and example;
+- do not summarize a detailed requirement into a generic paragraph;
+- show diagrams/specimens/instances where the specification calls for them;
+- write from the actual generated anatomy, properties, variables, and brand values;
+- documentation must exist visibly on the Figma canvas, not only in source Markdown or component descriptions;
+- if the user changes one part of a page, revalidate the entire page specification and its dependencies.
 
-Avatars and Buttons additionally keep their specialized long-form topic requirements below.
+Avatars and Buttons keep their additional page-specific documentation topics below; other pages keep the documentation topics defined in their own files.
 
-## 11.6 Buttons long-form documentation
+## 11.6 Buttons reading-oriented documentation
 
 The Buttons notes frame is substantial and must not be summarized into one paragraph.
 
@@ -678,7 +673,7 @@ Use:
 
 The active brand/system values may change, but the educational structure remains.
 
-## 11.7 Avatar long-form documentation
+## 11.7 Avatar reading-oriented documentation
 
 Required topics:
 1. image-source strategy;
