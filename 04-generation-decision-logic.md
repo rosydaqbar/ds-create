@@ -34,6 +34,59 @@ Before changing Figma:
 - identify existing naming patterns;
 - identify which observed Figma Page families already exist.
 
+# 1.1 Collection naming validation
+
+Before generating variables:
+
+1. inspect existing collection names;
+2. resolve whether the user selected Keep, Normalize, or Custom;
+3. resolve the required variable domains;
+4. generate collection names from the canonical domain labels;
+5. keep product-specific concepts inside the relevant collection unless a separate architecture was explicitly requested.
+
+For new systems, collection names must be deterministic.
+
+Reject and repair generation when equivalent runs produce inconsistent collection styles such as:
+
+```text
+Ref — Color
+Sys — Color
+Sys — Space
+Comp — Core
+```
+
+in one run and:
+
+```text
+Primitive
+Color
+Dimension
+Component
+```
+
+in another.
+
+For a new system, use the canonical domain grammar:
+
+```text
+Primitives
+Color
+Typography
+Spacing
+Sizing
+Radius
+Motion
+Components
+```
+
+Only include domains that exist in the confirmed architecture.
+
+Product-specific semantic color families such as signal strength, network quality, membership tier, or status belong inside `Color` rather than creating a differently named collection.
+
+Component collections are created only when a component-token layer is enabled.
+
+Token naming presets affect variable paths, not collection naming grammar.
+
 # 2. Figma Page actions
 
 ## Keep
