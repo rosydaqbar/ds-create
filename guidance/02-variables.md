@@ -1,6 +1,6 @@
 # Variables Guidance
 
-Create five separate 1600 px long-form documentation frames.
+Create five separate long-form documentation frames using the long-form frame role from the documentation system.
 
 ## 1. Introduction to variables
 
@@ -49,4 +49,4 @@ Must cover:
 - accessibility/contrast implications;
 - how to add/use transparent shades.
 
-Use the 1600 px long-form layout and do not compress these into a single FAQ card.
+Use the long-form documentation layout and do not compress these into a single FAQ card.
