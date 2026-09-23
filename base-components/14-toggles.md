@@ -1,10 +1,10 @@
 # Toggles
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private `_Toggle base`
-x≈2800    Public `Toggle`
+Private `_Toggle base`
+Public `Toggle`
 ```
 
 | Component set | Variant / property axes |
