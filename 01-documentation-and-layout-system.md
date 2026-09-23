@@ -178,103 +178,208 @@ When contrast information is relevant, show it on the swatch. Do not hide access
 
 # 6. Variable-table pattern
 
-Semantic variable pages use a **full-width documentation table**. This is a hard structural rule.
+Semantic variable pages use a **full-width documentation table**.
 
-## 6.1 Critical width rule
+The measured values in this section are **reference baselines**, not immutable output dimensions.
 
-For a 2528 px variable page:
+The generator must preserve the layout relationships while allowing the documentation frame to expand for:
+- longer token names;
+- additional modes/themes;
+- longer aliases;
+- localization;
+- larger brand systems;
+- more detailed Usage copy.
 
-```text
-Page                                  2528
-└─ Section                            2528
-   padding-left/right                   80
-   └─ Content group                   2368
-      ├─ Design note                   720
-      ├─ vertical gap                   64
-      └─ Variable table               2368
-```
+## 6.1 Structural rule
 
-**720 px applies only to the Design note. It never applies to the table or the Content group.**
-
-Never create this incorrect structure:
+The semantic-variable group uses:
 
 ```text
-Content group 720
-├─ Design note 720
-└─ Table 720   ← WRONG
-```
-
-Never place 2368 px worth of columns inside a 720 px clipped table.
-
-Required:
-- Content group width: `2368`;
-- Content group layout: vertical Auto Layout;
-- Content group clip content: `false`;
-- Design note width: `720`;
-- gap from Design note to table: `64`;
-- Variable table width: `2368`;
-- Variable table clip content: `false`.
-
-## 6.2 Table construction
-
-The table is built as **four vertical columns inside one horizontal table frame**, not as a vertical stack of horizontal rows.
-
-```text
-Variable table                         2368
-layout: horizontal
-gap: 0
+Variable group
+layout: vertical
+width: Fill container
 clip content: false
 
-├─ Column / Name                        400
-├─ Column / Light mode                  212
-├─ Column / Dark mode                   213
-└─ Column / Usage                      1543
+├─ Design note
+│  width: constrained reading width
+│  height: Hug
+│
+├─ vertical gap
+│
+└─ Variable table
+   width: Fill container
+   clip content: false
 ```
 
-Column widths must add up to the full table width.
+The Design note is intentionally narrower than the table.
 
-Each column is a vertical Auto Layout stack containing cells in the same row order. This guarantees that the Usage column remains visible and aligned.
+**Never allow the Design note width to constrain the table width.**
 
-Do **not** build each data row as a 720 px horizontal frame.
+## 6.2 Reference baseline
 
-## 6.3 Cell rhythm
-
-Each column follows the same vertical sequence:
+When the page uses the same scale as the audited reference, the observed baseline is approximately:
 
 ```text
-Header cell                            34
-Header separator                       12
-Data cell                              80
-Data cell                              80
-...
-Optional semantic-group separator      12
-Data cell                              80
-...
+Page                                   2528
+Section horizontal padding              80
+Available content width                2368
+
+Design note preferred width              720
+Note → table gap                          64
+
+Name column preferred width               400
+Light-mode column preferred width          212
+Dark-mode column preferred width           213
+Usage column receives remaining space
+```
+
+These numbers are useful as a starting composition only.
+
+They must **not** be used as hard maximums or universal fixed values.
+
+## 6.3 Adaptive table sizing
+
+Use Auto Layout behavior instead of hard-coded total width.
+
+### Table
+
+- width: Fill container;
+- height: Hug contents;
+- layout: Horizontal;
+- gap: 0;
+- clip content: false.
+
+### Name column
+
+- preferred width: based on the audited baseline;
+- minimum width: enough to keep normal token badges readable;
+- may expand for long token names or deeper hierarchy;
+- should not wrap token badges unless expansion would become unreasonable.
+
+### Mode columns
+
+One column per active mode/theme.
+
+Examples:
+
+```text
+Light
+Dark
+```
+
+or:
+
+```text
+Light
+Dark
+High contrast
+Brand A
+Brand B
 ```
 
 Rules:
-- header cell height: `34`;
-- header separator: `12`;
-- normal data cell height: `80`;
-- semantic subgroup separator: `12`;
-- horizontal column gap: `0`;
-- row boundary: subtle 1 px divider;
-- cells must not clip their content.
+- mode columns are content-driven;
+- each column must be wide enough for its largest alias chip;
+- adding modes expands the table/frame horizontally;
+- do not shrink existing columns merely to force the table into the original reference width.
 
-Header cells are minimal and white/transparent rather than a large filled table-header bar.
+### Usage column
 
-## 6.4 Name-column cells
+- Fill remaining width;
+- must have enough minimum width for readable prose;
+- expands naturally when the frame grows;
+- wraps text rather than clipping.
+
+## 6.4 Scaling behavior
+
+When content exceeds the baseline:
+
+### Longer token names
+
+Expand the Name column.
+
+Do not:
+- reduce type size;
+- truncate meaningful token names;
+- collapse hierarchy.
+
+### Longer aliases
+
+Expand the relevant mode column.
+
+### Additional modes
+
+Add additional mode columns.
+
+The documentation frame may grow horizontally.
+
+### Longer Usage copy
+
+Usage cells wrap and rows grow vertically when required.
+
+The 80 px reference row height is a **preferred minimum rhythm**, not a forced fixed height.
+
+### More semantic tokens
+
+The group grows vertically.
+
+Do not compress rows to fit a predetermined frame height.
+
+### Massive systems
+
+If one variable family becomes impractically large:
+- preserve the same table grammar;
+- split the family into logical subsections;
+- keep the same column model in each subsection;
+- do not reduce everything into a dense spreadsheet.
+
+## 6.5 Column model
+
+The reference relationship is:
+
+```text
+Name        preferred fixed / expandable
+Mode(s)     content-driven / expandable
+Usage       flexible / Fill
+```
+
+In Figma terms:
+
+```text
+Variable table
+├─ Name column              Fixed preferred width, may grow
+├─ Mode column              Hug/Fixed preferred width, may grow
+├─ Mode column              Hug/Fixed preferred width, may grow
+├─ Additional mode(s)       added as required
+└─ Usage column             Fill container
+```
+
+The Usage column must always remain visible.
+
+## 6.6 Cell rhythm
+
+Reference baseline:
+- header cell: approximately 34 px;
+- subgroup separator: approximately 12 px;
+- standard data row: approximately 80 px.
+
+Behavior:
+- use these as minimum/reference rhythm values;
+- row height becomes Hug when content requires more space;
+- all cells in the same logical row must resolve to the same final height;
+- row dividers remain aligned across all columns.
+
+## 6.7 Name-column cells
 
 Semantic token names are presented as compact token badges, not plain text.
 
-Badge treatment:
-- Hug width;
-- minimum height around 32;
-- radius: 6;
-- horizontal padding: 12;
-- vertical padding: 4;
-- subtle 1 px border;
-- text: 16 / 24.
+Badge behavior:
+- width: Hug contents;
+- height: Hug contents;
+- compact horizontal/vertical padding;
+- subtle border;
+- small radius;
+- token label remains readable.
 
 ### Hierarchical token relationships
 
@@ -293,17 +398,15 @@ text-secondary
 
 Presentation:
 - parent token starts at the column origin;
-- child token is indented;
-- a subtle connector line visually links child to parent;
-- child badge may display only the modifier portion such as `_hover` or `_on-brand` when the hierarchy remains unambiguous.
+- child token is indented using a documentation spacing token;
+- subtle connector line visually links child to parent;
+- hierarchy indentation increases only when hierarchy depth increases.
 
-Do not flatten every relationship into strings such as `text/secondary/on-brand` if the selected naming system supports a parent-child visual presentation.
+Do not calculate hierarchy from arbitrary fixed x coordinates.
 
-Actual token names still follow the naming convention selected in the initiator. The visual hierarchy is separate from output syntax.
+## 6.8 Mode alias cells
 
-## 6.5 Light/Dark alias cells
-
-Primitive aliases are rendered as **visual alias chips**, not plain text.
+Color aliases are rendered as **visual alias chips**, not plain text.
 
 Each chip contains:
 
@@ -313,32 +416,18 @@ Alias chip
 └─ Primitive / alias token name
 ```
 
-Rules:
-- chip width: Hug;
-- height: approximately 40 for standard visual aliases;
-- rounded border;
-- subtle border;
-- swatch clearly shows the resolved color;
-- token label names the referenced primitive/alias;
-- chip surface must preserve contrast in both Light and Dark columns;
-- very dark resolved colors may use a dark chip surface when required for legibility.
+Behavior:
+- chip width: Hug contents;
+- chip height: Hug contents;
+- alias column expands when the chip becomes wider;
+- swatch clearly shows the resolved value;
+- surface/border treatment preserves contrast in every mode.
 
-The documentation must visually communicate both:
-1. **which token is referenced**; and
-2. **what color/value it resolves to**.
+For non-color values, use an equivalent value chip appropriate to the token type.
 
-Plain strings such as `color/gray/900` without a swatch are not acceptable for color-variable documentation.
-
-## 6.6 Usage-column cells
+## 6.9 Usage-column cells
 
 Usage is a first-class documentation column.
-
-Usage cell:
-- width: `1543`;
-- text: 16 / 24;
-- vertically centered within the 80 px row where copy fits on one line;
-- wraps when required;
-- no clipping.
 
 Every semantic token has bespoke usage copy that states a concrete UI purpose.
 
@@ -348,44 +437,43 @@ Good:
 - `Primary text when used on solid brand-color backgrounds.`
 - `Default border used around form controls and cards.`
 
-Forbidden generated filler:
-- `Use for text brand primary content where this hierarchy or state applies.`
-- `Used for this hierarchy.`
-- `Primary color.`
+Forbidden:
+- generic filler;
+- copy generated only from the token name;
+- descriptions that repeat the token name without explaining usage.
 
-The generator must maintain an explicit usage-description map for every semantic token it creates.
+Usage text:
+- wraps;
+- never clips;
+- increases row height when necessary.
 
-## 6.7 Design-note relationship
+## 6.10 Design-note relationship
 
-The Design note above a variable table is deliberately narrower than the table.
+The Design note uses a constrained prose width so it remains readable.
 
-Design note:
-- width: `720`;
-- typical height: content-driven, commonly around `128`;
-- title row contains section name + optional `Variables` badge;
-- title-to-description gap: `12`;
-- body: 18 / 28;
-- description explains the role of the entire token family, not implementation trivia.
+Its width is controlled by a documentation reading-width token such as:
 
-The table begins `64` px below the note and expands to the full `2368` content width.
+```text
+doc.width.reading
+```
 
-## 6.8 Hard validation
+The table beneath it always uses the full available documentation content width.
 
-A generated semantic-variable group fails QA if any of the following is true:
+This relationship is more important than any particular pixel value.
 
-- Content group width is 720 instead of 2368;
-- table width is less than 2368 on a 2528 variable page;
-- table or Content group clips content;
-- Usage column is outside the visible bounds;
-- columns do not align to 400 / 212 / 213 / 1543;
-- data rows are shorter than the documented 80 px rhythm;
-- token names are plain text when the table requires token badges;
-- visual aliases are plain text without swatches;
-- token hierarchy is flattened with no visual grouping;
-- Usage copy is missing or templated filler;
-- semantic subgroup separators are missing where the token inventory defines groups.
+## 6.11 Hard validation
 
-Every semantic token row must have complete Name, mode alias(es), resolved visual preview where applicable, and Usage documentation.
+A semantic-variable group fails QA if:
+
+- the Design note constrains the table width;
+- the table clips content;
+- any mode or Usage column is outside the visible table;
+- additional modes are omitted because the original frame width was treated as fixed;
+- token badges truncate unnecessarily;
+- alias chips are plain text with no resolved-value preview where a preview is useful;
+- hierarchy is flattened;
+- Usage copy is missing or generic;
+- row content overlaps because a reference row height was treated as fixed.
 
 # 7. Long-form documentation pattern
 
