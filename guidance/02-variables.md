@@ -50,3 +50,20 @@ Must cover:
 - how to add/use transparent shades.
 
 Use the long-form documentation layout and do not compress these into a single FAQ card.
+
+## Mandatory visible notes/documentation
+
+The Variables page must include visible long-form documentation on the Figma canvas in addition to token collections/tables.
+
+It must explain the actual generated variable architecture:
+- primitive → semantic/alias → component/utility relationship;
+- naming convention used by this system;
+- active collections and modes;
+- how designers should choose variables in product UI;
+- when primitive values may or may not be used directly;
+- how themes, sizing, spacing, transparency, and accessibility are handled;
+- concrete examples using the generated variables.
+
+Do not treat the variable table or collection list as sufficient documentation.
+
+A Variables page without visible explanatory notes fails QA.
