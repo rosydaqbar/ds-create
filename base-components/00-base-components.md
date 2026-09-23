@@ -1,15 +1,15 @@
 # Base Components
 
-Base Component pages are not generic component galleries. Each page is a **complete component-family canvas** containing:
-- a page-level documentation header;
+Base Component Figma Pages are not generic component galleries. Each Figma Page is a **complete component-family canvas** containing:
+- one or more region-level documentation header Instances;
 - a private/unpublished construction zone when the family has shared bases;
 - every published component set in that family;
 - the full variant matrix rather than a few examples;
 - anatomy that preserves the actual nested construction;
 - related examples or composed groups when they exist;
-- every documentation, note, diagram, example, and guidance item required by that page's own specification.
+- every documentation, note, diagram, example, and guidance item required by that Figma Page's corresponding Markdown specification.
 
-Page order:
+Figma Page order:
 
 1. Avatars
 2. Badges
@@ -28,14 +28,14 @@ Page order:
 15. Tooltips
 16. Video players
 
-# 1. Required page header
+# 1. Required region/family header
 
 Every public component-family region starts with a large documentation header containing:
 
 ```text
 Header
-├─ Eyebrow: Base components → <Page>
-├─ Page/family title
+├─ Eyebrow: Base components → <Figma Page>
+├─ Region/family title
 └─ Supporting description
 ```
 
@@ -46,7 +46,7 @@ The supporting description must explain:
 
 Do not replace this with generic copy such as “Used in interfaces.”
 
-If the page contains private construction components, create a separate private header:
+If the Figma Page contains private construction components, create a separate private header:
 
 ```text
 _Unpublished base components
@@ -118,7 +118,7 @@ Do not reduce a 200-variant or 600-variant set to 6 showcase cards.
 
 Component documentation must contain, where relevant:
 
-1. page/family definition;
+1. Figma Page/family definition;
 2. private-base explanation;
 3. anatomy;
 4. size behavior;
@@ -129,14 +129,14 @@ Component documentation must contain, where relevant:
 9. optical/alignment rules;
 10. semantic/destructive rules;
 11. examples in use;
-12. page-specific notes and documentation;
+12. Figma-Page-specific notes and documentation;
 13. accessibility and interaction guidance where specified;
 14. do/don't or misuse guidance where specified;
 15. implementation/maintenance guidance where specified;
 16. examples/diagrams where specified;
 17. QA checks.
 
-The page Markdown file is responsible for specifying these details.
+The corresponding Markdown specification is responsible for specifying these details.
 
 # 6. Measurement rule
 
@@ -156,32 +156,32 @@ Allow:
 - extra modes/themes;
 - content-driven height growth.
 
-Do not hard-code a page to one absolute size if its content needs to grow.
+Do not hard-code a top-level Frame/region to one absolute size if its content needs to grow.
 
-# 7. Render the complete page specification
+# 7. Render the complete Markdown specification on the Figma Page
 
-Documentation is mandatory, but its **shape is page-specific**.
+Documentation is mandatory, but its **shape is Figma-Page-specific**.
 
-Do not force all Base Component pages into one universal notes template. For each page:
-- read the entire page Markdown file;
+Do not force all Base Component Figma Pages into one universal notes template. For each Figma Page:
+- read the entire corresponding Markdown specification;
 - preserve every anatomy rule, content rule, matrix requirement, state rule, example, documentation topic, and QA condition;
-- generate those requirements as visible Figma content in the composition defined by the page;
+- generate those requirements as visible Figma content in the composition defined for that Figma Page;
 - keep private-helper documentation next to private helpers;
 - keep property/state explanations close to the matrices they explain;
-- keep examples where the page specification places them;
-- use dedicated reading-oriented documentation only when that page actually calls for it.
+- keep examples where the Markdown specification places them;
+- use dedicated reading-oriented documentation only when that Figma Page's Markdown specification actually calls for it.
 
-The generator must not shorten a detailed page spec into “overview + anatomy + accessibility.” That is a summary, not the specification.
+The generator must not shorten a detailed Markdown specification into “overview + anatomy + accessibility.” That is a summary, not the specification.
 
 # 8. Completion criteria
 
-A Base Component page fails QA when:
+A Base Component Figma Page fails QA when:
 - a published component family is missing;
 - a private helper was incorrectly published;
 - the master anatomy is simplified into a different structure;
 - component properties are omitted;
 - variant matrices are reduced to samples;
-- page-level description is missing;
-- page-specific documentation, examples, or notes required by the page spec are missing;
+- required region/family description is missing;
+- Figma-Page-specific documentation, examples, or notes required by the Markdown specification are missing;
 - anatomy is described only conceptually rather than layer-by-layer;
 - generated components do not preserve the intended optical/layout relationships.
