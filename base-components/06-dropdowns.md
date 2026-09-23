@@ -215,6 +215,22 @@ The Figma page must visibly document:
 
 A menu matrix without visible usage/anatomy notes fails QA.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- Dropdown menu versus Context menu use;
+- trigger/open-state relationship;
+- private list-item, inset-icon, header, footer, and account-item anatomy;
+- alignment across rows with/without leading content;
+- check, checkbox, dot, avatar, shortcut, chevron, and divider cases;
+- keyboard navigation, focus, Escape/close behavior, and menu labeling;
+- destructive/high-risk action placement where applicable;
+- do/don't examples for clipped menus, hand-built rows, and inconsistent leading alignment;
+- central maintenance through private list-item/helper families and semantic tokens.
+
+A matrix alone fails documentation QA.
+
 # 10. QA
 
 Fail QA when:
