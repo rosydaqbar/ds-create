@@ -167,6 +167,23 @@ Do not reduce the 666-variant Badge matrix to a color swatch row.
 - X-close implies removable content, not a generic action;
 - Badge group is for a short status label plus explanatory message.
 
+
+
+## Mandatory notes/documentation region
+
+The Figma page must visibly document:
+- when to use a Badge versus a Tag or ordinary text;
+- Badge versus Badge group anatomy and nested-instance relationship;
+- Type, Color, Icon, Size, and removable-action behavior;
+- semantic color selection and why dot/color cannot be the only status cue;
+- concise-label guidance and handling of long labels;
+- dismiss behavior and target-size expectations for the close action;
+- accessibility for color, text contrast, and removable controls;
+- do/don't examples for overlong copy, decorative status colors, and using badges as buttons;
+- which private close helper and semantic tokens should be edited centrally.
+
+A header plus matrix is not sufficient documentation.
+
 # 7. QA
 
 Fail QA when:
