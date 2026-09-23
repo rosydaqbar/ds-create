@@ -111,6 +111,7 @@ Required repair:
 
 This validation applies globally, including Getting Started, Foundation pages, component documentation, examples, and custom brand-summary sections.
 
+# 6. Hard validation for variable documentation
 
 Variable pages require structural validation, not universal fixed dimensions.
 
