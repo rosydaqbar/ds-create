@@ -89,3 +89,37 @@ For every generated page verify:
 - Design note content exists where required;
 - token tables include Name / mode(s) / Usage;
 - no detached generic QA/source dashboard was introduced.
+
+
+# 6. Hard validation for variable documentation
+
+Variable pages require structural validation, not just content validation.
+
+For every 2528 px semantic-variable frame:
+
+```text
+Section content width = 2368
+Design note width = 720
+Table width = 2368
+Columns = 400 / 212 / 213 / 1543
+```
+
+The generation step must reject and repair the frame when:
+- the 720 px Design note width is inherited by the table;
+- table or group `clipsContent` is true;
+- the Usage column extends beyond the visible table bounds;
+- a row-based construction causes columns to overflow;
+- Light/Dark aliases are rendered as plain text instead of visual alias chips;
+- semantic token names are rendered as unstructured plain text instead of token badges/hierarchy;
+- Usage content is generic templated filler.
+
+For color-variable tables specifically, the final visual QA must verify:
+1. four visible columns;
+2. full-width table;
+3. token badges in Name;
+4. swatch + alias chips in mode columns;
+5. explicit per-token Usage copy;
+6. hierarchy connectors/indentation for modifiers;
+7. 80 px data-row rhythm and 12 px subgroup separators.
+
+Do not mark Color variables complete until this validation passes.
