@@ -25,7 +25,7 @@ The page includes:
 - a private-base header;
 - an avatar-user/image-resource header;
 - an Avatars public header;
-- a dedicated long-form notes/documentation frame.
+- a dedicated documentation/documentation frame.
 
 # 2. Avatar
 
@@ -226,7 +226,7 @@ Private helpers:
 
 Do not replace these matrices with a row of avatar examples.
 
-# 10. Long-form notes and documentation
+# 10. Avatar documentation
 
 This page requires a dedicated long-form frame.
 
@@ -255,22 +255,6 @@ Include:
 
 The documentation must describe the generated library's actual mechanism.
 
-
-
-## Mandatory visible documentation region
-
-In addition to the avatar-management topics above, the Figma page must visibly document:
-- when to use an avatar, avatar label group, avatar group, profile photo, and status icon;
-- fallback order: user image → initials/placeholder;
-- status-overlay anatomy and why it must not change the avatar footprint;
-- size behavior and overlap behavior in groups;
-- privacy/image-source guidance;
-- accessibility: meaningful alt/accessible names in implementation and avoiding status by color alone;
-- do/don't examples for fake profile imagery, decorative status, and inconsistent crops;
-- which image source, fill/token, and private helper should be changed centrally.
-
-A component matrix without this visible notes region fails QA.
-
 # 11. QA
 
 Fail QA when:
@@ -279,4 +263,4 @@ Fail QA when:
 - count avatar has a different footprint from peers;
 - add button is duplicated rather than using the private helper;
 - image/placeholder/initial states are separate unrelated components;
-- long-form avatar-management documentation is missing.
+- avatar-management documentation is missing.
