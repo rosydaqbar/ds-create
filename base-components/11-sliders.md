@@ -85,7 +85,7 @@ Show:
 - single-value-like and range examples.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when Slider is appropriate and when a discrete control is clearer;
