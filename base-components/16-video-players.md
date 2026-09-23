@@ -213,6 +213,21 @@ Show:
 - volume percentages;
 - actions-bar sizes/states.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when video/media playback is appropriate;
+- 16:9 media frame → overlay action → actions bar anatomy;
+- reusable action button, volume slider, timeline, tooltip, and timestamp helpers;
+- Playing, overlay, controls, size, caption, volume, and progress behavior;
+- why controls overlay media instead of changing the 16:9 layout height;
+- keyboard controls, caption availability, focus, accessible labels, and reduced-motion/autoplay considerations;
+- do/don't examples for intrusive autoplay, controls outside the media frame, and individually redrawn action buttons;
+- central maintenance through private media-control helpers and alpha/semantic tokens.
+
+A player matrix alone fails documentation QA.
+
 # 10. QA
 
 Fail QA when:
