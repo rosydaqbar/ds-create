@@ -1,6 +1,6 @@
 # Logos
 
-The Logos page is an asset canvas with multiple horizontal zones.
+The Logos Figma Page is an asset canvas with multiple horizontal zones.
 
 # Canvas region order
 
