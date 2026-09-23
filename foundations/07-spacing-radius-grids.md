@@ -162,3 +162,137 @@ Required outline:
 - practical Figma nudge/grid configuration tips.
 
 The documentation should explain the user's actual spacing/grid model, not a copied numeric system.
+
+# Notes & Documentation — Spacing, Radius & Grids
+
+Keep guidance that helps build or maintain spacing, layout, reading-width, radius, and grid behavior.
+
+## Why the spacing system matters
+
+A constrained spacing scale reduces arbitrary decisions and creates reusable rhythm between design and implementation.
+
+### Required visual documentation
+
+Create a **without-system vs with-system** comparison using the same modal/card composition.
+
+**Without system**
+- inconsistent gaps/padding;
+- arbitrary values;
+- weak alignment.
+
+**With system**
+- repeated scale values;
+- aligned edges;
+- predictable vertical rhythm.
+
+Add spacing annotations directly to both examples.
+
+## Show the spacing system inside components
+
+The system should demonstrate how tokens appear in real components, not only as a numeric scale.
+
+### Required visual documentation
+
+Create an annotated Dropdown/Menu example showing:
+- item padding;
+- icon-to-label gap;
+- group spacing;
+- divider spacing;
+- menu inset.
+
+Use actual semantic spacing-token names selected by the builder.
+
+## Optical exceptions
+
+Not every internal value must land perfectly on the base grid.
+
+Icon live areas and text metrics may require optical compensation.
+
+### Required visual documentation
+
+Use the Button family to show:
+1. mathematically even padding that looks visually uneven because of icon live-area;
+2. corrected optical treatment;
+3. measurement annotations.
+
+This visual should align with the Button Text-padding anatomy.
+
+## Component padding comparison
+
+Create an additional focused example showing:
+- outer control padding;
+- internal icon frame;
+- label wrapper;
+- perceived spacing.
+
+This is not a random spacing demo; it must explain the actual generated Button anatomy.
+
+## Reading width / line length
+
+Body copy should use constrained readable width.
+
+The system should use a semantic reading-width concept rather than one universal hard-coded pixel maximum.
+
+### Required visual documentation
+
+Create:
+- one annotated paragraph specimen showing the selected reading width;
+- a three-example comparison:
+  - too short;
+  - selected/readable;
+  - too long.
+
+Use the active typeface and actual body style.
+
+Annotate approximate character count/line length.
+
+## Container and grid relationship
+
+The documentation should show how:
+- page container;
+- columns;
+- gutters;
+- major section spacing;
+- component alignment
+
+work together.
+
+### Required visual documentation
+
+Create at least one responsive page/container grid specimen with measurement labels.
+
+Use the actual grid values produced by the initiator.
+
+## Radius
+
+Do not document Radius as numbers only.
+
+### Required visual documentation
+
+Create a radius specimen showing:
+- radius scale;
+- semantic assignments;
+- representative components/surfaces using each role.
+
+If the brand uses a constrained radius vocabulary, do not manufacture extra steps.
+
+## Figma nudge setting
+
+The source includes an authoring tip about matching keyboard nudge to the grid.
+
+This is optional builder guidance, not a required product-system section.
+
+If included:
+- recommend aligning big nudge to the selected spacing base;
+- show a small editor-setting example;
+- do not give it equal prominence to the actual spacing/grid documentation.
+
+## Spacing/Grids visual QA
+
+Fail QA when:
+- notes are text-only;
+- there is no without-system/with-system comparison;
+- semantic spacing is not shown inside a real component;
+- optical exceptions are not demonstrated visually;
+- reading-width guidance has no line-length comparison;
+- grid/container documentation does not use the generated system's real values.
