@@ -7,10 +7,10 @@ The icon library uses one wide header and a three-column categorized specimen la
 Observed column geometry:
 
 ```text
-left column    x≈80      width≈1144
-middle column  x≈1352    width≈1144
-right column   x≈2624    width≈1144
-notes          x≈4248    width=1600
+left icon-library column
+middle icon-library column
+right icon-library column
+long-form notes region
 ```
 
 # Required category model
