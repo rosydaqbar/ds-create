@@ -107,6 +107,23 @@ Group matrix:
 - both sizes;
 - both breakpoints.
 
+
+
+## Mandatory notes/documentation region
+
+The Figma page must visibly document:
+- single-choice radio semantics and when checkbox-style multi-select is intentionally appropriate;
+- Radio group item → Radio group composed anatomy;
+- selected versus Focused behavior;
+- simple, card, icon, avatar, and richer option types;
+- supporting text, badge, and leading-visual alignment;
+- mobile versus desktop/breakpoint behavior;
+- keyboard navigation, group labeling, and non-color selected cues;
+- do/don't examples for multiple selected radio items, using focus as selection, and scaling desktop down as “mobile”;
+- which item family, breakpoint behavior, and semantic tokens should be maintained centrally.
+
+The full matrix does not replace this guidance.
+
 # 6. QA
 
 Fail QA when:
