@@ -1,10 +1,10 @@
 # Progress Indicators
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Progress bar
-x≈2800    Progress circle
+Progress bar
+Progress circle
 ```
 
 | Component set | Variant / property axes |
