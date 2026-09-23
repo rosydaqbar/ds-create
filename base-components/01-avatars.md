@@ -255,6 +255,22 @@ Include:
 
 The documentation must describe the generated library's actual mechanism.
 
+
+
+## Mandatory visible documentation region
+
+In addition to the avatar-management topics above, the Figma page must visibly document:
+- when to use an avatar, avatar label group, avatar group, profile photo, and status icon;
+- fallback order: user image → initials/placeholder;
+- status-overlay anatomy and why it must not change the avatar footprint;
+- size behavior and overlap behavior in groups;
+- privacy/image-source guidance;
+- accessibility: meaningful alt/accessible names in implementation and avoiding status by color alone;
+- do/don't examples for fake profile imagery, decorative status, and inconsistent crops;
+- which image source, fill/token, and private helper should be changed centrally.
+
+A component matrix without this visible notes region fails QA.
+
 # 11. QA
 
 Fail QA when:
