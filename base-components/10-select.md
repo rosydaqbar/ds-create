@@ -2,7 +2,7 @@
 
 Select components allow selection from a potentially large set of options. Multi-select supports choosing multiple values and searching/filtering the available options.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private
@@ -177,7 +177,7 @@ Multi-select:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use Select versus Multi-select;
 - trigger → menu anatomy and private option-row reuse;
 - Default/Hover/Focused/Disabled/Error/open behavior as represented by the generated family;
@@ -193,7 +193,7 @@ A component matrix alone fails documentation QA.
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use Select versus Multi-select;
 - trigger → menu anatomy and private option-row reuse;
 - Default/Hover/Focused/Disabled/Error/Open behavior;
