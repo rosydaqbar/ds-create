@@ -110,7 +110,7 @@ Help icon:
 - cursor on/off where documented.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when Tooltip is appropriate and what information must remain directly visible in the UI;
