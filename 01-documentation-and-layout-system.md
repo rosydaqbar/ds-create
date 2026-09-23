@@ -238,6 +238,7 @@ Crimson Red
 
 The exact card composition may adapt to the page, but the visible specimen is mandatory.
 
+# 6. Variable-table pattern
 
 Semantic variable pages use a full-width documentation table.
 
