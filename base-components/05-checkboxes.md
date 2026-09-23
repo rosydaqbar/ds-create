@@ -1,15 +1,120 @@
 # Checkboxes
 
-# Canvas region order
+Checkboxes allow one or more selections; radio controls allow one selection from a set. This page deliberately shares a common base for checkbox and radio visual controls.
+
+# 1. Page regions
 
 ```text
-Private `_Checkbox base`
-Public `Checkbox`
+Private
+└─ _Checkbox base
+
+Published
+└─ Checkbox
+   supports Checkbox and Radio visual types
 ```
 
-| Component set | Variant / property axes |
-| --- | --- |
-| `_Checkbox base` | Checked: False / True; Indeterminate: False / True; Size: sm / md; Type: Checkbox / Radio; State: Default / Hover / Focused / Disabled |
-| `Checkbox` | Checked: False / True; Indeterminate: False / True; Size: sm / md; Type: Checkbox / Radio; Text: False / True; State: Default / Hover / Focused / Disabled; Supporting text boolean |
+# 2. Private control base
 
-Do not split checkbox and radio-base mechanics into separate Foundation-like pages; the shared control base is intentionally demonstrated here.
+Private set: `_Checkbox base`
+
+Observed:
+- 40 variants.
+
+Properties:
+- Checked: False / True
+- Indeterminate: False / True
+- Size: sm / md
+- Type: Checkbox / Radio
+- State: Default / Hover / Focused / Disabled
+
+Anatomy:
+
+```text
+_Checkbox base
+├─ control surface
+└─ mark
+   ├─ check                           checkbox selected
+   ├─ minus                           checkbox indeterminate
+   └─ dot                             radio selected
+```
+
+Unchecked/default variants may contain no mark child.
+
+The private base owns:
+- shape;
+- border;
+- selected fill;
+- focus ring;
+- disabled treatment;
+- check/minus/dot alignment.
+
+# 3. Published Checkbox
+
+Published set: `Checkbox`
+
+Observed:
+- 72 variants.
+
+Properties:
+- Supporting text: Boolean
+- Checked: False / True
+- Indeterminate: False / True
+- Size: sm / md
+- Type: Checkbox / Radio
+- Text: False / True
+- State: Default / Hover / Focused / Disabled
+
+Anatomy with text:
+
+```text
+Checkbox
+layout: Horizontal
+align: Start
+
+├─ Input
+│  top inset aligns control to first text line
+│  └─ _Checkbox base
+└─ Text and supporting text
+   layout: Vertical
+   ├─ Text
+   └─ Supporting text                  optional
+```
+
+Observed sm text baseline:
+- root gap around 8;
+- control around 16;
+- input wrapper offsets the control slightly from the top so it optically aligns to the label line;
+- text stack expands.
+
+Do not vertically center the control against a multi-line description.
+
+# 4. Selection logic
+
+Checkbox:
+- supports unchecked;
+- checked;
+- indeterminate.
+
+Radio:
+- uses the same private base but radio geometry/mark;
+- indeterminate is not a meaningful end-state for a radio selection and should not be exposed in product use even if the construction matrix can represent shared axes.
+
+# 5. Matrix requirements
+
+Show:
+- Checkbox and Radio types;
+- both sizes;
+- Checked false/true;
+- Indeterminate where applicable;
+- Text on/off;
+- Supporting text on/off;
+- Default / Hover / Focused / Disabled.
+
+# 6. QA
+
+Fail QA when:
+- Checkbox and Radio use unrelated bases;
+- indeterminate mark is missing;
+- text stack is not top-aligned to the control;
+- supporting text changes the control position unpredictably;
+- focus state is omitted from the private base.
