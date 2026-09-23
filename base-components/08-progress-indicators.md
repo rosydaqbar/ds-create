@@ -79,6 +79,22 @@ Progress circle:
 - both shapes;
 - label on/off.
 
+
+
+## Mandatory notes/documentation region
+
+The Figma page must visibly document:
+- when to use a Progress bar versus Progress circle;
+- determinate progress versus indeterminate/loading patterns;
+- value-driven construction and label-placement behavior;
+- why progress indicators must not represent network signal strength;
+- percent/value labeling and when numeric progress should be exposed;
+- motion/reduced-motion and screen-reader progress semantics in implementation;
+- do/don't examples for fake precision, unrelated per-value shapes, and using progress as a status badge;
+- which track/progress tokens and shared construction should be maintained centrally.
+
+A variant matrix without these notes fails QA.
+
 # 5. QA
 
 Fail QA when:
