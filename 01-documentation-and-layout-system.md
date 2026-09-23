@@ -178,45 +178,214 @@ When contrast information is relevant, show it on the swatch. Do not hide access
 
 # 6. Variable-table pattern
 
-Semantic variable pages use real documentation tables.
+Semantic variable pages use a **full-width documentation table**. This is a hard structural rule.
 
-For a 2528 px page:
+## 6.1 Critical width rule
+
+For a 2528 px variable page:
 
 ```text
-Section width                        2368
-Major Design note                   720
-Gap below note                       64
-Table                               2368
-├─ Name column                       400
-├─ Light mode                        ~212
-├─ Dark mode                         ~212
-└─ Usage                             remaining width (~1544)
+Page                                  2528
+└─ Section                            2528
+   padding-left/right                   80
+   └─ Content group                   2368
+      ├─ Design note                   720
+      ├─ vertical gap                   64
+      └─ Variable table               2368
 ```
 
-Observed table anatomy:
-- column header row: 34 px;
-- optional group spacer/divider: 12 px;
-- standard body row: 80 px;
-- horizontal columns have no gap;
-- row boundaries use a subtle 1 px divider.
+**720 px applies only to the Design note. It never applies to the table or the Content group.**
 
-Name cell:
-- token displayed as a compact bordered badge;
-- badge radius: 6;
-- badge horizontal padding: 12;
-- badge vertical padding: 4;
+Never create this incorrect structure:
+
+```text
+Content group 720
+├─ Design note 720
+└─ Table 720   ← WRONG
+```
+
+Never place 2368 px worth of columns inside a 720 px clipped table.
+
+Required:
+- Content group width: `2368`;
+- Content group layout: vertical Auto Layout;
+- Content group clip content: `false`;
+- Design note width: `720`;
+- gap from Design note to table: `64`;
+- Variable table width: `2368`;
+- Variable table clip content: `false`.
+
+## 6.2 Table construction
+
+The table is built as **four vertical columns inside one horizontal table frame**, not as a vertical stack of horizontal rows.
+
+```text
+Variable table                         2368
+layout: horizontal
+gap: 0
+clip content: false
+
+├─ Column / Name                        400
+├─ Column / Light mode                  212
+├─ Column / Dark mode                   213
+└─ Column / Usage                      1543
+```
+
+Column widths must add up to the full table width.
+
+Each column is a vertical Auto Layout stack containing cells in the same row order. This guarantees that the Usage column remains visible and aligned.
+
+Do **not** build each data row as a 720 px horizontal frame.
+
+## 6.3 Cell rhythm
+
+Each column follows the same vertical sequence:
+
+```text
+Header cell                            34
+Header separator                       12
+Data cell                              80
+Data cell                              80
+...
+Optional semantic-group separator      12
+Data cell                              80
+...
+```
+
+Rules:
+- header cell height: `34`;
+- header separator: `12`;
+- normal data cell height: `80`;
+- semantic subgroup separator: `12`;
+- horizontal column gap: `0`;
+- row boundary: subtle 1 px divider;
+- cells must not clip their content.
+
+Header cells are minimal and white/transparent rather than a large filled table-header bar.
+
+## 6.4 Name-column cells
+
+Semantic token names are presented as compact token badges, not plain text.
+
+Badge treatment:
+- Hug width;
+- minimum height around 32;
+- radius: 6;
+- horizontal padding: 12;
+- vertical padding: 4;
+- subtle 1 px border;
 - text: 16 / 24.
 
-Mode cells:
-- include a color/value preview chip when the token is visual;
-- include the referenced primitive/alias name.
+### Hierarchical token relationships
+
+Related modifiers/states must read as a hierarchy.
+
+Example:
+
+```text
+text-primary
+└─ _on-brand
+
+text-secondary
+├─ _hover
+└─ _on-brand
+```
+
+Presentation:
+- parent token starts at the column origin;
+- child token is indented;
+- a subtle connector line visually links child to parent;
+- child badge may display only the modifier portion such as `_hover` or `_on-brand` when the hierarchy remains unambiguous.
+
+Do not flatten every relationship into strings such as `text/secondary/on-brand` if the selected naming system supports a parent-child visual presentation.
+
+Actual token names still follow the naming convention selected in the initiator. The visual hierarchy is separate from output syntax.
+
+## 6.5 Light/Dark alias cells
+
+Primitive aliases are rendered as **visual alias chips**, not plain text.
+
+Each chip contains:
+
+```text
+Alias chip
+├─ Color swatch
+└─ Primitive / alias token name
+```
+
+Rules:
+- chip width: Hug;
+- height: approximately 40 for standard visual aliases;
+- rounded border;
+- subtle border;
+- swatch clearly shows the resolved color;
+- token label names the referenced primitive/alias;
+- chip surface must preserve contrast in both Light and Dark columns;
+- very dark resolved colors may use a dark chip surface when required for legibility.
+
+The documentation must visually communicate both:
+1. **which token is referenced**; and
+2. **what color/value it resolves to**.
+
+Plain strings such as `color/gray/900` without a swatch are not acceptable for color-variable documentation.
+
+## 6.6 Usage-column cells
+
+Usage is a first-class documentation column.
 
 Usage cell:
+- width: `1543`;
 - text: 16 / 24;
-- must describe **where and why** the token is used;
-- do not write empty descriptions such as `Primary color`.
+- vertically centered within the 80 px row where copy fits on one line;
+- wraps when required;
+- no clipping.
 
-Every semantic token row must have usage copy.
+Every semantic token has bespoke usage copy that states a concrete UI purpose.
+
+Good:
+- `Primary text such as page headings.`
+- `Secondary text such as labels and section headings.`
+- `Primary text when used on solid brand-color backgrounds.`
+- `Default border used around form controls and cards.`
+
+Forbidden generated filler:
+- `Use for text brand primary content where this hierarchy or state applies.`
+- `Used for this hierarchy.`
+- `Primary color.`
+
+The generator must maintain an explicit usage-description map for every semantic token it creates.
+
+## 6.7 Design-note relationship
+
+The Design note above a variable table is deliberately narrower than the table.
+
+Design note:
+- width: `720`;
+- typical height: content-driven, commonly around `128`;
+- title row contains section name + optional `Variables` badge;
+- title-to-description gap: `12`;
+- body: 18 / 28;
+- description explains the role of the entire token family, not implementation trivia.
+
+The table begins `64` px below the note and expands to the full `2368` content width.
+
+## 6.8 Hard validation
+
+A generated semantic-variable group fails QA if any of the following is true:
+
+- Content group width is 720 instead of 2368;
+- table width is less than 2368 on a 2528 variable page;
+- table or Content group clips content;
+- Usage column is outside the visible bounds;
+- columns do not align to 400 / 212 / 213 / 1543;
+- data rows are shorter than the documented 80 px rhythm;
+- token names are plain text when the table requires token badges;
+- visual aliases are plain text without swatches;
+- token hierarchy is flattened with no visual grouping;
+- Usage copy is missing or templated filler;
+- semantic subgroup separators are missing where the token inventory defines groups.
+
+Every semantic token row must have complete Name, mode alias(es), resolved visual preview where applicable, and Usage documentation.
 
 # 7. Long-form documentation pattern
 
