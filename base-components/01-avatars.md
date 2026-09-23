@@ -1,12 +1,12 @@
 # Avatars
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0        Private avatar helpers
-x≈2800     Published avatar components
-x≈5600     Avatar-user image library
-x≈11088    Long-form avatar documentation
+Private avatar helpers
+Published avatar components
+Avatar-user image library
+Long-form avatar documentation
 ```
 
 Private/public families:
