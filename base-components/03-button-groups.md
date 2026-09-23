@@ -98,6 +98,22 @@ Public group:
 - text, leading-icon, and icon-only forms;
 - examples with different current items.
 
+
+
+## Mandatory notes/documentation region
+
+The Figma page must visibly document:
+- when a Button group is appropriate versus tabs, radio groups, or independent buttons;
+- the private-base → published-group anatomy;
+- Current versus Hover/Focused behavior;
+- connected-edge, shared-border, and corner-merging rules;
+- text, leading-icon, and icon-only compositions;
+- keyboard/focus expectations for each item;
+- do/don't examples for multiple simultaneous Current items, doubled borders, and broken interior radii;
+- which private base, border token, radius token, and state styling should be maintained centrally.
+
+A matrix alone fails documentation QA.
+
 # 5. QA
 
 Fail QA when:
