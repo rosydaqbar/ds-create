@@ -1,40 +1,40 @@
 # Spacing, Radius & Grids
 
-This is one Foundation page containing five separate documentation frames.
+This is one Foundation page containing several related documentation regions.
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0        Spacing primitives       2528 × 3884
-x≈2928     Radius                   2400 × 2450
-x≈5728     Spacing                  2528 × 4856
-x≈8656     Grid layouts             2400 × 7356
-x≈11456    Long-form notes          1600 × 10752
+Spacing primitives
+→ Radius
+→ Semantic spacing / widths / containers
+→ Grid layouts
+→ Long-form notes
 ```
+
+Use the horizontal documentation-canvas grammar. Each region grows with its content.
 
 # 1. Spacing primitives
 
-Use a four-column table:
-- Name
-- Size (rem/base)
-- Pixels
-- Type/category
+Use a table such as:
 
-Observed numeric scale:
+| Name | Relative/base value | Resolved platform value | Type/category |
+| --- | --- | --- | --- |
 
-```text
-0, 0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24,
-32, 40, 48, 56, 64, 80, 96, 120, 140, 160, 180, 192, 256,
-320, 360, 400, 480
-```
+The primitive scale comes from:
+1. the existing system, when available;
+2. the initiator/product requirements;
+3. a newly derived coherent scale only when no scale exists.
 
-Observed pixel equivalents range from `0px` through `1920px` on a 16 px base.
+Do not copy a reference numeric spacing series into a different brand.
 
-The user may select a different primitive scale; preserve the table structure.
+Do not assume one base unit.
+
+Document the actual relationship between primitive values instead.
 
 # 2. Semantic spacing
 
-Required semantic names in the observed model:
+A semantic system may expose roles such as:
 
 ```text
 spacing-none
@@ -56,7 +56,13 @@ spacing-10xl
 spacing-11xl
 ```
 
+Preserve the existing naming/scale when already established.
+
+The list above is a supported pattern, not a required count.
+
 # 3. Widths
+
+A width system may expose roles such as:
 
 ```text
 width-xxs
@@ -72,9 +78,11 @@ width-5xl
 width-6xl
 ```
 
+Values come from the actual product/layout system.
+
 # 4. Containers
 
-Observed roles:
+Typical semantic roles include:
 
 ```text
 container-padding-mobile
@@ -82,19 +90,23 @@ container-padding-desktop
 container-max-width-desktop
 ```
 
+For products with different platform classes, generate equivalent roles based on the product rather than forcing these exact names or values.
+
 # 5. Paragraph max-width
 
-Observed role:
+Document the system's reading-measure role.
 
-```text
-paragraph-max-width
-```
+If no reading measure exists, derive one from:
+- typography;
+- content density;
+- primary platform;
+- localization needs.
 
-Default specimen width in the observed documentation is `720px`.
+Do not hard-code the reference reading width.
 
 # 6. Radius
 
-Observed semantic scale:
+A semantic radius system may use roles such as:
 
 ```text
 radius-none
@@ -110,37 +122,43 @@ radius-4xl
 radius-full
 ```
 
-Observed pixel series:
+The actual values are brand-dependent.
 
-```text
-0, 2, 4, 6, 8, 10, 12, 16, 20, 24, 9999
-```
-
-The brand may use different values, but preserve the named scale/table pattern.
+Rules:
+- preserve an established radius scale;
+- otherwise derive the scale from the selected corner treatment;
+- do not copy reference radius values.
 
 # 7. Grid layouts
 
-Required documentation examples:
-- Desktop 1280 px
-- Tablet 768 px
-- Mobile 375 px
-- Container grid layouts
-- 12 columns (auto)
-- 6 columns (auto)
-- 5 columns (auto)
-- 3 columns (auto)
-- 2 columns (auto)
+Document the actual platform classes supported by the product, for example:
+- desktop;
+- tablet;
+- mobile;
+- large-screen or app-specific layouts when required.
 
-Show gutters, margins, container width, and column behavior visually.
+For each class show:
+- container behavior;
+- column behavior;
+- gutters;
+- margins;
+- max-width rules;
+- breakpoint/mode relationships.
+
+Column counts and breakpoints come from the actual product.
+
+Do not force reference viewport widths or grid counts.
 
 # 8. Long-form documentation
 
 Required outline:
 - why a spacing system is necessary;
 - problems with designing without a defined scale;
-- 4 px soft-grid rationale;
+- rationale for the selected base-unit/spacing model;
 - defining the spacing system;
-- exceptions to the grid;
+- exceptions to the spacing model;
 - best practices;
-- paragraph max-width guidance;
+- paragraph measure guidance;
 - practical Figma nudge/grid configuration tips.
+
+The documentation should explain the user's actual spacing/grid model, not a copied numeric system.
