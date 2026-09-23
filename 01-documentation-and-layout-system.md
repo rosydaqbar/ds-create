@@ -725,3 +725,193 @@ A component page fails generation QA if:
 - a known optical/layout helper is omitted;
 - examples-in-use are missing where specified;
 - brand styling was copied as structure rather than mapped to the active brand tokens.
+
+# Visual teaching is part of documentation
+
+Long-form Notes & Documentation are not prose pages.
+
+When a selected relevant topic is taught through a visual example in the audited reference, the generated system must preserve the **teaching mechanism** using the generated system's own components, tokens, variables, and brand values.
+
+This means the builder must recreate relevant:
+- before/after comparisons;
+- good/bad comparisons;
+- annotated anatomy diagrams;
+- editor/workflow examples;
+- component state comparisons;
+- token/alias diagrams;
+- measurement overlays;
+- line-length comparisons;
+- accessibility/contrast examples;
+- responsive/grid examples;
+- propagation examples.
+
+The builder must not satisfy a visual teaching requirement by replacing it with another paragraph.
+
+## Long-form documentation anatomy
+
+Reference baseline:
+
+```text
+Long-form documentation frame
+├─ Documentation header
+├─ Section
+│  └─ Rich text column
+│     ├─ Heading / body content
+│     ├─ Visual example
+│     ├─ Heading / body content
+│     ├─ Visual example
+│     └─ ...
+└─ Footer
+```
+
+At the audited scale:
+- frame width is approximately 1600;
+- section gutters are approximately 80;
+- reading column is approximately 720;
+- visual examples generally occupy the full reading-column width.
+
+These are baseline composition measurements, not universal fixed limits.
+
+The generated frame may expand for:
+- longer localized copy;
+- larger brand typography;
+- more complex generated diagrams;
+- additional modes/themes;
+- larger examples.
+
+## Visual example placement
+
+A visual should appear immediately after the explanation it demonstrates.
+
+Correct:
+
+```text
+Heading
+Explanation
+Visual comparison
+Caption/annotation
+
+Next heading
+Explanation
+Workflow image
+```
+
+Incorrect:
+
+```text
+All prose
+All prose
+All prose
+Large gallery of unrelated screenshots at the end
+```
+
+## Documentation visual types
+
+### Comparison
+
+Use for:
+- good vs bad;
+- before vs after;
+- with-system vs without-system;
+- selected approach vs rejected approach.
+
+Keep unrelated variables constant so the lesson is obvious.
+
+### Anatomy diagram
+
+Use for:
+- component internal layers;
+- token hierarchy;
+- icon live area;
+- effect stack;
+- grid/container relationship.
+
+Anatomy diagrams require:
+- labels;
+- connector lines;
+- meaningful layer names;
+- measurement/role annotation where relevant.
+
+### Workflow / propagation example
+
+Use for:
+- editing variables;
+- replacing assets;
+- changing palettes;
+- changing typography;
+- changing effects.
+
+Show:
+1. source edit;
+2. dependency;
+3. resulting update.
+
+### Measurement overlay
+
+Use for:
+- spacing;
+- padding;
+- icon live areas;
+- line length;
+- optical sizing.
+
+Measurement overlays should label relationships, not clutter every pixel value.
+
+### Component/state specimen
+
+Use for:
+- hierarchy;
+- focus;
+- destructive states;
+- density;
+- modes/themes.
+
+Specimens must use the actual generated components.
+
+## Recreate, do not screenshot-copy
+
+Generated documentation must not paste screenshots from the audited source file.
+
+Instead:
+- recreate the same explanatory concept;
+- use the generated system's own Figma layers;
+- use the generated system's own variable/token names;
+- use the active brand styling;
+- use neutral/project-specific example copy.
+
+This keeps the builder agnostic while preserving the depth and teaching quality.
+
+## Relevance filtering rule
+
+The audit process is:
+
+```text
+Review every Notes & Documentation topic
+              ↓
+Determine whether it helps build/maintain the current agnostic system
+              ↓
+If relevant:
+    preserve the full explanation depth
+    +
+    preserve every relevant visual teaching mechanism
+If not relevant:
+    do not generate it
+```
+
+Do not:
+- select only headings and discard the visual examples;
+- copy every source note indiscriminately;
+- shorten a selected topic into a one-line rule;
+- create a separate parallel notes directory.
+
+Relevant Notes & Documentation live inside the page specification they belong to.
+
+## Visual documentation QA
+
+A long-form page fails QA when:
+- the source topic was selected as relevant but its visual teaching example is missing;
+- prose replaces a required diagram/comparison;
+- visuals use fake/unrelated token names;
+- screenshots from another system are pasted instead of recreated;
+- generated visuals use anatomy inconsistent with the published generated components;
+- visual examples are grouped far away from the explanatory text they support.
