@@ -664,48 +664,6 @@ Rules:
 
 Avatars and Buttons keep their additional Figma-Page-specific documentation topics below; other Figma Pages keep the documentation topics defined in their corresponding Markdown files.
 
-## 11.6 Buttons reading-oriented documentation
-
-The Buttons notes frame is substantial and must not be summarized into one paragraph.
-
-Required topic blocks:
-1. buttons should look actionable;
-2. button hierarchy;
-3. destructive actions;
-4. optical button balance;
-5. icon live-area/padding explanation;
-6. the label Text-padding wrapper and compensation logic;
-7. optional depth/effect treatment;
-8. how the effect treatment can be globally removed/changed.
-
-Use:
-- 30 px-level section headings at the reference scale;
-- 18/28 body rhythm at the reference scale;
-- documentation images/examples placed directly after the related explanation;
-- dividers between major conceptual topics.
-
-The active brand/system values may change, but the educational structure remains.
-
-## 11.7 Avatar reading-oriented documentation
-
-Required topics:
-1. image-source strategy;
-2. centrally managed/shared avatar assets;
-3. replacing avatar images;
-4. changing placeholder images;
-5. changing placeholder/background fills centrally.
-
-The generated text must describe the actual generated system mechanism.
-
-## 11.8 Examples in use
-
-When the Figma Page contains an explicit examples region, preserve it.
-
-Observed example region:
-- Text editors.
-
-Examples are composed instances showing how the base components work together. They are not new public component masters.
-
 # 12. Anatomy documentation inside Markdown specs
 
 Every Base Component Markdown file must include:
@@ -729,15 +687,15 @@ A file that only lists component-set names and variant axes is incomplete.
 
 # 13. Component Figma Page QA
 
-A component Figma Page fails generation QA if:
-- its Markdown file contains no anatomy tree;
-- a private helper exists in the source pattern but the generated family duplicates its layers;
-- a required region header description is generic;
-- the mandatory notes/documentation frame is missing or contains only generic filler;
-- the full component matrix is replaced by samples;
-- a known optical/layout helper is omitted;
-- examples-in-use are missing where specified;
-- brand styling was copied as structure rather than mapped to the active brand tokens.
+Global QA:
+- preserve Figma Page vs Frame terminology;
+- preserve required region separation;
+- preserve full component matrices rather than demo-only subsets;
+- keep private helpers private;
+- do not flatten documented anatomy;
+- render required documentation visibly on canvas.
+
+All component-family-specific QA belongs to the corresponding file under `base-components/` and must be executed from there.
 
 # Visual teaching is part of documentation
 
@@ -896,28 +854,14 @@ This keeps the builder agnostic while preserving the depth and teaching quality.
 
 ## Relevance filtering rule
 
-The audit process is:
+Audit source material broadly, but generate only guidance that directly helps build, maintain, audit, or evolve the selected design-system scope.
 
-```text
-Review every Notes & Documentation topic
-              ↓
-Determine whether it helps build/maintain the current agnostic system
-              ↓
-If relevant:
-    preserve the full explanation depth
-    +
-    preserve every relevant visual teaching mechanism
-If not relevant:
-    do not generate it
-```
+For any selected topic:
+- preserve its full explanatory depth;
+- preserve its relevant visual teaching mechanism;
+- recreate visuals with the generated system rather than source screenshots.
 
-Do not:
-- select only headings and discard the visual examples;
-- copy every source note indiscriminately;
-- shorten a selected topic into a one-line rule;
-- create a separate parallel notes directory.
-
-Relevant Notes & Documentation live inside the corresponding Markdown specification and are rendered into the appropriate Frame/region on that Figma Page.
+The exact selected topics live in the corresponding page-specific Markdown specification. Do not duplicate that inventory here.
 
 ## Visual documentation QA
 
