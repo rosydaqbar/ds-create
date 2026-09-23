@@ -83,3 +83,22 @@ Required outline:
 Use constrained rich text and relevant specimen images.
 
 Do not hard-code reference font sizes or reading widths into generated output.
+
+## Mandatory visible notes/documentation
+
+The long-form typography documentation must be generated as visible Figma content.
+
+A type specimen and scale are not sufficient documentation.
+
+The notes must explain the actual generated type system:
+- active family/families and why;
+- Display versus Text roles;
+- weight coverage;
+- line-height and letter-spacing logic;
+- readable body defaults;
+- hierarchy and content-density guidance;
+- accessibility/readability considerations;
+- how to update styles/variables centrally;
+- examples from the generated product/system.
+
+A Typography page without visible notes fails QA.
