@@ -4,421 +4,111 @@ The confirmed questionnaire becomes the generation contract.
 
 # 0. Integrated generation rule
 
-The confirmed questionnaire is only one part of the contract. Generation must combine:
-- the user's full current request;
-- supplied source/brand material;
-- the current Figma/library state;
-- global documentation/layout rules;
-- token/naming rules;
-- every in-scope Figma Page and its corresponding Markdown specification;
-- dependencies between foundations, assets, components, and examples.
+Generation combines:
+- the user's current request;
+- supplied brand/source material;
+- current Figma/library state;
+- the exact Page hierarchy in `00-page-map.md`;
+- global documentation/layout rules in `01-documentation-and-layout-system.md`;
+- token/naming rules in `02-token-and-naming-contract.md`;
+- every in-scope page-specific Markdown specification.
 
-Before editing Figma, build a completeness checklist from all of those sources. Do not narrow a complex request to the last defect mentioned by the user.
-
-A local correction means:
-1. fix the local defect;
-2. preserve every existing requirement not explicitly removed;
-3. re-check connected Figma Pages/Frames/components/tokens/documentation;
-4. update dependent examples and notes when the underlying system changed;
-5. run complete QA again.
-
-Fail the generation if any detailed source requirement was replaced by a shorter generic substitute.
+A local correction does not cancel unrelated approved requirements.
 
 # 1. Inspect first
 
 Before changing Figma:
-- inventory Figma Pages and their top-level Frames/Component Sets;
-- inventory variables and modes;
-- inventory local styles;
+- inventory Figma Pages and top-level Frames/Component Sets;
+- inventory variables, modes, and local styles;
 - inventory component sets and public properties;
-- identify existing naming patterns;
-- identify which observed Figma Page families already exist.
-
-# 1.1 Collection naming validation
-
-Before generating variables:
-
-1. inspect existing collection names;
-2. resolve whether the user selected Keep, Normalize, or Custom;
-3. resolve the required variable domains;
-4. generate collection names from the canonical domain labels;
-5. keep product-specific concepts inside the relevant collection unless a separate architecture was explicitly requested.
-
-For new systems, collection names must be deterministic.
-
-Reject and repair generation when equivalent runs produce inconsistent collection styles such as:
-
-```text
-Ref — Color
-Sys — Color
-Sys — Space
-Comp — Core
-```
-
-in one run and:
-
-```text
-Primitive
-Color
-Dimension
-Component
-```
-
-in another.
-
-For a new system, use the canonical domain grammar:
-
-```text
-Primitives
-Color
-Typography
-Spacing
-Sizing
-Radius
-Motion
-Components
-```
-
-Only include domains that exist in the confirmed architecture.
-
-Product-specific semantic color families such as signal strength, network quality, membership tier, or status belong inside `Color` rather than creating a differently named collection.
-
-Component collections are created only when a component-token layer is enabled.
-
-Token naming presets affect variable paths, not collection naming grammar.
+- identify current naming patterns;
+- map existing content to the exact Page hierarchy.
 
 # 2. Figma Page actions
 
 ## Keep
-- retain the Figma Page and its top-level canvas structure;
-- use existing assets as dependencies;
-- do not rename variables or public properties.
+Retain the Page, public API, and approved content.
 
 ## Audit
-- compare against the corresponding Markdown specification;
-- report missing sections, matrices, properties, states, usage copy, or documentation;
-- do not mutate until allowed by build strategy.
+Compare against its page-specific Markdown specification without mutating unless the build strategy permits it.
 
 ## Improve
-- preserve Figma Page identity and public component/token API;
-- fill missing documentation or variants without unnecessary structural churn.
+Preserve identity/public API and fill missing approved requirements.
 
 ## Refactor
-- preserve behavior and public meaning;
-- private anatomy and bindings may change.
+Preserve behavior/public meaning; private anatomy may change.
 
 ## Rebuild
-- reconstruct the page using its exact Markdown specification for that Figma Page;
-- migrate approved brand values and reusable assets.
+Reconstruct from the full page-specific Markdown specification while migrating approved brand values/assets.
 
 ## Replace
-- create the replacement first;
-- archive/remove superseded items only after migration.
+Create the replacement first; remove/archive superseded content only after migration.
 
 ## Build
-- create the missing Figma Page/family using its exact Markdown specification.
+Create the missing Page/family from its exact specification.
 
 ## Skip
-- create nothing.
+Create nothing. Never infer Skip merely because an item was not mentioned in the latest prompt.
 
-# 3. Generation order
+# 3. Collection naming
 
-```text
-1. Getting started / Variables guidance if requested
-2. Colors
-3. Typography
-4. Logos
-5. Icons
-6. Misc icons
-7. Effect styles
-8. Spacing, radius & grids
-9. Avatars
-10. Badges
-11. Button groups
-12. Buttons
-13. Checkboxes
-14. Dropdowns
-15. Inputs
-16. Progress indicators
-17. Radio groups
-18. Select
-19. Sliders
-20. Tags
-21. Text editors
-22. Toggles
-23. Tooltips
-24. Video players
-```
+Before generating variables:
+1. inspect existing collection names;
+2. resolve Keep / Normalize / Custom;
+3. resolve required domains;
+4. apply the deterministic collection grammar in `02-token-and-naming-contract.md`;
+5. keep product-specific concepts inside the appropriate domain unless a separate collection is explicitly required.
 
-# 4. Never replace Figma Page family structure with generic component taxonomy
+Token naming presets affect variable paths, not the collection naming grammar.
 
-If a component belongs to a Base Component Figma Page family, keep it on that Figma Page. Example: verification inputs belong to `Inputs`, not a separate page.
-
-# 5. Required validation
-
-For every generated Figma Page verify:
-- top-level Frame/Component-Set region sizing and relative canvas positioning;
-- header and section layout;
-- every required section/family exists;
-- full component-property matrix coverage;
-- Design note content exists where required;
-- token tables include Name / mode(s) / Usage;
-- no detached generic QA/source dashboard was introduced.
-
-
-# 5.1 Hard validation for color presentation
-
-Color documentation fails generation when color is represented only by raw text values.
-
-Reject and repair any frame/card/row where:
-- a hex/RGB/HSL/CMYK/Pantone value is the only color representation;
-- the raw value is merely colored to resemble the source color;
-- a brand-translation card contains name + hex + description but no swatch/fill specimen;
-- a color variable exists but the visual specimen is recreated as an unbound raw paint;
-- the token/variable name is omitted while only a raw color value is shown.
-
-Required repair:
-1. add a visible swatch, filled surface, strip, or equivalent color specimen;
-2. bind that specimen to the real variable when available;
-3. show the token/variable name as the primary technical label;
-4. keep the raw value only as secondary metadata when useful;
-5. re-run screenshot QA at normal inspection size.
-
-This validation applies globally, including Getting Started, Foundation pages, component documentation, examples, and custom brand-summary sections.
-
-# 6. Hard validation for variable documentation
-
-Variable documentation Frames require structural validation, not universal fixed dimensions.
-
-The audited measurements are **reference baselines**.
-
-Validate these relationships:
+# 4. Generation order
 
 ```text
-Section
-└─ Variable group                     Fill container
-   ├─ Design note                     constrained reading width
-   └─ Variable table                  Fill container
-      ├─ Name                         preferred / expandable
-      ├─ Mode(s)                      content-driven / expandable
-      └─ Usage                        Fill
+1. Getting started / Variables
+2. Foundations in the order defined by 00-page-map.md
+3. Base Components in the order defined by 00-page-map.md
+4. Notes, examples, and documentation required by each Page specification
 ```
 
-The generation step must reject and repair the frame when:
-- the Design note width is inherited by the table;
-- the table or group clips content;
-- Usage is not visible;
-- a row-based construction pushes columns outside the visible table;
-- additional modes are omitted to preserve an arbitrary reference width;
-- long token names or aliases are truncated instead of allowing their column/frame to grow;
-- row content overlaps because a baseline row height is treated as fixed;
-- Light/Dark/theme aliases are rendered as plain text when a visual alias chip is appropriate;
-- semantic token hierarchy is flattened;
-- child token rows are indented but have no connector lines;
-- connector lines are represented only by text glyphs instead of Figma line/vector layers;
-- connector branches do not terminate correctly at the final child;
-- Usage copy is generic templated filler.
+Do not substitute a different component taxonomy. A component stays on the Figma Page family defined by the Page map and its Markdown specification.
 
-For color-variable tables specifically, final visual QA must verify:
-1. every required column is visible;
-2. table fills the available documentation width;
-3. token badges are used in Name;
-4. swatch + alias chips appear in color-mode columns;
-5. every token has explicit usage copy;
-6. hierarchy connectors/indentation are preserved, including visible vertical branches and elbow connectors for every child token;
-7. rows grow when content requires it;
-8. additional modes expand the table/frame rather than compressing the existing layout.
+# 5. Build completeness
 
-Do not mark Color variables complete until this validation passes.
+Before editing, build a checklist containing every in-scope:
+- Figma Page;
+- required Frame/region;
+- variable/token family;
+- component family;
+- property axis;
+- anatomy requirement;
+- matrix;
+- Notes & Documentation topic;
+- diagram/example/workflow;
+- accessibility/content/usage rule;
+- QA requirement.
 
-# 7. Reference measurements are not constraints
+Resolve every checklist item to Keep / Audit / Improve / Refactor / Rebuild / Replace / Build / Skip.
 
-Whenever this package records observed pixels, treat them as one of:
+# 6. Validation
 
-- baseline composition;
-- preferred minimum;
-- measured reference rhythm.
+Run validation in this order:
 
-They are **not universal maximums** unless a component specification explicitly says a dimension is functionally fixed.
+1. **Page hierarchy** — use `00-page-map.md`.
+2. **Global documentation/layout** — use `01-documentation-and-layout-system.md`.
+3. **Token/naming** — use `02-token-and-naming-contract.md`.
+4. **Page-specific completeness** — run the complete QA in every in-scope file under `guidance/`, `foundations/`, and `base-components/`.
 
-For documentation layouts, prefer:
-- Fill container;
-- Hug contents;
-- semantic spacing tokens;
-- constrained reading widths;
-- content-driven columns;
-- minimum sizes;
-- expandable canvases.
+Do not duplicate detailed validation here.
 
-A large brand/system is allowed to produce a larger documentation canvas while keeping the same visual grammar.
+Generation fails when:
+- required Pages are merged, renamed, flattened, or reordered;
+- required Frames/regions are missing;
+- a component matrix is reduced to showcase samples;
+- documented component anatomy is flattened;
+- required Notes & Documentation exist only as prose when a visual example is required;
+- page-specific requirements are replaced with generic substitutes;
+- approved requirements disappear during a local fix.
 
-# 8. Hierarchy connector validation
+# 7. Completion rule
 
-For semantic-variable Name columns, hierarchy is considered complete only when child relationships are visually connected.
-
-Required for every token family with children:
-
-```text
-parent
-│
-├── child
-└── child
-```
-
-Implementation requirements:
-- parent badge remains at the base Name-column alignment;
-- child badges are indented;
-- a real vertical connector layer links the child stack;
-- a real horizontal elbow layer connects each child to the branch;
-- the final vertical segment stops at the last child;
-- connector color uses a semantic documentation-border token;
-- connector placement adapts to Hug-content row heights;
-- connector layers must remain aligned when rows grow because of localization or content.
-
-Fail generation if:
-- children are only indented;
-- connector layers are missing;
-- connectors are drawn as text characters;
-- branch/elbow alignment breaks when row height changes.
-
-
-# 9. Base Component deep-anatomy validation
-
-Before generating or refactoring any Base Component Figma Page:
-
-1. read the full corresponding Markdown specification;
-2. build private helpers first;
-3. build published masters from those helpers;
-4. construct the complete property matrix;
-5. add required region/family header Instances;
-6. render every page-specific note, diagram, example, and guidance item defined by the corresponding Markdown specification;
-7. validate that no detailed requirement was compressed into a generic substitute;
-8. validate that documentation is visible on canvas in the composition required on that Figma Page;
-9. validate internal layer anatomy, not only screenshot appearance.
-
-A Base Component Figma Page must be rejected and rebuilt if:
-- its dedicated notes/documentation region is missing;
-- its notes contain only generic prose that could describe another component;
-- documentation exists only in Markdown/component descriptions but not visibly on the Figma canvas;
-- its master hierarchy differs from the documented anatomy;
-- private helpers are missing or duplicated inline;
-- a component property is omitted because it produces a large matrix;
-- the Figma Page is represented by a few “nice examples” instead of the real matrix;
-- required region descriptions are generic;
-- Buttons omit the optical Text-padding wrapper;
-- Dropdowns omit reusable list-item/inset-icon helpers;
-- Inputs flatten label/control/hint into one frame;
-- Select recreates menu items instead of using private helpers;
-- Text-editor toolbars draw icons individually rather than using the icon set;
-- Video-player controls are individually authored inside the player.
-
-# 10. Documentation validation by Figma Page
-
-## Avatars
-Require:
-- private base region;
-- avatar-user asset region;
-- published avatar families;
-- avatar-management documentation.
-
-## Buttons
-Require:
-- standard + destructive matrices;
-- utility/close/loading helpers;
-- social buttons/groups;
-- app-store badges;
-- page-specific documentation including hierarchy, destructive usage, optical balancing, and effect treatment.
-
-## Text editors
-Require:
-- private icon set;
-- toolbar;
-- tooltip;
-- editor;
-- Text highlight;
-- examples-in-use region.
-
-## Every Base Component Figma Page
-Require:
-- every region defined by that Figma Page's Markdown specification;
-- required region/family header;
-- private region when specified;
-- all component sets;
-- exact property axes;
-- anatomy defined in the Markdown specification;
-- full matrices;
-- every page-specific note, rule, diagram, example, accessibility requirement, content rule, and maintenance instruction defined in that Markdown file.
-
-Do not impose one universal notes-frame structure. Generation is incomplete until the **entire Markdown specification** is represented visibly and structurally in Figma.
-
-# Notes & Documentation selection workflow
-
-Before generating documentation for any Figma Page with long-form notes:
-
-1. review the complete audited Notes & Documentation inventory for that Figma Page;
-2. classify each topic by whether it directly helps create, maintain, audit, or evolve the current agnostic system;
-3. discard topics that are promotional, source-specific, marketplace/resource catalogs, or outside the selected design-system scope;
-4. for every selected topic, preserve the full explanation depth;
-5. identify every relevant visual example used to teach that topic;
-6. recreate those visuals using the generated system itself;
-7. place the visuals immediately after the related explanation;
-8. validate that the selected documentation Frame is not prose-only.
-
-Selection happens at the **topic + visual module** level.
-
-Never perform this incorrect workflow:
-
-```text
-Audit Figma Page
-→ extract headings
-→ paraphrase headings into Markdown
-→ omit diagrams/images/examples
-```
-
-Required workflow:
-
-```text
-Audit page
-→ understand each topic
-→ inspect how it is visually demonstrated
-→ select relevant topic
-→ preserve full written depth
-→ recreate relevant demonstration
-→ integrate into the same Markdown specification
-```
-
-## Current audited long-form Notes Figma Pages
-
-The audited file contains long-form Notes/Documentation for:
-- Variables;
-- Colors;
-- Typography;
-- Logos;
-- Icons;
-- Effect styles;
-- Spacing/radius/grids;
-- Avatars;
-- Buttons;
-- Portfolio mockups;
-- Empty states;
-- Tables.
-
-For the current Foundation + Base Component builder:
-
-### Selected/integrated
-- Variables;
-- Colors;
-- Typography;
-- Logos when brand/logo scope is enabled;
-- Icons;
-- Effect styles;
-- Spacing/radius/grids;
-- Avatars when Avatar scope is enabled;
-- Buttons when Button scope is enabled.
-
-### Audited but not generated in the current scope
-- Portfolio mockups — presentation workflow, not Foundation/Base Component construction.
-- Empty states — Application Component/UX guidance.
-- Tables — Application Component/data-display guidance.
-
-If the builder scope later includes those component families, their audited Notes & Documentation must be revisited and integrated at that time rather than re-audited from scratch.
+Do not mark generation complete until every checklist item has a resolved state and every applicable canonical QA source passes.
