@@ -1,6 +1,6 @@
 # Colors
 
-The Colors page is a multi-region Foundation canvas. It must not be reduced to a palette grid or constrained to one fixed canvas size.
+The Colors Figma Page is a multi-region Foundation canvas. It must not be reduced to a palette grid or constrained to one fixed canvas size.
 
 # Canvas region order
 
@@ -86,7 +86,7 @@ Each swatch shows:
 
 A color family or brand color must never be documented as text-only metadata.
 
-For every color shown in this page:
+For every color shown on this Figma Page:
 - render a visible color specimen;
 - bind the specimen to its variable when one exists;
 - show the token/variable name prominently;
@@ -447,7 +447,7 @@ Automated contrast checks are useful, but the documentation should also show rep
 - alpha colors depend on the underlying surface;
 - tinted surfaces change the resulting contrast;
 - disabled states may become too faint;
-- nested/elevated surfaces can expose combinations not visible in the primitive palette page.
+- nested/elevated surfaces can expose combinations not visible in the primitive palette Frame/region.
 
 Contrast QA belongs to the generated color documentation.
 
@@ -633,7 +633,7 @@ At normal inspection:
 - table spans the intended documentation content region;
 - token badges and value previews are visually apparent;
 - hierarchical lines are visible;
-- page does not resemble a narrow article column with a truncated table.
+- Color variables Frame does not resemble a narrow article column with a truncated table.
 
 # 8. Visual documentation modules
 
