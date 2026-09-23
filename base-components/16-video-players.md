@@ -214,7 +214,7 @@ Show:
 - actions-bar sizes/states.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when video/media playback is appropriate;
