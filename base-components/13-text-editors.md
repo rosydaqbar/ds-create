@@ -205,7 +205,7 @@ Text editor:
 - scroll bar/hint variations.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use Text editor rather than a simple textarea;
