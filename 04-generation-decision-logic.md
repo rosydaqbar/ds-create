@@ -119,6 +119,9 @@ The generation step must reject and repair the frame when:
 - row content overlaps because a baseline row height is treated as fixed;
 - Light/Dark/theme aliases are rendered as plain text when a visual alias chip is appropriate;
 - semantic token hierarchy is flattened;
+- child token rows are indented but have no connector lines;
+- connector lines are represented only by text glyphs instead of Figma line/vector layers;
+- connector branches do not terminate correctly at the final child;
 - Usage copy is generic templated filler.
 
 For color-variable tables specifically, final visual QA must verify:
@@ -127,7 +130,7 @@ For color-variable tables specifically, final visual QA must verify:
 3. token badges are used in Name;
 4. swatch + alias chips appear in color-mode columns;
 5. every token has explicit usage copy;
-6. hierarchy connectors/indentation are preserved;
+6. hierarchy connectors/indentation are preserved, including visible vertical branches and elbow connectors for every child token;
 7. rows grow when content requires it;
 8. additional modes expand the table/frame rather than compressing the existing layout.
 
@@ -153,3 +156,32 @@ For documentation layouts, prefer:
 - expandable canvases.
 
 A large brand/system is allowed to produce a larger documentation canvas while keeping the same visual grammar.
+
+# 8. Hierarchy connector validation
+
+For semantic-variable Name columns, hierarchy is considered complete only when child relationships are visually connected.
+
+Required for every token family with children:
+
+```text
+parent
+│
+├── child
+└── child
+```
+
+Implementation requirements:
+- parent badge remains at the base Name-column alignment;
+- child badges are indented;
+- a real vertical connector layer links the child stack;
+- a real horizontal elbow layer connects each child to the branch;
+- the final vertical segment stops at the last child;
+- connector color uses a semantic documentation-border token;
+- connector placement adapts to Hug-content row heights;
+- connector layers must remain aligned when rows grow because of localization or content.
+
+Fail generation if:
+- children are only indented;
+- connector layers are missing;
+- connectors are drawn as text characters;
+- branch/elbow alignment breaks when row height changes.
