@@ -151,6 +151,22 @@ Show:
 - checkbox tags must preserve focus visibility;
 - country/avatar content is supportive, not the only meaning.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when to use Tag versus Badge, filter control, or Button;
+- leading visual, text, close/count action, and checkbox/selectable anatomy;
+- removable versus selectable behavior;
+- size and interaction behavior for close/checkbox helpers;
+- label-length, wrapping, and compactness guidance;
+- country/avatar visuals as supporting rather than sole meaning;
+- keyboard/focus and target-size accessibility for removable/selectable tags;
+- do/don't examples for mixed trailing actions, tiny long-label tags, and relying on flag/avatar alone;
+- central maintenance through private close/count/checkbox helpers and semantic tokens.
+
+A matrix alone fails documentation QA.
+
 # 9. QA
 
 Fail QA when:
