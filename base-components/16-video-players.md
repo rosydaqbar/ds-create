@@ -2,7 +2,7 @@
 
 Video player components provide realistic video-preview and playback-control mockups.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private controls
@@ -216,7 +216,7 @@ Show:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when video/media playback is appropriate;
 - 16:9 media frame → overlay action → actions bar anatomy;
 - reusable action button, volume slider, timeline, tooltip, and timestamp helpers;
