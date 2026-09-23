@@ -169,7 +169,7 @@ Do not reduce the 666-variant Badge matrix to a color swatch row.
 
 
 
-## Mandatory notes/documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use a Badge versus a Tag or ordinary text;
@@ -185,7 +185,7 @@ The Figma page must visibly document:
 A header plus matrix is not sufficient documentation.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use a Badge versus Tag, text label, or Button;
