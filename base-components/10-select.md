@@ -1,11 +1,11 @@
 # Select
 
-# Canvas inventory
+# Canvas region order
 
 ```text
-x≈0       Private select menu helpers
-x≈2800    Select
-x≈5600    Multi-select
+Private select menu helpers
+Select
+Multi-select
 ```
 
 | Component set | Variant / property axes |
