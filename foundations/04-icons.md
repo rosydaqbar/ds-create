@@ -46,9 +46,7 @@ Use the user's selected icon library. Do not copy another product's icon assets 
 
 # Long-form icon documentation
 
-Frame width: `1600`.
-
-Required outline:
+Frame sizing follows the documentation-layout role and content. Required outline:
 - why icons matter to UX;
 - what an icon is;
 - recognizability and comprehension;
