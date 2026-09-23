@@ -152,7 +152,7 @@ Show:
 - country/avatar content is supportive, not the only meaning.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use Tag versus Badge, filter control, or Button;
