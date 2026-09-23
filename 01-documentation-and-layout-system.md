@@ -72,7 +72,7 @@ Every finished documentation frame begins with a reusable header block.
 - height: Hug contents;
 - layout: vertical;
 - padding: `doc.space.frame`;
-- background: page surface;
+- background: documentation base surface;
 - contains one rounded inner Content frame.
 
 ## Inner header content
@@ -207,7 +207,7 @@ Rules:
 - all swatches in the same family use consistent dimensions;
 - swatch card uses a subtle border and documentation radius;
 - accessibility annotations appear directly on or near the specimen when useful;
-- a large palette expands the specimen region rather than shrinking swatches to fit an arbitrary page width.
+- a large palette expands the specimen region rather than shrinking swatches to fit an arbitrary Frame width.
 
 ## 5.1 Color representation is always visual
 
