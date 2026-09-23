@@ -1,5 +1,7 @@
 # Package Manifest
 
+Do not load this file during normal generation. It is only a repository file listing.
+
 - `00-page-map.md`
 - `01-documentation-and-layout-system.md`
 - `02-token-and-naming-contract.md`
