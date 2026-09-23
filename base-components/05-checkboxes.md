@@ -127,6 +127,22 @@ The Figma page must visibly document:
 
 The component matrix does not replace these notes.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- Checkbox versus Radio semantics and when each is appropriate;
+- unchecked, checked, and indeterminate states;
+- why indeterminate is not a meaningful product end-state for Radio;
+- control → label → supporting-text anatomy and top alignment for multi-line copy;
+- Size and Default/Hover/Focused/Disabled behavior;
+- label/content and click/tap target guidance;
+- keyboard/focus and non-color selection cues;
+- do/don't examples for checkbox-as-single-choice, hidden labels, and vertically centered multi-line controls;
+- central maintenance through the private control base and semantic state tokens.
+
+A matrix alone fails documentation QA.
+
 # 6. QA
 
 Fail QA when:
