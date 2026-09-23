@@ -175,7 +175,7 @@ Multi-select:
 
 
 
-## Mandatory notes/documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use Select versus Multi-select;
@@ -191,7 +191,7 @@ The Figma page must visibly document:
 A component matrix alone fails documentation QA.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use Select versus Multi-select;
