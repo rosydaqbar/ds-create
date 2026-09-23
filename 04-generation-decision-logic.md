@@ -185,3 +185,64 @@ Fail generation if:
 - connector layers are missing;
 - connectors are drawn as text characters;
 - branch/elbow alignment breaks when row height changes.
+
+
+# 9. Base Component deep-anatomy validation
+
+Before generating or refactoring any Base Component page:
+
+1. read the full page Markdown file;
+2. build private helpers first;
+3. build published masters from those helpers;
+4. construct the complete property matrix;
+5. add page/family documentation headers;
+6. add required long-form notes/examples;
+7. validate internal layer anatomy, not only screenshot appearance.
+
+A Base Component page must be rejected and rebuilt if:
+- its master hierarchy differs from the documented anatomy;
+- private helpers are missing or duplicated inline;
+- a component property is omitted because it produces a large matrix;
+- the page is represented by a few “nice examples” instead of the real matrix;
+- page descriptions are generic;
+- Buttons omit the optical Text-padding wrapper;
+- Dropdowns omit reusable list-item/inset-icon helpers;
+- Inputs flatten label/control/hint into one frame;
+- Select recreates menu items instead of using private helpers;
+- Text-editor toolbars draw icons individually rather than using the icon set;
+- Video-player controls are individually authored inside the player.
+
+# 10. Documentation validation by page
+
+## Avatars
+Require:
+- private base region;
+- avatar-user asset region;
+- published avatar families;
+- long-form avatar-management notes.
+
+## Buttons
+Require:
+- standard + destructive matrices;
+- utility/close/loading helpers;
+- social buttons/groups;
+- app-store badges;
+- long-form notes including hierarchy, destructive usage, optical balancing, and effect treatment.
+
+## Text editors
+Require:
+- private icon set;
+- toolbar;
+- tooltip;
+- editor;
+- Text highlight;
+- examples-in-use region.
+
+## Other Base Component pages
+Require:
+- page-specific header;
+- private region when specified;
+- all component sets;
+- exact property axes;
+- anatomy defined in the page spec;
+- full matrices.
