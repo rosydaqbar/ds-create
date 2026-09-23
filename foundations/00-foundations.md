@@ -1,6 +1,6 @@
 # ❖ FOUNDATIONS
 
-The Foundations parent page defines the reusable visual and behavioral primitives used by every component.
+The Foundations parent page defines the visual and behavioral primitives used by every component.
 
 ## Child pages
 
@@ -20,25 +20,25 @@ The Foundations parent page defines the reusable visual and behavioral primitive
 ↳ Accessibility
 ```
 
-## Parent-page layer tree
+## Parent-page presentation
+
+Use one `1600 px` complete documentation frame with the same Header → Section → Footer language defined in `01-documentation-system.md`.
+
+Section content contains:
 
 ```text
-Doc / Foundations
-├─ Header
-├─ Hero
-├─ Content
-│  ├─ Section / Foundation model
-│  ├─ Section / Token layers
-│  ├─ Section / Child-page index
-│  ├─ Section / Mode strategy
-│  ├─ Section / Dependency order
-│  └─ Section / Completion checklist
-└─ Footer
+Design note / Introduction
+Foundation model
+Child-page index
+Dependency order
+Status table from the initiator
 ```
+
+Do not place production variables/components on the parent page.
 
 ## Dependency order
 
-Build in this order:
+Build or validate in this order:
 
 1. Color primitives
 2. Spacing and sizing primitives
@@ -49,17 +49,16 @@ Build in this order:
 7. Motion
 8. Iconography and imagery
 9. Accessibility constraints
-10. semantic tokens
-11. component tokens
+10. Semantic tokens
+11. Component tokens
 
 A component may not hardcode a value that already exists in Foundations.
 
-
 ## Initiator integration
 
-The child-page list is the supported Foundation catalog, not a mandatory build list.
+The child-page list is a supported catalog, not a mandatory build list.
 
-For each child Foundation, use the status resolved from the initiator:
+For each child Foundation resolve:
 
 ```text
 KEEP
@@ -74,8 +73,4 @@ SKIP
 
 Only create missing Foundation pages with status `BUILD`.
 
-When a Foundation is `KEEP`, all new Components must bind to the existing valid Foundation values rather than creating parallel replacements.
-
-When a Foundation is `AUDIT`, do not mutate it until the selected build strategy permits changes.
-
-Brand, platform, mode, density, token architecture, and token-naming answers must be resolved before creating new Foundation variables.
+When a Foundation is `KEEP`, new Components bind to the existing valid Foundation values instead of creating parallel replacements.

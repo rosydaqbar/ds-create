@@ -184,6 +184,15 @@ Do not fragment a single component into dozens of micro-specification files.
 
 ---
 
+
+# Documentation visual contract
+
+The generated Figma file must use the finished documentation-page grammar defined in `01-documentation-system.md`.
+
+This is not optional styling. It defines the required page widths, header structure, 80 px section gutters, Design note pattern, swatch anatomy, variable-table anatomy, editorial typography hierarchy, footer, and component documentation composition.
+
+Do not substitute generic source boards, token dashboards, floating chips, or large utility panels.
+
 # Critical rule
 
 **The canonical architecture is a menu of supported system parts, not an instruction to blindly generate all of them.**

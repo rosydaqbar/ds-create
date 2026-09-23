@@ -1,42 +1,63 @@
 # ❖ COMPONENTS
 
-The Components parent page indexes all base components and defines the build contract shared by them.
+The Components parent page indexes the base-component library and defines the shared build/documentation contract.
 
-## Child pages
+# 1. Component page presentation
 
-Each child component receives exactly one Markdown specification file and one Figma page.
+Every component child page uses the finished documentation-page system from `01-documentation-system.md`.
 
-## Required Figma page zones
+Do not create visible top-level boards named `Source`, `Matrices`, `QA`, or `Internals` as the main presentation.
+
+Default component documentation frame:
 
 ```text
-00 — Documentation
-10 — Source
-20 — Matrices
-30 — QA
-90 — Internals
+Width: 2528
+Layout: Vertical Auto Layout
+Background: white
+
+<Component>
+├─ Design system header
+├─ Section
+│  ├─ Overview
+│  ├─ Anatomy
+│  ├─ Sizes
+│  ├─ Variants / emphasis
+│  ├─ States
+│  ├─ Properties
+│  ├─ Token bindings
+│  ├─ Behavior and content
+│  ├─ Accessibility
+│  └─ QA / edge cases
+└─ Design system footer
 ```
 
-`90 — Internals` may be omitted when the component has no private construction components.
+Each major section begins with a `720 px` Design note and shows specimens, tables, or diagrams after `64 px`.
 
-## Completion rule
+Dense matrices use the full `2368 px` section content width.
 
-A component is not ready to publish unless its specification contains:
+Published component masters may sit below the documentation frame with `240 px` canvas separation.
+
+Private construction components sit below the masters with `160 px` separation and `_` prefixes.
+
+# 2. Required component specification
+
+A component is not ready until its Markdown file defines:
 
 1. published asset names;
 2. exact master layer tree;
 3. exact Auto Layout and resizing behavior;
-4. exact public component properties;
-5. size table;
-6. state model;
+4. public component properties;
+5. size specification;
+6. state specification;
 7. layer-by-layer token mapping;
-8. interaction rules;
+8. interaction behavior;
 9. content rules;
-10. accessibility rules;
-11. required matrix definitions;
-12. QA specimens;
+10. accessibility behavior;
+11. documentation sections and matrices;
+12. QA / stress cases;
 13. prohibited combinations.
 
-## Shared size defaults
+# 3. Shared size defaults
 
 Unless a component file overrides them:
 
@@ -46,41 +67,25 @@ MD control height = 40
 LG control height = 48
 ```
 
-## Shared text defaults
+# 4. Shared text defaults
 
-- SM controls → `Label / SM` or `Body / SM / Medium`
-- MD controls → `Label / MD`
-- LG controls → `Body / MD / Medium`
+```text
+SM controls → Label / SM or Body / SM / Medium
+MD controls → Label / MD
+LG controls → Body / MD / Medium
+```
 
-Component files specify the exact style.
+Individual component files state the exact style.
 
+# 5. Initiator integration
 
-## Initiator integration
-
-The component catalog is not a mandatory build list.
-
-For every component, resolve:
+For every component resolve:
 
 ```text
 Existing → Keep / Audit / Improve / Refactor / Rebuild / Replace
 Missing  → Build / Skip
 ```
 
-A Component Markdown file is the normative construction spec **only when that component is in scope for creation or change**.
-
-### Existing component behavior
-
-- `Keep` → use existing master unchanged.
-- `Audit` → compare it against this package without mutating first.
-- `Improve` → fix targeted gaps while preserving its public API.
-- `Refactor` → internal structure may change; preserve intended behavior.
-- `Rebuild` → reconstruct using the component spec.
-- `Replace` → create replacement, then archive superseded master after migration.
-- `Build` → create missing master.
-- `Skip` → no page/master/placeholder is created.
-
-### Product filtering
-
-Product/platform answers decide which supported components are relevant.
+A component specification is normative only when the component is in scope for creation or change.
 
 Do not build a component merely because a Markdown specification exists.

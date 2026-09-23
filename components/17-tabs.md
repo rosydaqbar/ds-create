@@ -7,6 +7,33 @@
 
 Switches between peer content views within the same context.
 
+
+## Figma documentation layout
+
+Build this component's documentation as a complete `2528 px`-wide documentation frame using `01-documentation-system.md`.
+
+Required visible structure:
+
+```text
+Design system header
+Section (80 px padding, 64 px major gap)
+  Overview — 720 px Design note + representative specimen
+  Anatomy — Design note + annotated real instance
+  Sizes — Design note + size matrix/table
+  Variants — Design note + variant matrix
+  States — Design note + state matrix
+  Properties — Design note + property table
+  Token bindings — Design note + binding table
+  Behavior and content — Design note + examples
+  Accessibility — Design note + focused examples
+  QA / edge cases — Design note + stress specimens
+Design system footer
+```
+
+Use the real component or linked instances for every specimen. Do not redraw fake versions for documentation.
+
+Do not move matrices to a separate giant `QA` board. Do not present properties or token bindings as floating pills.
+
 ## Published assets
 
 - `Tabs / List`
@@ -15,18 +42,6 @@ Switches between peer content views within the same context.
 ## Private construction components
 
 - None.
-
-## Figma page structure
-
-```text
-00 — Documentation
-10 — Source
-20 — Matrices
-30 — QA
-
-```
-
-The Source zone contains masters only. Matrices and QA use linked instances.
 
 ## Master layer tree
 

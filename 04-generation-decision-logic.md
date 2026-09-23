@@ -358,3 +358,21 @@ Never silently invent:
 - a required platform;
 - a multi-brand architecture;
 - components the user did not ask for.
+
+# 13. Documentation visual grammar is fixed
+
+The initiator may change scope, values, brand inputs, modes, token naming, and documentation depth.
+
+It may **not** replace the documentation visual grammar with a generic board system.
+
+All generated Foundation and Component documentation must follow `01-documentation-system.md`, including:
+
+- complete documentation frames rather than visible Source/QA zones;
+- standard header and footer;
+- 80 px section gutters;
+- 64 px major section rhythm;
+- 720 px Design notes;
+- 480 px compact row notes;
+- 160 × 156 swatch cards where applicable;
+- structured tables with explicit Usage copy;
+- real component instances in examples and matrices.

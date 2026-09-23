@@ -1,14 +1,12 @@
 # Figma File Architecture
 
+This specification defines the canvas structure that every generated design-system file must follow.
+
+The file is documentation-first. Do **not** generate separate utility boards such as `Source`, `Matrices`, or `QA` as the main visual presentation. Foundations and components are documented inside complete, polished documentation frames.
+
 ## Page order
 
-The hierarchy below is the **canonical ordering**.
-
-Use `03-initiator-questionnaire.md` and `04-generation-decision-logic.md` to determine which pages are retained, created, updated, audited, rebuilt, or skipped.
-
-Do not create missing pages that are out of scope.
-
-For all pages that exist, preserve this relative order.
+Create or retain pages in this relative order. The initiator determines whether each page is kept, audited, rebuilt, built, or skipped.
 
 ```text
 00 — START
@@ -65,30 +63,46 @@ For all pages that exist, preserve this relative order.
 
 ## Parent pages
 
-`❖ FOUNDATIONS` and `❖ COMPONENTS` are real pages, not separators.
+`❖ FOUNDATIONS` and `❖ COMPONENTS` are real parent pages.
 
-They contain:
-- section introduction;
-- rules for the section;
-- index of child pages;
-- dependency diagram;
-- completion checklist.
-
-They must not contain published production assets.
-
-## Child page canvas zoning
-
-Every Foundation and Component child page uses the same horizontal canvas grammar.
+Each parent page contains one `1600 px`-wide documentation frame with:
 
 ```text
-x = 0       Documentation
-x = 2000    Source / Masters
-x = 4000    Matrices / Specimens
-x = 6000    QA / Stress tests
-x = 8000    Internal construction, only when needed
+Header
+Section
+  Introduction
+  Child-page index
+  Dependency order
+  Status table
+Footer
 ```
 
-Top-level zone frames:
+The parent page is an index and orientation page. Do not place published assets on it.
+
+## Child-page model
+
+Each Foundation or Component page contains **complete documentation frames**, not generic source zones.
+
+Use only the frame types required by the page:
+
+```text
+<Page name>                    2528 px or 2848 px wide
+<Page name> variables          2528 px wide, when variables exist
+<Page name> notes              1600 px wide, only when long-form guidance is useful
+```
+
+Examples of legitimate top-level frames:
+
+```text
+Color
+Color variables
+Color notes
+
+Button
+Button notes
+```
+
+Do not create:
 
 ```text
 00 — Documentation
@@ -98,132 +112,162 @@ Top-level zone frames:
 90 — Internals
 ```
 
-### Zone width
+as large visible canvas boards. Those names create a utility-sheet appearance and are prohibited as the primary documentation layout.
 
-- documentation board: `1600 px`
-- source zone: `1600 px`
-- matrix zone: `1600 px`
-- QA zone: `1600 px`
-- internal zone: `1600 px`
+## Top-level frame placement
 
-Leave `400 px` horizontal canvas space between zones.
+Top-level documentation frames sit side-by-side from left to right.
 
-### Vertical placement
+```text
+First frame: x = 0, y = 0
+Next frame: previous.x + previous.width + 240
+All top-level documentation frames: y = 0
+```
 
-All zones begin at `y = 0`.
+Use `240 px` canvas separation between complete documentation frames.
 
-Do not stagger zones vertically. A designer should be able to pan horizontally and compare equivalent sections.
+Production masters may sit **below the documentation frame that describes them** with at least `240 px` vertical canvas separation. They are not wrapped in a decorative board.
 
-## Source-zone rules
+Private construction components may sit below production masters with at least `160 px` separation.
 
-For Foundation pages:
-- variables are the source of truth;
-- the Source zone visually documents primitive and semantic values;
-- examples may be components but must not be published as product components.
+## Documentation frame families
 
-For Component pages:
-- only publishable component sets and their private construction dependencies belong here;
-- published masters are placed first;
-- private helpers are placed below the masters and prefixed `_`.
+### A. Overview / palette / specimen frame
 
-## Matrix-zone rules
+Use when the page contains dense visual specimens such as palettes, icon sets, type scales, effects, or large component matrices.
 
-Matrices are instance-only.
+```text
+Width: 2848
+Layout: Vertical Auto Layout
+Background: white
+Corner radius: 0
+Clip content: false
+```
 
-Never place a detached instance in `20 — Matrices`.
+Structure:
 
-Every matrix has:
-1. matrix title;
-2. fixed-property caption;
-3. row labels;
-4. column labels;
-5. linked instances;
-6. optional token or measurement annotations.
+```text
+<Page name>
+├─ Design system header
+├─ Section
+└─ Design system footer
+```
 
-## QA-zone rules
+### B. Variable / specification table frame
 
-QA specimens intentionally stress the component:
-- longest plausible content;
-- shortest content;
-- missing optional content;
-- all modes;
-- 200% text where relevant;
-- keyboard focus;
-- localization expansion;
-- RTL where relevant;
-- dense surrounding surfaces;
-- contrast edge cases.
+Use for variable tables, token mappings, property tables, and detailed specification tables.
 
-## Internal page
+```text
+Width: 2528
+Layout: Vertical Auto Layout
+Background: white
+Corner radius: 0
+Clip content: false
+```
 
-`90 — INTERNAL` contains reusable documentation-only assets such as:
-- annotation arrows;
-- measurement labels;
-- token chips;
-- property tables;
-- state labels;
-- documentation header;
-- documentation footer;
-- Do / Don't frames.
+Structure:
 
-Names must begin with `_Doc /` or `_Spec /`.
+```text
+<Page name> variables
+├─ Design system header
+├─ Section
+├─ Design system footer
+└─ optional 12 px closing divider
+```
 
-No product designer should need to use these assets in product design.
+### C. Long-form notes frame
+
+Use only when a topic genuinely benefits from deeper guidance.
+
+```text
+Width: 1600
+Layout: Vertical Auto Layout
+Background: white
+Corner radius: 0
+Clip content: false
+```
+
+Structure:
+
+```text
+<Page name> notes
+├─ Design system header
+├─ Section
+└─ Design system footer
+```
+
+Long-form notes are optional. Keep them shorter than the full reference-style handbook: cover only decisions the user needs to apply the system correctly.
+
+## Masters and examples
+
+Published components and reusable assets remain real Figma components/styles/variables.
+
+Documentation examples must use instances of those assets whenever possible.
+
+Do not redraw a fake Button, Input, Badge, etc. only for documentation if a real component already exists.
+
+## Internal documentation assets
+
+`90 — INTERNAL` contains reusable documentation primitives only:
+
+```text
+_Doc / Header
+_Doc / Footer
+_Doc / Design note
+_Doc / Tag
+_Doc / Swatch
+_Doc / Table cell / Header
+_Doc / Table cell / Name
+_Doc / Table cell / Value
+_Doc / Table cell / Usage
+_Doc / Divider
+_Doc / Annotation
+_Doc / Image frame
+```
+
+These assets exist to keep every page visually consistent. They are not product components.
 
 ## Archive page
 
-`99 — ARCHIVE` contains retired components or superseded documentation during migration only.
+`99 — ARCHIVE` contains superseded masters/documentation during migration only.
 
 Nothing on this page is published.
 
+## Initiator-driven status
 
-## Initiator-driven page status
-
-Before page creation, resolve each page to:
+Before generation, resolve every supported page to:
 
 ```text
 KEEP
 AUDIT
-UPDATE
+IMPROVE
+REFACTOR
 REBUILD
+REPLACE
 BUILD
 SKIP
 ```
 
-Example:
-
-```text
-❖ FOUNDATIONS
-  ↳ Color                     KEEP
-  ↳ Typography                AUDIT
-  ↳ Spacing                   BUILD
-  ↳ Motion                    SKIP
-
-❖ COMPONENTS
-  ↳ Button                    REFACTOR
-  ↳ Text Input                BUILD
-  ↳ Toast                     BUILD
-```
-
-`SKIP` means no placeholder page is created.
+`SKIP` creates nothing.
 
 ## Start page generation manifest
 
-`00 — START` must include a frame named:
+`00 — START` contains a frame named `Generation manifest` recording:
 
-`Generation manifest`
-
-It records the confirmed initiator contract:
 - product;
 - brand status;
-- platforms;
+- supported platforms;
 - modes;
-- scope;
 - existing-system actions;
+- Foundations in scope;
+- Components in scope;
 - token architecture;
 - token naming preset;
 - output formats;
-- density/radius/elevation/icon decisions;
+- density;
+- radius direction;
+- elevation direction;
+- icon strategy;
 - documentation depth.
 
-This frame is the traceable source for why the generated library has its current shape.
+This manifest explains why the generated library has its current shape.
