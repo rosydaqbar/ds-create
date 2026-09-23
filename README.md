@@ -52,8 +52,11 @@ Do **not** substitute a different component taxonomy such as generic `Link`, `To
 6. Build Foundation pages in their observed page order.
 7. Build Base Component pages in their observed page order.
 8. Use the exact page-family specification file for every page being built.
-9. Validate page structure, matrix coverage, copy hierarchy, spacing, and component properties before completion.
+9. Generate visible notes/documentation for every Foundation and Base Component page.
+10. Validate page structure, matrix coverage, documentation completeness, copy hierarchy, spacing, and component properties before completion.
 
 ## Non-negotiable rule
 
 The generator must not invent a generic documentation board. It must produce **finished documentation canvases and component matrices** using the page grammar in this package.
+
+A page is not complete if it contains only tokens/components/specimens. **Visible notes/documentation are mandatory.** Documentation must explain the actual generated system, not generic design-system theory.
