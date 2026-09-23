@@ -102,7 +102,7 @@ Show:
 - supporting text variations.
 
 
-## Mandatory visible documentation region
+# Documentation
 
 The Figma page must visibly document:
 - when to use Toggle for an immediate binary setting versus Checkbox for form submission;
