@@ -2,7 +2,7 @@
 
 Dropdown menus group related actions inside a compact subview. Context menus expose secondary actions on context interaction without permanently occupying interface space.
 
-# 1. Page regions
+# 1. Figma Page regions
 
 ```text
 Private construction region
@@ -202,7 +202,7 @@ Context menu:
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - when to use Dropdown menu versus Context menu;
 - menu trigger/open-state relationship;
 - private list-item, inset-icon, header, footer, and account-item anatomy;
@@ -218,7 +218,7 @@ A menu matrix without visible usage/anatomy notes fails QA.
 
 # Documentation
 
-The Figma page must visibly document:
+The Figma Page must visibly document:
 - Dropdown menu versus Context menu use;
 - trigger/open-state relationship;
 - private list-item, inset-icon, header, footer, and account-item anatomy;
