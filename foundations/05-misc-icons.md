@@ -1,6 +1,6 @@
 # Misc Icons
 
-This page groups non-core icon assets into separate horizontal zones. Do not merge them into the main icon-library page.
+This Figma Page groups non-core icon assets into separate horizontal zones. Do not merge them into the main Icons Figma Page.
 
 # Required families
 
@@ -100,7 +100,7 @@ Use repeated ~the system-defined value header zones arranged horizontally. Each 
 
 # Documentation
 
-Every Misc Icons page must include a visible documentation region describing which asset families are actually in scope and why.
+Every Misc Icons Figma Page must include a visible documentation region describing which asset families are actually in scope and why.
 
 The notes must explain:
 - which families are included versus intentionally skipped;
