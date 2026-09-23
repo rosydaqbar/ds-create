@@ -184,6 +184,22 @@ The Figma page must visibly document:
 
 A header plus matrix is not sufficient documentation.
 
+
+## Mandatory visible documentation region
+
+The Figma page must visibly document:
+- when to use a Badge versus Tag, text label, or Button;
+- Badge anatomy: optional dot/icon → text → optional close;
+- Badge group anatomy and nested Badge reuse;
+- Size, Type, Color, icon/content, and removable behavior;
+- semantic color choice and why color/dot alone cannot carry status meaning;
+- concise-label guidance and long-label behavior;
+- close-action target and accessible naming;
+- do/don't examples for badges used as buttons, overlong copy, and decorative status colors;
+- central maintenance through the private close helper and semantic tokens.
+
+A matrix alone fails documentation QA.
+
 # 7. QA
 
 Fail QA when:
