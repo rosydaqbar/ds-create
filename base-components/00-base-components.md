@@ -28,6 +28,41 @@ Figma Page order:
 15. Tooltips
 16. Video players
 
+# 0. Component implementation mode is mandatory
+
+Before implementing any Base Component family, explicitly resolve how the user wants component execution to proceed.
+
+Ask:
+
+**How do you want to implement the Base Components?**
+
+- **YOLO everything** — implement all confirmed selected component families continuously.
+- **One by one** — implement one confirmed component family at a time and stop after its QA before continuing.
+
+Do not infer or silently default the mode. If the user already explicitly selected a mode in the current request, reuse it without asking again.
+
+## YOLO everything
+
+When YOLO is selected:
+- load `base-components/00-base-components.md` and every selected Page-specific Markdown specification before implementation;
+- implement all confirmed selected component families in the approved generation order;
+- do not stop for per-family confirmation;
+- run every family’s full specification and QA;
+- do not interpret YOLO as permission to simplify matrices, anatomy, documentation, states, examples, or accessibility requirements.
+
+## One by one
+
+When One by one is selected:
+- implement exactly one confirmed component family in the current iteration;
+- load the Page-specific Markdown specification for that active family before implementation;
+- build only the private helpers or dependencies required by that family;
+- run the family’s complete QA before considering it complete;
+- report the completed family and the remaining confirmed families;
+- stop after completion and ask which family to implement next, unless the user already explicitly named the next family in the same request;
+- do not prebuild unrelated selected families.
+
+The mode changes **execution pacing only**. Scope, fidelity, documentation completeness, token behavior, and QA requirements remain identical in both modes.
+
 # 1. Required region/family header
 
 Every public component-family region starts with a large documentation header containing:
