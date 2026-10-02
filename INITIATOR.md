@@ -265,14 +265,31 @@ Inputs
 
 The complete child-family inventory is defined by the corresponding Markdown specification.
 
-# 8. Token architecture
+# 8. Base Component implementation mode
+
+If any Base Component Figma Page or component family is selected, explicitly ask:
+
+**How do you want to implement the Base Components?**
+
+- **YOLO everything** — implement every confirmed selected component family continuously without stopping for per-family approval.
+- **One by one** — implement exactly one confirmed component family at a time, run that family’s required QA, report what is complete and what remains, then stop for the user to choose or confirm the next family.
+
+Rules:
+- do not infer the mode from build strategy, project size, or phrases such as “complete the design system”;
+- do not silently default to YOLO;
+- if the user already explicitly chose YOLO or one-by-one in the current request, reuse that choice and do not ask again;
+- implementation mode controls execution pacing only; it does not reduce specification loading, anatomy fidelity, documentation depth, matrix completeness, or QA;
+- in **One by one**, do not prebuild unrelated selected families; required private helpers for the active family may be built as dependencies;
+- in **YOLO everything**, every selected family still follows its complete Markdown specification and QA before the run is considered complete.
+
+# 9. Token architecture
 
 - Primitive → Semantic
 - Primitive → Semantic → Component
 - Match existing
 - Custom
 
-# 9. Collection naming
+# 10. Collection naming
 
 For new systems, collection names use the canonical domain grammar from `SYSTEM.md`.
 
@@ -302,7 +319,7 @@ Do not expose architectural prefixes such as `Ref`, `Sys`, or `Comp` as the defa
 
 Product-specific concepts remain groups inside the relevant collection unless the user explicitly defines a separate collection architecture.
 
-# 10. Token naming preset
+# 11. Token naming preset
 
 - Keep existing naming
 - Atlassian-style semantic naming
@@ -314,7 +331,7 @@ Product-specific concepts remain groups inside the relevant collection unless th
 
 If the user supplies an existing library, default to `Keep existing naming`.
 
-# 11. Documentation depth
+# 12. Documentation depth
 
 The **top-level composition on the Figma Page canvas is fixed**. This selector only controls optional explanatory depth.
 
@@ -328,7 +345,7 @@ Selectable extras:
 
 Do not remove required region/header Instances, Design notes, variable Usage columns, or component matrices.
 
-# 12. Confirmation summary
+# 13. Confirmation summary
 
 Before generation, present:
 - product/brand summary;
@@ -336,6 +353,7 @@ Before generation, present:
 - existing-page actions;
 - selected Foundation Figma Pages/Frames/regions;
 - selected Base Component Figma Pages/families;
+- Base Component implementation mode: YOLO everything or One by one;
 - token architecture;
 - collection naming action;
 - token naming preset;
@@ -405,7 +423,28 @@ Only after mandatory specifications are loaded:
 - map existing content to the exact Page hierarchy;
 - map each selected Figma Page to its loaded Markdown specification.
 
-# 3. Figma Page actions
+# 3. Base Component implementation mode
+
+Before implementing any selected Base Component family, the implementation mode must be resolved.
+
+## YOLO everything
+- load every required Base Component specification first;
+- implement every confirmed selected component family continuously in the approved generation order;
+- do not pause for per-family confirmation;
+- run the complete family-specific QA for each family;
+- do not treat continuous execution as permission to skip documentation, matrices, states, anatomy, or QA.
+
+## One by one
+- load the folder-level Base Component specification and the Page-specific specification required for the active family before implementation;
+- implement exactly one confirmed component family;
+- include only private helpers/dependencies required by that active family;
+- run the complete QA required for that family;
+- report the completed family and the remaining confirmed families;
+- stop after that family and ask the user which family to implement next, unless the user already named the next family in the same request.
+
+Do not infer or default this mode. If the user has not explicitly chosen one, ask before component implementation begins.
+
+# 4. Figma Page actions
 
 ## Keep
 Retain the Page, public API, and approved content.
@@ -431,7 +470,7 @@ Create the missing Page/family from its complete loaded specification.
 ## Skip
 Create nothing. Never infer Skip merely because an item was not mentioned in the latest prompt.
 
-# 4. Collection naming
+# 5. Collection naming
 
 Before generating variables:
 1. inspect existing collection names;
@@ -441,19 +480,20 @@ Before generating variables:
 5. apply all variable requirements in `guidance/02-variables.md` when Variables are in scope;
 6. keep product-specific concepts inside the appropriate domain unless a separate collection is explicitly required.
 
-# 5. Generation order
+# 6. Generation order
 
 ```text
 1. Load all mandatory specifications
 2. Getting started / Variables
 3. Foundations using foundations/00-foundations.md + selected Foundation specs
-4. Base Components using base-components/00-base-components.md + selected Base Component specs
-5. Notes & Documentation, examples, diagrams, matrices, and QA required by each loaded spec
+4. Resolve Base Component implementation mode when Base Components are in scope
+5. Base Components using base-components/00-base-components.md + selected Base Component specs, paced according to the confirmed implementation mode
+6. Notes & Documentation, examples, diagrams, matrices, and QA required by each loaded spec
 ```
 
 Do not substitute a different component taxonomy.
 
-# 6. Build completeness
+# 7. Build completeness
 
 Build the completeness checklist from the **loaded specifications**, not from root summaries.
 
@@ -472,9 +512,10 @@ For every selected Page capture:
 
 Resolve every item to Keep / Audit / Improve / Refactor / Rebuild / Replace / Build / Skip.
 
-# 7. Validation
+# 8. Validation
 
 Validation fails immediately if:
+- Base Component implementation began without an explicit YOLO everything or One by one choice;
 - any required folder-level specification was not loaded;
 - any selected Page specification was not loaded;
 - generation relied only on root files;
@@ -491,9 +532,10 @@ Then run:
 3. Base Component-family validation from `base-components/00-base-components.md` when applicable;
 4. complete QA from every selected Page-specific specification.
 
-# 8. Completion rule
+# 9. Completion rule
 
 Do not mark generation complete until:
+- Base Component implementation mode is resolved whenever Base Components are in scope;
 - every required spec is confirmed loaded;
 - every checklist item is resolved;
 - every applicable global, family-level, and Page-specific QA rule passes.
