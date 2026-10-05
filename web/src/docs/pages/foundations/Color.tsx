@@ -348,7 +348,7 @@ function StatusRows() {
 /* ---------- role samples (Light and Dark side by side) ---------- */
 const STATUS_SAMPLES = [
   { tone: 'danger', icon: 'alerts/x-circle', text: 'Upload failed for 2 files' },
-  { tone: 'warning', icon: 'alerts/alert-triangle', text: 'Storage is 90% full' },
+  { tone: 'warning', icon: 'alerts/alert-triangle', text: 'Your plan is 90% used' },
   { tone: 'success', icon: 'alerts/check-circle', text: 'All changes are saved' },
   { tone: 'info', icon: 'alerts/info-circle', text: 'A new version is ready' },
 ] as const;
@@ -1126,7 +1126,7 @@ function NeutralCard() {
   return (
     <div className="flex flex-col gap-lg rounded-surface border border-border-subtle bg-surface-raised p-xl shadow-raised">
       <div className="flex flex-col gap-xxs">
-        <span className="type-heading-xs-semibold text-text-primary">Shared folder</span>
+        <span className="type-heading-xs-semibold text-text-primary">Shared project</span>
         <span className="type-body-sm-regular text-text-secondary">Everyone with the link can view.</span>
       </div>
       <Divider decorative />

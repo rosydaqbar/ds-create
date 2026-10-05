@@ -7,7 +7,7 @@ Parts are the smallest interactive or display units of the system: a button, a c
 - examples in use built from real instances;
 - every note, diagram, example and guideline required by the Part's Markdown file.
 
-Components (small groups of Parts that work as one unit, such as a labelled checkbox or a text field with label and hint) live in `components/`. Sections (larger sections with their own layout and behaviour) live in `sections/`. Both use the same component page template and the same rules as this file, plus a *Composition* block at the top of Anatomy.
+Components (small groups of Parts that work as one unit, such as a labeled checkbox or a text field with label and hint) live in `components/`. Sections (larger sections with their own layout and behavior) live in `sections/`. Both use the same component page template and the same rules as this file, plus a *Composition* block at the top of Anatomy.
 
 # 1. Part list and order
 
@@ -70,7 +70,7 @@ When One by one is selected:
 - stop after completion and ask which page to implement next, unless the user already explicitly named the next page in the same request;
 - do not prebuild unrelated selected pages.
 
-The mode changes **execution pacing only**. Scope, fidelity, documentation completeness, token behaviour and QA requirements stay identical in both modes.
+The mode changes **execution pacing only**. Scope, fidelity, documentation completeness, token behavior and QA requirements stay identical in both modes.
 
 # 3. Dependencies between Parts
 
@@ -151,7 +151,7 @@ Family header
 The supporting description must explain:
 - what the component is;
 - when it is useful;
-- any important behaviour or content constraint.
+- any important behavior or content constraint.
 
 Do not replace this with generic copy such as "Used in interfaces."
 
@@ -191,7 +191,7 @@ Minimum anatomy documentation:
 
 ```text
 Component
-├─ root layout behaviour
+├─ root layout behavior
 ├─ primary child frame(s)
 ├─ optional slots
 ├─ text/content wrapper
@@ -233,13 +233,13 @@ Part documentation contains, where relevant:
 1. page and set definition (family header);
 2. private-part explanation;
 3. anatomy;
-4. size behaviour;
+4. size behavior;
 5. property model;
-6. state behaviour;
+6. state behavior;
 7. composition rules;
 8. content rules;
 9. optical and alignment rules;
-10. tone rules (brand, danger, status colours);
+10. tone rules (brand, danger, status colors);
 11. examples in use;
 12. page-specific notes;
 13. accessibility and interaction guidance;
@@ -259,13 +259,13 @@ Keep:
 - relative gaps;
 - hierarchy;
 - sizing relationships;
-- matrix organisation.
+- matrix organization.
 
 Allow:
 - wider content;
 - longer labels;
 - larger brand typography;
-- extra colour modes;
+- extra color modes;
 - content-driven height growth.
 
 Do not hard-code a top-level frame to one absolute size when its content needs to grow.

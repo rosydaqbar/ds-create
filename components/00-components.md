@@ -10,7 +10,7 @@ Components are not built during Initiate unless the user selects them. They are 
 ── 3 · Components ──
 3.1 Button group       connected actions or a compact view switcher
 3.2 Text field         Label + Text control + Help text, plus textarea and code fields
-3.3 Choice field       labelled checkbox, radio and switch; choice cards and groups
+3.3 Choice field       labeled checkbox, radio and switch; choice cards and groups
 3.4 Avatar group       overlapping avatar stacks and avatar + name rows
 3.5 Select             select and multi-select fields with their option list
 3.6 Menu               dropdown and context menus with their item rows
@@ -97,7 +97,7 @@ The **· Component** frame shows the full matrix of every published set. A Compo
 ## Documentation density
 
 Each Component file specifies, where relevant:
-1. purpose and when to use it versus the neighbouring components;
+1. purpose and when to use it versus the neighboring components;
 2. the template frames and what goes in each;
 3. published sets and private parts;
 4. the Composition block;
@@ -105,7 +105,7 @@ Each Component file specifies, where relevant:
 6. anatomy tree with Auto Layout relationships;
 7. which children fill and which stay fixed;
 8. sizes and measurements per size;
-9. state behaviour;
+9. state behavior;
 10. matrix layout;
 11. token map;
 12. guidelines: usage, do / don't, content, accessibility, composition;

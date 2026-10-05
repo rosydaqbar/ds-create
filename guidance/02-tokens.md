@@ -2,7 +2,7 @@
 
 The Tokens page explains the token architecture of this system: which collections exist and what they hold, how every token is named, how modes work, and the primitive palette underneath it all. It documents the collections that actually exist in this file, with their real names. The values themselves are documented on the foundation pages (`1.1`–`1.6`); this page explains the structure.
 
-# Template frames
+# 1. Template frames
 
 This page is built with `templates/structure.md`; the frames and what they hold are below.
 
@@ -20,7 +20,7 @@ Every frame has `Doc/Header` (breadcrumb `Guidance › 02 Tokens`) and `Doc/Foot
 
 Every topic keeps its visual. Visuals are built from this file's own variables, collections and components; diagrams are real frames with cards and connectors, not paragraph text arranged to look like a diagram.
 
-# 02 Tokens · Collections
+# 2. 02 Tokens · Collections
 
 ## 1. What the token system is for
 
@@ -101,7 +101,7 @@ Add a variable to the domain collection it belongs to, with a name that follows 
 
 **Visual: where it goes.** Three new needs (a chart color, a sidebar width, a dialog radius) each with an arrow to its collection and its final name (`color/category/teal/solid`, `size/width/xs`, `radius/modal`).
 
-# 02 Tokens · Naming
+# 3. 02 Tokens · Naming
 
 ## 1. The grammar
 
@@ -176,7 +176,7 @@ Every semantic variable has a description stating its concrete UI purpose, for e
 
 **Visual: description in use.** A picker hover showing a variable's description, and the same text in the Usage column of its table.
 
-# 02 Tokens · Modes
+# 4. 02 Tokens · Modes
 
 ## 1. Color modes
 
@@ -256,7 +256,7 @@ Every mode is tested on its own: a pair that passes in `Light` can fail in `Dark
 
 **Visual: per-mode contrast.** Three text/surface pairs with their ratios in `Light` and `Dark`, one of them passing in one mode and failing in the other, with the fix shown.
 
-# 02 Tokens · Primitive palette
+# 5. 02 Tokens · Primitive palette
 
 ## 1. What primitives are
 
@@ -288,7 +288,7 @@ Solid neutrals let you choose their hue and saturation on purpose. A neutral fam
 
 The alpha scales (`palette/alpha-black/*`, `palette/alpha-white/*`) hold black and white at fixed opacities: 5, 10, 20, 30, 40, 50, 60, 70, 80 and 90. Use them for the scrim (`color/overlay/scrim`), shadow colors (`color/shadow/*`), and hover tints on images or media. To add a shade, add a step to the scale and alias it from a semantic role; never type an opacity on a layer.
 
-**Visual: alpha in use.** The alpha-black scale on a light surface and the alpha-white scale on a dark surface, then three uses: a dialog scrim, a shadow color and a hover tint over an image, each labelled with its role and primitive.
+**Visual: alpha in use.** The alpha-black scale on a light surface and the alpha-white scale on a dark surface, then three uses: a dialog scrim, a shadow color and a hover tint over an image, each labeled with its role and primitive.
 
 ## 5. Changing primitives
 
@@ -296,7 +296,7 @@ Change a primitive only to change the brand. After any change, review the roles 
 
 **Visual: change impact.** `palette/brand/600` edited, its Used-by roles highlighted, and three components that use those roles shown before and after.
 
-# QA
+# 6. QA
 
 - All four frames exist with their exact names, in order.
 - Only collections that exist in this file are shown, with their real names, variable counts and modes.

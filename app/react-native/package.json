@@ -1,0 +1,69 @@
+{
+  "name": "@your-org/design-system-native",
+  "version": "0.1.0",
+  "private": false,
+  "description": "React Native components, tokens and showcase app generated from the Figma design system.",
+  "license": "UNLICENSED",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "react-native": "src/index.ts",
+  "files": [
+    "src",
+    "!src/showcase",
+    "!**/__tests__"
+  ],
+  "scripts": {
+    "tokens": "node scripts/build-app-tokens.mjs --platform rn --in tokens/figma-variables.json --out src/tokens",
+    "contrast": "node scripts/check-contrast.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "jest",
+    "qa": "npm run contrast && npm run typecheck && npm run lint && npm run test",
+    "start": "react-native start",
+    "ios": "react-native run-ios",
+    "android": "react-native run-android"
+  },
+  "dependencies": {
+    "lucide-react-native": "^0.525.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0",
+    "react-native": ">=0.76.0",
+    "react-native-svg": ">=15.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@react-native-community/cli": "^19.0.0",
+    "@react-native/babel-preset": "^0.81.0",
+    "@react-native/eslint-config": "^0.81.0",
+    "@react-native/metro-config": "^0.81.0",
+    "@react-native/typescript-config": "^0.81.0",
+    "@react-navigation/native": "^7.1.0",
+    "@react-navigation/native-stack": "^7.3.0",
+    "@testing-library/react-native": "^13.2.0",
+    "@types/jest": "^29.5.0",
+    "@types/react": "^19.1.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "react": "19.1.0",
+    "react-native": "^0.81.0",
+    "react-native-safe-area-context": "^5.4.0",
+    "react-native-screens": "^4.11.0",
+    "react-native-svg": "^15.12.0",
+    "react-test-renderer": "19.1.0",
+    "typescript": "^5.8.0"
+  },
+  "jest": {
+    "preset": "react-native",
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|@react-navigation|lucide-react-native|react-native-svg)/)"
+    ]
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": "@react-native"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

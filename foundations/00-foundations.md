@@ -1,8 +1,8 @@
-# 1 Foundations
+# Foundations
 
 Foundations are the tokens, styles and assets every component uses. They are built before any Part, and every component page binds to them instead of typing its own values.
 
-# Pages
+# 1. Pages
 
 Foundation pages sit under the `── 1 · Foundations ──` separator, in this exact order:
 
@@ -24,7 +24,7 @@ Rules:
 - Do not add other foundation pages unless the user asks. A new foundation takes the next free ID (`1.9`).
 - Each collection, style group and asset family is owned by exactly one page. Other pages show it only by reference (an instance, a swatch bound to the variable, a link), never as a second copy.
 
-# Foundation page template
+# 2. Foundation page template
 
 Every foundation page is built with `templates/structure.md` and uses these frames, left to right, top-aligned, separated by `doc/space/canvas`:
 
@@ -82,7 +82,7 @@ The reading frame (Part B §7): `doc/measure/frame` wide, a rich-text column at 
 - Visual examples are built from the generated system's own components, tokens, styles and copy: comparisons, anatomy diagrams, workflow and propagation examples, measurement overlays, specimens. Never paste screenshots from another file.
 - A topic whose visual example is listed as required is not done until the visual exists.
 
-# Shared rules
+# 3. Shared rules
 
 ## Values come from the brand
 

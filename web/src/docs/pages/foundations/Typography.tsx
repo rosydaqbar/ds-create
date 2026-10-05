@@ -300,7 +300,7 @@ const textLine = (level: string, t: TokenTextStyle | undefined, text: string, co
 const CODE_SM = pick('type/code/sm/regular') ?? firstOfRole('code');
 const HIERARCHY: Line[] = [
   textLine('Display', pick('type/display/sm/semibold'), 'Your work, all in one place', 'text-text-primary'),
-  textLine('Heading', pick('type/heading/md/semibold'), 'Shared folders and team access', 'text-text-primary'),
+  textLine('Heading', pick('type/heading/md/semibold'), 'Projects and team access', 'text-text-primary'),
   textLine('Body', BODY, 'Changes save in the background while you work, and large uploads continue in parts, so a dropped connection never restarts the transfer.', 'text-text-secondary'),
   {
     level: 'Labels and controls',
@@ -534,7 +534,7 @@ type ReadingLine = { level: string; t: TokenTextStyle; text: string; color: stri
 const READING: ReadingLine[] = (
   [
     ['Display', pick('type/display/md/semibold', 'type/display/sm/semibold'), 'Your work, all in one place', 'text-text-primary'],
-    ['Heading', pick('type/heading/lg/semibold', 'type/heading/md/semibold'), 'Shared folders and team access', 'text-text-primary'],
+    ['Heading', pick('type/heading/lg/semibold', 'type/heading/md/semibold'), 'Projects and team access', 'text-text-primary'],
     ['Body', BODY, SENTENCE, 'text-text-secondary'],
     ['Labels and controls', pick('type/body/sm/medium'), 'Folder name · Visibility · Members', 'text-text-secondary'],
     ['Supporting', pick('type/body/xs/regular', 'type/body/sm/regular'), 'Last updated 2 minutes ago. Versions are kept for 30 days.', 'text-text-tertiary'],
@@ -831,8 +831,8 @@ function GuidelinesTab() {
         caption: 'Inside a card, a heading style and a body style are enough.',
         render: () => (
           <div className="flex flex-col gap-xxs rounded-surface border border-border-subtle bg-surface-base p-lg">
-            <span className="type-heading-xs-semibold text-text-primary">Storage</span>
-            <span className="type-body-sm-regular text-text-secondary">68 GB of 100 GB used</span>
+            <span className="type-heading-xs-semibold text-text-primary">Seats</span>
+            <span className="type-body-sm-regular text-text-secondary">68 of 100 seats used</span>
           </div>
         ),
       },
@@ -840,8 +840,8 @@ function GuidelinesTab() {
         caption: `Don’t reach for a ${BIG_LABEL.toLowerCase()} size to make a card title stand out.`,
         render: () => (
           <div className="flex flex-col gap-xxs rounded-surface border border-border-subtle bg-surface-base p-lg">
-            <span className={cn(BIG_BOLD?.className, 'text-text-primary')}>Storage</span>
-            <span className="type-body-sm-regular text-text-secondary">68 GB of 100 GB used</span>
+            <span className={cn(BIG_BOLD?.className, 'text-text-primary')}>Seats</span>
+            <span className="type-body-sm-regular text-text-secondary">68 of 100 seats used</span>
           </div>
         ),
       },

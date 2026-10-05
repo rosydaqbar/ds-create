@@ -352,7 +352,7 @@ const { mounted, closing } = usePresence(open);
 }
 
 /* ---------- Guidelines ---------- */
-const FILES = ['Q3 report.pdf', 'Team photos', 'Backups 2026', 'Design files'];
+const FILES = ['Q3 report.pdf', 'Team photos', 'Budget 2026', 'Design files'];
 
 function RowList({ animated, removed }: { animated: boolean; removed: boolean }) {
   return (

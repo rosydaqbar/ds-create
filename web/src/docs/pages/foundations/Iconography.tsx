@@ -420,13 +420,13 @@ const TOPICS: Topic[] = [
             <Icon name="files/folder" size="md" className="text-icon-secondary" /> Design files
           </span>
           <span className="flex items-center gap-sm type-body-sm-regular text-text-primary">
-            Backups 2026 <Icon name="security/lock" size="sm" label="Encrypted" className="text-icon-tertiary" />
+            Q4 budget <Icon name="security/lock" size="sm" label="Private" className="text-icon-tertiary" />
           </span>
         </div>
         <CodeBlock
           label="Icon accessible names"
           code={`<Icon name="files/folder" />                         // decorative: the text says it
-<Icon name="security/lock" label="Encrypted" />       // meaningful: needs a name
+<Icon name="security/lock" label="Private" />         // meaningful: needs a name
 <IconButton icon="general/x" label="Close" />         // icon buttons always have one`}
         />
       </div>
@@ -492,7 +492,7 @@ const TOPICS: Topic[] = [
           <Icon name="time/clock" size="sm" className="text-icon-secondary" /> Updated 2 min ago · body sm + icon sm
         </span>
         <span className="flex items-center gap-sm type-body-md-regular text-text-primary">
-          <Icon name="general/cloud" size="md" className="text-icon-secondary" /> 1.2 TB used · body md + icon md
+          <Icon name="users/users" size="md" className="text-icon-secondary" /> 12 members · body md + icon md
         </span>
       </div>
     ),
@@ -531,7 +531,7 @@ const TOPICS: Topic[] = [
       render: () => (
         <span className="flex flex-col gap-sm">
           <span className="flex items-center gap-sm type-body-sm-regular text-text-primary">
-            <Icon name="alerts/check-circle" size="md" className="text-icon-success" /> Backup complete
+            <Icon name="alerts/check-circle" size="md" className="text-icon-success" /> Export complete
           </span>
           <span className="flex items-center gap-sm type-body-sm-regular text-text-primary">
             <Icon name="alerts/alert-triangle" size="md" className="text-icon-warning" /> 2 files skipped

@@ -1,6 +1,6 @@
 # Sections
 
-Sections are larger blocks of an interface with their own layout and behaviour: an editor with its toolbar, a video player with its controls. They combine Components, Parts and private parts into one working region. Each Section page is a **complete component canvas**, built with the same page template as Parts and Components, plus the Composition block, plus examples in use that show the Section inside a realistic screen area.
+Sections are larger blocks of an interface with their own layout and behavior: an editor with its toolbar, a video player with its controls. They combine Components, Parts and private parts into one working region. Each Section page is a **complete component canvas**, built with the same page template as Parts and Components, plus the Composition block, plus examples in use that show the Section inside a realistic screen area.
 
 Sections are not built during Initiate unless the user selects them. They are added later when the user selects them in the questionnaire (`INITIATOR.md`) or when `EXTEND.md` adds them.
 
@@ -40,9 +40,9 @@ Every Section page is built with `templates/structure.md` and uses the component
 └─ {ID} {Name} · Guidelines   usage, do / don't, content, accessibility, composition
 ```
 
-The **Composition block** at the top of `· Anatomy` works as for Components (`components/00-components.md` §3): real instances of every Component, Part and private part the Section uses, each labelled with its page ID and the properties the Section sets.
+The **Composition block** at the top of `· Anatomy` works as for Components (`components/00-components.md` §3): real instances of every Component, Part and private part the Section uses, each labeled with its page ID and the properties the Section sets.
 
-**Examples in use** in `· Overview` are compositions, not new components. They place the Section in the part of a screen where it lives (a comment box under a post, a player inside a course page) so designers see its proportions and neighbours.
+**Examples in use** in `· Overview` are compositions, not new components. They place the Section in the part of a screen where it lives (a comment box under a post, a player inside a course page) so designers see its proportions and neighbors.
 
 # 4. Rules for every Section
 
@@ -51,7 +51,7 @@ The **Composition block** at the top of `· Anatomy` works as for Components (`c
 - **Regions keep their own layout.** The Section's file names which region fills and which stays fixed, and what overlays rather than adds height.
 - **Sizes propagate.** The Section's `Size` sets the size of every instance inside it, through the mapping its file lists.
 - **Matrices are complete.** Every published set and every private part shows its full matrix in `· Component` or `.Main`.
-- **Documentation density.** The same list as Components (`components/00-components.md` §4), plus: regions and their behaviour, at least one example in use, and the interaction model (keyboard, focus, what happens on resize).
+- **Documentation density.** The same list as Components (`components/00-components.md` §4), plus: regions and their behavior, at least one example in use, and the interaction model (keyboard, focus, what happens on resize).
 
 # 5. Implementation mode
 

@@ -2,7 +2,7 @@
 
 The Getting started page is the first thing a designer opens. It explains what the system contains, how the file is organized, how to set it up, and how to work with components and variables. It is built for every Initiate run and is never reduced to one short setup frame.
 
-# Template frames
+# 1. Template frames
 
 This page is built with `templates/structure.md`; the frames and what they hold are below.
 
@@ -24,7 +24,7 @@ Every frame is a reading frame (`SYSTEM.md` Part B §7):
 
 Topics follow the order below. Every topic keeps its visual example; do not merge topics into one card or a short FAQ.
 
-# 01 Getting started · Overview
+# 2. 01 Getting started · Overview
 
 ## 1. Welcome
 
@@ -67,7 +67,7 @@ The steps a designer needs before using the system:
 
 **Visual: setup steps.** Recreated editor views of each step, built with this file's own names: the font list, the library toggle with this file's name, the update dialog, the mode switch on a frame, and the property panel of a `Button` instance.
 
-# 01 Getting started · How the file works
+# 3. 01 Getting started · How the file works
 
 ## 1. The page tree
 
@@ -92,7 +92,7 @@ Every foundation page has `.Main` → `· Overview` → `· Tokens` → `· Guid
 - `· Anatomy`: how it is built: parts, properties, sizes, states, tokens.
 - `· Guidelines`: when and how to use it, do and don't, content, accessibility.
 
-**Visual: page template.** A miniature of `2.1 Button` with its five frames labelled, and of `1.1 Color` with its four.
+**Visual: page template.** A miniature of `2.1 Button` with its five frames labeled, and of `1.1 Color` with its four.
 
 ## 3. Components and properties
 
@@ -103,13 +103,13 @@ Each component is one set with a small, fixed set of properties, named the same 
 
 Grouping variants this way keeps the library small: one `Button` set covers every size, emphasis, tone and state, instead of separate components for each. Danger is a `Tone`, not a separate component.
 
-**Visual: one set, many uses.** The `Button` property panel next to four instances made from it (primary brand, secondary neutral, ghost, primary danger), each labelled with its property values.
+**Visual: one set, many uses.** The `Button` property panel next to four instances made from it (primary brand, secondary neutral, ghost, primary danger), each labeled with its property values.
 
 ## 4. Auto Layout
 
 Every component is built with Auto Layout, so it resizes with its content like a flexbox in code: a longer label widens the button, a hidden icon closes its gap, a field fills its container. Padding and gaps are bound to `space/*` variables.
 
-**Visual: responsive component.** One `Button` with a short and a long label, with and without its icon, and one `Text field` stretched across two widths, with its Auto Layout settings (direction, padding, gap, resizing) labelled.
+**Visual: responsive component.** One `Button` with a short and a long label, with and without its icon, and one `Text field` stretched across two widths, with its Auto Layout settings (direction, padding, gap, resizing) labeled.
 
 ## 5. One library or several
 
@@ -123,7 +123,7 @@ Before splitting:
 
 **Visual: library split.** A diagram of one library becoming two (core: foundations and Parts; product: Components and Sections), with the dependency arrow pointing one way only.
 
-# 01 Getting started · Working with variables
+# 4. 01 Getting started · Working with variables
 
 ## 1. What variables are
 
@@ -169,7 +169,7 @@ Variables are not mandatory. If an existing system works well with styles and th
 
 Links: `02 Tokens` for collections, naming, modes and the primitive palette.
 
-# QA
+# 5. QA
 
 - All three frames exist with their exact names and every topic above, in order.
 - Every color shown is a swatch bound to its variable; no text-only color card.

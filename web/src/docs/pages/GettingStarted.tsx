@@ -1068,14 +1068,14 @@ function ForDevelopers() {
         </P>
         <CodeBlock
           code={`<div className="rounded-surface bg-surface-raised p-xl shadow-raised">
-  <h2 className="type-heading-sm-semibold text-text-primary">Storage</h2>
-  <p className="type-body-sm-regular text-text-tertiary">1.2 TB of 2 TB used</p>
+  <h2 className="type-heading-sm-semibold text-text-primary">Seats</h2>
+  <p className="type-body-sm-regular text-text-tertiary">8 of 10 seats used</p>
 </div>`}
         />
         <P>Outside Tailwind, use the CSS variables directly.</P>
         <CodeBlock
           lang="css"
-          code={`.storage-card {
+          code={`.usage-card {
   color: var(--color-text-primary);
   padding: var(--space-md);
 }`}

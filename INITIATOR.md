@@ -282,7 +282,7 @@ The complete set and private-part inventory of every page is defined by its Mark
 
 # 8. Component implementation mode
 
-If any Part, Component or Section is selected, explicitly ask:
+If any Part, Component or Section is selected, explicitly ask (the same choice applies later to Layouts and Screens added through `EXTEND.md`):
 
 **How do you want to implement the components?**
 
@@ -317,7 +317,7 @@ Default for an existing library: `Keep existing naming`.
 
 Never rename silently during Keep, Audit or Improve. Product-specific concepts remain groups inside the relevant collection; they never become their own collection.
 
-# 10. Output formats
+# 10. Output formats and implementation targets
 
 **Multi-select** (Figma Variables are always produced):
 - CSS custom properties
@@ -330,11 +330,19 @@ Never rename silently during Keep, Audit or Improve. Product-specific concepts r
 
 Every format is an export of the same names (`SYSTEM.md` Part C §5).
 
-**Web implementation** (single choice):
-- **Yes** — also build the system for the web: a Tailwind-ready React library and an explorer site where people browse every foundation and component, try their properties and copy the code. It follows `WEB.md`, starting from the brand-agnostic template in `web/`, and produces CSS custom properties, the Tailwind theme, DTCG JSON and TypeScript token data from the Figma variables.
-- **Not now** — Figma only. The web implementation can be added later with `WEB.md`.
+**Implementation targets** (single choice; always ask, never infer from the platforms answer in §1):
+- **Figma only** — the design system in Figma. Code can be added later with `WEB.md` or `APP.md`.
+- **Web** — also a Tailwind-ready React library, an installable package and a documentation site where people browse every foundation and component, try their properties and copy the code. Follows `WEB.md`, starting from the template in `web/`.
+- **App** — also a native app library with a showcase app. Follows `APP.md`, starting from the template in `app/`.
+- **Web and App** — both. They share one token export and one changelog; the web is built first, then the app.
 
-When Yes, also ask where the web project should be created (default: a `{system-name}-web` folder next to the user's working folder). The component implementation mode (§8) applies to the web pages too.
+Suggest the default from §1 Platforms (web platforms → Web, iOS or Android → App, both → Web and App), but let the user choose.
+
+**App framework** (when App or Web and App; single choice):
+- **React Native** — one TypeScript codebase for iOS and Android (`app/react-native/`).
+- **Native** — SwiftUI for iOS (`app/swiftui/`) and/or Jetpack Compose for Android (`app/compose/`). Ask which: iOS, Android, or both.
+
+Projects are created in `output/{system-slug}/` (`web/`, `native/`, `ios/`, `android/`; README §5). Confirm the system slug with the user; don't ask for a location per target. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to web and app pages too. The output formats above that a target produces (CSS, Tailwind and DTCG for the web; Android and iOS for the app) are selected automatically.
 
 # 11. Documentation depth
 
@@ -362,6 +370,7 @@ Before generation, present:
 - component implementation mode: YOLO everything or One by one;
 - naming: fixed contract (new) or Keep / Normalize (existing);
 - output formats;
+- implementation targets (Figma only, Web, App, or Web and App), the app framework (React Native, or SwiftUI and/or Compose) and the system slug for `output/{system-slug}/`;
 - optional documentation depth.
 
 Final actions:
@@ -398,8 +407,32 @@ Then:
 - Any Component selected → load `components/00-components.md` **and every selected Component page file**, plus `parts/00-parts.md` and the file of every Part it contains
 - Any Section selected → load `sections/00-sections.md` **and every selected Section page file**, plus the folder and page files of every Component and Part it contains
 - Web implementation selected → load `WEB.md`, and for every page implemented on the web, the same page file used for its Figma page
+- App implementation selected → load `APP.md`, and for every page implemented in the app, the same page file used for its Figma page
 
 The exact page → file mapping is in `README.md`.
+
+## Loading per step
+
+The full specification is large (several hundred KB). Loading every page file at the start of a long run fills the context, and when it is compacted, page rules get lost. So:
+- load the global set (`README.md`, `SYSTEM.md`, `INITIATOR.md`, `templates/structure.md`) once at the start, and again after any context compaction or new session;
+- load each folder file and page file at the generation step that builds that page (§6), not all at once. A page is built only after its own file and the files of the components it contains are loaded in the current context;
+- after a page passes QA, its file can drop out of context; the ledger keeps what matters.
+
+## Progress ledger
+
+Keep a ledger on disk at `output/{system-slug}/ds-create-ledger.json` (README §5), even for a Figma-only build. Write it after the questionnaire and update it after every page:
+
+```text
+scope            the confirmed summary (Part A §12): pages, mode, formats, web
+step             current generation step (§6) and page
+pages[]          id, name, status (todo, building, qa, done), Figma page id, published sets with ids and variant counts, audit result (fail, warn), open issues
+tokens           collections and variable counts; last check-contrast / audit result
+web              per page: implemented, qa result
+app              per framework and page: implemented, qa result
+decisions        anything the user decided during the run (with the date)
+```
+
+At the start of every step, and after any compaction, re-read the ledger and the global set before touching Figma. Never rebuild a page the ledger marks `done` unless the user asks; never mark a page `done` before its QA and `tools/figma-audit.js` pass.
 
 **Root-only implementation is forbidden.**
 
@@ -463,7 +496,7 @@ Compare against its complete loaded page file without changing anything unless t
 Preserve identity and public API; fill missing approved requirements from the complete loaded file.
 
 ## Refactor
-Preserve behaviour and public meaning; private anatomy may change only where its file permits.
+Preserve behavior and public meaning; private anatomy may change only where its file permits.
 
 ## Rebuild
 Reconstruct from the complete loaded page file while migrating approved brand values and assets.
@@ -497,10 +530,11 @@ Before generating variables and components:
 6. Parts in ID order, dependencies first (parts/00-parts.md + each page file)
 7. Selected Components in ID order (components/00-components.md + each page file)
 8. Selected Sections in ID order (sections/00-sections.md + each page file)
-9. Documentation, examples, diagrams, matrices and QA required by each loaded file
+9. Documentation, examples, diagrams, matrices and QA required by each loaded file, then `tools/figma-audit.js` on every built page and once on the file (`fail` must be 0)
 10. Web implementation, when selected: WEB.md W1–W8 (template copy, token export with the contrast gate, brand assets, components in page order, foundation and guidance pages, docs data, build with package and QA, publish)
+11. App implementation, when selected: APP.md A1–A8 for each chosen framework (template copy and first compile, tokens with the contrast gate, brand assets and fonts, components in page order, showcase, docs data, build and QA, publish)
 
-Every page in steps 3–8 is built with templates/structure.md.
+Every page in steps 3–8 is built with templates/structure.md. Layouts (5.x) and Screens (6.x) are not built at initiation; they are added later through EXTEND.md.
 ```
 
 Pages are created in the order of the page tree, with separators, whatever order they are built in. Do not substitute a different taxonomy, page name or frame name.
@@ -541,9 +575,11 @@ Validation fails immediately if:
 Then run:
 1. global page tree, template, documentation and naming validation from `SYSTEM.md`;
 2. Foundation validation from `foundations/00-foundations.md` when applicable;
-3. Part, Component and Section completion criteria from their folder files when applicable;
+3. Part, Component and Section completion criteria from their folder files when applicable (Layout and Screen criteria when they are added through EXTEND);
 4. the complete QA list of every selected page file;
-5. when the web implementation is in scope, the QA list in `WEB.md` §9 for every implemented page.
+5. `tools/figma-audit.js` on every built page and once on the file, with `fail` = 0;
+6. when the web implementation is in scope, the QA list in `WEB.md` §9 for every implemented page;
+7. when the app implementation is in scope, the QA list in `APP.md` §9 for every implemented page and framework.
 
 # 9. Completion rule
 
@@ -551,5 +587,7 @@ Do not mark generation complete until:
 - the component implementation mode is resolved whenever components are in scope;
 - every required specification is confirmed loaded;
 - every checklist item is resolved;
-- every applicable global, folder-level and page-level QA rule passes;
+- every applicable global, folder-level and page-level QA rule passes, and `tools/figma-audit.js` reports `fail` = 0 on every built page and on the file;
+- when the app implementation is in scope, every chosen framework compiles, its tests pass, the showcase covers every implemented page, and `APP.md` §9 passes;
+- the progress ledger marks every in-scope page `done`;
 - when the web implementation is in scope, `npm run build` passes (including `check:contrast`), `npm run qa` reports 0 problems, the package installs in a fresh app, and every in-scope page passes `WEB.md` §9.

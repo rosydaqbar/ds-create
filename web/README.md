@@ -4,7 +4,7 @@ A brand-agnostic starting point for the web version of a design system built wit
 - a **Tailwind v4-ready React component library**, shipped as an installable package;
 - a **documentation site** for designers, product managers and developers: Getting started (overview, for designers, for developers), Tokens, Changelog, Foundations with Overview, Tokens and Guidelines, and one page per component with Overview, Component (playground and full variant matrix), Anatomy (marked on the live component, props, token map), Guidelines and Code. It has site search (⌘K) and Stable/Beta status labels.
 
-Everything brand-specific is a placeholder: the tokens in `tokens/figma-variables.json`, the logo files in `public/brand/`, the text in `src/ds.config.ts`, and the sentences marked `// BRAND:` in the foundation and guidance pages. The workflow that fills them from a generated Figma file is `../WEB.md`; every word follows `COPY-GUIDE.md`.
+Everything brand-specific is a placeholder: the tokens in `tokens/figma-variables.json`, the logo files in `public/brand/`, the text in `src/ds.config.ts`, and the sentences marked `// BRAND:` in the foundation and guidance pages. The workflow that fills them from a generated Figma file is `../WEB.md`; every word follows `COPY-GUIDE.md`. A build never edits this folder: it copies it to `output/{system-slug}/web/` (`../README.md` §5).
 
 ```bash
 npm install

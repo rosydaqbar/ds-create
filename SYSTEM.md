@@ -76,11 +76,13 @@ Level rules:
 | Foundations | Tokens, styles and assets every component uses | — |
 | Parts | The smallest interactive or display units | Foundations only (icons, tokens, styles) and private parts |
 | Components | Small groups of Parts that work as one unit | Parts, foundations |
-| Sections | Larger blocks with their own layout and behaviour | Components, Parts, foundations |
+| Sections | Larger blocks with their own layout and behavior | Components, Parts, foundations |
 | Layouts | Page-level layouts with placeholder content | Sections and below |
 | Screens | Layouts filled with real product content | Layouts and below |
 
 A component never instances a component from its own level or a higher level, except a Part that instances another Part as a fixed part (for example Button instancing Spinner for its loading state); that dependency is listed in the component's Markdown file.
+
+Layout and Screen rules live in their folder files: `layouts/00-layouts.md` and `screens/00-screens.md`. Screens are never published or instanced.
 
 ## A2. Existing libraries
 
@@ -128,6 +130,33 @@ The page's Markdown file lists which specimen sections go in **Overview**, which
 
 Components and Sections add one block at the top of **Anatomy**: *Composition* — the Parts they contain, shown as instances with labels.
 
+### Layout page template
+
+```text
+{ID} {Name}
+├─ .Main                     private parts with their own header (only when the Layout has parts)
+├─ {ID} {Name} · Overview     hero at the main breakpoint + 2–3 examples in use + when to use
+├─ {ID} {Name} · Layout       the published set at every breakpoint, grid drawn, regions labeled
+├─ {ID} {Name} · Anatomy      composition, region map, grid, spacing and sizes, responsive behavior, landmarks, token map
+└─ {ID} {Name} · Guidelines   usage, filling regions, responsive behavior, accessibility, do / don't
+```
+
+The component page template with `· Layout` in place of `· Component`. What each frame holds is in `layouts/00-layouts.md` §3.
+
+### Screen page template
+
+```text
+{ID} {Name}
+├─ .Main                                region content as private parts, with their own header
+├─ {ID} {Name} · Overview                purpose, hero, flow, states index
+├─ {ID} {Name} · {Data} · {Breakpoint}   one bare frame per screen state (default, empty, loading, error)
+├─ …
+├─ {ID} {Name} · Anatomy                 composition, region content map, content rules, headings, focus order
+└─ {ID} {Name} · Guidelines              content, flow, states, edge cases, accessibility, do / don't
+```
+
+The state frames are bare frames, so Figma can prototype, present and hand them off. What each frame holds is in `screens/00-screens.md` §3.
+
 ### Guidance pages
 
 ```text
@@ -140,10 +169,10 @@ Components and Sections add one block at the top of **Anatomy**: *Composition* �
 
 ```text
 9.1 Doc kit
-└─ 9.1 Doc kit · Components    every documentation component (Part B §12), published to this file only
+└─ 9.1 Doc kit · Components    every documentation component (Part B §16), published to this file only
 ```
 
-## A4. Canvas behaviour
+## A4. Canvas behavior
 
 - Each page is an infinite canvas with horizontally arranged frames. Never collapse a page into one small frame because it has one topic.
 - Frames grow with their content (Hug height; widths from documentation tokens, Part B §1). Never clip content to keep a frame at a reference size.
@@ -175,9 +204,9 @@ Measured dimensions from the source analysis are intentionally excluded from gen
 
 # 1. Documentation styling follows the brand
 
-The page tree, the template frames and the composition of every frame are fixed (Part A). How they **look** is not: documentation is styled with the brand being built, so a system for one brand and a system for another have the same structure but different fonts, colours, corners and density.
+The page tree, the template frames and the composition of every frame are fixed (Part A). How they **look** is not: documentation is styled with the brand being built, so a system for one brand and a system for another have the same structure but different fonts, colors, corners and density.
 
-Every documentation value comes from the `Documentation` collection (`doc/{group}/{role}`). Those variables alias the brand's own tokens; they never hold their own colours, fonts or radii. Change the brand and the documentation changes with it, in every mode.
+Every documentation value comes from the `Documentation` collection (`doc/{group}/{role}`). Those variables alias the brand's own tokens; they never hold their own colors, fonts or radii. Change the brand and the documentation changes with it, in every mode.
 
 | Documentation role | Aliases the brand token | Used for |
 | --- | --- | --- |
@@ -210,14 +239,14 @@ doc/table/row-min        minimum height of a data row (56)
 ```
 
 Rules:
-- Documentation never introduces a colour, typeface or radius the brand does not have. A dark or rounded brand gets dark or rounded documentation.
-- The doc kit (§12) binds only to `doc/*` variables and the brand's text styles, so it restyles itself when the brand changes.
+- Documentation never introduces a color, typeface or radius the brand does not have. A dark or rounded brand gets dark or rounded documentation.
+- The doc kit (§16) binds only to `doc/*` variables and the brand's text styles, so it restyles itself when the brand changes.
 - When the brand is not built yet (the doc kit is built first), create the brand tokens it aliases first, then the `Documentation` collection, then the doc kit.
 - Measures stay the same in every build so the structure stays the same.
 
 ## Frame families
 
-Each template frame (Part A §3) has one sizing behaviour:
+Each template frame (Part A §3) has one sizing behavior:
 
 | Template frame | Sizing behavior |
 | --- | --- |
@@ -658,8 +687,8 @@ When a component has private parts:
 ## Component frame
 
 Each published set receives:
-- a family header (Part B §11.1) directly above it;
-- the complete component-set matrix laid out so the property axes read without opening the sidebar (Part B §11.3);
+- a family header (Part B §12.1) directly above it;
+- the complete component-set matrix laid out so the property axes read without opening the sidebar (Part B §12.3);
 - axis labels above columns and to the left of rows.
 
 # 10. Reference measurements are observational only
@@ -693,7 +722,7 @@ Before marking a Figma Page complete, confirm:
 - no raw reference canvas dimensions are used as layout constraints.
 
 
-# 11. Component page documentation standard
+# 12. Component page documentation standard
 
 Component pages use the component page template rather than the Foundation table pattern.
 
@@ -709,7 +738,7 @@ The documentation model has three layers:
 · Guidelines    usage, do / don't, content, accessibility
 ```
 
-## 11.1 Region/family header
+## 12.1 Region/family header
 
 Every family region begins with a large documentation header.
 
@@ -734,7 +763,7 @@ Forbidden:
 - “Use this for actions.”
 - generic copy repeated across every Figma Page.
 
-## 11.2 Private parts header
+## 12.2 Private parts header
 
 When a component has private parts, the `.Main` frame receives its own header.
 
@@ -749,7 +778,7 @@ The private header may include neutral resource links for:
 
 Do not retain source-specific product URLs, names, or promotional copy.
 
-## 11.3 Component matrices are documentation
+## 12.3 Component matrices are documentation
 
 The full component set itself is a major documentation artifact.
 
@@ -765,7 +794,7 @@ The matrix must make these relationships inspectable:
 
 The visual grouping of the matrix should make property axes obvious even without opening the right sidebar.
 
-## 11.4 Anatomy fidelity
+## 12.4 Anatomy fidelity
 
 Generated components must follow the nested anatomy defined by the corresponding Markdown specification.
 
@@ -781,7 +810,7 @@ Examples of anatomy that must be preserved:
 
 The generator must not flatten these structures to reduce layer count.
 
-## 11.5 Page-specific notes, guidance, and examples
+## 12.5 Page-specific notes, guidance, and examples
 
 The template frames are fixed; their content comes from the page's Markdown file.
 
@@ -810,7 +839,7 @@ Rules:
 
 Each page keeps the documentation topics defined in its Markdown file, placed in the template frame the file names.
 
-# 12. Anatomy documentation inside Markdown specs
+# 13. Anatomy documentation inside Markdown specs
 
 Every component Markdown file (Parts, Components, Sections) must include:
 
@@ -831,9 +860,11 @@ QA
 
 For complex Figma Pages, document each component family separately.
 
+Layout and Screen files use the section lists in `layouts/00-layouts.md` §5 and `screens/00-screens.md` §5.
+
 A file that only lists component-set names and variant axes is incomplete.
 
-# 13. Component Figma Page QA
+# 14. Component Figma Page QA
 
 Global QA:
 - preserve Figma Page vs Frame terminology;
@@ -845,9 +876,11 @@ Global QA:
 - when documentation is rendered in code, show specimens of private parts that carry a child role (an option, a menu item) inside their parent container (a list box, a menu); a demo never places an option or a menu item on its own;
 - check every documentation claim before publishing it: a sentence such as "every state meets contrast" is verified in every mode (1.1 Color QA, *Contrast pairs*), never assumed.
 
-All component-specific QA belongs to the corresponding file under `parts/`, `components/` or `sections/` and must be executed from there.
+All component-specific QA belongs to the corresponding file under `parts/`, `components/`, `sections/`, `layouts/` or `screens/` and must be executed from there.
 
-# Visual teaching is part of documentation
+Run `tools/figma-audit.js` (a read-only `use_figma` script) on every built page and once on the file. A page with `fail` > 0 fails QA: raw values inside components, unbound fills, text without a text style, effects without an effect style, wrong variant names, loose nodes or overlapping frames on the canvas, missing template frames, and color pairs below AA. Warnings (raw spacing in documentation frames, variant names outside the vocabulary) are reviewed and either fixed or explained in the page report.
+
+# 15. Visual teaching is part of documentation
 
 `· Guidelines` frames are not prose-only Frames.
 
@@ -1021,7 +1054,7 @@ A long-form documentation Frame fails QA when:
 - generated visuals use anatomy inconsistent with the published generated components;
 - visual examples are grouped far away from the explanatory text they support.
 
-# 12. Doc kit
+# 16. Doc kit
 
 Every documentation frame is built from one fixed set of components on `9.1 Doc kit`. The structure components (header, footer, block note, badge) are specified in `templates/structure.md` §7. They use the system's own tokens and text styles, so documentation follows the brand and the modes. Build them first, before any foundation page.
 
@@ -1036,7 +1069,7 @@ Every documentation frame is built from one fixed set of components on `9.1 Doc 
 | `Doc/Token badge` | token names in tables | token name in the mono style, bordered |
 | `Doc/Tree connector` | child rows in variable tables (§6.4) | vertical line + elbow; variants `Type=middle`, `Type=last` |
 | `Doc/Alias chip` | mode cells in variable tables (§6.5) | swatch (or value glyph) → alias name |
-| `Doc/Color swatch` | palette rows (§5) | colour specimen with contrast annotation → step → value |
+| `Doc/Color swatch` | palette rows (§5) | color specimen with contrast annotation → step → value |
 | `Doc/Type row` | type scale | style name → sample in the style → size / line height / weight |
 | `Doc/Measure` | spacing and size specimens | token → bar or box bound to the token → value |
 | `Doc/Callout` | numbered anatomy markers | number → optional label |
@@ -1063,7 +1096,7 @@ Primitives  →  Semantic (Color, Typography, Space, Size, Shape, Motion)  →  
 
 - Primitives hold raw values and are hidden from pickers.
 - Semantic tokens alias primitives and carry the UI purpose. Components bind semantic tokens.
-- Component tokens are created only where a component needs a value no semantic role expresses (for example a button's padding per size, or a state colour that differs from the shared role). They alias semantic tokens.
+- Component tokens are created only where a component needs a value no semantic role expresses (for example a button's padding per size, or a state color that differs from the shared role). They alias semantic tokens.
 
 # 2. Collections
 
@@ -1071,7 +1104,7 @@ Plain domain names, in this order, created only when needed:
 
 ```text
 Primitives      raw values, hidden
-Color           semantic colour roles; one mode per colour mode (Light, Dark, …)
+Color           semantic color roles; one mode per color mode (Light, Dark, …)
 Typography      families, weights, sizes, line heights
 Space           spacing scale
 Size            control, icon, avatar, indicator, touch and layout sizes
@@ -1081,7 +1114,7 @@ Components      component tokens (only when needed)
 Documentation   documentation measures and roles (doc kit only)
 ```
 
-Never prefix collections with tier names, product names or feature names. A product concept (for example a signal-strength colour set) is a group inside its domain collection, not a new collection.
+Never prefix collections with tier names, product names or feature names. A product concept (for example a signal-strength color set) is a group inside its domain collection, not a new collection.
 
 # 3. Token naming grammar
 
@@ -1099,7 +1132,7 @@ color/text/brand               parent row
 └── color/text/brand/pressed   child row
 ```
 
-## 3.1 Colour roles
+## 3.1 Color roles
 
 | Group | Roles | Children |
 | --- | --- | --- |
@@ -1169,6 +1202,7 @@ One property name per concept, across every level:
 | Popup shown | `Open` | variant | `false, true` |
 | Media playing | `Playing` | variant | `false, true` |
 | Layout per breakpoint | `Breakpoint` | variant | subset of `mobile, tablet, desktop` |
+| Data state of a screen | `Data` | variant | subset of `default, empty, loading, error` (Screens only; interaction states stay in `State`) |
 | Third-party service | `Provider` | variant | the sign-in or integration providers chosen at initiation |
 | Attached position | `Placement` | variant | subset of `none, top, bottom, left, right, top-start, top-end, bottom-start, bottom-end` |
 | Direction | `Orientation` | variant | `horizontal, vertical` |
@@ -1178,6 +1212,7 @@ One property name per concept, across every level:
 | Optional part | `Show {part}` | boolean | — |
 | Swappable icon | `Icon`, `{Part} icon` | instance swap | icons |
 | Swappable asset | `{Asset kind}` (`Logo`, `Flag`, `Image`) | instance swap | brand assets |
+| Swappable region | `{Region} content` | slot, or instance swap where slots aren't available | Layout regions a screen fills |
 
 Rules:
 - Never use synonyms (`Hierarchy`, `Type`, `Kind`, `Variant` or `Appearance` for emphasis; `Destructive` instead of `Tone=danger`; `Position` for placement).
@@ -1188,7 +1223,7 @@ Rules:
 
 Support: Figma Variables, CSS custom properties, Tailwind theme, JSON, DTCG JSON, JavaScript / TypeScript, Android, iOS. Each format is an export of the same grammar; naming and output syntax are separate concerns.
 
-The web formats (CSS custom properties, Tailwind v4 theme, DTCG JSON, TypeScript data) are generated together by the web template from an export of the Figma file; the mapping from names to CSS variables and Tailwind utilities is in `WEB.md` §5.
+The web formats (CSS custom properties, Tailwind v4 theme, DTCG JSON, TypeScript data) are generated together by the web template from an export of the Figma file; the mapping from names to CSS variables and Tailwind utilities is in `WEB.md` §5. The app formats (React Native, SwiftUI, Jetpack Compose) are generated by `app/shared/scripts/build-app-tokens.mjs` from the same export; their naming is in `APP.md` §5.
 
 # 6. Existing systems
 
@@ -1213,6 +1248,8 @@ This is provenance only. **Do not load this part during normal generation.** The
 2.x Parts            → parts/2.x-*.md
 3.x Components        → components/3.x-*.md
 4.x Sections        → sections/4.x-*.md
+5.x Layouts         → layouts/5.x-*.md
+6.x Screens         → screens/6.x-*.md
 ```
 
 Audit rule:

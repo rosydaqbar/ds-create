@@ -1,6 +1,6 @@
 # Brand-Agnostic Design System Initiator
 
-This repository is the specification an agent follows to build a design system in Figma for any brand. Every build has **the same structure** — the same pages, in the same order, with the same frames and the same names — and only the brand values change: colours, typefaces, radius, density, assets.
+This repository is the specification an agent follows to build a design system in Figma for any brand. From the Figma file it can also build the system for the web (`WEB.md`) and for apps (`APP.md`: React Native, or SwiftUI and Jetpack Compose). Every build has **the same structure** — the same pages, in the same order, with the same frames and the same names — and only the brand values change: colors, typefaces, radius, density, assets.
 
 The repository is **not executable from root files alone**. Root files define the global structure; the requirements for each page live in its own Markdown file and must be loaded before that page is built.
 
@@ -66,8 +66,15 @@ SYSTEM.md      page tree, page templates, documentation system, token and compon
 INITIATOR.md   questionnaire and generation logic
 EXTEND.md      adding a component at any level after initiation
 WEB.md         web implementation: Tailwind-ready React library, installable package and documentation site built from the Figma file
+APP.md         app implementation: React Native, or SwiftUI and Jetpack Compose, with a showcase app, built from the Figma file
 templates/     templates/structure.md: the structure every page is built with (page → frames → blocks → items; no content)
+tools/         figma-audit.js: read-only use_figma audit run on every built page and once on the file (QA gate)
+ROADMAP.md     planned levels, components, renames and tooling (not built until specified)
+archive/       superseded proposals, kept for history only (never loaded)
 web/           brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that WEB.md copies and fills
+app/           brand-agnostic app templates (react-native/, swiftui/, compose/) and the shared token generator that APP.md copies and fills; reference skeletons, compiled by the first build
+examples/      finished builds made with ds-create, for reference only (never copied into a new build)
+output/        everything a build generates: one folder per system (git-ignored except output/README.md)
 ```
 
 # 3. File map
@@ -118,9 +125,12 @@ web/           brand-agnostic web template (React, Tailwind v4, documentation si
 | Any Section page | `sections/00-sections.md` (folder rules) |
 | 4.1 Rich text editor | `sections/4.1-rich-text-editor.md` |
 | 4.2 Video player | `sections/4.2-video-player.md` |
-| 9.1 Doc kit | `SYSTEM.md` Part B §12 |
+| Any Layout page | `layouts/00-layouts.md` (folder rules) |
+| Any Screen page | `screens/00-screens.md` (folder rules) |
+| 9.1 Doc kit | `SYSTEM.md` Part B §16 |
 | New components | `EXTEND.md`, then the new file in the level folder |
 | Web implementation | `WEB.md`, then the page file of each implemented page; template in `web/` |
+| App implementation | `APP.md`, then the page file of each implemented page; templates in `app/` |
 
 # 4. Mandatory loading
 
@@ -139,6 +149,8 @@ Every page is built with the structure in `templates/structure.md` (page → fra
 
 `INITIATOR.md` includes the generation logic. Do not skip it. Load `EXTEND.md` as well when adding a component after initiation.
 
+Load page files at the step that builds them, not all at once, and keep the progress ledger on disk (`INITIATOR.md` Part B §0: *Loading per step* and *Progress ledger*). After any context compaction, re-read the global files and the ledger before continuing.
+
 ## Per level
 
 | In scope | Load first | Then |
@@ -149,6 +161,8 @@ Every page is built with the structure in `templates/structure.md` (page → fra
 | Any Part page | `parts/00-parts.md` | every selected Part page file |
 | Any Component page | `components/00-components.md` | every selected Component page file and the files of the Parts it contains |
 | Any Section page | `sections/00-sections.md` | every selected Section page file and the files of the Components and Parts it contains |
+| Any Layout page | `layouts/00-layouts.md` | the page file and the files of the Sections and Components it contains |
+| Any Screen page | `screens/00-screens.md` | the page file and the file of its Layout |
 
 ## Hard loading rule
 
@@ -166,6 +180,7 @@ Selected 2.1 Button + no parts/2.1-button.md
 Selected 1.1 Color + no foundations/00-foundations.md
 Selected 1.1 Color + no foundations/1.1-color.md
 Selected 3.2 Text field + no parts/2.10-text-control.md
+Selected 6.x Screen + no layouts/5.x file of its Layout
 Any page + no templates/structure.md
 ```
 
@@ -199,7 +214,22 @@ Components and Sections
 
 Do not begin implementation until every applicable box is checked.
 
-# 5. Non-negotiable
+# 5. Executor and output
+
+The repo is split in two. The **executor** is everything an agent reads and copies: the root files, the page specs, `templates/`, `tools/`, and the `web/` and `app/` templates. The **output** is everything a build generates, and it all goes into `output/{system-slug}/`:
+
+```text
+output/{system-slug}/
+├─ ds-create-ledger.json   progress ledger
+├─ figma/                  the Figma export and figma-audit results
+├─ web/                    the web project (when Web is a target)
+├─ native/ ios/ android/   the app projects (when App is a target)
+└─ reports/                QA reports and reviews
+```
+
+`{system-slug}` is the system name in lowercase kebab case (`Acme Design System` → `acme`). `output/` is git-ignored, so no generated brand is ever committed. Never write a build into the executor folders or into `examples/`. Use another location only when the user explicitly asks for one; a finished build becomes a committed reference in `examples/` only when the user asks. The Figma file itself lives in Figma.
+
+# 6. Non-negotiable
 
 - Use the exact page tree, page names and template frames in `SYSTEM.md` Part A.
 - Use the naming in `SYSTEM.md` Part C for tokens, styles, component sets, properties, parts and layers.
@@ -212,14 +242,14 @@ Do not begin implementation until every applicable box is checked.
 
 Syncium is a complete example built with ds-create from one set of brand guidelines: a Figma design system (YOLO mode, every page in the tree) and its web version, made with the `WEB.md` workflow.
 
-The web version is in [`web/output/syncium`](web/output/syncium). It has the explorer site and an installable package, `@syncium/design-system`. The explorer covers:
+The web version is in [`examples/syncium`](examples/syncium). It has the explorer site and an installable package, `@syncium/design-system`. The explorer covers:
 - Getting started for designers, developers and product managers;
 - searchable tokens, a changelog and status labels;
 - eight foundations, each with Overview, Tokens and Guidelines;
 - 29 components with a playground, every variant, anatomy, guidelines and code.
 
 ```bash
-cd web/output/syncium
+cd examples/syncium
 npm install
 npm run dev            # explorer on http://localhost:5173/
 npm run build:package  # the installable package in package/

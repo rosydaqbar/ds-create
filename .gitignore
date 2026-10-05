@@ -1,0 +1,63 @@
+# 1. OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 2. Dependencies and build output (web template, examples, app templates)
+node_modules/
+dist/
+web/package/
+examples/*/package/
+*.tsbuildinfo
+*.log
+
+# 3. Local QA output
+qa-report.json
+playwright-report/
+test-results/
+
+# 4. Secrets, environment and signing (mostly for app builds)
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.p8
+*.p12
+*.keystore
+*.jks
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+
+# 5. Per-build working state
+ds-create-ledger.json
+**/tokens/parts/*.json
+
+# 6. App toolchains (for when the templates are compiled)
+**/ios/Pods/
+**/ios/build/
+**/android/build/
+**/android/app/build/
+.gradle/
+build/
+local.properties
+*.iml
+captures/
+.cxx/
+.expo/
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+
+# 7. Everything a build generates (systems, projects, ledgers, reports). See output/README.md.
+output/*
+!output/README.md
+
+# 8. Agent settings
+.claude/
+CLAUDE.local.md

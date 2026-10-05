@@ -12,12 +12,12 @@ Figma stays the source of truth. The web version never invents values: tokens co
 - Later, at any time, as its own task ("implement the system for web").
 - After a component is added through `EXTEND.md`, when the system already has a web implementation.
 
-It runs **after** the Figma pages it implements exist. A component is implemented on the web only when its Figma page is complete.
+It runs **after** the Figma pages it implements exist. A component is implemented on the web only when its Figma page is complete. When the app is also in scope (`APP.md`), web and app share this token export and one changelog; the web runs first.
 
 # 2. What is produced
 
 ```text
-{system}-web/                    a copy of ds-create/web, filled for the brand
+output/{system-slug}/web/        a copy of ds-create/web, filled for the brand (README §5)
 ├─ COPY-GUIDE.md                 voice and copy rules for every word on the site
 ├─ tokens/
 │  ├─ figma-variables.json       export of the Figma file (input): variables, styles, page ids
@@ -87,14 +87,14 @@ Run the steps in order. Each step names its exit check.
 
 ## W1 · Copy the template
 
-Copy `ds-create/web/` to the output folder (by default `{system-name}-web/` next to wherever the user keeps the build, or the folder the user names). Run `npm install`, then `npx playwright install chromium` once for QA.
+Copy `ds-create/web/` to `output/{system-slug}/web/` (README §5), or to another location only when the user explicitly asks for one. Never create the build inside `ds-create/web/` or `ds-create/examples/`: the template stays placeholder-only, and `examples/` holds only builds the user asked to keep as references. Run `npm install`, then `npx playwright install chromium` once for QA.
 
 Exit check: `npm run build` passes on the untouched copy.
 
 ## W2 · Export tokens from Figma
 
 1. Run `web/scripts/figma-export.js` as a `use_figma` script on the generated Figma file. It is read-only.
-2. Save the returned JSON as `tokens/figma-variables.json`. It includes `pages` (page ids and names): the site uses them for every "Open in Figma" button.
+2. Save the returned JSON as `output/{system-slug}/figma/figma-variables.json` (the one export every target shares) and copy it to the project's `tokens/figma-variables.json`. It includes `pages` (page ids and names): the site uses them for every "Open in Figma" button.
 3. Tool output is capped at about 20 KB. When the file is bigger, set `PART` at the top of the script and export in slices — for example `Color` in two halves, then the other collections, then `styles: true` — saving each result as `tokens/parts/01.json`, `02.json`, …, then run `npm run tokens:merge`.
 4. Run `npm run tokens`, then `npm run check:contrast`.
 
@@ -153,7 +153,7 @@ Exit check: build passes, `qa` reports 0 problems, the package installs and rend
 ## W8 · Publish
 
 1. `dist/` is a static site; it can be opened from any folder or hosted anywhere.
-2. Give the user the location of the project, the explorer link when hosting is available, and the package name.
+2. Give the user the location of the project (`output/{system-slug}/web/`), the explorer link when hosting is available, and the package name. Save QA results and reviews in `output/{system-slug}/reports/`.
 
 # 5. Token contract in code
 
@@ -231,7 +231,7 @@ Effects (`useEffect`, `useLayoutEffect`) always use a block body and return noth
 Components work, not just look right: real `<button>`, `<input>`, `<label>` elements; keyboard support as each spec's Accessibility topic describes (arrow keys in menus and lists, Escape to close and return focus, Space and Enter to activate); `aria-*` for state (`aria-pressed`, `aria-checked`, `aria-expanded`, `aria-invalid`, `aria-busy`). Popups (Select, Menu, Tooltip) open next to their trigger and close on outside click and Escape.
 
 These rules come from failures found in generated builds. Each is a QA failure when broken:
-- **Every control has an accessible name.** Icon-only controls take it from `label`. Sliders name every handle (`label`, `aria-label` or `aria-labelledby`; range handles "{name} minimum" and "{name} maximum") and give a readable `aria-valuetext` when the value is formatted. The text entry inside a tags field is labelled by the field's Label. A hidden file input gets the field's name.
+- **Every control has an accessible name.** Icon-only controls take it from `label`. Sliders name every handle (`label`, `aria-label` or `aria-labelledby`; range handles "{name} minimum" and "{name} maximum") and give a readable `aria-valuetext` when the value is formatted. The text entry inside a tags field is labeled by the field's Label. A hidden file input gets the field's name.
 - **No control inside a control.** Options and menu items show checked state with a visual mark (`parts/_ChoiceMark.tsx`, `aria-hidden`), never a nested `<input>`; the state lives on the row (`aria-selected`, `aria-checked`).
 - **Roles stay valid.** Only menu items live inside `role="menu"`: a menu's search field sits above the list, in the same panel. Option and menu-item specimens in the docs sit inside their parent role (§7).
 - **Target size.** Every pointer target is at least 24 × 24 CSS px (WCAG 2.2, 2.5.8). Steppers that can't reach it stacked sit side by side.
@@ -252,6 +252,8 @@ Each component page is one `ComponentDoc` (`src/docs/types.ts`), registered by f
 | `· Anatomy` | Anatomy | `anatomy.parts` (numbered layers, each with `target` = its `data-anatomy` value, so the marker sits on the live component), `props` (with the Figma property per prop), `tokens` (the token map with Light, Dark, CSS and Tailwind) |
 | `· Guidelines` | Guidelines | `guidelines` (the spec's topics, with do / don't built from real components), `accessibility` |
 | — | Code | install and import lines from `config.packageName`, every example with its live preview and code, the token → Tailwind map |
+
+Layouts (5.x) and Screens (6.x) use the same `ComponentDoc` with `level: 'layouts'` or `'screens'`. A Layout's `· Layout` frame maps to the Component tab (one matrix per breakpoint). A Screen's state frames map to the Component tab as one matrix of `Data` × `Breakpoint`; Screens are documentation, not exported from the package.
 
 Rules:
 - **Words.** Every summary, caption, guideline, anatomy note and prop description follows `COPY-GUIDE.md`: purpose first, full sentences, no token names or Figma build terms in running prose, US English. A doc module that reads like a spec sheet fails QA.

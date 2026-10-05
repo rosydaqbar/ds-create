@@ -239,12 +239,12 @@ function SegmentAnatomy() {
 function ModeCard() {
   return (
     <div className="flex flex-col gap-md rounded-surface border border-border-subtle bg-surface-base p-xl shadow-raised">
-      <span className="type-body-sm-semibold text-text-primary">Storage</span>
-      <span className="type-body-sm-regular text-text-secondary">You have used 1.9 TB of 2 TB.</span>
-      <Progress value={95} aria-label="Storage used" />
+      <span className="type-body-sm-semibold text-text-primary">Seats</span>
+      <span className="type-body-sm-regular text-text-secondary">You have used 19 of 20 seats.</span>
+      <Progress value={95} aria-label="Seats used" />
       <div className="flex flex-wrap gap-sm">
         <Button size="sm" label="Upgrade" />
-        <Button size="sm" emphasis="secondary" label="Manage files" />
+        <Button size="sm" emphasis="secondary" label="Manage members" />
       </div>
     </div>
   );
