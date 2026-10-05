@@ -1,0 +1,102 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/* Colour modes: data-theme on <html> (or any subtree) switches every token. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Interaction-state variants. Each one also matches a forced state, so the explorer can
+ * show every Figma variant statically: <Button data-force="hover" />.
+ * Use these instead of hover:/active:/focus-visible: in components.
+ */
+@custom-variant is-hover {
+  &:where([data-force="hover"]) {
+    @slot;
+  }
+  @media (hover: hover) {
+    &:where(:hover) {
+      @slot;
+    }
+  }
+}
+@custom-variant is-pressed (&:where(:active, [data-force="pressed"]));
+@custom-variant is-focus (&:where(:focus-visible, [data-force="focus"]));
+@custom-variant is-focus-within (&:where(:has(:focus-visible), [data-force="focus"]));
+@custom-variant is-disabled (&:where(:disabled, [aria-disabled="true"], [data-disabled="true"]));
+
+@layer base {
+  html {
+    background: var(--color-surface-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-ui);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    margin: 0;
+  }
+  ::selection {
+    background: var(--color-fill-brand-subtle);
+  }
+}
+
+/*
+ * Motion recipes — the 1.6 Motion pairings as utilities. Durations and easings are the motion
+ * tokens, so the Reduced mode applies automatically: base and slow become 0 (instant), fast
+ * stays and the shift and scale drop out, so leaving becomes a short fade.
+ *
+ *   motion-enter        menu, tooltip, popover entering     base · enter
+ *   motion-enter-slow   dialog, drawer entering             slow · enter
+ *   motion-exit         anything leaving                    fast · exit
+ *   motion-fade-in      content swapping in place           base · enter (opacity only)
+ *   data-side="above"   popups opening upward rise from below instead of dropping down
+ */
+:root {
+  --motion-shift: 4px;
+  --motion-scale-from: 0.97;
+  --motion-enter-dir: -1;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-shift: 0px;
+    --motion-scale-from: 1;
+  }
+}
+[data-motion="reduced"] {
+  --motion-shift: 0px;
+  --motion-scale-from: 1;
+}
+[data-side="above"] {
+  --motion-enter-dir: 1;
+}
+@keyframes ds-enter {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--motion-enter-dir) * var(--motion-shift));
+    scale: var(--motion-scale-from);
+  }
+}
+@keyframes ds-exit {
+  to {
+    opacity: 0;
+    translate: 0 calc(var(--motion-enter-dir) * var(--motion-shift));
+    scale: var(--motion-scale-from);
+  }
+}
+@keyframes ds-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@utility motion-enter {
+  animation: ds-enter var(--motion-duration-base) var(--motion-easing-enter) both;
+}
+@utility motion-enter-slow {
+  animation: ds-enter var(--motion-duration-slow) var(--motion-easing-enter) both;
+}
+@utility motion-exit {
+  animation: ds-exit var(--motion-duration-fast) var(--motion-easing-exit) both;
+  pointer-events: none;
+}
+@utility motion-fade-in {
+  animation: ds-fade-in var(--motion-duration-base) var(--motion-easing-enter) both;
+}

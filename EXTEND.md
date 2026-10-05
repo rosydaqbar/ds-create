@@ -53,7 +53,8 @@ When two levels fit, ask the user once. A component never uses components from i
 | 9 | Build | Build the page with `templates/structure.md`, with the frames of the component page template: `.Main` → `· Overview` → `· Component` → `· Anatomy` → `· Guidelines`, using the Doc kit components. | No. |
 | 10 | Document | Fill every template frame: hero and 2–4 compositions in Overview, the full matrix in Component, the anatomy and token map in Anatomy, do / don't and accessibility in Guidelines. | Only copy that can't be inferred (usage rules, do / don't). |
 | 11 | QA | Run the QA list in the new file and the completion criteria of the level's folder file. Fix and re-run. | Only for failures the agent can't fix. |
-| 12 | Report | List the page, the sets and variant counts, any new tokens, and offer to swap local copies on existing screens for the new component. | Before changing existing screens. |
+| 12 | Web | When the system has a web implementation (`WEB.md`): export new tokens (W2), then write the component and its doc module (W4) and run `WEB.md` §9. | No. |
+| 13 | Report | List the page, the sets and variant counts, any new tokens, and offer to swap local copies on existing screens for the new component. | Before changing existing screens. |
 
 # 5. A component the user designed
 
@@ -79,4 +80,4 @@ Changes to an existing component follow the same steps, starting from its Markdo
 - removing or renaming a property, value or part can break instances in product files: list what changes and get the user's confirmation first;
 - the page name and ID never change, even if the component is renamed.
 
-Update the component's Markdown file in the same change, so the file and the Figma page always match.
+Update the component's Markdown file in the same change, so the file and the Figma page always match. When the system has a web implementation, update the web component and its doc module in the same change too (`WEB.md` §8).

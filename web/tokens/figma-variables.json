@@ -1,0 +1,8130 @@
+{
+ "format": "ds-create/figma-variables@1",
+ "file": "Placeholder tokens — replace by exporting the generated Figma file (scripts/figma-export.js)",
+ "collections": [
+  {
+   "name": "Primitives",
+   "modes": [
+    "Value"
+   ]
+  },
+  {
+   "name": "Color",
+   "modes": [
+    "Light",
+    "Dark"
+   ]
+  },
+  {
+   "name": "Typography",
+   "modes": [
+    "Value"
+   ]
+  },
+  {
+   "name": "Space",
+   "modes": [
+    "Value"
+   ]
+  },
+  {
+   "name": "Size",
+   "modes": [
+    "Value"
+   ]
+  },
+  {
+   "name": "Shape",
+   "modes": [
+    "Value"
+   ]
+  },
+  {
+   "name": "Motion",
+   "modes": [
+    "Standard",
+    "Reduced"
+   ]
+  },
+  {
+   "name": "Components",
+   "modes": [
+    "Light",
+    "Dark"
+   ]
+  }
+ ],
+ "variables": [
+  {
+   "name": "palette/base/white",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "Pure white.",
+   "values": {
+    "Value": "#ffffff"
+   }
+  },
+  {
+   "name": "palette/base/black",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "Pure black.",
+   "values": {
+    "Value": "#000000"
+   }
+  },
+  {
+   "name": "palette/base/transparent",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "Fully transparent; keeps layers bound when nothing should show.",
+   "values": {
+    "Value": "#ffffff00"
+   }
+  },
+  {
+   "name": "palette/brand/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#eff6ff"
+   }
+  },
+  {
+   "name": "palette/brand/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#dbeafe"
+   }
+  },
+  {
+   "name": "palette/brand/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#bfdbfe"
+   }
+  },
+  {
+   "name": "palette/brand/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#93c5fd"
+   }
+  },
+  {
+   "name": "palette/brand/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#60a5fa"
+   }
+  },
+  {
+   "name": "palette/brand/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#3b82f6"
+   }
+  },
+  {
+   "name": "palette/brand/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#2563eb"
+   }
+  },
+  {
+   "name": "palette/brand/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#1d4ed8"
+   }
+  },
+  {
+   "name": "palette/brand/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#1e40af"
+   }
+  },
+  {
+   "name": "palette/brand/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#1e3a8a"
+   }
+  },
+  {
+   "name": "palette/brand/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#172554"
+   }
+  },
+  {
+   "name": "palette/neutral/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f8fafc"
+   }
+  },
+  {
+   "name": "palette/neutral/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f1f5f9"
+   }
+  },
+  {
+   "name": "palette/neutral/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#e2e8f0"
+   }
+  },
+  {
+   "name": "palette/neutral/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#cbd5e1"
+   }
+  },
+  {
+   "name": "palette/neutral/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#94a3b8"
+   }
+  },
+  {
+   "name": "palette/neutral/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#64748b"
+   }
+  },
+  {
+   "name": "palette/neutral/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#475569"
+   }
+  },
+  {
+   "name": "palette/neutral/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#334155"
+   }
+  },
+  {
+   "name": "palette/neutral/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#1e293b"
+   }
+  },
+  {
+   "name": "palette/neutral/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0f172a"
+   }
+  },
+  {
+   "name": "palette/neutral/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#020617"
+   }
+  },
+  {
+   "name": "palette/red/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fef2f2"
+   }
+  },
+  {
+   "name": "palette/red/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fee2e2"
+   }
+  },
+  {
+   "name": "palette/red/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fecaca"
+   }
+  },
+  {
+   "name": "palette/red/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fca5a5"
+   }
+  },
+  {
+   "name": "palette/red/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f87171"
+   }
+  },
+  {
+   "name": "palette/red/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ef4444"
+   }
+  },
+  {
+   "name": "palette/red/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#dc2626"
+   }
+  },
+  {
+   "name": "palette/red/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#b91c1c"
+   }
+  },
+  {
+   "name": "palette/red/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#991b1b"
+   }
+  },
+  {
+   "name": "palette/red/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#7f1d1d"
+   }
+  },
+  {
+   "name": "palette/red/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#450a0a"
+   }
+  },
+  {
+   "name": "palette/amber/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fffbeb"
+   }
+  },
+  {
+   "name": "palette/amber/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fef3c7"
+   }
+  },
+  {
+   "name": "palette/amber/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fde68a"
+   }
+  },
+  {
+   "name": "palette/amber/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fcd34d"
+   }
+  },
+  {
+   "name": "palette/amber/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fbbf24"
+   }
+  },
+  {
+   "name": "palette/amber/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f59e0b"
+   }
+  },
+  {
+   "name": "palette/amber/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#d97706"
+   }
+  },
+  {
+   "name": "palette/amber/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#b45309"
+   }
+  },
+  {
+   "name": "palette/amber/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#92400e"
+   }
+  },
+  {
+   "name": "palette/amber/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#78350f"
+   }
+  },
+  {
+   "name": "palette/amber/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#451a03"
+   }
+  },
+  {
+   "name": "palette/green/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f0fdf4"
+   }
+  },
+  {
+   "name": "palette/green/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#dcfce7"
+   }
+  },
+  {
+   "name": "palette/green/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#bbf7d0"
+   }
+  },
+  {
+   "name": "palette/green/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#86efac"
+   }
+  },
+  {
+   "name": "palette/green/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#4ade80"
+   }
+  },
+  {
+   "name": "palette/green/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#22c55e"
+   }
+  },
+  {
+   "name": "palette/green/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#16a34a"
+   }
+  },
+  {
+   "name": "palette/green/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#15803d"
+   }
+  },
+  {
+   "name": "palette/green/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#166534"
+   }
+  },
+  {
+   "name": "palette/green/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#14532d"
+   }
+  },
+  {
+   "name": "palette/green/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#052e16"
+   }
+  },
+  {
+   "name": "palette/blue/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f0f9ff"
+   }
+  },
+  {
+   "name": "palette/blue/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#e0f2fe"
+   }
+  },
+  {
+   "name": "palette/blue/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#bae6fd"
+   }
+  },
+  {
+   "name": "palette/blue/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#7dd3fc"
+   }
+  },
+  {
+   "name": "palette/blue/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#38bdf8"
+   }
+  },
+  {
+   "name": "palette/blue/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0ea5e9"
+   }
+  },
+  {
+   "name": "palette/blue/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0284c7"
+   }
+  },
+  {
+   "name": "palette/blue/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0369a1"
+   }
+  },
+  {
+   "name": "palette/blue/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#075985"
+   }
+  },
+  {
+   "name": "palette/blue/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0c4a6e"
+   }
+  },
+  {
+   "name": "palette/blue/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#082f49"
+   }
+  },
+  {
+   "name": "palette/slate/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f8fafc"
+   }
+  },
+  {
+   "name": "palette/slate/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f1f5f9"
+   }
+  },
+  {
+   "name": "palette/slate/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#e2e8f0"
+   }
+  },
+  {
+   "name": "palette/slate/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#cbd5e1"
+   }
+  },
+  {
+   "name": "palette/slate/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#94a3b8"
+   }
+  },
+  {
+   "name": "palette/slate/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#64748b"
+   }
+  },
+  {
+   "name": "palette/slate/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#475569"
+   }
+  },
+  {
+   "name": "palette/slate/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#334155"
+   }
+  },
+  {
+   "name": "palette/slate/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#1e293b"
+   }
+  },
+  {
+   "name": "palette/slate/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0f172a"
+   }
+  },
+  {
+   "name": "palette/slate/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#020617"
+   }
+  },
+  {
+   "name": "palette/sky/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f0f9ff"
+   }
+  },
+  {
+   "name": "palette/sky/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#e0f2fe"
+   }
+  },
+  {
+   "name": "palette/sky/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#bae6fd"
+   }
+  },
+  {
+   "name": "palette/sky/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#7dd3fc"
+   }
+  },
+  {
+   "name": "palette/sky/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#38bdf8"
+   }
+  },
+  {
+   "name": "palette/sky/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0ea5e9"
+   }
+  },
+  {
+   "name": "palette/sky/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0284c7"
+   }
+  },
+  {
+   "name": "palette/sky/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0369a1"
+   }
+  },
+  {
+   "name": "palette/sky/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#075985"
+   }
+  },
+  {
+   "name": "palette/sky/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0c4a6e"
+   }
+  },
+  {
+   "name": "palette/sky/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#082f49"
+   }
+  },
+  {
+   "name": "palette/indigo/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#eef2ff"
+   }
+  },
+  {
+   "name": "palette/indigo/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#e0e7ff"
+   }
+  },
+  {
+   "name": "palette/indigo/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#c7d2fe"
+   }
+  },
+  {
+   "name": "palette/indigo/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#a5b4fc"
+   }
+  },
+  {
+   "name": "palette/indigo/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#818cf8"
+   }
+  },
+  {
+   "name": "palette/indigo/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#6366f1"
+   }
+  },
+  {
+   "name": "palette/indigo/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#4f46e5"
+   }
+  },
+  {
+   "name": "palette/indigo/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#4338ca"
+   }
+  },
+  {
+   "name": "palette/indigo/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#3730a3"
+   }
+  },
+  {
+   "name": "palette/indigo/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#312e81"
+   }
+  },
+  {
+   "name": "palette/indigo/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#1e1b4b"
+   }
+  },
+  {
+   "name": "palette/purple/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#faf5ff"
+   }
+  },
+  {
+   "name": "palette/purple/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f3e8ff"
+   }
+  },
+  {
+   "name": "palette/purple/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#e9d5ff"
+   }
+  },
+  {
+   "name": "palette/purple/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#d8b4fe"
+   }
+  },
+  {
+   "name": "palette/purple/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#c084fc"
+   }
+  },
+  {
+   "name": "palette/purple/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#a855f7"
+   }
+  },
+  {
+   "name": "palette/purple/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#9333ea"
+   }
+  },
+  {
+   "name": "palette/purple/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#7e22ce"
+   }
+  },
+  {
+   "name": "palette/purple/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#6b21a8"
+   }
+  },
+  {
+   "name": "palette/purple/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#581c87"
+   }
+  },
+  {
+   "name": "palette/purple/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#3b0764"
+   }
+  },
+  {
+   "name": "palette/pink/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fdf2f8"
+   }
+  },
+  {
+   "name": "palette/pink/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fce7f3"
+   }
+  },
+  {
+   "name": "palette/pink/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fbcfe8"
+   }
+  },
+  {
+   "name": "palette/pink/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f9a8d4"
+   }
+  },
+  {
+   "name": "palette/pink/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f472b6"
+   }
+  },
+  {
+   "name": "palette/pink/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ec4899"
+   }
+  },
+  {
+   "name": "palette/pink/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#db2777"
+   }
+  },
+  {
+   "name": "palette/pink/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#be185d"
+   }
+  },
+  {
+   "name": "palette/pink/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#9d174d"
+   }
+  },
+  {
+   "name": "palette/pink/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#831843"
+   }
+  },
+  {
+   "name": "palette/pink/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#500724"
+   }
+  },
+  {
+   "name": "palette/orange/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fff7ed"
+   }
+  },
+  {
+   "name": "palette/orange/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffedd5"
+   }
+  },
+  {
+   "name": "palette/orange/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fed7aa"
+   }
+  },
+  {
+   "name": "palette/orange/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fdba74"
+   }
+  },
+  {
+   "name": "palette/orange/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#fb923c"
+   }
+  },
+  {
+   "name": "palette/orange/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f97316"
+   }
+  },
+  {
+   "name": "palette/orange/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ea580c"
+   }
+  },
+  {
+   "name": "palette/orange/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#c2410c"
+   }
+  },
+  {
+   "name": "palette/orange/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#9a3412"
+   }
+  },
+  {
+   "name": "palette/orange/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#7c2d12"
+   }
+  },
+  {
+   "name": "palette/orange/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#431407"
+   }
+  },
+  {
+   "name": "palette/teal/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#f0fdfa"
+   }
+  },
+  {
+   "name": "palette/teal/100",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ccfbf1"
+   }
+  },
+  {
+   "name": "palette/teal/200",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#99f6e4"
+   }
+  },
+  {
+   "name": "palette/teal/300",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#5eead4"
+   }
+  },
+  {
+   "name": "palette/teal/400",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#2dd4bf"
+   }
+  },
+  {
+   "name": "palette/teal/500",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#14b8a6"
+   }
+  },
+  {
+   "name": "palette/teal/600",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0d9488"
+   }
+  },
+  {
+   "name": "palette/teal/700",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0f766e"
+   }
+  },
+  {
+   "name": "palette/teal/800",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#115e59"
+   }
+  },
+  {
+   "name": "palette/teal/900",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#134e4a"
+   }
+  },
+  {
+   "name": "palette/teal/950",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#042f2e"
+   }
+  },
+  {
+   "name": "palette/alpha-black/5",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0000000d"
+   }
+  },
+  {
+   "name": "palette/alpha-white/5",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffff0d"
+   }
+  },
+  {
+   "name": "palette/alpha-black/10",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0000001a"
+   }
+  },
+  {
+   "name": "palette/alpha-white/10",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffff1a"
+   }
+  },
+  {
+   "name": "palette/alpha-black/20",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#00000033"
+   }
+  },
+  {
+   "name": "palette/alpha-white/20",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffff33"
+   }
+  },
+  {
+   "name": "palette/alpha-black/30",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#0000004d"
+   }
+  },
+  {
+   "name": "palette/alpha-white/30",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffff4d"
+   }
+  },
+  {
+   "name": "palette/alpha-black/40",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#00000066"
+   }
+  },
+  {
+   "name": "palette/alpha-white/40",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffff66"
+   }
+  },
+  {
+   "name": "palette/alpha-black/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#00000080"
+   }
+  },
+  {
+   "name": "palette/alpha-white/50",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffff80"
+   }
+  },
+  {
+   "name": "palette/alpha-black/60",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#00000099"
+   }
+  },
+  {
+   "name": "palette/alpha-white/60",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffff99"
+   }
+  },
+  {
+   "name": "palette/alpha-black/70",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#000000b2"
+   }
+  },
+  {
+   "name": "palette/alpha-white/70",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffffb2"
+   }
+  },
+  {
+   "name": "palette/alpha-black/80",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#000000cc"
+   }
+  },
+  {
+   "name": "palette/alpha-white/80",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffffcc"
+   }
+  },
+  {
+   "name": "palette/alpha-black/90",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#000000e5"
+   }
+  },
+  {
+   "name": "palette/alpha-white/90",
+   "collection": "Primitives",
+   "type": "COLOR",
+   "description": "",
+   "values": {
+    "Value": "#ffffffe5"
+   }
+  },
+  {
+   "name": "scale/space/0",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 0
+   }
+  },
+  {
+   "name": "scale/space/2",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 2
+   }
+  },
+  {
+   "name": "scale/space/4",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 4
+   }
+  },
+  {
+   "name": "scale/space/6",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 6
+   }
+  },
+  {
+   "name": "scale/space/8",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 8
+   }
+  },
+  {
+   "name": "scale/space/12",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 12
+   }
+  },
+  {
+   "name": "scale/space/16",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 16
+   }
+  },
+  {
+   "name": "scale/space/20",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 20
+   }
+  },
+  {
+   "name": "scale/space/24",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 24
+   }
+  },
+  {
+   "name": "scale/space/32",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 32
+   }
+  },
+  {
+   "name": "scale/space/40",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 40
+   }
+  },
+  {
+   "name": "scale/space/48",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 48
+   }
+  },
+  {
+   "name": "scale/space/64",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 64
+   }
+  },
+  {
+   "name": "scale/space/80",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 80
+   }
+  },
+  {
+   "name": "scale/space/96",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 96
+   }
+  },
+  {
+   "name": "scale/space/128",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 128
+   }
+  },
+  {
+   "name": "scale/space/160",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 160
+   }
+  },
+  {
+   "name": "scale/size/3",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 3
+   }
+  },
+  {
+   "name": "scale/size/4",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 4
+   }
+  },
+  {
+   "name": "scale/size/6",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 6
+   }
+  },
+  {
+   "name": "scale/size/8",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 8
+   }
+  },
+  {
+   "name": "scale/size/10",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 10
+   }
+  },
+  {
+   "name": "scale/size/12",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 12
+   }
+  },
+  {
+   "name": "scale/size/14",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 14
+   }
+  },
+  {
+   "name": "scale/size/16",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 16
+   }
+  },
+  {
+   "name": "scale/size/20",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 20
+   }
+  },
+  {
+   "name": "scale/size/24",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 24
+   }
+  },
+  {
+   "name": "scale/size/28",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 28
+   }
+  },
+  {
+   "name": "scale/size/32",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 32
+   }
+  },
+  {
+   "name": "scale/size/36",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 36
+   }
+  },
+  {
+   "name": "scale/size/40",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 40
+   }
+  },
+  {
+   "name": "scale/size/44",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 44
+   }
+  },
+  {
+   "name": "scale/size/48",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 48
+   }
+  },
+  {
+   "name": "scale/size/56",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 56
+   }
+  },
+  {
+   "name": "scale/size/64",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 64
+   }
+  },
+  {
+   "name": "scale/size/72",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 72
+   }
+  },
+  {
+   "name": "scale/size/80",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 80
+   }
+  },
+  {
+   "name": "scale/size/90",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 90
+   }
+  },
+  {
+   "name": "scale/size/96",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 96
+   }
+  },
+  {
+   "name": "scale/size/120",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 120
+   }
+  },
+  {
+   "name": "scale/size/128",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 128
+   }
+  },
+  {
+   "name": "scale/size/160",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 160
+   }
+  },
+  {
+   "name": "scale/size/200",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 200
+   }
+  },
+  {
+   "name": "scale/size/240",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 240
+   }
+  },
+  {
+   "name": "scale/size/280",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 280
+   }
+  },
+  {
+   "name": "scale/size/320",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 320
+   }
+  },
+  {
+   "name": "scale/size/360",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 360
+   }
+  },
+  {
+   "name": "scale/size/384",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 384
+   }
+  },
+  {
+   "name": "scale/size/480",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 480
+   }
+  },
+  {
+   "name": "scale/size/540",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 540
+   }
+  },
+  {
+   "name": "scale/size/560",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 560
+   }
+  },
+  {
+   "name": "scale/size/640",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 640
+   }
+  },
+  {
+   "name": "scale/size/720",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 720
+   }
+  },
+  {
+   "name": "scale/size/768",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 768
+   }
+  },
+  {
+   "name": "scale/size/960",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 960
+   }
+  },
+  {
+   "name": "scale/size/1024",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 1024
+   }
+  },
+  {
+   "name": "scale/size/1280",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 1280
+   }
+  },
+  {
+   "name": "scale/size/1440",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 1440
+   }
+  },
+  {
+   "name": "scale/size/1600",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 1600
+   }
+  },
+  {
+   "name": "scale/size/1920",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 1920
+   }
+  },
+  {
+   "name": "scale/radius/0",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 0
+   }
+  },
+  {
+   "name": "scale/radius/4",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 4
+   }
+  },
+  {
+   "name": "scale/radius/6",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 6
+   }
+  },
+  {
+   "name": "scale/radius/8",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 8
+   }
+  },
+  {
+   "name": "scale/radius/12",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 12
+   }
+  },
+  {
+   "name": "scale/radius/16",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 16
+   }
+  },
+  {
+   "name": "scale/radius/9999",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 9999
+   }
+  },
+  {
+   "name": "scale/border-width/1",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 1
+   }
+  },
+  {
+   "name": "scale/border-width/2",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 2
+   }
+  },
+  {
+   "name": "scale/border-width/3",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 3
+   }
+  },
+  {
+   "name": "scale/font-size/12",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 12
+   }
+  },
+  {
+   "name": "scale/font-size/14",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 14
+   }
+  },
+  {
+   "name": "scale/font-size/16",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 16
+   }
+  },
+  {
+   "name": "scale/font-size/18",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 18
+   }
+  },
+  {
+   "name": "scale/font-size/20",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 20
+   }
+  },
+  {
+   "name": "scale/font-size/24",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 24
+   }
+  },
+  {
+   "name": "scale/font-size/30",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 30
+   }
+  },
+  {
+   "name": "scale/font-size/36",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 36
+   }
+  },
+  {
+   "name": "scale/font-size/48",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 48
+   }
+  },
+  {
+   "name": "scale/font-size/60",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 60
+   }
+  },
+  {
+   "name": "scale/line-height/18",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 18
+   }
+  },
+  {
+   "name": "scale/line-height/20",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 20
+   }
+  },
+  {
+   "name": "scale/line-height/24",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 24
+   }
+  },
+  {
+   "name": "scale/line-height/28",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 28
+   }
+  },
+  {
+   "name": "scale/line-height/30",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 30
+   }
+  },
+  {
+   "name": "scale/line-height/32",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 32
+   }
+  },
+  {
+   "name": "scale/line-height/38",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 38
+   }
+  },
+  {
+   "name": "scale/line-height/44",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 44
+   }
+  },
+  {
+   "name": "scale/line-height/60",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 60
+   }
+  },
+  {
+   "name": "scale/line-height/72",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 72
+   }
+  },
+  {
+   "name": "scale/font-weight/400",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 400
+   }
+  },
+  {
+   "name": "scale/font-weight/500",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 500
+   }
+  },
+  {
+   "name": "scale/font-weight/600",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 600
+   }
+  },
+  {
+   "name": "scale/font-weight/700",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 700
+   }
+  },
+  {
+   "name": "scale/duration/0",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 0
+   }
+  },
+  {
+   "name": "scale/duration/120",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 120
+   }
+  },
+  {
+   "name": "scale/duration/200",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 200
+   }
+  },
+  {
+   "name": "scale/duration/250",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 250
+   }
+  },
+  {
+   "name": "scale/duration/300",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 300
+   }
+  },
+  {
+   "name": "scale/duration/400",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 400
+   }
+  },
+  {
+   "name": "scale/duration/900",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 900
+   }
+  },
+  {
+   "name": "scale/duration/1800",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 1800
+   }
+  },
+  {
+   "name": "scale/duration/5000",
+   "collection": "Primitives",
+   "type": "FLOAT",
+   "description": "",
+   "values": {
+    "Value": 5000
+   }
+  },
+  {
+   "name": "color/text/primary",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Primary text such as page headings, table cell values and body copy.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/900"
+    },
+    "Dark": {
+     "alias": "palette/neutral/50"
+    }
+   }
+  },
+  {
+   "name": "color/text/primary/on-brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Primary text on solid brand surfaces, such as a brand-colored banner heading.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/base/white"
+    }
+   }
+  },
+  {
+   "name": "color/text/secondary",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Secondary text such as labels, section headings and navigation items.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/700"
+    },
+    "Dark": {
+     "alias": "palette/neutral/300"
+    }
+   }
+  },
+  {
+   "name": "color/text/secondary/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Secondary text in hover states, such as a navigation item under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/800"
+    },
+    "Dark": {
+     "alias": "palette/neutral/200"
+    }
+   }
+  },
+  {
+   "name": "color/text/secondary/on-brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Secondary text on solid brand surfaces.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/100"
+    },
+    "Dark": {
+     "alias": "palette/brand/100"
+    }
+   }
+  },
+  {
+   "name": "color/text/tertiary",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Supporting text such as descriptions, timestamps and helper copy.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/600"
+    },
+    "Dark": {
+     "alias": "palette/neutral/400"
+    }
+   }
+  },
+  {
+   "name": "color/text/tertiary/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Supporting text in hover states, such as a breadcrumb link.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/700"
+    },
+    "Dark": {
+     "alias": "palette/neutral/300"
+    }
+   }
+  },
+  {
+   "name": "color/text/tertiary/on-brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Supporting text on solid brand surfaces.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/200"
+    },
+    "Dark": {
+     "alias": "palette/brand/200"
+    }
+   }
+  },
+  {
+   "name": "color/text/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text in disabled controls and unavailable menu items.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/400"
+    },
+    "Dark": {
+     "alias": "palette/neutral/600"
+    }
+   }
+  },
+  {
+   "name": "color/text/placeholder",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Placeholder and empty-input hint text.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/500"
+    },
+    "Dark": {
+     "alias": "palette/neutral/500"
+    }
+   }
+  },
+  {
+   "name": "color/text/inverse",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text on inverse surfaces such as tooltips.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/text/on-solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text on any solid tone fill: primary buttons, solid badges, danger buttons.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/base/white"
+    }
+   }
+  },
+  {
+   "name": "color/text/brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Brand-colored text such as links and highlighted figures.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/700"
+    },
+    "Dark": {
+     "alias": "palette/brand/300"
+    }
+   }
+  },
+  {
+   "name": "color/text/brand/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Links and brand text under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/800"
+    },
+    "Dark": {
+     "alias": "palette/brand/200"
+    }
+   }
+  },
+  {
+   "name": "color/text/brand/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Links and brand text while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/900"
+    },
+    "Dark": {
+     "alias": "palette/brand/100"
+    }
+   }
+  },
+  {
+   "name": "color/text/danger",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Error messages and danger text, such as an invalid-field message.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/700"
+    },
+    "Dark": {
+     "alias": "palette/red/400"
+    }
+   }
+  },
+  {
+   "name": "color/text/warning",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Warning messages and caution labels.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/700"
+    },
+    "Dark": {
+     "alias": "palette/amber/400"
+    }
+   }
+  },
+  {
+   "name": "color/text/success",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Success messages and positive values.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/700"
+    },
+    "Dark": {
+     "alias": "palette/green/400"
+    }
+   }
+  },
+  {
+   "name": "color/text/info",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Informational messages and neutral notices.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/700"
+    },
+    "Dark": {
+     "alias": "palette/blue/400"
+    }
+   }
+  },
+  {
+   "name": "color/icon/primary",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Icons that carry the main meaning of a row or control.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/800"
+    },
+    "Dark": {
+     "alias": "palette/neutral/100"
+    }
+   }
+  },
+  {
+   "name": "color/icon/primary/on-brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Primary icons on solid brand surfaces.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/base/white"
+    }
+   }
+  },
+  {
+   "name": "color/icon/secondary",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Icons in buttons, inputs and menu items.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/600"
+    },
+    "Dark": {
+     "alias": "palette/neutral/400"
+    }
+   }
+  },
+  {
+   "name": "color/icon/secondary/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Icons in those controls under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/700"
+    },
+    "Dark": {
+     "alias": "palette/neutral/300"
+    }
+   }
+  },
+  {
+   "name": "color/icon/secondary/on-brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Secondary icons on solid brand surfaces.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/200"
+    },
+    "Dark": {
+     "alias": "palette/brand/200"
+    }
+   }
+  },
+  {
+   "name": "color/icon/tertiary",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Supporting icons such as a chevron in a list row or a metadata icon.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/500"
+    },
+    "Dark": {
+     "alias": "palette/neutral/500"
+    }
+   }
+  },
+  {
+   "name": "color/icon/tertiary/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Supporting icons under the pointer, such as a help icon on hover.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/600"
+    },
+    "Dark": {
+     "alias": "palette/neutral/400"
+    }
+   }
+  },
+  {
+   "name": "color/icon/tertiary/on-brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Supporting icons on solid brand surfaces.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/300"
+    },
+    "Dark": {
+     "alias": "palette/brand/300"
+    }
+   }
+  },
+  {
+   "name": "color/icon/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Icons in disabled controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/300"
+    },
+    "Dark": {
+     "alias": "palette/neutral/700"
+    }
+   }
+  },
+  {
+   "name": "color/icon/placeholder",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Leading icons inside empty inputs, such as a search icon.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/400"
+    },
+    "Dark": {
+     "alias": "palette/neutral/600"
+    }
+   }
+  },
+  {
+   "name": "color/icon/inverse",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Icons on inverse surfaces such as tooltips.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/icon/on-solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Icons on solid tone fills, such as the icon in a primary button.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/base/white"
+    }
+   }
+  },
+  {
+   "name": "color/icon/brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Brand icons such as a selected navigation icon or an active tab icon.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/600"
+    },
+    "Dark": {
+     "alias": "palette/brand/400"
+    }
+   }
+  },
+  {
+   "name": "color/icon/brand/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Brand icons under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/700"
+    },
+    "Dark": {
+     "alias": "palette/brand/300"
+    }
+   }
+  },
+  {
+   "name": "color/icon/brand/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Brand icons while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/800"
+    },
+    "Dark": {
+     "alias": "palette/brand/200"
+    }
+   }
+  },
+  {
+   "name": "color/icon/danger",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Error icons in alerts, fields and featured icons.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/600"
+    },
+    "Dark": {
+     "alias": "palette/red/500"
+    }
+   }
+  },
+  {
+   "name": "color/icon/warning",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Warning icons; also the filled part of rating stars.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/600"
+    },
+    "Dark": {
+     "alias": "palette/amber/500"
+    }
+   }
+  },
+  {
+   "name": "color/icon/success",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Success icons, online dots and positive trend arrows.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/600"
+    },
+    "Dark": {
+     "alias": "palette/green/500"
+    }
+   }
+  },
+  {
+   "name": "color/icon/info",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Informational icons.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/600"
+    },
+    "Dark": {
+     "alias": "palette/blue/500"
+    }
+   }
+  },
+  {
+   "name": "color/border/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Dividers, table rows and the outline of cards and menus.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/200"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/border/default",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Default border around form controls, checkboxes and secondary buttons.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/300"
+    },
+    "Dark": {
+     "alias": "palette/neutral/700"
+    }
+   }
+  },
+  {
+   "name": "color/border/strong",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Borders that must stand out, such as a control boundary on a tinted surface or a hovered input.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/600"
+    },
+    "Dark": {
+     "alias": "palette/neutral/400"
+    }
+   }
+  },
+  {
+   "name": "color/border/brand",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Selected controls and active inputs, such as a selected choice card or a focused field.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/600"
+    },
+    "Dark": {
+     "alias": "palette/brand/400"
+    }
+   }
+  },
+  {
+   "name": "color/border/brand/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Brand-tinted outlines, such as a brand badge border.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/300"
+    },
+    "Dark": {
+     "alias": "palette/brand/800"
+    }
+   }
+  },
+  {
+   "name": "color/border/danger",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Border of an invalid field.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/600"
+    },
+    "Dark": {
+     "alias": "palette/red/400"
+    }
+   }
+  },
+  {
+   "name": "color/border/danger/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of danger badges and error alerts.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/300"
+    },
+    "Dark": {
+     "alias": "palette/red/800"
+    }
+   }
+  },
+  {
+   "name": "color/border/warning",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Border of a field with a warning.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/500"
+    },
+    "Dark": {
+     "alias": "palette/amber/400"
+    }
+   }
+  },
+  {
+   "name": "color/border/warning/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of warning badges and alerts.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/300"
+    },
+    "Dark": {
+     "alias": "palette/amber/800"
+    }
+   }
+  },
+  {
+   "name": "color/border/success",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Border of a validated field.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/600"
+    },
+    "Dark": {
+     "alias": "palette/green/400"
+    }
+   }
+  },
+  {
+   "name": "color/border/success/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of success badges and alerts.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/300"
+    },
+    "Dark": {
+     "alias": "palette/green/800"
+    }
+   }
+  },
+  {
+   "name": "color/border/info",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Border of an informational field or callout.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/600"
+    },
+    "Dark": {
+     "alias": "palette/blue/400"
+    }
+   }
+  },
+  {
+   "name": "color/border/info/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of info badges and alerts.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/300"
+    },
+    "Dark": {
+     "alias": "palette/blue/800"
+    }
+   }
+  },
+  {
+   "name": "color/border/focus",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Focus ring color.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/500"
+    },
+    "Dark": {
+     "alias": "palette/brand/400"
+    }
+   }
+  },
+  {
+   "name": "color/border/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Borders of disabled controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/200"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/surface/base",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Page background and the default background of cards and controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/neutral/950"
+    }
+   }
+  },
+  {
+   "name": "color/surface/base/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Rows, list items and secondary buttons under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/surface/base/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Rows, list items and secondary buttons while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/surface/sunken",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Recessed areas: page sections behind cards, table headers, code blocks.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/base/black"
+    }
+   }
+  },
+  {
+   "name": "color/surface/sunken/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Recessed rows under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/surface/raised",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Cards and panels that sit above the page; used with elevation/raised.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/surface/raised/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Clickable cards under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/surface/overlay",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Menus, popovers, dialogs and drawers; used with elevation/overlay and elevation/modal.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/white"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/surface/inverse",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Inverse surfaces such as tooltips and dark callouts.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/900"
+    },
+    "Dark": {
+     "alias": "palette/neutral/50"
+    }
+   }
+  },
+  {
+   "name": "color/surface/brand-subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Lightly tinted brand areas, such as a highlighted plan card or an announcement panel.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/50"
+    },
+    "Dark": {
+     "alias": "palette/brand/950"
+    }
+   }
+  },
+  {
+   "name": "color/surface/brand-subtle/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted brand areas under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/100"
+    },
+    "Dark": {
+     "alias": "palette/brand/900"
+    }
+   }
+  },
+  {
+   "name": "color/surface/brand-solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid brand sections such as a marketing banner; content on it uses the on-brand roles.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/700"
+    },
+    "Dark": {
+     "alias": "palette/brand/700"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid neutral fill, such as solid neutral badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/900"
+    },
+    "Dark": {
+     "alias": "palette/neutral/50"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/solid/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid neutral fill under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/800"
+    },
+    "Dark": {
+     "alias": "palette/neutral/100"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/solid/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid neutral fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/700"
+    },
+    "Dark": {
+     "alias": "palette/neutral/200"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/solid/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "A selected solid neutral item.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/800"
+    },
+    "Dark": {
+     "alias": "palette/neutral/100"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/solid/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid neutral fills of disabled controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted neutral fill: neutral badges, ghost-button hovers and selected rows in lists.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/subtle/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted neutral fill under the pointer, such as a tertiary button or menu row hover.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/subtle/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted neutral fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/200"
+    },
+    "Dark": {
+     "alias": "palette/neutral/700"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/subtle/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Selected rows and selected neutral items, such as a chosen segment or command.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/subtle/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid brand fill: primary buttons, checked checkboxes and radios, switches that are on and progress fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/600"
+    },
+    "Dark": {
+     "alias": "palette/brand/600"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/solid/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid brand fill under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/700"
+    },
+    "Dark": {
+     "alias": "palette/brand/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/solid/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid brand fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/800"
+    },
+    "Dark": {
+     "alias": "palette/brand/700"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/solid/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "A selected solid brand item, such as the active segment of a segmented control.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/700"
+    },
+    "Dark": {
+     "alias": "palette/brand/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/solid/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid brand fills of disabled controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted brand fill: brand badges, highlighted options and selected brand rows.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/50"
+    },
+    "Dark": {
+     "alias": "palette/brand/950"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/subtle/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted brand fill under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/100"
+    },
+    "Dark": {
+     "alias": "palette/brand/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/subtle/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted brand fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/200"
+    },
+    "Dark": {
+     "alias": "palette/brand/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/subtle/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Selected rows and selected brand items, such as a chosen segment or command.",
+   "values": {
+    "Light": {
+     "alias": "palette/brand/100"
+    },
+    "Dark": {
+     "alias": "palette/brand/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/brand/subtle/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid danger fill: danger buttons and destructive confirmations.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/600"
+    },
+    "Dark": {
+     "alias": "palette/red/600"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/solid/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid danger fill under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/700"
+    },
+    "Dark": {
+     "alias": "palette/red/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/solid/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid danger fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/800"
+    },
+    "Dark": {
+     "alias": "palette/red/700"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/solid/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "A selected solid danger item, such as the active segment of a segmented control.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/700"
+    },
+    "Dark": {
+     "alias": "palette/red/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/solid/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid danger fills of disabled controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted danger fill: danger badges, error alert backgrounds and danger hovers.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/50"
+    },
+    "Dark": {
+     "alias": "palette/red/950"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/subtle/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted danger fill under the pointer, such as a tertiary button or menu row hover.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/100"
+    },
+    "Dark": {
+     "alias": "palette/red/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/subtle/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted danger fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/200"
+    },
+    "Dark": {
+     "alias": "palette/red/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/subtle/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Selected rows and selected danger items, such as a chosen segment or command.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/100"
+    },
+    "Dark": {
+     "alias": "palette/red/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/danger/subtle/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid warning fill: solid warning badges and caution markers.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/600"
+    },
+    "Dark": {
+     "alias": "palette/amber/600"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/solid/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid warning fill under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/700"
+    },
+    "Dark": {
+     "alias": "palette/amber/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/solid/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid warning fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/800"
+    },
+    "Dark": {
+     "alias": "palette/amber/700"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/solid/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "A selected solid warning item, such as the active segment of a segmented control.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/700"
+    },
+    "Dark": {
+     "alias": "palette/amber/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/solid/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid warning fills of disabled controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted warning fill: warning badges and warning alert backgrounds.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/50"
+    },
+    "Dark": {
+     "alias": "palette/amber/950"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/subtle/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted warning fill under the pointer, such as a tertiary button or menu row hover.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/100"
+    },
+    "Dark": {
+     "alias": "palette/amber/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/subtle/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted warning fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/200"
+    },
+    "Dark": {
+     "alias": "palette/amber/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/subtle/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Selected rows and selected warning items, such as a chosen segment or command.",
+   "values": {
+    "Light": {
+     "alias": "palette/amber/100"
+    },
+    "Dark": {
+     "alias": "palette/amber/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/warning/subtle/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid success fill: solid success badges and completed-step markers.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/600"
+    },
+    "Dark": {
+     "alias": "palette/green/600"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/solid/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid success fill under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/700"
+    },
+    "Dark": {
+     "alias": "palette/green/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/solid/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid success fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/800"
+    },
+    "Dark": {
+     "alias": "palette/green/700"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/solid/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "A selected solid success item, such as the active segment of a segmented control.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/700"
+    },
+    "Dark": {
+     "alias": "palette/green/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/solid/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid success fills of disabled controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted success fill: success badges and success alert backgrounds.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/50"
+    },
+    "Dark": {
+     "alias": "palette/green/950"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/subtle/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted success fill under the pointer, such as a tertiary button or menu row hover.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/100"
+    },
+    "Dark": {
+     "alias": "palette/green/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/subtle/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted success fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/200"
+    },
+    "Dark": {
+     "alias": "palette/green/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/subtle/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Selected rows and selected success items, such as a chosen segment or command.",
+   "values": {
+    "Light": {
+     "alias": "palette/green/100"
+    },
+    "Dark": {
+     "alias": "palette/green/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/success/subtle/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid info fill: solid info badges and informational markers.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/600"
+    },
+    "Dark": {
+     "alias": "palette/blue/600"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/solid/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid info fill under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/700"
+    },
+    "Dark": {
+     "alias": "palette/blue/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/solid/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The solid info fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/800"
+    },
+    "Dark": {
+     "alias": "palette/blue/700"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/solid/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "A selected solid info item, such as the active segment of a segmented control.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/700"
+    },
+    "Dark": {
+     "alias": "palette/blue/500"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/solid/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Solid info fills of disabled controls.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/100"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted info fill: info badges and info alert backgrounds.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/50"
+    },
+    "Dark": {
+     "alias": "palette/blue/950"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/subtle/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted info fill under the pointer, such as a tertiary button or menu row hover.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/100"
+    },
+    "Dark": {
+     "alias": "palette/blue/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/subtle/pressed",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "The tinted info fill while pressed.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/200"
+    },
+    "Dark": {
+     "alias": "palette/blue/800"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/subtle/selected",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Selected rows and selected info items, such as a chosen segment or command.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/100"
+    },
+    "Dark": {
+     "alias": "palette/blue/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/info/subtle/disabled",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/50"
+    },
+    "Dark": {
+     "alias": "palette/neutral/900"
+    }
+   }
+  },
+  {
+   "name": "color/fill/none",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Transparent fill that keeps a layer bound, such as a ghost button at rest.",
+   "values": {
+    "Light": {
+     "alias": "palette/base/transparent"
+    },
+    "Dark": {
+     "alias": "palette/base/transparent"
+    }
+   }
+  },
+  {
+   "name": "color/fill/neutral/track",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Unfilled tracks: progress bars, sliders and the off state of switches.",
+   "values": {
+    "Light": {
+     "alias": "palette/neutral/200"
+    },
+    "Dark": {
+     "alias": "palette/neutral/800"
+    }
+   }
+  },
+  {
+   "name": "color/overlay/scrim",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Scrim behind dialogs and drawers that dims the page.",
+   "values": {
+    "Light": {
+     "alias": "palette/alpha-black/60"
+    },
+    "Dark": {
+     "alias": "palette/alpha-black/80"
+    }
+   }
+  },
+  {
+   "name": "color/shadow/ambient",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Soft, wide shadow layer that gives every elevation its spread.",
+   "values": {
+    "Light": {
+     "alias": "palette/alpha-black/5"
+    },
+    "Dark": {
+     "alias": "palette/alpha-black/20"
+    }
+   }
+  },
+  {
+   "name": "color/shadow/key",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Tighter, darker shadow layer that gives elevation its direction.",
+   "values": {
+    "Light": {
+     "alias": "palette/alpha-black/10"
+    },
+    "Dark": {
+     "alias": "palette/alpha-black/40"
+    }
+   }
+  },
+  {
+   "name": "color/category/slate/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Background of slate category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/slate/50"
+    },
+    "Dark": {
+     "alias": "palette/slate/950"
+    }
+   }
+  },
+  {
+   "name": "color/category/slate/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Slate chart series, category dots and avatar fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/slate/500"
+    },
+    "Dark": {
+     "alias": "palette/slate/500"
+    }
+   }
+  },
+  {
+   "name": "color/category/slate/text",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text and icons on the slate subtle background.",
+   "values": {
+    "Light": {
+     "alias": "palette/slate/700"
+    },
+    "Dark": {
+     "alias": "palette/slate/300"
+    }
+   }
+  },
+  {
+   "name": "color/category/slate/border",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of slate category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/slate/200"
+    },
+    "Dark": {
+     "alias": "palette/slate/800"
+    }
+   }
+  },
+  {
+   "name": "color/category/sky/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Background of sky category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/sky/50"
+    },
+    "Dark": {
+     "alias": "palette/sky/950"
+    }
+   }
+  },
+  {
+   "name": "color/category/sky/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Sky chart series, category dots and avatar fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/sky/500"
+    },
+    "Dark": {
+     "alias": "palette/sky/500"
+    }
+   }
+  },
+  {
+   "name": "color/category/sky/text",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text and icons on the sky subtle background.",
+   "values": {
+    "Light": {
+     "alias": "palette/sky/700"
+    },
+    "Dark": {
+     "alias": "palette/sky/300"
+    }
+   }
+  },
+  {
+   "name": "color/category/sky/border",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of sky category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/sky/200"
+    },
+    "Dark": {
+     "alias": "palette/sky/800"
+    }
+   }
+  },
+  {
+   "name": "color/category/blue/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Background of blue category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/50"
+    },
+    "Dark": {
+     "alias": "palette/blue/950"
+    }
+   }
+  },
+  {
+   "name": "color/category/blue/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Blue chart series, category dots and avatar fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/500"
+    },
+    "Dark": {
+     "alias": "palette/blue/500"
+    }
+   }
+  },
+  {
+   "name": "color/category/blue/text",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text and icons on the blue subtle background.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/700"
+    },
+    "Dark": {
+     "alias": "palette/blue/300"
+    }
+   }
+  },
+  {
+   "name": "color/category/blue/border",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of blue category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/blue/200"
+    },
+    "Dark": {
+     "alias": "palette/blue/800"
+    }
+   }
+  },
+  {
+   "name": "color/category/indigo/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Background of indigo category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/indigo/50"
+    },
+    "Dark": {
+     "alias": "palette/indigo/950"
+    }
+   }
+  },
+  {
+   "name": "color/category/indigo/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Indigo chart series, category dots and avatar fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/indigo/500"
+    },
+    "Dark": {
+     "alias": "palette/indigo/500"
+    }
+   }
+  },
+  {
+   "name": "color/category/indigo/text",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text and icons on the indigo subtle background.",
+   "values": {
+    "Light": {
+     "alias": "palette/indigo/700"
+    },
+    "Dark": {
+     "alias": "palette/indigo/300"
+    }
+   }
+  },
+  {
+   "name": "color/category/indigo/border",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of indigo category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/indigo/200"
+    },
+    "Dark": {
+     "alias": "palette/indigo/800"
+    }
+   }
+  },
+  {
+   "name": "color/category/purple/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Background of purple category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/purple/50"
+    },
+    "Dark": {
+     "alias": "palette/purple/950"
+    }
+   }
+  },
+  {
+   "name": "color/category/purple/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Purple chart series, category dots and avatar fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/purple/500"
+    },
+    "Dark": {
+     "alias": "palette/purple/500"
+    }
+   }
+  },
+  {
+   "name": "color/category/purple/text",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text and icons on the purple subtle background.",
+   "values": {
+    "Light": {
+     "alias": "palette/purple/700"
+    },
+    "Dark": {
+     "alias": "palette/purple/300"
+    }
+   }
+  },
+  {
+   "name": "color/category/purple/border",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of purple category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/purple/200"
+    },
+    "Dark": {
+     "alias": "palette/purple/800"
+    }
+   }
+  },
+  {
+   "name": "color/category/pink/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Background of pink category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/pink/50"
+    },
+    "Dark": {
+     "alias": "palette/pink/950"
+    }
+   }
+  },
+  {
+   "name": "color/category/pink/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Pink chart series, category dots and avatar fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/pink/500"
+    },
+    "Dark": {
+     "alias": "palette/pink/500"
+    }
+   }
+  },
+  {
+   "name": "color/category/pink/text",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text and icons on the pink subtle background.",
+   "values": {
+    "Light": {
+     "alias": "palette/pink/700"
+    },
+    "Dark": {
+     "alias": "palette/pink/300"
+    }
+   }
+  },
+  {
+   "name": "color/category/pink/border",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of pink category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/pink/200"
+    },
+    "Dark": {
+     "alias": "palette/pink/800"
+    }
+   }
+  },
+  {
+   "name": "color/category/orange/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Background of orange category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/orange/50"
+    },
+    "Dark": {
+     "alias": "palette/orange/950"
+    }
+   }
+  },
+  {
+   "name": "color/category/orange/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Orange chart series, category dots and avatar fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/orange/500"
+    },
+    "Dark": {
+     "alias": "palette/orange/500"
+    }
+   }
+  },
+  {
+   "name": "color/category/orange/text",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text and icons on the orange subtle background.",
+   "values": {
+    "Light": {
+     "alias": "palette/orange/700"
+    },
+    "Dark": {
+     "alias": "palette/orange/300"
+    }
+   }
+  },
+  {
+   "name": "color/category/orange/border",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of orange category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/orange/200"
+    },
+    "Dark": {
+     "alias": "palette/orange/800"
+    }
+   }
+  },
+  {
+   "name": "color/category/teal/subtle",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Background of teal category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/teal/50"
+    },
+    "Dark": {
+     "alias": "palette/teal/950"
+    }
+   }
+  },
+  {
+   "name": "color/category/teal/solid",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Teal chart series, category dots and avatar fills.",
+   "values": {
+    "Light": {
+     "alias": "palette/teal/500"
+    },
+    "Dark": {
+     "alias": "palette/teal/500"
+    }
+   }
+  },
+  {
+   "name": "color/category/teal/text",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Text and icons on the teal subtle background.",
+   "values": {
+    "Light": {
+     "alias": "palette/teal/700"
+    },
+    "Dark": {
+     "alias": "palette/teal/300"
+    }
+   }
+  },
+  {
+   "name": "color/category/teal/border",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Outline of teal category tags and badges.",
+   "values": {
+    "Light": {
+     "alias": "palette/teal/200"
+    },
+    "Dark": {
+     "alias": "palette/teal/800"
+    }
+   }
+  },
+  {
+   "name": "color/text/danger/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Danger text under the pointer, such as a secondary danger button label.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/800"
+    },
+    "Dark": {
+     "alias": "palette/red/300"
+    }
+   }
+  },
+  {
+   "name": "color/icon/danger/hover",
+   "collection": "Color",
+   "type": "COLOR",
+   "description": "Danger icons under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/red/700"
+    },
+    "Dark": {
+     "alias": "palette/red/400"
+    }
+   }
+  },
+  {
+   "name": "font/family/ui",
+   "collection": "Typography",
+   "type": "STRING",
+   "description": "Every interface role: display, headings, body, labels and controls.",
+   "values": {
+    "Value": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+   }
+  },
+  {
+   "name": "font/family/mono",
+   "collection": "Typography",
+   "type": "STRING",
+   "description": "Code, keys, IDs and tabular figures.",
+   "values": {
+    "Value": "ui-monospace, SFMono-Regular, Menlo, Consolas, \"Liberation Mono\", monospace"
+   }
+  },
+  {
+   "name": "font/weight/regular",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Reading text and input values.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-weight/400"
+    }
+   }
+  },
+  {
+   "name": "font/weight/medium",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Labels, badges, menu items and tags.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-weight/500"
+    }
+   }
+  },
+  {
+   "name": "font/weight/semibold",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Headings, buttons, links and emphasized labels.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-weight/600"
+    }
+   }
+  },
+  {
+   "name": "font/weight/bold",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Heavier display and heading alternates.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-weight/700"
+    }
+   }
+  },
+  {
+   "name": "font/size/display-lg",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/display/lg: hero and marketing headings.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/60"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/display-lg",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/display/lg.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/72"
+    }
+   }
+  },
+  {
+   "name": "font/size/display-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/display/md: hero and marketing headings.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/48"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/display-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/display/md.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/60"
+    }
+   }
+  },
+  {
+   "name": "font/size/display-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/display/sm: hero and marketing headings.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/36"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/display-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/display/sm.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/44"
+    }
+   }
+  },
+  {
+   "name": "font/size/heading-xl",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/heading/xl: page, section, card and dialog titles.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/30"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/heading-xl",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/heading/xl.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/38"
+    }
+   }
+  },
+  {
+   "name": "font/size/heading-lg",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/heading/lg: page, section, card and dialog titles.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/24"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/heading-lg",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/heading/lg.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/32"
+    }
+   }
+  },
+  {
+   "name": "font/size/heading-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/heading/md: page, section, card and dialog titles.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/20"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/heading-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/heading/md.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/30"
+    }
+   }
+  },
+  {
+   "name": "font/size/heading-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/heading/sm: page, section, card and dialog titles.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/18"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/heading-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/heading/sm.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/28"
+    }
+   }
+  },
+  {
+   "name": "font/size/heading-xs",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/heading/xs: page, section, card and dialog titles.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/16"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/heading-xs",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/heading/xs.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/24"
+    }
+   }
+  },
+  {
+   "name": "font/size/body-xl",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/body/xl: running text, labels and text inside controls.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/20"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/body-xl",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/body/xl.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/30"
+    }
+   }
+  },
+  {
+   "name": "font/size/body-lg",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/body/lg: running text, labels and text inside controls.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/18"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/body-lg",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/body/lg.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/28"
+    }
+   }
+  },
+  {
+   "name": "font/size/body-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/body/md: running text, labels and text inside controls.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/16"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/body-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/body/md.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/24"
+    }
+   }
+  },
+  {
+   "name": "font/size/body-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/body/sm: running text, labels and text inside controls.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/14"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/body-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/body/sm.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/20"
+    }
+   }
+  },
+  {
+   "name": "font/size/body-xs",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/body/xs: running text, labels and text inside controls.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/12"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/body-xs",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/body/xs.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/18"
+    }
+   }
+  },
+  {
+   "name": "font/size/code-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/code/md: code, IDs, keys and tabular figures.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/14"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/code-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/code/md.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/20"
+    }
+   }
+  },
+  {
+   "name": "font/size/code-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Size of type/code/sm: code, IDs, keys and tabular figures.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/12"
+    }
+   }
+  },
+  {
+   "name": "font/line-height/code-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Line height of type/code/sm.",
+   "values": {
+    "Value": {
+     "alias": "scale/line-height/18"
+    }
+   }
+  },
+  {
+   "name": "font/size/input-min",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Smallest value text in a text control on mobile, so browsers do not zoom on focus.",
+   "values": {
+    "Value": {
+     "alias": "scale/font-size/16"
+    }
+   }
+  },
+  {
+   "name": "font/letter-spacing/display-lg",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Display lg: −2% of the size.",
+   "values": {
+    "Value": -1.2
+   }
+  },
+  {
+   "name": "font/letter-spacing/display-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Display md: −2% of the size.",
+   "values": {
+    "Value": -0.96
+   }
+  },
+  {
+   "name": "font/letter-spacing/display-sm",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Display sm: −2% of the size.",
+   "values": {
+    "Value": -0.72
+   }
+  },
+  {
+   "name": "font/letter-spacing/heading-xl",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Heading xl: −1% of the size.",
+   "values": {
+    "Value": -0.3
+   }
+  },
+  {
+   "name": "font/letter-spacing/heading-lg",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Heading lg: −1% of the size.",
+   "values": {
+    "Value": -0.24
+   }
+  },
+  {
+   "name": "font/letter-spacing/heading-md",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Heading md: −1% of the size.",
+   "values": {
+    "Value": -0.2
+   }
+  },
+  {
+   "name": "font/letter-spacing/default",
+   "collection": "Typography",
+   "type": "FLOAT",
+   "description": "Every other style keeps the typeface default spacing.",
+   "values": {
+    "Value": 0
+   }
+  },
+  {
+   "name": "space/none",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "No space: edges that touch, such as joined field addons.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/0"
+    }
+   }
+  },
+  {
+   "name": "space/xxs",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Hairline gaps: label to required marker, keys in a shortcut.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/2"
+    }
+   }
+  },
+  {
+   "name": "space/xs",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Gap inside compact controls: badge icon to label, button icon to label.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/4"
+    }
+   }
+  },
+  {
+   "name": "space/sm",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Gap between a field label, its control and its hint.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/6"
+    }
+   }
+  },
+  {
+   "name": "space/md",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Gap between an icon and its label inside controls, and menu item padding.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/8"
+    }
+   }
+  },
+  {
+   "name": "space/lg",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Padding of compact cards and the gap between related fields.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/12"
+    }
+   }
+  },
+  {
+   "name": "space/xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Default card padding and gap between groups of controls.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/16"
+    }
+   }
+  },
+  {
+   "name": "space/2xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Padding of comfortable cards and choice cards.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/20"
+    }
+   }
+  },
+  {
+   "name": "space/3xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Gap between cards in a grid and desktop grid gutters.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/24"
+    }
+   }
+  },
+  {
+   "name": "space/4xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Gap between sections inside a panel.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/32"
+    }
+   }
+  },
+  {
+   "name": "space/5xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Padding of large panels and dialogs.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/40"
+    }
+   }
+  },
+  {
+   "name": "space/6xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Space between page sections on mobile.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/48"
+    }
+   }
+  },
+  {
+   "name": "space/7xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Space between page sections on desktop.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/64"
+    }
+   }
+  },
+  {
+   "name": "space/8xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Large hero padding.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/80"
+    }
+   }
+  },
+  {
+   "name": "space/9xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Spacing around marketing sections.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/96"
+    }
+   }
+  },
+  {
+   "name": "space/10xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Very large layout gaps.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/128"
+    }
+   }
+  },
+  {
+   "name": "space/11xl",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Gap between frames on documentation canvases.",
+   "values": {
+    "Value": {
+     "alias": "scale/space/160"
+    }
+   }
+  },
+  {
+   "name": "space/optical",
+   "collection": "Space",
+   "type": "FLOAT",
+   "description": "Optical inset around a label next to icons (the Text padding wrapper in buttons).",
+   "values": {
+    "Value": {
+     "alias": "scale/space/2"
+    }
+   }
+  },
+  {
+   "name": "size/control/xs",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Height of extra-small buttons in dense toolbars.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/32"
+    }
+   }
+  },
+  {
+   "name": "size/control/sm",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Height of small buttons, inputs and selects in filter rows.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/36"
+    }
+   }
+  },
+  {
+   "name": "size/control/md",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Height of default buttons, inputs and selects.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/40"
+    }
+   }
+  },
+  {
+   "name": "size/control/lg",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Height of large buttons and inputs.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/44"
+    }
+   }
+  },
+  {
+   "name": "size/control/xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Height of extra-large buttons on marketing and onboarding screens.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/48"
+    }
+   }
+  },
+  {
+   "name": "size/icon/xs",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Icons inside small badges, tags and labels.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/12"
+    }
+   }
+  },
+  {
+   "name": "size/icon/sm",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Icons inside xs and sm controls and inline with small text.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/16"
+    }
+   }
+  },
+  {
+   "name": "size/icon/md",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Icons inside md and lg controls.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/20"
+    }
+   }
+  },
+  {
+   "name": "size/icon/lg",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Icons inside xl controls and standalone icons.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/24"
+    }
+   }
+  },
+  {
+   "name": "size/icon/xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "The largest icon step; anything larger uses a Featured icon.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/32"
+    }
+   }
+  },
+  {
+   "name": "size/avatar/2xs",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Avatars inside tags and badges.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/16"
+    }
+   }
+  },
+  {
+   "name": "size/avatar/xs",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Avatars in dense tables and select options.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/24"
+    }
+   }
+  },
+  {
+   "name": "size/avatar/sm",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Avatars in table rows, comments and top bars.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/32"
+    }
+   }
+  },
+  {
+   "name": "size/avatar/md",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Avatars in lists and comment threads.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/40"
+    }
+   }
+  },
+  {
+   "name": "size/avatar/lg",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Avatars in cards.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/48"
+    }
+   }
+  },
+  {
+   "name": "size/avatar/xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Avatars in headers.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/56"
+    }
+   }
+  },
+  {
+   "name": "size/avatar/2xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "The largest everyday avatar, in profile headers.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/64"
+    }
+   }
+  },
+  {
+   "name": "size/indicator/xs",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Status dots in badges and tags.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/6"
+    }
+   }
+  },
+  {
+   "name": "size/indicator/sm",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Status dots in avatars and radio dots.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/8"
+    }
+   }
+  },
+  {
+   "name": "size/indicator/md",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Presence dots on md avatars.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/10"
+    }
+   }
+  },
+  {
+   "name": "size/indicator/lg",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Presence dots on large avatars.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/12"
+    }
+   }
+  },
+  {
+   "name": "size/track/sm",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Thickness of thin tracks such as large spinner rings and media timelines.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/4"
+    }
+   }
+  },
+  {
+   "name": "size/track/md",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Thickness of motion bars and medium tracks.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/6"
+    }
+   }
+  },
+  {
+   "name": "size/track/lg",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Thickness of progress bars and slider tracks.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/8"
+    }
+   }
+  },
+  {
+   "name": "size/width/xxs",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of tooltips at most, fields and small popovers.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/320"
+    }
+   }
+  },
+  {
+   "name": "size/width/xs",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of dropdown menus and small popovers.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/384"
+    }
+   }
+  },
+  {
+   "name": "size/width/sm",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of small dialogs.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/480"
+    }
+   }
+  },
+  {
+   "name": "size/width/md",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of default dialogs.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/560"
+    }
+   }
+  },
+  {
+   "name": "size/width/lg",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of large dialogs and side panels.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/640"
+    }
+   }
+  },
+  {
+   "name": "size/width/xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of wide panels.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/768"
+    }
+   }
+  },
+  {
+   "name": "size/width/2xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of tablet layouts.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/1024"
+    }
+   }
+  },
+  {
+   "name": "size/width/3xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of desktop layouts.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/1280"
+    }
+   }
+  },
+  {
+   "name": "size/width/4xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of wide desktop layouts.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/1440"
+    }
+   }
+  },
+  {
+   "name": "size/width/5xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of very wide layouts.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/1600"
+    }
+   }
+  },
+  {
+   "name": "size/width/6xl",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Width of full HD layouts.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/1920"
+    }
+   }
+  },
+  {
+   "name": "size/container/max",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Maximum width of page content on large screens.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/1280"
+    }
+   }
+  },
+  {
+   "name": "size/container/margin-mobile",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Side margin of page content on mobile.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/16"
+    }
+   }
+  },
+  {
+   "name": "size/container/margin-desktop",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Side margin of page content on tablet and desktop.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/32"
+    }
+   }
+  },
+  {
+   "name": "size/measure/reading",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Maximum width of running text: 65–80 characters of body text per line.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/640"
+    }
+   }
+  },
+  {
+   "name": "size/touch-min",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Smallest tap target on touch screens; icon-only controls reach it through their hit area.",
+   "values": {
+    "Value": {
+     "alias": "scale/size/44"
+    }
+   }
+  },
+  {
+   "name": "radius/none",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Square corners on tables, full-bleed media and edges that meet.",
+   "values": {
+    "Value": {
+     "alias": "scale/radius/0"
+    }
+   }
+  },
+  {
+   "name": "radius/xs",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Small parts inside controls, such as the checkbox box and keyboard keys.",
+   "values": {
+    "Value": {
+     "alias": "scale/radius/4"
+    }
+   }
+  },
+  {
+   "name": "radius/sm",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Nested parts such as menu items, tags and rounded badges.",
+   "values": {
+    "Value": {
+     "alias": "scale/radius/6"
+    }
+   }
+  },
+  {
+   "name": "radius/control",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Buttons, inputs, selects and every control the user operates.",
+   "values": {
+    "Value": {
+     "alias": "scale/radius/8"
+    }
+   }
+  },
+  {
+   "name": "radius/indicator",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Badges, tags and status chips.",
+   "values": {
+    "Value": {
+     "alias": "scale/radius/9999"
+    }
+   }
+  },
+  {
+   "name": "radius/surface",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Cards, panels, menus and popovers.",
+   "values": {
+    "Value": {
+     "alias": "scale/radius/12"
+    }
+   }
+  },
+  {
+   "name": "radius/modal",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Dialogs, drawers and sheets.",
+   "values": {
+    "Value": {
+     "alias": "scale/radius/16"
+    }
+   }
+  },
+  {
+   "name": "radius/full",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Pills, avatars, switches, dots and radio buttons.",
+   "values": {
+    "Value": {
+     "alias": "scale/radius/9999"
+    }
+   }
+  },
+  {
+   "name": "border/width/default",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Dividers and the outline of controls, cards and menus.",
+   "values": {
+    "Value": {
+     "alias": "scale/border-width/1"
+    }
+   }
+  },
+  {
+   "name": "border/width/strong",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Lines that must stand out: primary dividers, avatar rings, slider knobs.",
+   "values": {
+    "Value": {
+     "alias": "scale/border-width/2"
+    }
+   }
+  },
+  {
+   "name": "border/width/focus",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Focus outlines.",
+   "values": {
+    "Value": {
+     "alias": "scale/border-width/2"
+    }
+   }
+  },
+  {
+   "name": "border/width/selected",
+   "collection": "Shape",
+   "type": "FLOAT",
+   "description": "Outlines of selected cards, segments and options.",
+   "values": {
+    "Value": {
+     "alias": "scale/border-width/2"
+    }
+   }
+  },
+  {
+   "name": "motion/duration/instant",
+   "collection": "Motion",
+   "type": "FLOAT",
+   "description": "Changes that happen with no animation.",
+   "values": {
+    "Standard": {
+     "alias": "scale/duration/0"
+    },
+    "Reduced": {
+     "alias": "scale/duration/0"
+    }
+   }
+  },
+  {
+   "name": "motion/duration/fast",
+   "collection": "Motion",
+   "type": "FLOAT",
+   "description": "Hover, press and colour changes; anything leaving. Kept in Reduced because it is a fade.",
+   "values": {
+    "Standard": {
+     "alias": "scale/duration/120"
+    },
+    "Reduced": {
+     "alias": "scale/duration/120"
+    }
+   }
+  },
+  {
+   "name": "motion/duration/base",
+   "collection": "Motion",
+   "type": "FLOAT",
+   "description": "Small movements such as a switch thumb or a menu opening.",
+   "values": {
+    "Standard": {
+     "alias": "scale/duration/200"
+    },
+    "Reduced": {
+     "alias": "scale/duration/0"
+    }
+   }
+  },
+  {
+   "name": "motion/duration/slow",
+   "collection": "Motion",
+   "type": "FLOAT",
+   "description": "Large movements such as a dialog or drawer entering.",
+   "values": {
+    "Standard": {
+     "alias": "scale/duration/300"
+    },
+    "Reduced": {
+     "alias": "scale/duration/0"
+    }
+   }
+  },
+  {
+   "name": "motion/duration/loop",
+   "collection": "Motion",
+   "type": "FLOAT",
+   "description": "One rotation of a spinner; slower, not stopped, in Reduced.",
+   "values": {
+    "Standard": {
+     "alias": "scale/duration/900"
+    },
+    "Reduced": {
+     "alias": "scale/duration/1800"
+    }
+   }
+  },
+  {
+   "name": "motion/easing/standard",
+   "collection": "Motion",
+   "type": "STRING",
+   "description": "Elements changing in place.",
+   "values": {
+    "Standard": "0.2, 0, 0, 1",
+    "Reduced": "0.2, 0, 0, 1"
+   }
+  },
+  {
+   "name": "motion/easing/enter",
+   "collection": "Motion",
+   "type": "STRING",
+   "description": "Elements arriving on screen.",
+   "values": {
+    "Standard": "0, 0, 0.2, 1",
+    "Reduced": "0, 0, 0.2, 1"
+   }
+  },
+  {
+   "name": "motion/easing/exit",
+   "collection": "Motion",
+   "type": "STRING",
+   "description": "Elements leaving the screen.",
+   "values": {
+    "Standard": "0.4, 0, 1, 1",
+    "Reduced": "0.4, 0, 1, 1"
+   }
+  },
+  {
+   "name": "motion/easing/linear",
+   "collection": "Motion",
+   "type": "STRING",
+   "description": "Continuous rotation and progress.",
+   "values": {
+    "Standard": "0, 0, 1, 1",
+    "Reduced": "0, 0, 1, 1"
+   }
+  },
+  {
+   "name": "motion/delay/tooltip",
+   "collection": "Motion",
+   "type": "FLOAT",
+   "description": "Wait before a tooltip appears on hover.",
+   "values": {
+    "Standard": {
+     "alias": "scale/duration/400"
+    },
+    "Reduced": {
+     "alias": "scale/duration/400"
+    }
+   }
+  },
+  {
+   "name": "motion/delay/toast",
+   "collection": "Motion",
+   "type": "FLOAT",
+   "description": "Time before a toast dismisses itself.",
+   "values": {
+    "Standard": {
+     "alias": "scale/duration/5000"
+    },
+    "Reduced": {
+     "alias": "scale/duration/5000"
+    }
+   }
+  },
+  {
+   "name": "motion/delay/debounce",
+   "collection": "Motion",
+   "type": "FLOAT",
+   "description": "Wait after typing before a search runs.",
+   "values": {
+    "Standard": {
+     "alias": "scale/duration/250"
+    },
+    "Reduced": {
+     "alias": "scale/duration/250"
+    }
+   }
+  },
+  {
+   "name": "button/padding-x/xs",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Horizontal padding of xs buttons: the visual padding minus the optical inset.",
+   "values": {
+    "Light": 10,
+    "Dark": 10
+   }
+  },
+  {
+   "name": "button/padding-x/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Horizontal padding of sm buttons.",
+   "values": {
+    "Light": {
+     "alias": "space/lg"
+    },
+    "Dark": {
+     "alias": "space/lg"
+    }
+   }
+  },
+  {
+   "name": "button/padding-x/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Horizontal padding of md buttons.",
+   "values": {
+    "Light": 14,
+    "Dark": 14
+   }
+  },
+  {
+   "name": "button/padding-x/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Horizontal padding of lg buttons.",
+   "values": {
+    "Light": {
+     "alias": "space/xl"
+    },
+    "Dark": {
+     "alias": "space/xl"
+    }
+   }
+  },
+  {
+   "name": "button/padding-x/xl",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Horizontal padding of xl buttons.",
+   "values": {
+    "Light": 18,
+    "Dark": 18
+   }
+  },
+  {
+   "name": "button/gap/xs",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Gap between icon and label in xs buttons.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "button/gap/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Gap between icon and label in sm buttons.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "button/gap/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Gap between icon and label in md buttons.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "button/gap/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Gap between icon and label in lg buttons.",
+   "values": {
+    "Light": {
+     "alias": "space/sm"
+    },
+    "Dark": {
+     "alias": "space/sm"
+    }
+   }
+  },
+  {
+   "name": "button/gap/xl",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Gap between icon and label in xl buttons.",
+   "values": {
+    "Light": {
+     "alias": "space/sm"
+    },
+    "Dark": {
+     "alias": "space/sm"
+    }
+   }
+  },
+  {
+   "name": "icon-button/size/xs",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side of the square xs icon button.",
+   "values": {
+    "Light": 28,
+    "Dark": 28
+   }
+  },
+  {
+   "name": "icon-button/size/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side of the square sm icon button.",
+   "values": {
+    "Light": {
+     "alias": "size/control/xs"
+    },
+    "Dark": {
+     "alias": "size/control/xs"
+    }
+   }
+  },
+  {
+   "name": "icon-button/size/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side of the square md icon button.",
+   "values": {
+    "Light": {
+     "alias": "size/control/sm"
+    },
+    "Dark": {
+     "alias": "size/control/sm"
+    }
+   }
+  },
+  {
+   "name": "icon-button/size/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side of the square lg icon button.",
+   "values": {
+    "Light": {
+     "alias": "size/control/lg"
+    },
+    "Dark": {
+     "alias": "size/control/lg"
+    }
+   }
+  },
+  {
+   "name": "link/gap/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Gap between icon and label in sm standalone links.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "link/gap/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Gap between icon and label in md standalone links.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "link/gap/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Gap between icon and label in lg standalone links.",
+   "values": {
+    "Light": {
+     "alias": "space/sm"
+    },
+    "Dark": {
+     "alias": "space/sm"
+    }
+   }
+  },
+  {
+   "name": "badge/padding-x/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of sm badges.",
+   "values": {
+    "Light": {
+     "alias": "space/md"
+    },
+    "Dark": {
+     "alias": "space/md"
+    }
+   }
+  },
+  {
+   "name": "badge/padding-x/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of md badges.",
+   "values": {
+    "Light": 10,
+    "Dark": 10
+   }
+  },
+  {
+   "name": "badge/padding-x/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of lg badges.",
+   "values": {
+    "Light": {
+     "alias": "space/lg"
+    },
+    "Dark": {
+     "alias": "space/lg"
+    }
+   }
+  },
+  {
+   "name": "badge/padding-x-tight/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of sm badges next to a leading visual or close.",
+   "values": {
+    "Light": {
+     "alias": "space/sm"
+    },
+    "Dark": {
+     "alias": "space/sm"
+    }
+   }
+  },
+  {
+   "name": "badge/padding-x-tight/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of md badges next to a leading visual or close.",
+   "values": {
+    "Light": {
+     "alias": "space/md"
+    },
+    "Dark": {
+     "alias": "space/md"
+    }
+   }
+  },
+  {
+   "name": "badge/padding-x-tight/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of lg badges next to a leading visual or close.",
+   "values": {
+    "Light": 10,
+    "Dark": 10
+   }
+  },
+  {
+   "name": "tag/height/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Height of sm tags.",
+   "values": {
+    "Light": 24,
+    "Dark": 24
+   }
+  },
+  {
+   "name": "tag/height/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Height of md tags.",
+   "values": {
+    "Light": 28,
+    "Dark": 28
+   }
+  },
+  {
+   "name": "tag/height/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Height of lg tags.",
+   "values": {
+    "Light": {
+     "alias": "size/control/xs"
+    },
+    "Dark": {
+     "alias": "size/control/xs"
+    }
+   }
+  },
+  {
+   "name": "tag/padding-x/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of md tags.",
+   "values": {
+    "Light": 10,
+    "Dark": 10
+   }
+  },
+  {
+   "name": "tag/padding-x-tight/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Trailing padding of sm tags with a close or count.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "tag/padding-x-tight/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Trailing padding of md tags with a close or count.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "tag/padding-x-tight/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Trailing padding of lg tags with a close or count.",
+   "values": {
+    "Light": {
+     "alias": "space/sm"
+    },
+    "Dark": {
+     "alias": "space/sm"
+    }
+   }
+  },
+  {
+   "name": "avatar/placeholder/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Background of initials and icon avatars.",
+   "values": {
+    "Light": {
+     "alias": "color/fill/neutral/subtle"
+    },
+    "Dark": {
+     "alias": "color/fill/neutral/subtle"
+    }
+   }
+  },
+  {
+   "name": "avatar/placeholder/text",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Initials on placeholder avatars.",
+   "values": {
+    "Light": {
+     "alias": "color/text/tertiary"
+    },
+    "Dark": {
+     "alias": "color/text/tertiary"
+    }
+   }
+  },
+  {
+   "name": "avatar/placeholder/icon",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Icon on placeholder avatars.",
+   "values": {
+    "Light": {
+     "alias": "color/icon/tertiary"
+    },
+    "Dark": {
+     "alias": "color/icon/tertiary"
+    }
+   }
+  },
+  {
+   "name": "checkbox/size/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Box of sm checkboxes.",
+   "values": {
+    "Light": 16,
+    "Dark": 16
+   }
+  },
+  {
+   "name": "checkbox/size/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Box of md checkboxes.",
+   "values": {
+    "Light": 20,
+    "Dark": 20
+   }
+  },
+  {
+   "name": "radio/size/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring of sm radios.",
+   "values": {
+    "Light": 16,
+    "Dark": 16
+   }
+  },
+  {
+   "name": "radio/size/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring of md radios.",
+   "values": {
+    "Light": 20,
+    "Dark": 20
+   }
+  },
+  {
+   "name": "checkbox/radius/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Corner of sm checkboxes.",
+   "values": {
+    "Light": {
+     "alias": "radius/xs"
+    },
+    "Dark": {
+     "alias": "radius/xs"
+    }
+   }
+  },
+  {
+   "name": "checkbox/radius/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Corner of md checkboxes.",
+   "values": {
+    "Light": {
+     "alias": "radius/sm"
+    },
+    "Dark": {
+     "alias": "radius/sm"
+    }
+   }
+  },
+  {
+   "name": "checkbox/mark/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Check and minus mark in sm checkboxes.",
+   "values": {
+    "Light": 12,
+    "Dark": 12
+   }
+  },
+  {
+   "name": "checkbox/mark/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Check and minus mark in md checkboxes.",
+   "values": {
+    "Light": 14,
+    "Dark": 14
+   }
+  },
+  {
+   "name": "switch/width/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Width of sm switches.",
+   "values": {
+    "Light": 36,
+    "Dark": 36
+   }
+  },
+  {
+   "name": "switch/width/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Width of md switches.",
+   "values": {
+    "Light": 44,
+    "Dark": 44
+   }
+  },
+  {
+   "name": "switch/height/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Height of sm switches.",
+   "values": {
+    "Light": 20,
+    "Dark": 20
+   }
+  },
+  {
+   "name": "switch/height/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Height of md switches.",
+   "values": {
+    "Light": 24,
+    "Dark": 24
+   }
+  },
+  {
+   "name": "switch/inset",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Space between the track edge and the thumb.",
+   "values": {
+    "Light": {
+     "alias": "space/xxs"
+    },
+    "Dark": {
+     "alias": "space/xxs"
+    }
+   }
+  },
+  {
+   "name": "switch/thumb/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Thumb of sm switches.",
+   "values": {
+    "Light": 16,
+    "Dark": 16
+   }
+  },
+  {
+   "name": "switch/thumb/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Thumb of md switches.",
+   "values": {
+    "Light": 20,
+    "Dark": 20
+   }
+  },
+  {
+   "name": "switch/slim-width/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Width of sm slim switches.",
+   "values": {
+    "Light": 32,
+    "Dark": 32
+   }
+  },
+  {
+   "name": "switch/slim-width/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Width of md slim switches.",
+   "values": {
+    "Light": 40,
+    "Dark": 40
+   }
+  },
+  {
+   "name": "switch/slim-track/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Rail height of sm slim switches.",
+   "values": {
+    "Light": 10,
+    "Dark": 10
+   }
+  },
+  {
+   "name": "switch/slim-track/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Rail height of md slim switches.",
+   "values": {
+    "Light": 12,
+    "Dark": 12
+   }
+  },
+  {
+   "name": "switch/track/off-hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Track of an off switch under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "color/border/strong"
+    },
+    "Dark": {
+     "alias": "color/border/strong"
+    }
+   }
+  },
+  {
+   "name": "switch/thumb/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Fill of every switch thumb.",
+   "values": {
+    "Light": {
+     "alias": "color/surface/base"
+    },
+    "Dark": {
+     "alias": "color/surface/base"
+    }
+   }
+  },
+  {
+   "name": "text-control/padding-x/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of sm text controls.",
+   "values": {
+    "Light": {
+     "alias": "space/lg"
+    },
+    "Dark": {
+     "alias": "space/lg"
+    }
+   }
+  },
+  {
+   "name": "text-control/padding-x/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of md text controls.",
+   "values": {
+    "Light": {
+     "alias": "space/lg"
+    },
+    "Dark": {
+     "alias": "space/lg"
+    }
+   }
+  },
+  {
+   "name": "text-control/padding-x/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of lg text controls.",
+   "values": {
+    "Light": 14,
+    "Dark": 14
+   }
+  },
+  {
+   "name": "text-control/multiline-min-height",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Minimum height of multi-line text controls.",
+   "values": {
+    "Light": 128,
+    "Dark": 128
+   }
+  },
+  {
+   "name": "text-control/padding-y-multiline",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Top and bottom padding of multi-line text controls.",
+   "values": {
+    "Light": {
+     "alias": "space/lg"
+    },
+    "Dark": {
+     "alias": "space/lg"
+    }
+   }
+  },
+  {
+   "name": "profile-photo/size/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Outer size of sm profile photos.",
+   "values": {
+    "Light": 72,
+    "Dark": 72
+   }
+  },
+  {
+   "name": "profile-photo/size/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Outer size of md profile photos.",
+   "values": {
+    "Light": 96,
+    "Dark": 96
+   }
+  },
+  {
+   "name": "profile-photo/size/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Outer size of lg profile photos.",
+   "values": {
+    "Light": 160,
+    "Dark": 160
+   }
+  },
+  {
+   "name": "profile-photo/ring/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring padding of sm profile photos.",
+   "values": {
+    "Light": 3,
+    "Dark": 3
+   }
+  },
+  {
+   "name": "profile-photo/ring/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring padding of md profile photos.",
+   "values": {
+    "Light": 4,
+    "Dark": 4
+   }
+  },
+  {
+   "name": "profile-photo/ring/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring padding of lg profile photos.",
+   "values": {
+    "Light": 6,
+    "Dark": 6
+   }
+  },
+  {
+   "name": "progress/ring-thickness/2xs",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of 2xs circle and half-circle progress.",
+   "values": {
+    "Light": 6,
+    "Dark": 6
+   }
+  },
+  {
+   "name": "progress/ring-thickness/xs",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of xs circle and half-circle progress.",
+   "values": {
+    "Light": 16,
+    "Dark": 16
+   }
+  },
+  {
+   "name": "progress/ring-thickness/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of sm circle and half-circle progress.",
+   "values": {
+    "Light": 16,
+    "Dark": 16
+   }
+  },
+  {
+   "name": "progress/ring-thickness/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of md circle and half-circle progress.",
+   "values": {
+    "Light": 20,
+    "Dark": 20
+   }
+  },
+  {
+   "name": "progress/ring-thickness/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of lg circle and half-circle progress.",
+   "values": {
+    "Light": 20,
+    "Dark": 20
+   }
+  },
+  {
+   "name": "spinner/thickness/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of sm spinners.",
+   "values": {
+    "Light": 2,
+    "Dark": 2
+   }
+  },
+  {
+   "name": "spinner/thickness/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of md spinners.",
+   "values": {
+    "Light": 2,
+    "Dark": 2
+   }
+  },
+  {
+   "name": "spinner/thickness/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of lg spinners.",
+   "values": {
+    "Light": {
+     "alias": "size/track/sm"
+    },
+    "Dark": {
+     "alias": "size/track/sm"
+    }
+   }
+  },
+  {
+   "name": "spinner/thickness/xl",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Ring thickness of xl spinners.",
+   "values": {
+    "Light": {
+     "alias": "size/track/md"
+    },
+    "Dark": {
+     "alias": "size/track/md"
+    }
+   }
+  },
+  {
+   "name": "spinner/size/xl",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Box of xl spinners.",
+   "values": {
+    "Light": 48,
+    "Dark": 48
+   }
+  },
+  {
+   "name": "kbd/height/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Height and minimum width of sm keys.",
+   "values": {
+    "Light": 20,
+    "Dark": 20
+   }
+  },
+  {
+   "name": "kbd/height/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Height and minimum width of md keys.",
+   "values": {
+    "Light": 24,
+    "Dark": 24
+   }
+  },
+  {
+   "name": "featured-icon/size/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Container of sm featured icons.",
+   "values": {
+    "Light": 32,
+    "Dark": 32
+   }
+  },
+  {
+   "name": "featured-icon/size/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Container of md featured icons.",
+   "values": {
+    "Light": 40,
+    "Dark": 40
+   }
+  },
+  {
+   "name": "featured-icon/size/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Container of lg featured icons.",
+   "values": {
+    "Light": 48,
+    "Dark": 48
+   }
+  },
+  {
+   "name": "featured-icon/size/xl",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Container of xl featured icons.",
+   "values": {
+    "Light": 56,
+    "Dark": 56
+   }
+  },
+  {
+   "name": "featured-icon/icon/xl",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Icon box of xl featured icons.",
+   "values": {
+    "Light": 28,
+    "Dark": 28
+   }
+  },
+  {
+   "name": "button-group/item/padding-x/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of sm button group items.",
+   "values": {
+    "Light": {
+     "alias": "space/lg"
+    },
+    "Dark": {
+     "alias": "space/lg"
+    }
+   }
+  },
+  {
+   "name": "button-group/item/padding-x/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side padding of md button group items.",
+   "values": {
+    "Light": {
+     "alias": "space/xl"
+    },
+    "Dark": {
+     "alias": "space/xl"
+    }
+   }
+  },
+  {
+   "name": "button-group/item/padding-y/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Top and bottom padding of sm button group items.",
+   "values": {
+    "Light": {
+     "alias": "space/md"
+    },
+    "Dark": {
+     "alias": "space/md"
+    }
+   }
+  },
+  {
+   "name": "button-group/item/padding-y/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Top and bottom padding of md button group items.",
+   "values": {
+    "Light": {
+     "alias": "space/md"
+    },
+    "Dark": {
+     "alias": "space/md"
+    }
+   }
+  },
+  {
+   "name": "code-field/cell-size/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side of sm code field cells.",
+   "values": {
+    "Light": 64,
+    "Dark": 64
+   }
+  },
+  {
+   "name": "code-field/cell-size/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side of md code field cells.",
+   "values": {
+    "Light": 80,
+    "Dark": 80
+   }
+  },
+  {
+   "name": "code-field/cell-size/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Side of lg code field cells.",
+   "values": {
+    "Light": 96,
+    "Dark": 96
+   }
+  },
+  {
+   "name": "avatar-group/overlap/xs",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Negative gap that overlaps xs avatars in a group.",
+   "values": {
+    "Light": -4,
+    "Dark": -4
+   }
+  },
+  {
+   "name": "avatar-group/overlap/sm",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Negative gap that overlaps sm avatars in a group.",
+   "values": {
+    "Light": -8,
+    "Dark": -8
+   }
+  },
+  {
+   "name": "avatar-group/overlap/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Negative gap that overlaps md avatars in a group.",
+   "values": {
+    "Light": -12,
+    "Dark": -12
+   }
+  },
+  {
+   "name": "select/list/max-height",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Maximum height of an open select list before it scrolls.",
+   "values": {
+    "Light": {
+     "alias": "size/width/xxs"
+    },
+    "Dark": {
+     "alias": "size/width/xxs"
+    }
+   }
+  },
+  {
+   "name": "menu/width",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Width of menu panels.",
+   "values": {
+    "Light": 240,
+    "Dark": 240
+   }
+  },
+  {
+   "name": "badge-group/padding-badge/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Padding on the badge side of md badge groups.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "badge-group/padding-message/md",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Padding on the message side of md badge groups.",
+   "values": {
+    "Light": 10,
+    "Dark": 10
+   }
+  },
+  {
+   "name": "badge-group/padding-badge/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Padding on the badge side of lg badge groups.",
+   "values": {
+    "Light": {
+     "alias": "space/xs"
+    },
+    "Dark": {
+     "alias": "space/xs"
+    }
+   }
+  },
+  {
+   "name": "badge-group/padding-message/lg",
+   "collection": "Components",
+   "type": "FLOAT",
+   "description": "Padding on the message side of lg badge groups.",
+   "values": {
+    "Light": 10,
+    "Dark": 10
+   }
+  },
+  {
+   "name": "social-button/google/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Official Google sign-in button fill; same in every mode.",
+   "values": {
+    "Light": "#1f1f1f",
+    "Dark": "#1f1f1f"
+   }
+  },
+  {
+   "name": "social-button/google/fill/hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Google sign-in button fill under the pointer.",
+   "values": {
+    "Light": "#303030",
+    "Dark": "#303030"
+   }
+  },
+  {
+   "name": "social-button/google/fg",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Label and mark colour on the Google solid button.",
+   "values": {
+    "Light": "#ffffff",
+    "Dark": "#ffffff"
+   }
+  },
+  {
+   "name": "social-button/apple/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Official Apple sign-in button fill; same in every mode.",
+   "values": {
+    "Light": "#000000",
+    "Dark": "#000000"
+   }
+  },
+  {
+   "name": "social-button/apple/fill/hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Apple sign-in button fill under the pointer.",
+   "values": {
+    "Light": "#1c1c1e",
+    "Dark": "#1c1c1e"
+   }
+  },
+  {
+   "name": "social-button/apple/fg",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Label and mark colour on the Apple solid button.",
+   "values": {
+    "Light": "#ffffff",
+    "Dark": "#ffffff"
+   }
+  },
+  {
+   "name": "social-button/github/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Official GitHub sign-in button fill; same in every mode.",
+   "values": {
+    "Light": "#24292f",
+    "Dark": "#24292f"
+   }
+  },
+  {
+   "name": "social-button/github/fill/hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "GitHub sign-in button fill under the pointer.",
+   "values": {
+    "Light": "#32383f",
+    "Dark": "#32383f"
+   }
+  },
+  {
+   "name": "social-button/github/fg",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Label and mark colour on the GitHub solid button.",
+   "values": {
+    "Light": "#ffffff",
+    "Dark": "#ffffff"
+   }
+  },
+  {
+   "name": "social-button/facebook/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Official Facebook sign-in button fill; same in every mode.",
+   "values": {
+    "Light": "#1877f2",
+    "Dark": "#1877f2"
+   }
+  },
+  {
+   "name": "social-button/facebook/fill/hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Facebook sign-in button fill under the pointer.",
+   "values": {
+    "Light": "#166fe5",
+    "Dark": "#166fe5"
+   }
+  },
+  {
+   "name": "social-button/facebook/fg",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Label and mark colour on the Facebook solid button.",
+   "values": {
+    "Light": "#ffffff",
+    "Dark": "#ffffff"
+   }
+  },
+  {
+   "name": "social-button/x/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Official X sign-in button fill; same in every mode.",
+   "values": {
+    "Light": "#000000",
+    "Dark": "#000000"
+   }
+  },
+  {
+   "name": "social-button/x/fill/hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "X sign-in button fill under the pointer.",
+   "values": {
+    "Light": "#1c1c1e",
+    "Dark": "#1c1c1e"
+   }
+  },
+  {
+   "name": "social-button/x/fg",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Label and mark colour on the X solid button.",
+   "values": {
+    "Light": "#ffffff",
+    "Dark": "#ffffff"
+   }
+  },
+  {
+   "name": "social-button/gitlab/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Official GitLab sign-in button fill; same in every mode.",
+   "values": {
+    "Light": "#fc6d26",
+    "Dark": "#fc6d26"
+   }
+  },
+  {
+   "name": "social-button/gitlab/fill/hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "GitLab sign-in button fill under the pointer.",
+   "values": {
+    "Light": "#e2561a",
+    "Dark": "#e2561a"
+   }
+  },
+  {
+   "name": "social-button/gitlab/fg",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Label and mark colour on the GitLab solid button.",
+   "values": {
+    "Light": "#ffffff",
+    "Dark": "#ffffff"
+   }
+  },
+  {
+   "name": "video-player/control/fg",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Icons, timestamps and handles on video; light in every mode.",
+   "values": {
+    "Light": {
+     "alias": "color/text/on-solid"
+    },
+    "Dark": {
+     "alias": "color/text/on-solid"
+    }
+   }
+  },
+  {
+   "name": "video-player/action/fill/hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Media action under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/alpha-white/20"
+    },
+    "Dark": {
+     "alias": "palette/alpha-white/20"
+    }
+   }
+  },
+  {
+   "name": "video-player/overlay/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Overlay play button.",
+   "values": {
+    "Light": {
+     "alias": "palette/alpha-white/20"
+    },
+    "Dark": {
+     "alias": "palette/alpha-white/20"
+    }
+   }
+  },
+  {
+   "name": "video-player/overlay/fill/hover",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Overlay play button under the pointer.",
+   "values": {
+    "Light": {
+     "alias": "palette/alpha-white/30"
+    },
+    "Dark": {
+     "alias": "palette/alpha-white/30"
+    }
+   }
+  },
+  {
+   "name": "video-player/track",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Timeline and volume track.",
+   "values": {
+    "Light": {
+     "alias": "palette/alpha-white/30"
+    },
+    "Dark": {
+     "alias": "palette/alpha-white/30"
+    }
+   }
+  },
+  {
+   "name": "video-player/track/buffer",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Buffered part of the timeline.",
+   "values": {
+    "Light": {
+     "alias": "palette/alpha-white/50"
+    },
+    "Dark": {
+     "alias": "palette/alpha-white/50"
+    }
+   }
+  },
+  {
+   "name": "video-player/tooltip/fill",
+   "collection": "Components",
+   "type": "COLOR",
+   "description": "Media tooltip and timestamp indicator.",
+   "values": {
+    "Light": {
+     "alias": "color/overlay/scrim"
+    },
+    "Dark": {
+     "alias": "color/overlay/scrim"
+    }
+   }
+  }
+ ],
+ "textStyles": [
+  {
+   "name": "type/display/lg/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/display-lg",
+    "lineHeight": "font/line-height/display-lg",
+    "letterSpacing": "font/letter-spacing/display-lg",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/display/lg/bold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/display-lg",
+    "lineHeight": "font/line-height/display-lg",
+    "letterSpacing": "font/letter-spacing/display-lg",
+    "fontWeight": "font/weight/bold"
+   }
+  },
+  {
+   "name": "type/display/md/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/display-md",
+    "lineHeight": "font/line-height/display-md",
+    "letterSpacing": "font/letter-spacing/display-md",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/display/md/bold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/display-md",
+    "lineHeight": "font/line-height/display-md",
+    "letterSpacing": "font/letter-spacing/display-md",
+    "fontWeight": "font/weight/bold"
+   }
+  },
+  {
+   "name": "type/display/sm/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/display-sm",
+    "lineHeight": "font/line-height/display-sm",
+    "letterSpacing": "font/letter-spacing/display-sm",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/display/sm/bold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/display-sm",
+    "lineHeight": "font/line-height/display-sm",
+    "letterSpacing": "font/letter-spacing/display-sm",
+    "fontWeight": "font/weight/bold"
+   }
+  },
+  {
+   "name": "type/heading/xl/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-xl",
+    "lineHeight": "font/line-height/heading-xl",
+    "letterSpacing": "font/letter-spacing/heading-xl",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/heading/xl/bold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-xl",
+    "lineHeight": "font/line-height/heading-xl",
+    "letterSpacing": "font/letter-spacing/heading-xl",
+    "fontWeight": "font/weight/bold"
+   }
+  },
+  {
+   "name": "type/heading/lg/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-lg",
+    "lineHeight": "font/line-height/heading-lg",
+    "letterSpacing": "font/letter-spacing/heading-lg",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/heading/lg/bold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-lg",
+    "lineHeight": "font/line-height/heading-lg",
+    "letterSpacing": "font/letter-spacing/heading-lg",
+    "fontWeight": "font/weight/bold"
+   }
+  },
+  {
+   "name": "type/heading/md/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-md",
+    "lineHeight": "font/line-height/heading-md",
+    "letterSpacing": "font/letter-spacing/heading-md",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/heading/md/bold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-md",
+    "lineHeight": "font/line-height/heading-md",
+    "letterSpacing": "font/letter-spacing/heading-md",
+    "fontWeight": "font/weight/bold"
+   }
+  },
+  {
+   "name": "type/heading/sm/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-sm",
+    "lineHeight": "font/line-height/heading-sm",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/heading/sm/bold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-sm",
+    "lineHeight": "font/line-height/heading-sm",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/bold"
+   }
+  },
+  {
+   "name": "type/heading/xs/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-xs",
+    "lineHeight": "font/line-height/heading-xs",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/heading/xs/bold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/heading-xs",
+    "lineHeight": "font/line-height/heading-xs",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/bold"
+   }
+  },
+  {
+   "name": "type/body/xl/regular",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-xl",
+    "lineHeight": "font/line-height/body-xl",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/regular"
+   }
+  },
+  {
+   "name": "type/body/xl/medium",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-xl",
+    "lineHeight": "font/line-height/body-xl",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/medium"
+   }
+  },
+  {
+   "name": "type/body/xl/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-xl",
+    "lineHeight": "font/line-height/body-xl",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/body/lg/regular",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-lg",
+    "lineHeight": "font/line-height/body-lg",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/regular"
+   }
+  },
+  {
+   "name": "type/body/lg/medium",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-lg",
+    "lineHeight": "font/line-height/body-lg",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/medium"
+   }
+  },
+  {
+   "name": "type/body/lg/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-lg",
+    "lineHeight": "font/line-height/body-lg",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/body/md/regular",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-md",
+    "lineHeight": "font/line-height/body-md",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/regular"
+   }
+  },
+  {
+   "name": "type/body/md/medium",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-md",
+    "lineHeight": "font/line-height/body-md",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/medium"
+   }
+  },
+  {
+   "name": "type/body/md/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-md",
+    "lineHeight": "font/line-height/body-md",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/body/sm/regular",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-sm",
+    "lineHeight": "font/line-height/body-sm",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/regular"
+   }
+  },
+  {
+   "name": "type/body/sm/medium",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-sm",
+    "lineHeight": "font/line-height/body-sm",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/medium"
+   }
+  },
+  {
+   "name": "type/body/sm/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-sm",
+    "lineHeight": "font/line-height/body-sm",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/body/xs/regular",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-xs",
+    "lineHeight": "font/line-height/body-xs",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/regular"
+   }
+  },
+  {
+   "name": "type/body/xs/medium",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-xs",
+    "lineHeight": "font/line-height/body-xs",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/medium"
+   }
+  },
+  {
+   "name": "type/body/xs/semibold",
+   "bound": {
+    "fontFamily": "font/family/ui",
+    "fontSize": "font/size/body-xs",
+    "lineHeight": "font/line-height/body-xs",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/semibold"
+   }
+  },
+  {
+   "name": "type/code/md/regular",
+   "bound": {
+    "fontFamily": "font/family/mono",
+    "fontSize": "font/size/code-md",
+    "lineHeight": "font/line-height/code-md",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/regular"
+   }
+  },
+  {
+   "name": "type/code/md/medium",
+   "bound": {
+    "fontFamily": "font/family/mono",
+    "fontSize": "font/size/code-md",
+    "lineHeight": "font/line-height/code-md",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/medium"
+   }
+  },
+  {
+   "name": "type/code/sm/regular",
+   "bound": {
+    "fontFamily": "font/family/mono",
+    "fontSize": "font/size/code-sm",
+    "lineHeight": "font/line-height/code-sm",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/regular"
+   }
+  },
+  {
+   "name": "type/code/sm/medium",
+   "bound": {
+    "fontFamily": "font/family/mono",
+    "fontSize": "font/size/code-sm",
+    "lineHeight": "font/line-height/code-sm",
+    "letterSpacing": "font/letter-spacing/default",
+    "fontWeight": "font/weight/medium"
+   }
+  }
+ ],
+ "effectStyles": [
+  {
+   "name": "elevation/control",
+   "effects": [
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 1,
+     "blur": 2,
+     "spread": 0,
+     "color": {
+      "alias": "color/shadow/ambient"
+     }
+    }
+   ]
+  },
+  {
+   "name": "elevation/raised",
+   "effects": [
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 1,
+     "blur": 2,
+     "spread": 0,
+     "color": {
+      "alias": "color/shadow/ambient"
+     }
+    },
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 1,
+     "blur": 3,
+     "spread": 0,
+     "color": {
+      "alias": "color/shadow/key"
+     }
+    }
+   ]
+  },
+  {
+   "name": "elevation/overlay",
+   "effects": [
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 12,
+     "blur": 16,
+     "spread": -4,
+     "color": {
+      "alias": "color/shadow/key"
+     }
+    },
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 4,
+     "blur": 6,
+     "spread": -2,
+     "color": {
+      "alias": "color/shadow/ambient"
+     }
+    }
+   ]
+  },
+  {
+   "name": "elevation/modal",
+   "effects": [
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 20,
+     "blur": 24,
+     "spread": -4,
+     "color": {
+      "alias": "color/shadow/key"
+     }
+    },
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 8,
+     "blur": 8,
+     "spread": -4,
+     "color": {
+      "alias": "color/shadow/ambient"
+     }
+    }
+   ]
+  },
+  {
+   "name": "focus/default",
+   "effects": [
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 0,
+     "blur": 0,
+     "spread": 4,
+     "color": {
+      "alias": "color/border/focus"
+     }
+    },
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 0,
+     "blur": 0,
+     "spread": 2,
+     "color": {
+      "alias": "color/surface/base"
+     }
+    }
+   ]
+  },
+  {
+   "name": "focus/danger",
+   "effects": [
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 0,
+     "blur": 0,
+     "spread": 4,
+     "color": {
+      "alias": "color/border/danger"
+     }
+    },
+    {
+     "type": "DROP_SHADOW",
+     "x": 0,
+     "y": 0,
+     "blur": 0,
+     "spread": 2,
+     "color": {
+      "alias": "color/surface/base"
+     }
+    }
+   ]
+  }
+ ],
+ "gridStyles": [
+  {
+   "name": "grid/mobile",
+   "grids": [
+    {
+     "pattern": "COLUMNS",
+     "count": 4,
+     "gutter": 16,
+     "margin": 16,
+     "alignment": "STRETCH"
+    }
+   ]
+  },
+  {
+   "name": "grid/tablet",
+   "grids": [
+    {
+     "pattern": "COLUMNS",
+     "count": 8,
+     "gutter": 24,
+     "margin": 32,
+     "alignment": "STRETCH"
+    }
+   ]
+  },
+  {
+   "name": "grid/desktop",
+   "grids": [
+    {
+     "pattern": "COLUMNS",
+     "count": 12,
+     "gutter": 24,
+     "margin": 32,
+     "alignment": "STRETCH"
+    }
+   ]
+  },
+  {
+   "name": "grid/wide",
+   "grids": [
+    {
+     "pattern": "COLUMNS",
+     "count": 12,
+     "gutter": 32,
+     "margin": 0,
+     "alignment": "CENTER"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,6752 @@
+{
+  "palette": {
+    "base": {
+      "white": {
+        "$type": "color",
+        "$value": "#ffffff",
+        "$description": "Pure white.",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "black": {
+        "$type": "color",
+        "$value": "#000000",
+        "$description": "Pure black.",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "transparent": {
+        "$type": "color",
+        "$value": "#ffffff00",
+        "$description": "Fully transparent; keeps layers bound when nothing should show.",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "brand": {
+      "50": {
+        "$type": "color",
+        "$value": "#eff6ff",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#dbeafe",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#bfdbfe",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#93c5fd",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#60a5fa",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#3b82f6",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#2563eb",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#1d4ed8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#1e40af",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#1e3a8a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#172554",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "neutral": {
+      "50": {
+        "$type": "color",
+        "$value": "#f8fafc",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#f1f5f9",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#e2e8f0",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#cbd5e1",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#94a3b8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#64748b",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#475569",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#334155",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#1e293b",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#0f172a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#020617",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "red": {
+      "50": {
+        "$type": "color",
+        "$value": "#fef2f2",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#fee2e2",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#fecaca",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#fca5a5",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#f87171",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#ef4444",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#dc2626",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#b91c1c",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#991b1b",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#7f1d1d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#450a0a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "amber": {
+      "50": {
+        "$type": "color",
+        "$value": "#fffbeb",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#fef3c7",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#fde68a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#fcd34d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#fbbf24",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#f59e0b",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#d97706",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#b45309",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#92400e",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#78350f",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#451a03",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "green": {
+      "50": {
+        "$type": "color",
+        "$value": "#f0fdf4",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#dcfce7",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#bbf7d0",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#86efac",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#4ade80",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#22c55e",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#16a34a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#15803d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#166534",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#14532d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#052e16",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "blue": {
+      "50": {
+        "$type": "color",
+        "$value": "#f0f9ff",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#e0f2fe",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#bae6fd",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#7dd3fc",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#38bdf8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#0ea5e9",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#0284c7",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#0369a1",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#075985",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#0c4a6e",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#082f49",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "slate": {
+      "50": {
+        "$type": "color",
+        "$value": "#f8fafc",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#f1f5f9",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#e2e8f0",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#cbd5e1",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#94a3b8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#64748b",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#475569",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#334155",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#1e293b",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#0f172a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#020617",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "sky": {
+      "50": {
+        "$type": "color",
+        "$value": "#f0f9ff",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#e0f2fe",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#bae6fd",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#7dd3fc",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#38bdf8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#0ea5e9",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#0284c7",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#0369a1",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#075985",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#0c4a6e",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#082f49",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "indigo": {
+      "50": {
+        "$type": "color",
+        "$value": "#eef2ff",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#e0e7ff",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#c7d2fe",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#a5b4fc",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#818cf8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#6366f1",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#4f46e5",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#4338ca",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#3730a3",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#312e81",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#1e1b4b",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "purple": {
+      "50": {
+        "$type": "color",
+        "$value": "#faf5ff",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#f3e8ff",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#e9d5ff",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#d8b4fe",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#c084fc",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#a855f7",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#9333ea",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#7e22ce",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#6b21a8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#581c87",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#3b0764",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "pink": {
+      "50": {
+        "$type": "color",
+        "$value": "#fdf2f8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#fce7f3",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#fbcfe8",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#f9a8d4",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#f472b6",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#ec4899",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#db2777",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#be185d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#9d174d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#831843",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#500724",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "orange": {
+      "50": {
+        "$type": "color",
+        "$value": "#fff7ed",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#ffedd5",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#fed7aa",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#fdba74",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#fb923c",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#f97316",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#ea580c",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#c2410c",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#9a3412",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#7c2d12",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#431407",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "teal": {
+      "50": {
+        "$type": "color",
+        "$value": "#f0fdfa",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "100": {
+        "$type": "color",
+        "$value": "#ccfbf1",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "color",
+        "$value": "#99f6e4",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "color",
+        "$value": "#5eead4",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "color",
+        "$value": "#2dd4bf",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "color",
+        "$value": "#14b8a6",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "color",
+        "$value": "#0d9488",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "color",
+        "$value": "#0f766e",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "800": {
+        "$type": "color",
+        "$value": "#115e59",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "color",
+        "$value": "#134e4a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "950": {
+        "$type": "color",
+        "$value": "#042f2e",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "alpha-black": {
+      "5": {
+        "$type": "color",
+        "$value": "#0000000d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "10": {
+        "$type": "color",
+        "$value": "#0000001a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "20": {
+        "$type": "color",
+        "$value": "#00000033",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "30": {
+        "$type": "color",
+        "$value": "#0000004d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "40": {
+        "$type": "color",
+        "$value": "#00000066",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "50": {
+        "$type": "color",
+        "$value": "#00000080",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "60": {
+        "$type": "color",
+        "$value": "#00000099",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "70": {
+        "$type": "color",
+        "$value": "#000000b2",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "80": {
+        "$type": "color",
+        "$value": "#000000cc",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "90": {
+        "$type": "color",
+        "$value": "#000000e5",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "alpha-white": {
+      "5": {
+        "$type": "color",
+        "$value": "#ffffff0d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "10": {
+        "$type": "color",
+        "$value": "#ffffff1a",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "20": {
+        "$type": "color",
+        "$value": "#ffffff33",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "30": {
+        "$type": "color",
+        "$value": "#ffffff4d",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "40": {
+        "$type": "color",
+        "$value": "#ffffff66",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "50": {
+        "$type": "color",
+        "$value": "#ffffff80",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "60": {
+        "$type": "color",
+        "$value": "#ffffff99",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "70": {
+        "$type": "color",
+        "$value": "#ffffffb2",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "80": {
+        "$type": "color",
+        "$value": "#ffffffcc",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "90": {
+        "$type": "color",
+        "$value": "#ffffffe5",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    }
+  },
+  "scale": {
+    "space": {
+      "0": {
+        "$type": "dimension",
+        "$value": "0px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "2": {
+        "$type": "dimension",
+        "$value": "2px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "4": {
+        "$type": "dimension",
+        "$value": "4px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "6": {
+        "$type": "dimension",
+        "$value": "6px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "8": {
+        "$type": "dimension",
+        "$value": "8px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "12": {
+        "$type": "dimension",
+        "$value": "12px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "16": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "20": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "24": {
+        "$type": "dimension",
+        "$value": "24px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "32": {
+        "$type": "dimension",
+        "$value": "32px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "40": {
+        "$type": "dimension",
+        "$value": "40px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "48": {
+        "$type": "dimension",
+        "$value": "48px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "64": {
+        "$type": "dimension",
+        "$value": "64px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "80": {
+        "$type": "dimension",
+        "$value": "80px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "96": {
+        "$type": "dimension",
+        "$value": "96px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "128": {
+        "$type": "dimension",
+        "$value": "128px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "160": {
+        "$type": "dimension",
+        "$value": "160px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "size": {
+      "3": {
+        "$type": "dimension",
+        "$value": "3px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "4": {
+        "$type": "dimension",
+        "$value": "4px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "6": {
+        "$type": "dimension",
+        "$value": "6px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "8": {
+        "$type": "dimension",
+        "$value": "8px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "10": {
+        "$type": "dimension",
+        "$value": "10px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "12": {
+        "$type": "dimension",
+        "$value": "12px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "14": {
+        "$type": "dimension",
+        "$value": "14px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "16": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "20": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "24": {
+        "$type": "dimension",
+        "$value": "24px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "28": {
+        "$type": "dimension",
+        "$value": "28px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "32": {
+        "$type": "dimension",
+        "$value": "32px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "36": {
+        "$type": "dimension",
+        "$value": "36px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "40": {
+        "$type": "dimension",
+        "$value": "40px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "44": {
+        "$type": "dimension",
+        "$value": "44px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "48": {
+        "$type": "dimension",
+        "$value": "48px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "56": {
+        "$type": "dimension",
+        "$value": "56px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "64": {
+        "$type": "dimension",
+        "$value": "64px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "72": {
+        "$type": "dimension",
+        "$value": "72px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "80": {
+        "$type": "dimension",
+        "$value": "80px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "90": {
+        "$type": "dimension",
+        "$value": "90px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "96": {
+        "$type": "dimension",
+        "$value": "96px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "120": {
+        "$type": "dimension",
+        "$value": "120px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "128": {
+        "$type": "dimension",
+        "$value": "128px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "160": {
+        "$type": "dimension",
+        "$value": "160px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "dimension",
+        "$value": "200px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "240": {
+        "$type": "dimension",
+        "$value": "240px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "280": {
+        "$type": "dimension",
+        "$value": "280px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "320": {
+        "$type": "dimension",
+        "$value": "320px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "360": {
+        "$type": "dimension",
+        "$value": "360px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "384": {
+        "$type": "dimension",
+        "$value": "384px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "480": {
+        "$type": "dimension",
+        "$value": "480px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "540": {
+        "$type": "dimension",
+        "$value": "540px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "560": {
+        "$type": "dimension",
+        "$value": "560px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "640": {
+        "$type": "dimension",
+        "$value": "640px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "720": {
+        "$type": "dimension",
+        "$value": "720px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "768": {
+        "$type": "dimension",
+        "$value": "768px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "960": {
+        "$type": "dimension",
+        "$value": "960px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "1024": {
+        "$type": "dimension",
+        "$value": "1024px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "1280": {
+        "$type": "dimension",
+        "$value": "1280px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "1440": {
+        "$type": "dimension",
+        "$value": "1440px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "1600": {
+        "$type": "dimension",
+        "$value": "1600px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "1920": {
+        "$type": "dimension",
+        "$value": "1920px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "radius": {
+      "0": {
+        "$type": "dimension",
+        "$value": "0px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "4": {
+        "$type": "dimension",
+        "$value": "4px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "6": {
+        "$type": "dimension",
+        "$value": "6px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "8": {
+        "$type": "dimension",
+        "$value": "8px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "12": {
+        "$type": "dimension",
+        "$value": "12px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "16": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "9999": {
+        "$type": "dimension",
+        "$value": "9999px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "border-width": {
+      "1": {
+        "$type": "dimension",
+        "$value": "1px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "2": {
+        "$type": "dimension",
+        "$value": "2px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "3": {
+        "$type": "dimension",
+        "$value": "3px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "font-size": {
+      "12": {
+        "$type": "dimension",
+        "$value": "12px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "14": {
+        "$type": "dimension",
+        "$value": "14px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "16": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "18": {
+        "$type": "dimension",
+        "$value": "18px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "20": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "24": {
+        "$type": "dimension",
+        "$value": "24px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "30": {
+        "$type": "dimension",
+        "$value": "30px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "36": {
+        "$type": "dimension",
+        "$value": "36px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "48": {
+        "$type": "dimension",
+        "$value": "48px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "60": {
+        "$type": "dimension",
+        "$value": "60px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "line-height": {
+      "18": {
+        "$type": "dimension",
+        "$value": "18px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "20": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "24": {
+        "$type": "dimension",
+        "$value": "24px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "28": {
+        "$type": "dimension",
+        "$value": "28px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "30": {
+        "$type": "dimension",
+        "$value": "30px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "32": {
+        "$type": "dimension",
+        "$value": "32px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "38": {
+        "$type": "dimension",
+        "$value": "38px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "44": {
+        "$type": "dimension",
+        "$value": "44px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "60": {
+        "$type": "dimension",
+        "$value": "60px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "72": {
+        "$type": "dimension",
+        "$value": "72px",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "font-weight": {
+      "400": {
+        "$type": "fontWeight",
+        "$value": 400,
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "500": {
+        "$type": "fontWeight",
+        "$value": 500,
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "600": {
+        "$type": "fontWeight",
+        "$value": 600,
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "700": {
+        "$type": "fontWeight",
+        "$value": 700,
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    },
+    "duration": {
+      "0": {
+        "$type": "duration",
+        "$value": "0ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "120": {
+        "$type": "duration",
+        "$value": "120ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "200": {
+        "$type": "duration",
+        "$value": "200ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "250": {
+        "$type": "duration",
+        "$value": "250ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "300": {
+        "$type": "duration",
+        "$value": "300ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "400": {
+        "$type": "duration",
+        "$value": "400ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "900": {
+        "$type": "duration",
+        "$value": "900ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "1800": {
+        "$type": "duration",
+        "$value": "1800ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      },
+      "5000": {
+        "$type": "duration",
+        "$value": "5000ms",
+        "$extensions": {
+          "ds-create.collection": "Primitives"
+        }
+      }
+    }
+  },
+  "color": {
+    "text": {
+      "primary": {
+        "on-brand": {
+          "$type": "color",
+          "$value": "{palette.base.white}",
+          "$description": "Primary text on solid brand surfaces, such as a brand-colored banner heading.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.base.white}",
+              "Dark": "{palette.base.white}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.neutral.900}",
+          "$description": "Primary text such as page headings, table cell values and body copy.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.900}",
+              "Dark": "{palette.neutral.50}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "secondary": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.neutral.800}",
+          "$description": "Secondary text in hover states, such as a navigation item under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.800}",
+              "Dark": "{palette.neutral.200}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "on-brand": {
+          "$type": "color",
+          "$value": "{palette.brand.100}",
+          "$description": "Secondary text on solid brand surfaces.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.100}",
+              "Dark": "{palette.brand.100}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.neutral.700}",
+          "$description": "Secondary text such as labels, section headings and navigation items.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.700}",
+              "Dark": "{palette.neutral.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "tertiary": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.neutral.700}",
+          "$description": "Supporting text in hover states, such as a breadcrumb link.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.700}",
+              "Dark": "{palette.neutral.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "on-brand": {
+          "$type": "color",
+          "$value": "{palette.brand.200}",
+          "$description": "Supporting text on solid brand surfaces.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.200}",
+              "Dark": "{palette.brand.200}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.neutral.600}",
+          "$description": "Supporting text such as descriptions, timestamps and helper copy.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.600}",
+              "Dark": "{palette.neutral.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": "{palette.neutral.400}",
+        "$description": "Text in disabled controls and unavailable menu items.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.400}",
+            "Dark": "{palette.neutral.600}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "placeholder": {
+        "$type": "color",
+        "$value": "{palette.neutral.500}",
+        "$description": "Placeholder and empty-input hint text.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.500}",
+            "Dark": "{palette.neutral.500}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "{palette.base.white}",
+        "$description": "Text on inverse surfaces such as tooltips.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.base.white}",
+            "Dark": "{palette.neutral.900}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "on-solid": {
+        "$type": "color",
+        "$value": "{palette.base.white}",
+        "$description": "Text on any solid tone fill: primary buttons, solid badges, danger buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.base.white}",
+            "Dark": "{palette.base.white}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "brand": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.brand.800}",
+          "$description": "Links and brand text under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.800}",
+              "Dark": "{palette.brand.200}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "pressed": {
+          "$type": "color",
+          "$value": "{palette.brand.900}",
+          "$description": "Links and brand text while pressed.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.900}",
+              "Dark": "{palette.brand.100}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.brand.700}",
+          "$description": "Brand-colored text such as links and highlighted figures.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.700}",
+              "Dark": "{palette.brand.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "danger": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.red.800}",
+          "$description": "Danger text under the pointer, such as a secondary danger button label.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.red.800}",
+              "Dark": "{palette.red.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.red.700}",
+          "$description": "Error messages and danger text, such as an invalid-field message.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.red.700}",
+              "Dark": "{palette.red.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "warning": {
+        "$type": "color",
+        "$value": "{palette.amber.700}",
+        "$description": "Warning messages and caution labels.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.amber.700}",
+            "Dark": "{palette.amber.400}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "success": {
+        "$type": "color",
+        "$value": "{palette.green.700}",
+        "$description": "Success messages and positive values.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.green.700}",
+            "Dark": "{palette.green.400}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "info": {
+        "$type": "color",
+        "$value": "{palette.blue.700}",
+        "$description": "Informational messages and neutral notices.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.blue.700}",
+            "Dark": "{palette.blue.400}"
+          },
+          "ds-create.collection": "Color"
+        }
+      }
+    },
+    "icon": {
+      "primary": {
+        "on-brand": {
+          "$type": "color",
+          "$value": "{palette.base.white}",
+          "$description": "Primary icons on solid brand surfaces.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.base.white}",
+              "Dark": "{palette.base.white}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.neutral.800}",
+          "$description": "Icons that carry the main meaning of a row or control.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.800}",
+              "Dark": "{palette.neutral.100}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "secondary": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.neutral.700}",
+          "$description": "Icons in those controls under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.700}",
+              "Dark": "{palette.neutral.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "on-brand": {
+          "$type": "color",
+          "$value": "{palette.brand.200}",
+          "$description": "Secondary icons on solid brand surfaces.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.200}",
+              "Dark": "{palette.brand.200}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.neutral.600}",
+          "$description": "Icons in buttons, inputs and menu items.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.600}",
+              "Dark": "{palette.neutral.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "tertiary": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.neutral.600}",
+          "$description": "Supporting icons under the pointer, such as a help icon on hover.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.600}",
+              "Dark": "{palette.neutral.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "on-brand": {
+          "$type": "color",
+          "$value": "{palette.brand.300}",
+          "$description": "Supporting icons on solid brand surfaces.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.300}",
+              "Dark": "{palette.brand.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.neutral.500}",
+          "$description": "Supporting icons such as a chevron in a list row or a metadata icon.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.500}",
+              "Dark": "{palette.neutral.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": "{palette.neutral.300}",
+        "$description": "Icons in disabled controls.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.300}",
+            "Dark": "{palette.neutral.700}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "placeholder": {
+        "$type": "color",
+        "$value": "{palette.neutral.400}",
+        "$description": "Leading icons inside empty inputs, such as a search icon.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.400}",
+            "Dark": "{palette.neutral.600}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "{palette.base.white}",
+        "$description": "Icons on inverse surfaces such as tooltips.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.base.white}",
+            "Dark": "{palette.neutral.900}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "on-solid": {
+        "$type": "color",
+        "$value": "{palette.base.white}",
+        "$description": "Icons on solid tone fills, such as the icon in a primary button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.base.white}",
+            "Dark": "{palette.base.white}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "brand": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.brand.700}",
+          "$description": "Brand icons under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.700}",
+              "Dark": "{palette.brand.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "pressed": {
+          "$type": "color",
+          "$value": "{palette.brand.800}",
+          "$description": "Brand icons while pressed.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.800}",
+              "Dark": "{palette.brand.200}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.brand.600}",
+          "$description": "Brand icons such as a selected navigation icon or an active tab icon.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.600}",
+              "Dark": "{palette.brand.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "danger": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.red.700}",
+          "$description": "Danger icons under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.red.700}",
+              "Dark": "{palette.red.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.red.600}",
+          "$description": "Error icons in alerts, fields and featured icons.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.red.600}",
+              "Dark": "{palette.red.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "warning": {
+        "$type": "color",
+        "$value": "{palette.amber.600}",
+        "$description": "Warning icons; also the filled part of rating stars.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.amber.600}",
+            "Dark": "{palette.amber.500}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "success": {
+        "$type": "color",
+        "$value": "{palette.green.600}",
+        "$description": "Success icons, online dots and positive trend arrows.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.green.600}",
+            "Dark": "{palette.green.500}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "info": {
+        "$type": "color",
+        "$value": "{palette.blue.600}",
+        "$description": "Informational icons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.blue.600}",
+            "Dark": "{palette.blue.500}"
+          },
+          "ds-create.collection": "Color"
+        }
+      }
+    },
+    "border": {
+      "subtle": {
+        "$type": "color",
+        "$value": "{palette.neutral.200}",
+        "$description": "Dividers, table rows and the outline of cards and menus.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.200}",
+            "Dark": "{palette.neutral.800}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "default": {
+        "$type": "color",
+        "$value": "{palette.neutral.300}",
+        "$description": "Default border around form controls, checkboxes and secondary buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.300}",
+            "Dark": "{palette.neutral.700}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "strong": {
+        "$type": "color",
+        "$value": "{palette.neutral.600}",
+        "$description": "Borders that must stand out, such as a control boundary on a tinted surface or a hovered input.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.600}",
+            "Dark": "{palette.neutral.400}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "brand": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.brand.300}",
+          "$description": "Brand-tinted outlines, such as a brand badge border.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.300}",
+              "Dark": "{palette.brand.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.brand.600}",
+          "$description": "Selected controls and active inputs, such as a selected choice card or a focused field.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.600}",
+              "Dark": "{palette.brand.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "danger": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.red.300}",
+          "$description": "Outline of danger badges and error alerts.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.red.300}",
+              "Dark": "{palette.red.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.red.600}",
+          "$description": "Border of an invalid field.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.red.600}",
+              "Dark": "{palette.red.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "warning": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.amber.300}",
+          "$description": "Outline of warning badges and alerts.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.amber.300}",
+              "Dark": "{palette.amber.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.amber.500}",
+          "$description": "Border of a field with a warning.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.amber.500}",
+              "Dark": "{palette.amber.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "success": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.green.300}",
+          "$description": "Outline of success badges and alerts.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.green.300}",
+              "Dark": "{palette.green.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.green.600}",
+          "$description": "Border of a validated field.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.green.600}",
+              "Dark": "{palette.green.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "info": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.blue.300}",
+          "$description": "Outline of info badges and alerts.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.blue.300}",
+              "Dark": "{palette.blue.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.blue.600}",
+          "$description": "Border of an informational field or callout.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.blue.600}",
+              "Dark": "{palette.blue.400}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "focus": {
+        "$type": "color",
+        "$value": "{palette.brand.500}",
+        "$description": "Focus ring color.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.brand.500}",
+            "Dark": "{palette.brand.400}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "disabled": {
+        "$type": "color",
+        "$value": "{palette.neutral.200}",
+        "$description": "Borders of disabled controls.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.200}",
+            "Dark": "{palette.neutral.800}"
+          },
+          "ds-create.collection": "Color"
+        }
+      }
+    },
+    "surface": {
+      "base": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.neutral.50}",
+          "$description": "Rows, list items and secondary buttons under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.50}",
+              "Dark": "{palette.neutral.900}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "pressed": {
+          "$type": "color",
+          "$value": "{palette.neutral.100}",
+          "$description": "Rows, list items and secondary buttons while pressed.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.100}",
+              "Dark": "{palette.neutral.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.base.white}",
+          "$description": "Page background and the default background of cards and controls.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.base.white}",
+              "Dark": "{palette.neutral.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "sunken": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.neutral.100}",
+          "$description": "Recessed rows under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.100}",
+              "Dark": "{palette.neutral.900}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.neutral.50}",
+          "$description": "Recessed areas: page sections behind cards, table headers, code blocks.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.50}",
+              "Dark": "{palette.base.black}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "raised": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.neutral.50}",
+          "$description": "Clickable cards under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.50}",
+              "Dark": "{palette.neutral.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.base.white}",
+          "$description": "Cards and panels that sit above the page; used with elevation/raised.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.base.white}",
+              "Dark": "{palette.neutral.900}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "{palette.base.white}",
+        "$description": "Menus, popovers, dialogs and drawers; used with elevation/overlay and elevation/modal.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.base.white}",
+            "Dark": "{palette.neutral.800}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "inverse": {
+        "$type": "color",
+        "$value": "{palette.neutral.900}",
+        "$description": "Inverse surfaces such as tooltips and dark callouts.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.neutral.900}",
+            "Dark": "{palette.neutral.50}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "brand-subtle": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.brand.100}",
+          "$description": "Tinted brand areas under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.100}",
+              "Dark": "{palette.brand.900}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.brand.50}",
+          "$description": "Lightly tinted brand areas, such as a highlighted plan card or an announcement panel.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.brand.50}",
+              "Dark": "{palette.brand.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "brand-solid": {
+        "$type": "color",
+        "$value": "{palette.brand.700}",
+        "$description": "Solid brand sections such as a marketing banner; content on it uses the on-brand roles.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.brand.700}",
+            "Dark": "{palette.brand.700}"
+          },
+          "ds-create.collection": "Color"
+        }
+      }
+    },
+    "fill": {
+      "neutral": {
+        "solid": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.neutral.800}",
+            "$description": "The solid neutral fill under the pointer.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.800}",
+                "Dark": "{palette.neutral.100}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.neutral.700}",
+            "$description": "The solid neutral fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.700}",
+                "Dark": "{palette.neutral.200}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.neutral.800}",
+            "$description": "A selected solid neutral item.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.800}",
+                "Dark": "{palette.neutral.100}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.100}",
+            "$description": "Solid neutral fills of disabled controls.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.100}",
+                "Dark": "{palette.neutral.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.neutral.900}",
+            "$description": "Solid neutral fill, such as solid neutral badges.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.900}",
+                "Dark": "{palette.neutral.50}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        },
+        "subtle": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.neutral.100}",
+            "$description": "The tinted neutral fill under the pointer, such as a tertiary button or menu row hover.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.100}",
+                "Dark": "{palette.neutral.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.neutral.200}",
+            "$description": "The tinted neutral fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.200}",
+                "Dark": "{palette.neutral.700}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.neutral.100}",
+            "$description": "Selected rows and selected neutral items, such as a chosen segment or command.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.100}",
+                "Dark": "{palette.neutral.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.50}",
+            "$description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.50}",
+                "Dark": "{palette.neutral.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.neutral.50}",
+            "$description": "Tinted neutral fill: neutral badges, ghost-button hovers and selected rows in lists.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.50}",
+                "Dark": "{palette.neutral.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        },
+        "track": {
+          "$type": "color",
+          "$value": "{palette.neutral.200}",
+          "$description": "Unfilled tracks: progress bars, sliders and the off state of switches.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.neutral.200}",
+              "Dark": "{palette.neutral.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "brand": {
+        "solid": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.brand.700}",
+            "$description": "The solid brand fill under the pointer.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.brand.700}",
+                "Dark": "{palette.brand.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.brand.800}",
+            "$description": "The solid brand fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.brand.800}",
+                "Dark": "{palette.brand.700}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.brand.700}",
+            "$description": "A selected solid brand item, such as the active segment of a segmented control.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.brand.700}",
+                "Dark": "{palette.brand.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.100}",
+            "$description": "Solid brand fills of disabled controls.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.100}",
+                "Dark": "{palette.neutral.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.brand.600}",
+            "$description": "Solid brand fill: primary buttons, checked checkboxes and radios, switches that are on and progress fills.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.brand.600}",
+                "Dark": "{palette.brand.600}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        },
+        "subtle": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.brand.100}",
+            "$description": "The tinted brand fill under the pointer.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.brand.100}",
+                "Dark": "{palette.brand.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.brand.200}",
+            "$description": "The tinted brand fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.brand.200}",
+                "Dark": "{palette.brand.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.brand.100}",
+            "$description": "Selected rows and selected brand items, such as a chosen segment or command.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.brand.100}",
+                "Dark": "{palette.brand.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.50}",
+            "$description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.50}",
+                "Dark": "{palette.neutral.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.brand.50}",
+            "$description": "Tinted brand fill: brand badges, highlighted options and selected brand rows.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.brand.50}",
+                "Dark": "{palette.brand.950}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        }
+      },
+      "danger": {
+        "solid": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.red.700}",
+            "$description": "The solid danger fill under the pointer.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.red.700}",
+                "Dark": "{palette.red.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.red.800}",
+            "$description": "The solid danger fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.red.800}",
+                "Dark": "{palette.red.700}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.red.700}",
+            "$description": "A selected solid danger item, such as the active segment of a segmented control.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.red.700}",
+                "Dark": "{palette.red.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.100}",
+            "$description": "Solid danger fills of disabled controls.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.100}",
+                "Dark": "{palette.neutral.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.red.600}",
+            "$description": "Solid danger fill: danger buttons and destructive confirmations.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.red.600}",
+                "Dark": "{palette.red.600}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        },
+        "subtle": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.red.100}",
+            "$description": "The tinted danger fill under the pointer, such as a tertiary button or menu row hover.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.red.100}",
+                "Dark": "{palette.red.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.red.200}",
+            "$description": "The tinted danger fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.red.200}",
+                "Dark": "{palette.red.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.red.100}",
+            "$description": "Selected rows and selected danger items, such as a chosen segment or command.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.red.100}",
+                "Dark": "{palette.red.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.50}",
+            "$description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.50}",
+                "Dark": "{palette.neutral.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.red.50}",
+            "$description": "Tinted danger fill: danger badges, error alert backgrounds and danger hovers.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.red.50}",
+                "Dark": "{palette.red.950}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        }
+      },
+      "warning": {
+        "solid": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.amber.700}",
+            "$description": "The solid warning fill under the pointer.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.amber.700}",
+                "Dark": "{palette.amber.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.amber.800}",
+            "$description": "The solid warning fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.amber.800}",
+                "Dark": "{palette.amber.700}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.amber.700}",
+            "$description": "A selected solid warning item, such as the active segment of a segmented control.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.amber.700}",
+                "Dark": "{palette.amber.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.100}",
+            "$description": "Solid warning fills of disabled controls.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.100}",
+                "Dark": "{palette.neutral.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.amber.600}",
+            "$description": "Solid warning fill: solid warning badges and caution markers.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.amber.600}",
+                "Dark": "{palette.amber.600}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        },
+        "subtle": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.amber.100}",
+            "$description": "The tinted warning fill under the pointer, such as a tertiary button or menu row hover.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.amber.100}",
+                "Dark": "{palette.amber.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.amber.200}",
+            "$description": "The tinted warning fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.amber.200}",
+                "Dark": "{palette.amber.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.amber.100}",
+            "$description": "Selected rows and selected warning items, such as a chosen segment or command.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.amber.100}",
+                "Dark": "{palette.amber.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.50}",
+            "$description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.50}",
+                "Dark": "{palette.neutral.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.amber.50}",
+            "$description": "Tinted warning fill: warning badges and warning alert backgrounds.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.amber.50}",
+                "Dark": "{palette.amber.950}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        }
+      },
+      "success": {
+        "solid": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.green.700}",
+            "$description": "The solid success fill under the pointer.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.green.700}",
+                "Dark": "{palette.green.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.green.800}",
+            "$description": "The solid success fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.green.800}",
+                "Dark": "{palette.green.700}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.green.700}",
+            "$description": "A selected solid success item, such as the active segment of a segmented control.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.green.700}",
+                "Dark": "{palette.green.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.100}",
+            "$description": "Solid success fills of disabled controls.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.100}",
+                "Dark": "{palette.neutral.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.green.600}",
+            "$description": "Solid success fill: solid success badges and completed-step markers.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.green.600}",
+                "Dark": "{palette.green.600}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        },
+        "subtle": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.green.100}",
+            "$description": "The tinted success fill under the pointer, such as a tertiary button or menu row hover.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.green.100}",
+                "Dark": "{palette.green.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.green.200}",
+            "$description": "The tinted success fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.green.200}",
+                "Dark": "{palette.green.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.green.100}",
+            "$description": "Selected rows and selected success items, such as a chosen segment or command.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.green.100}",
+                "Dark": "{palette.green.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.50}",
+            "$description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.50}",
+                "Dark": "{palette.neutral.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.green.50}",
+            "$description": "Tinted success fill: success badges and success alert backgrounds.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.green.50}",
+                "Dark": "{palette.green.950}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        }
+      },
+      "info": {
+        "solid": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.blue.700}",
+            "$description": "The solid info fill under the pointer.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.blue.700}",
+                "Dark": "{palette.blue.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.blue.800}",
+            "$description": "The solid info fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.blue.800}",
+                "Dark": "{palette.blue.700}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.blue.700}",
+            "$description": "A selected solid info item, such as the active segment of a segmented control.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.blue.700}",
+                "Dark": "{palette.blue.500}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.100}",
+            "$description": "Solid info fills of disabled controls.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.100}",
+                "Dark": "{palette.neutral.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.blue.600}",
+            "$description": "Solid info fill: solid info badges and informational markers.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.blue.600}",
+                "Dark": "{palette.blue.600}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        },
+        "subtle": {
+          "hover": {
+            "$type": "color",
+            "$value": "{palette.blue.100}",
+            "$description": "The tinted info fill under the pointer, such as a tertiary button or menu row hover.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.blue.100}",
+                "Dark": "{palette.blue.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "pressed": {
+            "$type": "color",
+            "$value": "{palette.blue.200}",
+            "$description": "The tinted info fill while pressed.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.blue.200}",
+                "Dark": "{palette.blue.800}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "selected": {
+            "$type": "color",
+            "$value": "{palette.blue.100}",
+            "$description": "Selected rows and selected info items, such as a chosen segment or command.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.blue.100}",
+                "Dark": "{palette.blue.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "disabled": {
+            "$type": "color",
+            "$value": "{palette.neutral.50}",
+            "$description": "Tinted fills of disabled controls, such as a disabled input or primary button.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.neutral.50}",
+                "Dark": "{palette.neutral.900}"
+              },
+              "ds-create.collection": "Color"
+            }
+          },
+          "$root": {
+            "$type": "color",
+            "$value": "{palette.blue.50}",
+            "$description": "Tinted info fill: info badges and info alert backgrounds.",
+            "$extensions": {
+              "ds-create.modes": {
+                "Light": "{palette.blue.50}",
+                "Dark": "{palette.blue.950}"
+              },
+              "ds-create.collection": "Color"
+            }
+          }
+        }
+      },
+      "none": {
+        "$type": "color",
+        "$value": "{palette.base.transparent}",
+        "$description": "Transparent fill that keeps a layer bound, such as a ghost button at rest.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.base.transparent}",
+            "Dark": "{palette.base.transparent}"
+          },
+          "ds-create.collection": "Color"
+        }
+      }
+    },
+    "overlay": {
+      "scrim": {
+        "$type": "color",
+        "$value": "{palette.alpha-black.60}",
+        "$description": "Scrim behind dialogs and drawers that dims the page.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.alpha-black.60}",
+            "Dark": "{palette.alpha-black.80}"
+          },
+          "ds-create.collection": "Color"
+        }
+      }
+    },
+    "shadow": {
+      "ambient": {
+        "$type": "color",
+        "$value": "{palette.alpha-black.5}",
+        "$description": "Soft, wide shadow layer that gives every elevation its spread.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.alpha-black.5}",
+            "Dark": "{palette.alpha-black.20}"
+          },
+          "ds-create.collection": "Color"
+        }
+      },
+      "key": {
+        "$type": "color",
+        "$value": "{palette.alpha-black.10}",
+        "$description": "Tighter, darker shadow layer that gives elevation its direction.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.alpha-black.10}",
+            "Dark": "{palette.alpha-black.40}"
+          },
+          "ds-create.collection": "Color"
+        }
+      }
+    },
+    "category": {
+      "slate": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.slate.50}",
+          "$description": "Background of slate category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.slate.50}",
+              "Dark": "{palette.slate.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": "{palette.slate.500}",
+          "$description": "Slate chart series, category dots and avatar fills.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.slate.500}",
+              "Dark": "{palette.slate.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{palette.slate.700}",
+          "$description": "Text and icons on the slate subtle background.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.slate.700}",
+              "Dark": "{palette.slate.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{palette.slate.200}",
+          "$description": "Outline of slate category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.slate.200}",
+              "Dark": "{palette.slate.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "sky": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.sky.50}",
+          "$description": "Background of sky category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.sky.50}",
+              "Dark": "{palette.sky.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": "{palette.sky.500}",
+          "$description": "Sky chart series, category dots and avatar fills.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.sky.500}",
+              "Dark": "{palette.sky.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{palette.sky.700}",
+          "$description": "Text and icons on the sky subtle background.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.sky.700}",
+              "Dark": "{palette.sky.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{palette.sky.200}",
+          "$description": "Outline of sky category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.sky.200}",
+              "Dark": "{palette.sky.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "blue": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.blue.50}",
+          "$description": "Background of blue category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.blue.50}",
+              "Dark": "{palette.blue.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": "{palette.blue.500}",
+          "$description": "Blue chart series, category dots and avatar fills.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.blue.500}",
+              "Dark": "{palette.blue.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{palette.blue.700}",
+          "$description": "Text and icons on the blue subtle background.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.blue.700}",
+              "Dark": "{palette.blue.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{palette.blue.200}",
+          "$description": "Outline of blue category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.blue.200}",
+              "Dark": "{palette.blue.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "indigo": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.indigo.50}",
+          "$description": "Background of indigo category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.indigo.50}",
+              "Dark": "{palette.indigo.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": "{palette.indigo.500}",
+          "$description": "Indigo chart series, category dots and avatar fills.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.indigo.500}",
+              "Dark": "{palette.indigo.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{palette.indigo.700}",
+          "$description": "Text and icons on the indigo subtle background.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.indigo.700}",
+              "Dark": "{palette.indigo.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{palette.indigo.200}",
+          "$description": "Outline of indigo category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.indigo.200}",
+              "Dark": "{palette.indigo.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "purple": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.purple.50}",
+          "$description": "Background of purple category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.purple.50}",
+              "Dark": "{palette.purple.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": "{palette.purple.500}",
+          "$description": "Purple chart series, category dots and avatar fills.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.purple.500}",
+              "Dark": "{palette.purple.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{palette.purple.700}",
+          "$description": "Text and icons on the purple subtle background.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.purple.700}",
+              "Dark": "{palette.purple.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{palette.purple.200}",
+          "$description": "Outline of purple category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.purple.200}",
+              "Dark": "{palette.purple.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "pink": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.pink.50}",
+          "$description": "Background of pink category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.pink.50}",
+              "Dark": "{palette.pink.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": "{palette.pink.500}",
+          "$description": "Pink chart series, category dots and avatar fills.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.pink.500}",
+              "Dark": "{palette.pink.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{palette.pink.700}",
+          "$description": "Text and icons on the pink subtle background.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.pink.700}",
+              "Dark": "{palette.pink.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{palette.pink.200}",
+          "$description": "Outline of pink category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.pink.200}",
+              "Dark": "{palette.pink.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "orange": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.orange.50}",
+          "$description": "Background of orange category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.orange.50}",
+              "Dark": "{palette.orange.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": "{palette.orange.500}",
+          "$description": "Orange chart series, category dots and avatar fills.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.orange.500}",
+              "Dark": "{palette.orange.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{palette.orange.700}",
+          "$description": "Text and icons on the orange subtle background.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.orange.700}",
+              "Dark": "{palette.orange.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{palette.orange.200}",
+          "$description": "Outline of orange category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.orange.200}",
+              "Dark": "{palette.orange.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      },
+      "teal": {
+        "subtle": {
+          "$type": "color",
+          "$value": "{palette.teal.50}",
+          "$description": "Background of teal category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.teal.50}",
+              "Dark": "{palette.teal.950}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "solid": {
+          "$type": "color",
+          "$value": "{palette.teal.500}",
+          "$description": "Teal chart series, category dots and avatar fills.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.teal.500}",
+              "Dark": "{palette.teal.500}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "text": {
+          "$type": "color",
+          "$value": "{palette.teal.700}",
+          "$description": "Text and icons on the teal subtle background.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.teal.700}",
+              "Dark": "{palette.teal.300}"
+            },
+            "ds-create.collection": "Color"
+          }
+        },
+        "border": {
+          "$type": "color",
+          "$value": "{palette.teal.200}",
+          "$description": "Outline of teal category tags and badges.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.teal.200}",
+              "Dark": "{palette.teal.800}"
+            },
+            "ds-create.collection": "Color"
+          }
+        }
+      }
+    }
+  },
+  "font": {
+    "family": {
+      "ui": {
+        "$type": "fontFamily",
+        "$value": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+        "$description": "Every interface role: display, headings, body, labels and controls.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "ui-monospace, SFMono-Regular, Menlo, Consolas, \"Liberation Mono\", monospace",
+        "$description": "Code, keys, IDs and tabular figures.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      }
+    },
+    "weight": {
+      "regular": {
+        "$type": "fontWeight",
+        "$value": "{scale.font-weight.400}",
+        "$description": "Reading text and input values.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "medium": {
+        "$type": "fontWeight",
+        "$value": "{scale.font-weight.500}",
+        "$description": "Labels, badges, menu items and tags.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "semibold": {
+        "$type": "fontWeight",
+        "$value": "{scale.font-weight.600}",
+        "$description": "Headings, buttons, links and emphasized labels.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "bold": {
+        "$type": "fontWeight",
+        "$value": "{scale.font-weight.700}",
+        "$description": "Heavier display and heading alternates.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      }
+    },
+    "size": {
+      "display-lg": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.60}",
+        "$description": "Size of type/display/lg: hero and marketing headings.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "display-md": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.48}",
+        "$description": "Size of type/display/md: hero and marketing headings.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "display-sm": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.36}",
+        "$description": "Size of type/display/sm: hero and marketing headings.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-xl": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.30}",
+        "$description": "Size of type/heading/xl: page, section, card and dialog titles.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-lg": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.24}",
+        "$description": "Size of type/heading/lg: page, section, card and dialog titles.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-md": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.20}",
+        "$description": "Size of type/heading/md: page, section, card and dialog titles.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-sm": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.18}",
+        "$description": "Size of type/heading/sm: page, section, card and dialog titles.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-xs": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.16}",
+        "$description": "Size of type/heading/xs: page, section, card and dialog titles.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-xl": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.20}",
+        "$description": "Size of type/body/xl: running text, labels and text inside controls.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-lg": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.18}",
+        "$description": "Size of type/body/lg: running text, labels and text inside controls.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-md": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.16}",
+        "$description": "Size of type/body/md: running text, labels and text inside controls.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-sm": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.14}",
+        "$description": "Size of type/body/sm: running text, labels and text inside controls.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-xs": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.12}",
+        "$description": "Size of type/body/xs: running text, labels and text inside controls.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "code-md": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.14}",
+        "$description": "Size of type/code/md: code, IDs, keys and tabular figures.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "code-sm": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.12}",
+        "$description": "Size of type/code/sm: code, IDs, keys and tabular figures.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "input-min": {
+        "$type": "dimension",
+        "$value": "{scale.font-size.16}",
+        "$description": "Smallest value text in a text control on mobile, so browsers do not zoom on focus.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      }
+    },
+    "line-height": {
+      "display-lg": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.72}",
+        "$description": "Line height of type/display/lg.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "display-md": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.60}",
+        "$description": "Line height of type/display/md.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "display-sm": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.44}",
+        "$description": "Line height of type/display/sm.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-xl": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.38}",
+        "$description": "Line height of type/heading/xl.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-lg": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.32}",
+        "$description": "Line height of type/heading/lg.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-md": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.30}",
+        "$description": "Line height of type/heading/md.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-sm": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.28}",
+        "$description": "Line height of type/heading/sm.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-xs": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.24}",
+        "$description": "Line height of type/heading/xs.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-xl": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.30}",
+        "$description": "Line height of type/body/xl.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-lg": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.28}",
+        "$description": "Line height of type/body/lg.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-md": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.24}",
+        "$description": "Line height of type/body/md.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-sm": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.20}",
+        "$description": "Line height of type/body/sm.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "body-xs": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.18}",
+        "$description": "Line height of type/body/xs.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "code-md": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.20}",
+        "$description": "Line height of type/code/md.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "code-sm": {
+        "$type": "dimension",
+        "$value": "{scale.line-height.18}",
+        "$description": "Line height of type/code/sm.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      }
+    },
+    "letter-spacing": {
+      "display-lg": {
+        "$type": "dimension",
+        "$value": "-1.2px",
+        "$description": "Display lg: −2% of the size.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "display-md": {
+        "$type": "dimension",
+        "$value": "-0.96px",
+        "$description": "Display md: −2% of the size.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "display-sm": {
+        "$type": "dimension",
+        "$value": "-0.72px",
+        "$description": "Display sm: −2% of the size.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-xl": {
+        "$type": "dimension",
+        "$value": "-0.3px",
+        "$description": "Heading xl: −1% of the size.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-lg": {
+        "$type": "dimension",
+        "$value": "-0.24px",
+        "$description": "Heading lg: −1% of the size.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "heading-md": {
+        "$type": "dimension",
+        "$value": "-0.2px",
+        "$description": "Heading md: −1% of the size.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      },
+      "default": {
+        "$type": "dimension",
+        "$value": "0px",
+        "$description": "Every other style keeps the typeface default spacing.",
+        "$extensions": {
+          "ds-create.collection": "Typography"
+        }
+      }
+    }
+  },
+  "space": {
+    "none": {
+      "$type": "dimension",
+      "$value": "{scale.space.0}",
+      "$description": "No space: edges that touch, such as joined field addons.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "xxs": {
+      "$type": "dimension",
+      "$value": "{scale.space.2}",
+      "$description": "Hairline gaps: label to required marker, keys in a shortcut.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "xs": {
+      "$type": "dimension",
+      "$value": "{scale.space.4}",
+      "$description": "Gap inside compact controls: badge icon to label, button icon to label.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": "{scale.space.6}",
+      "$description": "Gap between a field label, its control and its hint.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": "{scale.space.8}",
+      "$description": "Gap between an icon and its label inside controls, and menu item padding.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": "{scale.space.12}",
+      "$description": "Padding of compact cards and the gap between related fields.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.16}",
+      "$description": "Default card padding and gap between groups of controls.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "2xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.20}",
+      "$description": "Padding of comfortable cards and choice cards.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "3xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.24}",
+      "$description": "Gap between cards in a grid and desktop grid gutters.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "4xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.32}",
+      "$description": "Gap between sections inside a panel.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "5xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.40}",
+      "$description": "Padding of large panels and dialogs.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "6xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.48}",
+      "$description": "Space between page sections on mobile.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "7xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.64}",
+      "$description": "Space between page sections on desktop.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "8xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.80}",
+      "$description": "Large hero padding.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "9xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.96}",
+      "$description": "Spacing around marketing sections.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "10xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.128}",
+      "$description": "Very large layout gaps.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "11xl": {
+      "$type": "dimension",
+      "$value": "{scale.space.160}",
+      "$description": "Gap between frames on documentation canvases.",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    },
+    "optical": {
+      "$type": "dimension",
+      "$value": "{scale.space.2}",
+      "$description": "Optical inset around a label next to icons (the Text padding wrapper in buttons).",
+      "$extensions": {
+        "ds-create.collection": "Space"
+      }
+    }
+  },
+  "size": {
+    "control": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "{scale.size.32}",
+        "$description": "Height of extra-small buttons in dense toolbars.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "{scale.size.36}",
+        "$description": "Height of small buttons, inputs and selects in filter rows.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{scale.size.40}",
+        "$description": "Height of default buttons, inputs and selects.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{scale.size.44}",
+        "$description": "Height of large buttons and inputs.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.48}",
+        "$description": "Height of extra-large buttons on marketing and onboarding screens.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      }
+    },
+    "icon": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "{scale.size.12}",
+        "$description": "Icons inside small badges, tags and labels.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "{scale.size.16}",
+        "$description": "Icons inside xs and sm controls and inline with small text.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{scale.size.20}",
+        "$description": "Icons inside md and lg controls.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{scale.size.24}",
+        "$description": "Icons inside xl controls and standalone icons.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.32}",
+        "$description": "The largest icon step; anything larger uses a Featured icon.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      }
+    },
+    "avatar": {
+      "2xs": {
+        "$type": "dimension",
+        "$value": "{scale.size.16}",
+        "$description": "Avatars inside tags and badges.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "xs": {
+        "$type": "dimension",
+        "$value": "{scale.size.24}",
+        "$description": "Avatars in dense tables and select options.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "{scale.size.32}",
+        "$description": "Avatars in table rows, comments and top bars.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{scale.size.40}",
+        "$description": "Avatars in lists and comment threads.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{scale.size.48}",
+        "$description": "Avatars in cards.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.56}",
+        "$description": "Avatars in headers.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "2xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.64}",
+        "$description": "The largest everyday avatar, in profile headers.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      }
+    },
+    "indicator": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "{scale.size.6}",
+        "$description": "Status dots in badges and tags.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "{scale.size.8}",
+        "$description": "Status dots in avatars and radio dots.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{scale.size.10}",
+        "$description": "Presence dots on md avatars.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{scale.size.12}",
+        "$description": "Presence dots on large avatars.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      }
+    },
+    "track": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{scale.size.4}",
+        "$description": "Thickness of thin tracks such as large spinner rings and media timelines.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{scale.size.6}",
+        "$description": "Thickness of motion bars and medium tracks.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{scale.size.8}",
+        "$description": "Thickness of progress bars and slider tracks.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      }
+    },
+    "width": {
+      "xxs": {
+        "$type": "dimension",
+        "$value": "{scale.size.320}",
+        "$description": "Width of tooltips at most, fields and small popovers.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "xs": {
+        "$type": "dimension",
+        "$value": "{scale.size.384}",
+        "$description": "Width of dropdown menus and small popovers.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "{scale.size.480}",
+        "$description": "Width of small dialogs.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{scale.size.560}",
+        "$description": "Width of default dialogs.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{scale.size.640}",
+        "$description": "Width of large dialogs and side panels.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.768}",
+        "$description": "Width of wide panels.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "2xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.1024}",
+        "$description": "Width of tablet layouts.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "3xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.1280}",
+        "$description": "Width of desktop layouts.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "4xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.1440}",
+        "$description": "Width of wide desktop layouts.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "5xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.1600}",
+        "$description": "Width of very wide layouts.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "6xl": {
+        "$type": "dimension",
+        "$value": "{scale.size.1920}",
+        "$description": "Width of full HD layouts.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      }
+    },
+    "container": {
+      "max": {
+        "$type": "dimension",
+        "$value": "{scale.size.1280}",
+        "$description": "Maximum width of page content on large screens.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "margin-mobile": {
+        "$type": "dimension",
+        "$value": "{scale.size.16}",
+        "$description": "Side margin of page content on mobile.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      },
+      "margin-desktop": {
+        "$type": "dimension",
+        "$value": "{scale.size.32}",
+        "$description": "Side margin of page content on tablet and desktop.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      }
+    },
+    "measure": {
+      "reading": {
+        "$type": "dimension",
+        "$value": "{scale.size.640}",
+        "$description": "Maximum width of running text: 65–80 characters of body text per line.",
+        "$extensions": {
+          "ds-create.collection": "Size"
+        }
+      }
+    },
+    "touch-min": {
+      "$type": "dimension",
+      "$value": "{scale.size.44}",
+      "$description": "Smallest tap target on touch screens; icon-only controls reach it through their hit area.",
+      "$extensions": {
+        "ds-create.collection": "Size"
+      }
+    }
+  },
+  "radius": {
+    "none": {
+      "$type": "dimension",
+      "$value": "{scale.radius.0}",
+      "$description": "Square corners on tables, full-bleed media and edges that meet.",
+      "$extensions": {
+        "ds-create.collection": "Shape"
+      }
+    },
+    "xs": {
+      "$type": "dimension",
+      "$value": "{scale.radius.4}",
+      "$description": "Small parts inside controls, such as the checkbox box and keyboard keys.",
+      "$extensions": {
+        "ds-create.collection": "Shape"
+      }
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": "{scale.radius.6}",
+      "$description": "Nested parts such as menu items, tags and rounded badges.",
+      "$extensions": {
+        "ds-create.collection": "Shape"
+      }
+    },
+    "control": {
+      "$type": "dimension",
+      "$value": "{scale.radius.8}",
+      "$description": "Buttons, inputs, selects and every control the user operates.",
+      "$extensions": {
+        "ds-create.collection": "Shape"
+      }
+    },
+    "indicator": {
+      "$type": "dimension",
+      "$value": "{scale.radius.9999}",
+      "$description": "Badges, tags and status chips.",
+      "$extensions": {
+        "ds-create.collection": "Shape"
+      }
+    },
+    "surface": {
+      "$type": "dimension",
+      "$value": "{scale.radius.12}",
+      "$description": "Cards, panels, menus and popovers.",
+      "$extensions": {
+        "ds-create.collection": "Shape"
+      }
+    },
+    "modal": {
+      "$type": "dimension",
+      "$value": "{scale.radius.16}",
+      "$description": "Dialogs, drawers and sheets.",
+      "$extensions": {
+        "ds-create.collection": "Shape"
+      }
+    },
+    "full": {
+      "$type": "dimension",
+      "$value": "{scale.radius.9999}",
+      "$description": "Pills, avatars, switches, dots and radio buttons.",
+      "$extensions": {
+        "ds-create.collection": "Shape"
+      }
+    }
+  },
+  "border": {
+    "width": {
+      "default": {
+        "$type": "dimension",
+        "$value": "{scale.border-width.1}",
+        "$description": "Dividers and the outline of controls, cards and menus.",
+        "$extensions": {
+          "ds-create.collection": "Shape"
+        }
+      },
+      "strong": {
+        "$type": "dimension",
+        "$value": "{scale.border-width.2}",
+        "$description": "Lines that must stand out: primary dividers, avatar rings, slider knobs.",
+        "$extensions": {
+          "ds-create.collection": "Shape"
+        }
+      },
+      "focus": {
+        "$type": "dimension",
+        "$value": "{scale.border-width.2}",
+        "$description": "Focus outlines.",
+        "$extensions": {
+          "ds-create.collection": "Shape"
+        }
+      },
+      "selected": {
+        "$type": "dimension",
+        "$value": "{scale.border-width.2}",
+        "$description": "Outlines of selected cards, segments and options.",
+        "$extensions": {
+          "ds-create.collection": "Shape"
+        }
+      }
+    }
+  },
+  "motion": {
+    "duration": {
+      "instant": {
+        "$type": "duration",
+        "$value": "{scale.duration.0}",
+        "$description": "Changes that happen with no animation.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "{scale.duration.0}",
+            "Reduced": "{scale.duration.0}"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "fast": {
+        "$type": "duration",
+        "$value": "{scale.duration.120}",
+        "$description": "Hover, press and colour changes; anything leaving. Kept in Reduced because it is a fade.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "{scale.duration.120}",
+            "Reduced": "{scale.duration.120}"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "base": {
+        "$type": "duration",
+        "$value": "{scale.duration.200}",
+        "$description": "Small movements such as a switch thumb or a menu opening.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "{scale.duration.200}",
+            "Reduced": "{scale.duration.0}"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "slow": {
+        "$type": "duration",
+        "$value": "{scale.duration.300}",
+        "$description": "Large movements such as a dialog or drawer entering.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "{scale.duration.300}",
+            "Reduced": "{scale.duration.0}"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "loop": {
+        "$type": "duration",
+        "$value": "{scale.duration.900}",
+        "$description": "One rotation of a spinner; slower, not stopped, in Reduced.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "{scale.duration.900}",
+            "Reduced": "{scale.duration.1800}"
+          },
+          "ds-create.collection": "Motion"
+        }
+      }
+    },
+    "easing": {
+      "standard": {
+        "$type": "cubicBezier",
+        "$value": "0.2, 0, 0, 1",
+        "$description": "Elements changing in place.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "0.2, 0, 0, 1",
+            "Reduced": "0.2, 0, 0, 1"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "enter": {
+        "$type": "cubicBezier",
+        "$value": "0, 0, 0.2, 1",
+        "$description": "Elements arriving on screen.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "0, 0, 0.2, 1",
+            "Reduced": "0, 0, 0.2, 1"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "exit": {
+        "$type": "cubicBezier",
+        "$value": "0.4, 0, 1, 1",
+        "$description": "Elements leaving the screen.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "0.4, 0, 1, 1",
+            "Reduced": "0.4, 0, 1, 1"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "linear": {
+        "$type": "cubicBezier",
+        "$value": "0, 0, 1, 1",
+        "$description": "Continuous rotation and progress.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "0, 0, 1, 1",
+            "Reduced": "0, 0, 1, 1"
+          },
+          "ds-create.collection": "Motion"
+        }
+      }
+    },
+    "delay": {
+      "tooltip": {
+        "$type": "duration",
+        "$value": "{scale.duration.400}",
+        "$description": "Wait before a tooltip appears on hover.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "{scale.duration.400}",
+            "Reduced": "{scale.duration.400}"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "toast": {
+        "$type": "duration",
+        "$value": "{scale.duration.5000}",
+        "$description": "Time before a toast dismisses itself.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "{scale.duration.5000}",
+            "Reduced": "{scale.duration.5000}"
+          },
+          "ds-create.collection": "Motion"
+        }
+      },
+      "debounce": {
+        "$type": "duration",
+        "$value": "{scale.duration.250}",
+        "$description": "Wait after typing before a search runs.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Standard": "{scale.duration.250}",
+            "Reduced": "{scale.duration.250}"
+          },
+          "ds-create.collection": "Motion"
+        }
+      }
+    }
+  },
+  "button": {
+    "padding-x": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "10px",
+        "$description": "Horizontal padding of xs buttons: the visual padding minus the optical inset.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "10px",
+            "Dark": "10px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "{space.lg}",
+        "$description": "Horizontal padding of sm buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.lg}",
+            "Dark": "{space.lg}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "14px",
+        "$description": "Horizontal padding of md buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "14px",
+            "Dark": "14px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{space.xl}",
+        "$description": "Horizontal padding of lg buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xl}",
+            "Dark": "{space.xl}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "18px",
+        "$description": "Horizontal padding of xl buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "18px",
+            "Dark": "18px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "gap": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Gap between icon and label in xs buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Gap between icon and label in sm buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Gap between icon and label in md buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{space.sm}",
+        "$description": "Gap between icon and label in lg buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.sm}",
+            "Dark": "{space.sm}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "{space.sm}",
+        "$description": "Gap between icon and label in xl buttons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.sm}",
+            "Dark": "{space.sm}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "icon-button": {
+    "size": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "28px",
+        "$description": "Side of the square xs icon button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "28px",
+            "Dark": "28px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "{size.control.xs}",
+        "$description": "Side of the square sm icon button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{size.control.xs}",
+            "Dark": "{size.control.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{size.control.sm}",
+        "$description": "Side of the square md icon button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{size.control.sm}",
+            "Dark": "{size.control.sm}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{size.control.lg}",
+        "$description": "Side of the square lg icon button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{size.control.lg}",
+            "Dark": "{size.control.lg}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "link": {
+    "gap": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Gap between icon and label in sm standalone links.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Gap between icon and label in md standalone links.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{space.sm}",
+        "$description": "Gap between icon and label in lg standalone links.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.sm}",
+            "Dark": "{space.sm}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "badge": {
+    "padding-x": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{space.md}",
+        "$description": "Side padding of sm badges.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.md}",
+            "Dark": "{space.md}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "10px",
+        "$description": "Side padding of md badges.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "10px",
+            "Dark": "10px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{space.lg}",
+        "$description": "Side padding of lg badges.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.lg}",
+            "Dark": "{space.lg}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "padding-x-tight": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{space.sm}",
+        "$description": "Side padding of sm badges next to a leading visual or close.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.sm}",
+            "Dark": "{space.sm}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{space.md}",
+        "$description": "Side padding of md badges next to a leading visual or close.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.md}",
+            "Dark": "{space.md}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "10px",
+        "$description": "Side padding of lg badges next to a leading visual or close.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "10px",
+            "Dark": "10px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "tag": {
+    "height": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "24px",
+        "$description": "Height of sm tags.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "24px",
+            "Dark": "24px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "28px",
+        "$description": "Height of md tags.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "28px",
+            "Dark": "28px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{size.control.xs}",
+        "$description": "Height of lg tags.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{size.control.xs}",
+            "Dark": "{size.control.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "padding-x": {
+      "md": {
+        "$type": "dimension",
+        "$value": "10px",
+        "$description": "Side padding of md tags.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "10px",
+            "Dark": "10px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "padding-x-tight": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Trailing padding of sm tags with a close or count.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Trailing padding of md tags with a close or count.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{space.sm}",
+        "$description": "Trailing padding of lg tags with a close or count.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.sm}",
+            "Dark": "{space.sm}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "avatar": {
+    "placeholder": {
+      "fill": {
+        "$type": "color",
+        "$value": "{color.fill.neutral.subtle}",
+        "$description": "Background of initials and icon avatars.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{color.fill.neutral.subtle}",
+            "Dark": "{color.fill.neutral.subtle}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "text": {
+        "$type": "color",
+        "$value": "{color.text.tertiary}",
+        "$description": "Initials on placeholder avatars.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{color.text.tertiary}",
+            "Dark": "{color.text.tertiary}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "icon": {
+        "$type": "color",
+        "$value": "{color.icon.tertiary}",
+        "$description": "Icon on placeholder avatars.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{color.icon.tertiary}",
+            "Dark": "{color.icon.tertiary}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "checkbox": {
+    "size": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$description": "Box of sm checkboxes.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "16px",
+            "Dark": "16px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$description": "Box of md checkboxes.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "20px",
+            "Dark": "20px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "radius": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{radius.xs}",
+        "$description": "Corner of sm checkboxes.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{radius.xs}",
+            "Dark": "{radius.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{radius.sm}",
+        "$description": "Corner of md checkboxes.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{radius.sm}",
+            "Dark": "{radius.sm}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "mark": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "12px",
+        "$description": "Check and minus mark in sm checkboxes.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "12px",
+            "Dark": "12px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "14px",
+        "$description": "Check and minus mark in md checkboxes.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "14px",
+            "Dark": "14px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "radio": {
+    "size": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$description": "Ring of sm radios.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "16px",
+            "Dark": "16px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$description": "Ring of md radios.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "20px",
+            "Dark": "20px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "switch": {
+    "width": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "36px",
+        "$description": "Width of sm switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "36px",
+            "Dark": "36px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "44px",
+        "$description": "Width of md switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "44px",
+            "Dark": "44px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "height": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$description": "Height of sm switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "20px",
+            "Dark": "20px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "24px",
+        "$description": "Height of md switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "24px",
+            "Dark": "24px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "inset": {
+      "$type": "dimension",
+      "$value": "{space.xxs}",
+      "$description": "Space between the track edge and the thumb.",
+      "$extensions": {
+        "ds-create.modes": {
+          "Light": "{space.xxs}",
+          "Dark": "{space.xxs}"
+        },
+        "ds-create.collection": "Components"
+      }
+    },
+    "thumb": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$description": "Thumb of sm switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "16px",
+            "Dark": "16px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$description": "Thumb of md switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "20px",
+            "Dark": "20px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "fill": {
+        "$type": "color",
+        "$value": "{color.surface.base}",
+        "$description": "Fill of every switch thumb.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{color.surface.base}",
+            "Dark": "{color.surface.base}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "slim-width": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "32px",
+        "$description": "Width of sm slim switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "32px",
+            "Dark": "32px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "40px",
+        "$description": "Width of md slim switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "40px",
+            "Dark": "40px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "slim-track": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "10px",
+        "$description": "Rail height of sm slim switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "10px",
+            "Dark": "10px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "12px",
+        "$description": "Rail height of md slim switches.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "12px",
+            "Dark": "12px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "track": {
+      "off-hover": {
+        "$type": "color",
+        "$value": "{color.border.strong}",
+        "$description": "Track of an off switch under the pointer.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{color.border.strong}",
+            "Dark": "{color.border.strong}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "text-control": {
+    "padding-x": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "{space.lg}",
+        "$description": "Side padding of sm text controls.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.lg}",
+            "Dark": "{space.lg}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "{space.lg}",
+        "$description": "Side padding of md text controls.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.lg}",
+            "Dark": "{space.lg}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "14px",
+        "$description": "Side padding of lg text controls.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "14px",
+            "Dark": "14px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "multiline-min-height": {
+      "$type": "dimension",
+      "$value": "128px",
+      "$description": "Minimum height of multi-line text controls.",
+      "$extensions": {
+        "ds-create.modes": {
+          "Light": "128px",
+          "Dark": "128px"
+        },
+        "ds-create.collection": "Components"
+      }
+    },
+    "padding-y-multiline": {
+      "$type": "dimension",
+      "$value": "{space.lg}",
+      "$description": "Top and bottom padding of multi-line text controls.",
+      "$extensions": {
+        "ds-create.modes": {
+          "Light": "{space.lg}",
+          "Dark": "{space.lg}"
+        },
+        "ds-create.collection": "Components"
+      }
+    }
+  },
+  "profile-photo": {
+    "size": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "72px",
+        "$description": "Outer size of sm profile photos.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "72px",
+            "Dark": "72px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "96px",
+        "$description": "Outer size of md profile photos.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "96px",
+            "Dark": "96px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "160px",
+        "$description": "Outer size of lg profile photos.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "160px",
+            "Dark": "160px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "ring": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "3px",
+        "$description": "Ring padding of sm profile photos.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "3px",
+            "Dark": "3px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "4px",
+        "$description": "Ring padding of md profile photos.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "4px",
+            "Dark": "4px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "6px",
+        "$description": "Ring padding of lg profile photos.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "6px",
+            "Dark": "6px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "progress": {
+    "ring-thickness": {
+      "2xs": {
+        "$type": "dimension",
+        "$value": "6px",
+        "$description": "Ring thickness of 2xs circle and half-circle progress.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "6px",
+            "Dark": "6px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "xs": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$description": "Ring thickness of xs circle and half-circle progress.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "16px",
+            "Dark": "16px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "16px",
+        "$description": "Ring thickness of sm circle and half-circle progress.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "16px",
+            "Dark": "16px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$description": "Ring thickness of md circle and half-circle progress.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "20px",
+            "Dark": "20px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$description": "Ring thickness of lg circle and half-circle progress.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "20px",
+            "Dark": "20px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "spinner": {
+    "thickness": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "2px",
+        "$description": "Ring thickness of sm spinners.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "2px",
+            "Dark": "2px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "2px",
+        "$description": "Ring thickness of md spinners.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "2px",
+            "Dark": "2px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{size.track.sm}",
+        "$description": "Ring thickness of lg spinners.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{size.track.sm}",
+            "Dark": "{size.track.sm}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "{size.track.md}",
+        "$description": "Ring thickness of xl spinners.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{size.track.md}",
+            "Dark": "{size.track.md}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "size": {
+      "xl": {
+        "$type": "dimension",
+        "$value": "48px",
+        "$description": "Box of xl spinners.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "48px",
+            "Dark": "48px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "kbd": {
+    "height": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "20px",
+        "$description": "Height and minimum width of sm keys.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "20px",
+            "Dark": "20px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "24px",
+        "$description": "Height and minimum width of md keys.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "24px",
+            "Dark": "24px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "featured-icon": {
+    "size": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "32px",
+        "$description": "Container of sm featured icons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "32px",
+            "Dark": "32px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "40px",
+        "$description": "Container of md featured icons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "40px",
+            "Dark": "40px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "48px",
+        "$description": "Container of lg featured icons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "48px",
+            "Dark": "48px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "xl": {
+        "$type": "dimension",
+        "$value": "56px",
+        "$description": "Container of xl featured icons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "56px",
+            "Dark": "56px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "icon": {
+      "xl": {
+        "$type": "dimension",
+        "$value": "28px",
+        "$description": "Icon box of xl featured icons.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "28px",
+            "Dark": "28px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "button-group": {
+    "item": {
+      "padding-x": {
+        "sm": {
+          "$type": "dimension",
+          "$value": "{space.lg}",
+          "$description": "Side padding of sm button group items.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{space.lg}",
+              "Dark": "{space.lg}"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "md": {
+          "$type": "dimension",
+          "$value": "{space.xl}",
+          "$description": "Side padding of md button group items.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{space.xl}",
+              "Dark": "{space.xl}"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      },
+      "padding-y": {
+        "sm": {
+          "$type": "dimension",
+          "$value": "{space.md}",
+          "$description": "Top and bottom padding of sm button group items.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{space.md}",
+              "Dark": "{space.md}"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "md": {
+          "$type": "dimension",
+          "$value": "{space.md}",
+          "$description": "Top and bottom padding of md button group items.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{space.md}",
+              "Dark": "{space.md}"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      }
+    }
+  },
+  "code-field": {
+    "cell-size": {
+      "sm": {
+        "$type": "dimension",
+        "$value": "64px",
+        "$description": "Side of sm code field cells.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "64px",
+            "Dark": "64px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "80px",
+        "$description": "Side of md code field cells.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "80px",
+            "Dark": "80px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "96px",
+        "$description": "Side of lg code field cells.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "96px",
+            "Dark": "96px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "avatar-group": {
+    "overlap": {
+      "xs": {
+        "$type": "dimension",
+        "$value": "-4px",
+        "$description": "Negative gap that overlaps xs avatars in a group.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "-4px",
+            "Dark": "-4px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "sm": {
+        "$type": "dimension",
+        "$value": "-8px",
+        "$description": "Negative gap that overlaps sm avatars in a group.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "-8px",
+            "Dark": "-8px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "md": {
+        "$type": "dimension",
+        "$value": "-12px",
+        "$description": "Negative gap that overlaps md avatars in a group.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "-12px",
+            "Dark": "-12px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "select": {
+    "list": {
+      "max-height": {
+        "$type": "dimension",
+        "$value": "{size.width.xxs}",
+        "$description": "Maximum height of an open select list before it scrolls.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{size.width.xxs}",
+            "Dark": "{size.width.xxs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "menu": {
+    "width": {
+      "$type": "dimension",
+      "$value": "240px",
+      "$description": "Width of menu panels.",
+      "$extensions": {
+        "ds-create.modes": {
+          "Light": "240px",
+          "Dark": "240px"
+        },
+        "ds-create.collection": "Components"
+      }
+    }
+  },
+  "badge-group": {
+    "padding-badge": {
+      "md": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Padding on the badge side of md badge groups.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "{space.xs}",
+        "$description": "Padding on the badge side of lg badge groups.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{space.xs}",
+            "Dark": "{space.xs}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "padding-message": {
+      "md": {
+        "$type": "dimension",
+        "$value": "10px",
+        "$description": "Padding on the message side of md badge groups.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "10px",
+            "Dark": "10px"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "lg": {
+        "$type": "dimension",
+        "$value": "10px",
+        "$description": "Padding on the message side of lg badge groups.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "10px",
+            "Dark": "10px"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "social-button": {
+    "google": {
+      "fill": {
+        "hover": {
+          "$type": "color",
+          "$value": "#303030",
+          "$description": "Google sign-in button fill under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#303030",
+              "Dark": "#303030"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "#1f1f1f",
+          "$description": "Official Google sign-in button fill; same in every mode.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#1f1f1f",
+              "Dark": "#1f1f1f"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "#ffffff",
+        "$description": "Label and mark colour on the Google solid button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "#ffffff",
+            "Dark": "#ffffff"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "apple": {
+      "fill": {
+        "hover": {
+          "$type": "color",
+          "$value": "#1c1c1e",
+          "$description": "Apple sign-in button fill under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#1c1c1e",
+              "Dark": "#1c1c1e"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "#000000",
+          "$description": "Official Apple sign-in button fill; same in every mode.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#000000",
+              "Dark": "#000000"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "#ffffff",
+        "$description": "Label and mark colour on the Apple solid button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "#ffffff",
+            "Dark": "#ffffff"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "github": {
+      "fill": {
+        "hover": {
+          "$type": "color",
+          "$value": "#32383f",
+          "$description": "GitHub sign-in button fill under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#32383f",
+              "Dark": "#32383f"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "#24292f",
+          "$description": "Official GitHub sign-in button fill; same in every mode.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#24292f",
+              "Dark": "#24292f"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "#ffffff",
+        "$description": "Label and mark colour on the GitHub solid button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "#ffffff",
+            "Dark": "#ffffff"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "facebook": {
+      "fill": {
+        "hover": {
+          "$type": "color",
+          "$value": "#166fe5",
+          "$description": "Facebook sign-in button fill under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#166fe5",
+              "Dark": "#166fe5"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "#1877f2",
+          "$description": "Official Facebook sign-in button fill; same in every mode.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#1877f2",
+              "Dark": "#1877f2"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "#ffffff",
+        "$description": "Label and mark colour on the Facebook solid button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "#ffffff",
+            "Dark": "#ffffff"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "x": {
+      "fill": {
+        "hover": {
+          "$type": "color",
+          "$value": "#1c1c1e",
+          "$description": "X sign-in button fill under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#1c1c1e",
+              "Dark": "#1c1c1e"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "#000000",
+          "$description": "Official X sign-in button fill; same in every mode.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#000000",
+              "Dark": "#000000"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "#ffffff",
+        "$description": "Label and mark colour on the X solid button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "#ffffff",
+            "Dark": "#ffffff"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "gitlab": {
+      "fill": {
+        "hover": {
+          "$type": "color",
+          "$value": "#e2561a",
+          "$description": "GitLab sign-in button fill under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#e2561a",
+              "Dark": "#e2561a"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "#fc6d26",
+          "$description": "Official GitLab sign-in button fill; same in every mode.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "#fc6d26",
+              "Dark": "#fc6d26"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      },
+      "fg": {
+        "$type": "color",
+        "$value": "#ffffff",
+        "$description": "Label and mark colour on the GitLab solid button.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "#ffffff",
+            "Dark": "#ffffff"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  },
+  "video-player": {
+    "control": {
+      "fg": {
+        "$type": "color",
+        "$value": "{color.text.on-solid}",
+        "$description": "Icons, timestamps and handles on video; light in every mode.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{color.text.on-solid}",
+            "Dark": "{color.text.on-solid}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "action": {
+      "fill": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.alpha-white.20}",
+          "$description": "Media action under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.alpha-white.20}",
+              "Dark": "{palette.alpha-white.20}"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      }
+    },
+    "overlay": {
+      "fill": {
+        "hover": {
+          "$type": "color",
+          "$value": "{palette.alpha-white.30}",
+          "$description": "Overlay play button under the pointer.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.alpha-white.30}",
+              "Dark": "{palette.alpha-white.30}"
+            },
+            "ds-create.collection": "Components"
+          }
+        },
+        "$root": {
+          "$type": "color",
+          "$value": "{palette.alpha-white.20}",
+          "$description": "Overlay play button.",
+          "$extensions": {
+            "ds-create.modes": {
+              "Light": "{palette.alpha-white.20}",
+              "Dark": "{palette.alpha-white.20}"
+            },
+            "ds-create.collection": "Components"
+          }
+        }
+      }
+    },
+    "track": {
+      "buffer": {
+        "$type": "color",
+        "$value": "{palette.alpha-white.50}",
+        "$description": "Buffered part of the timeline.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.alpha-white.50}",
+            "Dark": "{palette.alpha-white.50}"
+          },
+          "ds-create.collection": "Components"
+        }
+      },
+      "$root": {
+        "$type": "color",
+        "$value": "{palette.alpha-white.30}",
+        "$description": "Timeline and volume track.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{palette.alpha-white.30}",
+            "Dark": "{palette.alpha-white.30}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    },
+    "tooltip": {
+      "fill": {
+        "$type": "color",
+        "$value": "{color.overlay.scrim}",
+        "$description": "Media tooltip and timestamp indicator.",
+        "$extensions": {
+          "ds-create.modes": {
+            "Light": "{color.overlay.scrim}",
+            "Dark": "{color.overlay.scrim}"
+          },
+          "ds-create.collection": "Components"
+        }
+      }
+    }
+  }
+}

@@ -65,7 +65,9 @@ README.md      this file: structure and file map
 SYSTEM.md      page tree, page templates, documentation system, token and component naming
 INITIATOR.md   questionnaire and generation logic
 EXTEND.md      adding a component at any level after initiation
+WEB.md         web implementation: Tailwind-ready React library and explorer site built from the Figma file
 templates/     templates/structure.md: the structure every page is built with (page → frames → blocks → items; no content)
+web/           brand-agnostic web template (React, Tailwind v4, explorer) that WEB.md copies and fills
 ```
 
 # 3. File map
@@ -118,6 +120,7 @@ templates/     templates/structure.md: the structure every page is built with (p
 | 4.2 Video player | `sections/4.2-video-player.md` |
 | 9.1 Doc kit | `SYSTEM.md` Part B §12 |
 | New components | `EXTEND.md`, then the new file in the level folder |
+| Web implementation | `WEB.md`, then the page file of each implemented page; template in `web/` |
 
 # 4. Mandatory loading
 
@@ -204,3 +207,25 @@ Do not begin implementation until every applicable box is checked.
 - Never drop approved Guidelines topics, diagrams, examples, matrices, anatomy or QA.
 - Page-specific requirements come from the page files, not from root-file summaries.
 - A local fix does not cancel unrelated approved requirements.
+
+# Example: Syncium
+
+Syncium is a complete example built with ds-create from one set of brand guidelines: a Figma design system (YOLO mode, every page in the tree) and its web version, made with the `WEB.md` workflow.
+
+The web version is in [`web/output/syncium`](web/output/syncium). It has the explorer site and an installable package, `@syncium/design-system`. The explorer covers:
+- Getting started for designers, developers and product managers;
+- searchable tokens, a changelog and status labels;
+- eight foundations, each with Overview, Tokens and Guidelines;
+- 29 components with a playground, every variant, anatomy, guidelines and code.
+
+```bash
+cd web/output/syncium
+npm install
+npm run dev            # explorer on http://localhost:5173/
+npm run build:package  # the installable package in package/
+npm run qa             # every page and tab in Light and Dark: errors, overflow, WCAG 2.2 AA
+```
+
+The example is one step ahead of the template. Accessibility fixes, the foundation guidance, search, status and changelog, the package build, the QA script and the rewritten copy were made in `web/output/syncium` first. They haven't been moved into `web/` and `WEB.md` yet.
+
+**Credit.** The Syncium brand (name, logo, colors and typography) comes from the Dribbble shot [Syncium SaaS Platform Brand Guidelines](https://dribbble.com/shots/25207945-Syncium-SaaS-Platform-Brand-Guidelines). All brand rights belong to its creator. It is used here only to demonstrate ds-create.

@@ -330,6 +330,12 @@ Never rename silently during Keep, Audit or Improve. Product-specific concepts r
 
 Every format is an export of the same names (`SYSTEM.md` Part C §5).
 
+**Web implementation** (single choice):
+- **Yes** — also build the system for the web: a Tailwind-ready React library and an explorer site where people browse every foundation and component, try their properties and copy the code. It follows `WEB.md`, starting from the brand-agnostic template in `web/`, and produces CSS custom properties, the Tailwind theme, DTCG JSON and TypeScript token data from the Figma variables.
+- **Not now** — Figma only. The web implementation can be added later with `WEB.md`.
+
+When Yes, also ask where the web project should be created (default: a `{system-name}-web` folder next to the user's working folder). The component implementation mode (§8) applies to the web pages too.
+
 # 11. Documentation depth
 
 The **page templates and their frames are fixed** (`SYSTEM.md` Part A §3). This selector only controls optional explanatory depth inside the frames.
@@ -391,6 +397,7 @@ Then:
 - Any Part selected → load `parts/00-parts.md` **and every selected Part page file**
 - Any Component selected → load `components/00-components.md` **and every selected Component page file**, plus `parts/00-parts.md` and the file of every Part it contains
 - Any Section selected → load `sections/00-sections.md` **and every selected Section page file**, plus the folder and page files of every Component and Part it contains
+- Web implementation selected → load `WEB.md`, and for every page implemented on the web, the same page file used for its Figma page
 
 The exact page → file mapping is in `README.md`.
 
@@ -491,6 +498,7 @@ Before generating variables and components:
 7. Selected Components in ID order (components/00-components.md + each page file)
 8. Selected Sections in ID order (sections/00-sections.md + each page file)
 9. Documentation, examples, diagrams, matrices and QA required by each loaded file
+10. Web implementation, when selected: WEB.md W1–W5 (template copy, token export, brand assets, components in page order, build)
 
 Every page in steps 3–8 is built with templates/structure.md.
 ```
@@ -534,7 +542,8 @@ Then run:
 1. global page tree, template, documentation and naming validation from `SYSTEM.md`;
 2. Foundation validation from `foundations/00-foundations.md` when applicable;
 3. Part, Component and Section completion criteria from their folder files when applicable;
-4. the complete QA list of every selected page file.
+4. the complete QA list of every selected page file;
+5. when the web implementation is in scope, the QA list in `WEB.md` §9 for every implemented page.
 
 # 9. Completion rule
 
@@ -542,4 +551,5 @@ Do not mark generation complete until:
 - the component implementation mode is resolved whenever components are in scope;
 - every required specification is confirmed loaded;
 - every checklist item is resolved;
-- every applicable global, folder-level and page-level QA rule passes.
+- every applicable global, folder-level and page-level QA rule passes;
+- when the web implementation is in scope, the explorer builds and every in-scope page passes `WEB.md` §9.

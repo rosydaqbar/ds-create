@@ -1,0 +1,35 @@
+{
+  "name": "ds-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Web implementation and explorer for a design system generated with ds-create. Brand values come from the Figma export in tokens/.",
+  "type": "module",
+  "scripts": {
+    "tokens": "node scripts/build-tokens.mjs",
+    "index": "node scripts/build-index.mjs",
+    "dev": "npm run tokens && vite",
+    "build": "npm run tokens && npm run index && npm run check:effects && tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "tokens:merge": "node scripts/merge-export.mjs && node scripts/build-tokens.mjs",
+    "check:effects": "node scripts/check-effects.mjs"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.51.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^7.18.4",
+    "simple-icons": "^16.34.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.2"
+  }
+}

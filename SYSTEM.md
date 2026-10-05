@@ -1186,6 +1186,8 @@ Rules:
 
 Support: Figma Variables, CSS custom properties, Tailwind theme, JSON, DTCG JSON, JavaScript / TypeScript, Android, iOS. Each format is an export of the same grammar; naming and output syntax are separate concerns.
 
+The web formats (CSS custom properties, Tailwind v4 theme, DTCG JSON, TypeScript data) are generated together by the web template from an export of the Figma file; the mapping from names to CSS variables and Tailwind utilities is in `WEB.md` §5.
+
 # 6. Existing systems
 
 When the user brings an existing library and chooses **Keep existing naming**, preserve its collections, variables and component properties. When they choose **Normalize**, migrate to this contract and record every rename. Never rename silently during KEEP, AUDIT or IMPROVE.
