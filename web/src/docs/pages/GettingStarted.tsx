@@ -1,12 +1,12 @@
 import { Fragment, useState, type CSSProperties, type ReactNode } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { config } from '@/ds.config';
 import { Icon, type IconName } from '@/icons';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenVariable } from '@/tokens/types';
 import { Button, buttonVariants, Checkbox, FeaturedIcon, Label, Progress, Switch, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../DocPage';
-import { Bullets, Caption, CodeBlock, DoDont, H3, InlineCode, P } from '../blocks';
+import { APP_PLATFORMS, Bullets, Caption, CodeBlock, DoDont, H3, InlineCode, P, productHasApp, productHasWeb, Segmented, type AppPlatform } from '../blocks';
 import { componentDocs, levelLabel, slugOf, staticPages } from '../registry';
 import { figmaNodeFor, pageMeta, statusInfo, StatusPill } from '../meta';
 
@@ -249,7 +249,20 @@ function InviteCard() {
 
 /* ---------- Overview ---------- */
 // BRAND: rewrite from the Figma "01 Getting started · Overview" Welcome topic: name the product this system serves and its platforms (one or two sentences).
-const welcomeIntro = `${config.name} is the shared library of tokens, components and guidance for designing and building responsive web screens in ${joinList(colorModes)}.`;
+const productScreens = productHasWeb && productHasApp ? 'web screens and iOS and Android apps' : productHasApp ? 'iOS and Android apps' : 'responsive web screens';
+const welcomeIntro = `${config.name} is the shared library of tokens, components and guidance for designing and building ${productScreens} in ${joinList(colorModes)}.`;
+/** What developers get, by product type (ds.config `product`). */
+const codeHome =
+  productHasWeb && productHasApp
+    ? 'this site for developers, with the React components and the code for React Native, Swift and Kotlin'
+    : productHasApp
+      ? 'this site for developers, with every component previewed and its code in React Native, Swift and Kotlin'
+      : 'this site with its React components for developers';
+const developerStart = productHasApp
+  ? productHasWeb
+    ? 'Install the web package, or copy the code for React Native, Swift or Kotlin. Props match the Figma properties, and every value comes from a token.'
+    : 'Copy the code for React Native, Swift or Kotlin from each component page. Props match the Figma properties, and every value comes from a token.'
+  : 'Install one package and start building. Props match the Figma properties, and every value comes from a token.';
 // BRAND: rewrite from the Figma "The brand at a glance" topic: where the brand colors come from, and the corner and depth character.
 const brandSummary =
   'The brand color becomes the brand ramp, and the neutrals carry text, borders and surfaces. The corner scale and the elevation styles give every component the same shape and depth.';
@@ -270,13 +283,13 @@ function Overview() {
           {welcomeIntro} {typeSentence}
         </P>
         <P>
-          The system lives in two places: the Figma library for designers, and this site with its React components for developers. Both use the same names, so a design and its code
+          The system lives in two places: the Figma library for designers, and {codeHome}. Both use the same names, so a design and its code
           always describe the same thing.
         </P>
         <div className="grid gap-md sm:grid-cols-3">
           {[
             ['Designers', 'Keep components attached so library updates reach your screens. When something needs to change, change the variable, style or component, not the instance.', 'editor/palette'],
-            ['Developers', 'Install one package and start building. Props match the Figma properties, and every value comes from a token.', 'development/code'],
+            ['Developers', developerStart, 'development/code'],
             ['Product managers', 'Before you plan work, check what already exists and how mature it is, so new screens reuse what’s built and tested.', 'layout/layout-dashboard'],
           ].map(([t, d, i]) => (
             <div key={t} className="flex flex-col gap-sm rounded-surface border border-border-subtle p-xl">
@@ -467,7 +480,9 @@ function Overview() {
             Set up the Figma library, and learn how the file, its variables and modes work.
           </NavCard>
           <NavCard to="?tab=for-developers" icon="development/code" title="For developers">
-            Install the package, add the styles and use components and tokens in your app.
+            {productHasApp && !productHasWeb
+              ? 'Read the code for React Native, Swift and Kotlin, with props and tokens named after Figma.'
+              : 'Install the package, add the styles and use components and tokens in your app.'}
           </NavCard>
           <NavCard to="/guidance/03-changelog" icon="time/history" title="What changed">
             Release notes for every version: new components, changed props and fixes.
@@ -1127,6 +1142,132 @@ function ForDevelopers() {
   );
 }
 
+/* ---------- For developers, app code (products 'app' and 'both') ---------- */
+type AppCode = Record<AppPlatform, string>;
+
+function AppCodeBlock({ code, platform }: { code: AppCode; platform: AppPlatform }) {
+  const p = APP_PLATFORMS.find((x) => x.value === platform)!;
+  return <CodeBlock lang={p.lang} code={code[platform]} label={`${p.label} code`} />;
+}
+
+function ForAppDevelopers() {
+  const [platform, setPlatform] = useState<AppPlatform>('reactNative');
+  return (
+    <Column>
+      <Segmented label="Code for" options={APP_PLATFORMS} value={platform} onChange={setPlatform} />
+
+      <Topic title="Code on this site">
+        <P>
+          Every component page has a Code tab with each example in React Native, Swift (SwiftUI) and Kotlin (Jetpack Compose). The previews are the React Native version, and the
+          Swift and Kotlin code uses the same props, so all three look and behave the same.
+        </P>
+        <Caption>
+          Try <TextLink to={`${pageTo('2.1')}?tab=code`}>2.1 Button → Code</TextLink>.
+        </Caption>
+      </Topic>
+
+      <Topic title="Props are the Figma properties">
+        <P>
+          Props use the Figma property names, in each language’s own style, so you can read values straight from a design: <InlineCode>Size=lg</InlineCode> is{' '}
+          <InlineCode>size="lg"</InlineCode> in React Native, <InlineCode>size: .lg</InlineCode> in Swift and <InlineCode>DsSize.Lg</InlineCode> in Kotlin.
+        </P>
+        <AppCodeBlock
+          platform={platform}
+          code={{
+            reactNative: `// Figma: Button · Size=lg, Emphasis=primary, Tone=brand, Show leading icon=true
+<Button size="lg" leadingIcon="general/check" label="Save changes" onPress={save} />`,
+            swift: `// Figma: Button · Size=lg, Emphasis=primary, Tone=brand, Show leading icon=true
+DSButton("Save changes", size: .lg, leadingIcon: .check) { save() }`,
+            kotlin: `// Figma: Button · Size=lg, Emphasis=primary, Tone=brand, Show leading icon=true
+DsButton(label = "Save changes", onClick = ::save, size = DsSize.Lg, leadingIcon = DsIcons.Check)`,
+          }}
+        />
+      </Topic>
+
+      <Topic title="Token names">
+        <P>
+          Values come from tokens, never typed numbers or colors, so screens follow the modes and the brand. Token names are the Figma variable names in camelCase:{' '}
+          <InlineCode>color/text/primary</InlineCode> is <InlineCode>textPrimary</InlineCode>. Find every token in{' '}
+          <TextLink to="/guidance/02-tokens?tab=reference">02 Tokens → Reference</TextLink>.
+        </P>
+        <AppCodeBlock
+          platform={platform}
+          code={{
+            reactNative: `const theme = useTheme();
+<View style={{ padding: dimensions.space.xl, backgroundColor: theme.color.surfaceRaised }}>
+  <Text style={[theme.text('headingSmSemibold'), { color: theme.color.textPrimary }]}>Seats</Text>
+</View>`,
+            swift: `Text("Seats")
+    .dsTextStyle(DSTokens.TextStyle.headingSmSemibold)
+    .dsForeground(DSTokens.Color.textPrimary)
+    .padding(DSTokens.Space.xl)
+    .dsBackground(DSTokens.Color.surfaceRaised)`,
+            kotlin: `Column(Modifier.background(DsTheme.colors.surfaceRaised).padding(DsSpace.xl)) {
+    Text("Seats", style = DsTheme.textStyle(DsTextStyles.headingSmSemibold), color = DsTheme.colors.textPrimary)
+}`,
+          }}
+        />
+      </Topic>
+
+      <Topic title="Color mode, text size and motion">
+        <P>
+          Components follow the phone’s Light or Dark setting, its text size and its Reduce motion setting. To keep one part of a screen in one mode, like a dark promo card in a
+          light screen, the code wraps that part:
+        </P>
+        <AppCodeBlock
+          platform={platform}
+          code={{
+            reactNative: `<ThemeScope scheme="dark">{/* always dark */}</ThemeScope>`,
+            swift: `PromoCard()
+    .dsTheme(colorScheme: .dark)`,
+            kotlin: `DsTheme(darkTheme = true, reducedMotion = DsTheme.reducedMotion) {
+    PromoCard()
+}`,
+          }}
+        />
+        <Caption>
+          How each component behaves on iOS and Android, like its touch area and what screen readers announce, is in the “In apps” section of its Guidelines tab.
+        </Caption>
+      </Topic>
+
+      <Topic title="Keeping in sync with Figma">
+        <P>
+          Figma is the source of truth. Component, prop and token names in the code are the Figma names, so when a variable or a component changes in Figma, this site and its code
+          change with it.
+        </P>
+      </Topic>
+    </Column>
+  );
+}
+
+/** For developers: the web guide, the app guide, or both with a Web / App switch (`?platform=app`). */
+function Developers() {
+  const [params, setParams] = useSearchParams();
+  const app = productHasApp && (!productHasWeb || params.get('platform') === 'app');
+  if (!(productHasWeb && productHasApp)) return app ? <ForAppDevelopers /> : <ForDevelopers />;
+  return (
+    <div className="flex flex-col gap-3xl">
+      <Segmented
+        label="Developers on"
+        options={[
+          { value: 'web', label: 'Web' },
+          { value: 'app', label: 'App' },
+        ]}
+        value={app ? 'app' : 'web'}
+        onChange={(p) =>
+          setParams((prev) => {
+            const n = new URLSearchParams(prev);
+            if (p === 'app') n.set('platform', 'app');
+            else n.delete('platform');
+            return n;
+          }, { replace: true })
+        }
+      />
+      {app ? <ForAppDevelopers /> : <ForDevelopers />}
+    </div>
+  );
+}
+
 export default function GettingStarted() {
   return (
     <DocPage
@@ -1137,7 +1278,7 @@ export default function GettingStarted() {
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'For designers', render: () => <ForDesigners /> },
-        { label: 'For developers', render: () => <ForDevelopers /> },
+        { label: 'For developers', render: () => <Developers /> },
       ]}
     />
   );

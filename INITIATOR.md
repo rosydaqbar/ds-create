@@ -317,7 +317,7 @@ Default for an existing library: `Keep existing naming`.
 
 Never rename silently during Keep, Audit or Improve. Product-specific concepts remain groups inside the relevant collection; they never become their own collection.
 
-# 10. Output formats and implementation targets
+# 10. Output formats and product type
 
 **Multi-select** (Figma Variables are always produced):
 - CSS custom properties
@@ -330,19 +330,20 @@ Never rename silently during Keep, Audit or Improve. Product-specific concepts r
 
 Every format is an export of the same names (`SYSTEM.md` Part C §5).
 
-**Implementation targets** (single choice; always ask, never infer from the platforms answer in §1):
-- **Figma only** — the design system in Figma. Code can be added later with `WEB.md` or `APP.md`.
-- **Web** — also a Tailwind-ready React library, an installable package and a documentation site where people browse every foundation and component, try their properties and copy the code. Follows `WEB.md`, starting from the template in `web/`.
-- **App** — also a native app library with a showcase app. Follows `APP.md`, starting from the template in `app/`.
-- **Web and App** — both. They share one token export and one changelog; the web is built first, then the app.
+**Product type** (single choice; always ask, never infer from the platforms answer in §1):
+- **Web**: the Figma file for a web product, the documentation site, and a Tailwind-ready React library with an installable package (`WEB.md`, template `web/`).
+- **App**: the Figma file adapted for iOS and Android apps (`SYSTEM.md` Part A §A5), and the documentation site with every component previewed in React Native and its code in React Native, Swift and Kotlin (`APP.md`). All three are always shown; there is no framework choice. Nothing native is provided or built.
+- **Web and App**: both, from one Figma file with one brand look. The documentation site switches each component page between Web and App, and the React library is built for the web.
 
-Suggest the default from §1 Platforms (web platforms → Web, iOS or Android → App, both → Web and App), but let the user choose.
+Suggest the default from §1 Platforms (web platforms → Web, iOS or Android → App, both → Web and App), but let the user choose. The product type adapts the Figma file (`SYSTEM.md` Part A §A5); the scope of pages and components stays the same.
 
-**App framework** (when App or Web and App; single choice):
-- **React Native** — one TypeScript codebase for iOS and Android (`app/react-native/`).
-- **Native** — SwiftUI for iOS (`app/swiftui/`) and/or Jetpack Compose for Android (`app/compose/`). Ask which: iOS, Android, or both.
+**Code** (single choice):
+- **Figma and code** (default): everything the product type includes. The documentation site is always on the web, whatever the product type: it is where tokens, foundations and components are browsed.
+- **Figma only for now**: only the Figma file, already adapted to the product type. Code can be added later with `WEB.md` and `APP.md`.
 
-Projects are created in `output/{system-slug}/` (`web/`, `native/`, `ios/`, `android/`; README §5). Confirm the system slug with the user; don't ask for a location per target. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to web and app pages too. The output formats above that a target produces (CSS, Tailwind and DTCG for the web; Android and iOS for the app) are selected automatically.
+The project is created in `output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`web/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
+
+Nothing native is installed, created or built: no Xcode, Android SDK, simulators, emulators or app projects (`APP.md`, "Nothing is installed or built").
 
 # 11. Documentation depth
 
@@ -370,7 +371,7 @@ Before generation, present:
 - component implementation mode: YOLO everything or One by one;
 - naming: fixed contract (new) or Keep / Normalize (existing);
 - output formats;
-- implementation targets (Figma only, Web, App, or Web and App), the app framework (React Native, or SwiftUI and/or Compose) and the system slug for `output/{system-slug}/`;
+- product type (Web, App, or Web and App), what that means for Figma and for code (the docs site, the React library for Web, the App previews and code for App), Figma and code or Figma only, and the system slug for `output/{system-slug}/`;
 - optional documentation depth.
 
 Final actions:
@@ -406,8 +407,8 @@ Then:
 - Any Part selected → load `parts/00-parts.md` **and every selected Part page file**
 - Any Component selected → load `components/00-components.md` **and every selected Component page file**, plus `parts/00-parts.md` and the file of every Part it contains
 - Any Section selected → load `sections/00-sections.md` **and every selected Section page file**, plus the folder and page files of every Component and Part it contains
-- Web implementation selected → load `WEB.md`, and for every page implemented on the web, the same page file used for its Figma page
-- App implementation selected → load `APP.md`, and for every page implemented in the app, the same page file used for its Figma page
+- Code in scope (any product type) → load `WEB.md`, and for every page documented on the site, the same page file used for its Figma page
+- Product type App or Web and App → also load `APP.md`, and for every page with an App preview, the same page file used for its Figma page
 
 The exact page → file mapping is in `README.md`.
 
@@ -423,12 +424,12 @@ The full specification is large (several hundred KB). Loading every page file at
 Keep a ledger on disk at `output/{system-slug}/ds-create-ledger.json` (README §5), even for a Figma-only build. Write it after the questionnaire and update it after every page:
 
 ```text
-scope            the confirmed summary (Part A §12): pages, mode, formats, web
+scope            the confirmed summary (Part A §12): pages, mode, formats, product type, code
 step             current generation step (§6) and page
 pages[]          id, name, status (todo, building, qa, done), Figma page id, published sets with ids and variant counts, audit result (fail, warn), open issues
 tokens           collections and variable counts; last check-contrast / audit result
-web              per page: implemented, qa result
-app              per framework and page: implemented, qa result
+web              per page: documented, implemented on the web (Web products), qa result
+app              per page: React Native preview component, story app block with React Native, Swift and Kotlin code, qa result
 decisions        anything the user decided during the run (with the date)
 ```
 
@@ -531,8 +532,8 @@ Before generating variables and components:
 7. Selected Components in ID order (components/00-components.md + each page file)
 8. Selected Sections in ID order (sections/00-sections.md + each page file)
 9. Documentation, examples, diagrams, matrices and QA required by each loaded file, then `tools/figma-audit.js` on every built page and once on the file (`fail` must be 0)
-10. Web implementation, when selected: WEB.md W1–W8 (template copy, token export with the contrast gate, brand assets, components in page order, foundation and guidance pages, docs data, build with package and QA, publish)
-11. App implementation, when selected: APP.md A1–A8 for each chosen framework (template copy and first compile, tokens with the contrast gate, brand assets and fonts, components in page order, showcase, docs data, build and QA, publish)
+10. Documentation site, whenever code is in scope: WEB.md W1–W8 (template copy, token export with the contrast gate, brand assets, components in page order, foundation and guidance pages, docs data, build and QA, publish). `product` in `ds.config.ts` is the product type; the web package is built for Web and Web and App
+11. App previews, for App and Web and App: APP.md A1–A4 (copy the React Native preview source into the docs project, React Native tokens, each component's preview and its `app` block with React Native, Swift and Kotlin code, QA). Nothing native is installed or built
 
 Every page in steps 3–8 is built with templates/structure.md. Layouts (5.x) and Screens (6.x) are not built at initiation; they are added later through EXTEND.md.
 ```
@@ -578,8 +579,8 @@ Then run:
 3. Part, Component and Section completion criteria from their folder files when applicable (Layout and Screen criteria when they are added through EXTEND);
 4. the complete QA list of every selected page file;
 5. `tools/figma-audit.js` on every built page and once on the file, with `fail` = 0;
-6. when the web implementation is in scope, the QA list in `WEB.md` §9 for every implemented page;
-7. when the app implementation is in scope, the QA list in `APP.md` §9 for every implemented page and framework.
+6. when code is in scope, the QA list in `WEB.md` §9 for every documented page;
+7. for App and Web and App, the QA list in `APP.md` §9 for every page.
 
 # 9. Completion rule
 
@@ -588,6 +589,6 @@ Do not mark generation complete until:
 - every required specification is confirmed loaded;
 - every checklist item is resolved;
 - every applicable global, folder-level and page-level QA rule passes, and `tools/figma-audit.js` reports `fail` = 0 on every built page and on the file;
-- when the app implementation is in scope, every chosen framework compiles, its tests pass, the showcase covers every implemented page, and `APP.md` §9 passes;
+- for App and Web and App, every in-scope page has its React Native preview and an `app` block with React Native, Swift and Kotlin code, and `APP.md` §9 passes;
 - the progress ledger marks every in-scope page `done`;
-- when the web implementation is in scope, `npm run build` passes (including `check:contrast`), `npm run qa` reports 0 problems, the package installs in a fresh app, and every in-scope page passes `WEB.md` §9.
+- when code is in scope, `npm run build` passes (including `check:contrast`), `npm run qa` reports 0 problems, the package installs in a fresh app (Web and Web and App), and every in-scope page passes `WEB.md` §9.

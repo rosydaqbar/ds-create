@@ -4855,7 +4855,15 @@
     "touch-min": {
       "$type": "dimension",
       "$value": "{scale.size.44}",
-      "$description": "Smallest tap target on touch screens; icon-only controls reach it through their hit area.",
+      "$description": "Smallest tap target on touch screens and iOS (44 pt); icon-only controls reach it through their hit area.",
+      "$extensions": {
+        "ds-create.collection": "Size"
+      }
+    },
+    "touch-min-android": {
+      "$type": "dimension",
+      "$value": "{scale.size.48}",
+      "$description": "Smallest tap target on Android (48 dp, the platform minimum). App products only.",
       "$extensions": {
         "ds-create.collection": "Size"
       }

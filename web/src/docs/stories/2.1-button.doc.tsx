@@ -1,6 +1,9 @@
 import { Button } from '@/components/parts/Button';
+import * as App from '@app';
+import { Text } from 'react-native';
 import { defineDoc } from '../types';
 import { jsxProps, Matrix } from '../blocks';
+import type { AppCode } from '../types';
 
 const SIZES = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 const STATES = ['rest', 'hover', 'pressed', 'focus', 'disabled', 'loading'] as const;
@@ -20,6 +23,27 @@ const variant = (p: { size?: (typeof SIZES)[number]; emphasis: (typeof EMPHASIS)
     loading={p.state === 'loading'}
   />
 );
+
+
+/** App version: the React Native Button, rendered on this site with react-native-web. */
+const appVariant = (p: { size?: (typeof SIZES)[number]; emphasis: (typeof EMPHASIS)[number]; tone: 'brand' | 'danger'; state: (typeof STATES)[number] }) => (
+  <App.Button
+    size={p.size ?? 'md'}
+    emphasis={p.emphasis}
+    tone={p.tone}
+    label={p.state === 'loading' ? 'Saving…' : 'Button'}
+    previewState={p.state === 'hover' || p.state === 'pressed' || p.state === 'focus' ? p.state : undefined}
+    disabled={p.state === 'disabled'}
+    loading={p.state === 'loading'}
+  />
+);
+const row = (children: React.ReactNode) => <div className="flex flex-wrap items-center gap-md">{children}</div>;
+/** Text styled like a label, for the “doesn’t look clickable” example. */
+function AppPlainLabel({ children }: { children: string }) {
+  const theme = App.useTheme();
+  return <Text style={[theme.text('bodySmSemibold'), { color: theme.color.textSecondary }]}>{children}</Text>;
+}
+const code = (reactNative: string, swift: string, kotlin: string): AppCode => ({ reactNative, swift, kotlin });
 
 export default defineDoc({
   id: '2.1',
@@ -211,6 +235,111 @@ export default defineDoc({
       body: 'Write labels as a verb, or a verb and a noun: “Save changes”, “Delete project”. Use sentence case and aim for three words or fewer.\n\nWhile loading, say what’s happening (“Saving…”). Icon-only buttons need a name for screen readers and a Tooltip (2.13).',
     },
   ],
+  app: {
+    hero: () => <App.Button size="lg" leadingIcon="general/check" label="Save changes" />,
+    examples: [
+      {
+        title: 'Dialog footer',
+        caption: 'Use one primary action per view, and let the secondary action support it.',
+        render: () => row(<><App.Button emphasis="secondary" label="Cancel" /><App.Button label="Save changes" /></>),
+        code: code(
+          `<View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: dimensions.space.md }}>
+  <Button emphasis="secondary" label="Cancel" onPress={close} />
+  <Button label="Save changes" onPress={save} />
+</View>`,
+          `HStack(spacing: DSTokens.Space.md) {
+    DSButton("Cancel", emphasis: .secondary) { dismiss() }
+    DSButton("Save changes") { save() }
+}`,
+          `Row(horizontalArrangement = Arrangement.spacedBy(DsSpace.md, Alignment.End)) {
+    DsButton(label = "Cancel", onClick = onCancel, emphasis = DsEmphasis.Secondary)
+    DsButton(label = "Save changes", onClick = onSave)
+}`,
+        ),
+      },
+      {
+        title: 'Delete confirmation',
+        caption: 'Give the danger tone only to the action that has the consequence.',
+        render: () => row(<><App.Button emphasis="secondary" label="Cancel" /><App.Button tone="danger" label="Delete project" /></>),
+        code: code(
+          `<Button emphasis="secondary" label="Cancel" onPress={close} />
+<Button tone="danger" label="Delete project" onPress={remove} />`,
+          `DSButton("Cancel", emphasis: .secondary) { dismiss() }
+DSButton("Delete project", tone: .danger) { delete() }`,
+          `DsButton(label = "Cancel", onClick = onCancel, emphasis = DsEmphasis.Secondary)
+DsButton(label = "Delete project", onClick = onDelete, tone = DsTone.Danger)`,
+        ),
+      },
+      {
+        title: 'Screen header actions',
+        caption: 'Three levels of emphasis let the main action stand out from the rest.',
+        render: () => row(<><App.Button emphasis="tertiary" leadingIcon="general/download" label="Export" /><App.Button emphasis="secondary" label="Share" /><App.Button leadingIcon="general/plus" label="New report" /></>),
+        code: code(
+          `<Button emphasis="tertiary" leadingIcon="general/download" label="Export" onPress={exportReport} />
+<Button emphasis="secondary" label="Share" onPress={share} />
+<Button leadingIcon="general/plus" label="New report" onPress={create} />`,
+          `DSButton("Export", emphasis: .tertiary, leadingIcon: .download) { export() }
+DSButton("Share", emphasis: .secondary) { share() }
+DSButton("New report", leadingIcon: .plus) { create() }`,
+          `DsButton(label = "Export", onClick = onExport, emphasis = DsEmphasis.Tertiary, leadingIcon = DsIcons.Download)
+DsButton(label = "Share", onClick = onShare, emphasis = DsEmphasis.Secondary)
+DsButton(label = "New report", onClick = onCreate, leadingIcon = DsIcons.Plus)`,
+        ),
+      },
+      {
+        title: 'Form submit in progress',
+        caption: 'While it saves, the button keeps its place and width, so the layout doesn’t jump.',
+        render: () => row(<><App.Button emphasis="secondary" disabled label="Cancel" /><App.Button loading label="Saving…" /></>),
+        code: code(
+          `<Button emphasis="secondary" disabled label="Cancel" />
+<Button loading label="Saving…" />`,
+          `DSButton("Cancel", emphasis: .secondary) {}.disabled(true)
+DSButton("Saving…", isLoading: true) {}`,
+          `DsButton(label = "Cancel", onClick = onCancel, emphasis = DsEmphasis.Secondary, enabled = false)
+DsButton(label = "Saving…", onClick = onSave, loading = true)`,
+        ),
+      },
+    ],
+    matrices: (['brand', 'danger'] as const).flatMap((tone) =>
+      EMPHASIS.map((emphasis) => ({
+        title: `App · Tone=${tone} · Emphasis=${emphasis}`,
+        rows: 'Size',
+        columns: 'State',
+        render: () => <Matrix rowProp="Size" rows={SIZES} colProp="State" cols={STATES} cell={(size, state) => appVariant({ size, emphasis, tone, state })} />,
+      })),
+    ),
+    anatomy: () => (
+      <div className="flex scale-150 gap-xl">
+        <App.Button leadingIcon="general/plus" trailingIcon="arrows/arrow-right" label="Button" />
+        <App.Button loading label="Saving…" />
+      </div>
+    ),
+    visuals: {
+      'Make buttons look clickable': {
+        do: () => <App.Button label="Upload files" leadingIcon="general/upload" />,
+        dont: () => <AppPlainLabel>Upload files</AppPlainLabel>,
+      },
+      'Use one primary action': {
+        do: () => row(<><App.Button emphasis="tertiary" label="Skip" /><App.Button emphasis="secondary" label="Back" /><App.Button label="Continue" /></>),
+        dont: () => row(<><App.Button label="Skip" /><App.Button label="Back" /><App.Button label="Continue" /></>),
+      },
+      'Save the danger tone for real consequences': {
+        do: () => <App.Button tone="danger" label="Delete project" />,
+        dont: () => <App.Button tone="danger" emphasis="secondary" label="Cancel" />,
+      },
+      'Balance buttons optically': {
+        render: () =>
+          row(<><App.Button emphasis="secondary" label="Label only" /><App.Button emphasis="secondary" leadingIcon="general/plus" label="Leading icon" /><App.Button emphasis="secondary" trailingIcon="arrows/arrow-right" label="Trailing icon" /></>),
+      },
+    },
+    notes: [
+      'The touch area is at least 44 × 44 pt on iOS and 48 × 48 dp on Android, even for the xs and sm sizes. The visible button keeps its Figma size.',
+      'The height is a minimum: at large system text sizes the button grows with its label instead of cutting it off.',
+      'There is no hover on touch. Pressed is the main feedback, and hover appears only with a pointer (iPad, Android tablets).',
+      'With a hardware keyboard, the button is focusable and shows the focus ring as a border.',
+      'While loading, VoiceOver and TalkBack announce “Loading” and the button ignores taps.',
+    ],
+  },
   accessibility: [
     'Label text meets contrast requirements against the fill in every state. Disabled buttons are exempt, but stay legible.',
     'Keyboard focus always shows a visible ring (focus/default, or focus/danger on danger buttons) that looks different from hover.',

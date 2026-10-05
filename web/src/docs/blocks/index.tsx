@@ -10,6 +10,8 @@ import type { ControlDef, PropDoc } from '../types';
 import { Switch } from '@/components/parts/Switch';
 import { Select } from '@/components/components/Select';
 import { TextField } from '@/components/components/TextField';
+import * as appLib from '@app';
+import { config } from '@/ds.config';
 
 /** `Danger tone` → `danger-tone`; used for tab keys and heading ids. */
 export const slugify = (s: string) =>
@@ -161,11 +163,11 @@ export function Stage({ children, className, padded = true, dark, label = 'Examp
   );
 }
 
-export function ExampleBlock({ title, caption, code, children, full }: { title: string; caption?: string; code?: string; children: ReactNode; full?: boolean }) {
+export function ExampleBlock({ title, caption, code, children, full, app }: { title: string; caption?: string; code?: string; children: ReactNode; full?: boolean; app?: boolean }) {
   const [show, setShow] = useState(false);
   return (
     <div className={cn('flex min-w-0 flex-col gap-md', full && 'col-span-full')}>
-      <Stage className="min-h-40">{children}</Stage>
+      {app ? <AppStage className="min-h-40">{children}</AppStage> : <Stage className="min-h-40">{children}</Stage>}
       <div className="flex items-start justify-between gap-lg">
         <div className="flex flex-col gap-xxs">
           <span className="type-body-sm-semibold text-text-primary">{title}</span>
@@ -458,4 +460,78 @@ export function jsxProps(args: Record<string, any>, defaults: Record<string, any
     .filter(([k, v]) => !skip.includes(k) && v !== undefined && v !== '' && v !== defaults[k])
     .map(([k, v]) => (v === true ? ` ${k}` : v === false ? ` ${k}={false}` : typeof v === 'number' ? ` ${k}={${v}}` : ` ${k}="${v}"`))
     .join('');
+}
+
+/* ---------- app products (React Native on the web) ---------- */
+export const productHasWeb = config.product !== 'app';
+export const productHasApp = config.product !== 'web' && !('__missing' in appLib);
+
+/** The site's color mode, so React Native previews follow the Light / Dark toggle. */
+export function useDocsScheme(): 'light' | 'dark' {
+  const read = () => (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+  const [scheme, setScheme] = useState<'light' | 'dark'>(read);
+  useLayoutEffect(() => {
+    const mo = new MutationObserver(() => setScheme(read()));
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => mo.disconnect();
+  }, []);
+  return scheme;
+}
+
+/** A stage that renders React Native components inside the app theme (react-native-web). */
+export function AppStage({ children, className, dark, label = 'App example' }: { children: ReactNode; className?: string; dark?: boolean; label?: string }) {
+  const scheme = useDocsScheme();
+  return (
+    <Stage className={className} dark={dark} label={label}>
+      <appLib.ThemeProvider colorScheme={dark ? 'dark' : scheme}>
+        {/* React Native components hug with alignSelf: flex-start; this box keeps them centered on the stage. */}
+        <div className="flex max-w-full flex-wrap items-center justify-center-safe gap-xl">{children}</div>
+      </appLib.ThemeProvider>
+    </Stage>
+  );
+}
+
+/** The app theme for React Native content that sits outside an AppStage (variant grids). */
+export function AppTheme({ children }: { children: ReactNode }) {
+  const scheme = useDocsScheme();
+  return <appLib.ThemeProvider colorScheme={scheme}>{children}</appLib.ThemeProvider>;
+}
+
+export type AppPlatform = 'reactNative' | 'swift' | 'kotlin';
+export const APP_PLATFORMS: readonly { value: AppPlatform; label: string; lang: string }[] = [
+  { value: 'reactNative', label: 'React Native', lang: 'tsx' },
+  { value: 'swift', label: 'Swift', lang: 'swift' },
+  { value: 'kotlin', label: 'Kotlin', lang: 'kotlin' },
+];
+
+/** Shown on an app product's page when the component has no app version yet. */
+export function NoAppVersion() {
+  return (
+    <div role="note" className="flex flex-col gap-xs rounded-surface border border-dashed border-border-default p-2xl">
+      <h2 className="type-body-md-semibold text-text-primary">No app version yet</h2>
+      <P>This component has no app preview or app code yet. They’re added in page order (APP.md A3).</P>
+    </div>
+  );
+}
+
+/** Segmented choice for platform previews and code (Web / App, or React / React Native / Swift / Kotlin). */
+export function Segmented<T extends string>({ label, options, value, onChange }: { label: string; options: readonly { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
+  return (
+    <div role="group" aria-label={label} className="inline-flex flex-wrap gap-xxs rounded-control border border-border-default bg-surface-base p-xxs">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          aria-pressed={o.value === value}
+          onClick={() => onChange(o.value)}
+          className={cn(
+            'type-body-sm-semibold min-h-8 cursor-pointer rounded-sm px-md outline-none transition-colors duration-(--motion-duration-fast) is-focus:shadow-focus-default',
+            o.value === value ? 'bg-fill-brand-subtle text-text-brand' : 'text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary',
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
 }

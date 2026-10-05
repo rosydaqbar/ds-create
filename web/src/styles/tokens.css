@@ -827,6 +827,7 @@
   --size-container-margin-desktop: var(--scale-size-32);
   --size-measure-reading: var(--scale-size-640);
   --size-touch-min: var(--scale-size-44);
+  --size-touch-min-android: var(--scale-size-48);
   --radius-none: var(--scale-radius-0);
   --radius-xs: var(--scale-radius-4);
   --radius-sm: var(--scale-radius-6);

@@ -3,6 +3,7 @@
  *   - no console errors or uncaught exceptions
  *   - no horizontal overflow at desktop (1440) and phone (390) widths
  *   - axe-core WCAG 2.2 AA (+ best practice) finds no violations
+ * Web and App products (ds.config `product: 'both'`) are checked in Web and App preview.
  * Usage:
  *   npm run qa                      builds, serves dist/ on :4319 and checks it
  *   npm run qa -- --url http://localhost:5173/    checks a running dev server instead
@@ -57,6 +58,8 @@ for (const p of pages) {
   await page.waitForTimeout(250);
   const tabs = await tabsOf();
   routes.push(p, ...tabs.slice(1).map((t) => `${p}?tab=${t}`));
+  // Web and App products: every tab again in App preview (React Native via react-native-web).
+  if (await page.$('[role=group][aria-label=Preview]')) routes.push(`${p}?platform=app`, ...tabs.slice(1).map((t) => `${p}?platform=app&tab=${t}`));
 }
 
 /** Wait for lazy pages and every running animation (page and tab fades, popups) to finish. */

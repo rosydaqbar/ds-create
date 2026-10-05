@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- The library needs no permissions or components; the namespace is set in build.gradle.kts. -->
-<manifest />

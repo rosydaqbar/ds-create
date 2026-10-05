@@ -8192,13 +8192,27 @@ export const tokens: TokenData = {
    "name": "size/touch-min",
    "collection": "Size",
    "type": "FLOAT",
-   "description": "Smallest tap target on touch screens; icon-only controls reach it through their hit area.",
+   "description": "Smallest tap target on touch screens and iOS (44 pt); icon-only controls reach it through their hit area.",
    "css": "--size-touch-min",
    "tailwind": "h-(--size-touch-min)",
    "modes": {
     "Value": {
      "alias": "scale/size/44",
      "value": "44px"
+    }
+   }
+  },
+  {
+   "name": "size/touch-min-android",
+   "collection": "Size",
+   "type": "FLOAT",
+   "description": "Smallest tap target on Android (48 dp, the platform minimum). App products only.",
+   "css": "--size-touch-min-android",
+   "tailwind": "h-(--size-touch-min-android)",
+   "modes": {
+    "Value": {
+     "alias": "scale/size/48",
+     "value": "48px"
     }
    }
   },

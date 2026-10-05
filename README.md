@@ -1,6 +1,6 @@
 # Brand-Agnostic Design System Initiator
 
-This repository is the specification an agent follows to build a design system in Figma for any brand. From the Figma file it can also build the system for the web (`WEB.md`) and for apps (`APP.md`: React Native, or SwiftUI and Jetpack Compose). Every build has **the same structure** — the same pages, in the same order, with the same frames and the same names — and only the brand values change: colors, typefaces, radius, density, assets.
+This repository is the specification an agent follows to build a design system in Figma for any brand. The product type is Web, App, or Web and App. From the Figma file it also builds a documentation site on the web for every product type, with the React library and package for Web (`WEB.md`). For App, the same site previews every component in React Native and shows its code in React Native, Swift and Kotlin (`APP.md`); nothing native is provided or built. Every build has **the same structure** — the same pages, in the same order, with the same frames and the same names — and only the brand values change: colors, typefaces, radius, density, assets.
 
 The repository is **not executable from root files alone**. Root files define the global structure; the requirements for each page live in its own Markdown file and must be loaded before that page is built.
 
@@ -65,14 +65,14 @@ README.md      this file: structure and file map
 SYSTEM.md      page tree, page templates, documentation system, token and component naming
 INITIATOR.md   questionnaire and generation logic
 EXTEND.md      adding a component at any level after initiation
-WEB.md         web implementation: Tailwind-ready React library, installable package and documentation site built from the Figma file
-APP.md         app implementation: React Native, or SwiftUI and Jetpack Compose, with a showcase app, built from the Figma file
+WEB.md         the documentation site (every product type) and, for Web products, the Tailwind-ready React library and package
+APP.md         App products on the docs site: React Native previews (react-native-web) and React Native, Swift and Kotlin code
 templates/     templates/structure.md: the structure every page is built with (page → frames → blocks → items; no content)
 tools/         figma-audit.js: read-only use_figma audit run on every built page and once on the file (QA gate)
 ROADMAP.md     planned levels, components, renames and tooling (not built until specified)
 archive/       superseded proposals, kept for history only (never loaded)
 web/           brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that WEB.md copies and fills
-app/           brand-agnostic app templates (react-native/, swiftui/, compose/) and the shared token generator that APP.md copies and fills; reference skeletons, compiled by the first build
+app/           brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
 examples/      finished builds made with ds-create, for reference only (never copied into a new build)
 output/        everything a build generates: one folder per system (git-ignored except output/README.md)
 ```
@@ -129,8 +129,8 @@ output/        everything a build generates: one folder per system (git-ignored 
 | Any Screen page | `screens/00-screens.md` (folder rules) |
 | 9.1 Doc kit | `SYSTEM.md` Part B §16 |
 | New components | `EXTEND.md`, then the new file in the level folder |
-| Web implementation | `WEB.md`, then the page file of each implemented page; template in `web/` |
-| App implementation | `APP.md`, then the page file of each implemented page; templates in `app/` |
+| Docs site and web library | `WEB.md`, then the page file of each documented page; template in `web/` |
+| App previews and code (App products) | `APP.md`, then the page file of each page; preview source in `app/` |
 
 # 4. Mandatory loading
 
@@ -222,8 +222,7 @@ The repo is split in two. The **executor** is everything an agent reads and copi
 output/{system-slug}/
 ├─ ds-create-ledger.json   progress ledger
 ├─ figma/                  the Figma export and figma-audit results
-├─ web/                    the web project (when Web is a target)
-├─ native/ ios/ android/   the app projects (when App is a target)
+├─ web/                    the docs site, for every product type (the React library for Web; web/react-native/ for App previews)
 └─ reports/                QA reports and reviews
 ```
 

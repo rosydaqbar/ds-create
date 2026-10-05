@@ -36,5 +36,4 @@ Renames break instances in product files and props in code, so they wait for a m
 | Item | Status |
 | --- | --- |
 | `tools/figma-audit.js` checks per page and per file | In use (QA gate). Next: check variant counts against each page spec's matrix, and doc frames bound to `doc/*`. |
-| Compile-verified app templates | `app/` templates are reference skeletons. Next: a CI job (macOS runner with Xcode, Android SDK, Node) that compiles all three, runs their tests and renders showcase screenshots. |
 | Binding documentation frames to `doc/*` spacing | Generated files leave many doc-frame paddings raw (the audit reports them as warnings). Fix in the Doc kit build step. |

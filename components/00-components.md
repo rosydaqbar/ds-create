@@ -49,7 +49,7 @@ Every Component page is built with `templates/structure.md` and uses the compone
 ├─ {ID} {Name} · Overview     hero instance + 2–4 compositions in use + when to use
 ├─ {ID} {Name} · Component    every published set with its family header and full matrix
 ├─ {ID} {Name} · Anatomy      Composition block, then anatomy, properties, sizes, states, token map
-└─ {ID} {Name} · Guidelines   usage, do / don't, content, accessibility, composition
+└─ {ID} {Name} · Guidelines   usage, do / don't, content, accessibility, composition, In apps (App products)
 ```
 
 ## The Composition block
@@ -108,7 +108,7 @@ Each Component file specifies, where relevant:
 9. state behavior;
 10. matrix layout;
 11. token map;
-12. guidelines: usage, do / don't, content, accessibility, composition;
+12. guidelines: usage, do / don't, content, accessibility, composition, and In apps for App products (`SYSTEM.md` Part A §A5);
 13. QA.
 
 The template frames are fixed. The topics inside them come from the Component's file and are never shortened into "overview + anatomy + accessibility".

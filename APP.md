@@ -1,182 +1,186 @@
-# App implementation
+# App products
 
-This file turns a generated Figma design system into a **native app library with its own showcase app**: React Native for iOS and Android from one codebase, or native SwiftUI (iOS) and Jetpack Compose (Android). Designers, product managers and developers open the showcase on a phone to try every component, in Light and Dark, at every text size.
+This file covers what changes on the documentation site when the product is an **App** (or **Web and App**). The docs site from `WEB.md` is the documentation for every product type. For an App product:
 
-It is a reusable workflow, the app counterpart of `WEB.md`. The starting point is the brand-agnostic template for the chosen framework in `app/`; every build copies it and fills it from its own Figma file. Nothing in `app/` belongs to a brand.
+- every component is **previewed in React Native**, rendered in the browser with react-native-web;
+- the **Code tab** shows every example in **React Native, Swift (SwiftUI) and Kotlin (Jetpack Compose)**, side by side with the web version when the product is Web and App.
 
-**The templates are reference skeletons.** Each one has the real structure, the theme, one complete reference component (Button), the showcase screens and the generated tokens, written as close to compilable code as possible, but they are not compiled inside ds-create (no Xcode, Android SDK or device toolchain is assumed here). The first build compiles them against the real toolchain and fixes what the compiler finds (A1 exit check).
+That is all an App product gets in code. ds-create previews; it doesn't provide app libraries, packages or app projects. The React Native components exist only so the docs can render the previews, and they live inside the docs project. Swift and Kotlin exist only as code on the Code tab.
 
-Figma stays the source of truth. The app never invents values: tokens come from the Figma variables, component properties from the Figma component sets, documentation from the page specs.
+Figma stays the source of truth. The previews and the code never invent values: tokens come from the Figma variables, props from the Figma component sets, documentation from the page specs.
+
+## Nothing is installed or built
+
+- Never install Xcode, the Android SDK, a JDK, Gradle, CocoaPods, React Native, simulators, emulators or any app.
+- Never create an app project, a build file (Gradle, `Package.swift`, `package.json` for an app) or a package.
+- Never run an app build, an app test runner or a device.
+
+The only things that run are the docs site (`npm run dev`, `npm run build`, `npm run qa` in `web/`) and the Node token script in §4 A2. react-native-web renders the previews without `react-native` itself (`WEB.md` §7.1).
 
 # 1. When this runs
 
-- At initiation, when the implementation targets in `INITIATOR.md` Part A §10 include **App** (App, or Web and App).
-- Later, at any time, as its own task ("implement the system for iOS and Android").
-- After a component is added through `EXTEND.md`, when the system already has an app implementation.
+- At initiation, when the product type in `INITIATOR.md` Part A §10 is **App** or **Web and App**, right after the docs site is set up (`WEB.md` W1–W3).
+- Later, as its own task ("add the app previews").
+- After a component is added through `EXTEND.md`, when the product includes App.
 
-It runs **after** the Figma pages it implements exist, like the web. When both web and app are in scope, they share one token export (A2) and one changelog; the web runs first, then the app.
+A component gets its app preview only when its Figma page is complete.
 
 # 2. What is produced
 
-One project per chosen framework. React Native:
+Everything lives in the docs project:
 
 ```text
-output/{system-slug}/native/     a copy of ds-create/app/react-native, filled for the brand (README §5)
-├─ tokens/figma-variables.json   export of the Figma file (the same file the web uses)
-├─ scripts/                      build-app-tokens.mjs, check-contrast.mjs (copied from app/shared and web/scripts)
-├─ assets/brand/                 logo, mark and flags as SVG; brand fonts
-└─ src/
-   ├─ tokens/tokens.ts           generated
-   ├─ theme/                     ThemeProvider, useTheme, color mode, reduced motion, text scaling
-   ├─ icons/                     icon registry (system icon names → icon library)
-   ├─ components/{parts,components,sections}/   one file per published set
-   └─ showcase/                  the catalog app: home, foundations, one screen per component
+output/{system-slug}/web/            the docs site (WEB.md), product 'app' or 'both'
+├─ react-native/                     React Native source for the previews (copy of ds-create/app/react-native)
+│  ├─ tokens/tokens.ts               generated from the Figma export
+│  ├─ theme/                         ThemeProvider, useTheme: color mode, reduced motion, text size; anatomy()
+│  ├─ icons/                         icon registry (system icon names → lucide-react-native)
+│  └─ components/{parts,components,sections}/   one file per published set
+└─ src/docs/stories/                 each component page's story, with its `app` block (§7)
 ```
 
-SwiftUI (`output/{system-slug}/ios/`): a Swift package `DesignSystem` (`Sources/DesignSystem/{Tokens,Theme,Icons,Components}`) and a `Showcase` app. A Swift package can't hold an iOS app, so the Showcase is an Xcode project in `Showcase/` that depends on the local package; generate it from a project spec (XcodeGen `project.yml`) so every build creates it the same way. Jetpack Compose (`output/{system-slug}/android/`): an Android library module `designsystem` (`tokens`, `theme`, `icons`, `components`) and a `showcase` app module. Each template's README shows its tree.
+There are no `ios/`, `android/` or `native/` folders, and no app package.
 
-# 3. Frameworks
+# 3. Stack
 
-Fixed per framework, so every build reads the same way:
+| Concern | Choice |
+| --- | --- |
+| Preview components | TypeScript React Native components (`View`, `Text`, `Pressable`, `Animated`), styled with `StyleSheet` values from the tokens |
+| Rendering on the site | react-native-web, set up in `web/vite.config.ts` (`WEB.md` §7.1) |
+| Icons | lucide-react-native with react-native-svg, behind one registry with the web icon names |
+| Swift code | SwiftUI, written as `DSButton(…)` with `DSTokens.*` (§5) |
+| Kotlin code | Jetpack Compose, written as `DsButton(…)` with `DsTheme.*` (§5) |
 
-| Concern | React Native | SwiftUI (iOS) | Jetpack Compose (Android) |
-| --- | --- | --- | --- |
-| Language and UI | TypeScript, React Native (New Architecture) | Swift 6, SwiftUI, iOS 17+ | Kotlin 2, Jetpack Compose, minSdk 26 |
-| Theme | `ThemeProvider` + `useTheme()` context | `DSTheme` in the SwiftUI environment | `DsTheme { }` with `CompositionLocal`s |
-| Styling | `StyleSheet` from tokens only | view modifiers from tokens only | modifiers from tokens only |
-| Icons | `react-native-svg` + registry (Lucide by default) | asset catalog symbols from the 1.7 library | `ImageVector`s from the 1.7 library |
-| Showcase | in-app catalog (React Navigation) | `Showcase` app target | `showcase` app module |
-| Package | npm (`@org/design-system-native`) | Swift Package Manager | Maven artifact (AAR) |
-| Tests | Jest + React Native Testing Library | XCTest + snapshot tests | JUnit + Compose UI tests + screenshot tests |
-
-Don't build on top of a third-party UI kit (no Material components as the visual base, no NativeBase, no UIKit-styled wrappers). Use platform primitives (`Pressable`, `Button`/`View` in SwiftUI, `Box`/`Row` with `clickable` in Compose) and system tokens.
+Don't build the previews on a third-party UI kit (no NativeBase, no React Native Paper). Swift and Kotlin code doesn't use Material or UIKit-styled components; it reads as the system's own components.
 
 # 4. Workflow
 
-## A1 · Copy the template
+## A1 · Copy the preview source
 
-Copy `ds-create/app/{react-native|swiftui|compose}/` to `output/{system-slug}/native/`, `ios/` or `android/` (README §5), with `app/shared/scripts/build-app-tokens.mjs` and `web/scripts/check-contrast.mjs` into its `scripts/`. Use another location only when the user explicitly asks. Never build inside `ds-create/app/` or `ds-create/examples/`.
-
-Exit check: the untouched copy compiles and the showcase launches on a simulator or emulator. Fix anything the real compiler reports in the template code first, and report those fixes back to ds-create so the template improves.
+After `WEB.md` W1, copy `ds-create/app/react-native/` to `output/{system-slug}/web/react-native/`. The docs site finds it there by itself (`@app` alias). Never build inside `ds-create/app/`.
 
 ## A2 · Tokens
 
-1. Use the shared export `output/{system-slug}/figma/figma-variables.json` (WEB.md W2 makes it; export it the same way when there is no web build) and copy it to the project's `tokens/`.
-2. `node scripts/check-contrast.mjs`: every color pair AA in every mode. A failure is fixed in Figma, then exported again.
-3. `node scripts/build-app-tokens.mjs --platform rn|swiftui|compose --in tokens/figma-variables.json --out <tokens folder>`.
+From `output/{system-slug}/web/`, generate the React Native tokens from the same export the docs use (`WEB.md` W2, contrast gate included):
 
-Exit check: contrast all AA; the generated file compiles.
+```sh
+node ../../../app/scripts/build-rn-tokens.mjs --in tokens/figma-variables.json --out react-native/tokens
+```
 
-## A3 · Brand assets, fonts and identity
+(Or copy `app/scripts/build-rn-tokens.mjs` into `web/scripts/` and run it from there.) Never edit `tokens.ts`; fix values in Figma and export again.
 
-1. Logo, mark and flags from `1.8 Brand assets` as vector assets (SVG for React Native, PDF/SVG in the asset catalog for SwiftUI, vector drawables for Compose).
-2. Bundle the brand typeface when its license allows apps; otherwise name the stand-in, as on the web.
-3. Fill the identity (name, version, package name) in the template's config.
+## A3 · Components
 
-## A4 · Components
+Work in page order (2.x, then 3.x, then 4.x), only for pages in scope. For each page:
 
-Work in page order (2.x, then 3.x, then 4.x), only for pages in scope. For each page: load its spec, read the Figma set, write the component following §6, add its showcase screen following §7, run it in Light, Dark and the largest text size. Mode (YOLO everything / One by one) is the same as the Figma build.
+1. Load its spec and read the Figma set.
+2. Write the React Native component in `react-native/components/{level}/`, following §6, and export it from `components/index.ts`.
+3. Add the `app` block to the page's story (§7): hero, examples with their React Native, Swift and Kotlin code, variant matrices, anatomy, Guidelines visuals and "In apps" notes. Add the component to `src/docs/app/app.d.ts`.
+4. Look at the page in App preview, in Light and Dark.
 
-## A5 · Showcase
+The mode (YOLO everything, or One by one) is the same as the Figma build.
 
-Fill the showcase home and the foundation screens (color, type, space, shape, elevation, motion, icons, brand), then one screen per component (§7). Words follow `web/COPY-GUIDE.md`.
+## A4 · QA
 
-## A6 · Docs data
+Run §9. Save the results in `output/{system-slug}/reports/`.
 
-Status (Stable, Beta, Deprecated), the release a component arrived in and the changelog follow `WEB.md` W6. When web and app are both in scope, keep one changelog and one status per component; a component can be Stable on one platform and Beta on another, and the showcase says so.
+# 5. Token names in code
 
-## A7 · Build and QA
+The previews read the generated React Native tokens. The Swift and Kotlin code on the Code tab uses the same tokens under these names, so a developer can map every value back to Figma. Figma names become camelCase members, without the domain prefix (`color/text/primary` → `textPrimary`); a name that would start with a digit keeps its domain (`space/2xl` → `space2xl`).
 
-Run the framework's checks (§9), then the manual review on one small and one large device per platform. Exit check: §9 passes.
-
-## A8 · Publish
-
-Package the library (npm, SwiftPM, Maven), build the showcase for internal distribution (TestFlight, Play internal testing or an Expo/EAS build), and give the user the project locations under `output/{system-slug}/`, the package names and how to install the showcase. Save QA results in `output/{system-slug}/reports/`.
-
-# 5. Token contract in code
-
-Generated by `build-app-tokens.mjs`. Figma names become camelCase members, without the domain prefix (`color/text/primary` → `textPrimary`); a name that would start with a digit keeps its domain (`space/2xl` → `space2xl`).
-
-| Figma | React Native | SwiftUI | Compose |
+| Figma | React Native | Swift | Kotlin |
 | --- | --- | --- | --- |
-| `color/text/primary` | `theme.color.textPrimary` | `DSTokens.Color.textPrimary` (a `ShapeStyle` that resolves for the color scheme), e.g. `.foregroundStyle(DSTokens.Color.textPrimary)` | `DsTheme.colors.textPrimary` |
-| `color/fill/brand/solid/hover` | `theme.color.fillBrandSolidHover` | `DSTokens.Color.fillBrandSolidHover` | `DsTheme.colors.fillBrandSolidHover` |
-| `space/md`, `size/control/md` | `dimensions.space.md`, `dimensions.size.controlMd` | `DSTokens.Space.md`, `DSTokens.Size.controlMd` | `DsSpace.md`, `DsSizes.controlMd` (`DsSize` is the Size variant enum) |
+| `color/text/primary` | `theme.color.textPrimary` | `DSTokens.Color.textPrimary` | `DsTheme.colors.textPrimary` |
+| `space/md`, `size/control/md` | `dimensions.space.md`, `dimensions.size.controlMd` | `DSTokens.Space.md`, `DSTokens.Size.controlMd` | `DsSpace.md`, `DsSizes.controlMd` |
+| `size/touch-min`, `size/touch-min-android` | `theme.touchTarget` (picks the platform's value) | `DSTokens.Size.touchMin` | `DsSizes.touchMinAndroid` |
 | `radius/control` | `dimensions.radius.control` | `DSTokens.Radius.control` | `DsRadius.control` |
-| `type/body/md/regular` | `typography.bodyMdRegular` | `DSTokens.TextStyle.bodyMdRegular` → `.dsTextStyle(...)` | `DsTextStyles.bodyMdRegular` |
-| `elevation/raised`, `focus/default` | `shadows.elevationRaised`, `shadows.focusDefault` (strongest layer + `elevation`) | `DSTokens.Shadow.elevationRaised` (every layer) | `DsShadows.elevationRaised` (every layer; draw elevation from the strongest) |
-| `motion/duration/base` | `motion.durationBase` (Standard or Reduced) | `DSTokens.Motion.durationBase.value(reduced:)` | `DsTheme.motion.durationBase` |
-| `motion/easing/standard` | `motion.easingStandard` (cubic-bezier points) | `DSTokens.Motion.easingStandard` | `DsEasing.easingStandard` |
-| component tokens | `theme.component.buttonPaddingXMd` (sizes in `dimensions.component`) | `DSTokens.Component.buttonPaddingXMd`; component colors in `DSTokens.ComponentColor` | `DsComponent.buttonPaddingXMd`; component colors in `DsTheme.colors` |
+| `type/body/md/regular` | `theme.text('bodyMdRegular')` | `.dsTextStyle(DSTokens.TextStyle.bodyMdRegular)` | `DsTheme.textStyle(DsTextStyles.bodyMdRegular)` |
+| `elevation/raised` | `theme.shadows.elevationRaised` | `DSTokens.Shadow.elevationRaised` | `DsShadows.elevationRaised` |
+| `motion/duration/base` | `theme.motion.durationBase` | `DSTokens.Motion.durationBase` | `DsTheme.motion.durationBase` |
+| component tokens | `theme.component.buttonPaddingXMd` | `DSTokens.Component.buttonPaddingXMd` | `DsComponent.buttonPaddingXMd` |
 
 Rules:
-- Figma px become dp (React Native, Compose) and pt (SwiftUI) one to one. Font sizes are scaled text (Compose `sp`, SwiftUI `relativeTo:`, React Native `allowFontScaling`).
-- Light and Dark follow the system color scheme by default; any subtree can be forced into one mode, like `data-theme` on the web.
-- Never type a color, size or duration in a component. If a value is missing, it is missing in Figma first.
+- Figma px become dp and pt one to one. Text sizes scale with the system text size.
+- Light and Dark follow the system by default; a subtree can be forced into one mode, like `data-theme` on the web.
+- Never type a color, size or duration, in a preview component or in the code on the site.
 
 # 6. Component contract
 
-## 6.1 One file per published set, props are the Figma properties
+## 6.1 Props are the Figma properties
 
-`Button` in Figma is `Button` (React Native), `DSButton` (SwiftUI) and `DsButton` (Compose), with the Figma properties as parameters:
+`Button` in Figma is `Button` in React Native, `DSButton` in Swift and `DsButton` in Kotlin, with the Figma properties as props:
 
 ```text
 React Native   <Button size="md" emphasis="primary" tone="brand" leadingIcon="general/check" label="Save" onPress={save} />
-SwiftUI        DSButton("Save", size: .md, emphasis: .primary, tone: .brand, leadingIcon: .check, action: save)
-Compose        DsButton(label = "Save", onClick = save, size = DsSize.Md, emphasis = DsEmphasis.Primary, tone = DsTone.Brand, leadingIcon = DsIcons.Check)
+Swift          DSButton("Save", size: .md, emphasis: .primary, tone: .brand, leadingIcon: .check, action: save)
+Kotlin         DsButton(label = "Save", onClick = save, size = DsSize.Md, emphasis = DsEmphasis.Primary, tone = DsTone.Brand, leadingIcon = DsIcons.Check)
 ```
 
-Variant properties become enums with the Figma values (`Size`, `Emphasis`, `Tone`, …, SYSTEM.md Part C §4.2); `Show {part}` + swap becomes one optional parameter; `State` is not a parameter (pressed, focused and hovered come from the platform; `disabled` and `loading` are parameters). Private parts (`.Main/…`) are internal and not exported. The showcase can pin a state with a documentation-only `previewState`.
+Variant properties take the Figma values (`Size`, `Emphasis`, `Tone`, …, `SYSTEM.md` Part C §4.2). A `Show {part}` toggle and its swap become one optional prop. `State` is not a prop: pressed, focused and hovered come from the platform, while `disabled` and `loading` are props. Private parts (`.Main/…`) are internal.
 
-## 6.2 Platform translation
+Two helpers exist only for the docs site:
 
-The look comes from the system; the behavior comes from the platform. Each rule is a QA failure when broken.
+- `previewState` pins a state (hover, pressed or focus) for the variant matrices.
+- `anatomy('part')` names a part for the Anatomy markers (`data-anatomy` on the web).
 
-- **Touch targets.** At least 44 × 44 pt on iOS (`size/touch-min`) and 48 × 48 dp on Android (the platform minimum; written once as a named platform constant until Figma adds an Android token), even when the visual control is smaller. Expand the hit area: `hitSlop` (React Native; on Android it can't reach outside the parent, so leave room around small controls), `.contentShape` (SwiftUI), the template's `Modifier.dsMinimumTouchTarget()` (Compose; Material's `minimumInteractiveComponentSize()` would pull in Material, which §3 rules out). This is stricter than the web's 24 × 24.
-- **Text size.** Every text style scales with the system text size, and every screen still works at the largest accessibility size (wrap, grow, scroll; never clip or overlap). Cap scaling only where a spec says so (badge counts). A fixed control height from the spec becomes a minimum height in apps: the control grows with its text, and a single-line label may wrap only at accessibility text sizes.
-- **Color mode.** Follow the system; the showcase can force Light or Dark. When a subtree forces a mode, pass the current motion setting through (Compose: `DsTheme(darkTheme = true, reducedMotion = DsTheme.reducedMotion)`), so forcing Dark doesn't reset a forced Reduced motion.
-- **Reduced motion.** Read the system setting (`AccessibilityInfo.isReduceMotionEnabled`, `accessibilityReduceMotion`, the animator scale on Android) and use the Reduced motion tokens.
-- **Screen readers.** Every control has a role, a name and its state for VoiceOver and TalkBack (`accessibilityRole/Label/State`, `.accessibilityLabel`/`.accessibilityAddTraits`, `semantics { role; contentDescription; stateDescription }`). Icon-only controls take their name from `label`. Decorative images are hidden.
-- **Hover-only content.** Tooltips have no hover on touch: show them on long-press, and give the control an accessibility hint with the same text.
-- **Keyboard and focus.** With a hardware keyboard (iPad, Android tablets, ChromeOS) controls are focusable in order and show a focus ring. Draw the ring as a border from `color/border/focus` (or `color/border/danger`) and `border/width/focus`, offset like the web's `focus/default`: a zero-blur spread shadow doesn't render as a ring on mobile. React Native on iOS has limited hardware-keyboard focus; where it needs native work, note it on the showcase screen.
-- **Native patterns.** Use the platform's own back navigation, sheets, haptics and pickers where the page spec allows (a Select may open a bottom sheet on phones); document each platform difference on the component's showcase screen. On Compose, build sheets and pickers from foundation and tokens (not Material 3's `ModalBottomSheet`), so no Material styling leaks in.
-- **Shadows.** iOS draws every layer of an effect style; Android approximates it with elevation from the strongest layer. Keep surfaces distinguishable by color as well, so depth never relies on the shadow alone.
-- **Web-only parts.** Kbd shows only when a hardware keyboard is connected. Rich text editor and Video player wrap the platform's own text and media views and keep the Figma chrome.
+## 6.2 Platform behavior
+
+The look comes from the system, and the behavior follows iOS and Android. The React Native preview component follows these rules, and each one is written in the component's "In apps" notes (§7):
+
+- **Touch targets.** At least 44 × 44 pt on iOS (`size/touch-min`) and 48 × 48 dp on Android (`size/touch-min-android`), even when the visual control is smaller. The hit area grows, never the visual size. This is stricter than the web's 24 × 24.
+- **Text size.** Every text style scales with the system text size. A fixed control height from the spec becomes a minimum height, so the control grows with its text instead of clipping.
+- **Color mode and reduced motion.** Follow the system, and use the Reduced motion tokens when the system asks for it.
+- **Screen readers.** Every control has a role, a name and its state for VoiceOver and TalkBack. Icon-only controls take their name from `label`. Decorative images are hidden.
+- **Hover-only content.** There is no hover on touch: tooltips show on long-press, and the control gets an accessibility hint with the same text.
+- **Keyboard focus.** With a hardware keyboard, controls are focusable and show the focus ring, drawn as a border from `color/border/focus` and `border/width/focus`.
+- **Native patterns.** A component may use the platform's own pattern where the spec allows, such as a Select opening a sheet on phones. The notes say so.
+- **Shadows.** Android draws elevation from the strongest shadow layer. Surfaces stay distinguishable by color as well.
 
 ## 6.3 States and motion
 
-Pressed, disabled, focused, selected and loading look exactly like the Figma variants. Motion follows the 1.6 pairings with the motion tokens: press feedback fast · standard; toggles and marks base · standard; sheets, menus and dialogs entering base or slow · enter, leaving fast · exit.
+Pressed, disabled, focused, selected and loading look exactly like the Figma variants. Motion follows the 1.6 pairings with the motion tokens: press feedback fast · standard, toggles base · standard, sheets and menus entering base · enter and leaving fast · exit.
 
-# 7. Showcase contract
+## 6.4 One component, three ways of writing it
 
-The showcase is the app's documentation site. It mirrors the web explorer, sized for a phone:
-- **Home**: the system name and version, starting points, recently updated, every level.
-- **Foundations**: one screen per page with live specimens from the tokens (palettes with contrast, the type scale at the current text size, spacing, radii, elevation, motion with a Reduced toggle, icons, brand assets).
-- **Component screens**, with tabs that keep the web's names: **Overview** (hero and examples in use), **Component** (every variant in a scrollable matrix, plus a playground whose controls are the system's own components), **Anatomy** (parts, props and the token map), **Guidelines** (a short summary with a link to the full page on the web or in Figma) and **Code** (the snippet for this platform).
-- **Global controls**: Light/Dark, text size (from the smallest to the largest accessibility size) and Reduced motion, so anyone can check a component under every condition. SwiftUI and Compose can preview the text size directly (`.dynamicTypeSize`, a font-scale `Density`); React Native can't change the system size, so the theme applies a preview scale and components read text styles through the theme (`theme.text(…)`), never straight from `typography`.
+- **Same props:** the React Native component and the Swift and Kotlin code use the same props with the same values, from Figma (§6.1).
+- **Same look:** the preview is the React Native version, and the Swift and Kotlin code describes the same component.
+- **Same scope:** the components of the system's pages. An App product adds no app-only components. Sheets, tab bars and pickers are how a component in scope behaves on a phone, written in its notes, not new components.
 
-Words follow `web/COPY-GUIDE.md`. Status and changelog come from §A6.
+# 7. Documentation contract
 
-# 8. Keeping code and Figma in sync
+Each component page's story (`web/src/docs/stories/{id}-{slug}.doc.tsx`) gets an `app` block (`WEB.md` §7.1):
 
-Same rules as `WEB.md` §8: run A2 again when variables change; fix tokens in Figma, never in the export or the generated files; change a component and its showcase screen in the same task; a difference between app and Figma is a bug in the app unless the user decides otherwise. When web and app are both in scope, a component change lands on both in the same task.
+- **`hero` and `examples`**: the same situations as the web examples, rendered with the React Native component. Each example has its `code` in React Native, Swift and Kotlin, which the Code tab shows.
+- **`matrices`**: every variant, rendered with the React Native component, pinning states with `previewState`.
+- **`anatomy`**: the anatomy specimen in React Native, with each part tagged by `anatomy('part')`.
+- **`visuals`**: React Native versions of the Guidelines visuals, by guideline title. App preview never shows a web component.
+- **`notes`**: the "In apps" section of Guidelines: touch area, text size, hover and touch, keyboard focus, screen reader announcements and any platform pattern.
+
+Stories import the previews as a namespace (`import * as App from '@app'`) and use `App.Button`. A component without an `app` block shows "No app version yet", which fails QA for an App product.
+
+# 8. Keeping the previews and Figma in sync
+
+- Changed variables or styles: export again (`WEB.md` W2) and run A2.
+- Changed component properties: change the React Native component and the story's `app` block, including the Swift and Kotlin code, in the same task.
+- A difference between a preview and Figma is a bug in the preview, unless the user decides otherwise.
 
 # 9. QA
 
-Automated (per framework):
-- **React Native**: `tsc`, ESLint, Jest with React Native Testing Library (renders, roles and names for every component), and the contrast check.
-- **SwiftUI**: `xcodebuild build test -scheme DesignSystem -destination 'platform=iOS Simulator,name=iPhone 16'` (`swift build` targets macOS and fails for an iOS-only package), XCTest, snapshot tests of every variant in Light and Dark at default and largest text sizes.
-- **Compose**: Gradle build, unit tests, Compose UI tests with semantics checks, screenshot tests (Light, Dark, font scale 2.0).
+Automated (all in `web/`):
+- `npm run qa` checks every page and tab in App preview, in Light and Dark: no errors, no overflow at phone width, and zero axe WCAG 2.2 AA violations. On a Web and App product it checks both previews.
+- `npm run check:contrast`: every color pair AA in every mode.
 
-Manual, on a small and a large device per platform: VoiceOver / TalkBack through every component screen, the largest text size, Dark, Reduced motion, a hardware keyboard where relevant.
+Review the Code tab against the Figma set: the React Native, Swift and Kotlin code uses the same props and values, and only tokens.
 
 Fail QA when:
-- a component types a color, size or duration instead of a token;
-- a prop or enum differs from the Figma property, or a Figma variant is missing;
+- a preview component or the code on the site types a color, size or duration instead of a token;
+- a prop or value differs from the Figma property, or a Figma variant is missing from the matrix;
+- the React Native, Swift and Kotlin code for an example disagree;
 - pressed, disabled, focus, selected or loading looks different from Figma;
 - a touch target is smaller than 44 pt (iOS) or 48 dp (Android);
-- text clips, overlaps or truncates at the largest text size where the spec doesn't allow it;
-- a control has no role, name or state for VoiceOver or TalkBack;
+- a control has no role, name or state for screen readers;
 - motion ignores the Reduced setting;
-- a component has no showcase screen, or the screen lacks examples, the variant matrix, the playground or the token map;
-- a brand value is written into `ds-create/app/` (the templates stay placeholder-only).
+- a component page has no `app` block, or it lacks examples with code, the variant matrix or the anatomy;
+- App preview shows a web component;
+- a brand value is written into `ds-create/app/` (the template stays placeholder-only);
+- anything was installed, built or created that "Nothing is installed or built" rules out.

@@ -103,7 +103,7 @@ Every Part page is built with `templates/structure.md` and uses the component pa
 ├─ {ID} {Name} · Overview            hero specimen + examples in use + when to use
 ├─ {ID} {Name} · Component           the published component set(s), full matrix, axis labels
 ├─ {ID} {Name} · Anatomy             anatomy diagram, properties, sizes, states, token map
-└─ {ID} {Name} · Guidelines          usage, do / don't, content, accessibility, composition
+└─ {ID} {Name} · Guidelines          usage, do / don't, content, accessibility, composition, In apps (App products)
 ```
 
 What goes in each frame:
@@ -133,7 +133,8 @@ What goes in each frame:
 **· Guidelines**
 - reading-oriented frame (SYSTEM.md Part B §7);
 - every guideline topic and visual teaching module from the Part's file, in the order the file lists them;
-- do / don't pairs built from real instances, each with `Doc/Do-dont` underneath.
+- do / don't pairs built from real instances, each with `Doc/Do-dont` underneath;
+- for App products, an **In apps** topic after Accessibility (`SYSTEM.md` Part A §A5).
 
 Every frame ends with `Doc/Footer`.
 

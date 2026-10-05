@@ -40,8 +40,8 @@ export const buttonVariants = cva(
       { emphasis: 'tertiary', tone: 'brand', className: 'border-transparent bg-fill-none text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary is-pressed:bg-fill-neutral-subtle-pressed is-pressed:text-text-primary is-focus:shadow-focus-default' },
       // Tone=danger
       { emphasis: 'primary', tone: 'danger', className: 'border-transparent bg-fill-danger-solid text-text-on-solid shadow-control is-hover:bg-fill-danger-solid-hover is-pressed:bg-fill-danger-solid-pressed is-focus:shadow-focus-danger' },
-      { emphasis: 'secondary', tone: 'danger', className: 'border-border-danger-subtle bg-surface-base text-text-danger shadow-control is-hover:bg-fill-danger-subtle-hover is-hover:text-text-danger-hover is-pressed:bg-fill-danger-subtle-pressed is-focus:shadow-focus-danger' },
-      { emphasis: 'tertiary', tone: 'danger', className: 'border-transparent bg-fill-none text-text-danger is-hover:bg-fill-danger-subtle-hover is-hover:text-text-danger-hover is-pressed:bg-fill-danger-subtle-pressed is-focus:shadow-focus-danger' },
+      { emphasis: 'secondary', tone: 'danger', className: 'border-border-danger-subtle bg-surface-base text-text-danger shadow-control is-hover:bg-fill-danger-subtle-hover is-hover:text-text-danger-hover is-pressed:bg-fill-danger-subtle-pressed is-pressed:text-text-danger is-focus:shadow-focus-danger' },
+      { emphasis: 'tertiary', tone: 'danger', className: 'border-transparent bg-fill-none text-text-danger is-hover:bg-fill-danger-subtle-hover is-hover:text-text-danger-hover is-pressed:bg-fill-danger-subtle-pressed is-pressed:text-text-danger is-focus:shadow-focus-danger' },
       // Disabled (all emphasis, both tones) — listed last so it wins.
       { emphasis: 'primary', className: 'is-disabled:border-border-disabled is-disabled:bg-fill-neutral-subtle-disabled is-disabled:text-text-disabled' },
       { emphasis: 'secondary', className: 'is-disabled:border-border-disabled is-disabled:bg-surface-base is-disabled:text-text-disabled' },

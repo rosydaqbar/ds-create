@@ -37,7 +37,7 @@ Every Section page is built with `templates/structure.md` and uses the component
 ├─ {ID} {Name} · Overview     hero instance + 2–4 examples in use inside realistic screen areas
 ├─ {ID} {Name} · Component    every published set with its family header and full matrix
 ├─ {ID} {Name} · Anatomy      Composition block, then anatomy, properties, sizes, states, token map
-└─ {ID} {Name} · Guidelines   usage, do / don't, content, accessibility, composition
+└─ {ID} {Name} · Guidelines   usage, do / don't, content, accessibility, composition, In apps (App products)
 ```
 
 The **Composition block** at the top of `· Anatomy` works as for Components (`components/00-components.md` §3): real instances of every Component, Part and private part the Section uses, each labeled with its page ID and the properties the Section sets.

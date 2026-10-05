@@ -65,6 +65,50 @@ export interface Guideline {
   dont?: { caption: string; render?: () => ReactNode };
 }
 
+/** Code for the three app implementations (APP.md): React Native, SwiftUI and Jetpack Compose. */
+export interface AppCode {
+  reactNative: string;
+  swift: string;
+  kotlin: string;
+}
+
+export interface AppExample {
+  title: string;
+  caption?: string;
+  /** Renders the React Native component (react-native-web on this site). */
+  render: () => ReactNode;
+  code: AppCode;
+}
+
+export interface AppVisual {
+  render?: () => ReactNode;
+  do?: () => ReactNode;
+  dont?: () => ReactNode;
+}
+
+/**
+ * The app version of a component page (products 'app' and 'both'). Previews render the real
+ * React Native components; Swift and Kotlin share the same look (APP.md §6.4 parity).
+ */
+export interface AppDoc {
+  hero: () => ReactNode;
+  examples: AppExample[];
+  /** Variant grids rendered with the React Native component. */
+  matrices?: MatrixSpec[];
+  /**
+   * The Anatomy specimen in React Native. It uses the same `anatomy.parts`: tag each part with
+   * `anatomy('label')` (or `anatomyPart` on Icon) so the numbered markers find it.
+   */
+  anatomy?: () => ReactNode;
+  /**
+   * React Native versions of the Guidelines visuals, by guideline title. In App preview the page
+   * shows only these; a guideline without one shows its text alone.
+   */
+  visuals?: Record<string, AppVisual>;
+  /** Platform behavior on iOS and Android (APP.md §6.2), shown on Guidelines under "In apps". */
+  notes?: string[];
+}
+
 export interface ComponentDoc {
   /** Page ID from the spec tree, e.g. `2.1`. */
   id: string;
@@ -104,6 +148,8 @@ export interface ComponentDoc {
   tokens: string[];
   guidelines: Guideline[];
   accessibility?: string[];
+  /** The app version (products 'app' and 'both'). Missing = no app version yet. */
+  app?: AppDoc;
 }
 
 export const defineDoc = (d: ComponentDoc) => d;

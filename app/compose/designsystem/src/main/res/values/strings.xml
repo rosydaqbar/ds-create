@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Words the library itself announces to TalkBack. Translate per locale (values-xx/strings.xml). -->
-<resources>
-    <string name="ds_state_loading">Loading</string>
-</resources>
