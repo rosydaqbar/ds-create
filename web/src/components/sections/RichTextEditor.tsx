@@ -94,7 +94,7 @@ const floatingSlots = (type: RichTextToolbarType): Slot[] =>
 /** Divider wrapper: the same spacing around every divider (padding-x space/xs, height 20). */
 function DividerWrapper() {
   return (
-    <span aria-hidden className="flex h-(--size-icon-md) shrink-0 items-center px-xs">
+    <span aria-hidden data-anatomy="divider-wrapper" className="flex h-(--size-icon-md) shrink-0 items-center px-xs">
       <Divider orientation="vertical" decorative />
     </span>
   );
@@ -210,6 +210,7 @@ export function RichTextToolbar({
   const roving = useRoving();
   return (
     <div
+      data-anatomy="rich-text-toolbar"
       ref={roving.ref}
       role="toolbar"
       aria-label="Formatting"
@@ -243,6 +244,7 @@ export function RichTextFloatingToolbar({ type = 'simple', formats, onCommand, c
   const roving = useRoving();
   return (
     <div
+      data-anatomy="rich-text-toolbar"
       ref={roving.ref}
       role="toolbar"
       aria-label="Formatting"
@@ -562,6 +564,7 @@ export function RichTextEditor({
       )}
       <div className="relative flex flex-col gap-sm">
         <div
+          data-anatomy="input"
           ref={box}
           style={boxStyle}
           className={cn(
@@ -577,6 +580,7 @@ export function RichTextEditor({
               </span>
             )}
             <div
+              data-anatomy="rich-text-content"
               ref={editor}
               id={id}
               role="textbox"
@@ -585,6 +589,8 @@ export function RichTextEditor({
               aria-labelledby={labelledBy}
               aria-describedby={describedBy}
               contentEditable
+              // Explicit tab stop (contenteditable is already one); lets tools see the scroll area is reachable.
+              tabIndex={0}
               suppressContentEditableWarning
               data-text-control-field=""
               className={cn('relative min-h-full', contentSize[size], contentStyles)}
@@ -600,6 +606,7 @@ export function RichTextEditor({
           {/* Resize handle: decorative grip over the native resizer, bottom trailing corner. */}
           <svg
             aria-hidden
+            data-anatomy="resize-handle"
             viewBox="0 0 12 12"
             className="pointer-events-none absolute bottom-sm right-sm size-(--size-icon-xs) stroke-current text-icon-tertiary"
             fill="none"

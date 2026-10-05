@@ -69,7 +69,7 @@ export default defineDoc({
   spec: 'parts/2.19-featured-icon.md',
   exports: ['FeaturedIcon'],
   summary:
-    "An icon in a shaped container that anchors empty states, dialogs, feature lists and notifications. Tone carries the message's intent; Emphasis sets its weight; the icon is swappable and keeps its standard size.",
+    "A featured icon puts an icon in a shaped container to anchor an empty state, dialog, feature list or notification. Pick the tone to match the message and the emphasis to set how much it stands out.",
   hero: () => <FeaturedIcon size="xl" icon="general/layers" className="scale-150" />,
   playground: {
     controls: [
@@ -85,7 +85,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Empty state',
-      caption: 'A featured icon anchors an empty state above its heading.',
+      caption: 'Above the heading, a featured icon gives an empty state a clear starting point.',
       render: () => (
         <div className="flex max-w-[22rem] flex-col items-center gap-xl text-center">
           <FeaturedIcon type="square" size="lg" tone="neutral" icon="general/search" />
@@ -107,7 +107,7 @@ export default defineDoc({
     },
     {
       title: 'Delete confirmation dialog',
-      caption: 'Tone matches the consequence of the action below it.',
+      caption: 'The danger tone warns people before an action they can’t undo.',
       render: () => (
         <DemoCard className="w-full max-w-[22rem] shadow-overlay">
           <FeaturedIcon size="lg" tone="danger" icon="general/trash" />
@@ -129,7 +129,7 @@ export default defineDoc({
     },
     {
       title: 'Feature list',
-      caption: 'In lists, one size and one emphasis keep the items equal.',
+      caption: 'One size and one emphasis keep every item in the list equally important.',
       stage: 'full',
       render: () => (
         <div className="grid w-full max-w-[48rem] gap-3xl md:grid-cols-3">
@@ -144,7 +144,7 @@ export default defineDoc({
     },
     {
       title: 'Success notification',
-      caption: 'The outline style signals intent quietly next to body text.',
+      caption: 'Next to body text, the outline style signals success without shouting.',
       render: () => (
         <DemoCard className="w-full max-w-[24rem] flex-row items-start gap-lg shadow-overlay">
           <FeaturedIcon size="sm" tone="success" emphasis="tertiary" icon="alerts/check-circle" />
@@ -164,8 +164,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['To anchor a block: empty states, dialogs, feature lists, notifications.', 'When an icon needs more presence than its standard size.'],
-    dont: ['Inline in a sentence — use a plain icon.', 'As an action — use an Icon button (2.2).'],
+    use: ['Anchor a block, like an empty state, dialog, feature list or notification.', 'Give an icon more presence than its standard size allows.'],
+    dont: ['Inside a sentence, use a plain icon.', 'For an action, use an Icon button (2.2).'],
   },
   matrices: [
     { title: 'Type=circle', rows: 'Emphasis × Tone', columns: 'Size', render: () => <FeaturedMatrix type="circle" emphases={EMPHASIS} /> },
@@ -198,19 +198,19 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Container', description: 'Fixed square featured-icon/size/{size} (32 / 40 / 48 / 56). Circle: radius/full, fill by Emphasis and Tone. Square: color/surface/base, color/border/default, elevation/raised, radius/control (sm, md) or radius/surface (lg, xl).', tokens: ['featured-icon/size/md', 'radius/full', 'color/fill/brand/subtle', 'color/surface/base', 'color/border/default', 'elevation/raised'] },
-      { name: 'Outer ring', description: 'Tertiary circle: full box, border/width/strong, color/border/{tone}/subtle.', tokens: ['border/width/strong', 'color/border/brand/subtle'] },
-      { name: 'Inner ring', description: 'Tertiary circle: inset space/xs (4) on every side, border/width/strong, color/border/{tone}.', tokens: ['color/border/brand', 'space/xs'] },
-      { name: 'Icon', description: 'Keeps its standard box: size/icon/sm, md, lg, and featured-icon/icon/xl (28). Colour bound by Emphasis and Tone, so swapping keeps it.', tokens: ['size/icon/md', 'featured-icon/icon/xl', 'color/icon/on-solid', 'color/icon/brand'] },
+      { name: 'Container', target: 'container', description: 'The shape behind the icon, 32 / 40 / 48 / 56 across the sizes. A circle takes its fill from the emphasis and tone. A square is a raised tile with a border and rounded corners.', tokens: ['featured-icon/size/md', 'radius/full', 'color/fill/brand/subtle', 'color/surface/base', 'color/border/default', 'elevation/raised'] },
+      { name: 'Outer ring', target: 'outer-ring', description: 'On a tertiary circle, a light ring in the tone color around the edge.', tokens: ['border/width/strong', 'color/border/brand/subtle'] },
+      { name: 'Inner ring', target: 'inner-ring', description: 'On a tertiary circle, a stronger ring 4px inside the outer one.', tokens: ['color/border/brand', 'space/xs'] },
+      { name: 'Icon', target: 'icon', description: 'Any icon at its standard size, 28 at xl. Its color comes from the emphasis and tone, so a swapped icon keeps it.', tokens: ['size/icon/md', 'featured-icon/icon/xl', 'color/icon/on-solid', 'color/icon/brand'] },
     ],
   },
   props: [
-    { name: 'type', figma: 'Type', type: "'circle' | 'square'", default: "'circle'", description: 'Square exists only with tertiary emphasis.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg' | 'xl'", default: "'md'", description: 'Container 32 / 40 / 48 / 56; icon 16 / 20 / 24 / 28.' },
-    { name: 'emphasis', figma: 'Emphasis', type: "'primary' | 'secondary' | 'tertiary'", default: "'secondary'", description: 'Solid, subtle fill, or outline rings.' },
+    { name: 'type', figma: 'Type', type: "'circle' | 'square'", default: "'circle'", description: 'Square is only available with tertiary emphasis.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg' | 'xl'", default: "'md'", description: 'The container is 32 / 40 / 48 / 56 and the icon 16 / 20 / 24 / 28.' },
+    { name: 'emphasis', figma: 'Emphasis', type: "'primary' | 'secondary' | 'tertiary'", default: "'secondary'", description: 'A solid fill, a subtle fill or outline rings.' },
     { name: 'tone', figma: 'Tone', type: "'neutral' | 'brand' | 'danger' | 'warning' | 'success'", default: "'brand'", description: 'The intent of the message that follows.' },
     { name: 'icon', figma: 'Icon', type: 'IconName', default: "'general/placeholder'", description: 'Any icon from the registry.' },
-    { name: 'label', type: 'string', description: 'Accessible name, only when the icon is the only signal of intent. Otherwise aria-hidden.' },
+    { name: 'label', type: 'string', description: 'An accessible name, set only when the icon is the only signal of intent. Without it, the icon is aria-hidden.' },
   ],
   tokens: [
     'featured-icon/size/sm', 'featured-icon/size/md', 'featured-icon/size/lg', 'featured-icon/size/xl', 'featured-icon/icon/xl',
@@ -222,14 +222,14 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'A bigger icon without a bigger icon',
-      body: 'Icons are drawn for their box; scaling one far beyond it thickens strokes and blurs details. When an icon needs more presence, place the standard icon in a Featured icon: icon box 24, container 48, strokes and proportions unchanged.',
-      do: { caption: 'The 24 icon in a Size=lg Featured icon.', render: () => <FeaturedIcon size="lg" icon="general/layers" /> },
-      dont: { caption: 'The icon scaled up to 48 with thick strokes.', render: () => <Icon name="general/layers" className="text-icon-brand" style={{ width: 'var(--featured-icon-size-lg)', height: 'var(--featured-icon-size-lg)' }} /> },
+      title: 'Make it bigger without scaling the icon',
+      body: 'Icons are drawn for their size, so scaling one far beyond it thickens strokes and blurs details. When an icon needs more presence, put the standard icon in a featured icon. A 24px icon in a 48px container keeps its strokes and proportions.',
+      do: { caption: 'The 24px icon in a large featured icon.', render: () => <FeaturedIcon size="lg" icon="general/layers" /> },
+      dont: { caption: 'The icon scaled up to 48px, with thick strokes.', render: () => <Icon name="general/layers" className="text-icon-brand" style={{ width: 'var(--featured-icon-size-lg)', height: 'var(--featured-icon-size-lg)' }} /> },
     },
     {
       title: 'Tone follows the message',
-      body: 'Match the tone to what follows: danger for errors and destructive confirmations, warning for risk, success for completion, brand for features and onboarding, neutral for everything else. Tone is never the only signal: the heading says the same thing.',
+      body: 'Use danger for errors and destructive confirmations, warning for risk, success for completion, brand for features and onboarding, and neutral for everything else. Make sure the heading says the same thing, so color is never the only signal.',
       render: () => (
         <div className="flex flex-wrap justify-center gap-xl">
           {([
@@ -247,10 +247,10 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Emphasis per screen',
-      body: 'Use one emphasis on a screen. Use primary only when the Featured icon is the main focal point, secondary by default, and tertiary next to body text or when several sit together.',
+      title: 'Use one emphasis per screen',
+      body: 'Secondary is the default. Save primary for when the featured icon is the main focal point, and use tertiary next to body text or when several sit together.',
       do: {
-        caption: 'One list, secondary only.',
+        caption: 'One list, all secondary.',
         render: () => (
           <div className="flex gap-xl">
             <FeaturedIcon icon="general/zap" />
@@ -271,8 +271,8 @@ export default defineDoc({
       },
     },
     {
-      title: 'Size from the heading',
-      body: 'Pick the size from the text it anchors: sm–md beside body text and list items, lg above a dialog or empty-state heading, xl for large empty states and onboarding.',
+      title: 'Size it to the text it anchors',
+      body: 'Use sm or md beside body text and list items, lg above a dialog or empty-state heading, and xl for large empty states and onboarding.',
       render: () => (
         <div className="flex flex-wrap items-center justify-center gap-3xl">
           <span className="type-body-sm-regular flex items-center gap-md text-text-secondary">
@@ -292,14 +292,14 @@ export default defineDoc({
     },
     {
       title: 'Not a button, not inline',
-      body: 'A Featured icon is not interactive; when the icon is an action, use an Icon button (2.2). Don’t place a Featured icon inside a sentence; use a plain icon.',
-      do: { caption: 'An Icon button with the close icon.', render: () => <IconButton emphasis="secondary" icon="general/x" label="Close" /> },
-      dont: { caption: 'A Featured icon used as a close control.', render: () => <FeaturedIcon size="md" tone="neutral" icon="general/x" className="cursor-pointer" /> },
+      body: 'A featured icon isn’t interactive, so people can’t click it. When the icon is an action, use an Icon button (2.2). Inside a sentence, use a plain icon.',
+      do: { caption: 'An icon button with the close icon.', render: () => <IconButton emphasis="secondary" icon="general/x" label="Close" /> },
+      dont: { caption: 'A featured icon used as a close control.', render: () => <FeaturedIcon size="md" tone="neutral" icon="general/x" className="cursor-pointer" /> },
     },
   ],
   accessibility: [
-    'Most Featured icons repeat what the heading next to them says and are hidden from assistive technology (aria-hidden, the default).',
-    'When the icon is the only signal of the message’s intent, pass `label` (“Warning”) — it becomes role="img" with that name.',
-    'The icon meets the non-text contrast threshold against its container (or against the surface for tertiary) in every colour mode and tone.',
+    'Most featured icons repeat what the heading beside them says, so they’re hidden from assistive technology by default (aria-hidden).',
+    'When the icon is the only signal of the message’s intent, pass label (“Warning”). It then gets role="img", and screen readers announce that name.',
+    'The icon meets the non-text contrast threshold against its container (or against the surface for tertiary) in every color mode and tone.',
   ],
 });

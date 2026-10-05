@@ -5,7 +5,7 @@ import { cn } from '@/lib/cn';
 import { Badge, Button, Checkbox, Divider, HelpText, Icon, Label, Link, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
 import { Bullets, Caption, DoDont, InlineCode, P, TokenTable } from '../../blocks';
-import { pageMeta } from '../../meta';
+import { figmaNodeFor } from '../../meta';
 
 /* ---------- token lookups ---------- */
 const byName = new Map(tokens.variables.map((v) => [v.name, v]));
@@ -1185,7 +1185,7 @@ export default function Color() {
         eyebrow="Foundations › 1.1 Color"
         title="Color"
         description="Color carries the Syncium brand and tells people what’s happening. Components use semantic roles instead of raw palette values, so every screen works in Light and Dark and the palette can change in one place."
-        figmaNode={pageMeta['1.1'].figmaNode}
+        figmaNode={figmaNodeFor('1.1')}
         tabs={[
           { label: 'Overview', render: () => <Overview /> },
           { label: 'Tokens', render: () => <TokensTab /> },

@@ -25,7 +25,7 @@ export interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 
 export function Radio({ size = 'sm', checked, onCheckedChange, onChange, parentFocus = false, forceState, className, style, ...rest }: RadioProps) {
   return (
-    <span className={cn('relative inline-flex shrink-0', ring[size], className)} style={style}>
+    <span data-anatomy="root" className={cn('relative inline-flex shrink-0', ring[size], className)} style={style}>
       <input
         type="radio"
         className={cn(choiceInputClasses, 'rounded-full')}
@@ -38,9 +38,9 @@ export function Radio({ size = 'sm', checked, onCheckedChange, onChange, parentF
         {...forceAttr(forceState)}
         {...rest}
       />
-      <span aria-hidden className={cn(choiceBoxClasses, 'rounded-full', !parentFocus && choiceFocusClasses)}>
+      <span aria-hidden data-anatomy="ring" className={cn(choiceBoxClasses, 'rounded-full', !parentFocus && choiceFocusClasses)}>
         {/* 1.6 Motion: the dot scales in at base · standard (instant in Reduced). */}
-        <span className={cn('scale-0 rounded-full bg-current transition-[scale] duration-(--motion-duration-base) ease-standard [.peer:checked~*_&]:scale-100', dot[size])} />
+        <span data-anatomy="dot" className={cn('scale-0 rounded-full bg-current transition-[scale] duration-(--motion-duration-base) ease-standard [.peer:checked~*_&]:scale-100', dot[size])} />
       </span>
     </span>
   );

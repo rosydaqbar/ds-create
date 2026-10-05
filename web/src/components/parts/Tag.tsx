@@ -98,8 +98,11 @@ export function Tag({
 
   return (
     <Root
+      data-anatomy="root"
       {...(Root === 'button' ? { type: 'button' as const, disabled, onClick } : {})}
       data-disabled={disabled || undefined}
+      // A static tag (not a button or label) exposes its disabled state itself; the close is natively disabled.
+      aria-disabled={(Root === 'span' && disabled) || undefined}
       className={cn(
         'group/tag relative inline-flex shrink-0 select-none items-center whitespace-nowrap rounded-sm border-(length:--border-width-default) outline-none',
         'transition-[background-color,color,box-shadow] duration-(--motion-duration-fast) ease-standard',
@@ -129,13 +132,13 @@ export function Tag({
         />
       )}
       {showDot ? (
-        <span aria-hidden className={cn('shrink-0 rounded-full bg-icon-success group-data-[disabled=true]/tag:bg-icon-disabled', dotSize[size])} />
+        <span aria-hidden data-anatomy="leading-visual" className={cn('shrink-0 rounded-full bg-icon-success group-data-[disabled=true]/tag:bg-icon-disabled', dotSize[size])} />
       ) : flag ? (
-        <Flag country={flag} size={size === 'lg' ? 'md' : 'sm'} alt="" />
+        <Flag country={flag} size={size === 'lg' ? 'md' : 'sm'} alt="" data-anatomy="leading-visual" />
       ) : avatar ? (
-        <Avatar size="2xs" type={avatar.src ? 'image' : avatar.initials ? 'initials' : 'icon'} src={avatar.src} initials={avatar.initials} alt="" />
+        <Avatar size="2xs" type={avatar.src ? 'image' : avatar.initials ? 'initials' : 'icon'} src={avatar.src} initials={avatar.initials} alt="" data-anatomy="leading-visual" />
       ) : null}
-      <span>{label}</span>
+      <span data-anatomy="label">{label}</span>
       {removable && (
         <TagClose
           size={size}
@@ -166,6 +169,7 @@ function TagClose({
 }) {
   return (
     <button
+      data-anatomy="close"
       type="button"
       aria-label={label}
       onClick={onClick}
@@ -191,7 +195,7 @@ function TagClose({
 /** `.Main/Tag count` — compact trailing count. Private. */
 function TagCount({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-xs bg-fill-neutral-subtle px-(--space-xs) type-body-xs-medium text-text-secondary group-data-[disabled=true]/tag:text-text-disabled">
+    <span data-anatomy="count" className="inline-flex shrink-0 items-center rounded-xs bg-fill-neutral-subtle px-(--space-xs) type-body-xs-medium text-text-secondary group-data-[disabled=true]/tag:text-text-disabled">
       {children}
     </span>
   );

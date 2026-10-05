@@ -54,11 +54,11 @@ export function Label({
   const text = label ?? children ?? 'Label';
   const Text = as as 'label';
   return (
-    <div className={cn('inline-flex items-center gap-xxs', className)}>
+    <div data-anatomy="label" className={cn('inline-flex items-center gap-xxs', className)}>
       <Text className={cn('inline-flex items-center gap-xxs text-text-secondary', sizes[size].text)} {...rest}>
-        <span>{text}</span>
+        <span data-anatomy="label-text">{text}</span>
         {showRequired && (
-          <span aria-hidden className="text-text-brand">
+          <span aria-hidden data-anatomy="asterisk" className="text-text-brand">
             *
           </span>
         )}

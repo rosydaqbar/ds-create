@@ -12084,5 +12084,191 @@ export const tokens: TokenData = {
     }
    ]
   }
+ ],
+ "pages": [
+  {
+   "id": "0:1",
+   "name": "00 Cover"
+  },
+  {
+   "id": "6:234",
+   "name": "01 Getting started"
+  },
+  {
+   "id": "6:235",
+   "name": "02 Tokens"
+  },
+  {
+   "id": "6:236",
+   "name": "── 1 · Foundations ──"
+  },
+  {
+   "id": "6:237",
+   "name": "1.1 Color"
+  },
+  {
+   "id": "6:238",
+   "name": "1.2 Typography"
+  },
+  {
+   "id": "6:239",
+   "name": "1.3 Space & layout"
+  },
+  {
+   "id": "6:240",
+   "name": "1.4 Shape"
+  },
+  {
+   "id": "6:241",
+   "name": "1.5 Elevation"
+  },
+  {
+   "id": "6:242",
+   "name": "1.6 Motion"
+  },
+  {
+   "id": "6:243",
+   "name": "1.7 Iconography"
+  },
+  {
+   "id": "6:244",
+   "name": "1.8 Brand assets"
+  },
+  {
+   "id": "6:245",
+   "name": "── 2 · Parts ──"
+  },
+  {
+   "id": "6:246",
+   "name": "2.1 Button"
+  },
+  {
+   "id": "6:247",
+   "name": "2.2 Icon button"
+  },
+  {
+   "id": "6:248",
+   "name": "2.3 Link"
+  },
+  {
+   "id": "6:249",
+   "name": "2.4 Badge"
+  },
+  {
+   "id": "6:250",
+   "name": "2.5 Tag"
+  },
+  {
+   "id": "6:251",
+   "name": "2.6 Avatar"
+  },
+  {
+   "id": "6:252",
+   "name": "2.7 Checkbox"
+  },
+  {
+   "id": "6:253",
+   "name": "2.8 Radio"
+  },
+  {
+   "id": "6:254",
+   "name": "2.9 Switch"
+  },
+  {
+   "id": "6:255",
+   "name": "2.10 Text control"
+  },
+  {
+   "id": "6:256",
+   "name": "2.11 Label"
+  },
+  {
+   "id": "6:257",
+   "name": "2.12 Help text"
+  },
+  {
+   "id": "6:258",
+   "name": "2.13 Tooltip"
+  },
+  {
+   "id": "6:259",
+   "name": "2.14 Progress"
+  },
+  {
+   "id": "6:260",
+   "name": "2.15 Spinner"
+  },
+  {
+   "id": "6:261",
+   "name": "2.16 Divider"
+  },
+  {
+   "id": "6:262",
+   "name": "2.17 Kbd"
+  },
+  {
+   "id": "6:263",
+   "name": "2.18 Slider"
+  },
+  {
+   "id": "6:264",
+   "name": "2.19 Featured icon"
+  },
+  {
+   "id": "6:265",
+   "name": "── 3 · Components ──"
+  },
+  {
+   "id": "6:266",
+   "name": "3.1 Button group"
+  },
+  {
+   "id": "6:267",
+   "name": "3.2 Text field"
+  },
+  {
+   "id": "6:268",
+   "name": "3.3 Choice field"
+  },
+  {
+   "id": "6:269",
+   "name": "3.4 Avatar group"
+  },
+  {
+   "id": "6:270",
+   "name": "3.5 Select"
+  },
+  {
+   "id": "6:271",
+   "name": "3.6 Menu"
+  },
+  {
+   "id": "6:272",
+   "name": "3.7 Social button"
+  },
+  {
+   "id": "6:273",
+   "name": "3.8 Badge group"
+  },
+  {
+   "id": "6:274",
+   "name": "── 4 · Sections ──"
+  },
+  {
+   "id": "6:275",
+   "name": "4.1 Rich text editor"
+  },
+  {
+   "id": "6:276",
+   "name": "4.2 Video player"
+  },
+  {
+   "id": "6:277",
+   "name": "── 9 · Internal ──"
+  },
+  {
+   "id": "6:278",
+   "name": "9.1 Doc kit"
+  }
  ]
 };

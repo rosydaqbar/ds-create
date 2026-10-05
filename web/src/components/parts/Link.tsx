@@ -78,6 +78,7 @@ export function Link({
   const newTab = rest.target === '_blank';
   return (
     <a
+      data-anatomy="root"
       href={disabled ? undefined : href}
       role={disabled ? 'link' : undefined}
       aria-disabled={disabled || undefined}
@@ -86,10 +87,10 @@ export function Link({
       {...forceAttr(forceState)}
       {...rest}
     >
-      {standalone && leadingIcon && <Icon name={leadingIcon} size={iconSize[s]} />}
-      {label ?? children}
+      {standalone && leadingIcon && <Icon name={leadingIcon} size={iconSize[s]} data-anatomy="leading-icon" />}
+      <span data-anatomy="label">{label ?? children}</span>
       {newTab && <span className="sr-only"> (opens in a new tab)</span>}
-      {standalone && trailingIcon && <Icon name={trailingIcon} size={iconSize[s]} />}
+      {standalone && trailingIcon && <Icon name={trailingIcon} size={iconSize[s]} data-anatomy="trailing-icon" />}
     </a>
   );
 }

@@ -101,12 +101,12 @@ export function AvatarGroup({
   const rest_ = total - named.length;
   const groupName = `${total} ${total === 1 ? 'person' : 'people'}: ${named.join(', ')}${rest_ > 0 ? ` and ${rest_} more` : ''}`;
 
-  const countAvatar = <Avatar size={size} type="initials" initials={countText} showRing alt="" />;
+  const countAvatar = <Avatar size={size} type="initials" initials={countText} showRing alt="" data-anatomy="count" />;
   const countTooltip: ReactNode = hiddenNames.length > 0 ? hiddenNames.join(', ') : `${hidden} more`;
 
   return (
-    <div role="group" aria-label={rest['aria-label'] ?? groupName} className={cn('inline-flex items-center gap-md', className)} {...rest}>
-      <div className={cn('isolate flex items-center', overlap[size])}>
+    <div data-anatomy="avatar-group" role="group" aria-label={rest['aria-label'] ?? groupName} className={cn('inline-flex items-center gap-md', className)} {...rest}>
+      <div data-anatomy="avatars" className={cn('isolate flex items-center', overlap[size])}>
         {shown.map((p, i) => (
           <Avatar
             key={`${p.name}-${i}`}
@@ -114,6 +114,7 @@ export function AvatarGroup({
             {...personAvatar(p)}
             alt={p.name}
             showRing
+            data-anatomy="avatar"
             style={{ zIndex: shown.length + 1 - i }}
           />
         ))}
@@ -164,10 +165,10 @@ export function AvatarLabel({ size = 'md', text = 'Olivia Rhye', supportingText,
   const name = typeof text === 'string' ? text : '';
   const initials = avatar?.initials ?? (name ? initialsOf(name) : undefined);
   return (
-    <div className={cn('flex min-w-0 items-center', labelGap[size], className)} {...rest}>
+    <div data-anatomy="avatar-label" className={cn('flex min-w-0 items-center', labelGap[size], className)} {...rest}>
       {/* The name is visible text, so the avatar is decorative here. */}
       <Avatar size={size} type={avatar?.src ? 'image' : initials ? 'initials' : 'icon'} src={avatar?.src} initials={initials} alt="" />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div data-anatomy="text-stack" className="flex min-w-0 flex-1 flex-col">
         <span className={cn('truncate text-text-primary', labelText[size])}>{text}</span>
         {supportingText != null && supportingText !== '' && <span className={cn('truncate text-text-tertiary', labelSupporting[size])}>{supportingText}</span>}
       </div>

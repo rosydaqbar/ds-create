@@ -43,7 +43,7 @@ function TooltipArrow({ edge }: { edge: 'top' | 'bottom' | 'left' | 'right' }) {
     left: `${w},0 ${w},${h} 0,${h / 2}`,
   }[edge];
   return (
-    <svg aria-hidden width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="block shrink-0 fill-surface-inverse">
+    <svg aria-hidden data-anatomy="arrow" width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="block shrink-0 fill-surface-inverse">
       <polygon points={points} />
     </svg>
   );
@@ -80,19 +80,20 @@ export function TooltipBubble({ placement = 'top', text = 'This is a tooltip', s
       </div>
     );
   return (
-    <div className={cn('inline-flex w-max', side ? 'flex-row items-stretch' : 'flex-col', className)} {...rest}>
+    <div data-anatomy="tooltip" className={cn('inline-flex w-max', side ? 'flex-row items-stretch' : 'flex-col', className)} {...rest}>
       {arrowFirst && arrowRow}
       <div
+        data-anatomy="content"
         className={cn(
           'flex max-w-(--size-width-xxs) flex-col gap-xs rounded-surface bg-surface-inverse shadow-overlay',
           withSupporting ? 'p-lg text-start' : 'px-lg py-md text-center',
         )}
       >
-        <span className={cn('type-body-xs-semibold text-text-inverse', trailing != null && 'inline-flex items-center gap-sm')}>
+        <span data-anatomy="text" className={cn('type-body-xs-semibold text-text-inverse', trailing != null && 'inline-flex items-center gap-sm')}>
           {text}
           {trailing}
         </span>
-        {withSupporting && <span className="type-body-xs-medium text-text-inverse">{supportingText}</span>}
+        {withSupporting && <span data-anatomy="supporting-text" className="type-body-xs-medium text-text-inverse">{supportingText}</span>}
       </div>
       {!arrowFirst && arrowRow}
     </div>
@@ -283,7 +284,7 @@ export interface HelpIconProps extends Omit<HTMLAttributes<HTMLButtonElement>, '
 function CursorSpecimen() {
   // Pointer specimen for mockups (Figma `Show cursor`); decorative.
   return (
-    <svg aria-hidden viewBox="0 0 16 20" className="pointer-events-none absolute left-[60%] top-[55%] z-10 h-(--size-icon-md) w-(--size-icon-md)">
+    <svg aria-hidden data-anatomy="cursor" viewBox="0 0 16 20" className="pointer-events-none absolute left-[60%] top-[55%] z-10 h-(--size-icon-md) w-(--size-icon-md)">
       <path d="M1 1 L1 15 L5 11.5 L8 18 L10.5 17 L7.6 10.6 L13 10.6 Z" className="fill-text-primary stroke-surface-base" strokeWidth="1.5" strokeLinejoin="round" />
     </svg>
   );
@@ -323,6 +324,7 @@ export function HelpIcon({
       onPointerLeave={(e) => e.pointerType !== 'touch' && hide()}
     >
       <button
+        data-anatomy="help-icon"
         type="button"
         aria-label={label}
         aria-describedby={id}

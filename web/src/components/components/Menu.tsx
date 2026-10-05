@@ -280,8 +280,8 @@ function MenuPanel({
   className,
   panelRef,
 }: PanelProps) {
-  const own = useRef<HTMLDivElement>(null);
-  const ref = panelRef ?? own;
+  /** The `role="menu"` element. With a search header it sits inside the panel surface, below the search field. */
+  const ref = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState('');
@@ -423,32 +423,37 @@ function MenuPanel({
   );
 
   let itemIndex = -1;
-  return (
-    <div ref={wrap} className={cn('relative', width === 'trigger' && 'w-full', className)}>
-    <div
-      ref={ref}
-      id={id}
-      role="menu"
-      tabIndex={-1}
-      aria-labelledby={labelledBy}
-      aria-label={labelledBy ? undefined : label}
-      onKeyDown={onKeyDown}
-      className={cn(menuPanelSurface, 'relative flex flex-col outline-none', width === 'menu' ? 'w-(--menu-width)' : 'w-full')}
-    >
+  const surfaceClass = cn(menuPanelSurface, 'relative flex flex-col outline-none', width === 'menu' ? 'w-(--menu-width)' : 'w-full');
+  const menuAttrs = {
+    id,
+    role: 'menu',
+    tabIndex: -1,
+    'aria-labelledby': labelledBy,
+    'aria-label': labelledBy ? undefined : label,
+  } as const;
+  /** The surface: `panelRef` (popup placement) measures it; without search it is the menu itself. */
+  const setSurface = (el: HTMLDivElement | null) => {
+    if (panelRef) panelRef.current = el;
+    if (!hasSearch) ref.current = el;
+  };
+  // The search field is a textbox, not a menu child: it sits above the role="menu" list, inside the same surface.
+  const searchHeader = hasSearch && (
+    <MenuHeader
+      type="search"
+      searchProps={{
+        ref: (el: HTMLElement | null) => {
+          search.current = el;
+        },
+        value: query,
+        onValueChange: setQuery,
+        'aria-controls': id,
+      }}
+    />
+  );
+  const body = (
+    <>
       {headers.map((h, k) =>
-        h.type === 'search' ? (
-          <MenuHeader
-            key={k}
-            type="search"
-            searchProps={{
-              ref: (el: HTMLElement | null) => {
-                search.current = el;
-              },
-              value: query,
-              onValueChange: setQuery,
-            }}
-          />
-        ) : (
+        h.type === 'search' ? null : (
           <MenuHeader
             key={k}
             type={h.type}
@@ -461,6 +466,7 @@ function MenuPanel({
       <div role="none" className="relative flex min-h-0 flex-col">
       <div
         ref={scroller}
+        data-anatomy="items"
         role="none"
         className="flex max-h-[min(var(--select-list-max-height),70vh)] flex-col overflow-y-auto py-xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
@@ -515,8 +521,24 @@ function MenuPanel({
       <MenuScrollBar thumb={thumb} />
       </div>
       {footer && <MenuFooter type={footer.type} text={footer.text} onClick={() => (footer.onClick?.(), onClose(true))} />}
-    </div>
-    {subNode}
+    </>
+  );
+
+  return (
+    <div ref={wrap} className={cn('relative', width === 'trigger' && 'w-full', className)}>
+      {hasSearch ? (
+        <div ref={setSurface} data-anatomy="panel" onKeyDown={onKeyDown} className={surfaceClass}>
+          {searchHeader}
+          <div ref={ref} {...menuAttrs} className="relative flex min-h-0 flex-col outline-none">
+            {body}
+          </div>
+        </div>
+      ) : (
+        <div ref={setSurface} data-anatomy="panel" {...menuAttrs} onKeyDown={onKeyDown} className={surfaceClass}>
+          {body}
+        </div>
+      )}
+      {subNode}
     </div>
   );
 }
@@ -621,6 +643,7 @@ export function Menu({
     }
   };
   const triggerProps = {
+    'data-anatomy': 'trigger',
     id: triggerId,
     'aria-haspopup': 'menu' as const,
     'aria-expanded': open,

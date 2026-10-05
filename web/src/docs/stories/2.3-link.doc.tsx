@@ -30,7 +30,7 @@ export default defineDoc({
   spec: 'parts/2.3-link.md',
   exports: ['Link'],
   summary:
-    'Text that navigates. Inline links follow the sentence and are always underlined; standalone links underline on hover and can carry a trailing icon. Brand or neutral tone, three sizes, five states.',
+    'Links take people to another page, section or resource. Use an inline link inside a sentence, and a standalone link on its own after the content it leads to.',
   hero: () => <Link href="#" size="md" label="View all projects" trailingIcon="arrows/arrow-right" />,
   playground: {
     controls: [
@@ -61,7 +61,7 @@ export default defineDoc({
     },
     {
       title: 'Card footer',
-      caption: 'Standalone links sit after the content they lead to.',
+      caption: 'Place a standalone link after the content it leads to.',
       render: () => (
         <div className="flex w-full max-w-[20rem] flex-col gap-lg rounded-surface border border-border-subtle bg-surface-raised p-xl">
           <span className="type-body-md-semibold text-text-primary">Recent projects</span>
@@ -77,7 +77,7 @@ export default defineDoc({
     },
     {
       title: 'Form helper row',
-      caption: 'Neutral links keep secondary paths quiet.',
+      caption: 'A neutral link keeps a secondary path, like a password reset, quiet.',
       render: () => (
         <div className="flex w-full max-w-[20rem] items-center justify-between">
           <span className="type-body-sm-medium text-text-secondary">Password</span>
@@ -91,7 +91,7 @@ export default defineDoc({
     },
     {
       title: 'Footer links',
-      caption: 'The external icon marks destinations that leave the product.',
+      caption: 'The external-link icon tells people the destination leaves the product.',
       render: () => (
         <div className="flex flex-wrap items-center gap-xl border-t border-border-subtle pt-lg">
           <Link href="#" tone="neutral" size="sm" label="Privacy" />
@@ -105,8 +105,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Navigate to another page, section or resource.', 'Inside a sentence (inline) or after the content it leads to (standalone).'],
-    dont: ['Submit, delete or save — that is a Button (2.1).', 'A primary call to action that changes data.'],
+    use: ['To take people to another page, section or resource.', 'Inside a sentence (inline), or after the content it leads to (standalone).'],
+    dont: ['To submit, save or delete, use a Button (2.1).', 'For a primary call to action that changes data, use a Button (2.1).'],
   },
   matrices: [
     {
@@ -160,22 +160,22 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root', description: 'Horizontal, Hug, no padding and no control height — the height is the text’s line height, so inline links never shift the sentence. Gap link/gap/{size}; radius/xs for the focus ring.', tokens: ['link/gap/md', 'radius/xs', 'color/fill/none'] },
-      { name: 'Leading icon', description: 'Standalone only. Identifies the destination type (a document, a download). size/icon/sm (sm) or md (md, lg).', tokens: ['size/icon/md'] },
-      { name: 'Label', description: 'Names the destination. Standalone: type/body/{size}/semibold, underline on hover and pressed. Inline: type/body/{size}/regular, always underlined.', tokens: ['type/body/md/semibold', 'type/body/md/regular'] },
-      { name: 'Trailing icon', description: 'Standalone only. arrow-right for “continue to”; external-link when the destination leaves the product.' },
+      { name: 'Root', target: 'root', description: 'The link’s container. It has no padding or fixed height, so it’s as tall as the line of text and an inline link never shifts the sentence.', tokens: ['link/gap/md', 'radius/xs', 'color/fill/none'] },
+      { name: 'Leading icon', target: 'leading-icon', description: 'Standalone links only. Shows the kind of destination, such as a document or a download.', tokens: ['size/icon/md'] },
+      { name: 'Label', target: 'label', description: 'Names the destination. Standalone labels are semibold and underline on hover and press. Inline labels match the body text and stay underlined.', tokens: ['type/body/md/semibold', 'type/body/md/regular'] },
+      { name: 'Trailing icon', target: 'trailing-icon', description: 'Standalone links only. Use an arrow for “continue to”, or the external-link icon when the destination leaves the product.' },
     ],
   },
   props: [
-    { name: 'label', figma: 'Label', type: 'ReactNode', description: 'Visible text; names the destination. `children` works too.' },
-    { name: 'type', figma: 'Type', type: "'inline' | 'standalone'", default: "'standalone'", description: 'Inline: always underlined, no icons. Standalone: underline on hover, icons allowed.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Label style and icon size.' },
-    { name: 'tone', figma: 'Tone', type: "'brand' | 'neutral'", default: "'brand'", description: 'Brand-coloured or neutral text.' },
-    { name: 'leadingIcon', figma: 'Show leading icon + Leading icon', type: 'IconName', description: 'Standalone only.' },
-    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName', description: 'Standalone only.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Removes href, not focusable, aria-disabled. Prefer removing the link.' },
+    { name: 'label', figma: 'Label', type: 'ReactNode', description: 'The visible text that names the destination. children works too.' },
+    { name: 'type', figma: 'Type', type: "'inline' | 'standalone'", default: "'standalone'", description: 'Inline links are always underlined and have no icons. Standalone links underline on hover and can have icons.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Sets the label style and icon size.' },
+    { name: 'tone', figma: 'Tone', type: "'brand' | 'neutral'", default: "'brand'", description: 'Brand-colored or neutral text.' },
+    { name: 'leadingIcon', figma: 'Show leading icon + Leading icon', type: 'IconName', description: 'Standalone links only.' },
+    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName', description: 'Standalone links only.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Removes href, takes the link out of the tab order and sets aria-disabled. Prefer removing the link instead.' },
     { name: 'href, target, rel …', type: 'AnchorHTMLAttributes', description: 'Native anchor attributes. target="_blank" adds “(opens in a new tab)” to the accessible name.' },
-    { name: 'forceState', type: "'hover' | 'pressed' | 'focus'", description: 'Documentation only: pins a pseudo-state.' },
+    { name: 'forceState', type: "'hover' | 'pressed' | 'focus'", description: 'For documentation only. Pins a hover, pressed or focus state.' },
   ],
   tokens: [
     'color/text/brand', 'color/text/brand/hover', 'color/text/brand/pressed',
@@ -186,8 +186,8 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Link or Button',
-      body: 'If it goes somewhere, it is a Link; if it does something, it is a Button. Never style one to look like the other — the role in code must match what people see.',
+      title: 'Link or button',
+      body: 'If it goes somewhere, it’s a link. If it does something, it’s a button. Don’t style one to look like the other: screen readers announce the real role, so it has to match what people see.',
       render: () => (
         <div className="flex w-full max-w-[26rem] flex-col gap-md">
           <div className="flex items-center justify-between rounded-surface border border-border-subtle bg-surface-base p-lg">
@@ -200,11 +200,11 @@ export default defineDoc({
           </div>
         </div>
       ),
-      dont: { caption: 'A Link that deletes, saves or submits.', render: () => <Link href="#" tone="brand" label="Delete account" /> },
+      dont: { caption: 'A link that deletes, saves or submits.', render: () => <Link href="#" tone="brand" label="Delete account" /> },
     },
     {
-      title: 'Inline vs standalone',
-      body: 'Inline: inside a sentence, same size and weight as the text, always underlined so it never depends on colour alone. Standalone: on its own line or in an action row, after the content it leads to; semibold; underline on hover.',
+      title: 'Inline or standalone',
+      body: 'Inline links sit inside a sentence, in the same size and weight as the text. They stay underlined, so they never depend on color alone.\n\nStandalone links sit on their own line or in an action row, after the content they lead to. They’re semibold and underline on hover.',
       render: () => (
         <div className="flex flex-wrap items-start gap-3xl">
           <p className="type-body-md-regular max-w-[18rem] text-text-secondary">
@@ -217,11 +217,11 @@ export default defineDoc({
         </div>
       ),
       do: { caption: 'Underline inline links.', render: () => <p className="type-body-md-regular text-text-secondary">Read the <Link type="inline" href="#" label="billing terms" />.</p> },
-      dont: { caption: 'Rely on colour alone inside paragraphs.', render: () => <p className="type-body-md-regular text-text-secondary">Read the <span className="text-text-brand">billing terms</span>.</p> },
+      dont: { caption: 'Rely on color alone inside a paragraph.', render: () => <p className="type-body-md-regular text-text-secondary">Read the <span className="text-text-brand">billing terms</span>.</p> },
     },
     {
-      title: 'Brand vs neutral tone',
-      body: 'Brand is the default and the one people recognise as a link. Neutral suits dense secondary text: footers, captions, table metadata, “Forgot password?”.',
+      title: 'Brand or neutral tone',
+      body: 'Brand is the default, and the tone people recognize as a link. Use neutral for dense secondary text: footers, captions, table metadata, “Forgot password?”.',
       do: {
         caption: 'Neutral links in a dense footer.',
         render: () => (
@@ -231,7 +231,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Brand-tone links stacked densely in a footer.',
+        caption: 'Brand-tone links crowded into a footer.',
         render: () => (
           <div className="flex gap-lg">
             {['Privacy', 'Terms', 'Cookies', 'Status'].map((l) => <Link key={l} href="#" size="sm" label={l} />)}
@@ -241,7 +241,7 @@ export default defineDoc({
     },
     {
       title: 'Icons',
-      body: 'Trailing arrow-right for “continue to” standalone links. Trailing external-link only when the destination leaves the product or opens a new tab. Leading icons only when they identify the destination type.',
+      body: 'Add a trailing arrow to standalone links that mean “continue to”. Use the external-link icon only when the destination leaves the product or opens a new tab. Add a leading icon only when it shows the kind of destination.',
       render: () => (
         <div className="flex flex-wrap gap-2xl">
           <Link href="#" label="View all" trailingIcon="arrows/arrow-right" />
@@ -252,17 +252,17 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'The label names the destination (“Billing settings”, “Release notes”), never “click here” or “read more” on its own. Standalone labels are short (up to four words); inline labels may wrap with the sentence.',
-      do: { caption: '“billing terms” is linked.', render: () => <p className="type-body-md-regular text-text-secondary">Read the <Link type="inline" href="#" label="billing terms" />.</p> },
-      dont: { caption: '“Click here” is linked.', render: () => <p className="type-body-md-regular text-text-secondary">For billing terms, <Link type="inline" href="#" label="click here" />.</p> },
+      body: 'Make the label name the destination: “Billing settings”, “Release notes”. Avoid “click here” or “read more” on their own, because they mean nothing out of context.\n\nKeep standalone labels to four words or fewer. Inline labels can wrap with the sentence.',
+      do: { caption: '“billing terms” is the link.', render: () => <p className="type-body-md-regular text-text-secondary">Read the <Link type="inline" href="#" label="billing terms" />.</p> },
+      dont: { caption: '“Click here” is the link.', render: () => <p className="type-body-md-regular text-text-secondary">For billing terms, <Link type="inline" href="#" label="click here" />.</p> },
     },
   ],
   accessibility: [
-    'The underline keeps inline links distinguishable without colour.',
-    'Text colour meets text contrast against color/surface/base in every mode and state except disabled.',
-    'Focus ring (focus/default, radius/xs) always visible.',
-    'Avoid disabled links; a disabled Link has no href, is not focusable and is announced as unavailable (aria-disabled).',
-    'Links that open a new tab say so in their accessible name — `target="_blank"` adds “(opens in a new tab)” automatically.',
-    'Standalone links reach size/touch-min on touch platforms through an invisible hit area.',
+    'The underline keeps inline links recognizable without relying on color.',
+    'Link text meets text contrast against color/surface/base in every mode and state except disabled.',
+    'Keyboard focus always shows a visible ring (focus/default, with radius/xs corners).',
+    'Avoid disabled links. A disabled link has no href, can’t be focused and is announced as unavailable (aria-disabled).',
+    'Links that open a new tab say so: target="_blank" adds “(opens in a new tab)” to the name screen readers announce.',
+    'On touch screens, standalone links get an invisible tap area of at least size/touch-min.',
   ],
 });

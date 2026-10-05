@@ -35,6 +35,7 @@ export function Divider({ orientation = 'horizontal', emphasis = 'tertiary', lab
   if (orientation === 'vertical') {
     return (
       <div
+        data-anatomy="start-line"
         role={decorative ? undefined : 'separator'}
         aria-orientation={decorative ? undefined : 'vertical'}
         aria-hidden={decorative || undefined}
@@ -47,15 +48,16 @@ export function Divider({ orientation = 'horizontal', emphasis = 'tertiary', lab
   if (withLabel) {
     // A labelled divider exposes its label as text, so "or" is announced.
     return (
-      <div className={cn('flex w-full items-center gap-md', className)} {...rest}>
-        <span aria-hidden className={cn('h-0 min-w-0 flex-1', lineClass)} />
-        <span className="type-body-sm-medium shrink-0 whitespace-nowrap text-text-tertiary">{label}</span>
-        <span aria-hidden className={cn('h-0 min-w-0 flex-1', lineClass)} />
+      <div data-anatomy="root" className={cn('flex w-full items-center gap-md', className)} {...rest}>
+        <span aria-hidden data-anatomy="start-line" className={cn('h-0 min-w-0 flex-1', lineClass)} />
+        <span data-anatomy="label" className="type-body-sm-medium shrink-0 whitespace-nowrap text-text-tertiary">{label}</span>
+        <span aria-hidden data-anatomy="end-line" className={cn('h-0 min-w-0 flex-1', lineClass)} />
       </div>
     );
   }
   return (
     <div
+      data-anatomy="start-line"
       role={decorative ? undefined : 'separator'}
       aria-orientation={decorative ? undefined : 'horizontal'}
       aria-hidden={decorative || undefined}

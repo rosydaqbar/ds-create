@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn';
 import { forceAttr } from '@/lib/types';
 import { Icon, type IconName } from '@/icons';
 import { Avatar } from '../parts/Avatar';
-import { Checkbox } from '../parts/Checkbox';
+import { ChoiceMark } from '../parts/_ChoiceMark';
 import { Tag } from '../parts/Tag';
 import { textControlSurface, type TextControlStatus } from '../parts/TextControl';
 import { tagBoxPad } from './_TextFieldParts';
@@ -112,6 +112,7 @@ export function SelectOptionRow({
   const c = rowClasses(disabled);
   return (
     <div
+      data-anatomy="option"
       role="option"
       aria-selected={selected}
       aria-disabled={disabled || undefined}
@@ -123,7 +124,7 @@ export function SelectOptionRow({
       <span className={cn(c.content, contentPad[size])}>
         {type !== 'default' && (
           // Fixed leading box (avatar xs): icon, avatar and dot rows keep the text on one edge.
-          <span aria-hidden className="inline-flex size-(--size-avatar-xs) shrink-0 items-center justify-center">
+          <span aria-hidden data-anatomy="leading-visual" className="inline-flex size-(--size-avatar-xs) shrink-0 items-center justify-center">
             {type === 'icon' && <Icon name={icon} size="md" className={disabled ? 'text-icon-disabled' : 'text-icon-tertiary'} />}
             {type === 'avatar' && <Avatar size="xs" type={avatar?.src ? 'image' : avatar?.initials ? 'initials' : 'icon'} src={avatar?.src} initials={avatar?.initials} alt="" />}
             {type === 'dot' && <span className={cn('size-(--size-indicator-sm) rounded-full', disabled ? 'bg-icon-disabled' : 'bg-icon-success')} />}
@@ -155,6 +156,7 @@ export function MultiSelectOptionRow({
   const c = rowClasses(disabled);
   return (
     <div
+      data-anatomy="option"
       role="option"
       aria-selected={selected}
       aria-disabled={disabled || undefined}
@@ -164,17 +166,8 @@ export function MultiSelectOptionRow({
       {...rest}
     >
       <span className={cn(c.content, contentPad[size])}>
-        {/* The row is the option; the Checkbox is its visual state and follows the row's hover. */}
-        <Checkbox
-          size="sm"
-          checked={selected}
-          disabled={disabled}
-          tabIndex={-1}
-          aria-hidden
-          parentFocus
-          forceState={(active || forceState === 'hover') && !disabled ? 'hover' : undefined}
-          className="pointer-events-none"
-        />
+        {/* The row is the option (aria-selected); the box is a visual-only Checkbox that follows the row's hover. */}
+        <ChoiceMark kind="checkbox" size="sm" checked={selected} disabled={disabled} hover={(active || forceState === 'hover') && !disabled} />
         <OptionText size={size} text={text} supportingText={supportingText} disabled={disabled} query={query} />
       </span>
     </div>
@@ -210,8 +203,10 @@ export function SelectTagBox({ size = 'md', status = 'none', disabled, forceStat
   const adorn = 'shrink-0 text-icon-tertiary group-data-[disabled=true]/tc:text-icon-disabled';
   return (
     <div
+      data-anatomy="tag-box"
       className={cn(textControlSurface(status), 'items-center gap-md', tagBoxPad[size], disabled ? 'cursor-not-allowed' : 'cursor-text', className)}
       data-disabled={disabled || undefined}
+      aria-disabled={disabled || undefined}
       onPointerDown={onBoxPointerDown}
       {...forceAttr(forceState)}
     >
@@ -255,7 +250,7 @@ export function SelectScrollBar({ thumb = { top: 0, size: 0.4, overflow: true },
   if (!thumb.overflow) return null;
   return (
     <span aria-hidden className={cn('pointer-events-none absolute end-xs top-xs bottom-[calc(var(--space-xs)*2)]', SCROLL_THUMB_WIDTH, className)}>
-      <span className="absolute inset-x-0 rounded-full bg-fill-neutral-track" style={{ top: `${thumb.top * 100}%`, height: `${thumb.size * 100}%` }} />
+      <span data-anatomy="scroll-bar" className="absolute inset-x-0 rounded-full bg-fill-neutral-track" style={{ top: `${thumb.top * 100}%`, height: `${thumb.size * 100}%` }} />
     </span>
   );
 }

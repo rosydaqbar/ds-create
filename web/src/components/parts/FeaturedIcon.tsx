@@ -82,12 +82,13 @@ export function FeaturedIcon({
   ...rest
 }: FeaturedIconProps) {
   const e = type === 'square' ? 'tertiary' : emphasis;
-  const glyph = <Icon name={icon} size={iconSize[size]} style={size === 'xl' ? xlIcon : undefined} className="relative" />;
+  const glyph = <Icon data-anatomy="icon" name={icon} size={iconSize[size]} style={size === 'xl' ? xlIcon : undefined} className="relative" />;
   const a11y = label ? { role: 'img' as const, 'aria-label': label } : { 'aria-hidden': true as const };
 
   if (type === 'square') {
     return (
       <span
+        data-anatomy="container"
         className={cn(
           'inline-flex shrink-0 items-center justify-center border-(length:--border-width-default) border-border-default bg-surface-base shadow-raised',
           size === 'sm' || size === 'md' ? 'rounded-control' : 'rounded-surface',
@@ -105,9 +106,9 @@ export function FeaturedIcon({
 
   if (e === 'tertiary') {
     return (
-      <span className={cn('relative inline-flex shrink-0 items-center justify-center rounded-full', box[size], iconTone[tone], className)} {...a11y} {...rest}>
-        <span className={cn('absolute inset-0 rounded-full border-(length:--border-width-strong)', outerRing[tone])} />
-        <span className={cn('absolute inset-xs rounded-full border-(length:--border-width-strong)', innerRing[tone])} />
+      <span data-anatomy="container" className={cn('relative inline-flex shrink-0 items-center justify-center rounded-full', box[size], iconTone[tone], className)} {...a11y} {...rest}>
+        <span data-anatomy="outer-ring" className={cn('absolute inset-0 rounded-full border-(length:--border-width-strong)', outerRing[tone])} />
+        <span data-anatomy="inner-ring" className={cn('absolute inset-xs rounded-full border-(length:--border-width-strong)', innerRing[tone])} />
         {glyph}
       </span>
     );
@@ -115,6 +116,7 @@ export function FeaturedIcon({
 
   return (
     <span
+      data-anatomy="container"
       className={cn('inline-flex shrink-0 items-center justify-center rounded-full', box[size], e === 'primary' ? solid[tone] : subtle[tone], className)}
       {...a11y}
       {...rest}

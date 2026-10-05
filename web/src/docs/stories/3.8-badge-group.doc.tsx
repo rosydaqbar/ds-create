@@ -30,7 +30,7 @@ export default defineDoc({
   level: 'components',
   spec: 'components/3.8-badge-group.md',
   exports: ['BadgeGroup'],
-  summary: 'A badge followed by a short message, used for announcements and update notices. The badge is a real Badge instance; the whole group behaves as one link.',
+  summary: 'Badge groups announce something in one line, like a new feature or a release, and link to the details. The badge and message work together as one link.',
   hero: heroGroup,
   playground: {
     controls: [
@@ -49,7 +49,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Page hero announcement',
-      caption: 'Announces what is new above the page title and links to it.',
+      caption: 'Place it above a page title to announce what’s new and link to the details.',
       render: () => (
         <div className="flex flex-col items-center gap-xl text-center">
           <BadgeGroup size="md" badgeLabel="New" message="Dark mode is here" href="#" onClick={(e) => e.preventDefault()} />
@@ -63,7 +63,7 @@ export default defineDoc({
     },
     {
       title: 'Release notes header',
-      caption: 'Success tone for a completed release.',
+      caption: 'Use the success tone once a release has shipped.',
       render: () => (
         <div className="flex flex-col items-start gap-lg">
           <BadgeGroup tone="success" badgeLabel="v2.4" message="See what’s changed" href="#" onClick={(e) => e.preventDefault()} />
@@ -75,7 +75,7 @@ export default defineDoc({
     },
     {
       title: 'Beta notice in settings',
-      caption: 'Outline on a busy surface; the badge qualifies the message, so it goes on the right.',
+      caption: 'The outline type stays calm on a busy surface. Here the badge qualifies the message, so it goes on the right.',
       render: () => (
         <div className="flex w-full max-w-[28rem] flex-col gap-md rounded-surface border border-border-subtle bg-surface-raised p-xl">
           <span className="type-body-md-semibold text-text-primary">Smart replies</span>
@@ -87,7 +87,7 @@ export default defineDoc({
   ],
   whenToUse: {
     use: ['A short label (“New”, “Beta”, “v2.4”) with a one-line message that links somewhere.', 'Announcements and update notices above a page or section title.'],
-    dont: ['A label on its own — use a Badge (2.4).', 'A message with a title, body or actions — use a banner or alert.', 'Two-line messages, or two Badge groups above the same title.'],
+    dont: ['For a label on its own, use a Badge (2.4).', 'For a message with a title, body or actions, use a banner or alert.', 'For a message that needs two lines, use a banner. Keep to one badge group per title.'],
   },
   matrices: [
     {
@@ -121,22 +121,22 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root', description: 'One link (or button). Horizontal, centred, Hug; gap space/md; padding badge-group/padding-badge/{size} on the badge side, badge-group/padding-message/{size} on the message side, space/xs top and bottom. radius/full (pill) or radius/sm (outline).', tokens: ['badge-group/padding-badge/md', 'badge-group/padding-message/md', 'space/xs', 'space/md', 'border/width/default'] },
-      { name: 'Badge', description: 'A real Badge (2.4): group md → Badge sm, lg → md; same Tone; the opposite Type (outline on a pill group, pill on an outline group).' },
-      { name: 'Content', description: 'Horizontal, centred, gap space/xs: the message and the trailing icon.', tokens: ['space/xs'] },
-      { name: 'Message', description: 'One short sentence, single line, no full stop. type/body/sm/medium.', tokens: ['type/body/sm/medium'] },
-      { name: 'Trailing icon', description: 'Optional (Show trailing icon), arrow-right by default, size/icon/sm.', tokens: ['size/icon/sm'] },
+      { name: 'Root', target: 'root', description: 'The clickable container: one link, or a button when there’s no link. It sizes to its content. Pill groups have fully rounded ends; outline groups have slightly rounded corners.', tokens: ['badge-group/padding-badge/md', 'badge-group/padding-message/md', 'space/xs', 'space/md', 'border/width/default'] },
+      { name: 'Badge', target: 'badge', description: 'A real Badge (2.4), one size smaller than the group and in the same tone. It takes the opposite type: outline on a pill group, pill on an outline group.' },
+      { name: 'Content', target: 'content', description: 'Holds the message and the trailing icon side by side.', tokens: ['space/xs'] },
+      { name: 'Message', target: 'message', description: 'One short sentence on a single line, with no full stop.', tokens: ['type/body/sm/medium'] },
+      { name: 'Trailing icon', target: 'trailing-icon', description: 'An optional icon after the message. It’s an arrow by default.', tokens: ['size/icon/sm'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'md' | 'lg'", default: "'md'", description: 'Heights and the inner Badge size (sm or md).' },
-    { name: 'placement', figma: 'Placement', type: "'left' | 'right'", default: "'left'", description: 'The badge before or after the message.' },
-    { name: 'type', figma: 'Type', type: "'pill' | 'outline'", default: "'pill'", description: 'Tinted pill, or neutral surface with a border. The Badge takes the opposite type.' },
-    { name: 'tone', figma: 'Tone', type: "'neutral' | 'brand' | 'danger' | 'warning' | 'success'", default: "'brand'", description: 'Colours of the container and the badge.' },
-    { name: 'badgeLabel', figma: 'Badge label', type: 'string', default: "'New feature'", description: 'Label of the inner Badge: one or two words.' },
-    { name: 'message', figma: 'Message', type: 'ReactNode', default: "'We’ve just released a new update'", description: 'One short sentence, single line.' },
-    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName | null', default: "'arrows/arrow-right'", description: 'Arrow after the message; null hides it.' },
-    { name: 'href', type: 'string', description: 'Link target: the group renders as one <a>. Without it, a <button>.' },
+    { name: 'size', figma: 'Size', type: "'md' | 'lg'", default: "'md'", description: 'Sets the height and the inner Badge size (sm or md).' },
+    { name: 'placement', figma: 'Placement', type: "'left' | 'right'", default: "'left'", description: 'Puts the badge before (left) or after (right) the message.' },
+    { name: 'type', figma: 'Type', type: "'pill' | 'outline'", default: "'pill'", description: 'pill is tinted; outline is a neutral surface with a border. The inner Badge takes the opposite type.' },
+    { name: 'tone', figma: 'Tone', type: "'neutral' | 'brand' | 'danger' | 'warning' | 'success'", default: "'brand'", description: 'Colors the container and the badge.' },
+    { name: 'badgeLabel', figma: 'Badge label', type: 'string', default: "'New feature'", description: 'The inner Badge’s label, one or two words.' },
+    { name: 'message', figma: 'Message', type: 'ReactNode', default: "'We’ve just released a new update'", description: 'One short sentence that fits on a single line.' },
+    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName | null', default: "'arrows/arrow-right'", description: 'The icon after the message. Pass null to hide it.' },
+    { name: 'href', type: 'string', description: 'The link target. With it, the group renders as one <a>; without it, as a <button>.' },
     { name: 'forceState', type: "'hover' | 'focus'", description: 'Documentation only: pins a Figma State.' },
   ],
   tokens: [
@@ -153,7 +153,7 @@ export default defineDoc({
   guidelines: [
     {
       title: 'Badge group, Badge or banner',
-      body: 'A Badge labels; a Badge group announces in one line and links; a banner explains and asks for action.',
+      body: 'Use a badge to label something, and a badge group to announce something in one line and link to it. When you need to explain more or ask people to act, use a banner.',
       render: () => (
         <div className="flex w-full max-w-[36rem] flex-col items-start gap-2xl">
           <span className="flex items-center gap-sm">
@@ -169,8 +169,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Anatomy: the Badge inside',
-      body: 'Badge group reuses the real Badge. Change the badge look in 2.4 Badge and every Badge group follows.',
+      title: 'The badge inside',
+      body: 'A badge group uses the real Badge, so a change in 2.4 Badge carries through to every badge group.',
       render: () => (
         <div className="flex items-center gap-xl">
           <BadgeGroup size="lg" badgeLabel="New" message="Dark mode is here" tabIndex={-1} />
@@ -181,7 +181,7 @@ export default defineDoc({
     },
     {
       title: 'Placement and type',
-      body: 'Placement=left is the default; use right when the message is the main point and the badge only qualifies it (“This feature may change · Beta”). Pill for announcements on plain pages; outline on busy or tinted backgrounds where a tinted container would be noisy.',
+      body: 'Put the badge on the left by default. Move it to the right when the message is the main point and the badge only qualifies it, as in “This feature may change · Beta”.\n\nUse pill for announcements on plain pages. On busy or tinted backgrounds, use outline, where a tinted container would add noise.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-2">
           <div className="flex flex-col items-start gap-lg rounded-surface bg-surface-base p-xl">
@@ -196,8 +196,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Choosing a tone',
-      body: 'Brand for new features and announcements, success for completed releases, warning for beta or changing features, danger for incidents, neutral for general notices. The badge label and message always name the meaning; colour supports it.',
+      title: 'Pick a tone by meaning',
+      body: 'Use brand for new features, success for finished releases, warning for beta or changing features, danger for incidents and neutral for general notices. Let the badge label and message carry the meaning, so it still reads without color.',
       render: () => (
         <div className="flex flex-col items-start gap-md">
           <BadgeGroup tone="brand" badgeLabel="New" message="Dark mode is here" tabIndex={-1} />
@@ -210,7 +210,7 @@ export default defineDoc({
     },
     {
       title: 'One announcement per title',
-      body: 'Keep one Badge group above a title, with a message of up to about eight words.',
+      body: 'Use one badge group above a title, with a message of about eight words at most, so it reads at a glance.',
       do: {
         caption: '“New · Dark mode is here →” above a page title.',
         render: () => (
@@ -221,7 +221,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Two Badge groups stacked above the same title.',
+        caption: 'Two badge groups stacked above the same title.',
         render: () => (
           <div className="flex flex-col items-start gap-md">
             <BadgeGroup badgeLabel="New" message="Dark mode is here" tabIndex={-1} />
@@ -232,11 +232,11 @@ export default defineDoc({
       },
     },
     {
-      title: 'Single line, real Badge',
-      body: 'A message that needs two lines is a banner. The badge is always the Badge Part, never drawn by hand.',
+      title: 'Keep it to one line',
+      body: 'If the message needs two lines, use a banner instead. Build the badge from the Badge part rather than drawing it by hand, so it stays in sync.',
       do: { caption: 'A short message on one line.', render: () => <BadgeGroup badgeLabel="New" message="Faster exports" tabIndex={-1} /> },
       dont: {
-        caption: 'A hand-drawn badge and a message that wraps.',
+        caption: 'A hand-drawn badge with a message that wraps.',
         render: () => (
           <span className="inline-flex max-w-[16rem] items-center gap-md rounded-surface border border-border-brand-subtle bg-fill-brand-subtle py-xs pl-xs pr-lg">
             <span className="type-body-xs-medium shrink-0 rounded-full bg-surface-base px-sm text-text-brand">New</span>
@@ -247,17 +247,17 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'The badge is one or two words (“New”, “Beta”, “v2.4”); the message says what happened or what is new, not “Click here”, in one short sentence without a full stop. The trailing arrow is on whenever the group links somewhere.',
+      body: 'Keep the badge to one or two words, like “New”, “Beta” or “v2.4”. Make the message say what happened or what’s new, not “Click here”, in one short sentence without a full stop. Show the trailing arrow whenever the group links somewhere.',
     },
     {
       title: 'Maintenance',
-      body: 'Change the badge look in 2.4 Badge; change the container through the tone tokens. Never edit individual variants.',
+      body: 'Change the badge’s look in 2.4 Badge and the container through the tone tokens. Avoid editing single variants, or they’ll drift from the rest.',
     },
   ],
   accessibility: [
-    'The group is one link (or button) with one accessible name made of the badge label and the message: “New: Dark mode is here”.',
-    'Hover and focus belong to the whole group; the inner Badge has no states.',
-    'The focus ring wraps the whole group (focus/danger for Tone=danger), never just the badge.',
-    'Message text meets text contrast against the container in every tone and mode.',
+    'The group is one link (or button) with one accessible name, made of the badge label and the message: “New: Dark mode is here”.',
+    'Hover and focus apply to the whole group. The inner badge has no states of its own.',
+    'The focus ring wraps the whole group, never only the badge. Danger groups use the danger ring (focus/danger).',
+    'Message text meets text contrast against the container in every tone, in Light and Dark.',
   ],
 });

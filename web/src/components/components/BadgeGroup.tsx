@@ -88,11 +88,11 @@ export function BadgeGroup({
   // One accessible name made of the badge label and the message: "New: Dark mode is here".
   const name = rest['aria-label'] ?? (typeof message === 'string' ? `${badgeLabel}: ${message}` : undefined);
 
-  const badge = <Badge size={badgeSize[size]} tone={tone} type={type === 'pill' ? 'outline' : 'pill'} label={badgeLabel} />;
+  const badge = <Badge size={badgeSize[size]} tone={tone} type={type === 'pill' ? 'outline' : 'pill'} label={badgeLabel} data-anatomy="badge" />;
   const content = (
-    <span className="inline-flex items-center gap-xs">
-      <span className="type-body-sm-medium whitespace-nowrap">{message}</span>
-      {trailingIcon && <Icon name={trailingIcon} size="sm" className={t.icon} />}
+    <span data-anatomy="content" className="inline-flex items-center gap-xs">
+      <span data-anatomy="message" className="type-body-sm-medium whitespace-nowrap">{message}</span>
+      {trailingIcon && <Icon name={trailingIcon} size="sm" className={t.icon} data-anatomy="trailing-icon" />}
     </span>
   );
 
@@ -120,13 +120,13 @@ export function BadgeGroup({
 
   if (href != null) {
     return (
-      <a href={href} aria-label={name} className={classes} {...forceAttr(forceState)} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      <a data-anatomy="root" href={href} aria-label={name} className={classes} {...forceAttr(forceState)} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}>
         {children}
       </a>
     );
   }
   return (
-    <button type="button" aria-label={name} className={classes} {...forceAttr(forceState)} {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}>
+    <button data-anatomy="root" type="button" aria-label={name} className={classes} {...forceAttr(forceState)} {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}>
       {children}
     </button>
   );

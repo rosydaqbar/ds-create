@@ -37,7 +37,7 @@ export default defineDoc({
   level: 'parts',
   spec: 'parts/2.12-help-text.md',
   exports: ['HelpText'],
-  summary: "The hint or validation message under a form control. Status switches the same line from a neutral hint to a danger message without changing the field's layout.",
+  summary: "Help text sits under a form control to explain what to enter, or what went wrong. When validation fails, the same line turns into an error, so the layout doesn’t jump.",
   hero: () => (
     <div className="scale-150">
       <HelpText hint="Use 8 or more characters with at least one number." />
@@ -55,7 +55,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Password field',
-      caption: 'A hint says what a valid value looks like before the user types.',
+      caption: 'The hint shows what a valid password looks like before people start typing.',
       render: () => (
         <DemoField className="max-w-[22rem]">
           <Label htmlFor="ht-pw" label="Password" showRequired />
@@ -69,7 +69,7 @@ export default defineDoc({
     },
     {
       title: 'Email field with an error',
-      caption: 'The error replaces the hint in the same place; the control and the message turn danger together.',
+      caption: 'The error replaces the hint in the same spot, and the control and message switch to the danger color together.',
       render: () => <EmailField />,
       code: `<Label htmlFor="email" label="Email address" />
 <TextControl id="email" status="invalid" value="anna@" aria-describedby="email-msg" />
@@ -77,7 +77,7 @@ export default defineDoc({
     },
     {
       title: 'Choice group',
-      caption: 'Help text works under groups of choices as well as single inputs.',
+      caption: 'Help text works under a group of choices as well as a single input.',
       render: () => (
         <div role="group" aria-labelledby="ch-label" aria-describedby="ch-hint" className="flex flex-col gap-sm">
           <Label as="span" id="ch-label" label="Notification channel" />
@@ -101,7 +101,7 @@ export default defineDoc({
     },
     {
       title: 'Textarea with a limit',
-      caption: 'Limits and formats belong in the hint, not in the placeholder.',
+      caption: 'Put limits and formats in the hint, where they stay visible, not in the placeholder.',
       render: () => (
         <DemoField className="max-w-[22rem]">
           <Label htmlFor="ht-bio" label="Bio" />
@@ -115,8 +115,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Hints for what users need before they act: a format, a limit, what the value is used for.', 'Validation messages after a value fails a check — in the same place.', 'One line per field.'],
-    dont: ['Repeating the Label.', 'Non-essential detail — use the Label’s help icon (2.13).', 'Stacking a hint and an error under the same control.'],
+    use: ['Telling people what they need before they type: a format, a limit, or what the value is for.', 'Showing a validation message in the same place after a value fails a check.', 'Adding one line of help per field.'],
+    dont: ['Repeating what the label already says.', 'For nice-to-know detail, use the label’s Help icon (2.13).', 'Stacking a hint and an error under the same control.'],
   },
   matrices: [
     {
@@ -141,26 +141,26 @@ export default defineDoc({
         <DemoField className="w-[18rem]">
           <AxisLabel prop="Wrapping" value="field width" />
           <TextControl aria-label="Wrapping example" />
-          <HelpText hint="A message longer than the field wraps to a second line under the control; the field never grows wider." />
+          <HelpText hint="A message longer than the field wraps onto a second line. The field never grows wider." />
         </DemoField>
       </div>
     ),
     parts: [
-      { name: 'Text', description: 'Fills the field width and wraps. type/body/xs/regular (sm) or type/body/sm/regular (md); colour by Status.', tokens: ['type/body/sm/regular', 'color/text/tertiary', 'color/text/danger'] },
-      { name: 'Field gap', description: 'space/sm above the Help text, owned by the field. Help text adds no margin, so hint and error sit in exactly the same place.', tokens: ['space/sm'] },
+      { name: 'Text', target: 'hint', description: 'The message itself. It fills the field’s width, wraps when it needs to, and changes color with the status.', tokens: ['type/body/sm/regular', 'color/text/tertiary', 'color/text/danger'] },
+      { name: 'Field gap', description: 'The small gap above the help text comes from the field. Help text adds no margin of its own, so the hint and the error sit in exactly the same place.', tokens: ['space/sm'] },
     ],
   },
   props: [
     { name: 'hint', figma: 'Hint', type: 'ReactNode', default: "'This is a hint text to help the user.'", description: 'The hint or the validation message.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'Text style; match the control and Label size.' },
-    { name: 'status', figma: 'Status', type: "'none' | 'invalid'", default: "'none'", description: 'Invalid turns the line into the danger message; set the control to the same Status.' },
-    { name: 'id', type: 'string', description: 'Point the control’s aria-describedby at it.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'Sets the text style. Match it to the control and label size.' },
+    { name: 'status', figma: 'Status', type: "'none' | 'invalid'", default: "'none'", description: 'Invalid turns the line into an error message. Set the control to the same status.' },
+    { name: 'id', type: 'string', description: 'The id the control’s aria-describedby points to.' },
   ],
   tokens: ['color/text/tertiary', 'color/text/danger', 'type/body/xs/regular', 'type/body/sm/regular', 'space/sm'],
   guidelines: [
     {
       title: 'Hint first, then error',
-      body: 'Show a hint when users need it before they type: a format, a limit, a consequence. When validation fails, replace the hint with the error message in the same place. Don’t stack a hint and an error.',
+      body: 'Show a hint when people need something before they type, like a format, a limit or a consequence. When validation fails, replace the hint with the error in the same place, rather than stacking both.',
       render: () => (
         <div className="flex flex-wrap items-start gap-xl">
           <Step n="1 · Empty">
@@ -181,10 +181,10 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Validation is not only colour',
-      body: 'The error message is text that says what went wrong; the control also turns Status=invalid. Colour supports the message; it never carries it alone.',
+      title: 'Don’t rely on color alone',
+      body: 'Write an error message that says what went wrong, and set the control to invalid as well. Color backs up the message, but people who can’t see the color still need the words.',
       do: {
-        caption: 'Invalid control with a message that explains the fix.',
+        caption: 'An invalid control with a message that explains the fix.',
         render: () => (
           <DemoField className="w-[16rem]">
             <TextControl aria-label="Start date" status="invalid" defaultValue="12/12/2025" />
@@ -203,10 +203,10 @@ export default defineDoc({
       },
     },
     {
-      title: 'Essential information stays visible',
-      body: 'Formats, limits and requirements go in Help text, not in a Tooltip or the placeholder. Tooltips are hidden until hovered and don’t exist on touch; placeholders disappear on typing.',
+      title: 'Keep essential information visible',
+      body: 'Put formats, limits and requirements in help text, not in a tooltip or the placeholder. Tooltips stay hidden until someone hovers and don’t work on touch screens. Placeholders disappear as soon as people type.',
       do: {
-        caption: 'The format in Help text under an empty control.',
+        caption: 'The format in help text, under an empty control.',
         render: () => (
           <DemoField className="w-[16rem]">
             <TextControl aria-label="Date" />
@@ -218,7 +218,7 @@ export default defineDoc({
     },
     {
       title: 'Long messages wrap',
-      body: 'A message that is longer than the field wraps under the control; the field never grows wider. Keep messages to two lines at the field width.',
+      body: 'A message longer than the field wraps under the control, and the field never grows wider. Keep messages to two lines at the field’s width.',
       render: () => (
         <DemoField className="w-[18rem]">
           <Label htmlFor="wrap-g" label="Project key" />
@@ -229,14 +229,14 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Hints describe the expected value; they don’t repeat the Label (“Use 8 or more characters”, not “Enter your password”). Error messages say what went wrong and how to fix it, in plain words. Don’t blame the user and don’t use codes (“Error 422”). Sentence case; end full sentences with a full stop. One sentence, two lines at most.',
+      body: 'Hints describe the expected value without repeating the label: “Use 8 or more characters”, not “Enter your password”. Error messages say what went wrong and how to fix it, in plain words, without blaming anyone or showing codes like “Error 422”.\n\nWrite one sentence in sentence case, end it with a full stop, and keep it to two lines.',
       do: { caption: 'What went wrong and how to fix it.', render: () => <HelpText status="invalid" hint="Enter an email address like name@example.com." /> },
-      dont: { caption: 'Blame and a code.', render: () => <HelpText status="invalid" hint="You entered an invalid email (Error 422)" /> },
+      dont: { caption: 'A message that blames people and shows a code.', render: () => <HelpText status="invalid" hint="You entered an invalid email (Error 422)" /> },
     },
   ],
   accessibility: [
-    'The field links Help text to its control with aria-describedby, so it is read after the Label.',
-    'The line is a polite live region: a validation message that appears after the user acts is announced without moving focus.',
-    'Hint and error text meet the text contrast threshold on the surface behind them in every colour mode.',
+    'The field links help text to its control with aria-describedby, so screen readers read it after the label.',
+    'The line is a polite live region. When a validation message appears after someone acts, screen readers announce it without moving focus.',
+    'Hint and error text meet text contrast on the surface behind them in every color mode.',
   ],
 });

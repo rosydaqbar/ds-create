@@ -841,7 +841,9 @@ Global QA:
 - preserve full component matrices rather than demo-only subsets;
 - keep private helpers private;
 - do not flatten documented anatomy;
-- render required documentation visibly on canvas.
+- render required documentation visibly on canvas;
+- when documentation is rendered in code, show specimens of private parts that carry a child role (an option, a menu item) inside their parent container (a list box, a menu); a demo never places an option or a menu item on its own;
+- check every documentation claim before publishing it: a sentence such as "every state meets contrast" is verified in every mode (1.1 Color QA, *Contrast pairs*), never assumed.
 
 All component-specific QA belongs to the corresponding file under `parts/`, `components/` or `sections/` and must be executed from there.
 

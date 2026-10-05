@@ -91,7 +91,7 @@ interface ShellProps {
 
 function FieldShell({ size, status, id, hintId, label, labelAs = 'label', labelId, hint, required, showHelpIcon, helpText, className, children }: ShellProps) {
   return (
-    <div className={cn('relative flex w-full min-w-0 flex-col gap-sm', className)}>
+    <div data-anatomy="field" className={cn('relative flex w-full min-w-0 flex-col gap-sm', className)}>
       {label != null && (
         <Label
           as={labelAs}
@@ -260,7 +260,7 @@ export function TextField({
   /* Tags inside the box replace the Text control. */
   if (type === 'tags-inner') {
     return (
-      <FieldShell size={size} status={status} id={id} hintId={hintId} label={label} hint={hint} required={required} showHelpIcon={showLabelHelpIcon} helpText={labelHelpText} className={className}>
+      <FieldShell size={size} status={status} id={id} hintId={hintId} label={label} labelId={labelId} hint={hint} required={required} showHelpIcon={showLabelHelpIcon} helpText={labelHelpText} className={className}>
         <TextFieldTagBox
           size={size}
           type="single-line"
@@ -274,6 +274,8 @@ export function TextField({
           placeholder={rest.placeholder}
           describedBy={describedBy}
           required={required}
+          labelledBy={label != null ? labelId : rest['aria-labelledby']}
+          ariaLabel={rest['aria-label']}
         />
       </FieldShell>
     );
@@ -393,7 +395,7 @@ export function TextField({
       helpText={labelHelpText}
       className={className}
     >
-      <div className="flex w-full items-stretch">
+      <div data-anatomy="control-row" className="flex w-full items-stretch">
         {leading}
         {control}
         {trailing}
@@ -403,7 +405,8 @@ export function TextField({
           ref={fileInput}
           type="file"
           tabIndex={-1}
-          aria-labelledby={label != null ? labelId : undefined}
+          aria-labelledby={label != null ? labelId : rest['aria-labelledby']}
+          aria-label={label == null && !rest['aria-labelledby'] ? (rest['aria-label'] ?? 'Choose file') : undefined}
           accept={accept}
           multiple={multiple}
           disabled={disabled}
@@ -416,7 +419,7 @@ export function TextField({
         />
       )}
       {outerTags && tagList.length > 0 && (
-        <div className="flex w-full flex-wrap gap-sm">
+        <div data-anatomy="tags-row" className="flex w-full flex-wrap gap-sm">
           {tagList.map((t, i) => (
             <Tag key={t} size="sm" type="removable" label={t} disabled={disabled} onRemove={() => setTags(tagList.filter((_, j) => j !== i))} />
           ))}
@@ -481,10 +484,11 @@ export function TextareaField({
   const auto = useId();
   const id = idProp ?? `ta-${auto}`;
   const hintId = `${id}-hint`;
+  const labelId = `${id}-label`;
   const describedBy = [rest['aria-describedby'], hint != null ? hintId : undefined].filter(Boolean).join(' ') || undefined;
   const [text, setText] = useControllable(value, defaultValue ?? '', onValueChange);
   const [tagList, setTags] = useControllable(tags, defaultTags, onTagsChange);
-  const shell = { size, status, id, hintId, label, hint, required, showHelpIcon: showLabelHelpIcon, helpText: labelHelpText, className } as const;
+  const shell = { size, status, id, hintId, label, labelId, hint, required, showHelpIcon: showLabelHelpIcon, helpText: labelHelpText, className } as const;
 
   if (type === 'tags-inner') {
     return (
@@ -502,6 +506,8 @@ export function TextareaField({
           placeholder={rest.placeholder}
           describedBy={describedBy}
           required={required}
+          labelledBy={label != null ? labelId : rest['aria-labelledby']}
+          ariaLabel={rest['aria-label']}
         />
       </FieldShell>
     );
@@ -536,7 +542,7 @@ export function TextareaField({
         {...controlProps}
       />
       {type === 'tags-outer' && tagList.length > 0 && (
-        <div className="flex w-full flex-wrap gap-sm">
+        <div data-anatomy="tags-row" className="flex w-full flex-wrap gap-sm">
           {tagList.map((t, i) => (
             <Tag key={t} size="sm" type="removable" label={t} disabled={disabled} onRemove={() => setTags(tagList.filter((_, j) => j !== i))} />
           ))}
@@ -655,7 +661,7 @@ export function CodeField({
   );
   const half = length / 2;
   return (
-    <div className={cn('inline-flex flex-col gap-sm', className)} {...rest}>
+    <div data-anatomy="field" className={cn('inline-flex flex-col gap-sm', className)} {...rest}>
       {label != null && <Label as="span" id={`${id}-label`} size={size === 'sm' ? 'sm' : 'md'} label={label} showRequired={required} />}
       <div role="group" aria-labelledby={label != null ? `${id}-label` : undefined} className={cn('flex items-center', cellGap[size])}>
         {type === '6-digit' ? (

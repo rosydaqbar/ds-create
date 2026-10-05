@@ -448,6 +448,7 @@ function SelectField({
   const rowType = type === 'icon' || type === 'avatar' || type === 'dot' ? type : 'default';
   const list = presence.mounted && (
     <div
+      data-anatomy="list"
       ref={popup}
       data-side={side}
       inert={presence.closing || undefined}

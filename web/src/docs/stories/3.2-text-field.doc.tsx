@@ -90,7 +90,7 @@ export default defineDoc({
   spec: 'components/3.2-text-field.md',
   exports: ['TextField', 'TextareaField', 'CodeField'],
   summary:
-    'Single-line fields for typed data in forms and dialogs. Type changes what sits before and after the value — a prefix, a dropdown, a button, steppers or tags — while label, control and hint stay the same. Textarea field holds longer free text; Code field holds one-time and verification codes.',
+    'Text fields let people type data like names, emails, amounts and dates. Pick a type to add a prefix, dropdown, button or tags around the value. Use a textarea for longer text and a code field for verification codes.',
   hero: () => (
     <div className="w-(--size-width-xxs)">
       <TextField label="Email address" required leadingIcon="communication/mail" placeholder="you@company.com" hint="We'll only use this for receipts." inputType="email" />
@@ -120,7 +120,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Sign-up dialog',
-      caption: 'Every field is Label → control → hint; the password reveals on demand.',
+      caption: 'Every field has the same label, control and hint, and people can show the password when they want to check it.',
       render: () => (
         <form className="flex w-full max-w-[22rem] flex-col gap-xl rounded-surface border border-border-subtle bg-surface-raised p-2xl shadow-raised" onSubmit={(e) => e.preventDefault()}>
           <span className="type-heading-xs-semibold text-text-primary">Create your account</span>
@@ -139,7 +139,7 @@ export default defineDoc({
     },
     {
       title: 'Website field',
-      caption: 'The static prefix sits inside the box; people type only the rest.',
+      caption: 'The fixed “https://” prefix sits inside the box, so people only type the rest.',
       render: () => (
         <div className="w-full max-w-[22rem]">
           <TextField type="leading-text" label="Website" prefix="https://" placeholder="www.example.com" defaultValue="example.com" hint="Your public company page." />
@@ -149,7 +149,7 @@ export default defineDoc({
     },
     {
       title: 'Invite form',
-      caption: 'Tags wrap inside the box; Enter or comma adds one, Backspace removes the last.',
+      caption: 'Tags wrap inside the box as the list grows. Enter or a comma adds one, and Backspace removes the last.',
       render: () => (
         <div className="flex w-full max-w-[24rem] flex-col items-end gap-lg">
           <TextField type="tags-inner" label="Invite people" placeholder="Add people" defaultTags={['olivia@company.com', 'phoenix@company.com', 'lana@company.com']} hint="They’ll get an email with a link to join." />
@@ -167,7 +167,7 @@ export default defineDoc({
     },
     {
       title: 'Verification screen',
-      caption: 'Six digits in two groups of three; paste fills every cell.',
+      caption: 'Two groups of three make a six-digit code easy to check, and pasting fills every cell.',
       render: () => (
         <div className="flex flex-col items-center gap-xl text-center">
           <div className="flex flex-col gap-xs">
@@ -186,14 +186,14 @@ export default defineDoc({
   ],
   whenToUse: {
     use: [
-      'Typed data in forms and dialogs: names, emails, amounts, links, dates, people.',
-      'Textarea field for longer free text such as descriptions, messages and notes.',
-      'Code field for one-time and verification codes.',
+      'Typed data in forms and dialogs, like names, emails, amounts, links, dates or people.',
+      'A textarea field for longer free text, like descriptions, messages and notes.',
+      'A code field for one-time and verification codes.',
     ],
     dont: [
-      'Picking from a known list — use a Select (3.5).',
-      'Yes / no and one-of-few choices — use a Choice field (3.3).',
-      'Text that needs formatting — use a Rich text editor (4.1).',
+      'For picking from a known list, use a Select (3.5).',
+      'For yes / no or one-of-a-few choices, use a Choice field (3.3).',
+      'For text that needs formatting, use a Rich text editor (4.1).',
     ],
   },
   matrices: [
@@ -248,7 +248,7 @@ export default defineDoc({
       columns: 'State',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">Attached dropdowns, buttons and steppers before or after the control.</p>
+          <p className="type-body-sm-regular text-text-secondary">The dropdowns, buttons and steppers that attach before or after the control.</p>
           <Matrix
             rowProp="Type · Placement · Size"
             rows={ADDON_ROWS}
@@ -280,7 +280,7 @@ export default defineDoc({
       columns: 'State',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">The control box that holds Tags. Binds the same tokens as the Text control.</p>
+          <p className="type-body-sm-regular text-text-secondary">The control box that holds tags. It uses the same tokens as the Text control.</p>
           <Matrix
             rowProp="Type · Status · Size"
             rows={TAGBOX_ROWS}
@@ -315,7 +315,7 @@ export default defineDoc({
       columns: 'Filled × State',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">One digit of a Code field. Same border, focus and invalid treatment as the Text control.</p>
+          <p className="type-body-sm-regular text-text-secondary">One digit of a code field. Its border, focus and invalid styles match the Text control.</p>
           <Matrix
             rowProp="Size · Status"
             rows={CELL_ROWS}
@@ -369,6 +369,10 @@ export default defineDoc({
             <TextField type="trailing-button" aria-label="Link" defaultValue="example.com/s/8f3k" />
           </div>
         </div>
+        <div className="flex flex-col items-start gap-md">
+          <span className="type-body-sm-semibold text-text-primary">Code field</span>
+          <CodeField size="md" label="Verification code" defaultValue="12" />
+        </div>
         <div className="flex flex-wrap items-start gap-xl">
           {SIZES.map((s) => (
             <div key={s} className="flex w-[14rem] flex-col gap-sm">
@@ -380,40 +384,40 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Field', description: 'Vertical stack, gap space/sm, width size/width/xxs in the set (Fill in layouts); grows with wrapped hints and tag rows.', tokens: ['space/sm', 'size/width/xxs'] },
-      { name: 'Label', description: '2.11 Label: Size sm for sm fields, md for md and lg. Show required and Show help icon exposed. Linked with htmlFor.', tokens: ['type/body/sm/medium'] },
-      { name: 'Control row', description: 'Horizontal, gap −border/width/default so addon and control share one border line. Text control fills; addons hug.', tokens: ['border/width/default'] },
-      { name: 'Leading / trailing addon', description: '.Main/Text field addon: dropdown, button (a real 2.1 Button), stepper or stepper-vertical. Radius only on its outer side; padding-x space/lg (lg: space/xl).', tokens: ['space/lg', 'color/border/default', 'color/fill/neutral/subtle/hover'] },
-      { name: 'Text control', description: '2.10 Text control (or .Main/Text field tag box for tags-inner). Joined corners square; on focus it sits in front of the addons.', tokens: ['radius/control', 'focus/default'] },
-      { name: 'Tags row', description: 'tags-outer: wrap row of 2.5 Tags under the control, gap space/sm.', tokens: ['space/sm'] },
-      { name: 'Help text', description: '2.12 Help text, same Size and Status as the field; referenced by aria-describedby.', tokens: ['type/body/sm/regular'] },
-      { name: 'Code cell', description: '.Main/Code field cell: code-field/cell-size/{Size} square, radius/control, digit type/heading/xl or type/display/sm–md; empty shows a placeholder “0”.', tokens: ['code-field/cell-size/md', 'type/display/sm/semibold'] },
+      { name: 'Field', target: 'field', description: 'Stacks the label, control and hint with a small gap. It fills the width of its layout and grows taller when the hint wraps or tags add rows.', tokens: ['space/sm', 'size/width/xxs'] },
+      { name: 'Label', target: 'label', description: 'A Label (2.11) linked to the input. Small fields use the small label, medium and large fields the medium one. It can show a required mark and a help icon.', tokens: ['type/body/sm/medium'] },
+      { name: 'Control row', target: 'control-row', description: 'Holds the control and any addons, overlapped so they share one border line. The control fills the row, and addons take only the space they need.', tokens: ['border/width/default'] },
+      { name: 'Leading / trailing addon', target: 'addon', description: 'An attached dropdown, button (a real Button, 2.1) or stepper, rounded only on its outer side. The vertical counter shows − and + side by side, so each button is at least 24 × 24 px.', tokens: ['space/lg', 'color/border/default', 'color/fill/neutral/subtle/hover'] },
+      { name: 'Text control', target: 'root', description: 'The input itself: a Text control (2.10), or the tag box for tags-inner. Its joined corners are square, and it moves in front of the addons on focus.', tokens: ['radius/control', 'focus/default'] },
+      { name: 'Tags row', target: 'tags-row', description: 'For tags-outer: a wrapping row of Tags (2.5) below the control.', tokens: ['space/sm'] },
+      { name: 'Help text', target: 'help-text', description: 'Help text (2.12) with the same size and status as the field. Screen readers read it as the field’s description.', tokens: ['type/body/sm/regular'] },
+      { name: 'Code cell', target: 'code-cell', description: 'One square cell per digit, with the digit in a large display style. An empty cell shows a “0” placeholder.', tokens: ['code-field/cell-size/md', 'type/display/sm/semibold'] },
     ],
   },
   props: [
-    { name: 'type', figma: 'Type', type: 'TextFieldType', default: "'default'", description: 'What sits before and after the value: prefix, dropdown, button, password reveal, payment mark, date-time, tags, counters, file upload.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Control height; Label and Help text are sm for sm, md for md and lg. Textarea field: sm | md. Code field: cell size.' },
-    { name: 'status', figma: 'Status', type: "'none' | 'invalid'", default: "'none'", description: 'Danger border and danger Help text; aria-invalid. Put the error copy in hint.' },
-    { name: 'label', figma: 'Show label + Label', type: 'ReactNode', description: 'The field’s name, linked with htmlFor. Without it pass aria-label.' },
-    { name: 'hint', figma: 'Show hint + Hint', type: 'ReactNode', description: 'The hint, or the error message when invalid; linked with aria-describedby.' },
-    { name: 'required', figma: 'Label › Show required', type: 'boolean', description: 'Asterisk on the Label and required on the input.' },
-    { name: 'showLabelHelpIcon / labelHelpText', figma: 'Label › Show help icon', type: 'boolean / ReactNode', description: 'Help icon after the label and its Tooltip.' },
-    { name: 'value / defaultValue / onValueChange', figma: 'Filled', type: 'string', description: 'The value; Filled is derived from it.' },
+    { name: 'type', figma: 'Type', type: 'TextFieldType', default: "'default'", description: 'What sits before and after the value: a prefix, dropdown, button, password reveal, payment mark, date and time, tags, counter or file upload.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'The control height. Label and help text are sm for sm fields, md for md and lg. Textarea field takes sm | md, and on Code field it sets the cell size.' },
+    { name: 'status', figma: 'Status', type: "'none' | 'invalid'", default: "'none'", description: 'Invalid adds a danger border, danger help text and aria-invalid. Put the error message in hint.' },
+    { name: 'label', figma: 'Show label + Label', type: 'ReactNode', description: 'The field’s name, linked with htmlFor. Without a label, pass aria-label.' },
+    { name: 'hint', figma: 'Show hint + Hint', type: 'ReactNode', description: 'The hint, or the error message when invalid. Linked with aria-describedby.' },
+    { name: 'required', figma: 'Label › Show required', type: 'boolean', description: 'Adds an asterisk to the label and sets required on the input.' },
+    { name: 'showLabelHelpIcon / labelHelpText', figma: 'Label › Show help icon', type: 'boolean / ReactNode', description: 'A help icon after the label, and the text of its tooltip.' },
+    { name: 'value / defaultValue / onValueChange', figma: 'Filled', type: 'string', description: 'The value. The Figma Filled property follows from it.' },
     { name: 'placeholder', figma: 'Text control › Text', type: 'string', description: 'An example of the expected format.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', description: 'Disabled control and addons; the Label stays readable.' },
-    { name: 'prefix', type: 'string', default: "'https://'", description: 'leading-text: the static prefix inside the box.' },
-    { name: 'dropdownOptions / dropdownValue / onDropdownChange / dropdownLabel', type: 'string[] / string', description: 'leading-dropdown, trailing-dropdown and date-time time: the addon’s options, value and accessible name.' },
-    { name: 'buttonLabel / buttonIcon / onButtonClick', type: 'string / IconName / () => void', description: 'trailing-button (“Copy”) and file-upload (“Choose file”).' },
-    { name: 'showTime', figma: 'Show time', type: 'boolean', default: 'false', description: 'date-time: trailing time dropdown.' },
-    { name: 'paymentMark', type: 'ReactNode', description: 'payment: the card mark from 1.8 Brand assets.' },
-    { name: 'tags / defaultTags / onTagsChange', type: 'string[]', description: 'tags-inner and tags-outer: the Tags.' },
-    { name: 'min / max / step', type: 'number', description: 'counter-horizontal and counter-vertical: stepper limits; arrow keys step too.' },
-    { name: 'accept / multiple / onFilesChange', type: 'string / boolean / (files) => void', description: 'file-upload: the native file picker.' },
-    { name: 'controlProps', type: 'Partial<TextControlProps>', description: 'The nested Text control’s own options (help icon, shortcut, …).' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', description: 'Disables the control and addons. The label stays readable.' },
+    { name: 'prefix', type: 'string', default: "'https://'", description: 'For leading-text: the fixed prefix inside the box.' },
+    { name: 'dropdownOptions / dropdownValue / onDropdownChange / dropdownLabel', type: 'string[] / string', description: 'For leading-dropdown, trailing-dropdown and the date-time time picker: the addon’s options, value and accessible name.' },
+    { name: 'buttonLabel / buttonIcon / onButtonClick', type: 'string / IconName / () => void', description: 'The addon button for trailing-button (“Copy”) and file-upload (“Choose file”).' },
+    { name: 'showTime', figma: 'Show time', type: 'boolean', default: 'false', description: 'For date-time: adds a time dropdown after the date.' },
+    { name: 'paymentMark', type: 'ReactNode', description: 'For payment: the card mark from 1.8 Brand assets.' },
+    { name: 'tags / defaultTags / onTagsChange', type: 'string[]', description: 'For tags-inner and tags-outer: the tags.' },
+    { name: 'min / max / step', type: 'number', description: 'For counter-horizontal and counter-vertical: the stepper limits. Arrow keys step the value too.' },
+    { name: 'accept / multiple / onFilesChange', type: 'string / boolean / (files) => void', description: 'For file-upload: options for the native file picker.' },
+    { name: 'controlProps', type: 'Partial<TextControlProps>', description: 'Options for the nested Text control, like its help icon or shortcut.' },
     { name: 'CodeField type', figma: 'Code field › Type', type: "'4-digit' | '6-digit'", default: "'4-digit'", description: 'Four cells, or two groups of three with a separator.' },
     { name: 'CodeField onComplete', type: '(code: string) => void', description: 'Called when every cell holds a digit.' },
-    { name: 'TextareaField showResizeHandle', figma: 'Show resize handle', type: 'boolean', default: 'true', description: 'Vertical resize grip.' },
-    { name: 'forceState', figma: 'State=focus', type: "'focus'", description: 'Documentation only.' },
+    { name: 'TextareaField showResizeHandle', figma: 'Show resize handle', type: 'boolean', default: 'true', description: 'Shows a grip for resizing the field vertically.' },
+    { name: 'forceState', figma: 'State=focus', type: "'focus'", description: 'For documentation only.' },
   ],
   tokens: [
     'space/sm', 'size/width/xxs', 'border/width/default', 'radius/control', 'color/border/default', 'color/border/disabled', 'color/border/danger',
@@ -425,7 +429,7 @@ export default defineDoc({
   guidelines: [
     {
       title: 'When to use',
-      body: 'Text field for typed data; Select (3.5) when people pick from a known list; Choice field (3.3) for yes / no and one-of-few choices; Rich text editor (4.1) when the text needs formatting.',
+      body: 'Use a text field when people type the value. When they pick from a known list, use a Select (3.5). For yes / no or one-of-a-few choices, use a Choice field (3.3), and for formatted text, a Rich text editor (4.1).',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-2">
           <TextField label="Company name" placeholder="Acme Inc." hint="Typed data → Text field." />
@@ -438,19 +442,19 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Label → control → hint',
-      body: 'Every field is the same three rows with space/sm between them; only the control changes.',
+      title: 'Label, control, hint',
+      body: 'Every field uses the same three rows with the same small gap between them. Only the control changes, so forms stay easy to scan.',
       render: () => (
         <div className="w-(--size-width-xxs)">
           <TextField label="Email address" placeholder="you@company.com" hint="We’ll only use this for receipts." />
         </div>
       ),
-      do: { caption: 'Keep the Label visible.', render: () => <div className="w-[16rem]"><TextField label="Email address" placeholder="you@company.com" /></div> },
-      dont: { caption: 'Placeholder as the label.', render: () => <div className="w-[16rem]"><TextField aria-label="Email address" placeholder="Email address" /></div> },
+      do: { caption: 'Keep the label visible.', render: () => <div className="w-[16rem]"><TextField label="Email address" placeholder="you@company.com" /></div> },
+      dont: { caption: 'The placeholder doubles as the label.', render: () => <div className="w-[16rem]"><TextField aria-label="Email address" placeholder="Email address" /></div> },
     },
     {
-      title: 'Status is not a State',
-      body: 'Invalid describes the value; focus describes where the user is. A field can be both.',
+      title: 'Status and state are separate',
+      body: 'Invalid describes the value, and focus describes where the person is. A field can be both at once.',
       render: () => (
         <Matrix
           rowProp="Status"
@@ -470,8 +474,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Types change the slots',
-      body: 'Type is never only a different placeholder: each value changes what sits before or after the value.',
+      title: 'Types change what’s around the value',
+      body: 'A type is more than a different placeholder. Each one changes what sits before or after the value.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-2 xl:grid-cols-3">
           {(['leading-text', 'leading-dropdown', 'trailing-button', 'password', 'tags-inner'] as const).map((t) => (
@@ -485,8 +489,8 @@ export default defineDoc({
     },
     {
       title: 'Joined edges',
-      body: 'Addons and the control share one border line and square inner corners; the outer corners keep radius/control. A button addon holds a real Button, never text styled as a link.',
-      do: { caption: 'A Button addon for the action.', render: () => <div className="w-[18rem]"><TextField type="trailing-button" aria-label="Share link" defaultValue="example.com/s/8f3k" /></div> },
+      body: 'Addons and the control share one border line, with square inner corners and rounded outer corners. A button addon holds a real button, not text styled as a link, so it looks and works like an action.',
+      do: { caption: 'A button addon for the action.', render: () => <div className="w-[18rem]"><TextField type="trailing-button" aria-label="Share link" defaultValue="example.com/s/8f3k" /></div> },
       dont: {
         caption: 'Addon text styled as a link.',
         render: () => (
@@ -499,7 +503,7 @@ export default defineDoc({
     },
     {
       title: 'Tags grow the field',
-      body: 'Tags wrap; the field grows down, never sideways.',
+      body: 'Tags wrap onto new lines, so the field grows taller instead of scrolling sideways.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-2">
           <TextField type="tags-inner" label="Two tags" defaultTags={['Design', 'Research']} />
@@ -522,7 +526,7 @@ export default defineDoc({
     },
     {
       title: 'Code fields',
-      body: 'Group long codes so they are easy to read back: six digits are two groups of three with a separator. Cells keep their size; the field grows wider rather than shrinking digits.',
+      body: 'Group long codes so people can read them back: show six digits as two groups of three with a separator. Cells keep their size, so the field gets wider instead of shrinking the digits.',
       render: () => (
         <div className="flex flex-wrap items-start gap-3xl">
           <CodeField size="sm" label="4-digit" />
@@ -545,10 +549,10 @@ export default defineDoc({
     },
     {
       title: 'Textarea text',
-      body: 'Text starts at the top left and the field can be resized vertically; never centre textarea content.',
+      body: 'Text in a textarea starts at the top left, and people can resize the field vertically. Avoid centering the text.',
       do: { caption: 'Top-aligned text.', render: () => <div className="w-[16rem]"><TextareaField aria-label="Message" defaultValue="Thanks — I’ll review it today." /></div> },
       dont: {
-        caption: 'Vertically centred text.',
+        caption: 'Vertically centered text.',
         render: () => (
           <div className="type-body-md-regular flex h-(--text-control-multiline-min-height) w-[16rem] items-center rounded-control border border-border-default bg-surface-base px-lg text-text-primary">
             Thanks — I’ll review it today.
@@ -558,22 +562,22 @@ export default defineDoc({
     },
     {
       title: 'Mobile text size',
-      body: '16 or larger stops the browser zooming in on focus. The Text control switches small sizes to font/size/input-min on touch screens, so every field inherits it.',
+      body: 'Text of 16 px or larger stops mobile browsers zooming in when a field gets focus. On touch screens, the Text control switches small sizes to font/size/input-min, so every field inherits it.',
     },
     {
       title: 'Content',
-      body: 'Labels name the data (“Email address”); hints say what a valid value looks like; placeholders show an example, never the instructions. Error messages say how to fix it: “Enter a date after 1 January 2026.” Keep prefixes and suffixes short (“https://”, “USD”, “kg”).',
+      body: 'Labels name the data (“Email address”), hints say what a valid value looks like, and placeholders show an example, not instructions. Error messages say how to fix the problem: “Enter a date after 1 January 2026.” Keep prefixes and suffixes short, like “https://”, “USD” or “kg”.',
     },
     {
       title: 'Maintenance',
-      body: 'Change the box in Text control (2.10), label type in Label (2.11), hint and error style in Help text (2.12); change addons, the tag box and code cells in the .Main parts here.',
+      body: 'Change the input box in Text control (2.10), the label style in Label (2.11), and the hint and error style in Help text (2.12). Addons, the tag box and code cells are edited in the .Main parts on this page.',
     },
   ],
   accessibility: [
-    'The Label is the control’s name (htmlFor) and the Help text its description (aria-describedby); invalid sets aria-invalid and shows the error as text, not colour alone.',
-    'Addon dropdowns and steppers are their own focusable controls with names (“Country code”, “Increase”, “Decrease”); steppers also respond to the arrow keys on the input (role="spinbutton").',
-    'The password reveal is a button whose name changes: “Show password” / “Hide password”.',
-    'Code fields accept a paste of the whole code, move focus to the next cell as each digit is typed, go back on Backspace and move with the arrow keys; the first cell offers one-time-code autofill.',
-    'Tags in tags fields are removable with their own “Remove {tag}” button; Backspace in the empty input removes the last tag.',
+    'The label gives the control its name (htmlFor), and the help text becomes its description (aria-describedby). An invalid field sets aria-invalid and shows the error as text, so it doesn’t rely on color alone.',
+    'Addon dropdowns and steppers are focusable controls with their own names (“Country code”, “Increase”, “Decrease”). The arrow keys on the input step the value too (role="spinbutton").',
+    'The password reveal is a button whose name switches between “Show password” and “Hide password”.',
+    'People can paste a whole code into a code field. Focus moves to the next cell as each digit is typed, Backspace goes back, and arrow keys move between cells. The first cell offers one-time-code autofill.',
+    'Each tag has its own “Remove {tag}” button, and Backspace in the empty input removes the last tag.',
   ],
 });

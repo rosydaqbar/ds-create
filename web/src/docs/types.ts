@@ -34,6 +34,8 @@ export interface Example {
 
 export interface PropDoc {
   name: string;
+  /** Documentation-only props (e.g. `forceState`) are hidden from the public props table. */
+  internal?: boolean;
   type: string;
   default?: string;
   description: string;
@@ -43,6 +45,11 @@ export interface PropDoc {
 
 export interface MatrixSpec {
   title: string;
+  /**
+   * Private parts that carry an ARIA child role (option, menuitem) are wrapped in this
+   * parent role so the specimen grid stays valid for assistive technology.
+   */
+  specimenRole?: 'listbox' | 'menu';
   /** Row and column axis names shown above the grid, e.g. `Emphasis × Size` and `State`. */
   rows?: string;
   columns?: string;
@@ -86,7 +93,11 @@ export interface ComponentDoc {
   privateParts?: MatrixSpec[];
   anatomy: {
     render?: () => ReactNode;
-    parts: { name: string; description: string; tokens?: string[] }[];
+    /**
+     * `target` is the `data-anatomy` value on the element this part describes. The explorer
+     * places the numbered marker on that element inside the rendered specimen.
+     */
+    parts: { name: string; description: string; tokens?: string[]; target?: string }[];
   };
   props: PropDoc[];
   /** Tokens the component binds (names from the token contract). */
@@ -96,3 +107,6 @@ export interface ComponentDoc {
 }
 
 export const defineDoc = (d: ComponentDoc) => d;
+
+/** Shared shape for one guideline topic on foundation and guidance pages. */
+export type Topic = Guideline;

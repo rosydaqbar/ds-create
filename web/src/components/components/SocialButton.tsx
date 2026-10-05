@@ -78,6 +78,7 @@ export function SocialButton({
   const mono = type === 'mono' || (solid && solidMarkMono[provider]);
   return (
     <button
+      data-anatomy="button"
       type="button"
       aria-label={iconOnly ? text : undefined}
       className={cn(
@@ -97,13 +98,14 @@ export function SocialButton({
         mono={mono}
         size={markSize[size]}
         alt=""
+        data-anatomy="leading-icon"
         className={cn(
           type === 'mono' &&
             'text-icon-secondary transition-colors duration-(--motion-duration-fast) ease-standard group-is-hover/social:text-icon-primary',
         )}
       />
       {/* Text padding: Button's optical wrapper. */}
-      {!iconOnly && <span className="px-(--space-optical)">{text}</span>}
+      {!iconOnly && <span data-anatomy="text-padding" className="px-(--space-optical)"><span data-anatomy="label">{text}</span></span>}
     </button>
   );
 }
@@ -144,6 +146,7 @@ export function SocialButtonGroup({
   const list = providers ?? socialProviders.slice(0, iconOnly ? 4 : 3);
   return (
     <div
+      data-anatomy="social-button-group"
       role="group"
       aria-label={rest['aria-label'] ?? `${verb} with another account`}
       className={cn('flex gap-lg', iconOnly ? 'flex-row' : 'w-full flex-col', iconOnly && fullWidth && 'w-full', className)}

@@ -5,7 +5,7 @@ import { cn } from '@/lib/cn';
 import { Badge, Button, Icon, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
 import { Bullets, Caption, DoDont, InlineCode, P, TokenBadge } from '../../blocks';
-import { pageMeta } from '../../meta';
+import { figmaNodeFor } from '../../meta';
 
 /* ---------- token lookups ---------- */
 const byName = new Map(tokens.variables.map((v) => [v.name, v]));
@@ -783,7 +783,7 @@ export default function Typography() {
       eyebrow="Foundations › 1.2 Typography"
       title="Typography"
       description="Text styles set the hierarchy of every screen, from hero headlines to table data. Each Figma text style has a matching utility class: type/body/md/regular → type-body-md-regular."
-      figmaNode={pageMeta['1.2'].figmaNode}
+      figmaNode={figmaNodeFor('1.2')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Tokens', render: () => <TokensTab /> },

@@ -103,6 +103,7 @@ export function Button({
   const showText = !iconOnly && (!loading || showLoadingText);
   return (
     <button
+      data-anatomy="root"
       type={type}
       disabled={disabled}
       aria-busy={loading || undefined}
@@ -114,10 +115,10 @@ export function Button({
       {loading ? (
         <Spinner size="md" tone="current" />
       ) : (
-        leadingVisual ?? ((leadingIcon || iconOnly) && <Icon name={leadingIcon ?? 'general/plus'} size="md" />)
+        leadingVisual ?? ((leadingIcon || iconOnly) && <Icon name={leadingIcon ?? 'general/plus'} size="md" data-anatomy="leading-icon" />)
       )}
-      {showText && text != null && <span className="px-(--space-optical)">{text}</span>}
-      {!iconOnly && !loading && trailingIcon && <Icon name={trailingIcon} size="md" />}
+      {showText && text != null && <span data-anatomy="text-padding" className="px-(--space-optical)"><span data-anatomy="label">{text}</span></span>}
+      {!iconOnly && !loading && trailingIcon && <Icon name={trailingIcon} size="md" data-anatomy="trailing-icon" />}
     </button>
   );
 }

@@ -5,7 +5,7 @@ import { Icon, iconNames, type IconName, type IconSize } from '@/icons';
 import { Avatar, Badge, Button, FeaturedIcon, IconButton, Tooltip } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
 import { Caption, CodeBlock, H3, InlineCode, P, TokenBadge } from '../../blocks';
-import { pageMeta } from '../../meta';
+import { figmaNodeFor } from '../../meta';
 import type { Topic } from '../../types';
 
 /* ---------- data ---------- */
@@ -629,7 +629,7 @@ export default function Iconography() {
       eyebrow="Foundations › 1.7 Iconography"
       title="Iconography"
       description="Icons help people scan a screen and recognize actions quickly. They share one outline style, and their sizes and colors come from tokens, so each icon fits the text and surface around it."
-      figmaNode={pageMeta['1.7'].figmaNode}
+      figmaNode={figmaNodeFor('1.7')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Guidelines', render: () => <Topics items={TOPICS} /> },

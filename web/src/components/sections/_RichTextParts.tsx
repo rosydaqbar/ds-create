@@ -88,6 +88,7 @@ export function RichTextCommand({ type = 'bold', selected = false, color, showTo
   const meta = richTextCommandMeta[type];
   const button = (
     <button
+      data-anatomy="command"
       type="button"
       aria-label={meta.name}
       aria-pressed={meta.toggle ? selected : undefined}
@@ -143,7 +144,7 @@ export function RichTextScrollBar({ thumb = { top: 0, size: 0.4, overflow: true 
   if (!thumb.overflow) return null;
   return (
     <span aria-hidden className={cn('pointer-events-none absolute end-xs top-xs bottom-xs', SCROLL_THUMB_WIDTH, className)}>
-      <span className="absolute inset-x-0 rounded-full bg-fill-neutral-track" style={{ top: `${thumb.top * 100}%`, height: `${thumb.size * 100}%` }} />
+      <span data-anatomy="scroll-bar" className="absolute inset-x-0 rounded-full bg-fill-neutral-track" style={{ top: `${thumb.top * 100}%`, height: `${thumb.size * 100}%` }} />
     </span>
   );
 }

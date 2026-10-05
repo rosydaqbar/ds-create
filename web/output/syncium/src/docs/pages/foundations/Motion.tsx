@@ -5,7 +5,7 @@ import { Icon, type IconName } from '@/icons';
 import { Button, Checkbox, IconButton, Menu, Select, Spinner, Switch, Tooltip } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
 import { Caption, CodeBlock, InlineCode, P, TokenBadge } from '../../blocks';
-import { pageMeta } from '../../meta';
+import { figmaNodeFor } from '../../meta';
 import type { Topic } from '../../types';
 
 /* ---------- token helpers ---------- */
@@ -565,7 +565,7 @@ export default function Motion() {
       eyebrow="Foundations › 1.6 Motion"
       title="Motion"
       description="Motion explains change: what arrived, what left, what synced. It stays quick and calm, and Reduced mode swaps movement for instant changes and short fades."
-      figmaNode={pageMeta['1.6'].figmaNode}
+      figmaNode={figmaNodeFor('1.6')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Tokens', render: () => <Tokens /> },

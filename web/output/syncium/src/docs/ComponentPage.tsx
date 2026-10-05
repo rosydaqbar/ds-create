@@ -6,7 +6,7 @@ import { config } from '@/ds.config';
 import { tokens } from '@/tokens/tokens.gen';
 import type { ComponentDoc, MatrixSpec } from './types';
 import { levelLabel } from './registry';
-import { pageMeta } from './meta';
+import { figmaNodeFor, pageMeta } from './meta';
 import { AnchorHeading, DocTabs, PageHeader, Topics } from './DocPage';
 import { Bullets, Caption, CodeBlock, ExampleBlock, H3, P, Playground, PropsTable, Stage, TokenTable, useScrollRegion } from './blocks';
 
@@ -285,7 +285,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
 
   return (
     <article className="flex flex-col gap-4xl">
-      <PageHeader eyebrow={`${levelLabel[doc.level]} › ${doc.id} ${doc.name}`} title={doc.name} description={doc.summary} status={meta?.status} figmaNode={meta?.figmaNode} />
+      <PageHeader eyebrow={`${levelLabel[doc.level]} › ${doc.id} ${doc.name}`} title={doc.name} description={doc.summary} status={meta?.status} figmaNode={figmaNodeFor(doc.id)} />
       <DocTabs tabs={tabs} label={`${doc.name} documentation`} />
       <footer className="flex flex-wrap gap-x-xl gap-y-xs border-t border-border-subtle pt-lg type-body-xs-regular text-text-tertiary">
         <span>Since v{meta?.since ?? '1.0'}</span>

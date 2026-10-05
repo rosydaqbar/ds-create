@@ -31,6 +31,7 @@ export interface AvatarGroupAddButtonProps extends Omit<ButtonHTMLAttributes<HTM
 export function AvatarGroupAddButton({ size = 'sm', label = 'Add people', forceState, showTooltip = true, disabled, className, type = 'button', ...rest }: AvatarGroupAddButtonProps) {
   const button = (
     <button
+      data-anatomy="add-button"
       type={type}
       aria-label={label}
       disabled={disabled}

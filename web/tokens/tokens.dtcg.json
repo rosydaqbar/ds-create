@@ -2055,12 +2055,12 @@
       },
       "placeholder": {
         "$type": "color",
-        "$value": "{palette.neutral.500}",
+        "$value": "{palette.neutral.600}",
         "$description": "Placeholder and empty-input hint text.",
         "$extensions": {
           "ds-create.modes": {
-            "Light": "{palette.neutral.500}",
-            "Dark": "{palette.neutral.500}"
+            "Light": "{palette.neutral.600}",
+            "Dark": "{palette.neutral.400}"
           },
           "ds-create.collection": "Color"
         }
@@ -2142,12 +2142,12 @@
         },
         "$root": {
           "$type": "color",
-          "$value": "{palette.red.700}",
+          "$value": "{palette.red.800}",
           "$description": "Error messages and danger text, such as an invalid-field message.",
           "$extensions": {
             "ds-create.modes": {
-              "Light": "{palette.red.700}",
-              "Dark": "{palette.red.400}"
+              "Light": "{palette.red.800}",
+              "Dark": "{palette.red.200}"
             },
             "ds-create.collection": "Color"
           }
@@ -2160,7 +2160,7 @@
         "$extensions": {
           "ds-create.modes": {
             "Light": "{palette.amber.700}",
-            "Dark": "{palette.amber.400}"
+            "Dark": "{palette.amber.300}"
           },
           "ds-create.collection": "Color"
         }
@@ -2172,7 +2172,7 @@
         "$extensions": {
           "ds-create.modes": {
             "Light": "{palette.green.700}",
-            "Dark": "{palette.green.400}"
+            "Dark": "{palette.green.300}"
           },
           "ds-create.collection": "Color"
         }
@@ -2184,7 +2184,7 @@
         "$extensions": {
           "ds-create.modes": {
             "Light": "{palette.blue.700}",
-            "Dark": "{palette.blue.400}"
+            "Dark": "{palette.blue.300}"
           },
           "ds-create.collection": "Color"
         }
@@ -2936,7 +2936,7 @@
             "$extensions": {
               "ds-create.modes": {
                 "Light": "{palette.brand.700}",
-                "Dark": "{palette.brand.500}"
+                "Dark": "{palette.brand.700}"
               },
               "ds-create.collection": "Color"
             }
@@ -2948,7 +2948,7 @@
             "$extensions": {
               "ds-create.modes": {
                 "Light": "{palette.brand.800}",
-                "Dark": "{palette.brand.700}"
+                "Dark": "{palette.brand.800}"
               },
               "ds-create.collection": "Color"
             }
@@ -2960,7 +2960,7 @@
             "$extensions": {
               "ds-create.modes": {
                 "Light": "{palette.brand.700}",
-                "Dark": "{palette.brand.500}"
+                "Dark": "{palette.brand.700}"
               },
               "ds-create.collection": "Color"
             }
@@ -3062,7 +3062,7 @@
             "$extensions": {
               "ds-create.modes": {
                 "Light": "{palette.red.700}",
-                "Dark": "{palette.red.500}"
+                "Dark": "{palette.red.700}"
               },
               "ds-create.collection": "Color"
             }
@@ -3074,7 +3074,7 @@
             "$extensions": {
               "ds-create.modes": {
                 "Light": "{palette.red.800}",
-                "Dark": "{palette.red.700}"
+                "Dark": "{palette.red.800}"
               },
               "ds-create.collection": "Color"
             }
@@ -3086,7 +3086,7 @@
             "$extensions": {
               "ds-create.modes": {
                 "Light": "{palette.red.700}",
-                "Dark": "{palette.red.500}"
+                "Dark": "{palette.red.700}"
               },
               "ds-create.collection": "Color"
             }
@@ -6637,12 +6637,12 @@
       },
       "fg": {
         "$type": "color",
-        "$value": "#ffffff",
-        "$description": "Label and mark colour on the GitLab solid button.",
+        "$value": "#171321",
+        "$description": "Label and mark color on the GitLab solid button: GitLab charcoal, so the label reaches 4.5:1 on GitLab orange (white is 2.85:1).",
         "$extensions": {
           "ds-create.modes": {
-            "Light": "#ffffff",
-            "Dark": "#ffffff"
+            "Light": "#171321",
+            "Dark": "#171321"
           },
           "ds-create.collection": "Components"
         }

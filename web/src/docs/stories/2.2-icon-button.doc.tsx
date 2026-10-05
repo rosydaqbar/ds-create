@@ -46,7 +46,7 @@ export default defineDoc({
   spec: 'parts/2.2-icon-button.md',
   exports: ['IconButton'],
   summary:
-    'Square, label-free actions for toolbars, rows and close. Four sizes, secondary or tertiary emphasis, six states including loading. The icon is swappable; close is the same component with the x icon.',
+    'Icon buttons are small, label-free actions for toolbars, table rows and closing things. Use them when the icon is instantly recognizable and space is tight.',
   hero: () => <IconButton size="md" emphasis="tertiary" label="Close" />,
   playground: {
     controls: [
@@ -63,7 +63,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Dialog close',
-      caption: 'Close sits in the corner, aligned to the title’s first line.',
+      caption: 'Put the close button in the corner, lined up with the first line of the title.',
       render: () => dialogHeader,
       code: `<div className="flex items-start gap-lg">
   <div className="flex flex-1 flex-col gap-xxs">
@@ -75,7 +75,7 @@ export default defineDoc({
     },
     {
       title: 'Table row actions',
-      caption: 'Row actions stay quiet until the row is hovered.',
+      caption: 'Row actions stay quiet until someone hovers the row.',
       render: () => (
         <div className="flex w-full max-w-[28rem] items-center gap-md rounded-surface border border-border-subtle bg-surface-base py-sm pl-lg pr-sm">
           <span className="type-body-sm-medium flex-1 text-text-primary">Quarterly report.pdf</span>
@@ -93,7 +93,7 @@ export default defineDoc({
     },
     {
       title: 'Toolbar',
-      caption: 'Secondary emphasis gives tool actions a visible boundary on busy surfaces.',
+      caption: 'On a busy surface, secondary emphasis gives each tool a visible edge.',
       render: () => (
         <div className="flex w-full max-w-[28rem] flex-col gap-sm">
           <div className="flex justify-end gap-xs">
@@ -112,7 +112,7 @@ export default defineDoc({
     },
     {
       title: 'Dark banner close',
-      caption: 'On dark surfaces, the same component follows the colour mode; there is no dark variant.',
+      caption: 'On a dark surface, the same component follows the color mode. There’s no separate dark variant.',
       render: () => (
         <div data-theme="dark" className="flex w-full max-w-[28rem] items-center gap-md rounded-surface bg-surface-raised py-sm pl-lg pr-sm">
           <span className="type-body-sm-medium flex-1 text-text-primary">Scheduled maintenance tonight at 22:00.</span>
@@ -126,8 +126,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['The icon is universally understood and space is tight: close, more, copy, edit, delete, settings.', 'Quiet tool actions in toolbars and table rows, and the close of dialogs, drawers, banners and toasts.'],
-    dont: ['The action needs words or is the main action — use a labelled Button (2.1).', 'An icon action inside a row of labelled buttons — use Button with iconOnly.', 'A primary or destructive icon action — use Button with iconOnly and its emphasis or tone.'],
+    use: ['When the icon is universally understood and space is tight: close, more, copy, edit, delete, settings.', 'For quiet tool actions in toolbars and table rows, and for closing dialogs, drawers, banners and toasts.'],
+    dont: ['If the action needs words or is the main action, use a labeled Button (2.1).', 'For an icon action in a row of labeled buttons, use an icon-only Button (2.1).', 'For a primary or destructive icon action, use an icon-only Button (2.1) with the right emphasis or tone.'],
   },
   matrices: [
     {
@@ -165,7 +165,7 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Colour modes',
+      title: 'Color modes',
       rows: 'Mode',
       columns: 'Emphasis',
       render: () => (
@@ -191,18 +191,18 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root', description: 'Fixed square, icon centred so the space is equal on every side. Side icon-button/size/{size}; radius/control; border/width/default.', tokens: ['icon-button/size/md', 'radius/control', 'border/width/default'] },
-      { name: 'Icon', description: 'Fixed icon box: size/icon/sm (xs, sm), md (md), lg (lg). Replaced by a 2.15 Spinner (sm for xs–sm, md for md–lg) while loading.', tokens: ['size/icon/md'] },
+      { name: 'Root', target: 'root', description: 'A fixed square with the icon centered, so the space is equal on every side. The size sets how big the square is.', tokens: ['icon-button/size/md', 'radius/control', 'border/width/default'] },
+      { name: 'Icon', target: 'icon', description: 'The icon, which grows with the button. While loading, a Spinner (2.15) takes its place.', tokens: ['size/icon/md'] },
     ],
   },
   props: [
-    { name: 'label', type: 'string', description: 'Accessible name (required): the button has no visible text. Pair with a Tooltip showing the same text.' },
-    { name: 'icon', figma: 'Icon', type: 'IconName', default: "'general/x'", description: 'The glyph; close is the x icon.' },
-    { name: 'size', figma: 'Size', type: "'xs' | 'sm' | 'md' | 'lg'", default: "'md'", description: 'Side 28 · 32 · 36 · 44 and icon size.' },
-    { name: 'emphasis', figma: 'Emphasis', type: "'secondary' | 'tertiary'", default: "'tertiary'", description: 'Bordered surface, or no container at rest.' },
-    { name: 'loading', figma: 'State=loading', type: 'boolean', default: 'false', description: 'Spinner replaces the icon; not clickable; aria-busy.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Native disabled button.' },
-    { name: 'forceState', type: "'hover' | 'pressed' | 'focus'", description: 'Documentation only: pins a pseudo-state.' },
+    { name: 'label', type: 'string', description: 'The accessible name, required because the button has no visible text. Show the same text in a Tooltip.' },
+    { name: 'icon', figma: 'Icon', type: 'IconName', default: "'general/x'", description: 'The icon to show. Use the x icon for close.' },
+    { name: 'size', figma: 'Size', type: "'xs' | 'sm' | 'md' | 'lg'", default: "'md'", description: 'Sets the side (28 · 32 · 36 · 44) and the icon size.' },
+    { name: 'emphasis', figma: 'Emphasis', type: "'secondary' | 'tertiary'", default: "'tertiary'", description: 'Secondary is a bordered surface. Tertiary has no container at rest.' },
+    { name: 'loading', figma: 'State=loading', type: 'boolean', default: 'false', description: 'Replaces the icon with a spinner, blocks clicks and sets aria-busy.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Renders a native disabled button.' },
+    { name: 'forceState', type: "'hover' | 'pressed' | 'focus'", description: 'For documentation only. Pins a hover, pressed or focus state.' },
   ],
   tokens: [
     'icon-button/size/xs', 'icon-button/size/sm', 'icon-button/size/md', 'icon-button/size/lg',
@@ -214,20 +214,20 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Icon button, icon-only Button, or labelled Button',
-      body: 'A labelled Button when the action needs words or is the main action. Button with iconOnly when an icon action sits in a row of labelled buttons and shares their height and emphasis. Icon button for a quiet tool or close action inside content.',
+      title: 'Icon button, icon-only button or labeled button',
+      body: 'Use a labeled button when the action needs words or is the main action. Use an icon-only button when an icon action sits in a row of labeled buttons and should match their height and emphasis. Use an icon button for a quiet tool or close action inside content.',
       render: () => (
         <div className="flex flex-wrap items-center gap-3xl">
           <div className="flex flex-col items-center gap-sm">
             <Button label="Save changes" />
-            <span className="type-body-xs-regular text-text-tertiary">Labelled Button</span>
+            <span className="type-body-xs-regular text-text-tertiary">Labeled button</span>
           </div>
           <div className="flex flex-col items-center gap-sm">
             <div className="flex gap-sm">
               <Button emphasis="secondary" label="Export" />
               <Button emphasis="secondary" iconOnly leadingIcon="general/settings" label="Settings" />
             </div>
-            <span className="type-body-xs-regular text-text-tertiary">Button, Icon only</span>
+            <span className="type-body-xs-regular text-text-tertiary">Icon-only button</span>
           </div>
           <div className="flex flex-col items-center gap-sm">
             <IconButton icon="general/more-horizontal" label="More actions" />
@@ -237,8 +237,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Close actions',
-      body: 'Always the x icon, in the top-right corner of the surface, aligned to the first line of the title. Size follows the surface: sm for tags and toasts, md for banners and drawers, lg for dialogs.',
+      title: 'Place close buttons consistently',
+      body: 'Use the x icon in the top-right corner, lined up with the first line of the title. Match the size to the surface: sm for tags and toasts, md for banners and drawers, lg for dialogs.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-xl">
           <div className="flex items-center gap-md rounded-surface border border-border-subtle bg-surface-raised py-xs pl-lg pr-xs shadow-raised">
@@ -252,12 +252,12 @@ export default defineDoc({
           {dialogHeader}
         </div>
       ),
-      do: { caption: 'The x close in the dialog corner.', render: () => <IconButton size="lg" label="Close dialog" /> },
+      do: { caption: 'An x close button in the dialog corner.', render: () => <IconButton size="lg" label="Close dialog" /> },
       dont: { caption: 'A text “Close” link in the same corner.', render: () => <span className="type-body-sm-semibold text-text-brand underline">Close</span> },
     },
     {
-      title: 'Dark surfaces through colour mode',
-      body: 'Same component, same variant. The frame’s colour mode switches the tokens — there is no dark-background variant and no separately drawn dark close button.',
+      title: 'Let color mode handle dark surfaces',
+      body: 'Use the same component and variant on light and dark surfaces. The frame’s color mode switches the tokens, so you don’t need a dark-background variant or a separately drawn close button.',
       render: () => (
         <div className="flex gap-xl">
           {(['light', 'dark'] as const).map((m) => (
@@ -271,7 +271,7 @@ export default defineDoc({
     },
     {
       title: 'One size and emphasis per toolbar',
-      body: 'Tool icons in one row share the same size and emphasis so the row reads as one group.',
+      body: 'Give every icon in a toolbar the same size and emphasis, so the row reads as one group.',
       do: {
         caption: 'One row, one size, one emphasis.',
         render: () => (
@@ -294,16 +294,16 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Use only icons whose meaning is widely understood (close, more, copy, edit, delete, settings). When in doubt, use a labelled Button. Never use an Icon button for the primary action of a view.',
-      do: { caption: 'Primary action with words.', render: () => <Button leadingIcon="general/plus" label="New project" /> },
-      dont: { caption: 'An Icon button as the primary action.', render: () => <IconButton emphasis="secondary" icon="general/plus" label="New project" /> },
+      body: 'Stick to icons people understand at a glance: close, more, copy, edit, delete, settings. If you’re unsure, use a labeled button. The primary action of a view always needs words, so it shouldn’t be an icon button.',
+      do: { caption: 'A primary action with words.', render: () => <Button leadingIcon="general/plus" label="New project" /> },
+      dont: { caption: 'An icon button as the primary action.', render: () => <IconButton emphasis="secondary" icon="general/plus" label="New project" /> },
     },
   ],
   accessibility: [
-    'Every Icon button has an accessible name (`label` → aria-label) and shows a Tooltip (2.13) with that name on hover and focus.',
-    'Visible focus ring (focus/default) on every emphasis, distinct from hover.',
-    'Icon contrast meets the non-text threshold (3:1) against its surface.',
-    'On touch platforms (coarse pointers) the hit area grows to size/touch-min; the visual square does not change.',
-    'Loading sets aria-busy and blocks clicks.',
+    'Every icon button has a name screen readers announce (label, set as aria-label) and shows it in a Tooltip (2.13) on hover and focus.',
+    'Keyboard focus shows a visible ring (focus/default) on every emphasis, different from hover.',
+    'Icons meet the 3:1 non-text contrast threshold against their surface.',
+    'On touch screens, the tap area grows to size/touch-min while the visible square stays the same.',
+    'While loading, the button sets aria-busy and ignores clicks.',
   ],
 });

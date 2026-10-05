@@ -34,7 +34,7 @@ export default defineDoc({
   spec: 'parts/2.4-badge.md',
   exports: ['Badge'],
   summary:
-    'Compact, read-only labels for status, counts, categories and metadata. Three sizes, three types (pill, rounded, outline), semantic and category tones, optional dot, flag, avatar or icons, and an optional close action for removable filters.',
+    'Badges label things with a status, count, category or bit of metadata. They’re compact and read-only, so they sit next to what they describe without competing with it.',
   hero: () => <Badge size="lg" type="pill" tone="success" label="Active" showDot />,
   playground: {
     controls: [
@@ -55,7 +55,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Table status column',
-      caption: 'Status badges pair colour with a word.',
+      caption: 'Each status pairs a color with a word, so it still reads without the color.',
       render: () => tableStatus(),
       code: `<Badge tone="success" label="Active" showDot />
 <Badge tone="neutral" label="Draft" showDot />
@@ -63,7 +63,7 @@ export default defineDoc({
     },
     {
       title: 'Navigation count',
-      caption: 'Counts sit at the end of the row they count.',
+      caption: 'Put a count at the end of the row it counts.',
       render: () => (
         <div className="flex w-full max-w-[16rem] flex-col gap-xxs rounded-surface border border-border-subtle bg-surface-base p-sm">
           {[
@@ -87,7 +87,7 @@ export default defineDoc({
     },
     {
       title: 'Card metadata',
-      caption: 'Category colours separate groups; the text names them.',
+      caption: 'Category colors tell groups apart, and the text names them.',
       render: () => (
         <div className="flex w-full max-w-[20rem] flex-col gap-md rounded-surface border border-border-subtle bg-surface-raised p-xl">
           <span className="type-body-md-semibold text-text-primary">Checkout redesign</span>
@@ -103,7 +103,7 @@ export default defineDoc({
     },
     {
       title: 'Feature label',
-      caption: 'A badge qualifies the thing next to it; it doesn’t act.',
+      caption: 'The badge describes the feature next to it. Clicking it does nothing.',
       render: () => (
         <div className="flex w-full max-w-[24rem] items-center justify-between rounded-surface border border-border-subtle bg-surface-base p-lg">
           <div className="flex flex-col gap-xxs">
@@ -122,8 +122,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Read-only status: active, draft, failed, pending.', 'Counts, categories and metadata next to the thing they describe.'],
-    dont: ['Values the user removes, counts or selects — use a Tag (2.5).', 'Actions — use a Button (2.1).', 'A badge with an announcement message — use a Badge group (3.8).'],
+    use: ['To show a read-only status: active, draft, failed, pending.', 'To add a count, category or metadata next to the thing it describes.'],
+    dont: ['For values people remove, count or select, use a Tag (2.5).', 'For actions, use a Button (2.1).', 'For a badge with an announcement message, use a Badge group (3.8).'],
   },
   matrices: [
     {
@@ -184,33 +184,33 @@ export default defineDoc({
   ],
   anatomy: {
     render: () => (
-      <div className="flex scale-150 flex-col items-center gap-lg">
+      <div className="flex scale-[2] flex-col items-center gap-lg">
         <Badge size="lg" tone="brand" label="Label" showDot showClose />
         <Badge size="lg" tone="brand" type="rounded" label="Label" leadingIcon="general/zap" trailingIcon="arrows/arrow-right" />
       </div>
     ),
     parts: [
-      { name: 'Root', description: 'Horizontal, Hug. Padding-x badge/padding-x/{size} (tightened to badge/padding-x-tight/{size} on the side with a leading visual or close); padding-y space/xxs (sm, md) or space/xs (lg); gap space/xs. Radius full (pill) or radius/sm.', tokens: ['badge/padding-x/md', 'badge/padding-x-tight/md', 'space/xxs', 'space/xs', 'radius/full', 'radius/sm'] },
-      { name: 'Leading visual', description: 'One at a time: dot (size/indicator/xs, sm at lg), flag, avatar (2.6, Size=2xs) or icon (size/icon/xs, sm at lg).', tokens: ['size/indicator/xs', 'size/icon/xs'] },
-      { name: 'Label', description: 'Single line, never wraps. type/body/xs/medium (sm) or type/body/sm/medium (md, lg). Hidden when Icon only.', tokens: ['type/body/sm/medium'] },
-      { name: 'Trailing icon', description: 'Optional; never together with the close.' },
-      { name: 'Close', description: '.Main/Badge close: x icon at size/icon/xs with space/xxs padding; hover tint in the tone’s subtle hover fill. Radius follows the badge type.', tokens: ['space/xxs', 'size/icon/xs'] },
+      { name: 'Root', target: 'root', description: 'The container fits its content, with padding set by the size. The padding tightens next to a leading visual or close. Pills are fully rounded; the other types have small corners.', tokens: ['badge/padding-x/md', 'badge/padding-x-tight/md', 'space/xxs', 'space/xs', 'radius/full', 'radius/sm'] },
+      { name: 'Leading visual', target: 'leading-visual', description: 'One optional visual before the label: a dot, a flag, an Avatar (2.6) or an icon. It grows a little at the large size.', tokens: ['size/indicator/xs', 'size/icon/xs'] },
+      { name: 'Label', target: 'label', description: 'One line of text that never wraps. Medium and large badges use a larger text style. It hides when the badge is icon-only.', tokens: ['type/body/sm/medium'] },
+      { name: 'Trailing icon', target: 'trailing-icon', description: 'An optional icon after the label. Use it or the close, not both.' },
+      { name: 'Close', target: 'close', description: 'An optional x button that removes the badge. On hover it tints in the badge’s tone, and its corners follow the badge type.', tokens: ['space/xxs', 'size/icon/xs'] },
     ],
   },
   props: [
-    { name: 'label', figma: 'Label', type: 'ReactNode', default: "'Label'", description: 'Visible text; the accessible name when iconOnly.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Height 22 · 24 · 28, padding and label style.' },
-    { name: 'type', figma: 'Type', type: "'pill' | 'rounded' | 'outline'", default: "'pill'", description: 'Pill: full radius, tinted. Rounded: small radius, tinted. Outline: neutral surface; colour carried by the dot or icon.' },
-    { name: 'tone', figma: 'Tone', type: "'neutral' | 'brand' | 'danger' | 'warning' | 'success' | 'info' | 'slate' | 'sky' | 'blue' | 'indigo' | 'purple' | 'pink' | 'orange'", default: "'neutral'", description: 'Semantic tones carry meaning; category families only separate groups.' },
-    { name: 'iconOnly', figma: 'Icon only', type: 'boolean', default: 'false', description: 'Square (circular for pill) badge with one icon.' },
-    { name: 'showDot', figma: 'Show dot', type: 'boolean', default: 'false', description: 'Leading status dot in the tone’s icon colour.' },
-    { name: 'flag', figma: 'Show flag + Flag', type: 'string', description: 'ISO country code; renders the 1.8 Flag asset.' },
-    { name: 'avatar', figma: 'Show avatar', type: '{ src?: string; initials?: string }', description: 'Leading 2.6 Avatar, Size=2xs.' },
-    { name: 'leadingIcon', figma: 'Show leading icon + Leading icon', type: 'IconName', description: 'Leading icon; also the icon of iconOnly.' },
-    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName', description: 'Trailing icon.' },
-    { name: 'showClose', figma: 'Show close', type: 'boolean', default: 'false', description: 'Trailing close (removable content such as an applied filter).' },
-    { name: 'onClose', type: '() => void', description: 'Called by the close.' },
-    { name: 'closeLabel', type: 'string', default: '"Remove {label}"', description: 'Accessible name of the close.' },
+    { name: 'label', figma: 'Label', type: 'ReactNode', default: "'Label'", description: 'The visible text. When iconOnly is set, it becomes the accessible name.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Sets the height (22 · 24 · 28), padding and label style.' },
+    { name: 'type', figma: 'Type', type: "'pill' | 'rounded' | 'outline'", default: "'pill'", description: 'Pill is fully rounded and tinted. Rounded has small corners and is tinted. Outline uses a neutral surface, with color only on the dot or icon.' },
+    { name: 'tone', figma: 'Tone', type: "'neutral' | 'brand' | 'danger' | 'warning' | 'success' | 'info' | 'slate' | 'sky' | 'blue' | 'indigo' | 'purple' | 'pink' | 'orange'", default: "'neutral'", description: 'Semantic tones carry meaning. Category tones only tell groups apart.' },
+    { name: 'iconOnly', figma: 'Icon only', type: 'boolean', default: 'false', description: 'A square badge with one icon (circular for pills).' },
+    { name: 'showDot', figma: 'Show dot', type: 'boolean', default: 'false', description: 'Adds a status dot before the label, in the tone’s icon color.' },
+    { name: 'flag', figma: 'Show flag + Flag', type: 'string', description: 'ISO country code. Renders the matching Flag (1.8) asset.' },
+    { name: 'avatar', figma: 'Show avatar', type: '{ src?: string; initials?: string }', description: 'Adds an Avatar (2.6) at the 2xs size before the label.' },
+    { name: 'leadingIcon', figma: 'Show leading icon + Leading icon', type: 'IconName', description: 'The icon before the label, and the icon used when iconOnly is set.' },
+    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName', description: 'The icon after the label.' },
+    { name: 'showClose', figma: 'Show close', type: 'boolean', default: 'false', description: 'Adds a close button for removable content, such as an applied filter.' },
+    { name: 'onClose', type: '() => void', description: 'Called when the close button is pressed.' },
+    { name: 'closeLabel', type: 'string', default: '"Remove {label}"', description: 'Accessible name of the close button.' },
   ],
   tokens: [
     'color/fill/neutral/subtle', 'color/border/subtle', 'color/text/secondary', 'color/icon/tertiary',
@@ -227,8 +227,8 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Badge, Tag, text label or Button',
-      body: 'Badge labels; Tag holds a value the user manages; plain text is enough when no emphasis is needed; Button acts.',
+      title: 'Badge, tag, text or button',
+      body: 'A badge labels something, and a tag holds a value people manage. Plain text is enough when nothing needs emphasis, and a button performs an action.',
       render: () => (
         <div className="grid w-full max-w-[30rem] grid-cols-[8rem_1fr] items-center gap-x-xl gap-y-lg">
           <span className="type-body-xs-semibold text-text-tertiary">Badge</span>
@@ -243,8 +243,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Anatomy',
-      body: 'Optional dot / flag / avatar / icon → label → optional trailing icon or close. Each optional part is shown by its own boolean; use one leading visual and one trailing element at a time.',
+      title: 'Optional parts',
+      body: 'A badge can start with a dot, flag, avatar or icon, and end with a trailing icon or a close. Each part has its own on/off property. Use one leading visual and one trailing element at a time.',
       render: () => (
         <div className="flex flex-wrap items-center gap-lg">
           <Badge tone="brand" label="Show dot" showDot />
@@ -257,8 +257,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Type, tone, size and icon modes',
-      body: 'Pill for status and counts, rounded for categories and metadata, outline when many badges sit together and colour would be noisy. Size matches the text around it: sm in dense tables and navigation, md by default, lg in headers.',
+      title: 'Pick a type and size',
+      body: 'Use pill for status and counts, rounded for categories and metadata, and outline when many badges sit together and color would get noisy.\n\nMatch the size to the text around it: sm in dense tables and navigation, md by default, lg in headers.',
       render: () => (
         <div className="flex flex-col items-center gap-lg">
           <div className="flex gap-md">{TYPES.map((t) => <Badge key={t} type={t} tone="info" label={t} showDot />)}</div>
@@ -271,8 +271,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Choosing a tone',
-      body: 'Semantic tones carry meaning: success done, warning needs attention, danger failed or blocked, info neutral information, brand new or featured, neutral inactive or default. Category tones carry no meaning — use them only to separate groups. Colour or a dot alone never carries status: the label always names it, so the same column still reads in greyscale.',
+      title: 'Choose a tone by meaning',
+      body: 'Semantic tones carry meaning: success is done, warning needs attention, danger is failed or blocked, info is neutral information, brand is new or featured, and neutral is inactive or default. Category tones carry no meaning, so use them only to tell groups apart.\n\nColor or a dot alone never carries a status. The label always names it, so the same column still reads in grayscale.',
       render: () => (
         <div className="flex w-full flex-col gap-lg">
           <div className="flex flex-wrap justify-center gap-sm">{badgeSemanticTones.map((t) => <Badge key={t} tone={t} label={t} showDot />)}</div>
@@ -284,36 +284,36 @@ export default defineDoc({
         </div>
       ),
       do: { caption: '“Pending review” with a warning dot.', render: () => <Badge tone="warning" label="Pending review" showDot /> },
-      dont: { caption: 'A coloured dot with no label.', render: () => <span className="size-(--size-indicator-sm) rounded-full bg-icon-warning" /> },
+      dont: { caption: 'A colored dot with no label.', render: () => <span className="size-(--size-indicator-sm) rounded-full bg-icon-warning" /> },
     },
     {
-      title: 'Content and long labels',
-      body: 'Badges stay compact; labels are one or two words. Labels never wrap and are never truncated mid-word — shorten the label instead. Counts above 99 show “99+”.',
+      title: 'Keep labels short',
+      body: 'Badges stay compact, with labels of one or two words. Labels don’t wrap or get cut off mid-word, so shorten the label instead. Counts above 99 show “99+”.',
       do: { caption: 'A short label.', render: () => <div className="flex gap-sm"><Badge tone="danger" label="Failed" showDot /><Badge tone="brand" size="sm" label="99+" /></div> },
-      dont: { caption: 'A badge with a full sentence.', render: () => <Badge tone="danger" label="The payment could not be processed by the bank" showDot /> },
+      dont: { caption: 'A full sentence in a badge.', render: () => <Badge tone="danger" label="The payment could not be processed by the bank" showDot /> },
     },
     {
       title: 'Removable badges',
-      body: 'Show close implies the badge represents removable content (an applied filter), not a generic action. The close has an accessible name (“Remove Design”). When users manage many values, use a Tag (2.5).',
+      body: 'A close button means the badge stands for something people can remove, like an applied filter. It isn’t a general action. The close has its own name for screen readers (“Remove Design”).\n\nWhen people manage many values, use a Tag (2.5).',
       render: () => (
         <div className="flex gap-sm">
           <Badge type="rounded" tone="indigo" label="Design" showClose />
           <Badge type="rounded" tone="orange" label="Research" showClose />
         </div>
       ),
-      dont: { caption: 'A badge used as a button (an “Upgrade” badge that opens checkout).', render: () => <Badge tone="brand" label="Upgrade" trailingIcon="arrows/arrow-right" /> },
+      dont: { caption: 'A badge used as a button, like an “Upgrade” badge that opens checkout.', render: () => <Badge tone="brand" label="Upgrade" trailingIcon="arrows/arrow-right" /> },
     },
     {
-      title: 'Maintenance',
-      body: 'To change every badge at once, edit the tone tokens (color/fill/{tone}/subtle, color/text/{tone}, color/category/*) or .Main/Badge close. Never edit individual variants.',
-      dont: { caption: 'Category colours for status, or status colours for decoration.', render: () => <div className="flex gap-sm"><Badge type="rounded" tone="pink" label="Failed" /><Badge type="rounded" tone="danger" label="Marketing" /></div> },
+      title: 'Change badges in one place',
+      body: 'To change every badge at once, edit the tone tokens (color/fill/{tone}/subtle, color/text/{tone}, color/category/*) or the .Main/Badge close component. Avoid editing single variants, because they’ll drift out of sync.',
+      dont: { caption: 'Category colors for status, or status colors for decoration.', render: () => <div className="flex gap-sm"><Badge type="rounded" tone="pink" label="Failed" /><Badge type="rounded" tone="danger" label="Marketing" /></div> },
     },
   ],
   accessibility: [
     'Label text meets text contrast against the badge fill in every tone and mode.',
-    'Status is never colour-only: the label names it.',
-    'A badge is not focusable; only its close is, with the accessible name “Remove {label}” and a visible focus ring.',
-    'The close reaches size/touch-min on touch platforms through an invisible hit area.',
-    'Icon-only badges expose `label` as their accessible name.',
+    'Status never relies on color alone: the label names it.',
+    'The badge itself isn’t focusable. Only its close button is, with the name “Remove {label}” and a visible focus ring.',
+    'On touch screens, the close button gets an invisible tap area of at least size/touch-min.',
+    'Icon-only badges use label as the name screen readers announce.',
   ],
 });

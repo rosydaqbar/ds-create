@@ -53,7 +53,7 @@ When two levels fit, ask the user once. A component never uses components from i
 | 9 | Build | Build the page with `templates/structure.md`, with the frames of the component page template: `.Main` → `· Overview` → `· Component` → `· Anatomy` → `· Guidelines`, using the Doc kit components. | No. |
 | 10 | Document | Fill every template frame: hero and 2–4 compositions in Overview, the full matrix in Component, the anatomy and token map in Anatomy, do / don't and accessibility in Guidelines. | Only copy that can't be inferred (usage rules, do / don't). |
 | 11 | QA | Run the QA list in the new file and the completion criteria of the level's folder file. Fix and re-run. | Only for failures the agent can't fix. |
-| 12 | Web | When the system has a web implementation (`WEB.md`): export new tokens (W2), then write the component and its doc module (W4) and run `WEB.md` §9. | No. |
+| 12 | Web | When the system has a web implementation (`WEB.md`): export new tokens (W2, contrast gate included), write the component and its doc module (W4), add it to `meta.tsx` and `changelog.ts` (W6), then run `npm run qa` and `WEB.md` §9. | No. |
 | 13 | Report | List the page, the sets and variant counts, any new tokens, and offer to swap local copies on existing screens for the new component. | Before changing existing screens. |
 
 # 5. A component the user designed

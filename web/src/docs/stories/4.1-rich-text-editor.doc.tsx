@@ -17,6 +17,8 @@ const EDITOR_W = 'w-[40rem] max-w-full';
 const sample = `<h3>Release notes</h3>
 <p>This update makes <strong>sharing faster</strong> and adds a new <a href="#">activity view</a> for every project.</p>
 <ul><li>Share a link with one click</li><li>See who opened a document</li><li>Filter activity by person</li></ul>`;
+/** Hero: sits right under the page title (h1), so its content starts without an h3 — heading levels never skip. The field label names it. */
+const heroSample = sample.replace(/^<h3>[^<]*<\/h3>\n/, '');
 const long = Array.from({ length: 8 }, (_, i) => `<p>Paragraph ${i + 1}. Content is top-aligned and scrolls inside the surface when it is longer than the current height.</p>`).join('');
 
 const editor = (size: RichTextSize, type: (typeof TYPES)[number]) => (
@@ -41,10 +43,10 @@ export default defineDoc({
   spec: 'sections/4.1-rich-text-editor.md',
   exports: ['RichTextEditor', 'RichTextToolbar', 'RichTextFloatingToolbar'],
   summary:
-    'A writing surface with a toolbar, for text that benefits from formatting. Text starts at the top, the surface can be resized and scrolls when content is long, and the hint sits below the surface. The Rich text toolbar holds the formatting commands (simple, or advanced with paragraph style and size selects, colour, media and AI); the Rich text floating toolbar shows the same commands next to selected text.',
+    'The rich text editor is for writing that benefits from formatting, like comments, descriptions and release notes. Its toolbar sits above the text, or a floating toolbar appears next to selected text.',
   hero: () => (
     <div className={EDITOR_W}>
-      <RichTextEditor size="md" defaultValue={sample} hint="Markdown shortcuts work too." label="Release notes" />
+      <RichTextEditor size="md" defaultValue={heroSample} hint="Markdown shortcuts work too." label="Release notes" />
     </div>
   ),
   playground: {
@@ -71,7 +73,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Comment box',
-      caption: 'A small editor with the simple toolbar; the submit action stays a visible Button.',
+      caption: 'A small editor with the simple toolbar keeps comments light, and the submit button stays visible outside it.',
       render: () => (
         <DemoCard className="w-[34rem] max-w-full">
           <div className="flex gap-md">
@@ -91,13 +93,13 @@ export default defineDoc({
     },
     {
       title: 'Text highlight',
-      caption: 'The floating toolbar sits above the selected phrase and never covers it.',
+      caption: 'The floating toolbar appears above the selected phrase, so it never covers what you’re formatting.',
       render: highlight,
       code: `<RichTextEditor type="floating-toolbar" floatingToolbarType="simple" defaultValue={html} />`,
     },
     {
       title: 'Task description',
-      caption: 'In a narrow side panel the fixed toolbar is removed; select text to format it.',
+      caption: 'In a narrow side panel, drop the fixed toolbar and let people select text to format it.',
       render: () => (
         <div className="flex w-[22rem] flex-col gap-lg rounded-surface border-(length:--border-width-default) border-border-subtle bg-surface-raised p-xl">
           <span className="type-heading-xs-semibold text-text-primary">Update onboarding emails</span>
@@ -118,8 +120,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Comments, descriptions, messages and notes where formatting helps the reader.', 'Long content people structure with headings and lists.'],
-    dont: ['Plain text is enough — most fields are: use a Textarea field (3.2).', 'Code or markup — use a code editor.', 'A single line — use a Text field (3.2).'],
+    use: ['Comments, descriptions, messages and notes where formatting helps the reader.', 'Longer content that people organize with headings and lists.'],
+    dont: ['For plain text, which is all most fields need, use a Textarea field (3.2).', 'For code or markup, use a code editor.', 'For a single line, use a Text field (3.2).'],
   },
   matrices: [
     {
@@ -172,7 +174,7 @@ export default defineDoc({
       columns: 'State → Selected',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">Every command in both toolbars. Selected means the format is on at the cursor; it combines with hover.</p>
+          <p className="type-body-sm-regular text-text-secondary">Every command used in both toolbars. Selected means the format is on at the cursor, and it can combine with hover.</p>
           <Matrix
             rowProp="Type"
             rows={richTextCommandTypes}
@@ -190,7 +192,7 @@ export default defineDoc({
       title: '.Main/Rich text editor scroll bar',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">A 4-wide thumb with no rail, inset space/xs from the surface edge; it appears when the content is taller than the surface.</p>
+          <p className="type-body-sm-regular text-text-secondary">A 4-pixel-wide thumb with no rail, set in a little from the surface edge. It appears when the content is taller than the surface.</p>
           <div className="relative h-40 w-24 rounded-control border-(length:--border-width-default) border-border-default bg-surface-base">
             <RichTextScrollBar thumb={{ top: 0.2, size: 0.4, overflow: true }} />
           </div>
@@ -201,35 +203,36 @@ export default defineDoc({
   anatomy: {
     render: () => (
       <div className={EDITOR_W}>
-        <RichTextEditor defaultValue={sample} hint="Markdown shortcuts work too." label="Anatomy editor" />
+        {/* The sample plus more paragraphs in a fixed height, so the input scrolls and shows its scroll bar. */}
+        <RichTextEditor defaultValue={sample + long} height="12rem" hint="Markdown shortcuts work too." label="Anatomy editor" />
       </div>
     ),
     parts: [
-      { name: 'Rich text toolbar', description: 'Selects (Select 3.5, sm: paragraph style, size) → commands, gap space/md; commands gap space/xxs. Group order: text style → colour → paragraph → insert → AI and more.', tokens: ['space/md', 'space/xxs'] },
-      { name: 'Command', description: '.Main/Rich text editor command: 32 × 32, radius/control, icon size/icon/md. Selected = fill/neutral/subtle/selected; hover = fill/neutral/subtle/hover.', tokens: ['size/control/xs', 'radius/control', 'size/icon/md', 'color/fill/neutral/subtle/selected', 'color/fill/neutral/subtle/hover', 'color/icon/tertiary', 'color/icon/primary'] },
-      { name: 'Divider wrapper', description: 'Padding-x space/xs, height 20, holding a vertical Divider (2.16) so every divider has the same spacing.', tokens: ['space/xs', 'size/icon/md'] },
-      { name: 'Input', description: 'The Text control’s fill, border, radius and focus (2.10); min height 120 (sm) / 160 (md); padding space/lg × space/xl (sm), space/xl × space/2xl (md). Gap to the toolbar space/md (sm) / space/lg (md).', tokens: ['color/surface/base', 'color/border/default', 'color/border/brand', 'radius/control', 'focus/default'] },
-      { name: 'Rich text content', description: 'Top-aligned, blocks spaced space/md: heading type/heading/xs/semibold; paragraphs and lists type/body/{sm|md}/regular; links color/text/brand; selection color/fill/brand/subtle.', tokens: ['type/heading/xs/semibold', 'type/body/md/regular', 'color/text/primary', 'color/text/brand', 'color/fill/brand/subtle'] },
-      { name: 'Resize handle', description: 'Bottom trailing corner of the input, its own layer; drag to resize.', tokens: ['color/icon/tertiary'] },
-      { name: 'Scroll bar', description: '.Main/Rich text editor scroll bar: 4-wide thumb, inset space/xs, when content is long.', tokens: ['color/fill/neutral/track', 'radius/full'] },
-      { name: 'Help text', description: 'Help text (2.12) below the surface, gap space/sm; never inside it.', tokens: ['space/sm', 'color/text/tertiary'] },
+      { name: 'Rich text toolbar', target: 'rich-text-toolbar', description: 'Holds the formatting commands, with the paragraph style and size selects first. Commands are grouped in order: text style, color, paragraph, insert, then AI and more.', tokens: ['space/md', 'space/xxs'] },
+      { name: 'Command', target: 'command', description: 'A square, icon-only formatting button. It gets a light fill on hover and a selected fill when its format is on at the cursor.', tokens: ['size/control/xs', 'radius/control', 'size/icon/md', 'color/fill/neutral/subtle/selected', 'color/fill/neutral/subtle/hover', 'color/icon/tertiary', 'color/icon/primary'] },
+      { name: 'Divider wrapper', target: 'divider-wrapper', description: 'Holds a vertical Divider (2.16) with padding on both sides, so every divider in the toolbar gets the same spacing.', tokens: ['space/xs', 'size/icon/md'] },
+      { name: 'Input', target: 'input', description: 'The writing area. It uses the same fill, border, corner radius and focus ring as a text control (2.10). The md size has more padding and a taller minimum height than sm.', tokens: ['color/surface/base', 'color/border/default', 'color/border/brand', 'radius/control', 'focus/default'] },
+      { name: 'Rich text content', target: 'rich-text-content', description: 'The text itself, starting at the top. Headings, paragraphs, lists and links use the system’s text styles, and selected text gets a light brand highlight.', tokens: ['type/heading/xs/semibold', 'type/body/md/regular', 'color/text/primary', 'color/text/brand', 'color/fill/brand/subtle'] },
+      { name: 'Resize handle', target: 'resize-handle', description: 'Sits in the bottom trailing corner of the input. Drag it to resize the surface.', tokens: ['color/icon/tertiary'] },
+      { name: 'Scroll bar', target: 'scroll-bar', description: 'A thin scroll thumb that appears when the content is longer than the surface.', tokens: ['color/fill/neutral/track', 'radius/full'] },
+      { name: 'Help text', target: 'help-text', description: 'Help text (2.12) for hints and limits. It sits below the surface, never inside it.', tokens: ['space/sm', 'color/text/tertiary'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'RichTextEditor: padding, min height, content style, gap to the toolbar.' },
-    { name: 'type', figma: 'Type', type: "'default' | 'floating-toolbar'", default: "'default'", description: 'RichTextEditor: fixed toolbar above the surface, or the floating toolbar on selection.' },
-    { name: 'toolbarType', figma: 'Rich text toolbar · Type', type: "'simple' | 'advanced'", default: "'advanced'", description: 'RichTextEditor: the fixed toolbar’s Type.' },
-    { name: 'showSelects', figma: 'Rich text toolbar · Show selects', type: 'boolean', default: 'true', description: 'Paragraph style and size selects (advanced only).' },
-    { name: 'floatingToolbarType', figma: 'Rich text floating toolbar · Type', type: "'simple' | 'advanced'", default: "'simple'", description: 'RichTextEditor: the floating toolbar’s Type.' },
-    { name: 'hint', figma: 'Show hint + Hint', type: 'ReactNode', description: 'Help text below the surface. Present = shown.' },
-    { name: 'defaultValue / onValueChange', type: 'string (HTML)', description: 'Initial content and every change. The editor is uncontrolled.' },
-    { name: 'placeholder', type: 'string', default: "'Write something…'", description: 'What to write (“Write a description…”).' },
-    { name: 'height', figma: 'Show scroll bar (derived)', type: 'string', description: 'Fixed surface height: content scrolls inside it and the scroll bar appears. Without it the surface grows with the content.' },
-    { name: 'label / aria-labelledby', type: 'string', description: 'Accessible name of the surface: a Label (2.11) id, or a name.' },
-    { name: 'onCommand', type: '(type) => void', description: 'Called after every command; attachment, video, generate and more have no built-in behaviour.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'RichTextEditor: sets the padding, minimum height, content text style and gap to the toolbar.' },
+    { name: 'type', figma: 'Type', type: "'default' | 'floating-toolbar'", default: "'default'", description: 'RichTextEditor: a fixed toolbar above the surface, or a floating toolbar that appears on selection.' },
+    { name: 'toolbarType', figma: 'Rich text toolbar · Type', type: "'simple' | 'advanced'", default: "'advanced'", description: 'RichTextEditor: which commands the fixed toolbar holds.' },
+    { name: 'showSelects', figma: 'Rich text toolbar · Show selects', type: 'boolean', default: 'true', description: 'Shows the paragraph style and size selects. Advanced toolbar only.' },
+    { name: 'floatingToolbarType', figma: 'Rich text floating toolbar · Type', type: "'simple' | 'advanced'", default: "'simple'", description: 'RichTextEditor: which commands the floating toolbar holds.' },
+    { name: 'hint', figma: 'Show hint + Hint', type: 'ReactNode', description: 'Help text below the surface. Shown when set.' },
+    { name: 'defaultValue / onValueChange', type: 'string (HTML)', description: 'The initial HTML content, and a callback for every change. The editor is uncontrolled.' },
+    { name: 'placeholder', type: 'string', default: "'Write something…'", description: 'Tells people what to write, for example “Write a description…”.' },
+    { name: 'height', figma: 'Show scroll bar (derived)', type: 'string', description: 'A fixed surface height. Content scrolls inside it and the scroll bar appears. Without it, the surface grows with the content.' },
+    { name: 'label / aria-labelledby', type: 'string', description: 'The surface’s accessible name: the id of a Label (2.11), or a name string.' },
+    { name: 'onCommand', type: '(type) => void', description: 'Called after every command. Attachment, video, generate and more have no built-in behavior, so handle them here.' },
     { name: 'Toolbars · type', figma: 'Type', type: "'simple' | 'advanced'", default: "'advanced' · 'simple'", description: 'RichTextToolbar / RichTextFloatingToolbar: which commands they hold.' },
-    { name: 'Toolbars · formats', figma: 'Command · Selected', type: 'RichTextFormats', description: 'Toolbars: formats on at the cursor ({ bold: true, textColor, block, textSize }).' },
-    { name: 'Toolbars · onCommand / onParagraphStyle / onTextSize', type: 'callbacks', description: 'Toolbars: the chosen command, paragraph style (block tag) and size.' },
+    { name: 'Toolbars · formats', figma: 'Command · Selected', type: 'RichTextFormats', description: 'Toolbars: the formats that are on at the cursor ({ bold: true, textColor, block, textSize }).' },
+    { name: 'Toolbars · onCommand / onParagraphStyle / onTextSize', type: 'callbacks', description: 'Toolbars: called with the chosen command, paragraph style (block tag) or text size.' },
   ],
   tokens: [
     'color/fill/none', 'color/fill/neutral/subtle/hover', 'color/fill/neutral/subtle/selected', 'color/icon/tertiary', 'color/icon/secondary', 'color/icon/primary',
@@ -241,7 +244,7 @@ export default defineDoc({
   guidelines: [
     {
       title: 'Editor or textarea',
-      body: 'Choose the editor only when formatting helps the reader.',
+      body: 'Formatting tools add weight to a form. Use the editor when headings, lists or links make the text easier to read, and a plain textarea everywhere else.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-3xl">
           <div className="w-[20rem]">
@@ -255,7 +258,7 @@ export default defineDoc({
     },
     {
       title: 'Simple or advanced',
-      body: 'Start simple; add advanced commands only where people format long content.',
+      body: 'Start with the simple toolbar. Switch to the advanced one only where people format long content, like documents or announcements.',
       render: () => (
         <div className="flex flex-col items-start gap-xl">
           <RichTextToolbar type="simple" />
@@ -265,7 +268,7 @@ export default defineDoc({
     },
     {
       title: 'Command states',
-      body: 'Selected shows the format at the cursor; it is not hover.',
+      body: 'Selected shows which formats are on at the cursor, so it’s a different signal from hover. A command can be selected and hovered at the same time.',
       render: () => (
         <div className="flex items-end gap-2xl">
           {(
@@ -286,12 +289,12 @@ export default defineDoc({
     },
     {
       title: 'Floating toolbar',
-      body: 'The same commands, next to the selection. It never covers the selected text: above it, or below near the top of the viewport.',
+      body: 'The floating toolbar offers the same commands right next to the selection. It appears above the selected text, or below it near the top of the screen, so it never covers what’s selected.',
       render: highlight,
     },
     {
-      title: 'Content, scroll and resize',
-      body: 'Content is top-aligned. A long text scrolls inside the surface with the scroll bar; drag the resize handle to make the surface taller.',
+      title: 'Scrolling and resizing',
+      body: 'Text starts at the top of the surface. Long text scrolls inside it with a scroll bar, and people can drag the resize handle to make the surface taller.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-xl">
           <div className="w-[20rem]">
@@ -305,14 +308,14 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Keep the number of formatting options small; offer what the output can render. Placeholder text describes what to write (“Write a description…”); hints carry limits (“Up to 2,000 characters”).',
+      body: 'Offer a small set of formatting options, and only ones the final output can show. Use the placeholder to say what to write (“Write a description…”) and the hint for limits (“Up to 2,000 characters”).',
     },
     {
       title: 'Use the command part',
-      body: 'Every toolbar control is .Main/Rich text editor command, so states and sizes match in both toolbars.',
-      do: { caption: 'Command parts with their states.', render: () => <RichTextFloatingToolbar formats={{ italic: true }} /> },
+      body: 'Build every toolbar control from the shared command part, so states and sizes match in both toolbars.',
+      do: { caption: 'Command parts, with hover and selected states.', render: () => <RichTextFloatingToolbar formats={{ italic: true }} /> },
       dont: {
-        caption: 'Hand-drawn toolbar icons without states.',
+        caption: 'Hand-drawn icons with no states.',
         render: () => (
           <div className="flex items-center gap-lg text-icon-tertiary">
             <span className="type-body-md-semibold">B</span>
@@ -324,8 +327,8 @@ export default defineDoc({
     },
     {
       title: 'Keep dividers in wrappers',
-      body: 'Dividers sit in Divider wrappers so the spacing around every divider is the same.',
-      do: { caption: 'Divider wrappers: even spacing.', render: () => <RichTextToolbar type="simple" /> },
+      body: 'Place each divider in a divider wrapper so the spacing around every divider is the same.',
+      do: { caption: 'Wrapped dividers with even spacing.', render: () => <RichTextToolbar type="simple" /> },
       dont: {
         caption: 'Loose lines with uneven gaps.',
         render: () => (
@@ -342,26 +345,26 @@ export default defineDoc({
     },
     {
       title: 'A focused set of commands',
-      body: 'Offer the commands people need for the task.',
+      body: 'Offer the commands people need for the task, and leave the rest out. A comment box rarely needs paragraph styles or AI tools.',
       do: { caption: 'A comment box with the simple toolbar.', render: () => <RichTextToolbar type="simple" /> },
       dont: { caption: 'Every formatting option in a comment box.', render: () => <RichTextToolbar type="advanced" /> },
     },
     {
       title: 'Essential actions stay visible',
-      body: 'Don’t hide essential actions (submit, attach) only in the floating toolbar; every floating command is also reachable by keyboard shortcut or a fixed control.',
-      dont: { caption: 'Attach only reachable after selecting text.', render: () => <RichTextFloatingToolbar type="advanced" /> },
+      body: 'Keep essential actions like submit and attach in view, not only in the floating toolbar. Make every floating command reachable by a keyboard shortcut or a fixed control too.',
+      dont: { caption: 'Attach is only reachable after selecting text.', render: () => <RichTextFloatingToolbar type="advanced" /> },
     },
     {
       title: 'Maintenance',
-      body: 'Commands change in .Main/Rich text editor command and update both toolbars; the surface follows the Text control tokens; the selects follow Select (3.5).',
+      body: 'Change a command in the shared command part and both toolbars update. The surface follows the text control tokens, and the selects follow Select (3.5).',
     },
   ],
   accessibility: [
-    'Each toolbar is one tab stop (role="toolbar"); Left / Right, Home and End move between its commands and selects. Alt+F10 in the surface moves to the toolbar.',
-    'Every command has an accessible name and shows a Tooltip (2.13) with its name and shortcut (Kbd 2.17): “Bold ⌘B”.',
-    'Selected commands announce their pressed state (aria-pressed).',
-    'Formatting in the floating toolbar is also reachable from the keyboard: ⌘B, ⌘I, ⌘U, ⌘K and ⌘⇧8 / L / E / R / J.',
-    'The surface is a multi-line textbox with a name: a Label (2.11) through aria-labelledby, or `label`; the hint is its description.',
-    'Markdown shortcuts at the start of a line: “- ” or “* ” starts a list, “# ” a heading, “> ” a quote.',
+    'Each toolbar is a single tab stop (role="toolbar"). Inside it, Left / Right, Home and End move between commands and selects. Alt+F10 in the surface jumps to the toolbar.',
+    'Every command has a name screen readers announce, and a Tooltip (2.13) shows that name with its shortcut (Kbd 2.17), like “Bold ⌘B”.',
+    'Screen readers announce whether a command is on, through its pressed state (aria-pressed).',
+    'Keyboard users can apply the floating toolbar’s formatting with shortcuts too: ⌘B, ⌘I, ⌘U, ⌘K and ⌘⇧8 / L / E / R / J.',
+    'The surface is a multi-line textbox. It takes its name from a Label (2.11) through aria-labelledby, or from label, and the hint is read as its description.',
+    'Markdown shortcuts work at the start of a line: “- ” or “* ” starts a list, “# ” a heading and “> ” a quote.',
   ],
 });

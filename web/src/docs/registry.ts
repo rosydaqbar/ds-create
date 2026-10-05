@@ -21,6 +21,7 @@ export interface StaticPage {
 export const staticPages: StaticPage[] = [
   { id: '01', name: 'Getting started', group: 'guidance', load: () => import('./pages/GettingStarted') },
   { id: '02', name: 'Tokens', group: 'guidance', load: () => import('./pages/Tokens') },
+  { id: '03', name: 'Changelog', group: 'guidance', load: () => import('./pages/Changelog') },
   { id: '1.1', name: 'Color', group: 'foundations', load: () => import('./pages/foundations/Color') },
   { id: '1.2', name: 'Typography', group: 'foundations', load: () => import('./pages/foundations/Typography') },
   { id: '1.3', name: 'Space & layout', group: 'foundations', load: () => import('./pages/foundations/Space') },

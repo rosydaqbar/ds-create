@@ -91,7 +91,7 @@ export default defineDoc({
   spec: 'components/3.1-button-group.md',
   exports: ['ButtonGroup'],
   summary:
-    'Button groups join two to five related actions into one connected control. Use them for toolbars and compact view switchers; each segment keeps its own hover, focus and disabled states, and at most one segment is selected.',
+    'Button groups join two to five related options into one connected control. Use them for compact view switchers and formatting toolbars.',
   hero: () => <ButtonGroup aria-label="Example" items={views} defaultValue="day" />,
   playground: {
     controls: [
@@ -129,7 +129,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Calendar view switcher',
-      caption: 'One selected segment switches the view; arrow keys move between Day, Week and Month.',
+      caption: 'One segment is always selected, so it’s clear which view is showing. Arrow keys move between Day, Week and Month.',
       render: () => <CalendarHeader />,
       code: `const [view, setView] = useState('week');
 
@@ -146,7 +146,7 @@ export default defineDoc({
     },
     {
       title: 'Text toolbar',
-      caption: 'Icon-only segments for well-known formatting icons, each named and explained by a Tooltip.',
+      caption: 'Formatting icons are familiar enough to stand on their own, and a tooltip names each one.',
       render: () => <EditorToolbar />,
       code: `<ButtonGroup
   behavior="toolbar"
@@ -164,7 +164,7 @@ export default defineDoc({
     },
     {
       title: 'List filter',
-      caption: 'A dot marks the status segment; the table below follows the selection.',
+      caption: 'A status dot makes the Active filter easy to spot, and the list below updates with the selection.',
       render: () => <ListFilter />,
       code: `<ButtonGroup
   aria-label="Project status"
@@ -181,14 +181,14 @@ export default defineDoc({
   ],
   whenToUse: {
     use: [
-      'Two to five related actions used side by side: a formatting toolbar, a split action.',
-      'A compact view switcher where the selection changes how the same content is shown (Day / Week / Month).',
+      'Two to five related actions used side by side, like a formatting toolbar or a split action.',
+      'A compact view switcher, where the choice changes how the same content is shown (Day / Week / Month).',
     ],
     dont: [
-      'Independent actions such as a dialog footer — use separate Buttons (2.1).',
-      'Switching between page sections with their own content — use tabs.',
-      'One choice saved with a form on submit — use Radios in a Choice field (3.3).',
-      'More than five options — use a Select (3.5).',
+      'For independent actions, like a dialog footer, use separate Buttons (2.1).',
+      'For page sections with their own content, use tabs.',
+      'For one choice that’s saved when a form is submitted, use radios in a Choice field (3.3).',
+      'For more than five options, use a Select (3.5).',
     ],
   },
   matrices: [
@@ -231,7 +231,7 @@ export default defineDoc({
       columns: 'State',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">One segment of a Button group. Edit it to change every group.</p>
+          <p className="type-body-sm-regular text-text-secondary">One segment of a button group. Changes here apply to every group.</p>
           <Matrix
             rowProp="Size · Icon only · Selected"
             rows={ITEM_ROWS}
@@ -290,24 +290,24 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Group', description: 'Horizontal, gap 0, Hug. The only outer border (border/width/default, color/border/default) and the outer radius (radius/control); shadow matches secondary Buttons (elevation/control).', tokens: ['color/border/default', 'radius/control', 'elevation/control'] },
-      { name: 'Item', description: '.Main/Button group item: height size/control/{Size}, padding button-group/item/padding-x/{Size} × padding-y/{Size}, gap space/sm. Square when Icon only.', tokens: ['size/control/md', 'button-group/item/padding-x/md', 'button-group/item/padding-y/md', 'space/sm'] },
-      { name: 'Divider', description: '1 px line on each item’s leading edge — the single border between two items. The first item turns it off.', tokens: ['border/width/default', 'color/border/default'] },
-      { name: 'Dot', description: 'Optional status marker (size/indicator/sm, radius/full) in place of the leading icon.', tokens: ['size/indicator/sm', 'color/icon/success'] },
-      { name: 'Leading icon / Icon', description: 'size/icon/md; the only glyph when Icon only.', tokens: ['size/icon/md', 'color/icon/secondary'] },
-      { name: 'Text padding + Label', description: 'Optical wrapper (space/optical each side) around the label, type/body/sm/semibold — as on Button.', tokens: ['space/optical', 'type/body/sm/semibold'] },
+      { name: 'Group', target: 'group', description: 'The container. It draws the only outer border and the outer radius, and its shadow matches a secondary button.', tokens: ['color/border/default', 'radius/control', 'elevation/control'] },
+      { name: 'Item', target: 'item', description: 'One segment. Its height and padding follow the size, and it becomes a square when it’s icon-only.', tokens: ['size/control/md', 'button-group/item/padding-x/md', 'button-group/item/padding-y/md', 'space/sm'] },
+      { name: 'Divider', target: 'divider', description: 'A 1 px line on each item’s leading edge, and the only border between two items. The first item doesn’t show it.', tokens: ['border/width/default', 'color/border/default'] },
+      { name: 'Dot', target: 'dot', description: 'An optional status marker that takes the place of the leading icon.', tokens: ['size/indicator/sm', 'color/icon/success'] },
+      { name: 'Leading icon / Icon', target: 'leading-icon', description: 'An optional icon before the label. In an icon-only item, it’s the only thing shown.', tokens: ['size/icon/md', 'color/icon/secondary'] },
+      { name: 'Text padding + Label', target: 'text-padding', description: 'The label, with a little optical padding on each side, as on a button.', tokens: ['space/optical', 'type/body/sm/semibold'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'Height and padding of every item.' },
-    { name: 'iconOnly', figma: 'Icon only', type: 'boolean', default: 'false', description: 'Square icon segments; each item’s label becomes its accessible name.' },
-    { name: 'items', figma: 'Exposed item instances', type: 'ButtonGroupItemData[]', description: '{ value, label (Label), leadingIcon (Show leading icon), showDot (Show dot), disabled (State=disabled), selected (toolbar toggle) }.' },
-    { name: 'behavior', type: "'switcher' | 'toolbar'", default: "'switcher'", description: 'Switcher: radio group with one selected value. Toolbar: buttons (toggles with aria-pressed when `selected` is set).' },
-    { name: 'value / defaultValue', figma: 'Item › Selected', type: 'string', description: 'Switcher: the selected item. Controlled with onValueChange.' },
-    { name: 'onValueChange', type: '(value: string) => void', description: 'Switcher: called when the selection changes (click or arrow keys).' },
-    { name: 'onItemClick', type: '(value: string) => void', description: 'Toolbar: called when an item is activated.' },
-    { name: 'aria-label', type: 'string', description: 'The group’s accessible name (“Calendar view”, “Text formatting”).' },
-    { name: 'renderItem', type: '(item, node) => ReactNode', description: 'Wrap items, e.g. in a Tooltip for icon-only segments.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'The height and padding of every item.' },
+    { name: 'iconOnly', figma: 'Icon only', type: 'boolean', default: 'false', description: 'Shows square icon segments. Each item’s label becomes its accessible name.' },
+    { name: 'items', figma: 'Exposed item instances', type: 'ButtonGroupItemData[]', description: 'The segments, each as { value, label (Label), leadingIcon (Show leading icon), showDot (Show dot), disabled (State=disabled), selected (toolbar toggle) }.' },
+    { name: 'behavior', type: "'switcher' | 'toolbar'", default: "'switcher'", description: 'Switcher is a radio group with one selected value. Toolbar renders buttons, which become toggles with aria-pressed when selected is set.' },
+    { name: 'value / defaultValue', figma: 'Item › Selected', type: 'string', description: 'Switcher only: the selected item. Pair value with onValueChange to control it.' },
+    { name: 'onValueChange', type: '(value: string) => void', description: 'Switcher only: called when the selection changes, by click or arrow keys.' },
+    { name: 'onItemClick', type: '(value: string) => void', description: 'Toolbar only: called when an item is activated.' },
+    { name: 'aria-label', type: 'string', description: 'The group’s accessible name, like “Calendar view” or “Text formatting”.' },
+    { name: 'renderItem', type: '(item, node) => ReactNode', description: 'Wraps each item, for example in a Tooltip for icon-only segments.' },
   ],
   tokens: [
     'color/border/default', 'color/surface/base', 'color/fill/none', 'color/fill/neutral/subtle/hover', 'color/fill/neutral/subtle/selected',
@@ -319,19 +319,19 @@ export default defineDoc({
   guidelines: [
     {
       title: 'When to use',
-      body: 'A Button group for a compact view switcher; separate Buttons for unrelated actions such as a dialog footer; tabs when the choice changes a whole page section with its own content.',
+      body: 'Use a button group when a few related options change how something is shown. Use separate buttons for unrelated actions, like a dialog footer, and tabs when each choice opens a page section with its own content.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-3">
           <div className="flex flex-col items-start gap-sm">
             <ButtonGroup aria-label="View" size="sm" items={views} defaultValue="week" />
-            <span className="type-body-xs-medium text-text-tertiary">Button group — one control, related options.</span>
+            <span className="type-body-xs-medium text-text-tertiary">Button group: related options in one control.</span>
           </div>
           <div className="flex flex-col items-start gap-sm">
             <div className="flex gap-md">
               <Button size="sm" emphasis="secondary" label="Cancel" />
               <Button size="sm" label="Save" />
             </div>
-            <span className="type-body-xs-medium text-text-tertiary">Buttons — independent actions.</span>
+            <span className="type-body-xs-medium text-text-tertiary">Buttons: independent actions.</span>
           </div>
           <div className="flex flex-col items-start gap-sm">
             <div className="flex gap-lg border-b border-border-subtle">
@@ -341,22 +341,22 @@ export default defineDoc({
                 </span>
               ))}
             </div>
-            <span className="type-body-xs-medium text-text-tertiary">Tabs — page sections.</span>
+            <span className="type-body-xs-medium text-text-tertiary">Tabs: page sections.</span>
           </div>
         </div>
       ),
     },
     {
       title: 'Connected edges',
-      body: 'The group owns the outer border and the outer radius; only the outside corners of the first and last items are rounded, inner corners stay square. Items have no border of their own: the divider on each item’s leading edge is the single line between neighbours.',
+      body: 'The segments read as one control because the group draws a single outer border and rounds only its outside corners. Inner corners stay square, and one divider line separates each pair of neighbors.',
       render: () => (
         <div className="scale-150 py-xl">
           <ButtonGroup aria-label="Connected" items={views} defaultValue="day" />
         </div>
       ),
-      do: { caption: 'One group draws one border.', render: () => <ButtonGroup aria-label="Do" items={views} defaultValue="day" /> },
+      do: { caption: 'One group, one shared border.', render: () => <ButtonGroup aria-label="Do" items={views} defaultValue="day" /> },
       dont: {
-        caption: 'Bordered Buttons side by side double the borders and round every segment.',
+        caption: 'Separate buttons side by side double the borders and round every segment.',
         render: () => (
           <div className="flex">
             {['Day', 'Week', 'Month'].map((l) => (
@@ -367,8 +367,8 @@ export default defineDoc({
       },
     },
     {
-      title: 'Selected vs focus',
-      body: 'Selection is a fill; focus is a ring. They never replace each other: a selected segment can be focused or not, and focus never changes which segment is selected.',
+      title: 'Keep selection and focus distinct',
+      body: 'Selection shows as a fill and focus as a ring, so people can always tell them apart. A selected segment may or may not have focus, and moving focus never changes the selection.',
       render: () => (
         <ButtonGroup
           aria-label="Selected vs focus"
@@ -381,15 +381,15 @@ export default defineDoc({
           ]}
         />
       ),
-      do: { caption: 'Keep one selected item in a view switcher.', render: () => <ButtonGroup aria-label="One" items={views} defaultValue="week" /> },
+      do: { caption: 'One item selected in a view switcher.', render: () => <ButtonGroup aria-label="One" items={views} defaultValue="week" /> },
       dont: {
-        caption: 'Two selected items in a view switcher.',
+        caption: 'Two items selected in a view switcher.',
         render: () => <ButtonGroup aria-label="Two" behavior="toolbar" items={views.map((v, i) => ({ ...v, selected: i < 2 }))} />,
       },
     },
     {
-      title: 'Text, icon and icon-only',
-      body: 'Text segments for short words, leading icons when a glyph helps recognition, icon-only for well-known formatting or layout icons — each with an accessible name and a Tooltip.',
+      title: 'Choose text, icons or both',
+      body: 'Use text for short words, and add a leading icon when it helps people recognize an option faster. Go icon-only for familiar formatting or layout icons, and give each one a name and a tooltip.',
       render: () => (
         <div className="flex flex-wrap items-center gap-3xl">
           <ButtonGroup aria-label="Text" items={views} />
@@ -397,9 +397,9 @@ export default defineDoc({
           <ButtonGroup aria-label="Formatting" iconOnly behavior="toolbar" items={formatting} renderItem={(it, n) => <Tooltip text={it.label}>{n}</Tooltip>} />
         </div>
       ),
-      do: { caption: 'Icon-only for common formatting icons.', render: () => <ButtonGroup aria-label="Formatting" iconOnly behavior="toolbar" items={formatting} /> },
+      do: { caption: 'Icon-only for familiar formatting icons.', render: () => <ButtonGroup aria-label="Formatting" iconOnly behavior="toolbar" items={formatting} /> },
       dont: {
-        caption: 'Icon-only for actions without a common icon.',
+        caption: 'Icon-only for actions with no familiar icon.',
         render: () => (
           <ButtonGroup
             aria-label="Unclear"
@@ -416,20 +416,20 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Labels are one or two words with the same grammatical form across items (“Day / Week / Month”, not “Day / Show weeks / Month”). Use two to five items; more becomes a Select (3.5).',
+      body: 'Keep labels to one or two words, in the same form across items: “Day / Week / Month”, not “Day / Show weeks / Month”. Use two to five items. If you need more, use a Select (3.5).',
       do: { caption: 'Parallel, one-word labels.', render: () => <ButtonGroup aria-label="Parallel" items={views} /> },
       dont: { caption: 'Mixed forms and lengths.', render: () => <ButtonGroup aria-label="Mixed" items={[{ value: 'a', label: 'Day' }, { value: 'b', label: 'Show weeks' }, { value: 'c', label: 'Month' }]} /> },
     },
     {
       title: 'Maintenance',
-      body: 'Change the segment look in .Main/Button group item; change the outer border or radius on Button group; colours come from the semantic tokens in the token map.',
+      body: 'To change how every segment looks, edit .Main/Button group item. Change the outer border or radius on Button group itself. Colors come from the semantic tokens in the token map.',
     },
   ],
   accessibility: [
-    'As a view switcher the group is a radiogroup: one tab stop, arrow keys (and Home / End) move and select, the selected item has aria-checked.',
-    'As a toolbar the group has role="toolbar" and an accessible name; one tab stop, arrow keys move focus, Enter / Space activate; toggles expose aria-pressed.',
-    'Icon-only items take their accessible name from `label`; pair them with a Tooltip (2.13).',
-    'Selection is never colour alone: the selected fill plus the darker label give two cues; focus is a separate ring drawn inside the item.',
-    'Disabled items are skipped by arrow-key navigation.',
+    'As a view switcher, the group is a radiogroup with one tab stop. Arrow keys, Home and End move the selection, and the selected item has aria-checked.',
+    'As a toolbar, the group has role="toolbar" and its own name. It’s one tab stop: arrow keys move focus, Enter or Space activates an item, and toggles expose aria-pressed.',
+    'Icon-only items take the name screen readers announce from label. Pair them with a Tooltip (2.13) so sighted users can see it too.',
+    'Selection never relies on color alone: the selected fill and the darker label give two cues. Focus is a separate ring drawn inside the item.',
+    'Arrow-key navigation skips disabled items.',
   ],
 });

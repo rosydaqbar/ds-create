@@ -5,10 +5,9 @@ import { Icon, type IconName } from '@/icons';
 import { SocialMark, type SocialProvider } from '../assets/SocialMark';
 import { Avatar } from '../parts/Avatar';
 import { Button } from '../parts/Button';
-import { Checkbox } from '../parts/Checkbox';
 import { Divider } from '../parts/Divider';
 import { Kbd } from '../parts/Kbd';
-import { Radio } from '../parts/Radio';
+import { ChoiceMark } from '../parts/_ChoiceMark';
 import { TextControl, type TextControlProps } from '../parts/TextControl';
 
 /**
@@ -71,10 +70,11 @@ export interface MenuItemLeadingProps {
 export function MenuItemLeading({ type = 'icon', icon = 'users/user', checked = true, avatar, provider = 'github', logo, disabled, className }: MenuItemLeadingProps) {
   const box = type === 'avatar' ? 'size-(--size-avatar-xs)' : type === 'integration' ? 'size-(--size-icon-md)' : 'size-(--size-icon-sm)';
   return (
-    <span aria-hidden className={cn('inline-flex shrink-0 items-center justify-center', box, className)}>
+    <span aria-hidden data-anatomy="item-leading" className={cn('inline-flex shrink-0 items-center justify-center', box, className)}>
       {type === 'icon' && <Icon name={icon} size="sm" />}
       {type === 'check' && checked && <Icon name="general/check" size="sm" className={disabled ? 'text-icon-disabled' : 'text-icon-brand'} />}
-      {type === 'checkbox' && <Checkbox size="sm" checked={checked} disabled={disabled} tabIndex={-1} parentFocus className="pointer-events-none" />}
+      {/* Visual only: the row is the menuitemcheckbox and carries aria-checked. */}
+      {type === 'checkbox' && <ChoiceMark kind="checkbox" size="sm" checked={checked} disabled={disabled} />}
       {type === 'dot' && <span className={cn('size-(--size-indicator-sm) rounded-full', disabled ? 'bg-icon-disabled' : 'bg-icon-success')} />}
       {type === 'avatar' && <Avatar size="xs" type={avatar?.src ? 'image' : avatar?.initials ? 'initials' : 'icon'} src={avatar?.src} initials={avatar?.initials} alt="" />}
       {type === 'integration' && (logo ?? <SocialMark provider={provider} size="md" alt="" />)}
@@ -138,6 +138,7 @@ export function MenuItemRow({
   const keys = shortcut == null ? [] : Array.isArray(shortcut) ? shortcut : [shortcut];
   return (
     <div
+      data-anatomy="item"
       role={role}
       tabIndex={-1}
       aria-disabled={disabled || undefined}
@@ -205,11 +206,11 @@ export function MenuHeader({ type = 'avatar', text, supportingText, avatar, sear
   const pad = 'flex w-full flex-col px-xl py-lg';
   const stroke = 'border-b-(length:--border-width-default) border-border-subtle';
   if (type === 'subheading') {
-    return <div className={cn(pad, 'pb-xs type-body-xs-semibold text-text-tertiary', className)}>{text ?? 'Switch account'}</div>;
+    return <div data-anatomy="header" className={cn(pad, 'pb-xs type-body-xs-semibold text-text-tertiary', className)}>{text ?? 'Switch account'}</div>;
   }
   if (type === 'search') {
     return (
-      <div className={cn(pad, stroke, className)}>
+      <div data-anatomy="header" className={cn(pad, stroke, className)}>
         <TextControl size="sm" leadingIcon="general/search" shortcut={['⌘', 'K']} placeholder="Search" aria-label="Search" autoComplete="off" {...searchProps} />
       </div>
     );
@@ -219,7 +220,7 @@ export function MenuHeader({ type = 'avatar', text, supportingText, avatar, sear
   );
   if (type === 'header') {
     return (
-      <div className={cn(pad, stroke, className)}>
+      <div data-anatomy="header" className={cn(pad, stroke, className)}>
         <span className="truncate type-body-sm-semibold text-text-primary">{text ?? 'Workspace'}</span>
         {support}
       </div>
@@ -227,7 +228,7 @@ export function MenuHeader({ type = 'avatar', text, supportingText, avatar, sear
   }
   const name = typeof text === 'string' ? text : 'Olivia Rhye';
   return (
-    <div className={cn(pad, stroke, 'flex-row items-center gap-md', className)}>
+    <div data-anatomy="header" className={cn(pad, stroke, 'flex-row items-center gap-md', className)}>
       <Avatar size="md" type={avatar?.src ? 'image' : 'initials'} src={avatar?.src} initials={avatar?.initials ?? initialsOf(name)} alt="" />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate type-body-sm-semibold text-text-primary">{text ?? name}</span>
@@ -259,7 +260,7 @@ export interface MenuFooterProps {
 
 export function MenuFooter({ type = 'text', text, onClick, className }: MenuFooterProps) {
   return (
-    <div className={cn('flex w-full flex-col border-t-(length:--border-width-default) border-border-subtle px-xl py-lg', className)}>
+    <div data-anatomy="footer" className={cn('flex w-full flex-col border-t-(length:--border-width-default) border-border-subtle px-xl py-lg', className)}>
       {type === 'text' ? (
         <span className="type-body-xs-regular text-text-tertiary">{text ?? 'v4.0 · Terms · Privacy'}</span>
       ) : (
@@ -286,6 +287,7 @@ export function MenuAccountItem({ name = 'Olivia Rhye', email = 'olivia@example.
   const hl = useHighlight();
   return (
     <div
+      data-anatomy="item"
       role="menuitemradio"
       aria-checked={selected}
       tabIndex={-1}
@@ -301,7 +303,8 @@ export function MenuAccountItem({ name = 'Olivia Rhye', email = 'olivia@example.
           <span className="truncate type-body-sm-semibold text-text-primary">{name}</span>
           <span className="truncate type-body-sm-regular text-text-tertiary">{email}</span>
         </span>
-        <Radio size="sm" checked={selected} tabIndex={-1} aria-hidden parentFocus className="pointer-events-none" forceState={forceState} />
+        {/* Visual only: the row is the menuitemradio and carries aria-checked. */}
+        <ChoiceMark kind="radio" size="sm" checked={selected} hover={forceState === 'hover'} />
       </span>
     </div>
   );
@@ -360,7 +363,7 @@ export function MenuScrollBar({ thumb = { top: 0, size: 0.4, overflow: true }, c
   if (!thumb.overflow) return null;
   return (
     <span aria-hidden className={cn('pointer-events-none absolute end-xs top-xs bottom-xs', SCROLL_THUMB_WIDTH, className)}>
-      <span className="absolute inset-x-0 rounded-full bg-fill-neutral-track" style={{ top: `${thumb.top * 100}%`, height: `${thumb.size * 100}%` }} />
+      <span data-anatomy="scroll-bar" className="absolute inset-x-0 rounded-full bg-fill-neutral-track" style={{ top: `${thumb.top * 100}%`, height: `${thumb.size * 100}%` }} />
     </span>
   );
 }

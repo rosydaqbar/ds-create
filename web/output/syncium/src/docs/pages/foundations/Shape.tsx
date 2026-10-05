@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, ChoiceCard, Checkbox, Kbd, Switch, Tag, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
 import { Bullets, Caption, DoDont, InlineCode, P, TokenBadge } from '../../blocks';
-import { pageMeta } from '../../meta';
+import { figmaNodeFor } from '../../meta';
 
 /* ---------- token lookups ---------- */
 const byName = new Map(tokens.variables.map((v) => [v.name, v]));
@@ -530,7 +530,7 @@ export default function Shape() {
       eyebrow="Foundations › 1.4 Shape"
       title="Shape"
       description="Shape covers corner radius and border width. Each kind of element, from controls to dialogs, has its own radius role, so you can reshape a whole family of components in one place."
-      figmaNode={pageMeta['1.4'].figmaNode}
+      figmaNode={figmaNodeFor('1.4')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Tokens', render: () => <TokensTab /> },

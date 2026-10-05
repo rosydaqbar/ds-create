@@ -7,10 +7,12 @@ import { cn } from '@/lib/cn';
  * neutral round placeholder shows the uppercase code, so layouts never break.
  * Flags are supplied by the user (1.8); the template ships none.
  */
-const supplied = new Set(
-  Object.keys(import.meta.glob('/public/brand/flags/*.svg', { query: '?url', import: 'default' })).map((p) =>
+// Flags are inlined as data URIs, so they ship inside the package and need no public folder.
+const supplied = new Map(
+  Object.entries(import.meta.glob<string>('/public/brand/flags/*.svg', { query: '?raw', import: 'default', eager: true })).map(([p, svg]) => [
     p.replace(/^.*\/([a-z]{2}(?:-[a-z0-9]+)?)\.svg$/i, '$1').toLowerCase(),
-  ),
+    `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
+  ]),
 );
 
 let regionNames: Intl.DisplayNames | undefined;
@@ -43,7 +45,7 @@ export function Flag({ country, size = 'md', alt, className, style, ...rest }: F
   if (supplied.has(code)) {
     return (
       <span className={cn('inline-flex shrink-0 overflow-hidden rounded-full', className)} style={box} {...a11y} {...rest}>
-        <img src={`${import.meta.env.BASE_URL}brand/flags/${code}.svg`} alt="" className="size-full object-cover" />
+        <img src={supplied.get(code)} alt="" className="size-full object-cover" />
       </span>
     );
   }

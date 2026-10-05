@@ -25,7 +25,7 @@ export default defineDoc({
   level: 'parts',
   spec: 'parts/2.9-switch.md',
   exports: ['Switch'],
-  summary: 'On/off control for settings that apply immediately. Two sizes, default and slim constructions, on and off, four states. The thumb moves; the track never changes component.',
+  summary: 'Switches turn a single setting on or off, and the change applies straight away. Use them in settings lists, table rows and compact headers.',
   hero: () => <Switch size="md" type="default" defaultChecked aria-label="Example switch" />,
   playground: {
     controls: [
@@ -40,7 +40,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Settings list',
-      caption: 'Each row changes one setting immediately.',
+      caption: 'Each row controls one setting, and the change saves as soon as people flip it.',
       render: () => (
         <div className="flex w-full max-w-[28rem] flex-col divide-y divide-border-subtle">
           <SettingRow title="Email notifications" sub="Replies and mentions."><Switch defaultChecked /></SettingRow>
@@ -55,7 +55,7 @@ export default defineDoc({
     },
     {
       title: 'Table column',
-      caption: 'Small switches fit dense rows.',
+      caption: 'Small switches fit dense table rows without making them taller.',
       render: () => (
         <div className="w-full max-w-[26rem] overflow-hidden rounded-surface border border-border-subtle bg-surface-base">
           <div className="type-body-xs-semibold flex justify-between border-b border-border-subtle bg-surface-sunken px-lg py-sm text-text-tertiary">
@@ -81,7 +81,7 @@ export default defineDoc({
     },
     {
       title: 'Slim in a card header',
-      caption: 'Slim switches suit compact headers and toolbars.',
+      caption: 'The slim switch keeps compact headers and toolbars light.',
       render: () => (
         <div className="flex w-full max-w-[22rem] flex-col gap-md rounded-surface border border-border-subtle bg-surface-raised p-xl">
           <label className="flex cursor-pointer items-center justify-between">
@@ -98,8 +98,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Immediate binary settings: on/off, enabled/disabled.'],
-    dont: ['A choice submitted with a form, or one of many — use Checkbox (2.7).', 'More than two options — use Radio (2.8).'],
+    use: ['Turning a setting on or off when the change applies straight away.'],
+    dont: ['For a choice submitted with a form, or one of many, use a Checkbox (2.7).', 'For more than two options, use a Radio (2.8).'],
   },
   matrices: [
     {
@@ -128,19 +128,19 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root (track)', description: 'Default: switch/width/{size} × switch/height/{size}, padding switch/inset, radius/full, track tokens. Slim: switch/slim-width/{size} × thumb height, no fill. A native checkbox with role="switch" covers it.', tokens: ['switch/width/md', 'switch/height/md', 'switch/inset', 'switch/slim-width/md', 'radius/full'] },
-      { name: 'Track (slim)', description: 'A centred rail, height switch/slim-track/{size}, radius/full, track tokens.', tokens: ['switch/slim-track/md'] },
-      { name: 'Thumb', description: '.Main/Switch thumb: switch/thumb/{size}, switch/thumb/fill, elevation/raised. Slim adds border/width/default in color/border/default (on: color/fill/brand/solid). Moves from start to end when checked.', tokens: ['switch/thumb/md', 'switch/thumb/fill', 'elevation/raised'] },
+      { name: 'Root (track)', target: 'track', description: 'The pill-shaped track the thumb slides along. In the slim type it has no fill and is as tall as the thumb. A native checkbox with role="switch" sits on top.', tokens: ['switch/width/md', 'switch/height/md', 'switch/inset', 'switch/slim-width/md', 'radius/full'] },
+      { name: 'Track (slim)', target: 'rail', description: 'In the slim type, a thin rounded rail centered behind the thumb.', tokens: ['switch/slim-track/md'] },
+      { name: 'Thumb', target: 'thumb', description: 'The round handle that slides from the start to the end when the switch turns on. In the slim type it has a border, which takes the brand color when on.', tokens: ['switch/thumb/md', 'switch/thumb/fill', 'elevation/raised'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'Width, height and thumb.' },
-    { name: 'type', figma: 'Type', type: "'default' | 'slim'", default: "'default'", description: 'Thumb inside a full track, or over a thin rail.' },
-    { name: 'checked', figma: 'Checked', type: 'boolean', description: 'Controlled value. Omit and use defaultChecked for uncontrolled.' },
-    { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'New value; apply it immediately.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Native disabled input.' },
-    { name: 'name, aria-label …', type: 'InputHTMLAttributes', description: 'Native input attributes.' },
-    { name: 'forceState', type: "'hover' | 'focus'", description: 'Documentation only: pins a pseudo-state.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'Sets the track width, height and thumb size.' },
+    { name: 'type', figma: 'Type', type: "'default' | 'slim'", default: "'default'", description: 'Default puts the thumb inside a full track. Slim puts it over a thin rail.' },
+    { name: 'checked', figma: 'Checked', type: 'boolean', description: 'The controlled value. Leave it out and use defaultChecked for an uncontrolled switch.' },
+    { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'Called with the new value. Apply it straight away.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Disables the native input.' },
+    { name: 'name, aria-label …', type: 'InputHTMLAttributes', description: 'Passed to the native input.' },
+    { name: 'forceState', type: "'hover' | 'focus'", description: 'For documentation only. Pins the hover or focus look.' },
   ],
   tokens: [
     'color/fill/neutral/track', 'switch/track/off-hover', 'color/fill/brand/solid', 'color/fill/brand/solid/hover', 'color/fill/neutral/subtle/disabled',
@@ -151,9 +151,9 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Switch or Checkbox',
-      body: 'Switch when the change applies immediately; Checkbox when it waits for a submit or sits among other choices.',
-      do: { caption: 'Settings page: saves immediately.', render: () => <SettingRow title="Email notifications" sub="Saved automatically."><Switch defaultChecked /></SettingRow> },
+      title: 'Switch or checkbox',
+      body: 'Use a switch when the change applies straight away. Use a checkbox when it waits for a submit, or sits among other choices.',
+      do: { caption: 'A settings row that saves straight away.', render: () => <SettingRow title="Email notifications" sub="Saved automatically."><Switch defaultChecked /></SettingRow> },
       dont: {
         caption: 'A switch in a form that needs a submit button.',
         render: () => (
@@ -165,8 +165,8 @@ export default defineDoc({
       },
     },
     {
-      title: 'Anatomy: thumb part → Switch → Choice field',
-      body: 'The Part owns the mechanics; the field owns the label. .Main/Switch thumb sits inside Switch, which 3.3 Choice field labels.',
+      title: 'From thumb to labeled field',
+      body: 'The switch handles the on and off mechanics, and a Choice field (3.3) adds the label. The thumb is its own small part inside the switch.',
       render: () => (
         <div className="flex items-center gap-xl">
           <span className="size-(--switch-thumb-md) rounded-full bg-switch-thumb-fill shadow-raised" />
@@ -178,8 +178,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'On, off and states',
-      body: 'On is the thumb at the end and the brand track; off is the thumb at the start and the neutral track. Hover, focus and disabled exist for both.',
+      title: 'On, off and other states',
+      body: 'When on, the thumb sits at the end of a brand-colored track. When off, it sits at the start of a neutral track. Both have hover, focus and disabled states.',
       render: () => (
         <div className="flex flex-col gap-md">
           {[false, true].map((c) => (
@@ -191,26 +191,26 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Default vs slim',
-      body: 'Default for settings lists and forms. Slim for compact headers and toolbars where a full track feels heavy. Never mix the two in one list.',
-      do: { caption: 'One construction per list.', render: () => <div className="flex flex-col gap-md"><Switch defaultChecked aria-label="A" /><Switch aria-label="B" /></div> },
+      title: 'Default or slim',
+      body: 'Use the default switch in settings lists and forms. Use slim in compact headers and toolbars, where a full track feels heavy. Keep one type within a list so the rows line up.',
+      do: { caption: 'One type throughout the list.', render: () => <div className="flex flex-col gap-md"><Switch defaultChecked aria-label="A" /><Switch aria-label="B" /></div> },
       dont: { caption: 'Default and slim mixed in one list.', render: () => <div className="flex flex-col gap-md"><Switch defaultChecked aria-label="A" /><Switch type="slim" aria-label="B" /></div> },
     },
     {
-      title: 'Labels',
-      body: 'Labels describe the setting, not the action: “Email notifications”, not “Turn on email notifications”. In settings rows the label sits on the left and the switch on the right. Avoid labels that are ambiguous when on (“Disable sync” on = ?).',
-      do: { caption: '“Sync” — on means syncing.', render: () => <label className="flex items-center gap-md"><span className="type-body-sm-regular text-text-primary">Sync</span><Switch defaultChecked /></label> },
-      dont: { caption: '“Disable sync” — on means off.', render: () => <label className="flex items-center gap-md"><span className="type-body-sm-regular text-text-primary">Disable sync</span><Switch defaultChecked /></label> },
+      title: 'Name the setting, not the action',
+      body: 'Write labels that name the setting, like “Email notifications” rather than “Turn on email notifications”. In settings rows, put the label on the left and the switch on the right.\n\nAvoid negative labels. “Disable sync” switched on is hard to read at a glance.',
+      do: { caption: '“Sync”: on means it’s syncing.', render: () => <label className="flex items-center gap-md"><span className="type-body-sm-regular text-text-primary">Sync</span><Switch defaultChecked /></label> },
+      dont: { caption: '“Disable sync”: on means sync is off.', render: () => <label className="flex items-center gap-md"><span className="type-body-sm-regular text-text-primary">Disable sync</span><Switch defaultChecked /></label> },
     },
     {
       title: 'Maintenance',
-      body: 'Change .Main/Switch thumb for the thumb and the tokens in the token map for colours to update every switch, including those inside 3.3 Choice field. color/fill/neutral/track has no hover child, so the off-hover track is the component token switch/track/off-hover.',
+      body: 'To update every switch, including those inside a Choice field (3.3), edit .Main/Switch thumb for the thumb and the token map for colors. The off track’s color (color/fill/neutral/track) has no hover variant, so its hover uses the component token switch/track/off-hover.',
     },
   ],
   accessibility: [
-    'A native checkbox with role="switch": announced as a switch with “on” or “off”; Space toggles it.',
-    'Focus ring (focus/default) around the track (around the root for slim) is always visible.',
-    'On/off is shown by thumb position, not colour alone; the off track meets non-text contrast (3:1).',
-    'The switch reaches size/touch-min on touch platforms through an invisible hit area; in settings rows the whole row is the target.',
+    'It’s a native checkbox with role="switch", so screen readers announce it as a switch that’s “on” or “off”. Space toggles it.',
+    'The focus ring (focus/default) is always visible around the track, or around the whole control for slim.',
+    'The thumb’s position shows on or off, so the state doesn’t rely on color alone. The off track meets 3:1 non-text contrast.',
+    'On touch screens, an invisible hit area brings the switch up to size/touch-min. In settings rows, the whole row is the target.',
   ],
 });

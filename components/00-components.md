@@ -84,6 +84,7 @@ The gap between parts is a space token, never a typed number. When the gap diffe
 - The Part owns its own interaction states (hover, focus, disabled).
 - The Component passes the state down by choosing the matching Part variant in each of its own variants. A `Choice field` with `State=hover` contains a Checkbox with `State=hover`.
 - The Component owns only the states that belong to the group: `Selected` on a button-group item, `Open` on a select, `Status` across a whole field.
+- A disabled private part that is not a native control is announced as disabled, not only shown (`parts/00-parts.md` §13).
 
 ## Private parts
 

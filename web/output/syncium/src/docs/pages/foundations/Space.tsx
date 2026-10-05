@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, Icon, IconButton, Kbd, Menu, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
 import { Bullets, Caption, DoDont, InlineCode, P, TokenBadge } from '../../blocks';
-import { pageMeta } from '../../meta';
+import { figmaNodeFor } from '../../meta';
 
 /* ---------- token lookups ---------- */
 const byName = new Map(tokens.variables.map((v) => [v.name, v]));
@@ -883,7 +883,7 @@ export default function Space() {
       eyebrow="Foundations › 1.3 Space & layout"
       title="Space & layout"
       description="Space sets the rhythm of every screen. Use one spacing scale for gaps and padding, and the size roles for controls, icons, avatars, widths and the reading measure."
-      figmaNode={pageMeta['1.3'].figmaNode}
+      figmaNode={figmaNodeFor('1.3')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Tokens', render: () => <TokensTab /> },

@@ -24,7 +24,7 @@ export default defineDoc({
   level: 'parts',
   spec: 'parts/2.15-spinner.md',
   exports: ['Spinner'],
-  summary: 'Shows indeterminate loading. A background ring with a rotating active segment, sized like an icon. Button and Icon button instance it for their loading state.',
+  summary: 'Spinners tell people something is loading when you can’t say how long it will take. They’re sized like icons, and buttons use them for their loading state.',
   hero: () => <Spinner size="xl" tone="brand" label="Loading" />,
   playground: {
     controls: [
@@ -38,7 +38,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Dialog footer, saving',
-      caption: "Inside a Button the Spinner takes the label colour and keeps the button's size.",
+      caption: "Inside a button, the spinner takes the label color, so the button keeps its size and stays readable.",
       render: () => (
         <div className="flex gap-md">
           <Button emphasis="secondary" disabled label="Cancel" />
@@ -50,7 +50,7 @@ export default defineDoc({
     },
     {
       title: 'Toolbar refresh',
-      caption: 'In an Icon button the Spinner replaces the icon in the same box.',
+      caption: 'In an icon button, the spinner replaces the icon in the same spot, so nothing around it moves.',
       render: () => (
         <div className="flex gap-xs">
           <IconButton icon="general/filter" label="Filter" />
@@ -66,7 +66,7 @@ export default defineDoc({
     },
     {
       title: 'Card loading',
-      caption: 'On its own, the Spinner sits where the content will appear, with a short line of text.',
+      caption: 'On its own, the spinner sits where the content will appear, with a short line saying what’s loading.',
       render: () => (
         <DemoCard className="w-full max-w-[22rem]">
           <span className="type-heading-xs-semibold text-text-primary">Invoices</span>
@@ -82,7 +82,7 @@ export default defineDoc({
     },
     {
       title: 'Inline status',
-      caption: 'At small sizes it sits inline with text like an icon.',
+      caption: 'At small sizes, it sits inline with text, just like an icon.',
       render: () => (
         <span className="type-body-sm-medium flex items-center gap-sm text-text-secondary">
           <Spinner size="sm" /> Syncing 3 files
@@ -94,8 +94,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Loading that takes long enough to notice, with an unknown duration.', 'A region, card or table body waiting for its content.'],
-    dont: ['Work with a known size — use Progress (2.14).', 'Next to a button — use the Button’s loading state.', 'Waits under about one second — show nothing.'],
+    use: ['Show loading that takes long enough to notice when you don’t know how long it will take.', 'Fill a region, card or table body while it waits for content.'],
+    dont: ['For work with a known size, use Progress (2.14).', 'For a button’s action, use the button’s loading state instead of a spinner beside it.', 'For waits under about one second, show nothing.'],
   },
   matrices: [
     {
@@ -124,7 +124,8 @@ export default defineDoc({
           {SIZES.map((s) => (
             <div key={s} className="flex flex-col items-center gap-sm">
               <div className="flex items-center gap-xs">
-                <Spinner size={s} />
+                {/* The md spinner beside its icon carries the Box marker: the box is what matches the icon. */}
+                <Spinner size={s} data-anatomy={s === 'md' ? 'box' : undefined} />
                 <Icon name="general/placeholder" size={iconFor[s]} className="text-icon-tertiary" style={s === 'xl' ? { width: 'var(--spinner-size-xl)', height: 'var(--spinner-size-xl)' } : undefined} />
               </div>
               <AxisLabel prop="Size" value={s} />
@@ -134,15 +135,15 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Background ring', description: 'Full circle the size of the box, stroke inside so the Spinner never exceeds its icon box. color/fill/neutral/track.', tokens: ['color/fill/neutral/track', 'spinner/thickness/md'] },
-      { name: 'Active segment', description: '90° arc of the same circle from 12 o’clock, rotating clockwise once per motion/duration/loop at a linear speed. color/icon/secondary (neutral) or color/icon/brand.', tokens: ['color/icon/secondary', 'color/icon/brand', 'motion/duration/loop', 'motion/easing/linear'] },
-      { name: 'Box', description: 'size/icon/sm (sm), size/icon/md (md), size/icon/xl (lg), spinner/size/xl = 48 (xl).', tokens: ['size/icon/sm', 'size/icon/md', 'size/icon/xl', 'spinner/size/xl'] },
+      { name: 'Background ring', target: 'background-ring', description: 'A full, faint circle the size of the box. Its stroke is drawn inside, so the spinner never grows past its icon box.', tokens: ['color/fill/neutral/track', 'spinner/thickness/md'] },
+      { name: 'Active segment', description: 'A 90° arc on the same circle that starts at 12 o’clock and turns clockwise at a steady speed. It’s gray for neutral and brand-colored for brand.', tokens: ['color/icon/secondary', 'color/icon/brand', 'motion/duration/loop', 'motion/easing/linear'] },
+      { name: 'Box', target: 'box', description: 'The square the spinner fits in. It matches the icon sizes, with a 48px xl for whole regions.', tokens: ['size/icon/sm', 'size/icon/md', 'size/icon/xl', 'spinner/size/xl'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg' | 'xl'", default: "'md'", description: 'sm/md sit in controls and inline; lg/xl stand alone.' },
-    { name: 'tone', figma: 'Tone', type: "'neutral' | 'brand' | 'current'", default: "'neutral'", description: '`current` follows the text colour — used inside Button and Icon button.' },
-    { name: 'label', type: 'string', description: 'Standalone use: role="status" with this accessible name. Omit inside a button that already announces busy.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg' | 'xl'", default: "'md'", description: 'Use sm or md in controls and inline with text, and lg or xl on their own.' },
+    { name: 'tone', figma: 'Tone', type: "'neutral' | 'brand' | 'current'", default: "'neutral'", description: 'current follows the text color. Button and Icon button use it.' },
+    { name: 'label', type: 'string', description: 'For standalone use: adds role="status" with this accessible name. Leave it out inside a button that already announces it’s busy.' },
   ],
   tokens: [
     'color/fill/neutral/track', 'color/icon/secondary', 'color/icon/brand', 'size/icon/sm', 'size/icon/md', 'size/icon/xl', 'spinner/size/xl',
@@ -150,8 +151,8 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Spinner or Progress',
-      body: 'Use a Spinner when loading takes long enough to notice and its length is unknown. When the amount of work is known, use Progress (2.14); when it becomes known part-way, switch to Progress. Do you know how much is left?',
+      title: 'Choose a spinner or a progress bar',
+      body: 'Ask yourself whether you know how much is left. If you don’t, use a spinner. If you do, use Progress (2.14), and if you find out part-way, switch to it.',
       render: () => (
         <div className="flex flex-wrap items-center justify-center gap-4xl">
           <Loading text="Loading invoices…" />
@@ -164,10 +165,10 @@ export default defineDoc({
     },
     {
       title: 'Loading inside a button',
-      body: 'When an action starts work, put the button into its loading state. The Spinner appears inside it in the label colour, the button keeps its size, and it can’t be pressed twice. Don’t place a separate Spinner next to the button, and don’t disable the button without telling users why.',
-      do: { caption: 'The Button in its loading state with “Saving…”.', render: () => <Button loading label="Saving…" /> },
+      body: 'When an action starts work, put the button into its loading state. The spinner appears inside in the label color, the button keeps its size, and people can’t press it twice. Avoid a separate spinner beside the button, and don’t disable the button without saying why.',
+      do: { caption: 'The button in its loading state, with “Saving…”.', render: () => <Button loading label="Saving…" /> },
       dont: {
-        caption: 'A disabled Button with a Spinner floating beside it.',
+        caption: 'A disabled button with a spinner floating beside it.',
         render: () => (
           <div className="flex items-center gap-md">
             <Button disabled label="Save changes" />
@@ -177,11 +178,11 @@ export default defineDoc({
       },
     },
     {
-      title: 'Size from the content it replaces',
-      body: 'Place the Spinner where the content will appear and size it to that content: sm–md inline with text and in controls, lg in cards and panels, xl for a whole region. One Spinner per region; don’t scatter spinners in every row of a loading list.',
-      do: { caption: 'One lg Spinner in the card body.', render: () => <DemoCard className="w-[14rem] items-center"><Loading text="Loading…" /></DemoCard> },
+      title: 'Size it to the content it replaces',
+      body: 'Put the spinner where the content will appear. Use sm or md inline and in controls, lg in cards and panels, and xl for a whole region. Show one spinner per region rather than one in every row of a loading list.',
+      do: { caption: 'One lg spinner in the card body.', render: () => <DemoCard className="w-[14rem] items-center"><Loading text="Loading…" /></DemoCard> },
       dont: {
-        caption: 'A Spinner in every row.',
+        caption: 'A spinner in every row.',
         render: () => (
           <DemoCard className="w-[14rem] gap-md">
             {[1, 2, 3, 4].map((i) => (
@@ -195,12 +196,12 @@ export default defineDoc({
     },
     {
       title: 'Short waits and long waits',
-      body: 'For waits under about one second, show nothing; a flash of a Spinner feels slower than none. For long waits, add text that says what is happening (“Preparing your export…”) and, after a while, what users can do (“You can leave this page; we’ll email you.”).',
+      body: 'For waits under about one second, show nothing: a spinner that flashes by feels slower than none. For long waits, say what’s happening (“Preparing your export…”) and, after a while, what people can do (“You can leave this page. We’ll email you.”).',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-3xl">
           <div className="flex w-[8rem] flex-col items-center gap-md">
             <span className="type-body-xs-semibold text-text-tertiary">0–1 s</span>
-            <span className="type-body-sm-regular text-text-tertiary">nothing</span>
+            <span className="type-body-sm-regular text-text-tertiary">Show nothing</span>
           </div>
           <div className="flex w-[11rem] flex-col items-center gap-md">
             <span className="type-body-xs-semibold text-text-tertiary">1–10 s</span>
@@ -209,14 +210,14 @@ export default defineDoc({
           <div className="flex w-[14rem] flex-col items-center gap-md">
             <span className="type-body-xs-semibold text-text-tertiary">10 s +</span>
             <Loading text="Preparing your export…" />
-            <span className="type-body-xs-regular text-center text-text-tertiary">You can leave this page; we’ll email you.</span>
+            <span className="type-body-xs-regular text-center text-text-tertiary">You can leave this page. We’ll email you.</span>
           </div>
         </div>
       ),
     },
     {
       title: 'Tone',
-      body: 'Use neutral by default. Use brand only when the Spinner is the main thing on screen, for example a full region loading.',
+      body: 'Use neutral by default. Save brand for when the spinner is the main thing on screen, such as a whole region loading.',
       render: () => (
         <div className="flex flex-wrap items-center justify-center gap-4xl">
           <div className="flex flex-col items-center gap-sm">
@@ -231,8 +232,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Motion and reduced motion',
-      body: 'The Active segment rotates continuously at a constant speed (motion/duration/loop, linear). Rotation is the only signal that work is in progress, so with reduced motion the Spinner keeps rotating at half speed instead of stopping; the loading text carries the meaning as well.',
+      title: 'Motion',
+      body: 'The arc turns at a steady speed without stopping. Because the movement is what says work is happening, Reduced motion slows it to half speed instead of stopping it. The loading text carries the meaning too.',
       render: () => (
         <div className="flex items-center gap-4xl">
           <div className="flex flex-col items-center gap-sm">
@@ -248,14 +249,14 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Loading text is short and specific, with an ellipsis: “Loading invoices…”, “Saving…”. Don’t write “Please wait” on its own; say what is loading.',
-      do: { caption: 'Says what is loading.', render: () => <Loading text="Loading invoices…" /> },
+      body: 'Keep loading text short and specific, and end it with an ellipsis: “Loading invoices…”, “Saving…”. Instead of “Please wait” on its own, say what’s loading.',
+      do: { caption: 'Says what’s loading.', render: () => <Loading text="Loading invoices…" /> },
       dont: { caption: '“Please wait” on its own.', render: () => <Loading text="Please wait" /> },
     },
   ],
   accessibility: [
-    'A standalone Spinner has role="status" and an accessible name (`label`, e.g. “Loading invoices”); announce completion through the content that replaces it.',
-    'Inside a Button or Icon button, the button exposes aria-busy and keeps its accessible name; the Spinner itself is aria-hidden.',
-    'The Active segment meets the non-text contrast threshold against the surface or the parent’s fill in every colour mode.',
+    'A standalone spinner has role="status" and a name screen readers announce, set with label (for example “Loading invoices”). Announce completion through the content that replaces it.',
+    'Inside a button or icon button, the button sets aria-busy and keeps its name. The spinner itself is aria-hidden.',
+    'The turning arc meets the non-text contrast threshold against the surface or the parent’s fill in every color mode.',
   ],
 });

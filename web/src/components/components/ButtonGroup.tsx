@@ -106,6 +106,7 @@ export function ButtonGroup({
 
   return (
     <div
+      data-anatomy="group"
       role={switcher ? 'radiogroup' : 'toolbar'}
       aria-orientation={switcher ? undefined : 'horizontal'}
       className={cn(

@@ -19,6 +19,7 @@ export function Spinner({ size = 'md', tone = 'neutral', label, className, style
   const t = `var(--spinner-thickness-${size})`;
   return (
     <span
+      data-anatomy="spinner"
       role={label ? 'status' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
@@ -26,7 +27,7 @@ export function Spinner({ size = 'md', tone = 'neutral', label, className, style
       style={{ width: box[size], height: box[size], ...style }}
       {...rest}
     >
-      <span className="absolute inset-0 rounded-full" style={{ border: `${t} solid ${track}` }} />
+      <span data-anatomy="background-ring" className="absolute inset-0 rounded-full" style={{ border: `${t} solid ${track}` }} />
       <span
         className="absolute inset-0 animate-spin rounded-full"
         style={{

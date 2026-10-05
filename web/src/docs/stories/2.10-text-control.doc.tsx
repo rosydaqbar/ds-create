@@ -66,7 +66,7 @@ export default defineDoc({
   spec: 'parts/2.10-text-control.md',
   exports: ['TextControl'],
   summary:
-    'The input box for typing and choosing. Single-line, multi-line and select types, three sizes, placeholder or filled, normal or invalid, four states. Leading icon, avatar, dot, prefix, help icon, shortcut and resize handle are optional slots.',
+    'The box people type into or pick from: single-line inputs, multi-line text areas and select triggers. Optional icons, prefixes and shortcuts help explain the value.',
   hero: () => (
     <div className="w-(--size-width-xxs)">
       <TextControl aria-label="Email" leadingIcon="communication/mail" placeholder="you@company.com" />
@@ -114,7 +114,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Sign-in form',
-      caption: 'Controls stack with their labels and hints; the box itself stays this Part.',
+      caption: 'In forms, a Text field (3.2) wraps each control with its label and hint.',
       render: () => (
         <form className="flex w-full max-w-[22rem] flex-col gap-xl" onSubmit={(e) => e.preventDefault()}>
           <TextField label="Email address" inputType="email" autoComplete="email" placeholder="you@company.com" leadingIcon="communication/mail" />
@@ -130,7 +130,7 @@ export default defineDoc({
     },
     {
       title: 'Search in a top bar',
-      caption: 'Shortcut hints sit at the trailing edge.',
+      caption: 'The shortcut at the end of the box tells people how to jump to search from anywhere.',
       render: () => (
         <div className="w-full max-w-[22rem]">
           <TextControl aria-label="Search" inputType="search" leadingIcon="general/search" placeholder="Search" shortcut={['⌘', 'K']} aria-keyshortcuts="Meta+K" />
@@ -147,7 +147,7 @@ export default defineDoc({
     },
     {
       title: 'Filter row',
-      caption: 'Select triggers look like inputs and open a menu (3.5).',
+      caption: 'Select triggers look like the inputs around them and open a menu (3.5).',
       render: () => (
         <div className="flex flex-wrap gap-md">
           <FilterSelect label="Status" value="Status: All" />
@@ -161,7 +161,7 @@ export default defineDoc({
     },
     {
       title: 'Comment box',
-      caption: 'Multi-line text starts at the top and grows; it is never centred.',
+      caption: 'Multi-line text starts at the top and the box grows as people type.',
       render: () => (
         <div className="flex w-full max-w-[26rem] flex-col items-end gap-md">
           <TextControl type="multi-line" aria-label="Comment" placeholder="Add a comment…" />
@@ -177,13 +177,13 @@ export default defineDoc({
   whenToUse: {
     use: [
       'Whenever people enter or pick a value: a name, an email, a search, a description, a choice from a list.',
-      'Inside 3.2 Text field in forms, so every control has a visible label and a hint.',
-      'Alone only where the context names it (a search box in a top bar, a filter row) — and then with `aria-label`.',
+      'In forms, inside a Text field (3.2), so every control gets a visible label and hint.',
+      'On its own where the context already names it, like a search box in a top bar or a filter row. Screen readers still need a name, so add an aria-label.',
     ],
     dont: [
-      'As a complete form field — use 3.2 Text field (Label + control + Help text).',
-      'For a choice of two to five visible options — use 3.3 Choice field or 3.1 Button group.',
-      'For formatted text — use a Rich text editor (4.1).',
+      'For a complete form field, use a Text field (3.2). It adds the label and help text.',
+      'For two to five visible options, use a Choice field (3.3) or a Button group (3.1).',
+      'For formatted text, use a Rich text editor (4.1).',
     ],
   },
   matrices: [
@@ -220,15 +220,16 @@ export default defineDoc({
   anatomy: {
     render: () => (
       <div className="flex flex-col items-start gap-3xl">
+        {/* Multi-line first: Root and Text land on it, so the single-line row shows Prefix and Content apart from them. */}
         <div className="flex flex-col gap-xl">
           <div className="w-(--size-width-xxs)">
-            <TextControl aria-label="Website" prefix="https://" leadingIcon="maps/globe" defaultValue="example.com" showHelpIcon shortcut="/" />
+            <TextControl type="multi-line" aria-label="Description" defaultValue="Text starts at the top left and wraps." />
+          </div>
+          <div className="w-(--size-width-xxs)">
+            <TextControl aria-label="Website" prefix="https://" defaultValue="example.com" showHelpIcon shortcut="/" />
           </div>
           <div className="w-(--size-width-xxs)">
             <TextControl type="select" aria-label="Assignee" value="Olivia Rhye" avatar={{ initials: 'OR' }} supportingText="@olivia" />
-          </div>
-          <div className="w-(--size-width-xxs)">
-            <TextControl type="multi-line" aria-label="Description" defaultValue="Text starts at the top left and wraps." />
           </div>
         </div>
         <div className="flex flex-col gap-lg">
@@ -260,37 +261,37 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root', description: 'Horizontal (multi-line: vertical), Fill width; height size/control/{Size} (multi-line: min text-control/multiline-min-height, grows). Border border/width/default, radius/control, padding-x text-control/padding-x/{Size}.', tokens: ['size/control/md', 'text-control/padding-x/md', 'radius/control', 'border/width/default'] },
-      { name: 'Leading slot', description: 'One of: leading icon (size/icon/md), 2.6 Avatar Size=xs, or a status dot. Fixed; never shifts the text baseline.', tokens: ['size/icon/md', 'color/icon/tertiary'] },
-      { name: 'Prefix', description: 'Single-line only. Static text that is part of the value; flush with the left edge, padding-x as the control, right border color/border/default.', tokens: ['color/text/tertiary', 'color/border/default'] },
-      { name: 'Content', description: 'Fills the width, gap space/md between leading visual, text and supporting text.', tokens: ['space/md'] },
-      { name: 'Text', description: 'The placeholder (color/text/placeholder) or the value (color/text/primary) — one layer; Filled is derived from the value. Single line truncates with an ellipsis; multi-line is top-aligned and wraps.', tokens: ['type/body/md/regular', 'color/text/placeholder', 'color/text/primary', 'font/size/input-min'] },
-      { name: 'Supporting text', description: 'Optional secondary text after the value (select), hugs, color/text/tertiary.', tokens: ['color/text/tertiary'] },
-      { name: 'Trailing slot', description: '2.13 Help icon, 2.17 Kbd shortcut, a trailing icon (password reveal), or the status icon (alert-circle, color/icon/danger) when invalid — it replaces the Help icon.', tokens: ['size/icon/sm', 'color/icon/danger'] },
-      { name: 'Chevron', description: 'Type=select only: chevron-down, size/icon/md, color/icon/tertiary. The whole trigger opens the menu (3.5).', tokens: ['size/icon/md'] },
-      { name: 'Resize handle', description: 'Multi-line only: 12 × 12 grip in the bottom-right corner, inset space/sm; drag to enlarge on desktop.', tokens: ['size/icon/xs', 'space/sm'] },
+      { name: 'Root', target: 'root', description: 'The bordered box. It fills the available width, and its height and side padding follow the size. Multi-line boxes start at a minimum height and grow with the text.', tokens: ['size/control/md', 'text-control/padding-x/md', 'radius/control', 'border/width/default'] },
+      { name: 'Leading slot', target: 'leading-slot', description: 'Holds one leading visual: an icon, a small Avatar (2.6) or a status dot. It keeps a fixed size, so the text never shifts.', tokens: ['size/icon/md', 'color/icon/tertiary'] },
+      { name: 'Prefix', target: 'prefix', description: 'Fixed text at the start of a single-line value, like https://. It sits against the left edge with a divider on its right.', tokens: ['color/text/tertiary', 'color/border/default'] },
+      { name: 'Content', target: 'content', description: 'Fills the width and spaces out the leading visual, the text and any supporting text.', tokens: ['space/md'] },
+      { name: 'Text', target: 'text', description: 'One layer that shows the placeholder or the value, so the box counts as filled once there’s a value. Single-line text truncates with an ellipsis. Multi-line text starts at the top and wraps.', tokens: ['type/body/md/regular', 'color/text/placeholder', 'color/text/primary', 'font/size/input-min'] },
+      { name: 'Supporting text', target: 'supporting-text', description: 'Optional secondary text after a select value, such as a username.', tokens: ['color/text/tertiary'] },
+      { name: 'Trailing slot', target: 'trailing-slot', description: 'Holds a Help icon (2.13), a Kbd shortcut (2.17) or a trailing icon such as a password reveal. When the value is invalid, a status icon takes the help icon’s place.', tokens: ['size/icon/sm', 'color/icon/danger'] },
+      { name: 'Chevron', target: 'chevron', description: 'The down arrow on select triggers. The whole trigger opens the menu (3.5), not only the chevron.', tokens: ['size/icon/md'] },
+      { name: 'Resize handle', target: 'resize-handle', description: 'A 12 × 12 grip in the bottom-right corner of multi-line boxes. On desktop, people drag it to make the box bigger.', tokens: ['size/icon/xs', 'space/sm'] },
     ],
   },
   props: [
-    { name: 'type', figma: 'Type', type: "'single-line' | 'multi-line' | 'select'", default: "'single-line'", description: 'Input, text area, or select trigger with the chevron.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Height, padding and text style; matches Button sm / md / lg.' },
-    { name: 'status', figma: 'Status', type: "'none' | 'invalid'", default: "'none'", description: 'Danger border, status icon and aria-invalid. The message is a 2.12 Help text.' },
+    { name: 'type', figma: 'Type', type: "'single-line' | 'multi-line' | 'select'", default: "'single-line'", description: 'A single-line input, a text area, or a select trigger with a chevron.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Sets the height, padding and text style. Matches Button sm, md and lg.' },
+    { name: 'status', figma: 'Status', type: "'none' | 'invalid'", default: "'none'", description: 'Invalid adds the danger border, the status icon and aria-invalid. Show the message with Help text (2.12).' },
     { name: 'placeholder', figma: 'Text (Filled=false)', type: 'string', description: 'An example of the expected format, never the label.' },
-    { name: 'value / defaultValue', figma: 'Text (Filled=true) · Filled', type: 'string', description: 'The value; Filled is derived from it. Controlled with value + onValueChange.' },
+    { name: 'value / defaultValue', figma: 'Text (Filled=true) · Filled', type: 'string', description: 'The value. Filled follows from it. Use value with onValueChange to control it.' },
     { name: 'onValueChange', type: '(value: string) => void', description: 'Called with the new text (single-line, multi-line).' },
     { name: 'inputType', type: 'HTMLInputTypeAttribute', default: "'text'", description: 'Native type of the single-line input: email, password, tel, search…' },
-    { name: 'leadingIcon', figma: 'Show leading icon + Leading icon', type: 'IconName', description: 'Names the kind of value.' },
-    { name: 'avatar', figma: 'Show avatar', type: '{ src?: string; initials?: string }', description: 'A 2.6 Avatar Size=xs before the value.' },
+    { name: 'leadingIcon', figma: 'Show leading icon + Leading icon', type: 'IconName', description: 'An icon that hints at the kind of value.' },
+    { name: 'avatar', figma: 'Show avatar', type: '{ src?: string; initials?: string }', description: 'An extra-small Avatar (2.6) before the value.' },
     { name: 'showDot', figma: 'Show dot', type: 'boolean', default: 'false', description: 'A leading status dot.' },
-    { name: 'prefix', figma: 'Show prefix + Prefix', type: 'string', description: 'Static prefix segment (single-line).' },
+    { name: 'prefix', figma: 'Show prefix + Prefix', type: 'string', description: 'Fixed text before a single-line value.' },
     { name: 'supportingText', figma: 'Show supporting text + Supporting text', type: 'ReactNode', description: 'Secondary text after the value.' },
-    { name: 'showHelpIcon', figma: 'Show help icon', type: 'boolean', default: 'false', description: 'Trailing 2.13 Help icon; `helpText` is its Tooltip.' },
-    { name: 'shortcut', figma: 'Show shortcut', type: 'string | string[]', description: 'Keys of the shortcut, one 2.17 Kbd per key. Pair with aria-keyshortcuts.' },
-    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName', description: 'Trailing icon; with onTrailingIconClick + trailingIconLabel it is a button.' },
-    { name: 'showResizeHandle', figma: 'Show resize handle', type: 'boolean', default: 'true', description: 'Multi-line: vertical resize with the corner grip.' },
-    { name: 'open', type: 'boolean', description: 'Select: the menu is open (aria-expanded); looks like State=focus.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Disabled fill and text; adornments disabled.' },
-    { name: 'forceState', figma: 'State=hover / focus', type: "'hover' | 'focus'", description: 'Documentation only: pins a pseudo-state.' },
+    { name: 'showHelpIcon', figma: 'Show help icon', type: 'boolean', default: 'false', description: 'Adds a Help icon (2.13) at the end. helpText sets its tooltip.' },
+    { name: 'shortcut', figma: 'Show shortcut', type: 'string | string[]', description: 'The shortcut’s keys, shown as one Kbd (2.17) per key. Pair it with aria-keyshortcuts.' },
+    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName', description: 'An icon at the end. Add onTrailingIconClick and trailingIconLabel to make it a button.' },
+    { name: 'showResizeHandle', figma: 'Show resize handle', type: 'boolean', default: 'true', description: 'Multi-line only. Lets people resize the box vertically with the corner grip.' },
+    { name: 'open', type: 'boolean', description: 'Select only. Marks the menu as open (aria-expanded) and shows the focus look.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Applies the disabled fill and text, and disables the adornments.' },
+    { name: 'forceState', figma: 'State=hover / focus', type: "'hover' | 'focus'", description: 'For documentation only. Pins the hover or focus look.' },
   ],
   tokens: [
     'color/surface/base', 'color/border/default', 'color/border/strong', 'color/border/brand', 'color/border/disabled', 'color/border/danger',
@@ -302,8 +303,8 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Which type',
-      body: 'Single-line for short values: names, emails, numbers, search. Multi-line for free text longer than one line: comments, descriptions, messages. Select for choosing one value from a list the system knows; it opens 3.5 Select’s menu.',
+      title: 'Pick the right type',
+      body: 'Use single-line for short values like names, emails, numbers and search. Use multi-line for free text that runs longer, like comments and messages. Use select when people choose one value from a known list. It opens the Select (3.5) menu.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-3">
           {([
@@ -321,8 +322,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Anatomy: label → control → hint',
-      body: 'The box is the Part; the field is the Component. 2.11 Label sits above, this control in the middle, 2.12 Help text below — as they come together on 3.2 Text field.',
+      title: 'Label, control and hint',
+      body: 'This control is only the box. In a Text field (3.2), a Label (2.11) sits above it and Help text (2.12) sits below.',
       render: () => (
         <div className="flex w-(--size-width-xxs) flex-col gap-sm">
           <Label htmlFor="ga-email" label="Email address" />
@@ -334,8 +335,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Status vs state',
-      body: 'State is interaction (hover, focus, disabled). Status is validation (invalid). They combine: an invalid control keeps the danger border at rest, on hover and on focus — only focus adds the ring. The error message always appears as 2.12 Help text; the border and status icon alone are not enough.',
+      title: 'Status and state',
+      body: 'State follows interaction: hover, focus and disabled. Status follows validation: invalid. An invalid control keeps its danger border at rest, on hover and on focus, and focus adds the ring.\n\nAlways show the error message as Help text (2.12). The border and icon alone don’t tell people how to fix the problem.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-3">
           {(['rest', 'hover', 'focus'] as const).map((s) => (
@@ -347,7 +348,7 @@ export default defineDoc({
         </div>
       ),
       do: {
-        caption: 'Invalid border plus a Help text message that says how to fix it.',
+        caption: 'A danger border with a message that says how to fix it.',
         render: () => (
           <div className="flex w-[16rem] flex-col gap-sm">
             <TextControl aria-label="Email" status="invalid" defaultValue="olivia@" aria-describedby="sv-do" />
@@ -358,8 +359,8 @@ export default defineDoc({
       dont: { caption: 'A red border with no message.', render: () => <div className="w-[16rem]"><TextControl aria-label="Email" status="invalid" defaultValue="olivia@" /></div> },
     },
     {
-      title: 'Adornments',
-      body: 'Leading icon names the kind of value (mail, search, calendar). Prefix is static text that is part of the value but not typed (https://, a currency symbol). Avatar and dot are for select values that are people or statuses. Help icon opens a Tooltip with more context. Shortcut shows the key that focuses the control. Trailing icon is a small action on the value (show / hide password). Use one leading visual at a time.',
+      title: 'Use adornments sparingly',
+      body: 'Each adornment has one job. A leading icon hints at the kind of value, a prefix shows fixed text like https:// or a currency symbol, and an avatar or dot shows a person or status in a select.\n\nA help icon opens a tooltip, a shortcut shows the key that focuses the control, and a trailing icon acts on the value, like showing a password. Use one leading visual at a time.',
       do: { caption: 'One adornment that explains the value.', render: () => <div className="w-[16rem]"><TextControl aria-label="Search" leadingIcon="general/search" placeholder="Search" /></div> },
       dont: {
         caption: 'Three adornments crowd the value.',
@@ -371,11 +372,11 @@ export default defineDoc({
       },
     },
     {
-      title: 'Multi-line behaviour',
-      body: 'Text starts at the top-left and wraps; the control grows with content up to the layout’s limit, then scrolls. The resize handle lets people enlarge it on desktop.',
+      title: 'Multi-line behavior',
+      body: 'Text starts at the top left and wraps. The box grows with the content up to the layout’s limit, then scrolls. On desktop, people can drag the resize handle to make it bigger.',
       do: { caption: 'Top-aligned text.', render: () => <div className="w-[16rem]"><TextControl type="multi-line" aria-label="Message" defaultValue="Thanks for the update — I’ll review it today." /></div> },
       dont: {
-        caption: 'Vertically centred multi-line text.',
+        caption: 'Vertically centered multi-line text.',
         render: () => (
           <div className="flex h-(--text-control-multiline-min-height) w-[16rem] items-center rounded-control border border-border-default bg-surface-base px-lg type-body-md-regular text-text-primary">
             Thanks for the update — I’ll review it today.
@@ -384,8 +385,8 @@ export default defineDoc({
       },
     },
     {
-      title: 'Placeholder and value content',
-      body: 'Placeholders show an example of the expected format (“you@company.com”), never the label, and never instructions people need after they start typing. Long values truncate with an ellipsis in single-line and select; they wrap in multi-line.',
+      title: 'Placeholders and long values',
+      body: 'Use the placeholder for an example of the expected format, like “you@company.com”. Don’t use it for the label or for instructions, because it disappears once people start typing.\n\nLong values truncate with an ellipsis in single-line and select controls, and wrap in multi-line ones.',
       do: {
         caption: 'Label above, placeholder as an example.',
         render: () => (
@@ -399,21 +400,21 @@ export default defineDoc({
     },
     {
       title: 'Mobile text size',
-      body: 'On mobile, value text is at least 16 (font/size/input-min) so the browser does not zoom into the field on focus. Size sm uses 14 on desktop and switches to 16 on touch screens automatically.',
+      body: 'On mobile, the value text is at least 16px (font/size/input-min), so the browser doesn’t zoom into the field on focus. The small size uses 14px on desktop and switches to 16px on touch screens by itself.',
     },
     {
-      title: 'Select triggers',
-      body: 'The select trigger is its own Type: the chevron is part of it and the whole box opens the menu. Never build a select from a single-line control with a chevron icon pasted in — it reads as a text input and does not open.',
-      do: { caption: 'Type=select: the whole box is the trigger.', render: () => <div className="w-[16rem]"><TextControl type="select" aria-label="Country" value="Portugal" /></div> },
+      title: 'Build selects with the select type',
+      body: 'The select trigger is its own type. The chevron is built in, and the whole box opens the menu. Don’t fake one by adding a chevron icon to a single-line control: it reads as a text input and won’t open.',
+      do: { caption: 'The select type, where the whole box opens the menu.', render: () => <div className="w-[16rem]"><TextControl type="select" aria-label="Country" value="Portugal" /></div> },
       dont: { caption: 'A text input with a trailing chevron icon.', render: () => <div className="w-[16rem]"><TextControl aria-label="Country" defaultValue="Portugal" trailingIcon="arrows/chevron-down" /></div> },
     },
   ],
   accessibility: [
-    'Every control has a visible label in product (3.2 Text field links it with htmlFor). Placeholder is never the label; standalone controls take aria-label.',
-    'Focus is always visible (focus/default) and distinct from hover; invalid controls keep the ring on focus (focus/danger).',
-    'Status=invalid sets aria-invalid; the message is a 2.12 Help text referenced with aria-describedby.',
-    'The border meets non-text contrast (3:1) against the surface; text meets text contrast. Disabled values stay legible — prefer readOnly when people need to copy the value.',
-    'Select triggers are buttons with aria-haspopup="listbox" and aria-expanded; the trailing icon button and help icon have their own accessible names.',
-    'On touch screens the value is at least 16 so the browser does not zoom on focus.',
+    'Every control in the product has a visible label, which Text field (3.2) links with htmlFor. The placeholder is never the label, and standalone controls take aria-label.',
+    'Keyboard focus is always visible (focus/default) and looks different from hover. Invalid controls show a danger focus ring (focus/danger).',
+    'An invalid status sets aria-invalid. The message is Help text (2.12), linked with aria-describedby so screen readers read it with the control.',
+    'The border meets 3:1 non-text contrast against the surface, and the text meets text contrast. Disabled values stay legible. When people need to copy a value, prefer readOnly.',
+    'Select triggers are buttons with aria-haspopup="listbox" and aria-expanded. The trailing icon button and the help icon each have their own accessible name.',
+    'On touch screens, the value is at least 16px, so the browser doesn’t zoom in on focus.',
   ],
 });

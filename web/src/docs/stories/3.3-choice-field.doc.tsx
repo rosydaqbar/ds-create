@@ -110,7 +110,7 @@ export default defineDoc({
   spec: 'components/3.3-choice-field.md',
   exports: ['ChoiceField', 'ChoiceCard', 'ChoiceGroup'],
   summary:
-    'A checkbox, radio or switch with its label and supporting text. The whole row is one click target, and the control stays aligned to the first line of text however long the description is. Choice cards give each option room for a title, a description and a leading visual; a Choice group stacks them into one question.',
+    'Choice fields pair a checkbox, radio or switch with a label and optional supporting text, so the whole row is easy to click. Choice cards give each option room for a title, details and a visual.',
   hero: () => <ChoiceField defaultChecked text="Remember me for 30 days" supportingText="Save my login details on this device." />,
   playground: {
     controls: [
@@ -130,7 +130,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Notification settings',
-      caption: 'The parent is mixed while only some children are checked.',
+      caption: 'The parent checkbox shows mixed while only some of its children are checked.',
       render: () => <NotificationSettings />,
       code: `<div role="group" aria-labelledby="notif-label">
   <Label as="span" id="notif-label" label="Email me about" />
@@ -141,7 +141,7 @@ export default defineDoc({
     },
     {
       title: 'Privacy settings',
-      caption: 'Switches apply at once; the label names the setting.',
+      caption: 'Each switch applies straight away, and its label names the setting it controls.',
       render: () => (
         <div className="flex w-full max-w-[26rem] flex-col gap-xl rounded-surface border border-border-subtle bg-surface-raised p-2xl shadow-raised">
           <span className="type-body-md-semibold text-text-primary">Privacy</span>
@@ -156,7 +156,7 @@ export default defineDoc({
     },
     {
       title: 'Plan picker',
-      caption: 'Icon cards sit side by side on desktop; one plan is selected.',
+      caption: 'On desktop, icon cards sit side by side so people can compare plans at a glance.',
       stage: 'full',
       render: () => <ChoiceGroup type="icon-card" label="Choose a plan" defaultValue="business" options={plans} />,
       code: `<ChoiceGroup
@@ -172,7 +172,7 @@ export default defineDoc({
     },
     {
       title: 'Checkout payment',
-      caption: 'Payment cards and a bank option in one radio question.',
+      caption: 'Saved cards and a bank transfer sit in one question, so people pick exactly one way to pay.',
       render: () => (
         <div className="w-full max-w-[28rem]">
           <ChoiceGroup type="payment" size="sm" label="Payment method" options={groupOptions('payment')} />
@@ -192,15 +192,15 @@ export default defineDoc({
   ],
   whenToUse: {
     use: [
-      'Checkbox: zero or more choices saved with a form.',
-      'Radio: exactly one choice from a short list.',
-      'Switch: a setting that takes effect immediately.',
-      'Choice cards when each option needs more than one line: plans, payment methods, delivery speeds.',
+      'Checkboxes for zero or more choices saved with a form.',
+      'Radios for exactly one choice from a short list.',
+      'A switch for a setting that takes effect straight away.',
+      'Choice cards when each option needs more than one line, like plans, payment methods or delivery speeds.',
     ],
     dont: [
-      'Options that don’t fit on screen — use a Select (3.5).',
-      'A control with no visible text — that is the Part itself (2.7, 2.8, 2.9), used inside tables and lists.',
-      'Switching views of the same content — use a Button group (3.1).',
+      'For more options than fit on screen, use a Select (3.5).',
+      'For a control with no visible text, like in tables and lists, use the Part itself (2.7, 2.8, 2.9).',
+      'For switching views of the same content, use a Button group (3.1).',
     ],
   },
   matrices: [
@@ -295,37 +295,41 @@ export default defineDoc({
             <ChoiceCard breakpoint="mobile" defaultSelected badge="Popular" />
           </div>
         </div>
+        <div className="flex w-[24rem] flex-col gap-sm">
+          <AxisLabel prop="Choice group" value="radio · sm" />
+          <ChoiceGroup type="radio" size="sm" label="Plan" defaultValue="basic" options={groupOptions('radio').slice(0, 2)} />
+        </div>
       </div>
     ),
     parts: [
-      { name: 'Choice field', description: 'Horizontal, align top, gap space/md (sm) or space/lg (md); the whole row is a <label> and one click target.', tokens: ['space/md', 'space/lg'] },
-      { name: 'Control wrapper', description: 'Exactly one text line tall (20 at sm, 24 at md) and centres the 2.7 Checkbox, 2.8 Radio or 2.9 Switch inside it, so the control sits on the first line.', tokens: ['type/body/sm/medium', 'type/body/md/medium'] },
-      { name: 'Text and supporting text', description: 'Fill, wraps. Text type/body/{size}/medium color/text/secondary; supporting text regular, color/text/tertiary; both color/text/disabled when disabled.', tokens: ['color/text/secondary', 'color/text/tertiary', 'color/text/disabled'] },
-      { name: 'Choice card', description: 'Horizontal (icon-card: vertical), radius/surface, border/width/default color/border/default; padding space/xl–2xl (desktop) or space/lg–xl (mobile).', tokens: ['radius/surface', 'color/border/default', 'space/2xl'] },
-      { name: 'Leading', description: '2.19 Featured icon (icon, icon-card), 2.6 Avatar md (avatar), payment mark 46 × 32 (payment), or the Radio / Checkbox itself on the first line (radio, checkbox).', tokens: ['size/avatar/md'] },
-      { name: 'Content', description: 'Title row (Text medium, Subtext regular, optional 2.4 Badge; Subtext moves below on mobile) and supporting text; gap space/xxs. Titles share one left edge across types.', tokens: ['space/xxs', 'space/xs'] },
-      { name: 'Selection', description: 'Trailing 2.8 Radio sm (icon, avatar, payment, icon-card). Selected: brand border at border/width/strong drawn inside, title color/text/brand.', tokens: ['color/border/brand', 'border/width/strong', 'color/text/brand'] },
-      { name: 'Choice group', description: 'Vertical, gap space/lg; optional 2.11 Label as the question. icon-card sits in equal columns on desktop and stacks on mobile.', tokens: ['space/lg'] },
+      { name: 'Choice field', target: 'choice-field', description: 'The whole row is one label, so clicking anywhere on it toggles the control. Content aligns to the top, and medium fields have a slightly larger gap.', tokens: ['space/md', 'space/lg'] },
+      { name: 'Control wrapper', target: 'control-wrapper', description: 'Exactly one line of text tall, with the Checkbox (2.7), Radio (2.8) or Switch (2.9) centered inside. This keeps the control on the first line.', tokens: ['type/body/sm/medium', 'type/body/md/medium'] },
+      { name: 'Text and supporting text', target: 'text', description: 'The label and an optional description, which wrap to fill the width. The description is lighter, and both turn gray when the field is disabled.', tokens: ['color/text/secondary', 'color/text/tertiary', 'color/text/disabled'] },
+      { name: 'Choice card', target: 'choice-card', description: 'The card container, with a rounded border. Icon-card cards stack their content vertically, and mobile cards use tighter padding.', tokens: ['radius/surface', 'color/border/default', 'space/2xl'] },
+      { name: 'Leading', target: 'leading', description: 'The visual before the title: a Featured icon (2.19), an Avatar (2.6), a 46 × 32 payment mark, or the radio or checkbox itself for those card types.', tokens: ['size/avatar/md'] },
+      { name: 'Content', target: 'content', description: 'The title row (text, subtext and an optional Badge, 2.4) and the supporting text. On mobile the subtext moves below the title. Titles share one left edge across card types.', tokens: ['space/xxs', 'space/xs'] },
+      { name: 'Selection', target: 'selection', description: 'A small Radio (2.8) at the end of icon, avatar, payment and icon-card cards. A selected card gets a thicker brand border drawn inside and a brand-colored title.', tokens: ['color/border/brand', 'border/width/strong', 'color/text/brand'] },
+      { name: 'Choice group', target: 'choice-group', description: 'Stacks the cards under an optional Label (2.11) that asks the question. Icon cards sit in equal columns on desktop and stack on mobile.', tokens: ['space/lg'] },
     ],
   },
   props: [
-    { name: 'type', figma: 'Type', type: "'checkbox' | 'radio' | 'switch'", default: "'checkbox'", description: 'ChoiceField: which Part sits next to the text.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'Control size, gap and text styles.' },
-    { name: 'checked / defaultChecked', figma: 'Checked', type: "boolean | 'mixed'", description: "ChoiceField: 'mixed' only for checkbox." },
+    { name: 'type', figma: 'Type', type: "'checkbox' | 'radio' | 'switch'", default: "'checkbox'", description: 'ChoiceField: the control that sits next to the text.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'md'", description: 'The control size, gap and text styles.' },
+    { name: 'checked / defaultChecked', figma: 'Checked', type: "boolean | 'mixed'", description: "ChoiceField: the checked value. 'mixed' is for checkboxes only." },
     { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'ChoiceField: called with the new value.' },
-    { name: 'text', figma: 'Text', type: 'ReactNode', description: 'The label; positive statement, sentence case.' },
-    { name: 'supportingText', figma: 'Show supporting text + Supporting text', type: 'ReactNode', description: 'One or two sentences; linked as the input’s description.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Disabled control and text.' },
-    { name: 'ChoiceCard type', figma: 'Choice card › Type', type: "'icon' | 'icon-card' | 'avatar' | 'payment' | 'radio' | 'checkbox'", default: "'icon'", description: 'Leading visual and selection control; checkbox cards are the only multi-select type.' },
-    { name: 'selected / defaultSelected / onSelectedChange', figma: 'Selected', type: 'boolean', description: 'ChoiceCard: brand border, brand title and checked control.' },
-    { name: 'breakpoint', figma: 'Breakpoint', type: "'mobile' | 'desktop'", default: "'desktop'", description: 'Mobile is its own layout: tighter padding, Subtext under the title.' },
-    { name: 'subtext', figma: 'Subtext', type: 'ReactNode', description: 'ChoiceCard: price, handle or detail after the title.' },
-    { name: 'badge', figma: 'Show badge', type: 'ReactNode', description: 'ChoiceCard: 2.4 Badge in the title row.' },
-    { name: 'icon / avatar / paymentMark', type: 'IconName / { src, initials } / ReactNode', description: 'ChoiceCard leading visual for icon, avatar and payment types.' },
-    { name: 'label', figma: 'Choice group › Show label', type: 'ReactNode', description: 'ChoiceGroup: the question (2.11 Label). Without it pass aria-label.' },
-    { name: 'options', type: 'ChoiceGroupOption[]', description: 'ChoiceGroup: the cards.' },
+    { name: 'text', figma: 'Text', type: 'ReactNode', description: 'The label. Write it as a positive statement, in sentence case.' },
+    { name: 'supportingText', figma: 'Show supporting text + Supporting text', type: 'ReactNode', description: 'One or two sentences, linked as the input’s description.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Disables the control and its text.' },
+    { name: 'ChoiceCard type', figma: 'Choice card › Type', type: "'icon' | 'icon-card' | 'avatar' | 'payment' | 'radio' | 'checkbox'", default: "'icon'", description: 'The leading visual and selection control. Checkbox cards are the only multi-select type.' },
+    { name: 'selected / defaultSelected / onSelectedChange', figma: 'Selected', type: 'boolean', description: 'ChoiceCard: shows the brand border, brand title and checked control.' },
+    { name: 'breakpoint', figma: 'Breakpoint', type: "'mobile' | 'desktop'", default: "'desktop'", description: 'Mobile is its own layout, with tighter padding and the subtext under the title.' },
+    { name: 'subtext', figma: 'Subtext', type: 'ReactNode', description: 'ChoiceCard: a price, handle or detail after the title.' },
+    { name: 'badge', figma: 'Show badge', type: 'ReactNode', description: 'ChoiceCard: a Badge (2.4) in the title row.' },
+    { name: 'icon / avatar / paymentMark', type: 'IconName / { src, initials } / ReactNode', description: 'ChoiceCard: the leading visual for the icon, avatar and payment types.' },
+    { name: 'label', figma: 'Choice group › Show label', type: 'ReactNode', description: 'ChoiceGroup: the question, shown as a Label (2.11). Without it, pass aria-label.' },
+    { name: 'options', type: 'ChoiceGroupOption[]', description: 'ChoiceGroup: the cards to show.' },
     { name: 'value / defaultValue / onValueChange', type: 'string | string[]', description: 'ChoiceGroup: one value, or an array for checkbox groups.' },
-    { name: 'forceState', figma: 'State=hover / focus', type: "'hover' | 'focus'", description: 'Documentation only.' },
+    { name: 'forceState', figma: 'State=hover / focus', type: "'hover' | 'focus'", description: 'For documentation only.' },
   ],
   tokens: [
     'color/text/secondary', 'color/text/tertiary', 'color/text/disabled', 'color/text/brand', 'color/border/default', 'color/border/strong', 'color/border/brand',
@@ -335,7 +339,7 @@ export default defineDoc({
   guidelines: [
     {
       title: 'Checkbox, radio or switch',
-      body: 'Checkbox: zero or more, saved with the form. Radio: exactly one. Switch: on or off, right away.',
+      body: 'Use checkboxes when people can pick any number of options and save them with the form. Use radios when they must pick exactly one, and a switch for an on/off setting that applies straight away.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-3">
           <ChoiceField type="checkbox" defaultChecked text="Include archived" supportingText="Zero or more, saved with the form." />
@@ -364,7 +368,7 @@ export default defineDoc({
     },
     {
       title: 'Checked, unchecked, mixed',
-      body: 'Mixed means some children are selected. Radios never show mixed.',
+      body: 'A parent checkbox shows mixed when only some of its children are selected. Radios never show mixed, because only one can be picked.',
       render: () => (
         <div className="flex flex-wrap gap-3xl">
           {([false, 'mixed', true] as const).map((c) => (
@@ -380,14 +384,14 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Top alignment',
-      body: 'The control sits on the first line of text, never centred against a multi-line description; supporting text never moves the control.',
+      title: 'Align the control to the top',
+      body: 'The control sits on the first line of text instead of centering against a long description. That way, adding supporting text never moves it.',
       do: {
         caption: 'Control on the first line.',
         render: () => <ChoiceField className="w-[18rem]" text="Weekly summary" supportingText="Every Monday we email the last week’s activity, open tasks and deadlines." />,
       },
       dont: {
-        caption: 'Control centred against the paragraph.',
+        caption: 'Control centered against the paragraph.',
         render: () => (
           <div className="flex w-[18rem] items-center gap-lg">
             <span className="size-(--checkbox-size-md) shrink-0 rounded-(--checkbox-radius-md) border border-border-strong bg-surface-base" />
@@ -401,7 +405,7 @@ export default defineDoc({
     },
     {
       title: 'Choice cards',
-      body: 'Six card types share one left edge for the title: changing the leading visual never shifts the text. Radio and checkbox cards put the control first; the other types end with a Radio.',
+      body: 'All six card types line titles up on the same left edge, so changing the leading visual never shifts the text. Radio and checkbox cards put the control first, and the other types end with a radio.',
       render: () => (
         <div className="flex w-full max-w-[28rem] flex-col gap-md">
           {CARD_TYPES.filter((t) => t !== 'icon-card').map((t) => (
@@ -411,8 +415,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Selected vs focus',
-      body: 'Selection is a thicker brand border plus a checked control; focus is the ring around the card. They always look different.',
+      title: 'Keep selection and focus distinct',
+      body: 'Selection shows as a thicker brand border and a checked control, and focus as a ring around the card. The two always look different, so people can tell them apart.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-2">
           {([
@@ -441,7 +445,7 @@ export default defineDoc({
     },
     {
       title: 'Mobile and desktop',
-      body: 'Mobile rearranges the title row; it is not the desktop card scaled down.',
+      body: 'On mobile, the card rearranges its title row instead of shrinking the desktop layout.',
       render: () => (
         <div className="flex w-full flex-wrap items-start gap-3xl">
           <div className="w-[26rem]">
@@ -452,7 +456,7 @@ export default defineDoc({
           </div>
         </div>
       ),
-      do: { caption: 'Mobile layout: Subtext under the title.', render: () => <div className="w-[16rem]"><ChoiceCard breakpoint="mobile" size="sm" badge="Popular" /></div> },
+      do: { caption: 'Mobile layout, with the subtext under the title.', render: () => <div className="w-[16rem]"><ChoiceCard breakpoint="mobile" size="sm" badge="Popular" /></div> },
       dont: {
         caption: 'The desktop card scaled down.',
         render: () => (
@@ -466,13 +470,13 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Write labels as positive statements (“Send me updates”, not “Don’t send me updates”). Switch labels name the setting, not the action (“Dark mode”, not “Turn on dark mode”). Card titles are short; supporting text is one or two sentences. Keep option order logical: most common first, or small → large.',
+      body: 'Write labels as positive statements: “Send me updates”, not “Don’t send me updates”. Switch labels name the setting, not the action: “Dark mode”, not “Turn on dark mode”. Keep card titles short, supporting text to one or two sentences, and options in a logical order, like most common first or smallest to largest.',
       do: { caption: 'Switch names the setting.', render: () => <ChoiceField type="switch" defaultChecked text="Dark mode" /> },
       dont: { caption: 'Switch phrased as an action.', render: () => <ChoiceField type="switch" text="Turn on dark mode" /> },
     },
     {
-      title: 'Switch vs submit',
-      body: 'Use a switch for settings that apply instantly. In a form that saves on submit, use a checkbox.',
+      title: 'Switches apply straight away',
+      body: 'People expect a switch to take effect as soon as they flip it. In a form that saves on submit, use a checkbox instead.',
       do: { caption: 'Switch for an instant setting.', render: () => <ChoiceField type="switch" defaultChecked text="Email notifications" /> },
       dont: {
         caption: 'Switch in a form that saves on submit.',
@@ -486,15 +490,15 @@ export default defineDoc({
     },
     {
       title: 'Maintenance',
-      body: 'Control looks live in the Parts (2.7, 2.8, 2.9); the row layout and card styles live here and use the semantic tokens in the token map.',
+      body: 'The control styles live in the Parts (2.7, 2.8, 2.9). The row layout and card styles live here, and use the semantic tokens in the token map.',
     },
   ],
   accessibility: [
-    'The whole row or card is a <label>: clicking the text toggles the control; on touch platforms the control’s hit area reaches size/touch-min.',
-    'A group of radios or cards has a group label (the Choice group’s Label, or aria-label) so screen readers announce the question; radio groups use role="radiogroup".',
-    'Arrow keys move between radios in a group; Tab moves between checkboxes; Space toggles.',
-    'Supporting text is the input’s description (aria-describedby).',
-    'Selection is never colour alone: the control’s mark and the thicker border both change. Focus is a separate ring.',
-    'Switches announce on / off (role="switch"); the label stays the same in both states.',
+    'The whole row or card is a <label>, so clicking the text toggles the control. On touch screens, the control’s hit area grows to size/touch-min.',
+    'A group of radios or cards has a group label (the Choice group’s Label, or aria-label), so screen readers announce the question. Radio groups use role="radiogroup".',
+    'Arrow keys move between radios in a group, Tab moves between checkboxes, and Space toggles.',
+    'Screen readers read the supporting text as the input’s description (aria-describedby).',
+    'Selection never relies on color alone: the control’s mark and the thicker border both change. Focus is a separate ring.',
+    'Switches announce on or off (role="switch"), and the label stays the same in both states.',
   ],
 });

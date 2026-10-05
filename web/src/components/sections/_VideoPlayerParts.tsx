@@ -72,6 +72,7 @@ export function VideoTooltip({ text = 'Play', shortcut, floating, className }: V
   return (
     <span
       aria-hidden
+      data-anatomy="tooltip"
       className={cn(
         'pointer-events-none inline-flex items-center gap-sm whitespace-nowrap rounded-control bg-video-player-tooltip-fill px-md py-sm',
         'type-body-xs-semibold text-video-player-control-fg',
@@ -167,6 +168,7 @@ export function VideoAction({
   return (
     <span className="relative inline-flex shrink-0">
       <button
+        data-anatomy={type === 'playback-speed' ? 'playback-speed' : 'action'}
         type="button"
         aria-label={name}
         aria-keyshortcuts={shortcut === 'Space' ? 'Space k' : shortcut}
@@ -329,6 +331,7 @@ export function VideoVolume({ value = 75, muted = false, size = 'lg', forceState
   const level = muted ? 0 : value;
   return (
     <div
+      data-anatomy="volume"
       className={cn('flex shrink-0 items-center transition-[gap] duration-(--motion-duration-fast) ease-standard', shown ? 'gap-xs' : 'gap-none')}
       onPointerEnter={() => setOpen(true)}
       onPointerLeave={(e) => {
@@ -377,7 +380,7 @@ export interface VideoScrubPreviewProps {
 
 export function VideoScrubPreview({ time = 102, duration = 252, poster, showIndicator = true, className, style }: VideoScrubPreviewProps) {
   return (
-    <div aria-hidden className={cn('pointer-events-none flex flex-col items-center gap-xs', className)} style={style}>
+    <div aria-hidden data-anatomy="scrub-preview" className={cn('pointer-events-none flex flex-col items-center gap-xs', className)} style={style}>
       <div className="h-[5.625rem] w-[10rem] overflow-hidden rounded-control shadow-raised">
         {poster ? <img src={poster} alt="" className="size-full object-cover" /> : <VideoPlaceholderFrame compact />}
       </div>
@@ -481,6 +484,7 @@ export function VideoActionsBar({
 
   return (
     <div
+      data-anatomy="actions-bar"
       className={cn(
         'flex w-full flex-col bg-linear-to-t from-overlay-scrim to-transparent',
         barPad[size],
@@ -491,7 +495,7 @@ export function VideoActionsBar({
         <VideoAction type={playing ? 'pause' : 'play'} size={size} label={playing ? 'Pause' : 'Play'} shortcut="Space" tooltip="start" onClick={onTogglePlay} />
         <VideoVolume value={volume} muted={muted} size={size} onValueChange={onVolume} onToggleMute={onToggleMute} />
         {/* Video progress: fills; every action keeps its size. */}
-        <div className="flex min-w-0 flex-1 items-center gap-md">
+        <div data-anatomy="video-progress" className="flex min-w-0 flex-1 items-center gap-md">
           {showTimestamps && <span className="type-body-xs-medium shrink-0 text-video-player-control-fg tabular-nums">{formatTime(current)}</span>}
           <div className="relative min-w-0 flex-1" id={timelineId}>
             {scrub && (
@@ -571,6 +575,7 @@ export interface VideoOverlayActionProps extends Omit<ButtonHTMLAttributes<HTMLB
 export function VideoOverlayAction({ playing = false, size = 'lg', forceState, className, ...rest }: VideoOverlayActionProps) {
   return (
     <button
+      data-anatomy="overlay-action"
       type="button"
       aria-label={playing ? 'Pause' : 'Play'}
       className={cn(

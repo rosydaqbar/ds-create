@@ -29,6 +29,7 @@ export function Kbd({ size = 'sm', text, children, className, ...rest }: KbdProp
   const spoken = typeof content === 'string' ? symbolNames[content] : undefined;
   return (
     <kbd
+      data-anatomy="key-surface"
       className={cn(
         'inline-flex shrink-0 items-center justify-center whitespace-nowrap align-middle font-ui',
         'rounded-xs border-(length:--border-width-default) border-border-default bg-surface-sunken text-text-secondary',
@@ -39,11 +40,11 @@ export function Kbd({ size = 'sm', text, children, className, ...rest }: KbdProp
     >
       {spoken ? (
         <>
-          <span aria-hidden>{content}</span>
+          <span aria-hidden data-anatomy="text">{content}</span>
           <span className="sr-only">{spoken}</span>
         </>
       ) : (
-        content
+        <span data-anatomy="text">{content}</span>
       )}
     </kbd>
   );

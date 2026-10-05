@@ -43,8 +43,13 @@ export interface VideoPlayerProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   poster?: string;
   /** Caption tracks; the captions action is shown whenever there are captions. */
   tracks?: VideoTrack[];
-  /** Accessible name of the player, e.g. the video title. Also the text on the sample frame. */
+  /** The video title: the text on the sample frame and, unless `label` is set, the player's accessible name. */
   title?: string;
+  /**
+   * Accessible name of the player region ("Product tour video"). Defaults to `title`.
+   * Give every player on a page a distinct name so the regions can be told apart.
+   */
+  label?: string;
   /** Poster-only state: times shown on the timeline, in seconds. */
   placeholderTime?: { current?: number; duration?: number; buffered?: number };
   /** Documentation only: show the scrub preview at this time (seconds). */
@@ -76,6 +81,7 @@ export function VideoPlayer({
   poster,
   tracks,
   title = 'Video player',
+  label,
   placeholderTime,
   forceScrub,
   className,
@@ -260,7 +266,7 @@ export function VideoPlayer({
       ref={rootRef}
       data-video-frame
       role="region"
-      aria-label={title}
+      aria-label={label ?? title}
       aria-roledescription="video player"
       tabIndex={0}
       onKeyDown={handleKey}
@@ -278,7 +284,7 @@ export function VideoPlayer({
       {...rest}
     >
       {/* Media */}
-      <div className="absolute inset-0" onClick={togglePlay}>
+      <div data-anatomy="media" className="absolute inset-0" onClick={togglePlay}>
         {src ? (
           <video
             ref={videoRef}

@@ -498,7 +498,7 @@ Before generating variables and components:
 7. Selected Components in ID order (components/00-components.md + each page file)
 8. Selected Sections in ID order (sections/00-sections.md + each page file)
 9. Documentation, examples, diagrams, matrices and QA required by each loaded file
-10. Web implementation, when selected: WEB.md W1–W5 (template copy, token export, brand assets, components in page order, build)
+10. Web implementation, when selected: WEB.md W1–W8 (template copy, token export with the contrast gate, brand assets, components in page order, foundation and guidance pages, docs data, build with package and QA, publish)
 
 Every page in steps 3–8 is built with templates/structure.md.
 ```
@@ -552,4 +552,4 @@ Do not mark generation complete until:
 - every required specification is confirmed loaded;
 - every checklist item is resolved;
 - every applicable global, folder-level and page-level QA rule passes;
-- when the web implementation is in scope, the explorer builds and every in-scope page passes `WEB.md` §9.
+- when the web implementation is in scope, `npm run build` passes (including `check:contrast`), `npm run qa` reports 0 problems, the package installs in a fresh app, and every in-scope page passes `WEB.md` §9.

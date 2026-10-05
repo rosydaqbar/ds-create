@@ -48,7 +48,7 @@ export default defineDoc({
   level: 'parts',
   spec: 'parts/2.8-radio.md',
   exports: ['Radio'],
-  summary: 'The radio control. Two sizes, unchecked and checked, four states. The checked dot is centred inside the ring; labels, groups and option cards come from 3.3 Choice field.',
+  summary: 'Radios let people pick exactly one option from a short list they can see all at once. This page covers the control itself; a Choice field (3.3) adds labels, groups and option cards.',
   hero: () => <Radio size="md" defaultChecked aria-label="Example radio" />,
   playground: {
     controls: [
@@ -62,7 +62,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Billing period',
-      caption: 'Exactly one option is checked at all times.',
+      caption: 'One option is always checked, so people can see the current choice at a glance.',
       render: () => (
         <fieldset className="flex flex-col gap-md">
           <legend className="type-body-sm-semibold mb-md text-text-primary">Billing period</legend>
@@ -80,7 +80,7 @@ export default defineDoc({
     },
     {
       title: 'Option cards',
-      caption: 'In cards, the radio still carries the selection; the border reinforces it.',
+      caption: 'In option cards, the radio still shows the selection, and the brand border backs it up.',
       render: () => <PlanCards />,
       code: `<label className={plan === 'team' ? 'border-border-brand' : 'border-border-subtle'}>
   Team · $12 / seat
@@ -89,7 +89,7 @@ export default defineDoc({
     },
     {
       title: 'Table row choice',
-      caption: 'The whole row is the hit target.',
+      caption: 'People can click anywhere on the row to pick it.',
       render: () => (
         <div role="radiogroup" aria-label="Shipping address" className="w-full max-w-[26rem] overflow-hidden rounded-surface border border-border-subtle bg-surface-base">
           {['12 Harbour Street, Lisbon', '4 Rue des Fleurs, Lyon', '88 King Road, Leeds'].map((a, i) => (
@@ -108,8 +108,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['One choice among two to seven visible options, when comparing them matters.'],
-    dont: ['Longer lists — use Select (3.5).', 'Multiple choices — use Checkbox (2.7).', 'One on/off setting — use Switch (2.9).'],
+    use: ['Picking one option out of two to seven, when it helps to compare them side by side.'],
+    dont: ['For longer lists, use a Select (3.5).', 'When people can pick several, use a Checkbox (2.7).', 'For a single on/off setting, use a Switch (2.9).'],
   },
   matrices: [
     {
@@ -154,18 +154,18 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root (ring)', description: 'Fixed square radio/size/{size} (16 · 20 — the same as the checkbox), radius/full, border/width/default. A real radio input covers it.', tokens: ['radio/size/sm', 'radio/size/md', 'radius/full', 'border/width/default'] },
-      { name: 'Dot', description: 'Checked=true only: size/indicator/xs (sm) or size/indicator/sm (md), centred, color/icon/on-solid.', tokens: ['size/indicator/xs', 'size/indicator/sm', 'color/icon/on-solid'] },
+      { name: 'Root (ring)', target: 'ring', description: 'The round ring, 16 or 20px depending on the size, the same as the checkbox. A real radio input sits on top of it.', tokens: ['radio/size/sm', 'radio/size/md', 'radius/full', 'border/width/default'] },
+      { name: 'Dot', target: 'dot', description: 'The dot in the center of the ring. It appears only when the radio is checked.', tokens: ['size/indicator/xs', 'size/indicator/sm', 'color/icon/on-solid'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'sm'", description: 'Ring and dot size.' },
-    { name: 'checked', figma: 'Checked', type: 'boolean', description: 'Controlled value. Omit and use defaultChecked for an uncontrolled group.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'sm'", description: 'Sets the size of the ring and the dot.' },
+    { name: 'checked', figma: 'Checked', type: 'boolean', description: 'The controlled value. For an uncontrolled group, leave it out and use defaultChecked.' },
     { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'Called with true when this option becomes checked.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Native disabled input.' },
-    { name: 'name, value …', type: 'InputHTMLAttributes', description: 'Radios with the same name form one group (arrow keys, single selection).' },
-    { name: 'parentFocus', type: 'boolean', default: 'false', description: 'The parent row or card draws the focus ring.' },
-    { name: 'forceState', type: "'hover' | 'focus'", description: 'Documentation only: pins a pseudo-state.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Disables the native input.' },
+    { name: 'name, value …', type: 'InputHTMLAttributes', description: 'Radios that share a name form one group, with arrow-key navigation and a single selection.' },
+    { name: 'parentFocus', type: 'boolean', default: 'false', description: 'Lets the parent row or card draw the focus ring instead of the radio.' },
+    { name: 'forceState', type: "'hover' | 'focus'", description: 'For documentation only. Pins the hover or focus look.' },
   ],
   tokens: [
     'color/surface/base', 'color/fill/brand/subtle', 'color/fill/neutral/subtle/disabled',
@@ -175,21 +175,21 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Single-choice semantics',
-      body: 'One option in a group is always checked; start with a sensible default. Choosing an option clears the previous one. When several options may be chosen together, use Checkbox.',
+      title: 'Keep one option checked',
+      body: 'A radio group always has one option checked, so start with a sensible default. Picking an option clears the previous one. If people can choose several together, use checkboxes instead.',
       do: { caption: 'One option checked by default.', render: () => <div className="flex flex-col gap-sm"><Row label="Standard shipping"><Radio name="g-ship" defaultChecked /></Row><Row label="Express"><Radio name="g-ship" /></Row></div> },
       dont: { caption: 'Two radios checked in the same group.', render: () => <div className="flex flex-col gap-sm"><Row label="Standard shipping"><Radio checked /></Row><Row label="Express"><Radio checked /></Row></div> },
     },
     {
-      title: 'Checked vs focus',
-      body: 'Checked is the dot; focus is the ring around the control. They look different and can appear together. Focus is never selection.',
+      title: 'Checked and focused look different',
+      body: 'The dot shows which option is checked, and the outer ring shows where keyboard focus is. They can appear together, but the focus ring never means selected.',
       render: () => (
         <div className="flex gap-2xl">
           {[
-            { l: 'unchecked', c: false },
-            { l: 'checked', c: true },
-            { l: 'focused unchecked', c: false, f: true },
-            { l: 'focused checked', c: true, f: true },
+            { l: 'Unchecked', c: false },
+            { l: 'Checked', c: true },
+            { l: 'Focused, unchecked', c: false, f: true },
+            { l: 'Focused, checked', c: true, f: true },
           ].map((x) => (
             <div key={x.l} className="flex flex-col items-center gap-sm">
               <Radio size="md" checked={x.c} forceState={x.f ? 'focus' : undefined} aria-label={x.l} />
@@ -200,8 +200,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Radio, Select, Checkbox or Switch',
-      body: 'Radios when every option should be visible (two to seven). A Select (3.5) for longer lists. Not a Checkbox — only one can be chosen. Not a Switch — there is more than on and off.',
+      title: 'Radio, select, checkbox or switch',
+      body: 'Use radios when people should see every option at once, from two to seven. For longer lists, use a Select (3.5). A checkbox would suggest people can pick several, and a switch only covers on and off.',
       render: () => (
         <div className="flex flex-wrap gap-3xl">
           <div className="flex flex-col gap-sm">
@@ -216,17 +216,17 @@ export default defineDoc({
           </div>
         </div>
       ),
-      dont: { caption: 'A lone radio (use Checkbox for one statement).', render: () => <Row label="Subscribe to updates"><Radio /></Row> },
+      dont: { caption: 'A lone radio. For a single statement, use a checkbox.', render: () => <Row label="Subscribe to updates"><Radio /></Row> },
     },
     {
       title: 'Maintenance',
-      body: 'Radio and Checkbox share fill, border and focus tokens: change them once to update both, including every radio inside 3.3 Choice field.',
+      body: 'Radios and checkboxes share their fill, border and focus tokens. Change them once to update both, including every radio inside a Choice field (3.3).',
     },
   ],
   accessibility: [
-    'Real radio inputs: Tab enters and leaves the group; arrow keys move the selection within it.',
-    'The group has a label (fieldset legend or aria-label on a radiogroup) announced with each option.',
-    'Selection is shown by the dot, not by colour alone; the unchecked ring meets non-text contrast (3:1).',
-    'Focus ring (focus/default, round) is always visible and different from the checked state.',
+    'These are real radio inputs. Tab moves into and out of the group, and the arrow keys move the selection within it.',
+    'Each group has a label (a fieldset legend, or aria-label on a radiogroup) that screen readers announce with each option.',
+    'The dot shows the selection, so it doesn’t rely on color alone. The unchecked ring meets 3:1 non-text contrast.',
+    'The round focus ring (focus/default) is always visible and looks different from the checked state.',
   ],
 });

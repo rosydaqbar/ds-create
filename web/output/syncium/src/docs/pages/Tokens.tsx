@@ -6,7 +6,7 @@ import { Button, Progress, Select, Switch, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../DocPage';
 import { Bullets, Caption, DoDont, H3, InlineCode, P, Swatch, TokenTable } from '../blocks';
 import { componentDocs, slugOf, staticPages } from '../registry';
-import { pageMeta } from '../meta';
+import { figmaNodeFor } from '../meta';
 
 /* ---------- data ---------- */
 const byName = new Map(tokens.variables.map((t) => [t.name, t]));
@@ -652,7 +652,7 @@ export default function Tokens() {
       eyebrow="Guidance › 02 Tokens"
       title="Tokens"
       description="Tokens are the named values behind every screen, shared by Figma and code. Here’s how they’re organized, named and switched between modes. Look up any token in the Reference tab."
-      figmaNode={pageMeta['02'].figmaNode}
+      figmaNode={figmaNodeFor('02')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Reference', render: () => <Reference /> },

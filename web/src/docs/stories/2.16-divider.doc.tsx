@@ -38,7 +38,7 @@ const Toolbar = () => (
       <Divider orientation="vertical" />
     </div>
     <IconButton size="sm" icon="editor/align-left" label="Align left" />
-    <IconButton size="sm" icon="editor/align-center" label="Align centre" />
+    <IconButton size="sm" icon="editor/align-center" label="Align center" />
     <IconButton size="sm" icon="editor/align-right" label="Align right" />
     <div className="flex self-stretch py-sm">
       <Divider orientation="vertical" />
@@ -67,7 +67,7 @@ export default defineDoc({
   spec: 'parts/2.16-divider.md',
   exports: ['Divider'],
   summary:
-    'A thin line that separates groups on the same surface, horizontal between rows and sections or vertical between groups of controls. A horizontal divider can carry a short label to separate alternatives.',
+    'Dividers separate groups that share a surface when spacing alone isn’t enough. Run them across between rows and sections, or upright between groups of controls. Add a short label like “or” to separate alternatives.',
   hero: () => (
     <div className="flex w-[30rem] max-w-full flex-col gap-3xl">
       <Divider />
@@ -90,7 +90,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Menu groups',
-      caption: 'Dividers separate groups of related items in a list.',
+      caption: 'Dividers split a long menu into groups, so related items read together.',
       render: () => (
         <Menu>
           <MenuItem icon="users/user">Profile</MenuItem>
@@ -114,7 +114,7 @@ export default defineDoc({
     },
     {
       title: 'Editor toolbar',
-      caption: 'Vertical dividers separate groups of controls in a toolbar.',
+      caption: 'Vertical dividers group toolbar controls by what they do: text style, alignment and inserts.',
       render: () => <Toolbar />,
       code: `<div className="flex h-(--size-control-md) items-center gap-xs">
   <IconButton size="sm" icon="editor/bold" label="Bold" />
@@ -127,7 +127,7 @@ export default defineDoc({
     },
     {
       title: 'Sign-in alternatives',
-      caption: 'A labelled divider separates two ways of doing the same thing.',
+      caption: 'A labeled divider separates two ways of doing the same thing, like two ways to sign in.',
       render: () => (
         <div className="flex w-full max-w-[22rem] flex-col gap-xl">
           <Button emphasis="secondary" fullWidth leadingIcon="maps/globe" label="Continue with Google" />
@@ -147,7 +147,7 @@ export default defineDoc({
     },
     {
       title: 'Card sections',
-      caption: 'Inside a card, a divider splits sections without nesting surfaces.',
+      caption: 'Inside a card, a divider splits sections without putting a card inside a card.',
       render: () => (
         <DemoCard className="w-full max-w-[22rem]">
           <Section title="Plan" rows={[['Tier', 'Team'], ['Seats', '12 of 15']]} />
@@ -163,8 +163,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Two groups share a surface and spacing alone doesn’t separate them: long menus, dense settings, toolbars.', 'Separating alternatives with a short label (“or”).'],
-    dont: ['Between every field of a short form — use spacing.', 'Framing a whole region — give it a surface or a border instead.'],
+    use: ['Separate groups on the same surface when spacing alone doesn’t, like in long menus, dense settings and toolbars.', 'Separate alternatives with a short label (“or”).'],
+    dont: ['Between the fields of a short form, use spacing.', 'To frame a whole region, give it a surface or a border instead.'],
   },
   matrices: [
     {
@@ -222,24 +222,24 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Start line', description: 'One stroke thick: border/width/default (strong for primary). Spans the whole Divider when there is no label; fills the height when vertical.', tokens: ['border/width/default', 'border/width/strong', 'color/border/subtle'] },
-      { name: 'Label', description: 'Optional, horizontal only. type/body/sm/medium, color/text/tertiary, space/md from each line; never wraps.', tokens: ['type/body/sm/medium', 'color/text/tertiary', 'space/md'] },
-      { name: 'End line', description: 'Shown only with the label; shares the remaining width equally with the Start line.' },
+      { name: 'Start line', target: 'start-line', description: 'The line itself, thicker for primary emphasis. Without a label, it runs the full length of the divider.', tokens: ['border/width/default', 'border/width/strong', 'color/border/subtle'] },
+      { name: 'Label', target: 'label', description: 'An optional short word or two between the lines, on horizontal dividers only. It stays on one line.', tokens: ['type/body/sm/medium', 'color/text/tertiary', 'space/md'] },
+      { name: 'End line', target: 'end-line', description: 'Appears only with a label, and shares the remaining width equally with the start line.' },
     ],
   },
   props: [
-    { name: 'orientation', figma: 'Orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'", description: 'Vertical fills the height of its row (self-stretch).' },
-    { name: 'emphasis', figma: 'Emphasis', type: "'primary' | 'secondary' | 'tertiary'", default: "'tertiary'", description: 'Line weight: strong 2px, default 1px, subtle 1px.' },
-    { name: 'label', figma: 'Show label + Label', type: 'ReactNode', description: 'Horizontal only; present = shown (“or”).' },
-    { name: 'decorative', type: 'boolean', default: 'false', description: 'Hide from assistive technology instead of exposing role="separator".' },
+    { name: 'orientation', figma: 'Orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'", description: 'A vertical divider fills the height of its row (self-stretch).' },
+    { name: 'emphasis', figma: 'Emphasis', type: "'primary' | 'secondary' | 'tertiary'", default: "'tertiary'", description: 'The line weight: primary is a strong 2px, secondary a default 1px and tertiary a subtle 1px.' },
+    { name: 'label', figma: 'Show label + Label', type: 'ReactNode', description: 'Horizontal only. Shown when set, for example “or”.' },
+    { name: 'decorative', type: 'boolean', default: 'false', description: 'Hides the divider from assistive technology instead of exposing role="separator".' },
   ],
   tokens: ['color/border/strong', 'color/border/default', 'color/border/subtle', 'border/width/strong', 'border/width/default', 'color/text/tertiary', 'type/body/sm/medium', 'space/md'],
   guidelines: [
     {
-      title: 'Spacing first, then a Divider',
-      body: 'Space and alignment separate most groups. Add a Divider only when groups sit on the same surface and spacing alone doesn’t make the break clear — long menus, dense settings, toolbars.',
+      title: 'Try spacing first',
+      body: 'Space and alignment are enough to separate most groups. Add a divider only when groups share a surface and spacing doesn’t make the break clear, as in long menus, dense settings and toolbars.',
       do: {
-        caption: 'Grouped with spacing; one Divider before the danger zone.',
+        caption: 'Fields grouped with spacing, and one divider before the danger zone.',
         render: () => (
           <div className="flex w-[16rem] flex-col gap-lg">
             <TextControl aria-label="Name" placeholder="Name" />
@@ -250,7 +250,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'A Divider between every field.',
+        caption: 'A divider between every field.',
         render: () => (
           <div className="flex w-[16rem] flex-col gap-md">
             <TextControl aria-label="Name" placeholder="Name" />
@@ -263,8 +263,8 @@ export default defineDoc({
       },
     },
     {
-      title: 'Choosing the weight',
-      body: 'Use tertiary by default. Move to secondary or primary only when a stronger break is needed, and keep one weight per surface.',
+      title: 'Keep to one weight',
+      body: 'Use tertiary by default. Step up to secondary or primary only when you need a stronger break, and keep to one weight per surface.',
       do: {
         caption: 'One weight on the surface.',
         render: () => (
@@ -292,7 +292,7 @@ export default defineDoc({
     },
     {
       title: 'Horizontal and vertical',
-      body: 'Horizontal dividers separate rows and sections. Vertical dividers separate groups of controls in a toolbar or inline metadata (“Updated 2 h ago | 3 comments”). A vertical Divider fills the height of its row; it is never taller than the controls next to it.',
+      body: 'Horizontal dividers separate rows and sections. Vertical dividers separate groups of toolbar controls or bits of inline metadata (“Updated 2 h ago | 3 comments”). A vertical divider fills the height of its row, so it’s never taller than the controls beside it.',
       render: () => (
         <div className="flex flex-col items-center gap-xl">
           <Toolbar />
@@ -307,14 +307,14 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Labelled dividers',
-      body: 'Use the label to separate alternatives (“or”) or to name a group in a long list. Keep it to one or two words.',
+      title: 'Labeled dividers',
+      body: 'Use a label to separate alternatives (“or”) or to name a group in a long list. Keep it to one or two words.',
       do: { caption: '“or”.', render: () => <div className="w-[16rem]"><Divider label="or" /></div> },
       dont: { caption: 'A sentence as the label.', render: () => <div className="w-[16rem]"><Divider label="Or you can also sign in with email" /></div> },
     },
     {
       title: 'Dividers don’t frame regions',
-      body: 'Don’t use dividers above and below a block to make it look like a card. If a region needs to stand apart, give it a surface or a border on its container.',
+      body: 'Avoid lines above and below a block to make it look like a card. If a region needs to stand apart, give its container a surface or a border.',
       do: {
         caption: 'The block on a raised surface.',
         render: () => (
@@ -338,13 +338,13 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Labels are lower-case or sentence case, one or two words, and never wrap. Don’t put actions inside a Divider label; place a Button beside the content instead.',
+      body: 'Write labels in lowercase or sentence case, in one or two words that fit on one line. Keep actions out of the label. If you need one, place a button beside the content instead.',
     },
   ],
   accessibility: [
-    'By default the Divider is role="separator" with aria-orientation, for groups users move between such as menu groups.',
-    'Use `decorative` when it only adds visual structure; it is then hidden from assistive technology.',
-    'A labelled Divider exposes its label as text, so “or” is announced; its lines are hidden.',
-    'Lines are decorative unless they are the only boundary of a region; then the line meets the non-text contrast threshold.',
+    'By default, the divider has role="separator" with aria-orientation, so screen readers announce the break between groups people move through, like menu groups.',
+    'Use decorative when the line only adds visual structure. Assistive technology then skips it.',
+    'A labeled divider exposes its label as text, so screen readers announce “or”. The lines stay hidden.',
+    'Lines are decorative unless they’re the only boundary of a region. Then the line meets the non-text contrast threshold.',
   ],
 });

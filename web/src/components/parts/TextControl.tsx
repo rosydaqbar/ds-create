@@ -141,6 +141,7 @@ function ResizeGrip() {
     <svg
       aria-hidden
       viewBox="0 0 12 12"
+      data-anatomy="resize-handle"
       className="pointer-events-none absolute bottom-sm right-sm size-(--size-icon-xs) stroke-current text-icon-tertiary group-data-[disabled=true]/tc:text-icon-disabled"
       fill="none"
       strokeWidth={1.25}
@@ -220,13 +221,16 @@ export function TextControl({
   if (multi) {
     return (
       <div
+        data-anatomy="root"
         className={cn(textControlSurface(status), 'flex-col', className)}
         style={style}
         data-disabled={disabled || undefined}
+        aria-disabled={disabled || undefined}
         onPointerDown={onBoxPointerDown}
         {...forceAttr(shownForce)}
       >
         <textarea
+          data-anatomy="text"
           ref={setRef as Ref<HTMLTextAreaElement>}
           data-text-control-field=""
           aria-invalid={invalid || undefined}
@@ -265,21 +269,22 @@ export function TextControl({
       className={cn(fieldText, 'flex h-full cursor-pointer items-center gap-md text-start', filled ? 'text-text-primary' : 'text-text-placeholder')}
       {...(rest as HTMLAttributes<HTMLButtonElement>)}
     >
-      {leadingIcon && <Icon name={leadingIcon} size="md" className={adornIcon} />}
-      {avatar && <Avatar size="xs" type={avatar.src ? 'image' : avatar.initials ? 'initials' : 'icon'} src={avatar.src} initials={avatar.initials} alt="" />}
-      {showDot && <span aria-hidden className="size-(--size-indicator-sm) shrink-0 rounded-full bg-icon-success group-data-[disabled=true]/tc:bg-icon-disabled" />}
-      <span className="min-w-0 flex-1 truncate">
+      {leadingIcon && <Icon name={leadingIcon} size="md" className={adornIcon} data-anatomy="leading-slot" />}
+      {avatar && <Avatar size="xs" type={avatar.src ? 'image' : avatar.initials ? 'initials' : 'icon'} src={avatar.src} initials={avatar.initials} alt="" data-anatomy="leading-slot" />}
+      {showDot && <span aria-hidden data-anatomy="leading-slot" className="size-(--size-indicator-sm) shrink-0 rounded-full bg-icon-success group-data-[disabled=true]/tc:bg-icon-disabled" />}
+      <span data-anatomy="text" className="min-w-0 flex-1 truncate">
         {filled ? value ?? defaultValue : placeholder}
-        {supportingText != null && filled && <span className={cn(adornText, 'ms-md')}>{supportingText}</span>}
+        {supportingText != null && filled && <span data-anatomy="supporting-text" className={cn(adornText, 'ms-md')}>{supportingText}</span>}
       </span>
     </button>
   ) : (
     <>
       {leadingVisual}
-      {leadingIcon && <Icon name={leadingIcon} size="md" className={adornIcon} />}
-      {avatar && <Avatar size="xs" type={avatar.src ? 'image' : avatar.initials ? 'initials' : 'icon'} src={avatar.src} initials={avatar.initials} alt="" />}
-      {showDot && <span aria-hidden className="size-(--size-indicator-sm) shrink-0 rounded-full bg-icon-success group-data-[disabled=true]/tc:bg-icon-disabled" />}
+      {leadingIcon && <Icon name={leadingIcon} size="md" className={adornIcon} data-anatomy="leading-slot" />}
+      {avatar && <Avatar size="xs" type={avatar.src ? 'image' : avatar.initials ? 'initials' : 'icon'} src={avatar.src} initials={avatar.initials} alt="" data-anatomy="leading-slot" />}
+      {showDot && <span aria-hidden data-anatomy="leading-slot" className="size-(--size-indicator-sm) shrink-0 rounded-full bg-icon-success group-data-[disabled=true]/tc:bg-icon-disabled" />}
       <input
+        data-anatomy="text"
         ref={setRef as Ref<HTMLInputElement>}
         type={inputType}
         data-text-control-field=""
@@ -292,20 +297,24 @@ export function TextControl({
         className={cn(fieldText, 'h-full truncate text-text-primary')}
         {...rest}
       />
-      {supportingText != null && <span className={adornText}>{supportingText}</span>}
+      {supportingText != null && <span data-anatomy="supporting-text" className={adornText}>{supportingText}</span>}
     </>
   );
 
   return (
     <div
+      data-anatomy="root"
       className={cn(textControlSurface(status), 'items-center gap-md', boxSize[size], prefix && !select && 'ps-0', textStyle[size], className)}
       style={style}
       data-disabled={disabled || undefined}
+      // The box shows prefix / supporting text outside the native field: it carries the disabled state too.
+      aria-disabled={disabled || undefined}
       onPointerDown={onBoxPointerDown}
       {...forceAttr(shownForce)}
     >
       {prefix && !select && (
         <span
+          data-anatomy="prefix"
           className={cn(
             adornText,
             'flex items-center self-stretch border-e-(length:--border-width-default) border-border-default group-data-[disabled=true]/tc:border-border-disabled',
@@ -316,10 +325,10 @@ export function TextControl({
         </span>
       )}
       {/* Content: fills; adornments stay fixed. */}
-      <div className="flex h-full min-w-0 flex-1 items-center gap-md">{control}</div>
-      {showHelpIcon && !invalid && <HelpIcon text={helpText} label="More information" className="group-data-[disabled=true]/tc:text-icon-disabled" />}
+      <div data-anatomy="content" className="flex h-full min-w-0 flex-1 items-center gap-md">{control}</div>
+      {showHelpIcon && !invalid && <HelpIcon text={helpText} label="More information" className="group-data-[disabled=true]/tc:text-icon-disabled" data-anatomy="trailing-slot" />}
       {keys.length > 0 && (
-        <span className="flex shrink-0 items-center gap-xxs" aria-hidden={!!rest['aria-keyshortcuts'] || undefined}>
+        <span data-anatomy="trailing-slot" className="flex shrink-0 items-center gap-xxs" aria-hidden={!!rest['aria-keyshortcuts'] || undefined}>
           {keys.map((k) => (
             <Kbd key={k} size="sm" text={k} />
           ))}
@@ -328,6 +337,7 @@ export function TextControl({
       {trailingIcon &&
         (onTrailingIconClick ? (
           <button
+            data-anatomy="trailing-slot"
             type="button"
             aria-label={trailingIconLabel}
             onClick={onTrailingIconClick}
@@ -342,10 +352,10 @@ export function TextControl({
             <Icon name={trailingIcon} size="md" />
           </button>
         ) : (
-          <Icon name={trailingIcon} size="md" className={adornIcon} />
+          <Icon name={trailingIcon} size="md" className={adornIcon} data-anatomy="trailing-slot" />
         ))}
-      {invalid && <Icon name="alerts/alert-circle" size="sm" className="shrink-0 text-icon-danger" />}
-      {select && <Icon name="arrows/chevron-down" size="md" className={adornIcon} />}
+      {invalid && <Icon name="alerts/alert-circle" size="sm" className="shrink-0 text-icon-danger" data-anatomy="trailing-slot" />}
+      {select && <Icon name="arrows/chevron-down" size="md" className={adornIcon} data-anatomy="chevron" />}
     </div>
   );
 }

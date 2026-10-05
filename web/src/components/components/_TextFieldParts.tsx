@@ -89,6 +89,7 @@ export function TextFieldAddon({
   if (type === 'button') {
     return (
       <Button
+        data-anatomy="addon"
         size={size}
         emphasis="secondary"
         label={text}
@@ -103,6 +104,7 @@ export function TextFieldAddon({
   if (type === 'stepper') {
     return (
       <button
+        data-anatomy="addon"
         type="button"
         aria-label={label}
         disabled={disabled}
@@ -115,8 +117,9 @@ export function TextFieldAddon({
     );
   }
   if (type === 'stepper-vertical') {
+    // − and + side by side (not stacked) so each target is at least 24 × 24 px (WCAG 2.5.8) at every Size.
     const cell = cn(
-      'flex flex-1 cursor-pointer items-center justify-center px-md outline-none [--addon-icon:var(--color-icon-secondary)]',
+      'flex cursor-pointer items-center justify-center px-md outline-none [--addon-icon:var(--color-icon-secondary)]',
       'transition-[background-color] duration-(--motion-duration-fast) ease-standard',
       'is-hover:bg-fill-neutral-subtle-hover is-hover:[--addon-icon:var(--color-icon-primary)]',
       'is-focus:relative is-focus:z-10 is-focus:shadow-focus-default',
@@ -124,15 +127,16 @@ export function TextFieldAddon({
     );
     return (
       <span
+        data-anatomy="addon"
         data-disabled={disabled || undefined}
-        className={cn(addonFrame(size, placement, invalid, false), 'flex-col items-stretch overflow-hidden')}
+        className={cn(addonFrame(size, placement, invalid, false), 'items-stretch overflow-hidden')}
       >
-        <button type="button" aria-label={stepUpLabel} disabled={disabled} onClick={onStepUp} className={cell} {...forceAttr(forceState)}>
-          <Icon name="arrows/chevron-up" size="sm" className="text-(--addon-icon)" />
-        </button>
-        <span aria-hidden className={cn('h-(--border-width-default) shrink-0', invalid ? 'bg-border-danger' : 'bg-border-default', disabled && 'bg-border-disabled')} />
         <button type="button" aria-label={stepDownLabel} disabled={disabled} onClick={onStepDown} className={cell} {...forceAttr(forceState)}>
-          <Icon name="arrows/chevron-down" size="sm" className="text-(--addon-icon)" />
+          <Icon name="general/minus" size="md" className="text-(--addon-icon)" />
+        </button>
+        <span aria-hidden className={cn('w-(--border-width-default) shrink-0', invalid ? 'bg-border-danger' : 'bg-border-default', disabled && 'bg-border-disabled')} />
+        <button type="button" aria-label={stepUpLabel} disabled={disabled} onClick={onStepUp} className={cell} {...forceAttr(forceState)}>
+          <Icon name="general/plus" size="md" className="text-(--addon-icon)" />
         </button>
       </span>
     );
@@ -140,7 +144,10 @@ export function TextFieldAddon({
   // dropdown: the visible text + chevron, with a native <select> on top for the menu and keyboard.
   return (
     <span
+      data-anatomy="addon"
       data-disabled={disabled || undefined}
+      // The visible value sits beside the (transparent) native select, so the addon carries the disabled state.
+      aria-disabled={disabled || undefined}
       className={cn(addonFrame(size, placement, invalid, !disabled), addonPadX[size], 'gap-xs')}
       {...forceAttr(forceState)}
     >
@@ -178,6 +185,10 @@ export interface TagBoxProps {
   placeholder?: string;
   describedBy?: string;
   required?: boolean;
+  /** Id of the field's Label: names the input that types new Tags. */
+  labelledBy?: string;
+  /** Accessible name of that input when no Label names it. Defaults to "Add a tag". */
+  ariaLabel?: string;
 }
 
 /** Tag box padding per Size: Text control padding-x, vertical padding centring an sm Tag in the control height. Shared with 3.5 Select tag box. */
@@ -208,12 +219,13 @@ export function useTagTyping(tags: string[], onAdd: (t: string) => void, onRemov
   return { draft, setDraft, commit, onKeyDown };
 }
 
-export function TextFieldTagBox({ size, type, status = 'none', disabled, forceState, tags, onAdd, onRemove, id, placeholder = 'Add people', describedBy, required }: TagBoxProps) {
+export function TextFieldTagBox({ size, type, status = 'none', disabled, forceState, tags, onAdd, onRemove, id, placeholder = 'Add people', describedBy, required, labelledBy, ariaLabel }: TagBoxProps) {
   const input = useRef<HTMLInputElement>(null);
   const { draft, setDraft, commit, onKeyDown } = useTagTyping(tags, onAdd, onRemove);
   const multi = type === 'multi-line';
   return (
     <div
+      data-anatomy="tag-box"
       className={cn(
         textControlSurface(status),
         'flex-wrap gap-sm',
@@ -223,6 +235,7 @@ export function TextFieldTagBox({ size, type, status = 'none', disabled, forceSt
         'cursor-text is-disabled:cursor-not-allowed',
       )}
       data-disabled={disabled || undefined}
+      aria-disabled={disabled || undefined}
       onPointerDown={(e) => {
         if (disabled || (e.target as HTMLElement).closest('button, input')) return;
         e.preventDefault();
@@ -242,6 +255,8 @@ export function TextFieldTagBox({ size, type, status = 'none', disabled, forceSt
         required={required && tags.length === 0}
         aria-invalid={status === 'invalid' || undefined}
         aria-describedby={describedBy}
+        aria-labelledby={labelledBy}
+        aria-label={labelledBy ? undefined : (ariaLabel ?? 'Add a tag')}
         placeholder={tags.length === 0 ? placeholder : undefined}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={onKeyDown}
@@ -284,6 +299,7 @@ export function CodeFieldCell({ size, status = 'none', digit = '', disabled, for
   const invalid = status === 'invalid';
   return (
     <input
+      data-anatomy="code-cell"
       ref={inputRef}
       inputMode="numeric"
       pattern="[0-9]*"

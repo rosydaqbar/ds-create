@@ -49,7 +49,7 @@ export function Switch({ size = 'md', type = 'default', checked, onCheckedChange
   const slim = type === 'slim';
   const motion = 'duration-(--motion-duration-fast) ease-standard';
   return (
-    <span className={cn('relative inline-flex shrink-0', root[type][size], className)} style={style}>
+    <span data-anatomy="root" className={cn('relative inline-flex shrink-0', root[type][size], className)} style={style}>
       <input
         type="checkbox"
         role="switch"
@@ -66,6 +66,7 @@ export function Switch({ size = 'md', type = 'default', checked, onCheckedChange
       {/* Track (default: the whole root; slim: a centred rail). */}
       <span
         aria-hidden
+        data-anatomy={slim ? 'rail' : 'track'}
         className={cn(
           'pointer-events-none absolute rounded-full transition-colors',
           motion,
@@ -78,6 +79,7 @@ export function Switch({ size = 'md', type = 'default', checked, onCheckedChange
       {/* .Main/Switch thumb */}
       <span
         aria-hidden
+        data-anatomy="thumb"
         className={cn(
           'pointer-events-none absolute rounded-full bg-switch-thumb-fill shadow-raised transition-[translate,border-color]',
           // 1.6 Motion: the thumb moves at base · standard (instant in Reduced).

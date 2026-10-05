@@ -81,6 +81,7 @@ function AvatarIndicatorMark({
     const d = dotSize[size];
     return (
       <span
+        data-anatomy="indicator"
         className={cn('absolute bottom-0 right-0 rounded-full', type === 'online' ? 'bg-icon-success' : 'bg-icon-disabled')}
         style={{ width: d, height: d, boxShadow: ring }}
       />
@@ -89,7 +90,7 @@ function AvatarIndicatorMark({
   const m = markSize[size];
   if (type === 'verified') {
     return (
-      <span className="absolute -bottom-[2%] -right-[2%] inline-flex rounded-full bg-surface-base text-icon-brand" style={{ width: m, height: m }}>
+      <span data-anatomy="indicator" className="absolute -bottom-[2%] -right-[2%] inline-flex rounded-full bg-surface-base text-icon-brand" style={{ width: m, height: m }}>
         <Icon name="alerts/verified" style={{ width: '100%', height: '100%' }} />
       </span>
     );
@@ -97,6 +98,7 @@ function AvatarIndicatorMark({
   if (type === 'company') {
     return (
       <span
+        data-anatomy="indicator"
         className="absolute bottom-0 right-0 inline-flex items-center justify-center overflow-hidden rounded-xs bg-surface-base text-icon-tertiary"
         style={{ width: m, height: m, boxShadow: ring }}
       >
@@ -111,6 +113,7 @@ function AvatarIndicatorMark({
   const n = count ?? 0;
   return (
     <span
+      data-anatomy="indicator"
       className="absolute -bottom-[4%] -right-[10%] inline-flex items-center justify-center rounded-full bg-fill-danger-solid px-(--space-xxs) font-ui font-semibold text-text-on-solid"
       style={{ minWidth: m, height: m, fontSize: `calc(${m} * 0.7)`, lineHeight: 1, boxShadow: ring }}
     >
@@ -140,14 +143,14 @@ function AvatarContent({
   const [failed, setFailed] = useState(false);
   const showImage = type === 'image' && src && !failed;
   const resolved: AvatarType = showImage ? 'image' : type === 'image' ? (initials ? 'initials' : 'icon') : type;
-  if (resolved === 'image') return <img src={src} alt={alt ?? ''} onError={() => setFailed(true)} className="size-full object-cover" />;
+  if (resolved === 'image') return <img data-anatomy="content" src={src} alt={alt ?? ''} onError={() => setFailed(true)} className="size-full object-cover" />;
   if (resolved === 'initials')
     return (
-      <span aria-hidden className={cn('select-none uppercase text-avatar-placeholder-text', initialsClass)}>
+      <span aria-hidden data-anatomy="content" className={cn('select-none uppercase text-avatar-placeholder-text', initialsClass)}>
         {initials}
       </span>
     );
-  return <Icon name="users/user" size={iconSize} style={iconStyle} className="text-avatar-placeholder-icon" />;
+  return <Icon data-anatomy="content" name="users/user" size={iconSize} style={iconStyle} className="text-avatar-placeholder-icon" />;
 }
 
 export interface AvatarProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
@@ -190,6 +193,7 @@ export function Avatar({
   const label = accessibleName(alt ?? initials, indicator, count, companyName);
   return (
     <span
+      data-anatomy="root"
       role={label ? 'img' : undefined}
       aria-label={label || undefined}
       aria-hidden={label ? undefined : true}
@@ -197,13 +201,14 @@ export function Avatar({
       {...rest}
     >
       <span
+        data-anatomy="surface"
         className="flex size-full items-center justify-center overflow-hidden rounded-full bg-avatar-placeholder-fill">
         <AvatarContent type={size === '2xs' && type === 'initials' ? 'icon' : type} src={src} alt="" initials={size === '2xs' ? undefined : initials} initialsClass={initialsStyle[size]} iconSize={placeholderIcon[size]} />
       </span>
       {/* Inner contrast border: keeps photos and placeholders from bleeding into same-coloured surfaces. */}
       <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full border-(length:--border-width-default) border-border-subtle" />
       {showRing && (
-        <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full" style={{ boxShadow: `inset 0 0 0 ${ringWidth(size)} var(--color-surface-base)` }} />
+        <span aria-hidden data-anatomy="ring" className="pointer-events-none absolute inset-0 rounded-full" style={{ boxShadow: `inset 0 0 0 ${ringWidth(size)} var(--color-surface-base)` }} />
       )}
       {indicator && <AvatarIndicatorMark type={indicator} size={size} count={count} companySrc={companySrc} />}
     </span>
@@ -237,6 +242,7 @@ export function ProfilePhoto({ size = 'md', type = 'image', src, alt, initials, 
   const v = profileVerified[size];
   return (
     <span
+      data-anatomy="profile-photo"
       role={label ? 'img' : undefined}
       aria-label={label || undefined}
       aria-hidden={label ? undefined : true}
@@ -244,15 +250,15 @@ export function ProfilePhoto({ size = 'md', type = 'image', src, alt, initials, 
       {...rest}
     >
       {/* Outer wrapper: the ring. */}
-      <span className={cn('flex size-full rounded-full bg-surface-base shadow-raised', profileRing[size])}>
+      <span data-anatomy="outer-wrapper" className={cn('flex size-full rounded-full bg-surface-base shadow-raised', profileRing[size])}>
         {/* Avatar wrapper: clip + inner contrast border. */}
-        <span className="relative flex size-full items-center justify-center overflow-hidden rounded-full bg-avatar-placeholder-fill">
+        <span data-anatomy="avatar-wrapper" className="relative flex size-full items-center justify-center overflow-hidden rounded-full bg-avatar-placeholder-fill">
           <AvatarContent type={type} src={src} alt="" initials={initials} initialsClass={profileInitials[size]} iconStyle={{ width: '40%', height: '40%' }} />
           <span aria-hidden className="pointer-events-none absolute inset-0 rounded-full border-(length:--border-width-default) border-border-subtle" />
         </span>
       </span>
       {showVerified && (
-        <span className="absolute bottom-[4%] right-[4%] inline-flex rounded-full bg-surface-base text-icon-brand" style={{ width: v, height: v }}>
+        <span data-anatomy="verified" className="absolute bottom-[4%] right-[4%] inline-flex rounded-full bg-surface-base text-icon-brand" style={{ width: v, height: v }}>
           <Icon name="alerts/verified" style={{ width: '100%', height: '100%' }} />
         </span>
       )}

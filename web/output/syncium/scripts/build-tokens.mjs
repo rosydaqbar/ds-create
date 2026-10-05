@@ -218,6 +218,7 @@ const data = {
   })),
   effectStyles: src.effectStyles.map((s) => ({ name: s.name, css: effectName(s), tailwind: twNames[s.name], effects: s.effects, light: shadowCss(s, LIGHT), dark: shadowCss(s, DARK) })),
   gridStyles: src.gridStyles,
+  pages: src.pages ?? [],
 };
 mkdirSync(join(root, 'src/tokens'), { recursive: true });
 writeFileSync(

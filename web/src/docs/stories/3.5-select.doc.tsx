@@ -16,6 +16,11 @@ const ROW_COLS = ['rest · false', 'rest · true', 'hover · false', 'hover · t
 const W = 'w-(--size-width-xxs)';
 
 const people: SelectOption[] = selectSampleOptions.slice(0, 5);
+const longList: SelectOption[] = [
+  ...selectSampleOptions,
+  { value: 'drew', label: 'Drew Cano', supportingText: '@drew' },
+  { value: 'orlando', label: 'Orlando Diggs', supportingText: '@orlando' },
+];
 const reviewers: SelectOption[] = selectSampleOptions.map(({ value, label }) => ({ value, label }));
 const timezones = ['Pacific Time (UTC−08:00)', 'Eastern Time (UTC−05:00)', 'Greenwich Mean Time (UTC+00:00)', 'Central European Time (UTC+01:00)', 'India Standard Time (UTC+05:30)', 'Japan Standard Time (UTC+09:00)'];
 const statuses = ['Active', 'Paused', 'Archived'];
@@ -94,7 +99,7 @@ export default defineDoc({
   spec: 'components/3.5-select.md',
   exports: ['Select', 'MultiSelect'],
   summary:
-    'Pick one value from a list that may be long. The field opens a list directly under the trigger; options can show an icon, avatar or status dot, and the list scrolls when it is long. Multi-select picks several values: chosen values appear as removable tags in the field; options use checkboxes and the list can be searched, with an empty state when nothing matches.',
+    'Select lets people pick one option from a list that’s too long to show at once. Multi-select lets them pick several, shown as removable tags, with search to find options quickly.',
   hero: () => (
     <div className="flex min-h-[26rem] items-start">
       <Select className={W} size="md" type="avatar" label="Team member" options={people} defaultValue="olivia" defaultOpen inlinePopup />
@@ -133,7 +138,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Settings form',
-      caption: 'Long option lists in a form: a timezone, and a status with its dot.',
+      caption: 'Use a select when the list is long, like timezones, or when each option needs a cue, like a status dot.',
       render: settingsForm,
       code: `<Select label="Timezone" placeholder="Select a timezone" options={timezones} defaultValue="Central European Time (UTC+01:00)" />
 <Select label="Status" type="dot" options={['Active', 'Paused', 'Archived']} defaultValue="Active" />
@@ -141,7 +146,7 @@ export default defineDoc({
     },
     {
       title: 'Assign reviewers',
-      caption: 'Several people at once: chosen values become tags, the list stays open while people pick.',
+      caption: 'When people pick several reviewers, each choice becomes a tag and the list stays open until they’re done.',
       render: () => (
         <div className="flex min-h-[25rem] items-start">
           <MultiSelect className={W} label="Reviewers" options={reviewers} defaultValues={['olivia', 'phoenix', 'lana']} defaultOpen inlinePopup />
@@ -156,7 +161,7 @@ export default defineDoc({
     },
     {
       title: 'Filter bar',
-      caption: 'Small Selects side by side above a table; each shows the kind of value it filters by.',
+      caption: 'Small selects work well as filters above a table. Each one shows the kind of value it filters by.',
       stage: 'full',
       render: () => (
         <div className="flex w-full max-w-[48rem] flex-col gap-lg">
@@ -203,13 +208,13 @@ export default defineDoc({
   ],
   whenToUse: {
     use: [
-      'Choosing one value from more than about five options, or when space is tight.',
-      'Multi-select: choosing several values from a long list, with search.',
+      'Picking one value from more than about five options, or when space is tight.',
+      'Picking several values from a long list, with search to narrow it down (Multi-select).',
     ],
     dont: [
-      'Five or fewer options that should all stay visible — use Radios in a Choice field (3.3).',
-      'Actions rather than values — use a Menu (3.6).',
-      'A free value people type — use a Text field (3.2).',
+      'For five or fewer options that should all stay visible, use radios in a Choice field (3.3).',
+      'For actions rather than values, use a Menu (3.6).',
+      'For a value people type freely, use a Text field (3.2).',
     ],
   },
   matrices: [
@@ -237,22 +242,24 @@ export default defineDoc({
   privateParts: [
     ...OPTION_TYPES.map((type) => ({
       title: `.Main/Select option · Type=${type}`,
+      specimenRole: 'listbox' as const,
       rows: 'Size',
       columns: 'State → Selected',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">One row of a Select list. A list uses one Type for all its rows; the text keeps one left edge.</p>
+          <p className="type-body-sm-regular text-text-secondary">One row in a select list. Every row in a list uses the same type, so the text lines up on one left edge.</p>
           <Matrix rowProp="Size" rows={SIZES} colProp="State · Selected" cols={ROW_COLS} cell={(size, col) => rowCell(size, col, type)} />
         </div>
       ),
     })),
     {
       title: '.Main/Multi-select option',
+      specimenRole: 'listbox',
       rows: 'Size',
       columns: 'State → Selected',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">One row of a Multi-select list: a Checkbox (2.7) that follows the row’s state.</p>
+          <p className="type-body-sm-regular text-text-secondary">One row in a multi-select list. Its Checkbox (2.7) follows the row’s state.</p>
           <Matrix rowProp="Size" rows={SIZES} colProp="State · Selected" cols={ROW_COLS} cell={(size, col) => rowCell(size, col)} />
         </div>
       ),
@@ -263,7 +270,7 @@ export default defineDoc({
       columns: 'State',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">The trigger of Type=tags and Multi-select. Binds the Text control’s tokens because a Text control instance cannot hold Tags.</p>
+          <p className="type-body-sm-regular text-text-secondary">The trigger for the tags type and for Multi-select. It uses the Text control’s tokens directly, because a Text control instance can’t hold tags.</p>
           <Matrix
             rowProp="Size"
             rows={SIZES}
@@ -292,7 +299,7 @@ export default defineDoc({
       title: '.Main/Select scroll bar',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">A 4-wide thumb with no rail, inset space/xs from the list edge. It appears when the list is longer than select/list/max-height.</p>
+          <p className="type-body-sm-regular text-text-secondary">A 4px-wide thumb with no rail, set slightly in from the list edge. It appears once the list grows past its maximum height.</p>
           <div className={`relative h-40 w-24 ${selectListSurface}`}>
             <SelectScrollBar thumb={{ top: 0.15, size: 0.4, overflow: true }} />
           </div>
@@ -303,44 +310,48 @@ export default defineDoc({
   anatomy: {
     render: () => (
       <div className="flex flex-wrap items-start justify-center gap-4xl">
-        <Select className={W} label="Team member" hint="This is a hint text to help the user." options={people} value="olivia" />
+        <div className="flex flex-col gap-3xl">
+          <Select className={W} label="Team member" hint="This is a hint text to help the user." options={people} value="olivia" />
+          <MultiSelect className={W} label="Reviewers" options={reviewers} defaultValues={['olivia', 'phoenix']} />
+        </div>
         <div className="min-h-[24rem]">
-          <Select className={W} type="avatar" label="Team member" options={people} value="olivia" open inlinePopup />
+          {/* Eight options: more than select/list/max-height holds, so the list scrolls and shows its scroll bar. */}
+          <Select className={W} type="avatar" label="Team member" options={longList} value="olivia" open inlinePopup />
         </div>
       </div>
     ),
     parts: [
-      { name: 'Label', description: 'Label (2.11): sm for Size=sm, md for md and lg. Required marker and help icon exposed.', tokens: ['type/body/sm/medium'] },
-      { name: 'Trigger', description: 'Text control (2.10) Type=select (Type=search: single-line with a search icon and ⌘K); tags and Multi-select use the tag box. Heights 36 / 40 / 44.', tokens: ['size/control/md', 'text-control/padding-x/md', 'radius/control', 'color/border/default'] },
-      { name: 'Help text', description: 'Help text (2.12) under the trigger, same Size as the Label, Status as the field. Hidden while the list is open.', tokens: ['color/text/tertiary', 'color/text/danger'] },
-      { name: 'List', description: 'space/xs under the trigger, the trigger’s width, padding-y space/xs, max height select/list/max-height (320); then it scrolls.', tokens: ['color/surface/raised', 'color/border/subtle', 'radius/surface', 'elevation/overlay', 'select/list/max-height', 'space/xs'] },
-      { name: 'Option', description: '.Main/Select option: outer inset space/xxs × space/sm; content padding space/sm–md × space/md–lg, radius/control; leading visual, text (fills, truncates), supporting text, check.', tokens: ['radius/control', 'color/fill/neutral/subtle/hover', 'color/icon/brand'] },
-      { name: 'Leading visual', description: 'Icon (size/icon/md), Avatar (2.6) xs or a status dot, in a fixed avatar-xs box so the text keeps one edge.', tokens: ['size/icon/md', 'size/avatar/xs', 'size/indicator/sm', 'color/icon/success'] },
-      { name: 'Tag box', description: '.Main/Select tag box: removable Tags (2.5, sm) that wrap, the typing text and the chevron; Text control tokens.', tokens: ['tag/height/sm', 'space/sm'] },
-      { name: 'Scroll bar', description: '.Main/Select scroll bar: 4-wide thumb, no rail, inset space/xs.', tokens: ['color/fill/neutral/track', 'radius/full'] },
+      { name: 'Label', target: 'label', description: 'A Label (2.11) that names the field. It can show a required marker and a help icon, and is smaller on the small size.', tokens: ['type/body/sm/medium'] },
+      { name: 'Trigger', target: 'root', description: 'The field people click to open the list, built on the Text control (2.10). The search type adds a search icon and ⌘K; tags and Multi-select use the tag box. It’s 36, 40 or 44 px tall, by size.', tokens: ['size/control/md', 'text-control/padding-x/md', 'radius/control', 'color/border/default'] },
+      { name: 'Help text', target: 'help-text', description: 'Help text (2.12) below the trigger. It matches the label’s size and the field’s status, and hides while the list is open.', tokens: ['color/text/tertiary', 'color/text/danger'] },
+      { name: 'List', target: 'list', description: 'Opens just below the trigger, at the same width. It grows up to 320 px tall, then scrolls.', tokens: ['color/surface/raised', 'color/border/subtle', 'radius/surface', 'elevation/overlay', 'select/list/max-height', 'space/xs'] },
+      { name: 'Option', target: 'option', description: 'One choice in the list: an optional leading visual, the text, optional supporting text and a check on the selected option. Long text ends in an ellipsis.', tokens: ['radius/control', 'color/fill/neutral/subtle/hover', 'color/icon/brand'] },
+      { name: 'Leading visual', target: 'leading-visual', description: 'An icon, an Avatar (2.6) or a status dot. It sits in a fixed-size box, so the text starts on the same edge whichever you use.', tokens: ['size/icon/md', 'size/avatar/xs', 'size/indicator/sm', 'color/icon/success'] },
+      { name: 'Tag box', target: 'tag-box', description: 'Holds the chosen values as small removable Tags (2.5), the search text and the chevron. Tags wrap onto new lines as people add more.', tokens: ['tag/height/sm', 'space/sm'] },
+      { name: 'Scroll bar', target: 'scroll-bar', description: 'A 4px-wide thumb with no rail. It shows only when the list scrolls.', tokens: ['color/fill/neutral/track', 'radius/full'] },
     ],
   },
   props: [
-    { name: 'label', figma: 'Show label + Label', type: 'ReactNode', description: 'Label above the trigger. Without it, give the trigger an aria-label.' },
-    { name: 'hint', figma: 'Show hint + Hint', type: 'ReactNode', description: 'Help text under the trigger; the error message when invalid.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Trigger height and option rows; Label and Help text follow (sm → sm, md / lg → md).' },
-    { name: 'type', figma: 'Type', type: "'default' | 'icon' | 'avatar' | 'dot' | 'search' | 'tags'", default: "'default'", description: 'Select: what the trigger and the options show. search filters as people type; tags shows the value as a Tag.' },
-    { name: 'status', figma: 'Status', type: "'none' | 'invalid'", default: "'none'", description: 'Danger border and Help text; sets aria-invalid.' },
-    { name: 'options', type: '(SelectOption | string)[]', default: 'sample people', description: '{ value, label, supportingText?, icon?, avatar?, disabled? }. Strings are shorthand for value = label.' },
-    { name: 'value / defaultValue / onValueChange', figma: 'Filled (derived)', type: 'string | null', description: 'Select: the chosen option. Figma Filled comes from it.' },
-    { name: 'values / defaultValues / onValuesChange', figma: 'Filled (derived)', type: 'string[]', description: 'MultiSelect: the chosen options, shown as removable Tags.' },
-    { name: 'open / defaultOpen / onOpenChange', figma: 'Open', type: 'boolean', default: 'false', description: 'The list. Omit `open` for an uncontrolled list.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Not focusable; the list cannot open.' },
-    { name: 'placeholder', type: 'string', default: "'Select an option' · 'Search'", description: 'What to choose (“Select a timezone”).' },
-    { name: 'leadingIcon', type: 'IconName', default: "'users/user'", description: 'Type=icon: the icon before the placeholder; the chosen option’s icon replaces it.' },
-    { name: 'defaultQuery / onQueryChange', figma: 'Show empty state (derived)', type: 'string', description: 'Search text (search, tags, Multi-select). No match shows the empty state.' },
-    { name: 'emptyText', type: '(query) => ReactNode', default: '“No results for “{query}””', description: 'Empty-state text.' },
-    { name: 'required', type: 'boolean', description: 'Label required marker; aria-required on the trigger.' },
-    { name: 'showLabelHelpIcon / labelHelpText', type: 'boolean · ReactNode', description: 'The Label’s help icon and its Tooltip.' },
-    { name: 'name', type: 'string', description: 'Form name: hidden inputs carry the chosen value(s).' },
-    { name: 'inlinePopup', type: 'boolean', default: 'false', description: 'Lay the open list out in the page flow (the Figma Open variant hugs its list). Documentation and static layouts.' },
-    { name: 'forceState', type: "'focus'", description: 'Documentation only: Figma State=focus.' },
-    { name: '…trigger attributes', type: 'HTMLAttributes', description: 'id, aria-*, data-*, tabIndex and handlers go to the trigger control; className to the field.' },
+    { name: 'label', figma: 'Show label + Label', type: 'ReactNode', description: 'The label above the trigger. Without one, pass an aria-label so the trigger still has a name.' },
+    { name: 'hint', figma: 'Show hint + Hint', type: 'ReactNode', description: 'Help text below the trigger. When the status is invalid, it holds the error message.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Sets the trigger height and the option rows. The label and help text follow: sm uses sm, md and lg use md.' },
+    { name: 'type', figma: 'Type', type: "'default' | 'icon' | 'avatar' | 'dot' | 'search' | 'tags'", default: "'default'", description: 'Select only: what the trigger and options show. search filters as people type; tags shows the value as a Tag.' },
+    { name: 'status', figma: 'Status', type: "'none' | 'invalid'", default: "'none'", description: 'invalid shows a danger border and danger help text, and sets aria-invalid.' },
+    { name: 'options', type: '(SelectOption | string)[]', default: 'sample people', description: 'Each option is { value, label, supportingText?, icon?, avatar?, disabled? }. A plain string is shorthand for value = label.' },
+    { name: 'value / defaultValue / onValueChange', figma: 'Filled (derived)', type: 'string | null', description: 'Select only: the chosen option. The Figma Filled property follows from it.' },
+    { name: 'values / defaultValues / onValuesChange', figma: 'Filled (derived)', type: 'string[]', description: 'MultiSelect only: the chosen options, shown as removable tags.' },
+    { name: 'open / defaultOpen / onOpenChange', figma: 'Open', type: 'boolean', default: 'false', description: 'Whether the list is open. Leave out open for an uncontrolled list.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Takes the trigger out of the tab order and stops the list from opening.' },
+    { name: 'placeholder', type: 'string', default: "'Select an option' · 'Search'", description: 'Tells people what to choose, like “Select a timezone”.' },
+    { name: 'leadingIcon', type: 'IconName', default: "'users/user'", description: 'For the icon type: the icon before the placeholder. The chosen option’s icon replaces it.' },
+    { name: 'defaultQuery / onQueryChange', figma: 'Show empty state (derived)', type: 'string', description: 'The search text for search, tags and MultiSelect. When nothing matches, the empty state shows.' },
+    { name: 'emptyText', type: '(query) => ReactNode', default: '“No results for “{query}””', description: 'The message shown when no option matches.' },
+    { name: 'required', type: 'boolean', description: 'Adds the required marker to the label and aria-required to the trigger.' },
+    { name: 'showLabelHelpIcon / labelHelpText', type: 'boolean · ReactNode', description: 'Shows a help icon on the label, and the text of its tooltip.' },
+    { name: 'name', type: 'string', description: 'The form field name. Hidden inputs submit the chosen value or values.' },
+    { name: 'inlinePopup', type: 'boolean', default: 'false', description: 'Places the open list in the page flow instead of floating it, like the Figma Open variant. For documentation and static layouts.' },
+    { name: 'forceState', type: "'focus'", description: 'Documentation only: shows the focus state (Figma State=focus).' },
+    { name: '…trigger attributes', type: 'HTMLAttributes', description: 'id, aria-*, data-*, tabIndex and event handlers go to the trigger. className goes to the field.' },
   ],
   tokens: [
     'color/surface/raised', 'color/border/subtle', 'radius/surface', 'elevation/overlay', 'select/list/max-height', 'space/xs',
@@ -352,7 +363,7 @@ export default defineDoc({
   guidelines: [
     {
       title: 'Select, radios or menu',
-      body: 'A Select is for a value from a long list; radios for a value from a few visible options; a Menu for an action.',
+      body: 'Use a select to pick a value from a long list, and radios when there are only a few options to show. If the choice runs an action instead of setting a value, use a Menu (3.6).',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-3xl">
           <div className="flex flex-col gap-md">
@@ -375,7 +386,7 @@ export default defineDoc({
     },
     {
       title: 'Trigger and list',
-      body: 'The list opens space/xs under the trigger and matches its width. It is part of the field, not a separate panel placed next to it.',
+      body: 'The list opens just below the trigger and matches its width, so it reads as part of the field rather than a separate panel.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-3xl">
           <Select className={W} label="Team member" options={people} value="olivia" />
@@ -386,10 +397,10 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Option rows',
-      body: 'Leading visuals never move the text: icon, avatar and dot sit in one fixed box, so the text starts on the same edge in every list.',
+      title: 'Keep option text aligned',
+      body: 'Icons, avatars and status dots all sit in the same fixed-size box, so the text starts on the same edge in every list.',
       render: () => (
-        <div className={`flex flex-col py-xs ${W} ${selectListSurface}`}>
+        <div role="listbox" aria-label="Option types" className={`flex flex-col py-xs ${W} ${selectListSurface}`}>
           {OPTION_TYPES.map((t) => (
             <SelectOptionRow key={t} type={t} text={`Type=${t}`} avatar={{ initials: 'OR' }} />
           ))}
@@ -398,7 +409,7 @@ export default defineDoc({
     },
     {
       title: 'Long selected values',
-      body: 'Single values truncate; tags wrap and grow the field down.',
+      body: 'A long single value ends in an ellipsis. Tags wrap onto new lines instead, and the field grows taller to fit them.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-3xl">
           <Select className="w-[15rem]" label="Project" options={['Customer onboarding redesign for enterprise accounts']} value="Customer onboarding redesign for enterprise accounts" />
@@ -408,7 +419,7 @@ export default defineDoc({
     },
     {
       title: 'Search and empty state',
-      body: 'Typing filters the list and shows the matching part of each option in color/text/primary. When nothing matches, the list says so.',
+      body: 'As people type, the list narrows and picks out the matching part of each option in the primary text color. When nothing matches, the list says so.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-3xl">
           <div className="min-h-[14rem]">
@@ -419,19 +430,19 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Invalid',
-      body: 'A required Select left empty shows Status=invalid and says what to do in the Help text.',
+      title: 'Errors',
+      body: 'When people leave a required select empty, show the invalid status and use the help text to say what to do, like “Choose a timezone.”',
       render: () => <Select className={W} label="Timezone" required status="invalid" hint="Choose a timezone." options={timezones} placeholder="Select a timezone" />,
     },
     {
       title: 'Content',
-      body: 'Placeholders say what to choose (“Select a timezone”). Order options logically — alphabetical, most used first, or natural order. Keep option labels short and unique.',
+      body: 'Use the placeholder to say what to choose, like “Select a timezone”. Put options in an order people expect: alphabetical, most used first, or a natural order such as days of the week. Keep labels short and unique.',
     },
     {
       title: 'Open the list under the trigger',
-      body: 'The list belongs to its field.',
+      body: 'Keep the list attached to its field, so people can see which field they’re choosing for.',
       do: {
-        caption: 'The list opens directly under the trigger at its width.',
+        caption: 'The list opens right below the trigger, at the same width.',
         render: () => (
           <div className="min-h-[18rem]">
             <Select className="w-[15rem]" aria-label="Team member" options={people.slice(0, 3)} value="olivia" open inlinePopup />
@@ -439,11 +450,11 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'A detached list floating elsewhere.',
+        caption: 'A detached list floating away from its field.',
         render: () => (
           <div className="flex items-start gap-2xl">
             <Select className="w-[12rem]" aria-label="Team member" options={people} value="olivia" />
-            <div className={`mt-4xl flex w-[10rem] flex-col py-xs ${selectListSurface}`}>
+            <div role="listbox" aria-label="Team member" className={`mt-4xl flex w-[10rem] flex-col py-xs ${selectListSurface}`}>
               {people.slice(0, 3).map((p) => (
                 <SelectOptionRow key={p.value} size="sm" text={p.label} selected={p.value === 'olivia'} />
               ))}
@@ -454,11 +465,11 @@ export default defineDoc({
     },
     {
       title: 'Build rows from the option parts',
-      body: 'Rows come from .Main/Select option, so states, padding and alignment stay the same everywhere.',
+      body: 'Build every row from the Select option part (.Main/Select option), so states, padding and alignment match in every list.',
       do: {
-        caption: 'Option part rows.',
+        caption: 'Rows built from the option part.',
         render: () => (
-          <div className={`flex w-[14rem] flex-col py-xs ${selectListSurface}`}>
+          <div role="listbox" aria-label="Team member" className={`flex w-[14rem] flex-col py-xs ${selectListSurface}`}>
             {people.slice(0, 3).map((p) => (
               <SelectOptionRow key={p.value} size="sm" type="avatar" text={p.label} avatar={{ initials: p.label.split(' ').map((w) => w[0]).join('') }} selected={p.value === 'olivia'} />
             ))}
@@ -466,7 +477,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Rows typed by hand: uneven padding, no states.',
+        caption: 'Hand-made rows with uneven padding and no states.',
         render: () => (
           <div className={`flex w-[14rem] flex-col gap-xs p-sm ${selectListSurface}`}>
             {people.slice(0, 3).map((p, i) => (
@@ -479,12 +490,12 @@ export default defineDoc({
       },
     },
     {
-      title: 'Checkboxes in a Multi-select',
-      body: 'Multiple choices need checkboxes; single-select rows tell people they can pick one.',
+      title: 'Use checkboxes for several choices',
+      body: 'Checkboxes tell people they can pick more than one. Single-select rows suggest only one choice, so keep those for a select.',
       do: {
-        caption: 'Multi-select option rows.',
+        caption: 'Checkbox rows for picking several reviewers.',
         render: () => (
-          <div className={`flex w-[14rem] flex-col py-xs ${selectListSurface}`}>
+          <div role="listbox" aria-multiselectable aria-label="Reviewers" className={`flex w-[14rem] flex-col py-xs ${selectListSurface}`}>
             {people.slice(0, 3).map((p, i) => (
               <MultiSelectOptionRow key={p.value} size="sm" text={p.label} selected={i < 2} />
             ))}
@@ -492,9 +503,9 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Single-select rows used for several values.',
+        caption: 'Single-select rows used to pick several values.',
         render: () => (
-          <div className={`flex w-[14rem] flex-col py-xs ${selectListSurface}`}>
+          <div role="listbox" aria-label="Reviewers" className={`flex w-[14rem] flex-col py-xs ${selectListSurface}`}>
             {people.slice(0, 3).map((p, i) => (
               <SelectOptionRow key={p.value} size="sm" text={p.label} selected={i < 2} />
             ))}
@@ -504,10 +515,10 @@ export default defineDoc({
     },
     {
       title: 'Let tags wrap',
-      body: 'Chosen values stay readable: the tag box wraps and grows down.',
+      body: 'Let the tag box wrap and grow taller, so every chosen value stays readable.',
       do: { caption: 'Tags wrap onto a second line.', render: () => <MultiSelect className="w-[16rem]" aria-label="Reviewers" options={reviewers} values={['olivia', 'phoenix', 'lana', 'demi']} /> },
       dont: {
-        caption: 'Chosen values clipped at the edge.',
+        caption: 'Chosen values cut off at the edge.',
         render: () => (
           <div className="w-[16rem] [&_.flex-wrap]:flex-nowrap [&_.flex-wrap]:overflow-hidden">
             <MultiSelect aria-label="Reviewers" options={reviewers} values={['olivia', 'phoenix', 'lana', 'demi']} />
@@ -517,15 +528,15 @@ export default defineDoc({
     },
     {
       title: 'Maintenance',
-      body: 'Trigger looks come from the Text control (2.10); option rows, tag box and scroll bar live in .Main here; the list surface tokens are shared with Menu (3.6).',
+      body: 'The trigger’s look comes from the Text control (2.10). Option rows, the tag box and the scroll bar are private parts of this component. The list surface shares its tokens with the Menu (3.6), so changing them updates both.',
     },
   ],
   accessibility: [
-    'The Label names the select (aria-labelledby); the chosen value is announced with it. The trigger is a combobox with aria-expanded and aria-controls.',
-    'Enter, Space or Down opens the list; Up opens it on the last option; arrow keys, Home, End and Page keys move; Enter chooses; Escape closes and focus stays on the trigger; typing jumps to matching options.',
-    'Focus never leaves the trigger: the active option is aria-activedescendant and shows the hover look.',
-    'In a Multi-select each tag’s remove button has a name (“Remove Olivia Rhye”), and Backspace in the empty search removes the last tag.',
-    'Selected options are announced (aria-selected); the check and the checkbox give a non-colour cue.',
-    'A press outside or Tab closes the list.',
+    'Screen readers announce the label together with the chosen value (aria-labelledby). The trigger is a combobox with aria-expanded and aria-controls.',
+    'Enter, Space or Down opens the list, and Up opens it on the last option. Arrow keys, Home, End, Page Up and Page Down move through it, and typing jumps to a match. Enter chooses; Escape closes the list and keeps focus on the trigger.',
+    'Focus stays on the trigger while people move through the list. The active option is set with aria-activedescendant and shows the hover style.',
+    'In a multi-select, each tag’s remove button has its own name, like “Remove Olivia Rhye”. Backspace in an empty search removes the last tag.',
+    'Screen readers announce selected options (aria-selected). The check or checkbox shows the selection without relying on color.',
+    'Clicking or tapping outside the list, or pressing Tab, closes it.',
   ],
 });

@@ -80,4 +80,6 @@ return {
   textStyles,
   effectStyles,
   gridStyles,
+  // Page ids, so every docs page can link to its Figma page ("Open in Figma").
+  pages: figma.root.children.map((p) => ({ id: p.id, name: p.name })),
 };

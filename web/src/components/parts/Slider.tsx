@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type HTMLAttributes, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useId, useRef, useState, type HTMLAttributes, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { cn } from '@/lib/cn';
 import { forceAttr, type ForcedState } from '@/lib/types';
 import { TooltipBubble } from './Tooltip';
@@ -8,11 +8,15 @@ import { TooltipBubble } from './Tooltip';
  * Figma: `Slider` · Start value × End value × Placement (30 variants) · Show start handle;
  * private part `.Main/Slider handle` · State × Placement.
  * A single-value slider is `startValue={0}` with `showStartHandle={false}`.
+ * Every Slider needs an accessible name: `label`, `aria-label`, `aria-labelledby` or `endAriaLabel`.
+ * In a range the handles are named "{name} minimum" / "{name} maximum".
  */
 export type SliderPlacement = 'none' | 'bottom' | 'top';
 type HandleState = Extract<ForcedState, 'hover' | 'focus'>;
 
-export interface SliderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'children'> {
+interface SliderBaseProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'children'> {
+  /** Accessible name of the slider ("Price"). Range handles get "minimum" / "maximum" suffixes. Not rendered. */
+  label?: string;
   /** Figma `Start value`: where the progress line starts (the start handle's value). */
   startValue?: number;
   /** Figma `End value`: where the progress line ends (the end handle's value). */
@@ -26,9 +30,9 @@ export interface SliderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onCha
   step?: number;
   /** Called while a handle moves. Pass the values back as `startValue` / `endValue` to control the Slider. */
   onValueChange?: (start: number, end: number) => void;
-  /** Value text for labels and screen readers, with its unit: `(v) => `$${v}``. */
+  /** Value text for labels and screen readers (`aria-valuetext`), with its unit: `(v) => `$${v}``. */
   formatValue?: (v: number) => string;
-  /** Accessible names of the handles ("Minimum price", "Maximum price"). */
+  /** Accessible names of the handles ("Minimum price", "Maximum price"); override the names built from `label`. */
   startAriaLabel?: string;
   endAriaLabel?: string;
   disabled?: boolean;
@@ -39,6 +43,10 @@ export interface SliderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onCha
   /** Documentation only: `.Main/Slider handle` State of the start handle. */
   forceStartState?: HandleState;
 }
+
+/** A Slider must be named: by `label`, `aria-label`, `aria-labelledby` (id of a visible Label) or `endAriaLabel`. */
+type SliderName = { label: string } | { 'aria-label': string } | { 'aria-labelledby': string } | { endAriaLabel: string };
+export type SliderProps = SliderBaseProps & SliderName;
 
 type Which = 'start' | 'end';
 
@@ -51,8 +59,11 @@ export function Slider({
   max = 100,
   step = 1,
   onValueChange,
-  formatValue = (v) => String(v),
-  startAriaLabel = 'Minimum',
+  formatValue,
+  label,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
+  startAriaLabel,
   endAriaLabel,
   disabled = false,
   alwaysShowTooltip = false,
@@ -70,6 +81,20 @@ export function Slider({
   const area = useRef<HTMLDivElement>(null);
   const tie = useRef(false);
   const handles = { start: useRef<HTMLSpanElement>(null), end: useRef<HTMLSpanElement>(null) };
+  const uid = useId();
+  const display = formatValue ?? ((v: number) => String(v));
+
+  /** Accessible name of one handle: explicit handle label, else the slider name (+ minimum / maximum in a range). */
+  const nameOf = (which: Which): { 'aria-label'?: string; 'aria-labelledby'?: string } => {
+    const explicit = which === 'start' ? startAriaLabel : endAriaLabel;
+    if (explicit) return { 'aria-label': explicit };
+    const suffix = showStartHandle ? (which === 'start' ? 'minimum' : 'maximum') : undefined;
+    const base = label ?? ariaLabel;
+    if (base) return { 'aria-label': suffix ? `${base} ${suffix}` : base };
+    // Name from a visible Label plus the handle's own suffix ("Price minimum").
+    if (ariaLabelledby) return suffix ? { 'aria-label': suffix, 'aria-labelledby': `${ariaLabelledby} ${uid}-${which}` } : { 'aria-labelledby': ariaLabelledby };
+    return suffix ? { 'aria-label': suffix === 'minimum' ? 'Minimum' : 'Maximum' } : {};
+  };
 
   const range = max - min || 1;
   const pct = (v: number) => ((v - min) / range) * 100;
@@ -157,14 +182,16 @@ export function Slider({
     return (
       <span
         key={which}
+        data-anatomy={which === 'start' ? 'start-handle' : 'end-handle'}
         ref={handles[which]}
+        id={`${uid}-${which}`}
         role="slider"
         tabIndex={disabled ? -1 : 0}
-        aria-label={which === 'start' ? startAriaLabel : endAriaLabel ?? (showStartHandle ? 'Maximum' : undefined)}
+        {...nameOf(which)}
         aria-valuemin={which === 'start' ? min : showStartHandle ? values[0] : min}
         aria-valuemax={which === 'start' ? values[1] : max}
         aria-valuenow={v}
-        aria-valuetext={formatValue(v)}
+        aria-valuetext={formatValue?.(v)}
         aria-orientation="horizontal"
         aria-disabled={disabled || undefined}
         {...forceAttr(forced)}
@@ -186,15 +213,16 @@ export function Slider({
         style={{ left: `${pct(v)}%` }}
       >
         {placement === 'bottom' && (
-          <span aria-hidden className="type-body-md-medium pointer-events-none absolute left-1/2 top-full mt-md -translate-x-1/2 whitespace-nowrap text-text-primary">
-            {formatValue(v)}
+          <span aria-hidden data-anatomy="value-label" className="type-body-md-medium pointer-events-none absolute left-1/2 top-full mt-md -translate-x-1/2 whitespace-nowrap text-text-primary">
+            {display(v)}
           </span>
         )}
         {placement === 'top' && (
           <TooltipBubble
             aria-hidden
+            data-anatomy="value-label"
             placement="top"
-            text={formatValue(v)}
+            text={display(v)}
             className={cn(
               'pointer-events-none absolute bottom-full left-1/2 mb-md -translate-x-1/2 transition-[opacity,visibility] duration-(--motion-duration-fast) ease-standard',
               showTip ? 'visible opacity-100' : 'invisible opacity-0',
@@ -219,8 +247,9 @@ export function Slider({
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
         >
-          <div className="absolute inset-x-0 top-1/2 h-(--size-track-lg) -translate-y-1/2 rounded-full bg-fill-neutral-track" />
+          <div data-anatomy="background-track" className="absolute inset-x-0 top-1/2 h-(--size-track-lg) -translate-y-1/2 rounded-full bg-fill-neutral-track" />
           <div
+            data-anatomy="progress-line"
             className="absolute top-1/2 h-(--size-track-lg) -translate-y-1/2 rounded-full bg-fill-brand-solid"
             style={{ left: `${pct(lo)}%`, width: `${pct(values[1]) - pct(lo)}%` }}
           />

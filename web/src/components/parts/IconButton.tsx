@@ -68,6 +68,7 @@ export function IconButton({
   const s = size ?? 'md';
   return (
     <button
+      data-anatomy="root"
       type={type}
       disabled={disabled}
       aria-label={label}
@@ -76,7 +77,7 @@ export function IconButton({
       {...forceAttr(forceState)}
       {...rest}
     >
-      {loading ? <Spinner size={spinnerSize[s]} tone="current" /> : <Icon name={icon} size={iconSize[s]} />}
+      {loading ? <Spinner size={spinnerSize[s]} tone="current" /> : <Icon name={icon} size={iconSize[s]} data-anatomy="icon" />}
     </button>
   );
 }

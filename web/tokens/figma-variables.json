@@ -2609,10 +2609,10 @@
    "description": "Placeholder and empty-input hint text.",
    "values": {
     "Light": {
-     "alias": "palette/neutral/500"
+     "alias": "palette/neutral/600"
     },
     "Dark": {
-     "alias": "palette/neutral/500"
+     "alias": "palette/neutral/400"
     }
    }
   },
@@ -2693,10 +2693,10 @@
    "description": "Error messages and danger text, such as an invalid-field message.",
    "values": {
     "Light": {
-     "alias": "palette/red/700"
+     "alias": "palette/red/800"
     },
     "Dark": {
-     "alias": "palette/red/400"
+     "alias": "palette/red/200"
     }
    }
   },
@@ -2710,7 +2710,7 @@
      "alias": "palette/amber/700"
     },
     "Dark": {
-     "alias": "palette/amber/400"
+     "alias": "palette/amber/300"
     }
    }
   },
@@ -2724,7 +2724,7 @@
      "alias": "palette/green/700"
     },
     "Dark": {
-     "alias": "palette/green/400"
+     "alias": "palette/green/300"
     }
    }
   },
@@ -2738,7 +2738,7 @@
      "alias": "palette/blue/700"
     },
     "Dark": {
-     "alias": "palette/blue/400"
+     "alias": "palette/blue/300"
     }
    }
   },
@@ -3550,7 +3550,7 @@
      "alias": "palette/brand/700"
     },
     "Dark": {
-     "alias": "palette/brand/500"
+     "alias": "palette/brand/700"
     }
    }
   },
@@ -3564,7 +3564,7 @@
      "alias": "palette/brand/800"
     },
     "Dark": {
-     "alias": "palette/brand/700"
+     "alias": "palette/brand/800"
     }
    }
   },
@@ -3578,7 +3578,7 @@
      "alias": "palette/brand/700"
     },
     "Dark": {
-     "alias": "palette/brand/500"
+     "alias": "palette/brand/700"
     }
    }
   },
@@ -3690,7 +3690,7 @@
      "alias": "palette/red/700"
     },
     "Dark": {
-     "alias": "palette/red/500"
+     "alias": "palette/red/700"
     }
    }
   },
@@ -3704,7 +3704,7 @@
      "alias": "palette/red/800"
     },
     "Dark": {
-     "alias": "palette/red/700"
+     "alias": "palette/red/800"
     }
    }
   },
@@ -3718,7 +3718,7 @@
      "alias": "palette/red/700"
     },
     "Dark": {
-     "alias": "palette/red/500"
+     "alias": "palette/red/700"
     }
    }
   },
@@ -7478,10 +7478,10 @@
    "name": "social-button/gitlab/fg",
    "collection": "Components",
    "type": "COLOR",
-   "description": "Label and mark colour on the GitLab solid button.",
+   "description": "Label and mark color on the GitLab solid button: GitLab charcoal, so the label reaches 4.5:1 on GitLab orange (white is 2.85:1).",
    "values": {
-    "Light": "#ffffff",
-    "Dark": "#ffffff"
+    "Light": "#171321",
+    "Dark": "#171321"
    }
   },
   {

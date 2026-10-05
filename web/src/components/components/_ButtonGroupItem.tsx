@@ -64,6 +64,7 @@ export function ButtonGroupItemPart({
 }: ButtonGroupItemProps) {
   return (
     <button
+      data-anatomy="item"
       ref={buttonRef}
       type="button"
       disabled={disabled}
@@ -88,17 +89,17 @@ export function ButtonGroupItemPart({
       {...forceAttr(forceState)}
       {...rest}
     >
-      {showDivider && <span aria-hidden className="pointer-events-none absolute inset-y-0 start-0 w-(--border-width-default) bg-border-default" />}
+      {showDivider && <span aria-hidden data-anatomy="divider" className="pointer-events-none absolute inset-y-0 start-0 w-(--border-width-default) bg-border-default" />}
       {iconOnly ? (
-        <Icon name={leadingIcon ?? 'general/placeholder'} size="md" className="text-(--bgi-icon)" />
+        <Icon data-anatomy="leading-icon" name={leadingIcon ?? 'general/placeholder'} size="md" className="text-(--bgi-icon)" />
       ) : (
         <>
           {showDot ? (
-            <span aria-hidden className={cn('size-(--size-indicator-sm) shrink-0 rounded-full', disabled ? 'bg-icon-disabled' : 'bg-icon-success')} />
+            <span aria-hidden data-anatomy="dot" className={cn('size-(--size-indicator-sm) shrink-0 rounded-full', disabled ? 'bg-icon-disabled' : 'bg-icon-success')} />
           ) : (
-            leadingIcon && <Icon name={leadingIcon} size="md" className="text-(--bgi-icon)" />
+            leadingIcon && <Icon data-anatomy="leading-icon" name={leadingIcon} size="md" className="text-(--bgi-icon)" />
           )}
-          <span className="px-(--space-optical)">{label}</span>
+          <span data-anatomy="text-padding" className="px-(--space-optical)">{label}</span>
         </>
       )}
     </button>

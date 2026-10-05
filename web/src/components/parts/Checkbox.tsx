@@ -84,7 +84,7 @@ export function Checkbox({
   };
   const markStyle = { width: mark[size], height: mark[size] };
   return (
-    <span className={cn('relative inline-flex shrink-0', box[size], className)} style={style}>
+    <span data-anatomy="root" className={cn('relative inline-flex shrink-0', box[size], className)} style={style}>
       <input
         ref={ref}
         type="checkbox"
@@ -95,10 +95,10 @@ export function Checkbox({
         {...forceAttr(forceState)}
         {...rest}
       />
-      <span aria-hidden className={cn(choiceBoxClasses, mixedClasses, radius[size], !parentFocus && choiceFocusClasses)}>
+      <span aria-hidden data-anatomy="box" className={cn(choiceBoxClasses, mixedClasses, radius[size], !parentFocus && choiceFocusClasses)}>
         {/* 1.6 Motion: the mark scales in at base · standard (instant in Reduced). */}
-        <Icon name="general/check" strokeWidth={3} style={markStyle} className={cn('absolute', markMotion, '[.peer:checked~*_&]:scale-100 [.peer:checked~*_&]:opacity-100 [.peer:indeterminate~*_&]:scale-50 [.peer:indeterminate~*_&]:opacity-0')} />
-        <Icon name="general/minus" strokeWidth={3} style={markStyle} className={cn('absolute', markMotion, '[.peer:indeterminate~*_&]:scale-100 [.peer:indeterminate~*_&]:opacity-100')} />
+        <Icon data-anatomy="mark" name="general/check" strokeWidth={3} style={markStyle} className={cn('absolute', markMotion, '[.peer:checked~*_&]:scale-100 [.peer:checked~*_&]:opacity-100 [.peer:indeterminate~*_&]:scale-50 [.peer:indeterminate~*_&]:opacity-0')} />
+        <Icon data-anatomy="mark" name="general/minus" strokeWidth={3} style={markStyle} className={cn('absolute', markMotion, '[.peer:indeterminate~*_&]:scale-100 [.peer:indeterminate~*_&]:opacity-100')} />
       </span>
     </span>
   );

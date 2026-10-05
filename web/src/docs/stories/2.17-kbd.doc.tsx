@@ -30,7 +30,7 @@ export default defineDoc({
   level: 'parts',
   spec: 'parts/2.17-kbd.md',
   exports: ['Kbd'],
-  summary: 'Shows one keyboard key in a shortcut or an instruction. One key per Kbd; combinations are built by placing Kbds in a row. Display only.',
+  summary: 'Kbd shows a keyboard key in a shortcut or an instruction, like “Press Enter to send”. Use one per key, and place several in a row for a combination.',
   hero: () => (
     <div className="flex scale-150 items-center gap-3xl">
       <Kbd size="md" text="K" />
@@ -48,7 +48,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Menu with shortcuts',
-      caption: 'Shortcuts sit at the end of menu items, one Kbd per key.',
+      caption: 'Shortcuts sit at the end of each menu item, with one key per Kbd, so people learn them as they go.',
       render: () => (
         <div role="menu" className="flex w-[15rem] flex-col gap-xxs rounded-surface border border-border-subtle bg-surface-raised p-xs shadow-overlay">
           <MenuRow label="Copy" keys={['⌘', 'C']} />
@@ -63,13 +63,13 @@ export default defineDoc({
     },
     {
       title: 'Search field hint',
-      caption: 'A Kbd inside a field tells users how to reach it from anywhere.',
+      caption: 'A key inside the search field tells people how to jump to it from anywhere.',
       render: () => <TextControl aria-label="Search" aria-keyshortcuts="/" className="max-w-[20rem]" leadingIcon="general/search" placeholder="Search" shortcut="/" />,
       code: `<TextControl aria-label="Search" aria-keyshortcuts="/" leadingIcon="general/search" placeholder="Search" shortcut="/" />`,
     },
     {
       title: 'Tooltip with shortcut',
-      caption: 'Tooltips teach the shortcut for the control they name.',
+      caption: 'The tooltip that names a control is a natural place to teach its shortcut.',
       render: () => (
         <div className="pt-4xl">
           <Tooltip open text="Bold" trailing={<Keys keys={['⌘', 'B']} />}>
@@ -83,7 +83,7 @@ export default defineDoc({
     },
     {
       title: 'Inline instruction',
-      caption: 'Inline keys sit on the text line and match its size.',
+      caption: 'Inline keys sit on the line of text and match its size, so the sentence reads normally.',
       render: () => (
         <p className="type-body-md-regular text-text-secondary">
           Press <Kbd size="md" text="Enter" /> to send, or <Kbd size="md" text="Shift" /> + <Kbd size="md" text="Enter" /> for a new line.
@@ -95,8 +95,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Showing keyboard shortcuts next to the action they trigger.', 'Keys in instructions and help content.'],
-    dont: ['Code, values or file names — use code-styled text.', 'Clickable actions — use a Button.'],
+    use: ['Show a keyboard shortcut next to the action it triggers.', 'Show keys in instructions and help content.'],
+    dont: ['For code, values or file names, use code-styled text.', 'For something people click, use a Button (2.1).'],
   },
   matrices: [
     {
@@ -130,41 +130,45 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Key surface', description: 'Height kbd/height/{size}, min width = height so single characters are square; padding-x space/xs (sm) or space/sm (md). color/surface/sunken, inside border color/border/default, radius/xs.', tokens: ['kbd/height/sm', 'kbd/height/md', 'color/surface/sunken', 'color/border/default', 'radius/xs'] },
-      { name: 'Text', description: 'Single line, centred. type/body/xs/medium (sm) or type/body/sm/medium (md), color/text/secondary.', tokens: ['type/body/xs/medium', 'type/body/sm/medium', 'color/text/secondary'] },
+      { name: 'Key surface', target: 'key-surface', description: 'The small, sunken keycap with a thin border. Its height follows the size, and it’s never narrower than it is tall, so single characters sit in a square.', tokens: ['kbd/height/sm', 'kbd/height/md', 'color/surface/sunken', 'color/border/default', 'radius/xs'] },
+      { name: 'Text', target: 'text', description: 'The key’s name or symbol, on one line and centered. The md size uses a larger text style.', tokens: ['type/body/xs/medium', 'type/body/sm/medium', 'color/text/secondary'] },
     ],
   },
   props: [
-    { name: 'text', figma: 'Text', type: 'string', default: "'K'", description: 'One key: printed name or platform symbol. Symbols get a spoken text alternative (“Command”).' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'sm'", description: 'sm next to small text, menus, tooltips; md next to body text.' },
+    { name: 'text', figma: 'Text', type: 'string', default: "'K'", description: 'One key, as its printed name or platform symbol. Symbols get a spoken text alternative (“Command”).' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'sm'", description: 'Use sm next to small text and in menus and tooltips, and md next to body text.' },
   ],
   tokens: ['color/surface/sunken', 'color/border/default', 'border/width/default', 'radius/xs', 'color/text/secondary', 'type/body/xs/medium', 'type/body/sm/medium', 'space/xs', 'space/sm', 'space/xxs', 'kbd/height/sm', 'kbd/height/md'],
   guidelines: [
     {
       title: 'One key per Kbd',
-      body: 'Build a combination from one Kbd per key in a row, space/xxs apart. A whole shortcut in one Kbd (“⌘+K”) reads as one strange key and can’t wrap.',
-      do: { caption: 'Three Kbds: “Ctrl” “Shift” “P”.', render: () => <Keys size="md" keys={['Ctrl', 'Shift', 'P']} /> },
-      dont: { caption: 'One Kbd with “Ctrl+Shift+P”.', render: () => <Kbd size="md" text="Ctrl+Shift+P" /> },
+      body: 'Build a combination from one Kbd per key, placed in a row with a small gap. A whole shortcut in one Kbd (“⌘+K”) reads as one strange key and can’t wrap.',
+      do: { caption: 'Three keys: “Ctrl”, “Shift” and “P”.', render: () => <Keys size="md" keys={['Ctrl', 'Shift', 'P']} /> },
+      dont: { caption: 'One key reading “Ctrl+Shift+P”.', render: () => <Kbd size="md" text="Ctrl+Shift+P" /> },
     },
     {
       title: 'Match the platform',
-      body: 'Show the shortcut for the user’s platform — the command symbol on macOS, “Ctrl” elsewhere — not both side by side. Use the same symbols everywhere in the product.',
+      body: 'Show the shortcut for the platform people are on: the command symbol on macOS and “Ctrl” elsewhere, never both side by side. Use the same symbols everywhere in the product.',
       render: () => (
         <div className="flex flex-wrap gap-4xl">
           <div className="flex w-[13rem] flex-col gap-xs">
             <span className="type-body-xs-semibold text-text-tertiary">macOS</span>
-            <MenuRow label="Copy" keys={['⌘', 'C']} />
+            <div role="menu" aria-label="Edit menu on macOS">
+              <MenuRow label="Copy" keys={['⌘', 'C']} />
+            </div>
           </div>
           <div className="flex w-[13rem] flex-col gap-xs">
             <span className="type-body-xs-semibold text-text-tertiary">Windows, Linux</span>
-            <MenuRow label="Copy" keys={['Ctrl', 'C']} />
+            <div role="menu" aria-label="Edit menu on Windows, Linux">
+              <MenuRow label="Copy" keys={['Ctrl', 'C']} />
+            </div>
           </div>
         </div>
       ),
     },
     {
       title: 'Size follows the text',
-      body: 'Use sm next to small text, in menus and tooltips; use md next to body text. A Kbd never makes the text line taller.',
+      body: 'Use sm next to small text and in menus and tooltips, and md next to body text. Either way, the key never makes the line of text taller.',
       render: () => (
         <div className="flex flex-col gap-lg">
           <p className="type-body-sm-regular text-text-secondary">
@@ -178,9 +182,9 @@ export default defineDoc({
     },
     {
       title: 'Display only',
-      body: 'A Kbd is never clickable. If the key also exists as an action on screen, use a Button. Don’t use a Kbd for code, values or file names; use code-styled text.',
+      body: 'A Kbd only shows a key, so people can’t click it. If the same action needs to be on screen, use a button. For code, values or file names, use code-styled text.',
       do: {
-        caption: 'A Button “Save” with its shortcut in the Tooltip.',
+        caption: 'A “Save” button with its shortcut in the tooltip.',
         render: () => (
           <div className="flex flex-col items-center gap-xs">
             <TooltipBubble text="Save" trailing={<Keys keys={['⌘', 'S']} />} />
@@ -188,17 +192,17 @@ export default defineDoc({
           </div>
         ),
       },
-      dont: { caption: 'A Kbd “Save” used as a button.', render: () => <Kbd size="md" text="Save" className="cursor-pointer" /> },
+      dont: { caption: 'A “Save” key used as a button.', render: () => <Kbd size="md" text="Save" className="cursor-pointer" /> },
     },
     {
       title: 'Content',
-      body: 'Use the key’s printed name with its usual capitalisation: “Enter”, “Esc”, “Shift”, “Tab”, “K”. Use a symbol only when the platform prints it on the key (arrows, ⌘, ⌥, ⇧, ↵); keep the same choice across the product. Single letters are upper case.',
+      body: 'Use the name printed on the key, capitalized as usual: “Enter”, “Esc”, “Shift”, “Tab”, “K”. Single letters are uppercase. Use a symbol only when the platform prints it on the key (arrows, ⌘, ⌥, ⇧, ↵), and make the same choice across the product.',
     },
   ],
   accessibility: [
     'Each key renders a native <kbd> element.',
-    'Symbols have a text alternative read by screen readers (⌘ → “Command”, ↵ → “Enter”); the glyph itself is hidden.',
-    'A shortcut shown next to a menu item or control is also exposed on the item itself (aria-keyshortcuts), not only drawn.',
-    'Text on the key fill meets the text contrast threshold in every colour mode.',
+    'Screen readers read a text alternative for each symbol (⌘ → “Command”, ↵ → “Enter”) and skip the glyph itself.',
+    'When a shortcut appears next to a menu item or control, the item itself also exposes it with aria-keyshortcuts, so screen readers announce it too.',
+    'Text on the key fill meets the text contrast threshold in every color mode.',
   ],
 });

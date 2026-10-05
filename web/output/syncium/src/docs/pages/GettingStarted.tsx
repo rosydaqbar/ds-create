@@ -7,7 +7,7 @@ import { Button, buttonVariants, Checkbox, FeaturedIcon, Label, Progress, Switch
 import { AnchorHeading, DocPage } from '../DocPage';
 import { Bullets, Caption, CodeBlock, DoDont, H3, InlineCode, P } from '../blocks';
 import { componentDocs, levelLabel, slugOf, staticPages } from '../registry';
-import { pageMeta, statusInfo, StatusPill } from '../meta';
+import { figmaNodeFor, pageMeta, statusInfo, StatusPill } from '../meta';
 
 /* ---------- data ---------- */
 const v = (name: string) => tokens.variables.find((t) => t.name === name);
@@ -994,7 +994,7 @@ export default function GettingStarted() {
       eyebrow="Guidance › 01 Getting started"
       title="Getting started"
       description={`What’s in the ${config.name}, how mature each part is, and where designers, developers and product managers should start.`}
-      figmaNode={pageMeta['01'].figmaNode}
+      figmaNode={figmaNodeFor('01')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'For designers', render: () => <ForDesigners /> },

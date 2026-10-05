@@ -62,8 +62,9 @@ export function Progress({ type = 'bar', size = 'md', value = 40, placement = 'n
 /* ---------- bar ---------- */
 function Track({ v, trackRef, grow }: { v: number; trackRef?: Ref<HTMLDivElement>; grow?: boolean }) {
   return (
-    <div ref={trackRef} className={cn('relative h-(--size-track-lg) w-full min-w-0 shrink-0 overflow-hidden rounded-full bg-fill-neutral-track', grow && 'flex-1 shrink')}>
-      <div className={cn('absolute inset-y-0 left-0 rounded-full bg-fill-brand-solid transition-[width]', motion, v === 0 && 'hidden')} style={{ width: `${v}%` }} />
+    <div ref={trackRef} data-anatomy="track" className={cn('relative h-(--size-track-lg) w-full min-w-0 shrink-0 overflow-hidden rounded-full bg-fill-neutral-track', grow && 'flex-1 shrink')}>
+      {/* At 0 the fill is hidden, so it is not an anatomy target there. */}
+      <div data-anatomy={v === 0 ? undefined : 'fill'} className={cn('absolute inset-y-0 left-0 rounded-full bg-fill-brand-solid transition-[width]', motion, v === 0 && 'hidden')} style={{ width: `${v}%` }} />
     </div>
   );
 }
@@ -90,6 +91,7 @@ function FloatingLabel({ v, text, side }: { v: number; text: string; side: 'top'
     <div
       ref={space}
       aria-hidden
+      data-anatomy="floating-label"
       className={cn('relative w-full shrink-0', side === 'top' ? 'pb-md' : 'pt-md')}
     >
       <span
@@ -109,7 +111,7 @@ function FloatingLabel({ v, text, side }: { v: number; text: string; side: 'top'
 }
 
 function ProgressBar({ v, text, placement, className, ...rest }: { v: number; text: string; placement: ProgressPlacement; className?: string } & HTMLAttributes<HTMLDivElement>) {
-  const valueLabel = <span className="type-body-sm-medium shrink-0 text-text-secondary tabular-nums">{text}</span>;
+  const valueLabel = <span data-anatomy="value-label" className="type-body-sm-medium shrink-0 text-text-secondary tabular-nums">{text}</span>;
   if (placement === 'right') {
     return (
       <div className={cn('flex w-full items-center gap-lg', className)} {...rest}>
@@ -163,10 +165,11 @@ function ProgressRing({
       {...rest}
     >
       <svg aria-hidden width={d} height={d} viewBox={`0 0 ${d} ${d}`} className="absolute left-0 top-0" style={{ transform: rotate }}>
-        <circle {...ring} style={{ ...geo, strokeDasharray: half ? '50 100' : undefined }} className="stroke-fill-neutral-track" />
+        <circle {...ring} data-anatomy="background" style={{ ...geo, strokeDasharray: half ? '50 100' : undefined }} className="stroke-fill-neutral-track" />
         {v > 0 && (
           <circle
             {...ring}
+            data-anatomy="progress-line"
             style={{ ...geo, strokeDasharray: `${sweep} 100` }}
             className={cn('stroke-fill-brand-solid transition-[stroke-dasharray]', motion)}
           />
@@ -174,6 +177,7 @@ function ProgressRing({
       </svg>
       <div
         aria-hidden
+        data-anatomy="number-and-label"
         className={cn(
           'absolute inset-x-0 flex flex-col items-center gap-xxs text-center',
           half ? 'bottom-0' : 'top-1/2 -translate-y-1/2',

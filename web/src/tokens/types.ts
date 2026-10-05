@@ -33,6 +33,8 @@ export interface TokenEffectStyle {
   dark: string;
 }
 export interface TokenData {
+  /** Figma pages (id, name) from the export; used for "Open in Figma" links. */
+  pages?: { id: string; name: string }[];
   source: string;
   collections: { name: string; modes: string[] }[];
   variables: TokenVariable[];

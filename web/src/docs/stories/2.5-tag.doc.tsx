@@ -59,7 +59,7 @@ export default defineDoc({
   spec: 'parts/2.5-tag.md',
   exports: ['Tag'],
   summary:
-    'Compact interactive values. Text, removable and count types, an optional checkbox for selectable tags, and optional dot, flag or avatar before the text. Three sizes and four states.',
+    'Tags are compact values people can add, remove, filter by or select. Use them for applied filters, recipients in a field, or a list of topics with counts.',
   hero: () => <Tag size="md" type="removable" label="Design" showDot />,
   playground: {
     controls: [
@@ -78,7 +78,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Applied filters',
-      caption: 'Removable tags show what is applied and how to remove it.',
+      caption: 'Removable tags show which filters are on, and let people remove each one.',
       render: () => <AppliedFilters />,
       code: `{filters.map((f) => (
   <Tag key={f} type="removable" label={f} onRemove={() => remove(f)} />
@@ -87,14 +87,14 @@ export default defineDoc({
     },
     {
       title: 'Multi-value input',
-      caption: 'Inside a field, tags wrap and the field grows.',
+      caption: 'Inside a field, tags wrap onto new lines and the field grows to fit.',
       render: () => <MultiValueInput />,
       code: `<Tag size="sm" type="removable" label="Olivia" avatar={{ src: olivia.photo, initials: 'OR' }} onRemove={() => remove('olivia')} />
 <Tag size="sm" type="removable" label="Lana" avatar={{ src: lana.photo, initials: 'LS' }} onRemove={() => remove('lana')} />`,
     },
     {
       title: 'Topic list with counts',
-      caption: 'Count tags show how many items each value holds.',
+      caption: 'Each count tag shows how many items sit under that topic.',
       render: () => (
         <div className="flex flex-wrap gap-sm">
           <Tag type="count" label="Design" count="12" onClick={() => {}} />
@@ -108,7 +108,7 @@ export default defineDoc({
     },
     {
       title: 'Selectable interests',
-      caption: 'Selectable tags work like checkboxes in a compact form.',
+      caption: 'Selectable tags work like a compact set of checkboxes.',
       render: () => (
         <fieldset className="flex flex-wrap gap-sm">
           <legend className="sr-only">Interests</legend>
@@ -126,8 +126,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Values the user adds, removes, filters by or selects.', 'Multiple values inside a field (people, labels, recipients).'],
-    dont: ['Read-only labels — use a Badge (2.4).', 'Actions — use a Button (2.1).', 'Navigation — use a Link (2.3).'],
+    use: ['For values people add, remove, filter by or select.', 'For several values inside one field, like people, labels or recipients.'],
+    dont: ['For read-only labels, use a Badge (2.4).', 'For actions, use a Button (2.1).', 'For navigation, use a Link (2.3).'],
   },
   matrices: [
     {
@@ -197,35 +197,35 @@ export default defineDoc({
   ],
   anatomy: {
     render: () => (
-      <div className="flex scale-150 flex-col items-center gap-lg">
+      <div className="flex scale-[2] flex-col items-center gap-lg">
         <Tag size="md" type="removable" label="Olivia" showCheckbox checked avatar={{ initials: 'OR' }} />
         <Tag size="md" type="count" label="Design" count="12" showDot />
       </div>
     ),
     parts: [
-      { name: 'Root', description: 'Horizontal, Hug, fixed height tag/height/{size}. Padding-x space/md · tag/padding-x/md · space/lg; trailing side tightens to tag/padding-x-tight/{size} with a close or count. Gap space/xs (sm) or space/sm. radius/sm, border/width/default.', tokens: ['tag/height/md', 'tag/padding-x/md', 'tag/padding-x-tight/md', 'radius/sm'] },
-      { name: 'Checkbox', description: 'Optional (Show checkbox): 2.7 Checkbox, Size=sm at every tag size. The whole tag is the hit target.', tokens: ['checkbox/size/sm'] },
-      { name: 'Leading visual', description: 'One at a time: dot (size/indicator/xs, sm at lg), flag or avatar (2.6, Size=2xs).', tokens: ['size/indicator/xs', 'size/avatar/2xs'] },
-      { name: 'Label', description: 'Single line, the semantic centre. type/body/xs/medium (sm) or type/body/sm/medium (md, lg).', tokens: ['type/body/sm/medium'] },
-      { name: 'Close / Count', description: 'Type=removable: .Main/Tag close (x at size/icon/xs, sm at lg; padding space/xxs; radius/xs). Type=count: .Main/Tag count (type/body/xs/medium, padding 0 space/xs, radius/xs).', tokens: ['space/xxs', 'radius/xs', 'type/body/xs/medium'] },
+      { name: 'Root', target: 'root', description: 'The container fits its content at a fixed height set by the size. The padding tightens on the trailing side when there’s a close or count.', tokens: ['tag/height/md', 'tag/padding-x/md', 'tag/padding-x-tight/md', 'radius/sm'] },
+      { name: 'Checkbox', target: 'box', description: 'An optional small Checkbox (2.7) that stays the same size at every tag size. The whole tag is the click target.', tokens: ['checkbox/size/sm'] },
+      { name: 'Leading visual', target: 'leading-visual', description: 'One optional visual before the label: a dot, a flag or an Avatar (2.6).', tokens: ['size/indicator/xs', 'size/avatar/2xs'] },
+      { name: 'Label', target: 'label', description: 'One line of text that carries the tag’s meaning. Medium and large tags use a larger text style.', tokens: ['type/body/sm/medium'] },
+      { name: 'Close / Count', target: 'close', description: 'Removable tags end with an x button that removes the value. Count tags end with a small number instead.', tokens: ['space/xxs', 'radius/xs', 'type/body/xs/medium'] },
     ],
   },
   props: [
-    { name: 'label', figma: 'Label', type: 'ReactNode', default: "'Label'", description: 'Visible text.' },
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Height 24 · 28 · 32, padding, label style and part sizes.' },
-    { name: 'type', figma: 'Type', type: "'text' | 'removable' | 'count'", default: "'text'", description: 'Trailing element: none, close or count. Never both.' },
-    { name: 'count', figma: 'Count', type: 'ReactNode', default: "'5'", description: 'Count value (type="count").' },
-    { name: 'showCheckbox', figma: 'Show checkbox', type: 'boolean', default: 'false', description: 'Leading 2.7 Checkbox; the tag becomes a label around it.' },
+    { name: 'label', figma: 'Label', type: 'ReactNode', default: "'Label'", description: 'The visible text.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Sets the height (24 · 28 · 32), padding, label style and the size of inner parts.' },
+    { name: 'type', figma: 'Type', type: "'text' | 'removable' | 'count'", default: "'text'", description: 'Chooses the trailing element: none, a close button or a count. A tag never has both.' },
+    { name: 'count', figma: 'Count', type: 'ReactNode', default: "'5'", description: 'The count value, shown when type="count".' },
+    { name: 'showCheckbox', figma: 'Show checkbox', type: 'boolean', default: 'false', description: 'Adds a Checkbox (2.7) before the label and turns the tag into a label wrapped around it.' },
     { name: 'checked', figma: 'Checkbox › Checked (exposed)', type: 'boolean', description: 'Controlled selection. Use defaultChecked for uncontrolled.' },
-    { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'Selection change.' },
-    { name: 'showDot', figma: 'Show dot', type: 'boolean', default: 'false', description: 'Leading dot (color/icon/success).' },
-    { name: 'flag', figma: 'Show flag + Flag', type: 'string', description: 'ISO country code; renders the 1.8 Flag asset.' },
-    { name: 'avatar', figma: 'Show avatar', type: '{ src?: string; initials?: string }', description: 'Leading 2.6 Avatar, Size=2xs.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Disabled tokens; close and checkbox disabled.' },
-    { name: 'onRemove', type: '() => void', description: 'Called by the close (type="removable").' },
-    { name: 'removeLabel', type: 'string', default: '"Remove {label}"', description: 'Accessible name of the close.' },
-    { name: 'onClick', type: '() => void', description: 'Text and count tags: renders the tag as a button.' },
-    { name: 'forceState', type: "'hover' | 'focus'", description: 'Documentation only: pins a pseudo-state (focus lands on the close for removable tags).' },
+    { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'Called when the selection changes.' },
+    { name: 'showDot', figma: 'Show dot', type: 'boolean', default: 'false', description: 'Adds a dot before the label (color/icon/success).' },
+    { name: 'flag', figma: 'Show flag + Flag', type: 'string', description: 'ISO country code. Renders the matching Flag (1.8) asset.' },
+    { name: 'avatar', figma: 'Show avatar', type: '{ src?: string; initials?: string }', description: 'Adds an Avatar (2.6) at the 2xs size before the label.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Applies the disabled style and disables the close button and checkbox.' },
+    { name: 'onRemove', type: '() => void', description: 'Called when the close button is pressed (type="removable").' },
+    { name: 'removeLabel', type: 'string', default: '"Remove {label}"', description: 'Accessible name of the close button.' },
+    { name: 'onClick', type: '() => void', description: 'For text and count tags. Renders the tag as a button.' },
+    { name: 'forceState', type: "'hover' | 'focus'", description: 'For documentation only. Pins a hover or focus state (on removable tags, focus lands on the close button).' },
   ],
   tokens: [
     'color/surface/base', 'color/surface/base/hover', 'color/fill/neutral/subtle/disabled', 'color/border/default', 'color/border/disabled',
@@ -237,8 +237,8 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Tag, Badge, filter control or Button',
-      body: 'Tag = a value the user manages. A Badge is read-only; a Button acts.',
+      title: 'Tag, badge or button',
+      body: 'Use a tag for a value people manage, like an applied filter. A badge is read-only, and a button performs an action, like adding a filter.',
       render: () => (
         <div className="flex w-full max-w-[34rem] flex-col gap-lg">
           <div className="flex flex-wrap items-center gap-sm">
@@ -254,8 +254,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Anatomy',
-      body: 'Four compositions: text only; removable (optional leading visual, label, close); count (optional leading visual, label, count); selectable (checkbox, optional leading visual, label).',
+      title: 'Four kinds of tag',
+      body: 'A tag can be plain text, removable, a count or selectable. Removable and count tags can start with a dot, flag or avatar, and end with a close or a number. Selectable tags start with a checkbox, before any leading visual.',
       render: () => (
         <div className="flex flex-wrap items-center gap-lg">
           <Tag label="Text" />
@@ -266,8 +266,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Removable vs selectable',
-      body: 'Removable: the close removes the value from a list or filter; the whole tag is not a button, only the close is. Selectable: the checkbox toggles the value; the whole tag is the hit target.',
+      title: 'Removable or selectable',
+      body: 'In a removable tag, only the close button is interactive. It removes the value from a list or filter.\n\nIn a selectable tag, the whole tag is the click target and toggles the checkbox.',
       render: () => (
         <div className="flex gap-2xl">
           <span className="rounded-sm outline-(length:--border-width-strong) outline-offset-(--space-xs) outline-dashed outline-border-brand-subtle">
@@ -280,8 +280,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Size and interaction of parts',
-      body: 'Close and checkbox scale with the tag. Rest, hover, focus and disabled side by side.',
+      title: 'Parts scale with the tag',
+      body: 'The close button grows with the tag, while the checkbox stays small at every size. The rows below show rest, hover, focus and disabled side by side.',
       render: () => (
         <div className="flex flex-col gap-md">
           {(['removable', 'text'] as const).map((t) => (
@@ -295,10 +295,10 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Label length and wrapping',
-      body: 'Tags stay compact; labels are one to three words. Long labels never force smaller padding or type. In a row, tags wrap to the next line; inside a field, the field grows.',
+      title: 'Keep labels short',
+      body: 'Tags stay compact, with labels of one to three words. A long label never gets smaller padding or type to fit.\n\nIn a row, tags wrap to the next line. Inside a field, the field grows.',
       do: {
-        caption: 'Shortened labels in a wrapping row.',
+        caption: 'Short labels in a wrapping row.',
         render: () => (
           <div className="flex max-w-[16rem] flex-wrap gap-sm">
             {['Billing', 'Enterprise', 'Q3 renewals', 'EMEA'].map((l) => <Tag key={l} type="removable" label={l} />)}
@@ -306,22 +306,22 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Tiny type to fit a long label.',
+        caption: 'Tiny type squeezed in to fit a long label.',
         render: () => <span className="type-body-xs-regular inline-flex h-(--tag-height-sm) items-center rounded-sm border border-border-default px-xxs text-text-secondary">Enterprise customers renewing in the third quarter</span>,
       },
     },
     {
-      title: 'Supporting visuals',
-      body: 'Country flags and avatars support the label; they are never the only meaning. Always show the name next to the flag or avatar.',
-      do: { caption: 'Flag and avatar with their names.', render: () => <div className="flex gap-sm"><Tag flag="br" label="Brazil" /><Tag avatar={{ initials: 'DK' }} label="Demi" /></div> },
-      dont: { caption: 'A flag or avatar alone without a name.', render: () => <div className="flex gap-sm"><Tag flag="br" label="" /><Tag avatar={{ initials: 'DK' }} label="" /></div> },
+      title: 'Pair flags and avatars with a name',
+      body: 'Flags and avatars support the label, but they can’t carry the meaning on their own. Show the name next to them every time.',
+      do: { caption: 'A flag and an avatar, each with a name.', render: () => <div className="flex gap-sm"><Tag flag="br" label="Brazil" /><Tag avatar={{ initials: 'DK' }} label="Demi" /></div> },
+      dont: { caption: 'A flag or avatar with no name.', render: () => <div className="flex gap-sm"><Tag flag="br" label="" /><Tag avatar={{ initials: 'DK' }} label="" /></div> },
     },
     {
       title: 'One trailing action',
-      body: 'Type holds the trailing element, so a tag never combines close and count. Tags are not navigation links or primary actions.',
+      body: 'The type decides the trailing element, so a tag never combines a close button and a count. Tags aren’t for navigation or primary actions.',
       do: { caption: 'One trailing action.', render: () => <Tag type="removable" label="Design" /> },
       dont: {
-        caption: 'Close and count on the same tag.',
+        caption: 'A close button and a count on the same tag.',
         render: () => (
           <span className="type-body-sm-medium inline-flex h-(--tag-height-md) items-center gap-sm rounded-sm border border-border-default bg-surface-base pl-(--tag-padding-x-md) pr-(--tag-padding-x-tight-md) text-text-secondary">
             Design
@@ -332,14 +332,14 @@ export default defineDoc({
       },
     },
     {
-      title: 'Maintenance',
-      body: 'Edit .Main/Tag close, .Main/Tag count or the 2.7 Checkbox to change every tag. Colour changes go through the tokens in the token map.',
+      title: 'Change tags in one place',
+      body: 'To change every tag at once, edit .Main/Tag close, .Main/Tag count or the Checkbox (2.7). Change colors through the tokens in the token map.',
     },
   ],
   accessibility: [
-    'Removable tags: the close has an accessible name (“Remove Design”), is reachable by keyboard, and reaches size/touch-min on touch platforms.',
-    'Selectable tags: a real checkbox inside a label; its state is announced and Space toggles it; the focus ring sits around the whole tag.',
-    'Focus is always visible: around the tag (text, count, selectable) or around the close (removable).',
-    'Label contrast meets text contrast in every mode.',
+    'In removable tags, the close button has its own name (“Remove Design”), works from the keyboard, and gets a tap area of at least size/touch-min on touch screens.',
+    'Selectable tags use a real checkbox inside a label. Screen readers announce its state, Space toggles it, and the focus ring wraps the whole tag.',
+    'Focus is always visible: around the tag for text, count and selectable tags, and around the close button for removable ones.',
+    'Label text meets text contrast in every mode.',
   ],
 });

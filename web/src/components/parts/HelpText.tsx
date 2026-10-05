@@ -21,8 +21,8 @@ const statuses = { none: 'text-text-tertiary', invalid: 'text-text-danger' } as 
 
 export function HelpText({ size = 'md', status = 'none', hint, children, className, ...rest }: HelpTextProps) {
   return (
-    <p aria-live="polite" className={cn('m-0 flex items-start', sizes[size], statuses[status], className)} {...rest}>
-      <span className="min-w-0">{hint ?? children ?? 'This is a hint text to help the user.'}</span>
+    <p data-anatomy="help-text" aria-live="polite" className={cn('m-0 flex items-start', sizes[size], statuses[status], className)} {...rest}>
+      <span data-anatomy="hint" className="min-w-0">{hint ?? children ?? 'This is a hint text to help the user.'}</span>
     </p>
   );
 }

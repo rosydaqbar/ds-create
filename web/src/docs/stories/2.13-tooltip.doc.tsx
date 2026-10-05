@@ -35,7 +35,7 @@ export default defineDoc({
   spec: 'parts/2.13-tooltip.md',
   exports: ['Tooltip', 'TooltipBubble', 'HelpIcon'],
   summary:
-    'Describes or identifies an element on hover or focus. A dark surface with a short text, optional supporting text and an arrow on the side of the trigger. Placement only changes where the arrow sits. Help icon is a help-circle icon that opens a Tooltip on hover and focus, used beside field labels.',
+    'Tooltips name or explain an element when people hover over it or focus it, like an icon-only button or a cut-off label. The help icon opens one beside a field label.',
   hero: () => (
     <div className="pt-[9rem]">
       <Tooltip open text="This is a tooltip" supportingText="Tooltips are used to describe or identify an element.">
@@ -64,7 +64,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Toolbar',
-      caption: 'Icon-only controls get their name from a Tooltip.',
+      caption: 'Each icon-only button shows its name in a tooltip, so people know what it does before they click.',
       render: () => (
         <div className="flex gap-xs pt-4xl">
           <Tooltip text="Bold">
@@ -88,7 +88,7 @@ export default defineDoc({
     },
     {
       title: 'Field help',
-      caption: 'Short, non-essential detail sits behind a help icon; what users need to fill the field stays in Help text.',
+      caption: 'Nice-to-know detail goes behind the help icon. What people need to fill in the field stays visible in the help text.',
       render: () => (
         <DemoField className="max-w-[20rem] pt-4xl">
           <Label htmlFor="tax" label="Tax ID" showHelpIcon helpText="We need this for invoices in some countries." helpPlacement="top-start" helpForceState="focus" />
@@ -102,7 +102,7 @@ export default defineDoc({
     },
     {
       title: 'Truncated name',
-      caption: 'A Tooltip can reveal the full text of a truncated label.',
+      caption: 'When a label is cut off, a tooltip shows the full text.',
       render: () => (
         <div className="w-full max-w-[22rem] overflow-visible rounded-surface border border-border-subtle bg-surface-base pt-0">
           <div className="type-body-xs-semibold border-b border-border-subtle px-lg py-md text-text-tertiary">File name</div>
@@ -121,7 +121,7 @@ export default defineDoc({
     },
     {
       title: 'Shortcut hint',
-      caption: 'Tooltips can teach a keyboard shortcut.',
+      caption: 'A tooltip is a good place to teach the keyboard shortcut for an action.',
       render: () => (
         <div className="pt-4xl">
           <Tooltip
@@ -144,8 +144,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Name an icon-only control or identify an image.', 'Show the full text of a truncated label.', 'Add short, non-essential detail on hover or focus.'],
-    dont: ['Information users need to complete a task — keep it visible or in Help text (2.12).', 'Links, buttons or other interactive content — use a popover or a dialog.', 'Disabled elements that can’t be focused.'],
+    use: ['Name an icon-only control or identify an image.', 'Show the full text of a truncated label.', 'Add a short, nice-to-know detail on hover or focus.'],
+    dont: ['For information people need to finish a task, keep it visible or use Help text (2.12).', 'For links, buttons or other interactive content, use a popover or a dialog.', 'Skip disabled elements that can’t be focused: keyboard users would never see the tooltip.'],
   },
   matrices: [
     {
@@ -231,24 +231,24 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Content', description: 'Vertical stack, padding space/md × space/lg (space/lg all round with supporting text), max width size/width/xxs, radius/surface, color/surface/inverse, elevation/overlay.', tokens: ['color/surface/inverse', 'radius/surface', 'elevation/overlay', 'size/width/xxs'] },
-      { name: 'Text', description: 'type/body/xs/semibold, color/text/inverse. Centred when alone; start-aligned with supporting text.', tokens: ['type/body/xs/semibold', 'color/text/inverse'] },
-      { name: 'Supporting text', description: 'Optional, type/body/xs/medium, color/text/inverse, space/xs under the text; wraps at the max width.', tokens: ['type/body/xs/medium', 'space/xs'] },
-      { name: 'Arrow', description: '.Main/Tooltip arrow, 16 × 6, a sibling of the Content with the same fill. Inset space/lg for -start / -end.', tokens: ['color/surface/inverse', 'space/lg'] },
-      { name: 'Help icon', description: 'help-circle at size/icon/sm; bounds are the icon only. The Tooltip sits space/xs outside, so opening it moves nothing.', tokens: ['size/icon/sm', 'color/icon/tertiary', 'color/icon/tertiary/hover', 'focus/default'] },
-      { name: 'Cursor', description: 'Pointer specimen for mockups (Show cursor), hover only.' },
+      { name: 'Content', target: 'content', description: 'The dark surface that holds the text. It wraps at a fixed maximum width and gets more padding when supporting text is shown.', tokens: ['color/surface/inverse', 'radius/surface', 'elevation/overlay', 'size/width/xxs'] },
+      { name: 'Text', target: 'text', description: 'The short title. It’s centered on its own and aligns to the start when supporting text follows.', tokens: ['type/body/xs/semibold', 'color/text/inverse'] },
+      { name: 'Supporting text', target: 'supporting-text', description: 'Optional detail just below the title. It wraps at the tooltip’s maximum width.', tokens: ['type/body/xs/medium', 'space/xs'] },
+      { name: 'Arrow', target: 'arrow', description: 'A 16 × 6 point that aims at the trigger, in the same color as the surface. With a start or end placement, it sits in from the corner.', tokens: ['color/surface/inverse', 'space/lg'] },
+      { name: 'Help icon', target: 'help-icon', description: 'A small help-circle icon with no extra padding around it. Its tooltip opens just outside, so nothing on the page shifts.', tokens: ['size/icon/sm', 'color/icon/tertiary', 'color/icon/tertiary/hover', 'focus/default'] },
+      { name: 'Cursor', target: 'cursor', description: 'A pointer you can show in mockups to illustrate the hover state.' },
     ],
   },
   props: [
-    { name: 'text', figma: 'Text', type: 'ReactNode', default: "'This is a tooltip'", description: 'A short phrase without a full stop. For icon-only triggers it matches their name.' },
-    { name: 'supportingText', figma: 'Show supporting text + Supporting text', type: 'ReactNode', description: 'One or two short sentences; present = shown.' },
-    { name: 'placement', figma: 'Placement', type: "'none' | 'top' | 'top-start' | 'top-end' | 'bottom' | 'left' | 'right'", default: "'top'", description: 'Side of the trigger. Flips when it would leave the viewport; `none` follows the pointer.' },
+    { name: 'text', figma: 'Text', type: 'ReactNode', default: "'This is a tooltip'", description: 'A short phrase with no full stop. For an icon-only trigger, it matches the trigger’s name.' },
+    { name: 'supportingText', figma: 'Show supporting text + Supporting text', type: 'ReactNode', description: 'One or two short sentences of detail. Shown when set.' },
+    { name: 'placement', figma: 'Placement', type: "'none' | 'top' | 'top-start' | 'top-end' | 'bottom' | 'left' | 'right'", default: "'top'", description: 'The side of the trigger the tooltip opens on. It flips when it would leave the viewport. none follows the pointer.' },
     { name: 'trailing', type: 'ReactNode', description: 'Content after the text, such as a Kbd shortcut.' },
-    { name: 'children', type: 'ReactElement', description: 'Tooltip: the trigger. It gets aria-describedby pointing at the tooltip.' },
-    { name: 'open', type: 'boolean', description: 'Documentation only: keep the tooltip open.' },
-    { name: 'HelpIcon · label', type: 'string', default: "'More information'", description: 'Accessible name of the help trigger, e.g. “More information about Tax ID”.' },
-    { name: 'HelpIcon · forceState', figma: 'State', type: "'hover' | 'focus'", description: 'Documentation only: shows the open tooltip statically.' },
-    { name: 'HelpIcon · showCursor', figma: 'Show cursor', type: 'boolean', default: 'false', description: 'Pointer specimen; only with forceState="hover".' },
+    { name: 'children', type: 'ReactElement', description: 'The trigger. It gets aria-describedby pointing at the tooltip.' },
+    { name: 'open', type: 'boolean', description: 'Documentation only: keeps the tooltip open.' },
+    { name: 'HelpIcon · label', type: 'string', default: "'More information'", description: 'The accessible name of the help trigger, for example “More information about Tax ID”.' },
+    { name: 'HelpIcon · forceState', figma: 'State', type: "'hover' | 'focus'", description: 'Documentation only: shows the tooltip open without any interaction.' },
+    { name: 'HelpIcon · showCursor', figma: 'Show cursor', type: 'boolean', default: 'false', description: 'Shows a pointer specimen. Use it only with forceState="hover".' },
   ],
   tokens: [
     'color/surface/inverse', 'color/text/inverse', 'elevation/overlay', 'radius/surface', 'type/body/xs/semibold', 'type/body/xs/medium',
@@ -257,8 +257,8 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'When a Tooltip is right',
-      body: 'Use a Tooltip to name an icon-only control, to identify an image, or to show the full text of a truncated label. Its content is a bonus: the interface must work without it.',
+      title: 'When to use a tooltip',
+      body: 'Use a tooltip to name an icon-only control, identify an image or show the full text of a cut-off label. Treat what it says as a bonus: the interface should still work without it.',
       render: () => (
         <div className="flex flex-wrap items-end gap-x-[6rem] gap-y-4xl pt-4xl">
           <div className="flex gap-xs">
@@ -278,9 +278,9 @@ export default defineDoc({
     },
     {
       title: 'Keep essential information visible',
-      body: 'Instructions users need to complete a task — formats, rules, consequences — belong in the interface or in Help text (2.12). A Tooltip is hidden until hovered or focused and doesn’t exist on touch screens.',
+      body: 'Instructions people need to finish a task, like formats, rules and consequences, belong on the screen or in Help text (2.12). A tooltip stays hidden until someone hovers or focuses, and most never appear on touch screens.',
       do: {
-        caption: 'Requirements in Help text; the help icon explains why.',
+        caption: 'Requirements in the help text, with the help icon explaining why.',
         render: () => (
           <DemoField className="w-[18rem] pt-4xl">
             <Label htmlFor="pw-tt-do" label="Password" showHelpIcon helpText="Strong passwords protect shared workspaces." helpPlacement="top-start" helpForceState="hover" />
@@ -290,7 +290,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Requirements only inside the help tooltip.',
+        caption: 'Requirements hidden inside the help tooltip.',
         render: () => (
           <DemoField className="w-[18rem] pt-4xl">
             <Label htmlFor="pw-tt-dont" label="Password" showHelpIcon helpText="8+ characters, one number" helpPlacement="top-start" helpForceState="hover" />
@@ -300,11 +300,11 @@ export default defineDoc({
       },
     },
     {
-      title: 'Short title, optional supporting text',
-      body: 'The Text is a short phrase. Supporting text is one or two short sentences that add detail; turn it on only when the Text alone is not enough. A tooltip is read in passing, never as a paragraph.',
+      title: 'Keep it short',
+      body: 'Write the title as a short phrase. Add supporting text, one or two short sentences, only when the title alone isn’t enough. People read a tooltip in passing, not as a paragraph.',
       do: { caption: 'A short title with two short sentences.', render: () => <TooltipBubble text="Archive project" supportingText="Archived projects are read-only. You can restore them at any time." /> },
       dont: {
-        caption: 'A paragraph and a list.',
+        caption: 'A paragraph and a list in one tooltip.',
         render: () => (
           <TooltipBubble
             text="About archiving"
@@ -314,8 +314,8 @@ export default defineDoc({
       },
     },
     {
-      title: 'Placement and collisions',
-      body: 'Pick the side of the trigger with room to show the Tooltip; top is the default. In the product the Tooltip flips to the opposite side when it would leave the viewport, and the arrow follows. Use -start / -end when the trigger is near the left or right edge of the screen. Use none only when the Tooltip follows the pointer, for example over a chart.',
+      title: 'Open on the side with room',
+      body: 'Top is the default. If the tooltip would leave the screen, it flips to the opposite side and the arrow follows. Use a start or end placement when the trigger sits near the left or right edge. Save none for a tooltip that follows the pointer, for example over a chart.',
       render: () => (
         <div className="flex flex-wrap justify-center">
           {PLACEMENTS.filter((p) => p !== 'none').map((p) => (
@@ -329,8 +329,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Hover, focus, keyboard and touch',
-      body: 'A Tooltip opens on hover after a short delay (motion/delay/tooltip) and on keyboard focus immediately; it closes when the pointer leaves or focus moves, and on Escape. It stays open while the pointer moves onto it. On touch, Help icon opens on tap and closes on a second tap or a tap elsewhere; other Tooltips don’t appear on touch. Disabled elements that can’t be focused never get a Tooltip.',
+      title: 'How it opens and closes',
+      body: 'A tooltip opens after a short delay on hover, and straight away on keyboard focus. It stays open while the pointer moves onto it, and closes when the pointer leaves, focus moves or someone presses Escape. On touch screens, only the help icon shows one: a tap opens it, and a second tap or a tap elsewhere closes it.',
       render: () => (
         <div className="flex flex-wrap items-end justify-center gap-xl">
           {([
@@ -349,8 +349,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'One family, many triggers',
-      body: 'Help icon uses the same Tooltip; it doesn’t draw its own surface. Change the Tooltip once — colour, radius, padding, type — and every help icon in every field updates.',
+      title: 'The help icon reuses the tooltip',
+      body: 'The help icon doesn’t draw its own surface. It opens the same tooltip, so when you change the tooltip’s color, radius, padding or type, every help icon updates too.',
       render: () => (
         <div className="flex flex-wrap items-end justify-center gap-4xl">
           <TooltipBubble text="Tooltip" />
@@ -363,16 +363,16 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Text is a short phrase without a full stop (“Copy link”, “Archive project”); for an icon-only control, it is the control’s name. Supporting text uses full sentences with full stops. Don’t repeat the trigger’s visible label. No links, buttons or other interactive content. Sentence case.',
+      body: 'Write the title in sentence case with no full stop, like “Copy link” or “Archive project”. For an icon-only control, it’s the control’s name. Use full sentences in supporting text. Don’t repeat the trigger’s visible label, and leave out links and buttons.',
       do: { caption: 'Names the icon-only action.', render: () => <TooltipBubble text="Copy link" /> },
-      dont: { caption: 'Title case, full stop, repeats a visible label.', render: () => <TooltipBubble text="Click Here To Copy The Link." /> },
+      dont: { caption: 'Title case, a full stop and a repeated label.', render: () => <TooltipBubble text="Click Here To Copy The Link." /> },
     },
   ],
   accessibility: [
-    'The tooltip has role="tooltip" and is linked to its trigger with aria-describedby; for an icon-only trigger its text also matches the trigger’s accessible name.',
-    'Help icon is a focusable button with an accessible name (“More information about Tax ID”); its Tooltip is its description.',
-    'Tooltips appear on keyboard focus, not only on hover, and close on Escape without moving focus.',
-    'Text on the inverse surface meets the text contrast threshold in every colour mode.',
-    'Hover-only triggers with essential content are an accessibility failure, not a style choice.',
+    'The tooltip has role="tooltip" and is linked to its trigger with aria-describedby. For an icon-only trigger, its text also matches the name screen readers announce for the trigger.',
+    'The help icon is a focusable button with its own name (“More information about Tax ID”), and screen readers read its tooltip as the description.',
+    'Tooltips open on keyboard focus as well as on hover. Escape closes them without moving focus.',
+    'Text on the dark surface meets the text contrast threshold in every color mode.',
+    'Putting essential content behind a hover-only trigger is an accessibility failure, not a style choice.',
   ],
 });

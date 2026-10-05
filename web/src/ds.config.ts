@@ -5,6 +5,8 @@
 export const config = {
   name: 'Design System',
   version: '1.0',
+  /** npm package that ships the tokens, styles and React components (`npm run build:package`). */
+  packageName: '@your-org/design-system',
   description: 'Tokens, components and guidance generated with ds-create. Replace this text with the system description from 00 Cover.',
   /** Logo files in public/brand/ (Light and Dark surfaces). */
   logo: { light: 'brand/lockup-light.svg', dark: 'brand/lockup-dark.svg', mark: 'brand/mark.svg' },

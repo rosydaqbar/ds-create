@@ -65,9 +65,9 @@ README.md      this file: structure and file map
 SYSTEM.md      page tree, page templates, documentation system, token and component naming
 INITIATOR.md   questionnaire and generation logic
 EXTEND.md      adding a component at any level after initiation
-WEB.md         web implementation: Tailwind-ready React library and explorer site built from the Figma file
+WEB.md         web implementation: Tailwind-ready React library, installable package and documentation site built from the Figma file
 templates/     templates/structure.md: the structure every page is built with (page → frames → blocks → items; no content)
-web/           brand-agnostic web template (React, Tailwind v4, explorer) that WEB.md copies and fills
+web/           brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that WEB.md copies and fills
 ```
 
 # 3. File map
@@ -226,6 +226,6 @@ npm run build:package  # the installable package in package/
 npm run qa             # every page and tab in Light and Dark: errors, overflow, WCAG 2.2 AA
 ```
 
-The example is one step ahead of the template. Accessibility fixes, the foundation guidance, search, status and changelog, the package build, the QA script and the rewritten copy were made in `web/output/syncium` first. They haven't been moved into `web/` and `WEB.md` yet.
+The example was built first, then reviewed against the standard set by mature public design systems. Its fixes were folded back into the template, `WEB.md` and the page specs. They include accessibility, contrast, foundation guidance, search, status and changelog, the package build, the QA gates and the copy voice. A new build starts from the corrected template.
 
 **Credit.** The Syncium brand (name, logo, colors and typography) comes from the Dribbble shot [Syncium SaaS Platform Brand Guidelines](https://dribbble.com/shots/25207945-Syncium-SaaS-Platform-Brand-Guidelines). All brand rights belong to its creator. It is used here only to demonstrate ds-create.

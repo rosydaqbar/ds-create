@@ -6,7 +6,7 @@ import { Icon } from '@/icons';
 import { Avatar, Flag, SocialButton, SocialMark, socialProviderName, socialProviders, type SocialProvider } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
 import { Caption, CodeBlock, InlineCode, P } from '../../blocks';
-import { pageMeta } from '../../meta';
+import { figmaNodeFor } from '../../meta';
 import type { Topic } from '../../types';
 
 /* ---------- data ---------- */
@@ -511,7 +511,7 @@ export default function BrandAssets() {
       eyebrow="Foundations › 1.8 Brand assets"
       title="Brand assets"
       description={`The ${product} logo, sign-in provider marks and flags are artwork, not tokens. Each piece belongs to its owner, so it keeps their colors and proportions.`}
-      figmaNode={pageMeta['1.8'].figmaNode}
+      figmaNode={figmaNodeFor('1.8')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Guidelines', render: () => <Topics items={TOPICS} /> },

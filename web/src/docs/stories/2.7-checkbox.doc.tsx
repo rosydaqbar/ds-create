@@ -63,7 +63,7 @@ export default defineDoc({
   level: 'parts',
   spec: 'parts/2.7-checkbox.md',
   exports: ['Checkbox'],
-  summary: 'The checkbox box. Two sizes, unchecked, checked and mixed, four states. Its marks are aligned optically to the box; labels are added by 3.3 Choice field.',
+  summary: 'Checkboxes let people pick any number of options from a set, or confirm a single statement in a form. This page covers the box itself; a Choice field (3.3) adds the label.',
   hero: () => <Checkbox size="md" defaultChecked aria-label="Example checkbox" />,
   playground: {
     controls: [
@@ -77,7 +77,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Table selection',
-      caption: 'The header checkbox is mixed when only some rows are selected.',
+      caption: 'The header shows a mixed state when only some rows are selected, and one click selects them all.',
       render: () => <TableSelection />,
       code: `const all = selected.length === rows.length ? true : selected.length ? 'mixed' : false;
 
@@ -91,14 +91,14 @@ export default defineDoc({
     },
     {
       title: 'Nested list',
-      caption: 'Mixed belongs to the parent; children are only checked or unchecked.',
+      caption: 'Only the parent can be mixed. Each child is either checked or unchecked.',
       render: () => <NestedList />,
       code: `<Checkbox size="md" checked={parent} onCheckedChange={(c) => setOn(c ? children : [])} /> All notifications
 <Checkbox size="md" checked={on.includes('email')} onCheckedChange={…} /> Email`,
     },
     {
       title: 'Filter menu',
-      caption: 'In menus and lists, the row is the hit target, not only the box.',
+      caption: 'In menus and lists, people can click anywhere on the row, not only the box.',
       render: () => (
         <div role="group" aria-label="Filter by status" className="flex w-[14rem] flex-col rounded-surface border border-border-subtle bg-surface-raised p-xs shadow-overlay">
           {['Active', 'Draft', 'Archived', 'Scheduled'].map((l, i) => (
@@ -115,8 +115,8 @@ export default defineDoc({
 </label>`,
     },
     {
-      title: 'Labelled checkbox',
-      caption: 'Labels come from Choice field; the box stays this Part.',
+      title: 'Labeled checkbox',
+      caption: 'For a checkbox with a label, use a Choice field (3.3). It wraps this box and adds the text.',
       render: () => (
         <Row label="I agree to the terms">
           <Checkbox size="md" />
@@ -129,8 +129,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Multiple selection from a set.', 'A single yes/no statement submitted with a form.'],
-    dont: ['One choice among several — use Radio (2.8).', 'Settings that apply immediately — use Switch (2.9).'],
+    use: ['Picking any number of options from a set.', 'Agreeing to a single statement in a form, like accepting the terms.'],
+    dont: ['For one choice among several, use a Radio (2.8).', 'For a setting that applies straight away, use a Switch (2.9).'],
   },
   matrices: [
     {
@@ -160,19 +160,19 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root (box)', description: 'Fixed square checkbox/size/{size} (16 · 20), radius checkbox/radius/{size}, border/width/default. Owns shape, border, checked fill, focus ring and disabled treatment. A real input covers it.', tokens: ['checkbox/size/sm', 'checkbox/size/md', 'checkbox/radius/sm', 'border/width/default'] },
-      { name: 'Mark', description: 'Icon general/check (Checked=true) or general/minus (Checked=mixed), checkbox/mark/{size} (12 · 14), centred. Absent when unchecked.', tokens: ['checkbox/mark/sm', 'checkbox/mark/md', 'color/icon/on-solid'] },
+      { name: 'Root (box)', target: 'box', description: 'The square box, 16 or 20px depending on the size. It draws the border, checked fill, focus ring and disabled look, and a real checkbox input sits on top of it.', tokens: ['checkbox/size/sm', 'checkbox/size/md', 'checkbox/radius/sm', 'border/width/default'] },
+      { name: 'Mark', target: 'mark', description: 'A check when the box is checked, or a minus when it’s mixed, centered in the box. It disappears when the box is unchecked.', tokens: ['checkbox/mark/sm', 'checkbox/mark/md', 'color/icon/on-solid'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'sm'", description: 'sm pairs with type/body/sm labels, md with type/body/md.' },
-    { name: 'checked', figma: 'Checked', type: "boolean | 'mixed'", description: 'Controlled value; mixed sets the native indeterminate state. Omit for uncontrolled.' },
-    { name: 'defaultChecked', type: "boolean | 'mixed'", description: 'Uncontrolled initial value.' },
-    { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'New value; a mixed box becomes true.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Native disabled input.' },
-    { name: 'name, value, required, aria-label …', type: 'InputHTMLAttributes', description: 'Native input attributes; the box submits with forms.' },
-    { name: 'parentFocus', type: 'boolean', default: 'false', description: 'The parent (a Tag, a row) draws the focus ring instead of the box.' },
-    { name: 'forceState', type: "'hover' | 'focus'", description: 'Documentation only: pins a pseudo-state.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md'", default: "'sm'", description: 'The box size. sm pairs with type/body/sm labels, md with type/body/md labels.' },
+    { name: 'checked', figma: 'Checked', type: "boolean | 'mixed'", description: 'The controlled value. Mixed sets the native indeterminate state. Leave it out for an uncontrolled checkbox.' },
+    { name: 'defaultChecked', type: "boolean | 'mixed'", description: 'The starting value of an uncontrolled checkbox.' },
+    { name: 'onCheckedChange', type: '(checked: boolean) => void', description: 'Called with the new value. Clicking a mixed box makes it true.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Disables the native input.' },
+    { name: 'name, value, required, aria-label …', type: 'InputHTMLAttributes', description: 'Passed to the native input, so the box submits with forms.' },
+    { name: 'parentFocus', type: 'boolean', default: 'false', description: 'Lets the parent, such as a tag or a row, draw the focus ring instead of the box.' },
+    { name: 'forceState', type: "'hover' | 'focus'", description: 'For documentation only. Pins the hover or focus look.' },
   ],
   tokens: [
     'color/surface/base', 'color/fill/brand/subtle', 'color/fill/neutral/subtle/disabled',
@@ -183,8 +183,8 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Checkbox, Radio or Switch',
-      body: 'Checkbox for any number of choices or a single confirmation submitted with a form. Radio for exactly one of several. Switch for a setting that applies immediately.',
+      title: 'Checkbox, radio or switch',
+      body: 'Use checkboxes when people can pick any number of options, or confirm one statement in a form. Use radios when exactly one option fits, and a switch when the setting applies straight away.',
       render: () => (
         <div className="grid w-full gap-xl md:grid-cols-3">
           <div className="flex flex-col gap-md">
@@ -207,18 +207,18 @@ export default defineDoc({
           </div>
         </div>
       ),
-      do: { caption: 'Checkbox for multiple choices.', render: () => <div className="flex flex-col gap-sm"><Row label="Design"><Checkbox defaultChecked /></Row><Row label="Research"><Checkbox defaultChecked /></Row></div> },
-      dont: { caption: 'Checkbox for a single choice among several (use Radio).', render: () => <div className="flex flex-col gap-sm"><Row label="Monthly"><Checkbox /></Row><Row label="Yearly"><Checkbox defaultChecked /></Row></div> },
+      do: { caption: 'Checkboxes for options people can combine.', render: () => <div className="flex flex-col gap-sm"><Row label="Design"><Checkbox defaultChecked /></Row><Row label="Research"><Checkbox defaultChecked /></Row></div> },
+      dont: { caption: 'Checkboxes where only one option fits. Use radios.', render: () => <div className="flex flex-col gap-sm"><Row label="Monthly"><Checkbox /></Row><Row label="Yearly"><Checkbox defaultChecked /></Row></div> },
     },
     {
       title: 'Unchecked, checked and mixed',
-      body: 'Mixed (partly checked) only appears on a parent whose children are partly checked. Clicking a mixed parent checks all children. Mixed is never an end-state a user picks directly.',
+      body: 'A parent shows the mixed state when only some of its children are checked. Clicking it checks all of them. People never pick mixed directly; it follows from the children.',
       render: () => <NestedList />,
-      dont: { caption: 'Mixed on a child item.', render: () => <div className="flex flex-col gap-sm"><Row label="All notifications"><Checkbox checked /></Row><Row label="Email" indent><Checkbox checked="mixed" /></Row></div> },
+      dont: { caption: 'A mixed state on a child item.', render: () => <div className="flex flex-col gap-sm"><Row label="All notifications"><Checkbox checked /></Row><Row label="Email" indent><Checkbox checked="mixed" /></Row></div> },
     },
     {
       title: 'Size',
-      body: 'sm in dense tables, menus and tags; md in forms and settings. One size per list.',
+      body: 'Use small checkboxes in dense tables, menus and tags, and medium ones in forms and settings. Keep one size within a list.',
       render: () => (
         <div className="flex gap-3xl">
           <Row label="Small, type/body/sm"><Checkbox size="sm" defaultChecked /></Row>
@@ -228,7 +228,7 @@ export default defineDoc({
     },
     {
       title: 'Labels and hit targets',
-      body: 'In product, a checkbox almost always has a visible label (3.3 Choice field); an unlabelled box is only acceptable when the row or column header labels it (tables). The label and the box are one hit target.',
+      body: 'A checkbox almost always needs a visible label, which a Choice field (3.3) adds. Leave the box unlabeled only in tables, where the row or column header names it.\n\nMake the label and the box one target, so a click on either one toggles it.',
       render: () => (
         <label className="flex w-full max-w-[22rem] cursor-pointer items-center gap-md rounded-control px-lg py-md outline-(length:--border-width-strong) outline-offset-(--space-xxs) outline-dashed outline-border-brand-subtle is-hover:bg-surface-base-hover">
           <Checkbox />
@@ -236,19 +236,19 @@ export default defineDoc({
           <span className="type-body-xs-regular text-text-tertiary">2.4 MB</span>
         </label>
       ),
-      dont: { caption: 'An unlabelled checkbox outside tables.', render: () => <Checkbox aria-label="Unlabelled" /> },
+      dont: { caption: 'An unlabeled checkbox outside a table.', render: () => <Checkbox aria-label="Unlabeled" /> },
     },
     {
       title: 'Maintenance',
-      body: 'Edit the tokens in the token map or this component to change every checkbox in the system, including those inside tags, menus, tables and Choice fields. 2.8 Radio uses the same fill, border and focus tokens.',
-      dont: { caption: 'A checkbox that applies a setting immediately without a submit (use Switch).' },
+      body: 'Change the tokens in the token map, or this component, to update every checkbox in the system, including those in tags, menus, tables and choice fields. Radio (2.8) shares the same fill, border and focus tokens, so it updates too.',
+      dont: { caption: 'A checkbox that applies a setting straight away, with no submit. Use a switch.' },
     },
   ],
   accessibility: [
-    'A real `<input type="checkbox">`: Space toggles it and it submits with forms.',
-    'Checked and mixed are shown by the mark, not by colour alone; mixed is announced as “mixed” (native indeterminate).',
-    'Focus ring (focus/default) is always visible.',
-    'The unchecked border (color/border/strong) meets the non-text contrast threshold (3:1) against the surface.',
-    'On its own, the box reaches size/touch-min on touch platforms through an invisible hit area; in rows the whole row is the target.',
+    'It’s a real <input type="checkbox">, so Space toggles it and it submits with forms.',
+    'The mark shows checked and mixed, so the state doesn’t rely on color alone. Screen readers announce mixed as “mixed” (native indeterminate).',
+    'Keyboard users always see the focus ring (focus/default).',
+    'The unchecked border (color/border/strong) meets 3:1 non-text contrast against the surface.',
+    'On touch screens, an invisible hit area brings a standalone box up to size/touch-min. In rows, the whole row is the target.',
   ],
 });

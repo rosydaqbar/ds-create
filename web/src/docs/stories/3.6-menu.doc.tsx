@@ -28,7 +28,11 @@ const manyItems: MenuItem[] = Array.from({ length: 16 }, (_, i) => ({ text: `Sav
 
 /** A static open panel built from the item part, as the Figma doc frames show it. */
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={`flex w-(--menu-width) flex-col py-xs ${menuPanelSurface} ${className ?? ''}`}>{children}</div>;
+  return (
+    <div role="menu" aria-label="Example menu" className={`flex w-(--menu-width) flex-col py-xs ${menuPanelSurface} ${className ?? ''}`}>
+      {children}
+    </div>
+  );
 }
 const row = (text: string, leading?: MenuItemLeadingProps, extra: Partial<Parameters<typeof MenuItemRow>[0]> = {}) => <MenuItemRow key={text} text={text} leading={leading} {...extra} />;
 const divider = (k: string) => <MenuItemRow key={k} type="divider" />;
@@ -56,7 +60,7 @@ export default defineDoc({
   spec: 'components/3.6-menu.md',
   exports: ['Menu', 'ContextMenu'],
   summary:
-    'A compact panel of related actions or options that opens from a trigger. Items share one row structure so icons, checks, avatars and shortcuts line up in every menu. A Context menu gives quick secondary actions on right-click or long-press; it is built from the same items and is never the only way to reach an action.',
+    'Menus keep a short list of actions or options behind a trigger, like Edit, Duplicate and Delete on a table row. A context menu offers the same kind of shortcuts on right-click or long press.',
   hero: () => <Menu type="button-advanced" defaultOpen inlinePopup />,
   playground: {
     controls: [
@@ -75,7 +79,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Table row actions',
-      caption: 'An icon trigger at the end of the row; the destructive action comes last, in danger.',
+      caption: 'Put row actions behind an icon button at the end of the row, with Delete last and in the danger color.',
       stage: 'full',
       render: () => <div className="flex min-h-[20rem] w-full items-start justify-center">{tableRow(<Menu type="icon-simple" defaultOpen />)}</div>,
       code: `<Menu
@@ -93,7 +97,7 @@ export default defineDoc({
     },
     {
       title: 'Workspace switcher',
-      caption: 'An account card in the sidebar header switches accounts; the current one is selected.',
+      caption: 'An account card at the top of the sidebar lets people switch accounts, with the current one selected.',
       render: () => (
         <div className="flex min-h-[26rem] w-[17rem] flex-col gap-lg rounded-surface border-(length:--border-width-default) border-border-subtle bg-surface-raised p-lg">
           <Menu type="account-card-md" defaultOpen />
@@ -114,7 +118,7 @@ export default defineDoc({
     },
     {
       title: 'Text selection',
-      caption: 'Right-click the paragraph (or Shift+F10) for shortcuts to actions that also live in the toolbar.',
+      caption: 'Right-click the paragraph, or press Shift+F10, for quick access to actions that are also in the toolbar.',
       render: () => (
         <ContextMenu type="simple" defaultOpen inlinePopup targetLabel="Paragraph">
           <p className="type-body-md-regular max-w-[22rem] p-md text-text-secondary">
@@ -128,7 +132,7 @@ export default defineDoc({
     },
     {
       title: 'Integrations',
-      caption: 'A toolbar button lists services; connected ones show a check.',
+      caption: 'A toolbar button lists the available services, and a check marks the ones already connected.',
       render: () => (
         <div className="flex min-h-[18rem] items-start gap-md">
           <Button emphasis="secondary" leadingIcon="general/filter" label="Filter" />
@@ -145,11 +149,11 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Actions on an object (“Edit, Duplicate, Delete”).', 'Switching accounts or workspaces.', 'Context menu: shortcuts to actions that are also available elsewhere.'],
+    use: ['Actions on one object, like Edit, Duplicate and Delete.', 'Switching accounts or workspaces.', 'Shortcuts to actions that are also available elsewhere, in a context menu.'],
     dont: [
-      'Picking a value for a form field — use a Select (3.5).',
-      'Two to five actions that should stay visible — use a Button group (3.1).',
-      'The only way to reach an action — never hide it in a Context menu alone.',
+      'For picking a value in a form field, use a Select (3.5).',
+      'For two to five actions that should stay visible, use a Button group (3.1).',
+      'For an action with no visible control, add one first. A context menu can only be a shortcut.',
     ],
   },
   matrices: [
@@ -195,11 +199,12 @@ export default defineDoc({
   privateParts: [
     {
       title: '.Main/Menu item',
+      specimenRole: 'menu',
       rows: 'Tone, then the divider',
       columns: 'State → Open',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">One row of every menu. Leading, shortcut and chevron keep their size; the text is the flexible part.</p>
+          <p className="type-body-sm-regular text-text-secondary">The row every menu is built from. The leading visual, shortcut and chevron keep a fixed size, and the text takes the rest of the space.</p>
           <Matrix
             rowProp="Tone"
             rows={['neutral', 'danger', 'divider'] as const}
@@ -232,10 +237,11 @@ export default defineDoc({
     },
     {
       title: '.Main/Menu item leading',
+      specimenRole: 'menu',
       columns: 'Type',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">Keeps the text on the same left edge in every row. Each type shown inside a sample item.</p>
+          <p className="type-body-sm-regular text-text-secondary">The slot before the text that keeps it on the same left edge in every row. Each type is shown inside a sample item.</p>
           <Matrix
             rowProp="Item"
             rows={['sample'] as const}
@@ -256,7 +262,7 @@ export default defineDoc({
       columns: 'Type',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">The top of a panel: the signed-in person, a title, a group subheading, or a search field (Text control 2.10).</p>
+          <p className="type-body-sm-regular text-text-secondary">The top of a menu: the signed-in person, a title, a group subheading or a search field (Text control, 2.10).</p>
           <Matrix
             rowProp="Show supporting text"
             rows={OPEN.slice().reverse() as unknown as readonly ('true' | 'false')[]}
@@ -278,10 +284,11 @@ export default defineDoc({
     },
     {
       title: '.Main/Menu footer',
+      specimenRole: 'menu',
       columns: 'Type',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">The bottom of a panel: a line of small print, or a full-width secondary Button. Padding matches the header.</p>
+          <p className="type-body-sm-regular text-text-secondary">The bottom of a menu: a line of small print or a full-width secondary button. Its padding matches the header.</p>
           <Matrix
             rowProp="Footer"
             rows={['sample'] as const}
@@ -298,11 +305,12 @@ export default defineDoc({
     },
     {
       title: '.Main/Menu account item',
+      specimenRole: 'menu',
       rows: 'Selected',
       columns: 'State',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">One account in a switcher: Avatar (2.6) and a Radio (2.8), because switching account is a single choice.</p>
+          <p className="type-body-sm-regular text-text-secondary">One account in a switcher, with an Avatar (2.6) and a Radio (2.8), because people pick one account at a time.</p>
           <Matrix
             rowProp="Selected"
             rows={OPEN}
@@ -323,7 +331,7 @@ export default defineDoc({
       columns: 'State',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">The trigger of the account-card and account-breadcrumb menus.</p>
+          <p className="type-body-sm-regular text-text-secondary">The trigger for the account card and account breadcrumb menus.</p>
           <Matrix
             rowProp="Type"
             rows={menuAccountTriggerTypes}
@@ -342,7 +350,7 @@ export default defineDoc({
       title: '.Main/Menu scroll bar',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">A 4-wide thumb with no rail, inset space/xs from the panel edge; it appears when the items are taller than the panel.</p>
+          <p className="type-body-sm-regular text-text-secondary">A 4px-wide thumb with no rail, set slightly in from the panel edge. It appears when the items don’t fit in the panel.</p>
           <div className={`relative h-40 w-24 ${menuPanelSurface}`}>
             <MenuScrollBar thumb={{ top: 0.2, size: 0.4, overflow: true }} />
           </div>
@@ -358,34 +366,39 @@ export default defineDoc({
           {row('Duplicate', { type: 'icon', icon: 'general/copy' }, { shortcut: ['⌘', 'D'] })}
           {row('Share', { type: 'icon', icon: 'general/share' }, { showChevron: true })}
         </Panel>
+        {/* A static long panel (clipped, as the Figma doc frames show it): past the max height the scroll bar shows. */}
+        <Panel className="relative h-[12.5rem]">
+          {['Saved view 1', 'Saved view 2', 'Saved view 3', 'Saved view 4', 'Saved view 5', 'Saved view 6'].map((t) => row(t, { type: 'icon', icon: 'layout/layout-grid' }))}
+          <MenuScrollBar thumb={{ top: 0, size: 0.45, overflow: true }} />
+        </Panel>
       </div>
     ),
     parts: [
-      { name: 'Trigger', description: 'Button (2.1) secondary + chevron, Link (2.3), Icon button (2.2), Avatar (2.6) or the account trigger part, by Type.' },
-      { name: 'Panel', description: 'space/xs under the trigger (above it near the bottom edge), menu/width = 240 (account cards: the trigger’s width).', tokens: ['menu/width', 'color/surface/raised', 'color/border/subtle', 'radius/surface', 'elevation/overlay', 'space/xs'] },
-      { name: 'Header', description: '.Main/Menu header: avatar, header, subheading or search; padding space/lg × space/xl, bottom stroke (not on subheading).', tokens: ['space/lg', 'space/xl', 'color/border/subtle'] },
-      { name: 'Items', description: 'Vertical, padding-y space/xs. Rows are .Main/Menu item; dividers are items with their own padding-y space/xs.', tokens: ['space/xs'] },
-      { name: 'Item', description: 'Outer inset space/xxs × space/sm; content padding space/md, radius/control, gap space/md: leading, text (type/body/sm/medium, fills, truncates), shortcut (Kbd), chevron. Row height 40.', tokens: ['space/xxs', 'space/sm', 'space/md', 'radius/control', 'type/body/sm/medium'] },
-      { name: 'Item leading', description: '16 × 16 (avatar 24, integration 20): spacer, icon, check, checkbox, dot, avatar or integration logo. Keeps the text on one edge.', tokens: ['size/icon/sm', 'size/icon/md', 'color/icon/brand', 'color/icon/success'] },
-      { name: 'Footer', description: '.Main/Menu footer: small print or a full-width secondary Button; padding as the header, top stroke.', tokens: ['type/body/xs/regular', 'color/text/tertiary'] },
-      { name: 'Scroll bar', description: '.Main/Menu scroll bar: 4-wide thumb, no rail, inset space/xs.', tokens: ['color/fill/neutral/track', 'radius/full'] },
+      { name: 'Trigger', target: 'trigger', description: 'What people click to open the menu. Depending on the type, it’s a secondary Button (2.1) with a chevron, a Link (2.3), an Icon button (2.2), an Avatar (2.6) or the account trigger.' },
+      { name: 'Panel', target: 'panel', description: 'Opens just below the trigger, or above it near the bottom of the screen. It’s 240 px wide; account card menus match the trigger’s width.', tokens: ['menu/width', 'color/surface/raised', 'color/border/subtle', 'radius/surface', 'elevation/overlay', 'space/xs'] },
+      { name: 'Header', target: 'header', description: 'An optional top section: the signed-in person, a title, a subheading or a search field. A line separates it from the items, except under a subheading.', tokens: ['space/lg', 'space/xl', 'color/border/subtle'] },
+      { name: 'Items', target: 'items', description: 'The stack of rows. Dividers are items too, with their own space above and below.', tokens: ['space/xs'] },
+      { name: 'Item', target: 'item', description: 'One action: a leading visual, the text, and an optional shortcut or chevron. Rows are 40 px tall, and long text ends in an ellipsis.', tokens: ['space/xxs', 'space/sm', 'space/md', 'radius/control', 'type/body/sm/medium'] },
+      { name: 'Item leading', target: 'item-leading', description: 'An icon, check, checkbox, dot, avatar, integration logo or an empty spacer, so the text stays on one edge. It’s 16 px square (avatars 24, logos 20).', tokens: ['size/icon/sm', 'size/icon/md', 'color/icon/brand', 'color/icon/success'] },
+      { name: 'Footer', target: 'footer', description: 'An optional bottom section with small print or a full-width secondary button. A line separates it from the items.', tokens: ['type/body/xs/regular', 'color/text/tertiary'] },
+      { name: 'Scroll bar', target: 'scroll-bar', description: 'A 4px-wide thumb with no rail. It shows only when the items scroll.', tokens: ['color/fill/neutral/track', 'radius/full'] },
     ],
   },
   props: [
-    { name: 'type', figma: 'Type', type: menuTypes.map((t) => `'${t}'`).join(' | '), default: "'button-simple'", description: 'Menu: the trigger and the panel’s construction (header, items, footer).' },
-    { name: 'open / defaultOpen / onOpenChange', figma: 'Open', type: 'boolean', default: 'false', description: 'The panel. Omit `open` for an uncontrolled menu.' },
-    { name: 'showChevron', figma: 'Show chevron', type: 'boolean', default: 'true', description: 'The trigger chevron (button, link and account-button triggers).' },
-    { name: 'items', figma: '.Main/Menu item (nested)', type: 'MenuItem[]', default: 'Figma sample content', description: '{ text, leading?, icon?, avatar?, provider?, checked?, shortcut?, tone?, disabled?, onSelect?, submenu? } or { type: "divider" }.' },
-    { name: 'label', type: 'string', default: "'Options' · 'Search' · 'Integrations' · 'More actions'", description: 'Trigger text; the accessible name of icon and avatar triggers.' },
-    { name: 'leadingIcon', type: 'IconName', description: 'Trigger icon of button types.' },
-    { name: 'headerText / headerSupportingText', type: 'string', description: 'Header overrides; the avatar header reads `account` by default.' },
-    { name: 'footerText / onFooterClick', type: 'string · () => void', description: 'Footer small print, or the footer Button’s label and action.' },
-    { name: 'account / accounts / selectedAccount / onAccountChange', type: 'MenuAccount · MenuAccount[] · string', description: 'Account types: the signed-in account, the accounts to switch between, the current one (Radio checked).' },
-    { name: 'onAction', type: '(item) => void', description: 'Called with every chosen item.' },
-    { name: 'align', type: "'start' | 'end'", default: "'start' (icon: 'end')", description: 'Panel edge aligned to the trigger.' },
-    { name: 'inlinePopup', type: 'boolean', default: 'false', description: 'Lay the open panel out in the page flow (the Figma Open variant hugs its panel). Documentation and static layouts.' },
-    { name: 'ContextMenu · type', figma: 'Type', type: "'simple' | 'advanced'", default: "'simple'", description: 'ContextMenu: items with shortcuts, or with icons, dividers and a submenu.' },
-    { name: 'ContextMenu · children / targetLabel', type: 'ReactNode · string', description: 'ContextMenu: the target region (a dashed “Right-click here” region by default) and its accessible name.' },
+    { name: 'type', figma: 'Type', type: menuTypes.map((t) => `'${t}'`).join(' | '), default: "'button-simple'", description: 'Menu only: sets the trigger and what the panel holds (header, items, footer).' },
+    { name: 'open / defaultOpen / onOpenChange', figma: 'Open', type: 'boolean', default: 'false', description: 'Whether the panel is open. Leave out open for an uncontrolled menu.' },
+    { name: 'showChevron', figma: 'Show chevron', type: 'boolean', default: 'true', description: 'Shows the chevron on button, link and account-button triggers.' },
+    { name: 'items', figma: '.Main/Menu item (nested)', type: 'MenuItem[]', default: 'Figma sample content', description: 'Each item is { text, leading?, icon?, avatar?, provider?, checked?, shortcut?, tone?, disabled?, onSelect?, submenu? }, or { type: "divider" }.' },
+    { name: 'label', type: 'string', default: "'Options' · 'Search' · 'Integrations' · 'More actions'", description: 'The trigger text. For icon and avatar triggers, it becomes the accessible name.' },
+    { name: 'leadingIcon', type: 'IconName', description: 'An icon on the trigger, for the button types.' },
+    { name: 'headerText / headerSupportingText', type: 'string', description: 'Override the header text. The avatar header shows account by default.' },
+    { name: 'footerText / onFooterClick', type: 'string · () => void', description: 'The footer’s small print, or the footer button’s label and click handler.' },
+    { name: 'account / accounts / selectedAccount / onAccountChange', type: 'MenuAccount · MenuAccount[] · string', description: 'For account types: the signed-in account, the accounts to switch between, and the current one (its radio is checked).' },
+    { name: 'onAction', type: '(item) => void', description: 'Called with the item each time one is chosen.' },
+    { name: 'align', type: "'start' | 'end'", default: "'start' (icon: 'end')", description: 'Which panel edge lines up with the trigger.' },
+    { name: 'inlinePopup', type: 'boolean', default: 'false', description: 'Places the open panel in the page flow instead of floating it, like the Figma Open variant. For documentation and static layouts.' },
+    { name: 'ContextMenu · type', figma: 'Type', type: "'simple' | 'advanced'", default: "'simple'", description: 'ContextMenu: simple has items with shortcuts; advanced adds icons, dividers and a submenu.' },
+    { name: 'ContextMenu · children / targetLabel', type: 'ReactNode · string', description: 'ContextMenu: the area people right-click (a dashed “Right-click here” box by default), and its accessible name.' },
   ],
   tokens: [
     'menu/width', 'color/surface/raised', 'color/border/subtle', 'radius/surface', 'elevation/overlay', 'radius/control',
@@ -397,7 +410,7 @@ export default defineDoc({
   guidelines: [
     {
       title: 'Menu or context menu',
-      body: 'Context menus are shortcuts; every action in one must also be reachable from a visible control.',
+      body: 'Many people never discover a context menu, so treat it as a shortcut. Put every action in it somewhere visible too, like a menu button or the toolbar.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-3xl">
           <Menu type="icon-simple" open inlinePopup />
@@ -407,7 +420,7 @@ export default defineDoc({
     },
     {
       title: 'Trigger and panel',
-      body: 'The panel opens space/xs under the trigger and aligns to its edge — start for buttons, end for icon triggers.',
+      body: 'The menu opens just below its trigger and lines up with it: with the start edge for a text button, and with the end edge for an icon button, so it never covers what opened it.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-3xl">
           <Menu type="button-simple" />
@@ -417,8 +430,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Item anatomy',
-      body: 'Leading, text, shortcut and chevron in one row. The outer inset (space/xxs × space/sm) keeps the hover fill off the panel edge; the inner padding is space/md.',
+      title: 'Inside a menu item',
+      body: 'Each row holds a leading visual, the text, and an optional shortcut or chevron. A small inset keeps the hover fill clear of the panel edge.',
       render: () => (
         <Panel>
           {row('View profile', { type: 'icon', icon: 'users/user' }, { shortcut: ['⌘', 'P'] })}
@@ -427,10 +440,10 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Leading alignment',
-      body: 'A row with no icon in a menu that has icons uses the spacer leading, so its text stays on the same edge.',
+      title: 'Keep item text aligned',
+      body: 'When a menu has icons, give rows without one an empty spacer, so all the text starts on the same edge.',
       do: {
-        caption: 'The spacer keeps the text aligned.',
+        caption: 'A spacer keeps “Rename” in line with the rest.',
         render: () => (
           <Panel>
             {row('Copy link', { type: 'icon', icon: 'general/link' })}
@@ -440,7 +453,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'The leading removed: the text shifts left.',
+        caption: 'Without a spacer, “Rename” shifts left.',
         render: () => (
           <Panel>
             {row('Copy link', { type: 'icon', icon: 'general/link' })}
@@ -451,8 +464,8 @@ export default defineDoc({
       },
     },
     {
-      title: 'Leading types',
-      body: 'Check marks the current option, checkbox toggles several, dot shows a status, avatar a person, integration a connected service.',
+      title: 'Pick the right leading visual',
+      body: 'Use a check to mark the current option, and checkboxes when people can turn several on. A dot shows a status, an avatar shows a person and a logo shows a connected service.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-xl">
           <Panel>
@@ -473,7 +486,7 @@ export default defineDoc({
     },
     {
       title: 'Dividers and groups',
-      body: 'Group related actions; keep each group to a few items. A divider is an item with its own vertical padding.',
+      body: 'Group related actions and keep each group to a few items. Separate groups with a divider, which brings its own spacing.',
       render: () => (
         <Panel>
           {row('Edit')}
@@ -487,8 +500,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Danger actions',
-      body: 'Put destructive actions last, separated, and confirm them in a dialog.',
+      title: 'Confirm destructive actions',
+      body: 'Put destructive actions last, after a divider. Confirm them in a dialog before anything is lost.',
       render: () => (
         <Panel>
           {row('Edit', { type: 'icon', icon: 'general/edit' })}
@@ -500,13 +513,13 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Item labels start with a verb for actions (“Duplicate”, “Move to…”); use an ellipsis when the item opens a dialog that asks for more input. Sentence case, no full stops. Keep menus short — about seven items per group; long lists belong in a Select with search.',
+      body: 'Start action labels with a verb, like “Duplicate” or “Move to…”. Add an ellipsis when the item opens a dialog that asks for more input. Use sentence case and no full stops.\n\nKeep menus short, about seven items per group. For a long list of options, use a Select (3.5) with search.',
     },
     {
       title: 'Build rows from the item part',
-      body: 'Every row is .Main/Menu item, so states, padding and alignment stay the same in every menu.',
+      body: 'Build every row from the menu item part (.Main/Menu item), so states, padding and alignment match in every menu.',
       do: {
-        caption: 'Item part rows.',
+        caption: 'Rows built from the item part.',
         render: () => (
           <Panel>
             {row('Edit', { type: 'icon', icon: 'general/edit' })}
@@ -515,7 +528,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Hand-drawn rows: uneven padding, no states.',
+        caption: 'Hand-drawn rows with uneven padding and no states.',
         render: () => (
           <div className={`flex w-(--menu-width) flex-col gap-xs p-sm ${menuPanelSurface}`}>
             <span className="type-body-sm-regular text-text-secondary">Edit</span>
@@ -526,10 +539,10 @@ export default defineDoc({
     },
     {
       title: 'Let the menu show completely',
-      body: 'An open menu is never clipped by its container; it flips above the trigger near the bottom edge.',
-      do: { caption: 'The whole panel is visible.', render: () => <Menu type="button-simple" open inlinePopup /> },
+      body: 'Make sure an open menu is never cut off by its container. Near the bottom of the screen, it opens above the trigger instead.',
+      do: { caption: 'The whole menu is visible.', render: () => <Menu type="button-simple" open inlinePopup /> },
       dont: {
-        caption: 'The panel cut off inside a scrolling card.',
+        caption: 'The menu cut off inside a scrolling card.',
         render: () => (
           <div className="relative h-36 overflow-hidden rounded-surface border-(length:--border-width-default) border-border-subtle p-md">
             <Menu type="button-simple" open />
@@ -539,7 +552,7 @@ export default defineDoc({
     },
     {
       title: 'Separate destructive items',
-      body: 'Delete goes last, after a divider.',
+      body: 'Put Delete last, after a divider, so people don’t hit it while reaching for Edit or Duplicate.',
       do: {
         caption: 'Delete last, after a divider.',
         render: () => (
@@ -552,7 +565,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Delete between Edit and Duplicate.',
+        caption: 'Delete squeezed between Edit and Duplicate.',
         render: () => (
           <Panel>
             {row('Edit')}
@@ -564,16 +577,16 @@ export default defineDoc({
     },
     {
       title: 'Maintenance',
-      body: 'Change rows in .Main/Menu item and .Main/Menu item leading; headers and footers in their parts; the panel look through the tokens above. Every Menu and Context menu updates together.',
+      body: 'To change rows, edit the menu item and item leading parts. Headers and footers have their own parts, and the panel’s look comes from the tokens above. Every menu and context menu updates together.',
     },
   ],
   accessibility: [
-    'The trigger announces that it opens a menu (aria-haspopup="menu") and whether it is open (aria-expanded); the menu is named by its trigger.',
-    'Enter, Space or Down opens the menu on the first item, Up on the last. Arrow keys, Home and End move between items; typing a letter jumps to the matching item; Enter or Space activates; Escape closes and returns focus to the trigger; Tab or a press outside closes.',
-    'Right opens a submenu on its first item; Left or Escape closes it and returns to the parent item.',
-    'Check, checkbox and account items are menuitemcheckbox / menuitemradio and announce their state.',
-    'Icon-only triggers have an accessible name (“More actions”).',
-    'The open panel stays within the viewport: it flips above the trigger near the bottom edge; a Context menu shifts back inside the window.',
-    'Context menu: right-click, Shift+F10 or the Menu key on the focused target, or a long press on touch.',
+    'The trigger tells screen readers that it opens a menu (aria-haspopup="menu") and whether it’s open (aria-expanded). The menu takes its name from the trigger.',
+    'Enter, Space or Down opens the menu on the first item, and Up opens it on the last. Arrow keys, Home and End move between items, and typing a letter jumps to a match. Enter or Space activates an item. Escape closes the menu and returns focus to the trigger; Tab or clicking outside also closes it.',
+    'Right arrow opens a submenu on its first item. Left arrow or Escape closes it and returns to the parent item.',
+    'Check, checkbox and account items are menuitemcheckbox or menuitemradio, so screen readers announce whether they’re checked.',
+    'Icon-only triggers have a name screen readers announce, like “More actions”.',
+    'The open menu stays inside the window. Near the bottom edge it opens above the trigger, and a context menu shifts back into view.',
+    'People open a context menu by right-clicking, pressing Shift+F10 or the Menu key on the focused target, or with a long press on touch screens.',
   ],
 });

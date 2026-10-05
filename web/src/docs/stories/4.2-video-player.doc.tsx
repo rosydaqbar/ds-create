@@ -44,7 +44,7 @@ export default defineDoc({
   spec: 'sections/4.2-video-player.md',
   exports: ['VideoPlayer'],
   summary:
-    'Video players are for realistic playback-preview mockups. Controls overlay the 16:9 media frame: a large play button in the centre, and an actions bar along the bottom with play, volume, timeline, speed, casting and fullscreen.',
+    'The video player plays lessons, product tours and recordings, and works for realistic playback mockups. Its controls sit on the 16:9 frame: a large play button in the center and a bar of controls along the bottom.',
   hero: () => <VideoPlayer size="lg" title="Product tour · 4 minutes" />,
   playground: {
     controls: [
@@ -59,7 +59,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Course lesson',
-      caption: 'The player leads the lesson page; progress and the instructor sit under it.',
+      caption: 'The player leads the lesson page, with the instructor and course progress underneath.',
       stage: 'full',
       render: () => (
         <div className="flex w-[60rem] max-w-full flex-col gap-xl">
@@ -91,7 +91,7 @@ export default defineDoc({
     },
     {
       title: 'Product tour card',
-      caption: 'A small player with the overlay action only, inside a marketing card.',
+      caption: 'In a marketing card, a small player with only the play button keeps attention on the call to action.',
       render: () => (
         <div className="flex w-(--size-width-sm) max-w-full flex-col overflow-hidden rounded-surface border border-border-subtle bg-surface-raised shadow-raised">
           <div className="p-md pb-none">
@@ -118,7 +118,7 @@ export default defineDoc({
     },
     {
       title: 'Scrubbing',
-      caption: 'Hovering the timeline shows the scrub preview with the time under the pointer.',
+      caption: 'Hovering the timeline shows a preview frame and the time under the pointer.',
       stage: 'full',
       render: () => <VideoPlayer size="md" title="Quarterly review · recording" forceScrub={102} />,
       code: `<VideoPlayer size="md" src="/recordings/q3.mp4" poster="/recordings/q3.jpg" title="Quarterly review" />
@@ -126,11 +126,11 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['People will actually watch: course lessons, product tours, recorded meetings.', 'Realistic playback mockups in product screens.'],
+    use: ['Video people will actually watch, like course lessons, product tours and recorded meetings.', 'Realistic playback mockups in product screens.'],
     dont: [
-      'Video is secondary — use an image with a play link.',
-      'Ambient or decorative motion — use a still image; never autoplay with sound.',
-      'Audio-only content — the 16:9 frame has nothing to show.',
+      'When video is secondary, use an image with a play link.',
+      'For ambient or decorative motion, use a still image. Don’t autoplay with sound.',
+      'For audio-only content, skip the player: the 16:9 frame has nothing to show.',
     ],
   },
   matrices: [
@@ -146,7 +146,7 @@ export default defineDoc({
           cols={PLAYING}
           cell={(size, p) => (
             <div className={barWidth[size]}>
-              <VideoPlayer size={size} playing={p === 'true'} tabIndex={-1} />
+              <VideoPlayer size={size} playing={p === 'true'} label={`Video player, size ${size}, ${p === 'true' ? 'playing' : 'paused'}`} tabIndex={-1} />
             </div>
           )}
         />
@@ -157,8 +157,8 @@ export default defineDoc({
       columns: 'Show overlay action=false, Show actions bar=false',
       render: () => (
         <div className="flex w-[60rem] max-w-full flex-col gap-2xl">
-          <VideoPlayer size="lg" showOverlayAction={false} tabIndex={-1} />
-          <VideoPlayer size="lg" showActionsBar={false} tabIndex={-1} />
+          <VideoPlayer size="lg" showOverlayAction={false} label="Video player without overlay action" tabIndex={-1} />
+          <VideoPlayer size="lg" showActionsBar={false} label="Video player without actions bar" tabIndex={-1} />
         </div>
       ),
     },
@@ -265,31 +265,38 @@ export default defineDoc({
     },
   ],
   anatomy: {
-    render: () => <VideoPlayer size="md" title="Media" forceScrub={102} tabIndex={-1} />,
+    render: () => (
+      // Two states: at rest (the overlay action shows) and while scrubbing (the overlay hides, the preview shows).
+      <div className="flex w-[45rem] flex-col items-start gap-2xl">
+        <VideoPlayer size="md" title="Media" tabIndex={-1} />
+        <VideoPlayer size="sm" title="Scrubbing" forceScrub={102} tabIndex={-1} />
+      </div>
+    ),
     parts: [
-      { name: 'Media', description: 'Fixed 16:9 frame (480 × 270, 720 × 405, 960 × 540), clip content, radius/surface. The <video> or its poster; a sample frame when there is none.', tokens: ['radius/surface'] },
-      { name: 'Overlay action', description: 'Circle in the centre, absolutely positioned: 56 · 64 · 80 with a 24 · 28 · 32 icon, backdrop blur. Play or pause.', tokens: ['video-player/overlay/fill', 'video-player/overlay/fill/hover', 'video-player/control/fg'] },
-      { name: 'Actions bar', description: 'Absolute along the bottom, Fill width. The top padding is the fade zone (space/3xl · 4xl · 5xl) for the scrim gradient; padding x and bottom space/md · lg · xl.', tokens: ['color/overlay/scrim', 'space/5xl', 'space/xl'] },
-      { name: 'Action', description: 'Every control in the bar: 32 · 36 · 40 square, radius/control, icon size/icon/sm or md; hover fill and a tooltip with its shortcut.', tokens: ['video-player/action/fill/hover', 'size/control/md', 'radius/control'] },
-      { name: 'Volume', description: 'Mute action and a 64 × 4 track shown on hover or focus, with a 12 × 12 handle.', tokens: ['video-player/track', 'video-player/control/fg', 'elevation/raised'] },
-      { name: 'Video progress', description: 'Timestamps (type/body/xs/medium) around the timeline, which fills: track, buffered part and played line.', tokens: ['video-player/track', 'video-player/track/buffer', 'color/fill/brand/solid', 'type/body/xs/medium'] },
-      { name: 'Playback speed · Captions · Cast · Full screen', description: 'Actions after the timeline; speed shows the rate (“1×”) in type/body/sm/semibold.', tokens: ['type/body/sm/semibold'] },
-      { name: 'Tooltip', description: 'Above the action, outside its bounds: text in type/body/xs/semibold and a Kbd (2.17, sm). padding space/sm × space/md.', tokens: ['video-player/tooltip/fill', 'type/body/xs/semibold'] },
-      { name: 'Scrub preview', description: 'While scrubbing: a 160 × 90 frame, the time “1:42 / 4:12” and a 1 × 12 indicator line at the pointer.', tokens: ['video-player/tooltip/fill'] },
+      { name: 'Media', target: 'media', description: 'The video, or its poster, in a fixed 16:9 frame. A sample frame shows when there’s no video.', tokens: ['radius/surface'] },
+      { name: 'Overlay action', target: 'overlay-action', description: 'The large play or pause button in the center of the frame, on a blurred circle. It grows with the player size.', tokens: ['video-player/overlay/fill', 'video-player/overlay/fill/hover', 'video-player/control/fg'] },
+      { name: 'Actions bar', target: 'actions-bar', description: 'Runs along the bottom of the frame, full width. Its top padding is a fade zone where a gradient darkens the video so the controls stay readable.', tokens: ['color/overlay/scrim', 'space/5xl', 'space/xl'] },
+      { name: 'Action', target: 'action', description: 'Every control in the bar is an action: a square button with a fill on hover and a tooltip that shows its shortcut.', tokens: ['video-player/action/fill/hover', 'size/control/md', 'radius/control'] },
+      { name: 'Volume', target: 'volume', description: 'A mute button, plus a volume slider that appears on hover or focus.', tokens: ['video-player/track', 'video-player/control/fg', 'elevation/raised'] },
+      { name: 'Video progress', target: 'video-progress', description: 'The timeline, with timestamps on either side. It fills the free space and shows the played and buffered parts.', tokens: ['video-player/track', 'video-player/track/buffer', 'color/fill/brand/solid', 'type/body/xs/medium'] },
+      { name: 'Playback speed · Captions · Cast · Full screen', target: 'playback-speed', description: 'The actions after the timeline. Playback speed shows the current rate as text (“1×”).', tokens: ['type/body/sm/semibold'] },
+      { name: 'Tooltip', description: 'Appears above an action, outside its bounds, with the action’s name and a Kbd (2.17) for its shortcut.', tokens: ['video-player/tooltip/fill', 'type/body/xs/semibold'] },
+      { name: 'Scrub preview', target: 'scrub-preview', description: 'Appears while scrubbing: a small preview frame, the time (“1:42 / 4:12”) and a thin line at the pointer.', tokens: ['video-player/tooltip/fill'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'lg'", description: 'Frame 480 × 270, 720 × 405 or 960 × 540 (shrinks to its container), and the size of every control.' },
-    { name: 'playing', figma: 'Playing', type: 'boolean', default: 'false', description: 'Sets the playing state and follows the prop when it changes; the controls still toggle it. Switches the overlay icon and the play/pause action.' },
+    { name: 'size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'lg'", description: 'Sets the frame to 480 × 270, 720 × 405 or 960 × 540 (it shrinks to fit its container) and sizes every control to match.' },
+    { name: 'playing', figma: 'Playing', type: 'boolean', default: 'false', description: 'Sets the playing state and follows the prop when it changes, while the controls can still toggle it. Switches the overlay icon and the play/pause action.' },
     { name: 'onPlayingChange', type: '(playing: boolean) => void', description: 'Called when playback starts or stops.' },
-    { name: 'showOverlayAction', figma: 'Show overlay action', type: 'boolean', default: 'true', description: 'The large play / pause button in the centre.' },
-    { name: 'showActionsBar', figma: 'Show actions bar', type: 'boolean', default: 'true', description: 'The bar along the bottom.' },
-    { name: 'src', figma: 'Media (image fill)', type: 'string', description: 'The video file. Without it, the poster-only state is shown and the controls still work.' },
-    { name: 'poster', type: 'string', description: 'Preview frame; also used by the scrub preview.' },
-    { name: 'tracks', type: 'VideoTrack[]', description: 'Caption tracks ({ src, srcLang, label, kind?, default? }). The captions action shows when there are captions.' },
-    { name: 'title', type: 'string', default: "'Video player'", description: 'Accessible name of the player (the video title); shown on the sample frame.' },
-    { name: 'placeholderTime', type: '{ current?, duration?, buffered? }', description: 'Poster-only state: the times on the timeline, in seconds.' },
-    { name: 'forceScrub', type: 'number', description: 'Documentation only: show the scrub preview at this time.' },
+    { name: 'showOverlayAction', figma: 'Show overlay action', type: 'boolean', default: 'true', description: 'Shows the large play / pause button in the center.' },
+    { name: 'showActionsBar', figma: 'Show actions bar', type: 'boolean', default: 'true', description: 'Shows the bar of controls along the bottom.' },
+    { name: 'src', figma: 'Media (image fill)', type: 'string', description: 'The video file. Without it, the player shows only the poster, and the controls still work.' },
+    { name: 'poster', type: 'string', description: 'The preview frame, also used in the scrub preview.' },
+    { name: 'tracks', type: 'VideoTrack[]', description: 'Caption tracks ({ src, srcLang, label, kind?, default? }). The captions action appears when at least one track is set.' },
+    { name: 'title', type: 'string', default: "'Video player'", description: 'The video’s title. It’s the player’s accessible name and shows on the sample frame.' },
+    { name: 'label', type: 'string', default: 'title', description: 'The accessible name of the player region (“Product tour video”). Give each player on a page its own name.' },
+    { name: 'placeholderTime', type: '{ current?, duration?, buffered? }', description: 'The times shown on the timeline in the poster-only state, in seconds.' },
+    { name: 'forceScrub', type: 'number', description: 'Documentation only: shows the scrub preview at this time, in seconds.' },
   ],
   tokens: [
     'video-player/control/fg', 'video-player/action/fill/hover', 'video-player/overlay/fill', 'video-player/overlay/fill/hover',
@@ -300,8 +307,8 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'When to use',
-      body: 'Use the player when people will actually watch; use an image with a play link when video is secondary.',
+      title: 'Player or play link',
+      body: 'Use the player when people will actually watch the video. When the video is secondary, an image with a play link takes less space and attention.',
       render: () => (
         <div className="flex flex-wrap items-start justify-center gap-2xl">
           <div className="w-(--size-width-sm) max-w-full">
@@ -320,14 +327,14 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Media, overlay, actions bar',
-      body: 'Controls overlay the media; the frame stays 16:9. Three layers: the media, the overlay action in the centre and the actions bar along the bottom.',
+      title: 'Three layers',
+      body: 'The player has three layers: the media, the play button in the center and the actions bar along the bottom. The controls sit on top of the media, so the frame stays 16:9.',
       render: () => (
         <div className="flex flex-col items-center gap-lg">
           <div className="flex flex-wrap items-center justify-center gap-xl">
             <div className="flex flex-col items-center gap-sm">
               <div className="w-[15rem]">
-                <VideoPlayer size="sm" showOverlayAction={false} showActionsBar={false} tabIndex={-1} />
+                <VideoPlayer size="sm" showOverlayAction={false} showActionsBar={false} label="Video player without controls" tabIndex={-1} />
               </div>
               <span className="type-body-xs-medium text-text-tertiary">1 · Media</span>
             </div>
@@ -348,18 +355,18 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Overlay, not layout',
-      body: 'The overlay action and the actions bar are absolutely positioned on the media. Turning them on or off never changes the player’s size.',
+      title: 'Controls sit on the video',
+      body: 'The play button and the actions bar float on top of the media. Turning them on or off never changes the player’s size.',
       do: {
         caption: 'The actions bar sits on top of the video.',
         render: () => (
           <div className="w-[24rem]">
-            <VideoPlayer size="sm" tabIndex={-1} />
+            <VideoPlayer size="sm" label="Video player with controls on the media" tabIndex={-1} />
           </div>
         ),
       },
       dont: {
-        caption: 'The bar under the video makes the player taller than 16:9.',
+        caption: 'A bar below the video makes the player taller than 16:9.',
         render: () => (
           <div className="flex w-[24rem] flex-col overflow-hidden rounded-surface">
             <div className="aspect-video">
@@ -374,7 +381,7 @@ export default defineDoc({
     },
     {
       title: 'The actions bar',
-      body: 'Play, volume, the timeline, playback speed, captions, cast and full screen. The video progress fills the bar; every action keeps its size. The top padding is the fade zone: it gives the gradient room so controls stay readable on bright video.',
+      body: 'The bar holds play, volume, the timeline, playback speed, captions, cast and full screen. The timeline stretches to fill the space, and every action keeps its size.\n\nThe top padding is the fade zone. It gives the gradient room to darken the video, so the controls stay readable on bright footage.',
       render: () => (
         <Specimen bare className="w-[45rem] max-w-full">
           <VideoActionsBar size="lg" />
@@ -383,27 +390,27 @@ export default defineDoc({
     },
     {
       title: 'Playing and paused',
-      body: 'Playing switches the overlay icon and the play / pause action; it does not create a different anatomy. While a video plays, the overlay and the bar fade out after a few seconds without pointer movement and come back on hover or focus.',
+      body: 'Playing only swaps the icons on the play button and the play / pause action. Everything else stays the same.\n\nWhile a video plays, the controls fade out after a few seconds without pointer movement, and come back on hover or focus.',
       render: () => (
         <div className="flex flex-wrap justify-center gap-xl">
           <div className="w-[24rem]">
-            <VideoPlayer size="sm" tabIndex={-1} />
+            <VideoPlayer size="sm" label="Paused video player" tabIndex={-1} />
           </div>
           <div className="w-[24rem]">
-            <VideoPlayer size="sm" playing tabIndex={-1} />
+            <VideoPlayer size="sm" playing label="Playing video player" tabIndex={-1} />
           </div>
         </div>
       ),
     },
     {
       title: 'Content',
-      body: 'Show realistic durations (“4:12”), a sensible playback speed (“1×”) and a preview frame that represents the video, not a blank frame. Give the player the video’s title as its accessible name.',
+      body: 'Use realistic durations (“4:12”), a sensible playback speed (“1×”) and a preview frame that shows what the video is about, not a blank one. Use the video’s title as the player’s name, so screen readers announce it.',
     },
     {
       title: 'Use the action part',
-      body: 'Every control in the bar is the Video player action: the same size, hover fill, focus ring and tooltip with its shortcut.',
+      body: 'Build every control in the bar from the shared action part, so they all get the same size, hover fill, focus ring and shortcut tooltip.',
       do: {
-        caption: 'Actions from the private part.',
+        caption: 'Controls built from the action part.',
         render: () => (
           <Specimen bare className="flex gap-sm p-lg">
             <VideoAction type="play" size="md" tooltip={false} tabIndex={-1} />
@@ -414,7 +421,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Interface buttons redrawn inside the bar.',
+        caption: 'Regular interface buttons placed in the bar.',
         render: () => (
           <Specimen bare className="flex gap-sm p-lg">
             <Button size="sm" emphasis="secondary" iconOnly leadingIcon="media/play" label="Play" tabIndex={-1} />
@@ -426,7 +433,7 @@ export default defineDoc({
     },
     {
       title: 'Keep the fade zone',
-      body: 'Light controls need the scrim gradient behind them. Don’t put light controls straight on a bright frame.',
+      body: 'Light controls need the dark gradient behind them to stay readable. Without it, they disappear on a bright frame.',
       do: {
         caption: 'The bar’s fade zone keeps the controls readable.',
         render: () => (
@@ -449,21 +456,21 @@ export default defineDoc({
     },
     {
       title: 'No autoplay with sound',
-      body: 'The player never starts by itself: playback begins when the person presses play. Respect reduced motion: don’t autoplay at all when the user has asked for reduced motion.',
+      body: 'The player never starts on its own. Playback begins when someone presses play, so nobody is surprised by sound. When people have asked their device to reduce motion, don’t autoplay at all.',
     },
     {
       title: 'Maintenance',
-      body: 'Actions, tooltip, volume, bar and overlay are private parts of this page; change them once and every player updates. On-media colours live in the video-player/* tokens, which keep the same value in every colour mode.',
+      body: 'The actions, tooltip, volume, bar and overlay are private parts of this page. Change one and every player updates. Colors on the media come from the video-player/* tokens, which stay the same in every color mode.',
     },
   ],
   accessibility: [
-    'The player is a labelled region (its title) and focusable; shortcuts work while focus is anywhere inside it.',
-    'Every action has an accessible name (“Play”, “Mute”, “Enter full screen”) and a tooltip with its shortcut, also exposed as aria-keyshortcuts.',
-    'Shortcuts: Space or K play / pause, M mute, F full screen, C captions, ← → seek 5 seconds, ↑ ↓ volume. A focused action keeps native Space activation.',
-    'The timeline and the volume are sliders with arrow, Page Up / Down, Home and End keys and a spoken value (“0:42 of 4:12”).',
-    'Captions are available for speech; the captions action is a toggle (aria-pressed) and is present whenever captions exist.',
-    'No autoplay. Full screen uses the Fullscreen API, so Escape and the browser controls exit it.',
-    'Focus rings on actions are visible on bright video: focus/default plus the fade zone behind it.',
-    'Media controls keep the same colours in every colour mode (video-player/* tokens).',
+    'The player is a focusable region named after its title. Keyboard shortcuts work while focus is anywhere inside it.',
+    'Every action has a name screen readers announce (“Play”, “Mute”, “Enter full screen”) and a tooltip with its shortcut. The shortcut is also exposed through aria-keyshortcuts.',
+    'Shortcuts: Space or K to play or pause, M to mute, F for full screen, C for captions, ← → to seek 5 seconds and ↑ ↓ for volume. When an action has focus, Space presses that action as usual.',
+    'The timeline and the volume are sliders. They respond to the arrow keys, Page Up / Down, Home and End, and screen readers announce their value (“0:42 of 4:12”).',
+    'Provide captions for speech. The captions action is a toggle (aria-pressed) and appears whenever captions exist.',
+    'The player doesn’t autoplay. Full screen uses the browser’s Fullscreen API, so Escape and the browser’s own controls exit it.',
+    'Focus rings on actions (focus/default) stay visible on bright video, because the fade zone sits behind them.',
+    'Media controls keep the same colors in every color mode (video-player/* tokens), since they always sit on video.',
   ],
 });

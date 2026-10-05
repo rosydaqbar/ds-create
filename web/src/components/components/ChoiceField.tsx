@@ -77,12 +77,13 @@ export function ChoiceField({
   const plain = (c: boolean | 'mixed' | undefined) => (c === 'mixed' ? undefined : c);
   return (
     <label
+      data-anatomy="choice-field"
       data-disabled={disabled || undefined}
       className={cn('group/cf inline-flex items-start', disabled ? 'cursor-not-allowed' : 'cursor-pointer', fieldGap[size], className)}
       {...rest}
     >
       {/* Control wrapper: exactly one text line tall, so the control sits on the first line. */}
-      <span className={cn('flex h-[1lh] shrink-0 items-center', fieldText[size])}>
+      <span data-anatomy="control-wrapper" className={cn('flex h-[1lh] shrink-0 items-center', fieldText[size])}>
         {type === 'checkbox' ? (
           <Checkbox {...common} checked={checked} defaultChecked={defaultChecked} />
         ) : type === 'radio' ? (
@@ -91,7 +92,7 @@ export function ChoiceField({
           <Switch {...common} type={switchType} checked={plain(checked)} defaultChecked={plain(defaultChecked)} />
         )}
       </span>
-      <span className="flex min-w-0 flex-1 flex-col">
+      <span data-anatomy="text" className="flex min-w-0 flex-1 flex-col">
         <span className={cn(fieldText[size], disabled ? 'text-text-disabled' : 'text-text-secondary')}>{text}</span>
         {supportingText != null && (
           <span id={supId} className={cn(fieldSupporting[size], disabled ? 'text-text-disabled' : 'text-text-tertiary')}>
@@ -194,7 +195,7 @@ export function ChoiceCard({
     <Radio {...control} checked={selected} defaultChecked={defaultSelected} onCheckedChange={onSelectedChange} />
   );
   /** Leading controls sit on the first text line. */
-  const firstLine = (node: ReactNode) => <span className={cn('flex h-[1lh] shrink-0 items-center', cardText[size])}>{node}</span>;
+  const firstLine = (node: ReactNode, part: 'leading' | 'selection') => <span data-anatomy={part} className={cn('flex h-[1lh] shrink-0 items-center', cardText[size])}>{node}</span>;
 
   const title = (
     <span className={cn('flex gap-xs', mobile ? 'flex-col' : 'flex-wrap items-baseline')}>
@@ -207,7 +208,7 @@ export function ChoiceCard({
     </span>
   );
   const content = (
-    <span className="flex min-w-0 flex-1 flex-col gap-xxs">
+    <span data-anatomy="content" className="flex min-w-0 flex-1 flex-col gap-xxs">
       {title}
       {supportingText != null && (
         <span id={`${id}-sup`} className={cn(cardSub[size], 'text-text-tertiary')}>
@@ -216,10 +217,11 @@ export function ChoiceCard({
       )}
     </span>
   );
-  const featured = <FeaturedIcon size={size === 'sm' ? 'sm' : 'md'} icon={icon} />;
+  const featured = <FeaturedIcon size={size === 'sm' ? 'sm' : 'md'} icon={icon} data-anatomy="leading" />;
 
   return (
     <label
+      data-anatomy="choice-card"
       data-disabled={disabled || undefined}
       className={cn(
         'group/card relative flex w-full rounded-surface border-(length:--border-width-default) border-border-default bg-surface-base',
@@ -250,11 +252,11 @@ export function ChoiceCard({
       ) : (
         <>
           {type === 'icon' && featured}
-          {type === 'avatar' && <Avatar size="md" type={avatar?.src ? 'image' : avatar?.initials ? 'initials' : 'icon'} src={avatar?.src} initials={avatar?.initials} alt="" />}
+          {type === 'avatar' && <Avatar size="md" type={avatar?.src ? 'image' : avatar?.initials ? 'initials' : 'icon'} src={avatar?.src} initials={avatar?.initials} alt="" data-anatomy="leading" />}
           {type === 'payment' && (paymentMark ?? <PaymentMark size="md" />)}
-          {(type === 'radio' || type === 'checkbox') && firstLine(input)}
+          {(type === 'radio' || type === 'checkbox') && firstLine(input, 'leading')}
           {content}
-          {(type === 'icon' || type === 'avatar' || type === 'payment') && firstLine(input)}
+          {(type === 'icon' || type === 'avatar' || type === 'payment') && firstLine(input, 'selection')}
         </>
       )}
     </label>
@@ -323,6 +325,7 @@ export function ChoiceGroup({
   const row = type === 'icon-card' && breakpoint === 'desktop';
   return (
     <div
+      data-anatomy="choice-group"
       role={multi ? 'group' : 'radiogroup'}
       aria-labelledby={label != null ? `${groupName}-label` : undefined}
       aria-required={required || undefined}

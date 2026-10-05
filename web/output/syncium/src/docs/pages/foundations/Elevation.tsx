@@ -5,7 +5,7 @@ import { Icon } from '@/icons';
 import { Button, Checkbox, IconButton, Switch, TextField, TooltipBubble } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
 import { Bullets, Caption, CodeBlock, H3, InlineCode, P, Swatch, TokenBadge, TokenTable } from '../../blocks';
-import { pageMeta } from '../../meta';
+import { figmaNodeFor } from '../../meta';
 import type { Topic } from '../../types';
 
 /* ---------- token helpers ---------- */
@@ -655,7 +655,7 @@ export default function Elevation() {
       eyebrow="Foundations › 1.5 Elevation"
       title="Elevation"
       description="Elevation shows what sits above what. Soft shadows lift cards and menus, a two-part focus ring stays visible on any surface, and backdrop blur keeps controls over media readable."
-      figmaNode={pageMeta['1.5'].figmaNode}
+      figmaNode={figmaNodeFor('1.5')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Tokens', render: () => <Tokens /> },

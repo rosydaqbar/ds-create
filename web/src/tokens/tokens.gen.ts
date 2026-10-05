@@ -3993,12 +3993,12 @@ export const tokens: TokenData = {
    "tailwind": "text-text-placeholder",
    "modes": {
     "Light": {
-     "alias": "palette/neutral/500",
-     "value": "#64748b"
+     "alias": "palette/neutral/600",
+     "value": "#475569"
     },
     "Dark": {
-     "alias": "palette/neutral/500",
-     "value": "#64748b"
+     "alias": "palette/neutral/400",
+     "value": "#94a3b8"
     }
    }
   },
@@ -4101,12 +4101,12 @@ export const tokens: TokenData = {
    "tailwind": "text-text-danger",
    "modes": {
     "Light": {
-     "alias": "palette/red/700",
-     "value": "#b91c1c"
+     "alias": "palette/red/800",
+     "value": "#991b1b"
     },
     "Dark": {
-     "alias": "palette/red/400",
-     "value": "#f87171"
+     "alias": "palette/red/200",
+     "value": "#fecaca"
     }
    }
   },
@@ -4123,8 +4123,8 @@ export const tokens: TokenData = {
      "value": "#b45309"
     },
     "Dark": {
-     "alias": "palette/amber/400",
-     "value": "#fbbf24"
+     "alias": "palette/amber/300",
+     "value": "#fcd34d"
     }
    }
   },
@@ -4141,8 +4141,8 @@ export const tokens: TokenData = {
      "value": "#15803d"
     },
     "Dark": {
-     "alias": "palette/green/400",
-     "value": "#4ade80"
+     "alias": "palette/green/300",
+     "value": "#86efac"
     }
    }
   },
@@ -4159,8 +4159,8 @@ export const tokens: TokenData = {
      "value": "#0369a1"
     },
     "Dark": {
-     "alias": "palette/blue/400",
-     "value": "#38bdf8"
+     "alias": "palette/blue/300",
+     "value": "#7dd3fc"
     }
    }
   },
@@ -5203,8 +5203,8 @@ export const tokens: TokenData = {
      "value": "#1d4ed8"
     },
     "Dark": {
-     "alias": "palette/brand/500",
-     "value": "#3b82f6"
+     "alias": "palette/brand/700",
+     "value": "#1d4ed8"
     }
    }
   },
@@ -5221,8 +5221,8 @@ export const tokens: TokenData = {
      "value": "#1e40af"
     },
     "Dark": {
-     "alias": "palette/brand/700",
-     "value": "#1d4ed8"
+     "alias": "palette/brand/800",
+     "value": "#1e40af"
     }
    }
   },
@@ -5239,8 +5239,8 @@ export const tokens: TokenData = {
      "value": "#1d4ed8"
     },
     "Dark": {
-     "alias": "palette/brand/500",
-     "value": "#3b82f6"
+     "alias": "palette/brand/700",
+     "value": "#1d4ed8"
     }
    }
   },
@@ -5383,8 +5383,8 @@ export const tokens: TokenData = {
      "value": "#b91c1c"
     },
     "Dark": {
-     "alias": "palette/red/500",
-     "value": "#ef4444"
+     "alias": "palette/red/700",
+     "value": "#b91c1c"
     }
    }
   },
@@ -5401,8 +5401,8 @@ export const tokens: TokenData = {
      "value": "#991b1b"
     },
     "Dark": {
-     "alias": "palette/red/700",
-     "value": "#b91c1c"
+     "alias": "palette/red/800",
+     "value": "#991b1b"
     }
    }
   },
@@ -5419,8 +5419,8 @@ export const tokens: TokenData = {
      "value": "#b91c1c"
     },
     "Dark": {
-     "alias": "palette/red/500",
-     "value": "#ef4444"
+     "alias": "palette/red/700",
+     "value": "#b91c1c"
     }
    }
   },
@@ -10660,17 +10660,17 @@ export const tokens: TokenData = {
    "name": "social-button/gitlab/fg",
    "collection": "Components",
    "type": "COLOR",
-   "description": "Label and mark colour on the GitLab solid button.",
+   "description": "Label and mark color on the GitLab solid button: GitLab charcoal, so the label reaches 4.5:1 on GitLab orange (white is 2.85:1).",
    "css": "--social-button-gitlab-fg",
    "tailwind": "bg-social-button-gitlab-fg",
    "modes": {
     "Light": {
      "alias": null,
-     "value": "#ffffff"
+     "value": "#171321"
     },
     "Dark": {
      "alias": null,
-     "value": "#ffffff"
+     "value": "#171321"
     }
    }
   },
@@ -11543,5 +11543,6 @@ export const tokens: TokenData = {
     }
    ]
   }
- ]
+ ],
+ "pages": []
 };

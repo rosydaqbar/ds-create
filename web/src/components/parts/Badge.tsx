@@ -115,6 +115,7 @@ export function Badge({
   const text = typeof label === 'string' ? label : undefined;
   return (
     <span
+      data-anatomy="root"
       role={iconOnly && text ? 'img' : undefined}
       aria-label={iconOnly ? text : undefined}
       className={cn(
@@ -128,21 +129,21 @@ export function Badge({
       {...rest}
     >
       {iconOnly ? (
-        <span aria-hidden className="flex size-[1lh] items-center justify-center">
+        <span aria-hidden data-anatomy="leading-visual" className="flex size-[1lh] items-center justify-center">
           <Icon name={leadingIcon ?? 'arrows/arrow-up'} size={iconSize[size]} className={tk.icon} />
         </span>
       ) : (
         <>
           {showDot ? (
-            <span aria-hidden className={cn('shrink-0 rounded-full', dotSize[size], tk.dot)} />
+            <span aria-hidden data-anatomy="leading-visual" className={cn('shrink-0 rounded-full', dotSize[size], tk.dot)} />
           ) : flag ? (
-            <Flag country={flag} size="sm" alt="" />
+            <Flag country={flag} size="sm" alt="" data-anatomy="leading-visual" />
           ) : avatar ? (
-            <Avatar size="2xs" type={avatar.src ? 'image' : avatar.initials ? 'initials' : 'icon'} src={avatar.src} initials={avatar.initials} alt="" />
+            <Avatar size="2xs" type={avatar.src ? 'image' : avatar.initials ? 'initials' : 'icon'} src={avatar.src} initials={avatar.initials} alt="" data-anatomy="leading-visual" />
           ) : leadingIcon ? (
-            <Icon name={leadingIcon} size={iconSize[size]} className={tk.icon} />
+            <Icon name={leadingIcon} size={iconSize[size]} className={tk.icon} data-anatomy="leading-visual" />
           ) : null}
-          <span>{label}</span>
+          <span data-anatomy="label">{label}</span>
           {showClose ? (
             <BadgeClose
               type={type}
@@ -153,7 +154,7 @@ export function Badge({
               forceState={forceCloseState}
             />
           ) : trailingIcon ? (
-            <Icon name={trailingIcon} size={iconSize[size]} className={tk.icon} />
+            <Icon name={trailingIcon} size={iconSize[size]} className={tk.icon} data-anatomy="trailing-icon" />
           ) : null}
         </>
       )}
@@ -179,6 +180,7 @@ function BadgeClose({
 }) {
   return (
     <button
+      data-anatomy="close"
       type="button"
       aria-label={label}
       onClick={onClick}

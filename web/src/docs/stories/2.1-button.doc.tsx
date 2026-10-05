@@ -28,7 +28,7 @@ export default defineDoc({
   spec: 'parts/2.1-button.md',
   exports: ['Button'],
   summary:
-    'Actions users can take. Five sizes, three emphasis levels, brand and danger tones, six states, with optional leading and trailing icons and an icon-only square form. Label width hugs its content; height is fixed per size.',
+    'Buttons start actions, like saving a form, creating a project or confirming a delete. Choose the emphasis by how important the action is on the screen, and the size by the space around it.',
   hero: () => <Button size="lg" leadingIcon="general/check" label="Save changes" />,
   playground: {
     controls: [
@@ -48,7 +48,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Dialog footer',
-      caption: 'One primary action per view; the secondary action supports it.',
+      caption: 'Use one primary action per view, and let the secondary action support it.',
       render: () => (
         <div className="flex w-full max-w-[28rem] justify-end gap-md">
           <Button emphasis="secondary" label="Cancel" />
@@ -62,7 +62,7 @@ export default defineDoc({
     },
     {
       title: 'Delete confirmation',
-      caption: 'Danger tone only on the action that causes the consequence.',
+      caption: 'Give the danger tone only to the action that has the consequence.',
       render: () => (
         <div className="flex gap-md">
           <Button emphasis="secondary" label="Cancel" />
@@ -74,7 +74,7 @@ export default defineDoc({
     },
     {
       title: 'Page header actions',
-      caption: 'Three levels of emphasis in one row.',
+      caption: 'Three levels of emphasis let the main action stand out from the rest.',
       render: () => (
         <div className="flex gap-md">
           <Button emphasis="tertiary" leadingIcon="general/download" label="Export" />
@@ -88,7 +88,7 @@ export default defineDoc({
     },
     {
       title: 'Form submit in progress',
-      caption: 'Loading keeps the button’s place and width.',
+      caption: 'While it saves, the button keeps its place and width, so the layout doesn’t jump.',
       render: () => (
         <div className="flex gap-md">
           <Button emphasis="secondary" disabled label="Cancel" />
@@ -100,8 +100,8 @@ export default defineDoc({
     },
   ],
   whenToUse: {
-    use: ['Actions that change data or move a task forward: save, submit, create, delete.', 'The main action of a dialog, form or page header.'],
-    dont: ['Navigation to another page — use a Link (2.3).', 'Compact tool actions without a label — use an Icon button (2.2).', 'Several related options that stay visible — use a Button group (3.1).'],
+    use: ['For actions that change data or move a task forward: save, submit, create, delete.', 'For the main action in a dialog, form or page header.'],
+    dont: ['For navigation to another page, use a Link (2.3).', 'For a compact tool action without a label, use an Icon button (2.2).', 'For several related options that stay visible, use a Button group (3.1).'],
   },
   matrices: (['brand', 'danger'] as const).flatMap((tone) =>
     EMPHASIS.map((emphasis) => ({
@@ -126,28 +126,28 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root', description: 'Horizontal, centred. Height size/control/{size}; padding-x button/padding-x/{size}; gap button/gap/{size}.', tokens: ['size/control/md', 'button/padding-x/md', 'radius/control'] },
-      { name: 'Leading icon', description: 'Optional icon in a size/icon/md box; replaced by the Spinner while loading.', tokens: ['size/icon/md'] },
-      { name: 'Text padding', description: 'Wraps the label with space/optical on both sides so icon and label-only buttons look centred.', tokens: ['space/optical'] },
-      { name: 'Label', description: 'Single line, hugs its text. type/body/sm/semibold (xs–md) or type/body/md/semibold (lg–xl).', tokens: ['type/body/sm/semibold'] },
-      { name: 'Trailing icon', description: 'Optional icon after the label; hidden while loading.' },
-      { name: 'Spinner', description: '2.15 Spinner in the leading slot when loading, coloured like the label.' },
+      { name: 'Root', target: 'root', description: 'The clickable container. Its height and padding are set by the size.', tokens: ['size/control/md', 'button/padding-x/md', 'radius/control'] },
+      { name: 'Leading icon', target: 'leading-icon', description: 'An optional icon before the label. While loading, a spinner takes its place.', tokens: ['size/icon/md'] },
+      { name: 'Text padding', target: 'text-padding', description: 'A thin wrapper around the label that evens out the space, so buttons with and without icons both look centered.', tokens: ['space/optical'] },
+      { name: 'Label', target: 'label', description: 'One line of text that sets the button’s width. Larger sizes use a larger text style.', tokens: ['type/body/sm/semibold'] },
+      { name: 'Trailing icon', target: 'trailing-icon', description: 'An optional icon after the label. It hides while the button is loading.' },
+      { name: 'Spinner', target: 'spinner', description: 'A Spinner (2.15) that replaces the leading icon while loading, in the same color as the label.' },
     ],
   },
   props: [
-    { name: 'label', figma: 'Label', type: 'ReactNode', default: '—', description: 'Visible label; the accessible name when iconOnly.' },
-    { name: 'size', figma: 'Size', type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'", description: 'Height, padding, gap and label style.' },
-    { name: 'emphasis', figma: 'Emphasis', type: "'primary' | 'secondary' | 'tertiary'", default: "'primary'", description: 'Solid fill, bordered surface, or no container.' },
-    { name: 'tone', figma: 'Tone', type: "'brand' | 'danger'", default: "'brand'", description: 'Danger for destructive actions.' },
-    { name: 'leadingIcon', figma: 'Show leading icon + Leading icon', type: 'IconName', description: 'Icon before the label; the only icon when iconOnly.' },
-    { name: 'leadingVisual', type: 'ReactNode', description: 'Any node in the leading icon box (a brand mark, an avatar); wins over leadingIcon.' },
-    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName', description: 'Icon after the label.' },
-    { name: 'iconOnly', figma: 'Icon only', type: 'boolean', default: 'false', description: 'Square button with one icon; label becomes aria-label.' },
-    { name: 'loading', figma: 'State=loading', type: 'boolean', default: 'false', description: 'Spinner in the leading slot; not clickable; aria-busy.' },
-    { name: 'showLoadingText', figma: 'Show loading text', type: 'boolean', default: 'true', description: 'Keep the label next to the Spinner while loading.' },
-    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Native disabled button.' },
-    { name: 'fullWidth', type: 'boolean', default: 'false', description: 'Stretch to the container; content stays centred.' },
-    { name: 'forceState', type: "'hover' | 'pressed' | 'focus'", description: 'Documentation only: pins a pseudo-state.' },
+    { name: 'label', figma: 'Label', type: 'ReactNode', default: '—', description: 'The visible label. When iconOnly is set, it becomes the button’s accessible name.' },
+    { name: 'size', figma: 'Size', type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'", default: "'md'", description: 'Sets the height, padding, gap and label style.' },
+    { name: 'emphasis', figma: 'Emphasis', type: "'primary' | 'secondary' | 'tertiary'", default: "'primary'", description: 'Primary is a solid fill, secondary a bordered surface, and tertiary has no container.' },
+    { name: 'tone', figma: 'Tone', type: "'brand' | 'danger'", default: "'brand'", description: 'Use danger for destructive actions.' },
+    { name: 'leadingIcon', figma: 'Show leading icon + Leading icon', type: 'IconName', description: 'The icon before the label, or the only icon when iconOnly is set.' },
+    { name: 'leadingVisual', type: 'ReactNode', description: 'Any element in the leading icon slot, such as a brand mark or an avatar. Takes priority over leadingIcon.' },
+    { name: 'trailingIcon', figma: 'Show trailing icon + Trailing icon', type: 'IconName', description: 'The icon after the label.' },
+    { name: 'iconOnly', figma: 'Icon only', type: 'boolean', default: 'false', description: 'Makes a square button with one icon. The label becomes its aria-label.' },
+    { name: 'loading', figma: 'State=loading', type: 'boolean', default: 'false', description: 'Shows a spinner in the leading slot, blocks clicks and sets aria-busy.' },
+    { name: 'showLoadingText', figma: 'Show loading text', type: 'boolean', default: 'true', description: 'Keeps the label next to the spinner while loading.' },
+    { name: 'disabled', figma: 'State=disabled', type: 'boolean', default: 'false', description: 'Renders a native disabled button.' },
+    { name: 'fullWidth', type: 'boolean', default: 'false', description: 'Stretches the button to fill its container. The content stays centered.' },
+    { name: 'forceState', type: "'hover' | 'pressed' | 'focus'", description: 'For documentation only. Pins a hover, pressed or focus state.' },
   ],
   tokens: [
     'color/fill/brand/solid', 'color/fill/brand/solid/hover', 'color/fill/brand/solid/pressed', 'color/text/on-solid',
@@ -160,16 +160,16 @@ export default defineDoc({
   ],
   guidelines: [
     {
-      title: 'Buttons should look actionable',
-      body: 'A container, border, contrast and visible states tell people something can be clicked. Strip those cues and the same label reads as static text.',
-      do: { caption: 'A real Button: visible container and states.', render: () => <Button label="Upload files" leadingIcon="general/upload" /> },
-      dont: { caption: 'Text styled like a label gives no affordance.', render: () => <span className="type-body-sm-semibold text-text-secondary">Upload files</span> },
+      title: 'Make buttons look clickable',
+      body: 'People spot a button by its container, border, contrast and the way it reacts when they hover or press. Take those cues away and the same label reads as plain text.',
+      do: { caption: 'A real button, with a visible container and states.', render: () => <Button label="Upload files" leadingIcon="general/upload" /> },
+      dont: { caption: 'Text styled like a label doesn’t look clickable.', render: () => <span className="type-body-sm-semibold text-text-secondary">Upload files</span> },
     },
     {
-      title: 'Emphasis',
-      body: 'Primary, secondary and tertiary create a clear priority. Use one primary action per view or dialog so the next step is obvious.',
+      title: 'Use one primary action',
+      body: 'Primary, secondary and tertiary emphasis set a clear order of importance. Keep one primary action per view or dialog, so the next step is obvious.',
       do: {
-        caption: 'One primary, supported by secondary and tertiary.',
+        caption: 'One primary action, backed by secondary and tertiary.',
         render: () => (
           <div className="flex gap-md">
             <Button emphasis="tertiary" label="Skip" />
@@ -179,7 +179,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Three primary buttons compete for attention.',
+        caption: 'Three primary buttons fight for attention.',
         render: () => (
           <div className="flex gap-md">
             <Button label="Skip" />
@@ -190,14 +190,14 @@ export default defineDoc({
       },
     },
     {
-      title: 'Danger tone',
-      body: 'Not every negative action is dangerous. Use Tone=danger only for the action that causes the consequence — delete, remove, revoke — never for Cancel.',
-      do: { caption: 'Danger on “Delete project”.', render: () => <Button tone="danger" label="Delete project" /> },
-      dont: { caption: 'Danger on “Cancel”.', render: () => <Button tone="danger" emphasis="secondary" label="Cancel" /> },
+      title: 'Save the danger tone for real consequences',
+      body: 'Not every negative action is dangerous. Use the danger tone only on the button that does the damage, like delete, remove or revoke. Cancel is the safe way out, so it stays neutral.',
+      do: { caption: 'Danger on “Delete project”, the action with the consequence.', render: () => <Button tone="danger" label="Delete project" /> },
+      dont: { caption: 'Danger on “Cancel”, which is the safe choice.', render: () => <Button tone="danger" emphasis="secondary" label="Cancel" /> },
     },
     {
-      title: 'Optically balancing buttons',
-      body: 'Icons carry empty space inside their box. The label sits in a Text padding wrapper with space/optical on each side, and the outer padding is reduced by the same amount, so label-only and icon + label buttons look centred.',
+      title: 'Balance buttons optically',
+      body: 'Icons carry a little empty space inside their box, which can make a button look off-center. To fix it, the label gets a small extra padding on each side and the outer padding shrinks by the same amount. Buttons with and without icons then look evenly centered.',
       render: () => (
         <div className="flex flex-wrap gap-md">
           <Button emphasis="secondary" label="Label only" />
@@ -208,13 +208,13 @@ export default defineDoc({
     },
     {
       title: 'Content',
-      body: 'Labels are verbs or verb + noun (“Save changes”, “Delete project”), in sentence case, ideally three words or fewer. Loading labels say what is happening (“Saving…”). Icon-only buttons need an accessible name and a Tooltip.',
+      body: 'Write labels as a verb, or a verb and a noun: “Save changes”, “Delete project”. Use sentence case and aim for three words or fewer.\n\nWhile loading, say what’s happening (“Saving…”). Icon-only buttons need a name for screen readers and a Tooltip (2.13).',
     },
   ],
   accessibility: [
-    'Every state meets text contrast against its fill; disabled is exempt but stays legible.',
-    'Focus is always visible (focus/default, focus/danger) and differs from hover.',
-    'Loading sets aria-busy and blocks clicks; the label announces the progress phrase.',
-    'Icon-only buttons take their accessible name from `label`.',
+    'Label text meets contrast requirements against the fill in every state. Disabled buttons are exempt, but stay legible.',
+    'Keyboard focus always shows a visible ring (focus/default, or focus/danger on danger buttons) that looks different from hover.',
+    'While loading, the button sets aria-busy and ignores clicks. Screen readers announce the progress label, such as “Saving…”.',
+    'Icon-only buttons use label as the name screen readers announce.',
   ],
 });

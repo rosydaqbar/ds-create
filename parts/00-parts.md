@@ -298,4 +298,9 @@ A Part page fails QA when:
 - page-specific documentation, examples or notes required by the Markdown file are missing;
 - anatomy is described only conceptually rather than layer by layer;
 - components do not keep the intended optical and layout relationships;
-- any layer is bound to a raw value where the Part's token map names a token.
+- any layer is bound to a raw value where the Part's token map names a token;
+- a disabled state on a non-native element is shown but not announced (§13).
+
+# 13. Disabled is announced, not only shown
+
+Native controls (a button, an input, a select) announce their disabled state on their own. When a Part shows `State=disabled` on an element that is not a native control — a tag or its close, a custom select trigger, a menu item, an option — the interactive element in code also carries `aria-disabled="true"`, ignores activation, and keeps the disabled look. The Part's Accessibility topic says which of its elements this applies to; Components and Sections follow the same rule for their private parts.

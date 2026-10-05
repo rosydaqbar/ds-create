@@ -8,14 +8,15 @@
     "tokens": "node scripts/build-tokens.mjs",
     "index": "node scripts/build-index.mjs",
     "dev": "npm run tokens && vite",
-    "build": "npm run tokens && npm run index && npm run check:effects && tsc -b && vite build",
+    "build": "npm run tokens && npm run index && npm run check:effects && npm run check:contrast && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "tokens:merge": "node scripts/merge-export.mjs && node scripts/build-tokens.mjs",
     "check:effects": "node scripts/check-effects.mjs",
     "build:package": "npm run tokens && npm run index && node scripts/build-package.mjs",
     "qa": "npm run build && node scripts/qa.mjs",
-    "qa:dev": "node scripts/qa.mjs --url http://localhost:5173/"
+    "qa:dev": "node scripts/qa.mjs --url http://localhost:5173/",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

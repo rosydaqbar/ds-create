@@ -48,7 +48,7 @@ export default defineDoc({
   spec: 'components/3.4-avatar-group.md',
   exports: ['AvatarGroup', 'AvatarLabel'],
   summary:
-    'Overlapping avatars that show who is involved without listing names. Shows up to five people, then a +N count with the same footprint; the add button sits outside the stack. An Avatar label puts one avatar next to a name and a supporting line, used wherever a person is named: lists, menus, table cells and headers.',
+    'Avatar groups show who’s involved at a glance, without listing every name. An avatar label pairs one avatar with a name and a supporting line, wherever a person is named.',
   hero: () => <AvatarGroup size="sm" people={people(5)} count="+5" />,
   playground: {
     controls: [
@@ -63,7 +63,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Project card header',
-      caption: 'A small group says who works on the project; the count keeps the header compact.',
+      caption: 'A small group shows who works on the project, and the count keeps the header compact.',
       render: () => (
         <DemoCard className="w-[22rem]">
           <div className="flex items-start justify-between gap-lg">
@@ -84,7 +84,7 @@ export default defineDoc({
     },
     {
       title: 'Document share bar',
-      caption: 'The group shows who already has access; the add button and Share invite more people.',
+      caption: 'The group shows who already has access, and the add button and Share let people invite more.',
       render: () => (
         <div className="flex items-center gap-lg">
           <AvatarGroup size="sm" people={people(10)} />
@@ -98,7 +98,7 @@ export default defineDoc({
     },
     {
       title: 'Team list',
-      caption: 'When people need to be identified, list them with Avatar labels.',
+      caption: 'When people need to see exactly who’s on the team, list them with avatar labels.',
       render: () => teamList(),
       code: `{members.map((m, i) => (
   <Fragment key={m.id}>
@@ -110,13 +110,13 @@ export default defineDoc({
   ],
   whenToUse: {
     use: [
-      'Showing who is on a project, document or call when how many matters more than who.',
-      'Avatar label: wherever a person is named — lists, menus, table cells, headers.',
+      'Showing who’s on a project, document or call, when how many matters more than who.',
+      'Avatar labels wherever a person is named, like lists, menus, table cells and headers.',
     ],
     dont: [
-      'One person on their own — use an Avatar (2.6).',
-      'When every person must be identified — list them with Avatar labels.',
-      'Picking people — use a Select (3.5) with Type=avatar or a Multi-select.',
+      'For one person on their own, use an Avatar (2.6).',
+      'When every person needs to be identified, list them with avatar labels.',
+      'For picking people, use a Select (3.5) with avatars, or a Multi-select.',
     ],
   },
   matrices: [
@@ -162,7 +162,7 @@ export default defineDoc({
       columns: 'State',
       render: () => (
         <div className="flex min-w-0 flex-col gap-md">
-          <p className="type-body-sm-regular text-text-secondary">The add button at the end of an Avatar group. Edit it to change every group.</p>
+          <p className="type-body-sm-regular text-text-secondary">The add button at the end of an avatar group. Changes here apply to every group.</p>
           <Matrix
             rowProp="Size"
             rows={GROUP_SIZES}
@@ -193,27 +193,27 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Avatar group', description: 'Horizontal, align centre, gap space/md between the stack and the add button; hugs its content.', tokens: ['space/md'] },
-      { name: 'Avatars', description: 'Horizontal stack with a negative gap of avatar-group/overlap/{size} (−4 / −8 / −12). Earlier avatars sit on top, so the first person is fully visible.', tokens: ['avatar-group/overlap/xs', 'avatar-group/overlap/sm', 'avatar-group/overlap/md'] },
-      { name: 'Avatar', description: 'Avatar (2.6) at the group size (24 / 32 / 40) with Show ring on: a ring in color/surface/base separates the circles on any background.', tokens: ['size/avatar/sm', 'color/surface/base', 'border/width/strong'] },
-      { name: 'Count', description: 'Avatar (2.6) Type=initials with the count text ("+5") and the ring: the same footprint as its neighbours. Hover shows the hidden names in a Tooltip.' },
-      { name: 'Add button', description: '.Main/Avatar group add button: a dashed circle the size of the avatars, after the stack with a normal gap; never overlapped.', tokens: ['color/border/default', 'color/icon/tertiary'] },
-      { name: 'Avatar label', description: 'Avatar (fixed, never shrinks) + text stack (fills, truncates). Gap space/md (sm, md) or space/lg (lg).', tokens: ['space/md', 'space/lg'] },
-      { name: 'Text / supporting text', description: 'Name in type/body/{sm|md}/semibold, color/text/primary; supporting line in type/body/{sm|md}/regular, color/text/tertiary. No spacer between them.', tokens: ['type/body/sm/semibold', 'type/body/sm/regular', 'color/text/primary', 'color/text/tertiary'] },
+      { name: 'Avatar group', target: 'avatar-group', description: 'Holds the stack and the add button side by side, with a normal gap between them. It takes only the space it needs.', tokens: ['space/md'] },
+      { name: 'Avatars', target: 'avatars', description: 'The overlapping stack. Each size has its own overlap, and earlier avatars sit on top, so the first person is fully visible.', tokens: ['avatar-group/overlap/xs', 'avatar-group/overlap/sm', 'avatar-group/overlap/md'] },
+      { name: 'Avatar', target: 'avatar', description: 'An Avatar (2.6) at the group’s size, with its ring on. The ring keeps the circles separate on any background.', tokens: ['size/avatar/sm', 'color/surface/base', 'border/width/strong'] },
+      { name: 'Count', target: 'count', description: 'An initials Avatar (2.6) that shows the count (“+5”), with the same size and ring as its neighbors. Hovering it shows the hidden names in a tooltip.' },
+      { name: 'Add button', target: 'add-button', description: 'A dashed circle the size of the avatars, placed after the stack with a normal gap. It never overlaps an avatar.', tokens: ['color/border/default', 'color/icon/tertiary'] },
+      { name: 'Avatar label', target: 'avatar-label', description: 'An avatar next to a stack of text. The avatar keeps its size, while the text fills the rest and truncates. Large labels get a bigger gap.', tokens: ['space/md', 'space/lg'] },
+      { name: 'Text / supporting text', target: 'text-stack', description: 'The name in semibold, with a lighter supporting line right below it and no extra space between them.', tokens: ['type/body/sm/semibold', 'type/body/sm/regular', 'color/text/primary', 'color/text/tertiary'] },
     ],
   },
   props: [
-    { name: 'size', figma: 'Size', type: "'xs' | 'sm' | 'md'", default: "'sm'", description: 'AvatarGroup: avatar side, overlap and add button size.' },
-    { name: 'people', type: 'AvatarPerson[]', description: 'AvatarGroup: the people ({ name, src?, initials? }), exposed nested Avatars in Figma. The first five show.' },
-    { name: 'count', figma: 'Count', type: 'string', default: '"+{hidden}"', description: 'AvatarGroup: the count text; defaults to the number of people beyond five.' },
-    { name: 'showCount', figma: 'Show count', type: 'boolean', default: 'true', description: 'AvatarGroup: show the +N count.' },
-    { name: 'showAddButton', figma: 'Show add button', type: 'boolean', default: 'true', description: 'AvatarGroup: show the add button after the stack.' },
-    { name: 'onAddClick / addLabel', type: '() => void · string', default: "— · 'Add people'", description: 'AvatarGroup: the add button’s action, accessible name and Tooltip.' },
-    { name: 'onCountClick', type: '() => void', description: 'AvatarGroup: makes the count a button that opens the full list.' },
-    { name: 'total', type: 'number', description: 'AvatarGroup: the real number of people when `people` holds only the first few.' },
-    { name: 'AvatarLabel · size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'AvatarLabel: avatar 32 / 40 / 48 and the text styles.' },
-    { name: 'AvatarLabel · text', figma: 'Text', type: 'ReactNode', default: "'Olivia Rhye'", description: 'AvatarLabel: the person’s name; truncates.' },
-    { name: 'AvatarLabel · supportingText', figma: 'Show supporting text + Supporting text', type: 'ReactNode', description: 'AvatarLabel: email or role. Present = shown.' },
+    { name: 'size', figma: 'Size', type: "'xs' | 'sm' | 'md'", default: "'sm'", description: 'AvatarGroup: the avatar size, overlap and add button size.' },
+    { name: 'people', type: 'AvatarPerson[]', description: 'AvatarGroup: the people ({ name, src?, initials? }), exposed as nested Avatars in Figma. The first five are shown.' },
+    { name: 'count', figma: 'Count', type: 'string', default: '"+{hidden}"', description: 'AvatarGroup: the count text. Defaults to the number of people beyond five.' },
+    { name: 'showCount', figma: 'Show count', type: 'boolean', default: 'true', description: 'AvatarGroup: shows the +N count.' },
+    { name: 'showAddButton', figma: 'Show add button', type: 'boolean', default: 'true', description: 'AvatarGroup: shows the add button after the stack.' },
+    { name: 'onAddClick / addLabel', type: '() => void · string', default: "— · 'Add people'", description: 'AvatarGroup: the add button’s action, plus its accessible name and tooltip text.' },
+    { name: 'onCountClick', type: '() => void', description: 'AvatarGroup: turns the count into a button that opens the full list.' },
+    { name: 'total', type: 'number', description: 'AvatarGroup: the real number of people, when people holds only the first few.' },
+    { name: 'AvatarLabel · size', figma: 'Size', type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'AvatarLabel: the avatar size (32 / 40 / 48) and text styles.' },
+    { name: 'AvatarLabel · text', figma: 'Text', type: 'ReactNode', default: "'Olivia Rhye'", description: 'AvatarLabel: the person’s name. Long names truncate.' },
+    { name: 'AvatarLabel · supportingText', figma: 'Show supporting text + Supporting text', type: 'ReactNode', description: 'AvatarLabel: an email or role. It shows whenever it’s set.' },
     { name: 'AvatarLabel · avatar', type: '{ src?, initials? }', description: 'AvatarLabel: the photo, or initials (taken from the name by default).' },
   ],
   tokens: [
@@ -227,7 +227,7 @@ export default defineDoc({
   guidelines: [
     {
       title: 'Group or list',
-      body: 'Use a group when who matters less than how many; list names when people need to be identified.',
+      body: 'Use a group when how many people matters more than who they are. When people need to be identified, list their names.',
       render: () => (
         <div className="flex flex-wrap items-center justify-center gap-4xl">
           <AvatarGroup size="md" people={people(5)} showCount={false} showAddButton={false} />
@@ -237,10 +237,10 @@ export default defineDoc({
     },
     {
       title: 'Overlap',
-      body: 'Avatars overlap through a negative gap (avatar-group/overlap/{size}), never through hand placement, so adding or removing a person keeps the stack even. The ring separates the circles.',
-      do: { caption: 'Overlap from the negative gap, ring on.', render: () => <AvatarGroup size="md" people={people(4)} showCount={false} showAddButton={false} /> },
+      body: 'The stack overlaps avatars with a negative gap instead of placing each one by hand, so adding or removing a person keeps it even. The ring keeps each circle distinct.',
+      do: { caption: 'Even overlap, with the ring on.', render: () => <AvatarGroup size="md" people={people(4)} showCount={false} showAddButton={false} /> },
       dont: {
-        caption: 'Positive gaps between avatars read as a list, not a group.',
+        caption: 'Gaps between avatars make them read as a list, not a group.',
         render: () => (
           <div className="flex gap-md">
             {people(4).map((p) => (
@@ -251,8 +251,8 @@ export default defineDoc({
       },
     },
     {
-      title: 'The count',
-      body: 'Show up to five; the count shows the rest and keeps the avatar footprint.',
+      title: 'Use a count for the rest',
+      body: 'Show up to five avatars, then a count for everyone else. The count takes the same space as an avatar, so the group stays compact.',
       render: () => (
         <div className="flex flex-col items-start gap-xl">
           <AvatarGroup size="sm" people={people(3)} showAddButton={false} />
@@ -262,11 +262,11 @@ export default defineDoc({
       ),
     },
     {
-      title: 'The add button',
-      body: 'The add button sits after the stack with a normal positive gap; it never overlaps an avatar.',
-      do: { caption: 'Add button after the stack with space/md.', render: () => <AvatarGroup size="md" people={people(5)} /> },
+      title: 'Keep the add button separate',
+      body: 'Place the add button after the stack with a normal gap, so it never overlaps an avatar and reads as an action, not a person.',
+      do: { caption: 'The add button sits after the stack, with a gap.', render: () => <AvatarGroup size="md" people={people(5)} /> },
       dont: {
-        caption: 'Add button overlapped into the stack.',
+        caption: 'The add button overlaps the stack.',
         render: () => (
           <div className="flex items-center [&>*+*]:ms-(--avatar-group-overlap-md)">
             <AvatarGroup size="md" people={people(4)} showCount={false} showAddButton={false} />
@@ -277,7 +277,7 @@ export default defineDoc({
     },
     {
       title: 'Avatar label content',
-      body: 'Text is the person’s name; supporting text is the most useful second fact for the context — email in admin lists, role in team pages. Long names truncate; the avatar never shrinks.',
+      body: 'Show the person’s name, and use the supporting line for the most useful second fact: an email in admin lists, a role on team pages. Long names truncate, and the avatar never shrinks.',
       render: () => (
         <div className="flex w-[14rem] flex-col gap-lg">
           <AvatarLabel text="Olivia Rhye" supportingText="olivia@example.com" />
@@ -287,8 +287,8 @@ export default defineDoc({
       ),
     },
     {
-      title: 'Same size in a stack',
-      body: 'Every avatar in a group has the group’s size.',
+      title: 'Use one size per stack',
+      body: 'Every avatar in a group uses the group’s size, so the stack reads as one unit.',
       do: { caption: 'One size for the whole stack.', render: () => <AvatarGroup size="sm" people={people(5)} showAddButton={false} /> },
       dont: {
         caption: 'Mixed sizes in one stack.',
@@ -304,7 +304,7 @@ export default defineDoc({
     },
     {
       title: 'Truncate long names',
-      body: 'The text stack fills and truncates; the avatar keeps its size.',
+      body: 'Long names truncate to fit the space, and the avatar keeps its size.',
       do: {
         caption: 'The name truncates with an ellipsis.',
         render: () => (
@@ -314,7 +314,7 @@ export default defineDoc({
         ),
       },
       dont: {
-        caption: 'Shrinking the avatar to fit the name.',
+        caption: 'The avatar shrinks to fit the name.',
         render: () => (
           <div className="flex w-[11rem] items-center gap-md">
             <Avatar size="2xs" type="initials" alt="" />
@@ -325,13 +325,13 @@ export default defineDoc({
     },
     {
       title: 'Maintenance',
-      body: 'Avatar images, placeholders and colours are changed on the Avatar page (2.6) and reach every group and label. Overlap and spacing live here, in the avatar-group/overlap/* tokens and the add button part.',
+      body: 'Change avatar images, placeholders and colors on the Avatar page (2.6), and the change reaches every group and label. Overlap and spacing live here, in the avatar-group/overlap/* tokens and the add button part.',
     },
   ],
   accessibility: [
-    'A group has an accessible name that includes the total (“10 people: Olivia Rhye, Phoenix Baker and 8 more”).',
-    'Hovering the count shows a Tooltip (2.13) with the hidden names; with onCountClick the count is a button that opens the full list.',
-    'The add button is a button named “Add people” and shows a Tooltip with the same text.',
-    'In an Avatar label the name is visible text, so the avatar is decorative (hidden from assistive technology).',
+    'Screen readers announce the group with its total, for example “10 people: Olivia Rhye, Phoenix Baker and 8 more”.',
+    'Hovering the count shows a Tooltip (2.13) with the hidden names. With onCountClick, the count becomes a button that opens the full list.',
+    'The add button is a button named “Add people”, with a tooltip that shows the same text.',
+    'In an avatar label, the name is visible text, so the avatar is decorative and hidden from assistive technology.',
   ],
 });
