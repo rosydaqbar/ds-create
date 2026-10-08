@@ -2,7 +2,7 @@
 
 This is the canonical global contract. It defines the Figma Page tree, the fixed page templates, the documentation and layout system, the token and naming contract, and audit routing.
 
-The contract fixes **structure**: every build produces the same pages, in the same order, with the same frames in the same order and the same names. Visual quality comes from the documentation system in `DOCFRAMES.md`. Values come from the brand.
+The contract fixes **structure**: every build produces the same pages, in the same order, with the same frames in the same order and the same names. Visual quality comes from the documentation system in `workflow/DOCFRAMES.md`. Values come from the brand.
 
 # Part A — Figma Page Tree and Page Templates
 
@@ -63,7 +63,7 @@ Use this exact Figma Page tree and order. Page names carry an ID so pages, Markd
 
 Rules:
 - Separator pages (`── n · Name ──`) are navigation only and have no canvas content.
-- **Initiate** builds `00`–`02`, the selected Foundations, the selected Parts and `9.1 Doc kit`. Components and Sections are built when the user selects them or when `EXTEND.md` adds them; Layouts and Screens are added only through `EXTEND.md`.
+- **Initiate** builds `00`–`02`, the selected Foundations, the selected Parts and `9.1 Doc kit`. Components and Sections are built when the user selects them or when `workflow/EXTEND.md` adds them; Layouts and Screens are added only through `workflow/EXTEND.md`.
 - A level separator exists only when at least one page under it exists, except Foundations and Parts, which Initiate always creates.
 - A page is created only for an item in scope. Out-of-scope items get no placeholder page (`SKIP`).
 - New pages added later take the next free ID in their level (`2.20`, `3.9`, …). IDs are never reused or renumbered.
@@ -126,7 +126,7 @@ The page's Markdown file lists which specimen sections go in **Overview**, which
 - **Overview** shows the component as a designer meets it: one large default instance, then 2–4 realistic compositions built from real instances (a dialog footer, a form row, a toolbar), each with a one-line caption.
 - **Component** holds every published set of the page. A page may hold more than one set when the Markdown file says so (for example Button holds `Button`; Icon button holds `Icon button`). Each set has a family header above it.
 - **Anatomy** explains construction: numbered anatomy diagram, property table, size row, state row, and a compact token map (part × state → token chip with swatch).
-- **Guidelines** is a reading-oriented frame (`DOCFRAMES.md` §7) with visual teaching: do/don't pairs built from real instances, content rules, accessibility, and composition notes.
+- **Guidelines** is a reading-oriented frame (`workflow/DOCFRAMES.md` §7) with visual teaching: do/don't pairs built from real instances, content rules, accessibility, and composition notes.
 
 Components and Sections add one block at the top of **Anatomy**: *Composition* — the Parts they contain, shown as instances with labels.
 
@@ -169,19 +169,19 @@ The state frames are bare frames, so Figma can prototype, present and hand them 
 
 ```text
 9.1 Doc kit
-└─ 9.1 Doc kit · Components    every documentation component (`DOCFRAMES.md` §16), published to this file only
+└─ 9.1 Doc kit · Components    every documentation component (`workflow/DOCFRAMES.md` §16), published to this file only
 ```
 
 ## A4. Canvas behavior
 
 - Each page is an infinite canvas with horizontally arranged frames. Never collapse a page into one small frame because it has one topic.
-- Frames grow with their content (Hug height; widths from documentation tokens, `DOCFRAMES.md` §1). Never clip content to keep a frame at a reference size.
+- Frames grow with their content (Hug height; widths from documentation tokens, `workflow/DOCFRAMES.md` §1). Never clip content to keep a frame at a reference size.
 - Private parts live in the leftmost `.Main` frame and are named `.Main/{Component} {part}`. They are not published and never appear in product screens.
 - Component sets and variants follow the naming in Part C §4.
 
 ## A5. Product type
 
-The product type from `QUESTIONNAIRE.md` §10 (Web, App, or Web and App) adapts the Figma file to the product. It never changes the page tree, the page templates, the component scope or the naming. iOS and Android share one brand look; they never get separate styles or separate component sets.
+The product type from `workflow/QUESTIONNAIRE.md` §10 (Web, App, or Web and App) adapts the Figma file to the product. It never changes the page tree, the page templates, the component scope or the naming. iOS and Android share one brand look; they never get separate styles or separate component sets.
 
 | | Web | App | Web and App |
 | --- | --- | --- | --- |
@@ -203,13 +203,13 @@ The product type from `QUESTIONNAIRE.md` §10 (Web, App, or Web and App) adapts 
 Rules:
 - **Same scope.** An App product adds no app-only components. Sheets, tab bars and pickers are how a component in scope behaves on a phone; they are described in In apps, not built as new sets.
 - **Same variants.** A component's sets and properties are the same for web and app. Hover stays in the set, for pointers on tablets and the web.
-- **Docs on the web.** Every product type is documented on the web docs site (`WEB.md`); an App product's pages render the React Native components there (`APP.md` §7).
+- **Docs on the web.** Every product type is documented on the web docs site (`workflow/WEB.md`); an App product's pages render the React Native components there (`workflow/APP.md` §7).
 
 ---
 
 # Part B — Documentation and Layout System
 
-Moved to `DOCFRAMES.md`, with the same section numbers: a reference to Part B §6 is `DOCFRAMES.md` §6. Load it at the steps that draw or change documentation frames (`README.md` §4).
+Moved to `workflow/DOCFRAMES.md`, with the same section numbers: a reference to Part B §6 is `workflow/DOCFRAMES.md` §6. Load it at the steps that draw or change documentation frames (`README.md` §4).
 
 
 ---
@@ -254,7 +254,7 @@ Figma variable names use `/` between segments. Code syntax uses the same segment
 {domain}/{group}/{role}[/{emphasis}][/{state}]
 ```
 
-Each segment narrows the one before it. Segments that are states or variants of a role are **children** of that role, and variable tables show them as children with tree connectors (`DOCFRAMES.md` §6.4):
+Each segment narrows the one before it. Segments that are states or variants of a role are **children** of that role, and variable tables show them as children with tree connectors (`workflow/DOCFRAMES.md` §6.4):
 
 ```text
 color/text/brand               parent row
@@ -293,12 +293,12 @@ color/text/brand               parent row
 | Grid styles | `grid/{breakpoint}` | `grid/desktop` |
 | Motion | `motion/duration/{role}`, `motion/easing/{role}`, `motion/delay/{role}` | `motion/duration/base`, `motion/easing/enter` |
 | Components | `{component}[/{part}][/{emphasis}][/{tone}]/{property}[/{state}]` | `button/padding-x/md`, `button/primary/brand/fill/hover` |
-| Documentation | `doc/{group}/{role}`; aliases the brand tokens, except the measures (`DOCFRAMES.md` §1) | `doc/surface/base`, `doc/space/block`, `doc/measure/reading` |
+| Documentation | `doc/{group}/{role}`; aliases the brand tokens, except the measures (`workflow/DOCFRAMES.md` §1) | `doc/surface/base`, `doc/space/block`, `doc/measure/reading` |
 
 Rules:
 - One name per concept; never two names for the same role.
 - Token names never contain product, brand or feature names.
-- Every semantic token has a description that states its concrete UI purpose (`DOCFRAMES.md` §6.6); the same text is the Usage column.
+- Every semantic token has a description that states its concrete UI purpose (`workflow/DOCFRAMES.md` §6.6); the same text is the Usage column.
 
 # 4. Component naming
 
@@ -353,7 +353,7 @@ Rules:
 
 Support: Figma Variables, CSS custom properties, Tailwind theme, JSON, DTCG JSON, JavaScript / TypeScript, Android, iOS. Each format is an export of the same grammar; naming and output syntax are separate concerns.
 
-The web formats (CSS custom properties, Tailwind v4 theme, DTCG JSON, TypeScript data) are generated together by the web template from an export of the Figma file; the mapping from names to CSS variables and Tailwind utilities is in `WEB.md` §5. For App products, the React Native tokens behind the docs' App previews are generated by `app/scripts/build-rn-tokens.mjs` from the same export; the token names the React Native, Swift and Kotlin code uses are in `APP.md` §5.
+The web formats (CSS custom properties, Tailwind v4 theme, DTCG JSON, TypeScript data) are generated together by the web template from an export of the Figma file; the mapping from names to CSS variables and Tailwind utilities is in `workflow/WEB.md` §5. For App products, the React Native tokens behind the docs' App previews are generated by `app/scripts/build-rn-tokens.mjs` from the same export; the token names the React Native, Swift and Kotlin code uses are in `workflow/APP.md` §5.
 
 # 6. Existing systems
 

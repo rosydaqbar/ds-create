@@ -1,6 +1,6 @@
 # Documentation frames
 
-How every Figma documentation frame looks: brand styling, frame families, headers, tables, swatches, matrices, anatomy, the reading pattern and the Doc kit. This was `SYSTEM.md` Part B; its section numbers are unchanged, so `DOCFRAMES.md` §6.4 is the old Part B §6.4.
+How every Figma documentation frame looks: brand styling, frame families, headers, tables, swatches, matrices, anatomy, the reading pattern and the Doc kit. This was `SYSTEM.md` Part B; its section numbers are unchanged, so `workflow/DOCFRAMES.md` §6.4 is the old Part B §6.4.
 
 **Load it** at the build steps that draw frames the doc builder has no helper for: the Doc kit, Cover, guidance pages, foundation palette rows and variable tables, and Screens (`INITIATOR.md` Part B §6). Load it also to change or review the builder. `tools/figma-docbuilder.js` implements this file for Parts, Components, Sections and Layouts, and each of its rules cites a section here. A change here is made in the builder in the same change. The page tree, the frames each page has and the token contract stay in `SYSTEM.md`.
 
@@ -780,6 +780,15 @@ All prose
 Large gallery of unrelated screenshots at the end
 ```
 
+## Examples and previews say what they are
+
+A reader must tell at a glance whether a visual is the whole thing or one instance of it.
+
+Rules:
+- the caption under a visual that shows one worked case starts with `Example:`, then names the real variables and components in the visual, then says what the case proves (`Example: the checked Checkbox and the on Switch both fill with color/text/brand; edit that one variable and both change.`);
+- a visual that shows a sample of a larger set (three variables of a collection, four icons of a library, two pages of a level) labels the sample `Examples` and ends with a `See all on {page} →` link to the page that holds the full set;
+- a caption that only describes the full set (a table of every value, a complete matrix) does not start with `Example:`.
+
 ## Documentation visual types
 
 ### Comparison
@@ -791,6 +800,8 @@ Use for:
 - selected approach vs rejected approach.
 
 Keep unrelated variables constant so the lesson is obvious.
+
+A comparison that recommends one side is always a do / don't pair: each side on its own stage, each with a `Doc/Do-dont` instance below it (icon, label and one-line reason, colored with `doc/status/do` or `doc/status/dont`). Never mark the sides with neutral badges or plain words such as Prefer, Avoid, Good or Bad: a same-colored label reads as a category, not a verdict. A comparison that only shows options without a verdict (three corner treatments, two modes) uses labels, and the chosen option, if any, carries a `Selected` badge.
 
 ### Anatomy diagram
 
@@ -875,7 +886,9 @@ A long-form documentation Frame fails QA when:
 - visuals use fake/unrelated token names;
 - screenshots from another system are pasted instead of recreated;
 - generated visuals use anatomy inconsistent with the published generated components;
-- visual examples are grouped far away from the explanatory text they support.
+- visual examples are grouped far away from the explanatory text they support;
+- a worked example's caption does not start with `Example:`, or a sample of a larger set has no `Examples` label and `See all on {page} →` link;
+- a recommendation is marked with neutral badges or words instead of a `Doc/Do-dont` pair.
 
 # 16. Doc kit
 

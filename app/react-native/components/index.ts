@@ -1,5 +1,5 @@
 /**
- * Public components, one file per published Figma set (APP.md §6.1), in page order.
+ * Public components, one file per published Figma set (workflow/APP.md §6.1), in page order.
  * Private parts (`.Main/…` in Figma) stay internal and are never exported here.
  */
 

@@ -3,7 +3,7 @@
  * Every pair a component or page draws text with must reach WCAG AA 4.5:1 in every color mode,
  * including the hover, pressed and selected fills under on-solid text and the placeholder.
  * Pairs whose tokens don't exist in this system are skipped. Run: npm run check:contrast
- * (part of npm run build). Fix failures in the Figma variables, then export again (WEB.md §9).
+ * (part of npm run build). Fix failures in the Figma variables, then export again (workflow/WEB.md §9).
  */
 import fs from 'node:fs';
 import path from 'node:path';

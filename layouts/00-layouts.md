@@ -4,18 +4,18 @@ Layouts arrange a whole screen into regions: where the header, navigation, main 
 
 Each Layout page is a **complete component canvas**: the published Layout at every breakpoint, its anatomy and its guidelines, built with the same structure as the other levels.
 
-Layouts are never built during Initiate. They are added only through `EXTEND.md`, when the user asks for a page layout ("a settings page", "a list with a detail panel") or when a screen needs an arrangement no Layout covers.
+Layouts are never built during Initiate. They are added only through `workflow/EXTEND.md`, when the user asks for a page layout ("a settings page", "a list with a detail panel") or when a screen needs an arrangement no Layout covers.
 
 # 1. Layout pages
 
 ```text
 ── 5 · Layouts ──
-(no pages in the base tree; each Layout is added through EXTEND.md)
+(no pages in the base tree; each Layout is added through workflow/EXTEND.md)
 ```
 
 | Page | File |
 | --- | --- |
-| `5.1 {Name}`, `5.2 {Name}`, … | `layouts/5.x-{kebab-name}.md`, written by `EXTEND.md` step 8 |
+| `5.1 {Name}`, `5.2 {Name}`, … | `layouts/5.x-{kebab-name}.md`, written by `workflow/EXTEND.md` step 8 |
 
 - New Layouts take the next free ID (`5.1`, `5.2`, …). IDs are never reused or renumbered.
 - The `── 5 · Layouts ──` separator exists only once the first Layout page exists (`SYSTEM.md` Part A §1).
@@ -29,7 +29,7 @@ Layouts are never built during Initiate. They are added only through `EXTEND.md`
 | Does it live inside one region, with its own layout and behavior, and could it sit in different Layouts (a data table, a navigation sidebar, an editor)? | Section (`4.x`) |
 | Is it a Layout filled with the real content of one product view? | Screen (`6.x`) |
 
-This is the same test as `EXTEND.md` §3. When two levels fit, ask the user once.
+This is the same test as `workflow/EXTEND.md` §3. When two levels fit, ask the user once.
 
 # 2. What a Layout may contain
 
@@ -37,7 +37,7 @@ This is the same test as `EXTEND.md` §3. When two levels fit, ask the user once
 - Foundations: tokens, text styles, effect styles, grid styles (`grid/*`), icons and brand assets.
 - Its own private parts (`.Main/{Layout} {part}`): the region placeholder, and region shells that exist only in this Layout and have no behavior of their own.
 
-A Layout never instances another Layout or a Screen. A region that needs a missing Section or Component gets it through `EXTEND.md` first (step 4, bottom-up); it is never drawn inside the Layout.
+A Layout never instances another Layout or a Screen. A region that needs a missing Section or Component gets it through `workflow/EXTEND.md` first (step 4, bottom-up); it is never drawn inside the Layout.
 
 Raw values are never used. Every padding, gap, width and max width binds a `space/*` or `size/*` token, every color a `color/*` role, every shadow an `elevation/*` style and every text a `type/*` style. The only plain numbers on the page are the documentation widths and heights the Layouts are drawn at (§4.1).
 
@@ -84,7 +84,7 @@ All five are **documented frames** (header, blocks, footer). The breadcrumb is `
 7. Landmarks, headings and focus order: landmark labels on every region, the H1 slot, numbered focus order, the skip link at `State=focus` (§4.5).
 8. Token map: region × property → `Doc/Token badge` with `Doc/Alias chip`.
 
-**· Guidelines**: a reading-oriented frame (`DOCFRAMES.md` §7) with the topics in the Layout's file, each with its visual built from real instances and `Doc/Do-dont` under each pair.
+**· Guidelines**: a reading-oriented frame (`workflow/DOCFRAMES.md` §7) with the topics in the Layout's file, each with its visual built from real instances and `Doc/Do-dont` under each pair.
 
 Every frame ends with `Doc/Footer`.
 
@@ -104,7 +104,7 @@ A Layout has one variant per breakpoint in scope on `1.3 Space & layout`, and ea
 - Columns, gutters, margins and minimum widths are the ones on 1.3. Drawing widths and viewport heights are defaults; the Layout's file may change them for the product's real devices.
 - At wide, the `desktop` variant keeps its arrangement and its content centers at `size/container/max`. A Layout whose arrangement changes at wide (a third column appears) needs a `wide` value; add it to `Breakpoint` in `SYSTEM.md` Part C §4.2 first.
 - Each variant is at least one viewport tall. Fixed regions (navigation, side panel) fill that height; `Main` hugs its content and the page scrolls.
-- The Layout's file names its **main breakpoint**: the one most people use, from the platforms in `QUESTIONNAIRE.md` §1. Overview and Screens start there.
+- The Layout's file names its **main breakpoint**: the one most people use, from the platforms in `workflow/QUESTIONNAIRE.md` §1. Overview and Screens start there.
 
 ## 4.2 Regions
 
@@ -168,7 +168,7 @@ fill color/fill/neutral/subtle, stroke color/border/default (dashed, border/widt
 | `{Region} content` | slot or instance swap | placeholder by default | what a Screen puts in the region |
 
 - `Breakpoint`, `Open` and `Show {part}` are in `SYSTEM.md` Part C §4.2.
-- `{Region} content` is a swappable region: a native slot where the Figma plan supports slots, otherwise an instance-swap property whose default is `.Main/{Layout} placeholder`. This concept is not in Part C §4.2 yet; add it there before the first Layout is built (`EXTEND.md` step 7).
+- `{Region} content` is a swappable region: a native slot where the Figma plan supports slots, otherwise an instance-swap property whose default is `.Main/{Layout} placeholder`. This concept is not in Part C §4.2 yet; add it there before the first Layout is built (`workflow/EXTEND.md` step 7).
 - Any other concept a Layout needs is added to Part C §4.2 first, then used.
 
 ## 4.5 Accessibility at page level
@@ -205,7 +205,7 @@ Each Layout file specifies, where relevant:
 
 # 5. Layout file sections
 
-A `layouts/5.x-{kebab-name}.md` file follows `DOCFRAMES.md` §13, adapted to page arrangement. It contains, in this order:
+A `layouts/5.x-{kebab-name}.md` file follows `workflow/DOCFRAMES.md` §13, adapted to page arrangement. It contains, in this order:
 
 ```text
 Purpose (and when to use it versus the neighboring Layouts)
@@ -231,7 +231,7 @@ A file that only lists regions and breakpoints is incomplete.
 
 # 6. Implementation mode
 
-Layouts use the same implementation mode as the other levels (`QUESTIONNAIRE.md` §8 and `INITIATOR.md` Part B §3): **YOLO everything** or **One by one**. If the user already chose a mode in the current request, reuse it. The mode changes pacing only. In One by one, the Sections, Components and Parts a Layout needs are built first when they are missing; unrelated pages are not prebuilt.
+Layouts use the same implementation mode as the other levels (`workflow/QUESTIONNAIRE.md` §8 and `INITIATOR.md` Part B §3): **YOLO everything** or **One by one**. If the user already chose a mode in the current request, reuse it. The mode changes pacing only. In One by one, the Sections, Components and Parts a Layout needs are built first when they are missing; unrelated pages are not prebuilt.
 
 Neither mode changes the order. A Layout page starts only when every earlier step of the build sequence (`INITIATOR.md` Part B §6) is done in the ledger, every Section in scope included. It is done only after its own file and the files of the Sections and Components it contains were loaded at its step and the page gate passed.
 
@@ -254,4 +254,4 @@ A Layout page fails QA when:
 - a drawer changes the layout height instead of overlaying;
 - any topic, example or QA rule in the Layout's file is missing from the canvas.
 
-When the system has a web implementation, the Layout is documented on the site like the other levels (`WEB.md`) and its page passes `npm run qa`: no horizontal overflow at 390 px and no axe-core violations, in Light and Dark.
+When the system has a web implementation, the Layout is documented on the site like the other levels (`workflow/WEB.md`) and its page passes `npm run qa`: no horizontal overflow at 390 px and no axe-core violations, in Light and Dark.

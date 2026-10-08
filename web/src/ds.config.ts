@@ -23,7 +23,7 @@ export const config = {
   figmaUrl: '',
   /**
    * Whether src/brand/copy.ts holds the brand's own sentences. 'template' in ds-create and in a build
-   * until WEB.md W5; W5 sets 'written' once it has answered every slot. From then on `npm run build`
+   * until workflow/WEB.md W5; W5 sets 'written' once it has answered every slot. From then on `npm run build`
    * (check:brand-copy) fails on any slot still marked `template(…)` or left empty.
    */
   brandCopy: 'template' as 'template' | 'written',

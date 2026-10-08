@@ -8,7 +8,7 @@ import { a11yState, dim, FocusRing, num, role, touchSlop, useInteraction, useSta
  * 2.1 Button: actions people can take.
  * Figma: `Button` · Size × Emphasis × Tone × State × Icon only (360 variants).
  *
- * Props are the Figma properties (APP.md §6.1). Figma `State` is not a prop: pressed, hovered
+ * Props are the Figma properties (workflow/APP.md §6.1). Figma `State` is not a prop: pressed, hovered
  * (iPad pointer) and focused (hardware keyboard) come from the platform; `disabled` and
  * `loading` are props; `previewState` pins a state on the web docs site only.
  *
@@ -166,7 +166,7 @@ export function Button({
   const { interaction, focused, handlers } = useInteraction(!interactive, previewState);
   const showFocus = !disabled && focused;
 
-  // Press feedback: fast · standard (APP.md §6.3). Previews jump straight to the pinned state.
+  // Press feedback: fast · standard (workflow/APP.md §6.3). Previews jump straight to the pinned state.
   const states = interactionColors(theme, emphasis, tone);
   const current: StateColors = disabled ? disabledColors(theme, emphasis) : states[interaction];
   const stateColor = useStateColors(states as Record<Interaction, Record<keyof StateColors, string>>, interaction, !!previewState);
@@ -176,7 +176,7 @@ export function Button({
   const elevation: Partial<ThemeShadows> = theme.shadows;
   const depth = !disabled && emphasis !== 'tertiary' ? (elevation as Record<string, ViewStyle | undefined>).elevationControl : undefined;
 
-  // Touch target: grow the hit area, never the visual size (APP.md §6.2).
+  // Touch target: grow the hit area, never the visual size (workflow/APP.md §6.2).
   const hitSlop = touchSlop(theme.touchTarget, s.height, iconOnly ? s.height : undefined);
   const radius = dim('radius', 'control', 8);
 
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   hug: { alignSelf: 'flex-start' },
   fullWidth: { alignSelf: 'stretch' },
   root: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
-  // The label may wrap only at the largest accessibility text sizes; it never clips (APP.md §6.2).
+  // The label may wrap only at the largest accessibility text sizes; it never clips (workflow/APP.md §6.2).
   textPadding: { flexShrink: 1 },
   label: { textAlign: 'center' },
 });

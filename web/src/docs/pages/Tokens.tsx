@@ -251,26 +251,83 @@ function ModeCard() {
   );
 }
 
+/* What the token system is for (guidance/02-tokens.md §2.1): four goals, each with what it means and where this system meets it. */
+const goalRole = ['color/fill/brand/solid', 'color/text/brand', 'color/fill/accent/solid'].find((n) => byName.has(n));
+const GOALS: { goal: string; means: string; here: string; see: string; to: string }[] = [
+  {
+    goal: 'Simplicity',
+    means: 'One name per concept, and only as many collections as there are domains.',
+    here: `${tokens.collections.length} collections (${joinList(tokens.collections.map((c) => c.name))}) share one naming grammar: domain, group, role, then emphasis or state.`,
+    see: 'Naming',
+    to: '#naming',
+  },
+  {
+    goal: 'Accessibility',
+    means: 'Every text and surface pair passes contrast in each supported mode before a component uses it.',
+    here: `Pairs are checked in ${joinList(supportedModes)}${unsupportedModes.length ? `; ${joinList(unsupportedModes)} is checked once it has real values` : ''}. Pairs below AA are listed on 1.1 Color with the rule that makes them safe.`,
+    see: '1.1 Color',
+    to: pageTo('1.1'),
+  },
+  {
+    goal: 'Aesthetics',
+    means: 'The brand’s character lives in the primitives and the roles that alias them, never on layers.',
+    here: goalRole
+      ? `${families.length} palette families sit behind the color roles; ${goalRole} → ${primitiveOf(goalRole)} carries the brand into every component that uses it.`
+      : `${families.length} palette families sit behind the color roles.`,
+    see: 'Primitive palette',
+    to: '#primitive-palette',
+  },
+  {
+    goal: 'Scalability',
+    means: 'New modes, brands and components add values without renaming anything.',
+    here: unsupportedModes.length
+      ? `The ${joinList(unsupportedModes)} column is already in the Color collection, waiting for values; new roles go into the groups that exist.`
+      : 'New roles go into the groups that exist, and new modes into the collections that exist.',
+    see: 'Modes',
+    to: '#modes',
+  },
+];
+/* The connecting paragraph: each goal makes the next one possible. */
+const GOALS_LINK = `Because each concept has one name, each role exists once, so each foreground and background pair is checked once, in ${joinList(supportedModes)}. The brand sits in the primitives behind those roles, so restyling never touches a component, and growth only adds values and modes, never renames what exists.`;
+function HashOrPageLink({ to, children }: { to: string; children: ReactNode }) {
+  const cls = 'rounded-xs font-semibold text-text-brand underline decoration-1 underline-offset-2 outline-none is-hover:text-text-brand-hover is-focus:shadow-focus-default';
+  return to.startsWith('#') ? (
+    <a href={to} className={cls}>
+      {children}
+    </a>
+  ) : (
+    <Link to={to} className={cls}>
+      {children}
+    </Link>
+  );
+}
+
 function Overview() {
   return (
     <div className="flex max-w-[64rem] flex-col gap-4xl">
       <Topic title="What the token system is for">
-        <P>
-          Choose tokens by purpose, such as text, surface or a primary action. Use Reference to find the exported value and its code name. Typography and elevation are also documented as Figma styles.
-        </P>
+        <P>Four goals decide every token. Each one is a concrete rule with a place in this file where you can check it.</P>
         <div className="grid gap-md sm:grid-cols-2">
-          {[
-            ['Choose a role', 'Use semantic color tokens for their intended purpose, such as text or a surface.'],
-            ['Check the pair', 'Read the Color contrast notes before choosing foreground and background tokens.'],
-            ['Follow the mapping', 'Use the code name shown in Reference; Figma and code can use different naming formats.'],
-            ['Extend deliberately', 'Check for an existing role before adding a token. Document its purpose and code mapping.'],
-          ].map(([t, d]) => (
-            <div key={t} className="flex flex-col gap-xs rounded-surface border border-border-subtle p-xl">
-              <H3>{t}</H3>
-              <span className="type-body-sm-regular text-text-secondary">{d}</span>
+          {GOALS.map((g) => (
+            <div key={g.goal} className="flex flex-col gap-md rounded-surface border border-border-subtle p-xl">
+              <H3>{g.goal}</H3>
+              <dl className="flex flex-col gap-sm">
+                <div className="flex flex-col gap-xxs">
+                  <dt className="type-body-xs-semibold text-text-tertiary">What it means</dt>
+                  <dd className="type-body-sm-regular text-text-secondary">{g.means}</dd>
+                </div>
+                <div className="flex flex-col gap-xxs">
+                  <dt className="type-body-xs-semibold text-text-tertiary">In this system</dt>
+                  <dd className="type-body-sm-regular text-text-secondary">{g.here}</dd>
+                </div>
+              </dl>
+              <span className="type-body-sm-regular mt-auto">
+                <HashOrPageLink to={g.to}>See {g.see} →</HashOrPageLink>
+              </span>
             </div>
           ))}
         </div>
+        <P>{GOALS_LINK}</P>
       </Topic>
 
       <Topic title="The collections">
@@ -290,6 +347,7 @@ function Overview() {
                   </span>
                 </div>
                 {info && <span className="type-body-sm-regular text-text-secondary">{info.holds}</span>}
+                {info && <span className="type-body-xs-semibold text-text-tertiary">Examples</span>}
                 {info && (
                   <ul className="flex flex-col gap-xs">
                     {info.samples
@@ -303,7 +361,7 @@ function Overview() {
                   </ul>
                 )}
                 <div className="mt-auto flex flex-wrap items-center justify-between gap-sm border-t border-border-subtle pt-md">
-                  <span className="type-body-xs-regular text-text-tertiary">{info ? <>Shown on {info.shownOn}</> : `${c.modes.length} ${c.modes.length === 1 ? 'mode' : 'modes'}`}</span>
+                  <span className="type-body-xs-regular text-text-tertiary">{info ? <>See all on {info.shownOn} →</> : `${c.modes.length} ${c.modes.length === 1 ? 'mode' : 'modes'}`}</span>
                   <TextLink to={`?tab=reference&c=${encodeURIComponent(c.name)}`}>
                     Browse<span className="sr-only"> {c.name} tokens</span>
                   </TextLink>

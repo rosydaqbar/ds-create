@@ -133,7 +133,7 @@ What goes in each frame:
 - token map: part × state → `Doc/Token badge` with a swatch (`Doc/Alias chip`).
 
 **· Guidelines**
-- reading-oriented frame (`DOCFRAMES.md` §7);
+- reading-oriented frame (`workflow/DOCFRAMES.md` §7);
 - every guideline topic and visual teaching module from the Part's file, in the order the file lists them;
 - do / don't pairs built from real instances, each with `Doc/Do-dont` underneath;
 - for App products, an **In apps** topic after Accessibility (`SYSTEM.md` Part A §A5).

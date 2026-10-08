@@ -18,6 +18,7 @@ web/src/tokens/tokens.gen.ts
 web/tokens/tokens.dtcg.json
 web/src/styles/tokens.css
 web/src/styles/chrome.gen.css
+web/src/docs/copy.gen.json
 
 # 3. Local QA output
 qa-report.json
@@ -63,6 +64,10 @@ xcuserdata/
 # 7. Everything a build generates (systems, projects, ledgers, reports). See output/README.md.
 output/*
 !output/README.md
+
+# 7b. Everything a user provides for a build (briefs, brand files, existing systems, chat notes). See input/README.md.
+input/*
+!input/README.md
 
 # 8. Agent settings
 .claude/

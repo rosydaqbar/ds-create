@@ -6,4 +6,4 @@ It holds no content. Which frames a page has comes from the spec (in this repo S
 
 Notation in `structure.md`: one layer per line, `TYPE  layout  W  H  padding  gap  style`. `V` / `H` are Auto Layout directions; `hug`, `fill` or a number for size. Spacing and widths are `doc/*` tokens; the number in brackets is their default.
 
-`agent-brief.md` is the brief for agents that build docs-site pages (`INITIATOR.md` Part B §6, step 19). It holds what a page agent needs from `WEB.md`, `APP.md` and `web/COPY-GUIDE.md`, so each agent reads about 1.5k tokens instead of the full files. When any of those files changes, check this brief against it.
+`agent-brief.md` is the brief for agents that build docs-site pages (`INITIATOR.md` Part B §6, step 19). It holds what a page agent needs from `workflow/WEB.md`, `workflow/APP.md` and `web/COPY-GUIDE.md`, so each agent reads about 1.5k tokens instead of the full files. When any of those files changes, check this brief against it.

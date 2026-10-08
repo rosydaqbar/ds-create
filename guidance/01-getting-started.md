@@ -9,13 +9,13 @@ This page is built with `templates/structure.md`; the frames and what they hold 
 ```text
 01 Getting started
 ├─ 01 Getting started · Overview              welcome, brand at a glance, setting up
-├─ 01 Getting started · How the file works     page tree, page templates, components and properties, Auto Layout, libraries
+├─ 01 Getting started · How the file works     page tree, components and properties, Auto Layout, libraries
 └─ 01 Getting started · Working with variables what variables are, modes, editing, variables and styles
 ```
 
 There is no `.Main` frame and no `· Tokens` frame.
 
-Every frame is a reading frame (`DOCFRAMES.md` §7):
+Every frame is a reading frame (`workflow/DOCFRAMES.md` §7):
 - `Doc/Header` with breadcrumb `Guidance › 01 Getting started`;
 - one section with a rich-text column at `doc/measure/reading`, padded by `doc/space/block`;
 - each topic is heading → body → visual example → links, with the visual directly after the text it supports;
@@ -83,18 +83,7 @@ A component only uses components from lower levels. IDs never change, so a page 
 
 **Visual: levels.** One example per level, connected: an icon and a color (foundation) → `Button` and `Label` (Parts) → `Text field` (Component) → a sign-in form section (Section), each a real instance with its page ID.
 
-## 2. Every page has the same frames
-
-Every foundation page has `.Main` → `· Overview` → `· Tokens` → `· Guidelines`. Every component page has `.Main` → `· Overview` → `· Component` → `· Anatomy` → `· Guidelines`. Frames run left to right, so the same thing is always in the same place.
-- `.Main`: private building blocks. Edit them to update the published component; never use them in screens.
-- `· Overview`: the component or foundation as you meet it, with real examples.
-- `· Component`: the published set and its full matrix.
-- `· Anatomy`: how it is built: parts, properties, sizes, states, tokens.
-- `· Guidelines`: when and how to use it, do and don't, content, accessibility.
-
-**Visual: page template.** A miniature of `2.1 Button` with its five frames labeled, and of `1.1 Color` with its four.
-
-## 3. Components and properties
+## 2. Components and properties
 
 Each component is one set with a small, fixed set of properties, named the same way everywhere:
 - `Size`, `Emphasis` (primary, secondary, tertiary, ghost), `Tone` (neutral, brand, danger, warning, success, info), `State` (rest, hover, pressed, focus, disabled, loading);
@@ -105,13 +94,13 @@ Grouping variants this way keeps the library small: one `Button` set covers ever
 
 **Visual: one set, many uses.** The `Button` property panel next to four instances made from it (primary brand, secondary neutral, ghost, primary danger), each labeled with its property values.
 
-## 4. Auto Layout
+## 3. Auto Layout
 
 Every component is built with Auto Layout, so it resizes with its content like a flexbox in code: a longer label widens the button, a hidden icon closes its gap, a field fills its container. Padding and gaps are bound to `space/*` variables.
 
 **Visual: responsive component.** One `Button` with a short and a long label, with and without its icon, and one `Text field` stretched across two widths, with its Auto Layout settings (direction, padding, gap, resizing) labeled.
 
-## 5. One library or several
+## 4. One library or several
 
 A single library is easiest while the system is small. Split it when the file becomes slow to open or publish, or when separate teams own separate parts: for example foundations and Parts in a core library, product-specific Sections in their own. Splitting has a cost: components move between files, instances must be relinked, and each library is published separately.
 
@@ -129,13 +118,27 @@ Before splitting:
 
 A variable is a named, reusable value: a color, a number, a string. Components use variables instead of raw values, so changing one variable updates everything that uses it.
 
-**Visual: one change, many updates.** `color/fill/brand/solid` edited once, and a button, a checkbox, a switch and a progress bar updated together.
+**Visual: one change, many updates.** One semantic color variable (a swatch and its name) with an arrow to the real components that fill with it, each labeled (for example a checked checkbox, an on switch, a progress bar). Use only components that really bind that variable; leave out any that do not.
+
+**Caption.** Starts with `Example:` (`workflow/DOCFRAMES.md` §15, Examples and previews), names the variable and the components in the visual, and says what one edit changes: `Example: the checked Checkbox and the on Switch both fill with color/text/brand. Edit that one variable and both change together.`
 
 ## 2. Modes
 
-A collection can have several modes: the `Color` collection has `Light` and `Dark`. A frame set to `Dark` shows every variable's dark value without changing any component.
+This topic has a fixed structure. Only the collection names, mode names and values change from build to build; never add, drop or reorder the parts.
 
-**Visual: one card, two modes.** The same card with a button and an input, set to `Light` and to `Dark`, with the mode switch shown on the frame.
+1. **Definition**, always this sentence: `A collection can hold several modes: one column of values per mode. Set a mode on a frame and everything inside it switches, without touching a component.`
+2. **This file's modes**, one sentence per collection with more than one mode, in collection order (`02 Tokens · Collections`):
+   - a supported mode: `{Collection} has {Mode A} and {Mode B}: {what the second mode is for}.` (for example: Motion has Standard and Reduced, for people who turn on reduced motion);
+   - a mode that exists but is not supported: `The {Collection} collection has a {Mode} column, but {Mode} is not supported yet: its values are placeholders, so keep frames on {default mode}.`;
+   - no collection with more than one mode: `Every collection in this file has one mode.` Then skip parts 3 and 4 and keep 5 and 6.
+3. **Tables**, one per collection with more than one supported mode, except Color (its values are on `1.1 Color · Tokens`). Columns: Variable, then one column per mode. Up to four rows: the variables a designer meets first (the durations for Motion, the default width for Border, the base step for Space).
+4. **Visual: mode switch.**
+   - Color has a second supported mode (for example Dark): the same card (a text field and a primary button) twice, side by side, one frame per mode, each frame labeled with its mode.
+   - Color has one supported mode: a recreated `Frame · Appearance` panel listing every collection that has modes, with the mode the frame uses, next to one frame in that mode with the same card.
+5. **Caption**, this form: `Example: the mode switch sits on the frame, not on the components. {Other collections with modes} switch the same way.`
+6. **Links**: the foundation page of each collection with modes (`1.6 Motion`, `1.4 Shape`, `1.3 Space & layout`), then `02 Tokens`.
+
+When a new mode is added later (Dark is the usual one), only parts 2 to 4 change: its sentence loses "not supported", it gets a table row or column, and the visual becomes the side-by-side comparison. The rest of the topic stays word for word.
 
 ## 3. Opening and editing variables
 
@@ -147,7 +150,9 @@ Variables are edited in the local variables panel. Open a collection, find the v
 
 Variables store single values; text, effect and grid styles package several values into one asset that references variables where possible. They work together: primitives → semantic variables → styles and components.
 
-**Visual: relationship.** Three columns: a primitive variable, the semantic variable that aliases it, and a text style or component that uses it, connected with lines. Beside it, one element bound straight to a primitive next to the same element bound through the semantic role, with a callout on why the second scales.
+**Visual: relationship.** Three columns: a primitive variable, the semantic variable that aliases it, and a text style or component that uses it, connected with lines.
+
+**Visual: bind through the role.** A do / don't pair (`workflow/DOCFRAMES.md` §15, Comparison): Do shows the element bound through the semantic role, with the reason that re-pointing the role updates every use; Don't shows the same element bound straight to the primitive, with the reason that the primitive says which color, not why. Use `Doc/Do-dont` so the verdict is colored; never mark the two sides with neutral badges such as Prefer and Avoid.
 
 ## 5. Do you need variables?
 
@@ -171,7 +176,9 @@ Links: `02 Tokens` for collections, naming, modes and the primitive palette.
 
 # 5. QA
 
-- All three frames exist with their exact names and every topic above, in order.
+- All three frames exist with their exact names and every topic above, in order. There is no topic about the page frames (`.Main`, Overview, Component, Anatomy, Guidelines): readers learn them from the pages themselves.
+- Modes follows its six fixed parts in order, with this file's real collections and modes.
+- Every worked example's caption starts with `Example:`; every recommendation is a `Doc/Do-dont` pair.
 - Every color shown is a swatch bound to its variable; no text-only color card.
 - Every topic has its visual, recreated with this file's own names and components; no pasted screenshots from other files.
 - Links point to pages in this file.

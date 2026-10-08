@@ -1,6 +1,6 @@
 /**
  * Brand copy gate for src/brand/copy.ts: the brand's own sentences on the foundation and guidance
- * pages (WEB.md W5). Run: npm run check:brand-copy (part of npm run build).
+ * pages (workflow/WEB.md W5). Run: npm run check:brand-copy (part of npm run build).
  *
  * Every slot must have its question (a /** … *\/ comment) and a value. A slot still wrapped in
  * `template(…)` holds the template's generic text:
@@ -71,7 +71,7 @@ for (const s of slots) {
 
 if (!slots.length) problems.push('no slots found');
 for (const p of problems) console.log(`  ✕ ${rel} · ${p}`);
-// The questions are listed when they fail, or on request (`npm run check:brand-copy -- --list`, WEB.md W5).
+// The questions are listed when they fail, or on request (`npm run check:brand-copy -- --list`, workflow/WEB.md W5).
 if (pending.length && (written || process.argv.includes('--list'))) {
   const mark = written ? '✕' : '~';
   for (const s of pending) console.log(`  ${mark} ${s.key}: ${s.question}`);
@@ -79,7 +79,7 @@ if (pending.length && (written || process.argv.includes('--list'))) {
 const failed = problems.length + (written ? pending.length : 0);
 console.log(
   `brand copy: ${slots.length} slots, ${pending.length} still template text${
-    written ? '' : pending.length ? " (allowed while ds.config brandCopy is 'template'; WEB.md W5 answers them: npm run check:brand-copy -- --list)" : ''
+    written ? '' : pending.length ? " (allowed while ds.config brandCopy is 'template'; workflow/WEB.md W5 answers them: npm run check:brand-copy -- --list)" : ''
   } → ${failed ? `${failed} problem(s)` : 'ok'}`,
 );
 process.exit(failed ? 1 : 0);

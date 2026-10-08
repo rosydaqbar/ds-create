@@ -1,7 +1,7 @@
 /**
  * Release notes, newest first. `pages` are page ids (see meta.tsx), so the home page can show
  * what changed recently and each entry links to its page. Add an entry for every release
- * (WEB.md §7): token changes, new or changed props, fixes, and anything that changes how a
+ * (workflow/WEB.md §7): token changes, new or changed props, fixes, and anything that changes how a
  * design or screen should be built.
  */
 export interface ChangeItem {

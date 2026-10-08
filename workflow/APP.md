@@ -1,6 +1,6 @@
 # App products
 
-This file covers what changes on the documentation site when the product is an **App** (or **Web and App**). The docs site from `WEB.md` is the documentation for every product type. For an App product:
+This file covers what changes on the documentation site when the product is an **App** (or **Web and App**). The docs site from `workflow/WEB.md` is the documentation for every product type. For an App product:
 
 - every component is **previewed in React Native**, rendered in the browser with react-native-web;
 - the **Code tab** shows every example in **React Native, Swift (SwiftUI) and Kotlin (Jetpack Compose)**, side by side with the web version when the product is Web and App.
@@ -15,13 +15,13 @@ Figma stays the source of truth. The previews and the code never invent values: 
 - Never create an app project, a build file (Gradle, `Package.swift`, `package.json` for an app) or a package.
 - Never run an app build, an app test runner or a device.
 
-The only things that run are the docs site (`npm run dev`, `npm run build`, `npm run qa` in `web/`) and the Node token script in §4 A2. react-native-web renders the previews without `react-native` itself (`WEB.md` §7.1).
+The only things that run are the docs site (`npm run dev`, `npm run build`, `npm run qa` in `web/`) and the Node token script in §4 A2. react-native-web renders the previews without `react-native` itself (`workflow/WEB.md` §7.1).
 
 # 1. When this runs
 
-- At initiation, when the product type in `QUESTIONNAIRE.md` §10 is **App** or **Web and App**, right after the docs site is set up (`WEB.md` W1–W3).
+- At initiation, when the product type in `workflow/QUESTIONNAIRE.md` §10 is **App** or **Web and App**, right after the docs site is set up (`workflow/WEB.md` W1–W3).
 - Later, as its own task ("add the app previews").
-- After a component is added through `EXTEND.md`, when the product includes App.
+- After a component is added through `workflow/EXTEND.md`, when the product includes App.
 
 A component gets its app preview only when its Figma page is complete.
 
@@ -30,7 +30,7 @@ A component gets its app preview only when its Figma page is complete.
 Everything lives in the docs project:
 
 ```text
-output/{system-slug}/web/            the docs site (WEB.md), product 'app' or 'both'
+output/{system-slug}/web/            the docs site (workflow/WEB.md), product 'app' or 'both'
 ├─ react-native/                     React Native source for the previews (copy of ds-create/app/react-native)
 │  ├─ tokens/tokens.ts               generated from the Figma export
 │  ├─ theme/                         ThemeProvider, useTheme: color mode, reduced motion, text size; anatomy()
@@ -46,7 +46,7 @@ There are no `ios/`, `android/` or `native/` folders, and no app package.
 | Concern | Choice |
 | --- | --- |
 | Preview components | TypeScript React Native components (`View`, `Text`, `Pressable`, `Animated`), styled with `StyleSheet` values from the tokens |
-| Rendering on the site | react-native-web, set up in `web/vite.config.ts` (`WEB.md` §7.1) |
+| Rendering on the site | react-native-web, set up in `web/vite.config.ts` (`workflow/WEB.md` §7.1) |
 | Icons | lucide-react-native with react-native-svg, behind one registry with the web icon names |
 | Swift code | SwiftUI, written as `DSButton(…)` with `DSTokens.*` (§5) |
 | Kotlin code | Jetpack Compose, written as `DsButton(…)` with `DsTheme.*` (§5) |
@@ -59,11 +59,11 @@ At initiation, A1–A2 run in step 18 of the build sequence (`INITIATOR.md` Part
 
 ## A1 · Copy the preview source
 
-After `WEB.md` W1, copy `ds-create/app/react-native/` to `output/{system-slug}/web/react-native/`. The docs site finds it there by itself (`@app` alias). Never build inside `ds-create/app/`.
+After `workflow/WEB.md` W1, copy `ds-create/app/react-native/` to `output/{system-slug}/web/react-native/`. The docs site finds it there by itself (`@app` alias). Never build inside `ds-create/app/`.
 
 ## A2 · Tokens
 
-From `output/{system-slug}/web/`, generate the React Native tokens from the same export the docs use (`WEB.md` W2, contrast gate included):
+From `output/{system-slug}/web/`, generate the React Native tokens from the same export the docs use (`workflow/WEB.md` W2, contrast gate included):
 
 ```sh
 node ../../../app/scripts/build-rn-tokens.mjs --in tokens/figma-variables.json --out react-native/tokens
@@ -84,7 +84,7 @@ The mode (YOLO everything, or One by one) is the same as the Figma build.
 
 ## A4 · QA
 
-Run §9, the Impeccable design detector included (`WEB.md` W7). Write the React Native previews with the Impeccable skill loaded, as in `WEB.md` W4. Save the results in `output/{system-slug}/reports/`.
+Run §9, the Impeccable design detector included (`workflow/WEB.md` W7). Write the React Native previews with the Impeccable skill loaded, as in `workflow/WEB.md` W4. Save the results in `output/{system-slug}/reports/`.
 
 # 5. Token names in code
 
@@ -152,7 +152,7 @@ Pressed, disabled, focused, selected and loading look exactly like the Figma var
 
 # 7. Documentation contract
 
-Each component page's story (`web/src/docs/stories/{id}-{slug}.doc.tsx`) gets an `app` block (`WEB.md` §7.1):
+Each component page's story (`web/src/docs/stories/{id}-{slug}.doc.tsx`) gets an `app` block (`workflow/WEB.md` §7.1):
 
 - **`hero` and `examples`**: the same situations as the web examples, rendered with the React Native component. Each example has its `code` in React Native, Swift and Kotlin, which the Code tab shows.
 - **`matrices`**: every variant, rendered with the React Native component, pinning states with `previewState`.
@@ -164,7 +164,7 @@ Stories import the previews as a namespace (`import * as App from '@app'`) and u
 
 # 8. Keeping the previews and Figma in sync
 
-- Changed variables or styles: export again (`WEB.md` W2) and run A2.
+- Changed variables or styles: export again (`workflow/WEB.md` W2) and run A2.
 - Changed component properties: change the React Native component and the story's `app` block, including the Swift and Kotlin code, in the same task.
 - A difference between a preview and Figma is a bug in the preview, unless the user decides otherwise.
 

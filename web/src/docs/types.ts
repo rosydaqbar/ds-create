@@ -67,7 +67,7 @@ export interface Guideline {
   dont?: { caption: string; render?: () => ReactNode };
 }
 
-/** Code for the three app implementations (APP.md): React Native, SwiftUI and Jetpack Compose. */
+/** Code for the three app implementations (workflow/APP.md): React Native, SwiftUI and Jetpack Compose. */
 export interface AppCode {
   reactNative: string;
   swift: string;
@@ -90,7 +90,7 @@ export interface AppVisual {
 
 /**
  * The app version of a component page (products 'app' and 'both'). Previews render the real
- * React Native components; Swift and Kotlin share the same look (APP.md §6.4 parity).
+ * React Native components; Swift and Kotlin share the same look (workflow/APP.md §6.4 parity).
  */
 export interface AppDoc {
   hero: () => ReactNode;
@@ -107,7 +107,7 @@ export interface AppDoc {
    * shows only these; a guideline without one shows its text alone.
    */
   visuals?: Record<string, AppVisual>;
-  /** Platform behavior on iOS and Android (APP.md §6.2), shown on Guidelines under "In apps". */
+  /** Platform behavior on iOS and Android (workflow/APP.md §6.2), shown on Guidelines under "In apps". */
   notes?: string[];
 }
 

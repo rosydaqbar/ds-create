@@ -21,11 +21,11 @@ import {
 export type ColorScheme = 'light' | 'dark';
 export type TextStyleName = keyof typeof typography;
 
-/** `color/*` roles, e.g. `theme.color.textPrimary` (APP.md §5). */
+/** `color/*` roles, e.g. `theme.color.textPrimary` (workflow/APP.md §5). */
 export type ThemeColors = ColorTokens['color'];
 
 /**
- * Component tokens, e.g. `theme.component.buttonPaddingXMd` (APP.md §5): the component
+ * Component tokens, e.g. `theme.component.buttonPaddingXMd` (workflow/APP.md §5): the component
  * color tokens of the current mode plus the component dimension tokens. Empty when the Figma
  * file has no component tokens (components bound straight to semantic roles or raw values);
  * read them with a fallback (`num(theme.component.buttonGapMd, …)` in parts/_shared.tsx).
@@ -64,7 +64,7 @@ export interface Theme {
    * component never renders unstyled text.
    */
   text: (name: TextStyleName) => TextStyle;
-  /** Minimum touch target: `size/touch-min` on iOS, `size/touch-min-android` on Android (APP.md §6.2). */
+  /** Minimum touch target: `size/touch-min` on iOS, `size/touch-min-android` on Android (workflow/APP.md §6.2). */
   touchTarget: number;
 }
 

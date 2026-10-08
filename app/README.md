@@ -8,7 +8,7 @@ app/
 └─ react-native/                 the preview source: tokens, theme, icons, components (Button is the reference)
 ```
 
-A build copies `react-native/` into its docs project, at `output/{system-slug}/web/react-native/` (APP.md A1). In ds-create itself the docs site picks up `react-native/` by itself, so the template's Button shows in App preview (`VITE_DS_PRODUCT=both npm run dev` in `../web/`).
+A build copies `react-native/` into its docs project, at `output/{system-slug}/web/react-native/` (workflow/APP.md A1). In ds-create itself the docs site picks up `react-native/` by itself, so the template's Button shows in App preview (`VITE_DS_PRODUCT=both npm run dev` in `../web/`).
 
 Regenerate the template tokens from the placeholder export:
 

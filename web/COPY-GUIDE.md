@@ -2,7 +2,7 @@
 
 How every word on the explorer reads: page summaries, guidelines, captions, anatomy, props and accessibility notes. Readers are designers, product managers and front-end developers. Write like a thoughtful senior designer explaining the system to a colleague: clear, warm, confident, never cute.
 
-Use this guide when you write a page (WEB.md W4–W6), and as the checklist for a copy pass over an existing build. A copy pass changes only words: layout, components, props, tokens, class names, code samples, data and behavior stay exactly as they are.
+Use this guide when you write a page (workflow/WEB.md W4–W6), and as the checklist for a copy pass over an existing build. A copy pass changes only words: layout, components, props, tokens, class names, code samples, data and behavior stay exactly as they are.
 
 ## What makes docs copy sound robotic (avoid all of these)
 

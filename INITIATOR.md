@@ -2,7 +2,7 @@
 
 This is the canonical initiation and execution contract.
 
-The questionnaire that produces the generation contract is in `QUESTIONNAIRE.md` (formerly Part A), loaded only at initiation and when an answer changes. This file is the generation logic, Part B, loaded on every step.
+The questionnaire that produces the generation contract is in `workflow/QUESTIONNAIRE.md` (formerly Part A), loaded only at initiation and when an answer changes. This file is the generation logic, Part B, loaded on every step.
 
 # Part B — Generation Decision Logic
 
@@ -18,30 +18,35 @@ Always load:
 README.md
 SYSTEM.md
 INITIATOR.md
+GOTCHAS.md
 templates/structure.md
+input/{system-slug}/sources.md   once the system has a slug (input/README.md)
 ```
+
+The user's inputs are the ground truth of a build: briefs, brand files, the existing system, references and what the user says in chat, all in `input/{system-slug}/` (`input/README.md`). At initiation, read every file there before the first question. In later sessions, `sources.md` points to the files a step needs. Anything the user says in chat that shapes the system is written to `input/{system-slug}/chat/` in the same turn (`input/README.md` I3).
 
 Every page is built with `templates/structure.md`: page → frames → blocks → items. SYSTEM.md Part A gives the frames; the page file gives what they hold.
 
 Then, per step:
 
-- Initiation, and any change to an answer → load `QUESTIONNAIRE.md`
-- Any step that draws frames the doc builder has no helper for (Doc kit, Cover, guidance pages, Foundations, Screens), or that changes the builder → load `DOCFRAMES.md`. Parts, Components, Sections and Layouts are drawn with `tools/figma-docbuilder.js` (§6, *Figma tools*)
+- Initiation, and any change to an answer → load `workflow/QUESTIONNAIRE.md`
+- Any step that draws frames the doc builder has no helper for (Doc kit, Cover, guidance pages, Foundations, Screens), or that changes the builder → load `workflow/DOCFRAMES.md`. Parts, Components, Sections and Layouts are drawn with `tools/figma-docbuilder.js` (§6, *Figma tools*)
+- Writing or changing any sentence on a doc frame or a docs-site page → load `workflow/COPY.md`. The sentences live in the page's copy file, `output/{system-slug}/copy/`
 - `01 Getting started` in scope → load `guidance/01-getting-started.md`
 - `02 Tokens` in scope → load `guidance/02-tokens.md`
 - Any Foundation selected → load `foundations/00-foundations.md` **and every selected Foundation page file**
 - Any Part selected → load `parts/00-parts.md` **and every selected Part page file**
 - Any Component selected → load `components/00-components.md` **and every selected Component page file**, plus `parts/00-parts.md` and the file of every Part it contains
 - Any Section selected → load `sections/00-sections.md` **and every selected Section page file**, plus the folder and page files of every Component and Part it contains
-- Code in scope (any product type) → load `WEB.md`, and for every page documented on the site, the same page file used for its Figma page
-- Product type App or Web and App → also load `APP.md`, and for every page with an App preview, the same page file used for its Figma page
+- Code in scope (any product type) → load `workflow/WEB.md`, and for every page documented on the site, the same page file used for its Figma page
+- Product type App or Web and App → also load `workflow/APP.md`, and for every page with an App preview, the same page file used for its Figma page
 
 The exact page → file mapping is in `README.md`.
 
 ## Loading per step
 
 The full specification is large (several hundred KB). Loading every page file at the start of a long run fills the context, and when it is compacted, page rules get lost. So:
-- load the global set (`README.md`, `SYSTEM.md`, `INITIATOR.md`, `templates/structure.md`) once at the start, and again after any context compaction or new session. `QUESTIONNAIRE.md` and `DOCFRAMES.md` are not part of it: load them at the steps that need them;
+- load the global set (`README.md`, `SYSTEM.md`, `INITIATOR.md`, `GOTCHAS.md`, `templates/structure.md`, and `input/{system-slug}/sources.md` once the slug exists) once at the start, and again after any context compaction or new session. `workflow/QUESTIONNAIRE.md` and `workflow/DOCFRAMES.md` are not part of it: load them at the steps that need them;
 - load each folder file and page file at the generation step that builds that page (§6), not all at once. A page is built only after its own file and the files of the components it contains are loaded in the current context;
 - after a page passes QA, its file can drop out of context; the ledger keeps what matters.
 
@@ -50,7 +55,8 @@ The full specification is large (several hundred KB). Loading every page file at
 Keep a ledger on disk at `output/{system-slug}/ds-create-ledger.json` (README §5), even for a Figma-only build. Write it after the questionnaire and update it after every step and every page:
 
 ```text
-scope            the confirmed summary (`QUESTIONNAIRE.md` §12): pages, mode, formats, product type, code
+scope            the confirmed summary (`workflow/QUESTIONNAIRE.md` §12): pages, mode, formats, product type, code
+inputs           input/{system-slug}/sources.md: the date it was last read, and the input file each scope answer came from
 sequence[]       the build sequence (§6), written once at step 3, in the order it runs. Per entry:
                  step, page or task, status (todo, building, qa, done, skip),
                  loaded (the spec files loaded for it in the current context),
@@ -175,34 +181,36 @@ The build is one numbered sequence. It is the only order, for a new system and f
 
 | # | Step | Load at this step | Done when |
 | --- | --- | --- | --- |
-| 1 | **Global set** | `README.md`, `SYSTEM.md`, `INITIATOR.md`, `templates/structure.md`; at initiation also `QUESTIONNAIRE.md` | all four (five at initiation) are in the current context |
-| 2 | **Inventory** (existing system only). Read pages, frames, component sets and properties, variables, modes, styles and naming, and map them to the page tree (§2). Read-only. | — | the mapping is ready for the confirmation summary. A family with no page in the tree gets the next free ID of its level and is marked *spec to write*. |
-| 3 | **Confirmation** (`QUESTIONNAIRE.md` §12): scope, page actions, implementation mode, naming (fixed, or Keep / Normalize with the rename list), product type, code, system slug | `QUESTIONNAIRE.md` | the user confirmed; the ledger holds `scope` and the full `sequence` |
+| 1 | **Global set and inputs.** Read every file in `input/{system-slug}/` (`input/README.md`) and write its `sources.md` | `README.md`, `SYSTEM.md`, `INITIATOR.md`, `GOTCHAS.md`, `templates/structure.md`; at initiation also `workflow/QUESTIONNAIRE.md` and `input/README.md` | the global set is in the current context, and `sources.md` lists every input with what it decides |
+| 2 | **Inventory** (existing system only). Read pages, frames, component sets and properties, variables, modes, styles and naming, and map them to the page tree (§2). Also read `input/{system-slug}/design-system/` and compare it with what the file holds. Read-only. | — | the mapping is ready for the confirmation summary. A family with no page in the tree gets the next free ID of its level and is marked *spec to write*. |
+| 3 | **Confirmation** (`workflow/QUESTIONNAIRE.md` §12), with every answer the inputs give pre-filled and its source shown (`input/README.md` I2): scope, page actions, implementation mode, naming (fixed, or Keep / Normalize with the rename list), product type, code, system slug | `workflow/QUESTIONNAIRE.md` | the user confirmed; the ledger holds `scope`, `inputs` and the full `sequence`; no input conflict is open |
 | 4 | **Tokens.** New system: Primitives → Color, Typography (variables and text styles), Space, Size, Shape, in the `SYSTEM.md` Part C order. Existing system: the renames on the confirmed rename list (Normalize only), then the missing tokens. Effect styles, Motion, grid styles, icons and assets are made at the step of the foundation page that owns them. | `SYSTEM.md` Part C, `guidance/02-tokens.md` | `tools/figma-audit.js` in file mode reports `fail` = 0; collections and counts are in the ledger |
 | 5 | **Page tree.** Create the in-scope pages in tree order, with separators. Existing system: rename pages and move existing component sets onto their pages. Structure only: no frame is documented and no page is marked done. | `SYSTEM.md` Part A §A1–§A2 | every in-scope page exists with its exact name, in order |
-| 6 | **Documentation collection** (aliases the step 4 tokens) **and 9.1 Doc kit** | `DOCFRAMES.md` §1 and §16, `templates/structure.md` §7 | the Doc kit page passes `tools/figma-audit.js`, and the doc builder is cached: `tools/figma-docbuilder.js` (two calls, `docbuilder` and `docpages`) and `tools/figma-audit.js` (one call), as its header describes |
-| 7 | **00 Cover** | `SYSTEM.md` Part A §A3, `DOCFRAMES.md` | the page gate below |
-| 8 | **01 Getting started** | `guidance/01-getting-started.md`, `DOCFRAMES.md` | the page gate |
-| 9 | **02 Tokens** | `guidance/02-tokens.md`, `DOCFRAMES.md` | the page gate |
-| 10 | **Foundations**, one step per page: 1.1 → 1.2 → … → 1.8 | `foundations/00-foundations.md`, the page file, `DOCFRAMES.md` | the page gate, except the Guidelines examples that need components: they are listed in the ledger for step 16 |
+| 6 | **Documentation collection** (aliases the step 4 tokens) **and 9.1 Doc kit** | `workflow/DOCFRAMES.md` §1 and §16, `templates/structure.md` §7 | the Doc kit page passes `tools/figma-audit.js`, and the doc builder is cached: `tools/figma-docbuilder.js` (two calls, `docbuilder` and `docpages`) and `tools/figma-audit.js` (one call), as its header describes |
+| 7 | **00 Cover** | `SYSTEM.md` Part A §A3, `workflow/DOCFRAMES.md` | the page gate below |
+| 8 | **01 Getting started** | `guidance/01-getting-started.md`, `workflow/DOCFRAMES.md` | the page gate |
+| 9 | **02 Tokens** | `guidance/02-tokens.md`, `workflow/DOCFRAMES.md` | the page gate |
+| 10 | **Foundations**, one step per page: 1.1 → 1.2 → … → 1.8 | `foundations/00-foundations.md`, the page file, `workflow/DOCFRAMES.md` | the page gate, except the Guidelines examples that need components: they are listed in the ledger for step 16 |
 | 11 | **Parts**, one step per page, in ID order with the dependencies of `parts/00-parts.md` §3 first | `parts/00-parts.md`, the page file, the files of the Parts it instances, `tools/figma-docbuilder.js` (cached) | the page gate |
 | 12 | **Components**, one step per page, in ID order | `components/00-components.md`, the page file, `parts/00-parts.md` and the files of the Parts it contains, `tools/figma-docbuilder.js` (cached) | the page gate |
 | 13 | **Sections**, one step per page, in ID order | `sections/00-sections.md`, the page file, the folder and page files of the Components and Parts it contains, `tools/figma-docbuilder.js` (cached) | the page gate |
 | 14 | **Layouts**, one step per page, in ID order | `layouts/00-layouts.md`, the page file, the files of the Sections and Components it contains, `tools/figma-docbuilder.js` (cached) | the page gate |
-| 15 | **Screens**, one step per page, in ID order | `screens/00-screens.md`, the page file, the file of its Layout, `DOCFRAMES.md` | the page gate |
-| 16 | **Foundation examples that use components** (`foundations/00-foundations.md`, *Build order*) | the foundation page file again, `DOCFRAMES.md` | every example the ledger lists for it is built from real instances, and the page audit passes again |
+| 15 | **Screens**, one step per page, in ID order | `screens/00-screens.md`, the page file, the file of its Layout, `workflow/DOCFRAMES.md` | the page gate |
+| 16 | **Foundation examples that use components** (`foundations/00-foundations.md`, *Build order*) | the foundation page file again, `workflow/DOCFRAMES.md` | every example the ledger lists for it is built from real instances, and the page audit passes again |
 | 17 | **File audit**: `tools/figma-audit.js` on every built page and once on the file | `tools/figma-audit.js` | `fail` = 0 on every page and on the file |
-| 18 | **Docs site setup**: `WEB.md` W1–W3; App: `APP.md` A1–A2 | `WEB.md`; App: `APP.md` | the exit checks of W1–W3 |
-| 19 | **Docs pages**, one step per page, in ID order: `WEB.md` W4; App: `APP.md` A3 | `WEB.md` (and `APP.md`), the page file; agents working in parallel start from `templates/agent-brief.md` | `WEB.md` §9 (and `APP.md` §9) pass for the page |
-| 20 | **Foundation and guidance pages, docs data**: `WEB.md` W5–W6 | `WEB.md`, the foundation and guidance files | the exit checks of W5–W6 |
-| 21 | **Build, package and QA**: `WEB.md` W7; App: `APP.md` A4 | `WEB.md`; App: `APP.md` | the exit check of W7; App: `APP.md` §9 |
-| 22 | **Publish**: `WEB.md` W8 | `WEB.md` | the location is reported and the QA results are saved |
+| 18 | **Docs site setup**: `workflow/WEB.md` W1–W3; App: `workflow/APP.md` A1–A2 | `workflow/WEB.md`; App: `workflow/APP.md` | the exit checks of W1–W3 |
+| 19 | **Docs pages**, one step per page, in ID order: `workflow/WEB.md` W4; App: `workflow/APP.md` A3 | `workflow/WEB.md` (and `workflow/APP.md`), the page file; agents working in parallel start from `templates/agent-brief.md` | `workflow/WEB.md` §9 (and `workflow/APP.md` §9) pass for the page |
+| 20 | **Foundation and guidance pages, docs data**: `workflow/WEB.md` W5–W6 | `workflow/WEB.md`, the foundation and guidance files | the exit checks of W5–W6 |
+| 21 | **Build, package and QA**: `workflow/WEB.md` W7; App: `workflow/APP.md` A4 | `workflow/WEB.md`; App: `workflow/APP.md` | the exit check of W7; App: `workflow/APP.md` §9 |
+| 22 | **Publish**: `workflow/WEB.md` W8 | `workflow/WEB.md` | the location is reported and the QA results are saved |
 
-**Figma tools.** Steps 11–14 draw frames with `tools/figma-docbuilder.js`, cached once at step 6: Parts, Components and Sections use `sectionPage`, Layouts use `layoutPage`. Each page body is small and comes from the page file, and `finishPage` arranges the frames and runs the audit. Steps 6–10, 15 and 16 draw frames the builder has no helper for yet (Doc kit, Cover, guidance pages, foundation palette rows and variable tables, Screens), so they load `DOCFRAMES.md`. Load it too when changing the builder. If a call drops after about 120 s, first make a read-only call that lists the page's frames, then re-run. `use_figma` rejects return values over 20 KB, so tools return compact results and page themselves. After step 17, clear the `dscreate` plugin data on the document root.
+**Figma tools.** Steps 11–14 draw frames with `tools/figma-docbuilder.js`, cached once at step 6: Parts, Components and Sections use `sectionPage`, Layouts use `layoutPage`. Each page body is small and comes from the page file, and `finishPage` arranges the frames and runs the audit. Steps 6–10, 15 and 16 draw frames the builder has no helper for yet (Doc kit, Cover, guidance pages, foundation palette rows and variable tables, Screens), so they load `workflow/DOCFRAMES.md`. Load it too when changing the builder. If a call drops after about 120 s, first make a read-only call that lists the page's frames, then re-run. `use_figma` rejects return values over 20 KB, so tools return compact results and page themselves. After step 17, clear the `dscreate` plugin data on the document root.
+
+**Page copy.** Every sentence on a page comes from its copy file, `output/{system-slug}/copy/{id}-{kebab name}.md` (`workflow/COPY.md`). Write the file before the page is drawn: the builder's page text is taken from its `both` and `figma` lines, and its node ids are added once the frames exist. The site's text comes from the `both` and `web` lines of the same file (steps 19–20). After a review, change the copy file first, then apply it to Figma with `tools/figma-copy.js`.
 
 Which steps are in scope:
 - Step 2 runs only for an existing system.
-- Steps 10–15 hold only the pages in scope. A new system has no Layouts or Screens at initiation; an existing system has them when the inventory maps them. Pages added later through `EXTEND.md` get their own entry (`EXTEND.md`).
+- Steps 10–15 hold only the pages in scope. A new system has no Layouts or Screens at initiation; an existing system has them when the inventory maps them. Pages added later through `workflow/EXTEND.md` get their own entry (`workflow/EXTEND.md`).
 - Steps 18–22 run only when code is in scope; the App parts only for App and Web and App. Nothing native is installed or built.
 - A step out of scope is written as `skip`, with the reason from the confirmed summary.
 
@@ -215,10 +223,11 @@ Which steps are in scope:
   2. its frames match `SYSTEM.md` Part A §A3: names, order, `y = 0`, the canvas gap;
   3. the page file's QA list and the folder file's completion criteria pass;
   4. `tools/figma-audit.js` on the page reports `fail` = 0, saved in `output/{system-slug}/figma/`;
-  5. pages with component sets (steps 11–15): every set is exported with `tools/figma-export-sets.js` to `output/{system-slug}/figma/sets/{set-id}.json` (`:` written as `-`). Docs agents (step 19) read these files and open Figma only for screenshots.
+  5. pages with component sets (steps 11–15): every set is exported with `tools/figma-export-sets.js` to `output/{system-slug}/figma/sets/{set-id}.json` (`:` written as `-`). Docs agents (step 19) read these files and open Figma only for screenshots;
+  6. its copy file exists with the sections of its page type, and `tools/figma-copy.js` in `diff` mode reports 0 differences (`workflow/COPY.md` §7).
 - **Approved exceptions.** When an audit fail can't be fixed without a change the user ruled out (for example existing values that must stay), ask the user. An approved exception is recorded in the ledger under `auditExceptions` (contrast pairs, unsupported modes, collections that aren't tokens) with the date and reason, documented on the page it belongs to (contrast pairs on 1.1 Color, an unsupported mode on 02 Tokens), and copied into the `ACCEPTED` block of `tools/figma-audit.js` for the run. The audit then reports it as `info`, not `fail`. An exception the user didn't approve is a fail.
 - **Keep and Audit pages take their step too.** Load the file, compare, run the audit and record the findings. They change nothing, and they are done when the findings are recorded.
-- **No spec, no page.** A page with no spec file (an existing family that isn't in the tree) gets its file first, through `EXTEND.md` steps 1–8. Then the page is built at its place in the sequence.
+- **No spec, no page.** A page with no spec file (an existing family that isn't in the tree) gets its file first, through `workflow/EXTEND.md` steps 1–8. Then the page is built at its place in the sequence.
 - **Structure early, documentation in order.** Renaming pages and moving component sets is step 5 and may come before a page's own step. Building or filling any frame of a page happens only at that page's step.
 - **YOLO is pacing, not order.** YOLO everything removes the pause between pages. It never allows skipping, reordering or merging steps. One by one stops after each step and proposes the next one.
 - **Only the user changes the order.** The user may skip a page, or move a page later within its level. Record it under `decisions` with the date and update `sequence`. The order of the levels never changes.
@@ -271,8 +280,8 @@ Then run:
 3. Part, Component and Section completion criteria from their folder files when applicable (Layout and Screen criteria when they are added through EXTEND);
 4. the complete QA list of every selected page file;
 5. `tools/figma-audit.js` on every built page and once on the file, with `fail` = 0;
-6. when code is in scope, the QA list in `WEB.md` §9 for every documented page;
-7. for App and Web and App, the QA list in `APP.md` §9 for every page.
+6. when code is in scope, the QA list in `workflow/WEB.md` §9 for every documented page;
+7. for App and Web and App, the QA list in `workflow/APP.md` §9 for every page.
 
 # 9. Completion rule
 
@@ -281,6 +290,8 @@ Do not mark generation complete until:
 - every required specification is confirmed loaded;
 - every checklist item is resolved;
 - every applicable global, folder-level and page-level QA rule passes, and `tools/figma-audit.js` reports `fail` = 0 on every built page and on the file;
-- for App and Web and App, every in-scope page has its React Native preview and an `app` block with React Native, Swift and Kotlin code, and `APP.md` §9 passes;
+- for App and Web and App, every in-scope page has its React Native preview and an `app` block with React Native, Swift and Kotlin code, and `workflow/APP.md` §9 passes;
 - every entry of the ledger's `sequence` is `done` or `skip`, in order, and every `done` entry has its evidence (`loaded`, `audit.fail` = 0);
-- when code is in scope, `npm run build` passes (including `check:contrast`), `npm run qa` reports 0 problems, the package installs in a fresh app (Web and Web and App), and every in-scope page passes `WEB.md` §9.
+- `input/{system-slug}/sources.md` lists every file in the input folder, every chat instruction is captured in `chat/`, and *Open conflicts* is empty (`input/README.md` I3–I5);
+- every lesson the build learned (a retry, a rollback, an audit failure or a user correction) is in `output/{slug}/reports/build-notes.md`, and each one that applies to any brand is added to `GOTCHAS.md` as its next rule (`GOTCHAS.md` §0);
+- when code is in scope, `npm run build` passes (including `check:contrast`), `npm run qa` reports 0 problems, the package installs in a fresh app (Web and Web and App), and every in-scope page passes `workflow/WEB.md` §9.

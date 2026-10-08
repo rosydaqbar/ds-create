@@ -16,7 +16,7 @@ This page is built with `templates/structure.md`; the frames and what they hold 
 
 There is no `.Main` frame.
 
-Every frame has `Doc/Header` (breadcrumb `Guidance › 02 Tokens`) and `Doc/Footer`. The first three are reading frames (`DOCFRAMES.md` §7): a rich-text column at `doc/measure/reading`, each topic heading → body → visual → caption. `· Primitive palette` starts with the same reading column and then adds full-width variable tables (Part B §6).
+Every frame has `Doc/Header` (breadcrumb `Guidance › 02 Tokens`) and `Doc/Footer`. The first three are reading frames (`workflow/DOCFRAMES.md` §7): a rich-text column at `doc/measure/reading`, each topic heading → body → visual → caption. `· Primitive palette` starts with the same reading column and then adds full-width variable tables (Part B §6).
 
 Every topic keeps its visual. Visuals are built from this file's own variables, collections and components; diagrams are real frames with cards and connectors, not paragraph text arranged to look like a diagram.
 
@@ -24,11 +24,26 @@ Every topic keeps its visual. Visuals are built from this file's own variables, 
 
 ## 1. What the token system is for
 
-Four goals:
-- **Simplicity**: one name per concept, a small number of collections, the same structure in every build.
-- **Accessibility**: color pairs are tested in every mode before components use them.
-- **Aesthetics**: the brand's character lives in the primitives and roles, so every component carries it.
-- **Scalability**: new modes, brands and components are added without renaming what exists.
+Four goals decide every token. Each goal is stated concretely, then shown in this file, never as a slogan: words such as consistent, robust or flexible only appear next to the mechanism that makes them true.
+
+**Visual: goal tiles.** One tile per goal, in this order, each with the same four lines filled from this file:
+
+```text
+Goal tile
+├─ Goal          Simplicity · Accessibility · Aesthetics · Scalability
+├─ What it means one sentence: what the goal asks of every token
+├─ In this file  how this file meets it, with real collection, role and mode names
+└─ See           a link to the page that shows it
+```
+
+| Goal | What it means | In this file (fill with real names) | See |
+| --- | --- | --- | --- |
+| Simplicity | One name per concept, and only as many collections as there are domains. | The collections that exist, by name, and the one grammar they share. | `02 Tokens · Naming` |
+| Accessibility | Every text and surface pair passes contrast in each supported mode before a component uses it. | The modes that are tested, and each accepted exception with its usage rule. | `1.1 Color · Guidelines` |
+| Aesthetics | The brand's character lives in the primitives and the roles that alias them, never on layers. | The brand families and the roles that carry them (brand, accent, neutral). | `02 Tokens · Primitive palette` |
+| Scalability | New modes, brands and components add values without renaming anything. | What is ready to grow: unsupported modes waiting for values, groups with room for new roles. | `02 Tokens · Modes` |
+
+**How they connect.** After the tiles, one paragraph (no list) ties the four goals together in this order, with this file's real names: simple, predictable names mean each role exists once → so each foreground and background pair is checked once, in every supported mode (accessibility) → the brand sits in the primitives behind those roles, so restyling never touches a component (aesthetics) → so growth only adds values and modes, never renames (scalability).
 
 ## 2. The collections
 
@@ -60,7 +75,7 @@ Color
 
 - An existing system that is kept, audited or improved keeps its collection names unless the user chose to normalize them.
 
-**Visual: collection map.** One card per collection that exists in this file, in order: name, variable count, modes, and a sample of three variables with swatches or values. Only collections that exist are shown.
+**Visual: collection map.** One card per collection that exists in this file, in order: name, variable count, modes, what it holds, then three sample variables with swatches or values under an `Examples` label, and a `See all on {page} →` link to the page that documents every variable of that collection (the `Shown on` column above). The samples are examples, not the full list (`workflow/DOCFRAMES.md` §15, Examples and previews). Only collections that exist are shown.
 
 ## 3. Three layers
 
@@ -304,3 +319,5 @@ Change a primitive only to change the brand. After any change, review the roles 
 - Density is shown with a three-density specimen; breakpoints with a structural responsive example; solid vs transparent dark neutrals with all required visuals.
 - The primitive tables list every primitive with its value and the roles that use it.
 - No visual uses names other than this system's real token names.
+- Each goal tile has its four lines filled with this file's real names, followed by the one connecting paragraph.
+- Each collection card labels its samples `Examples` and links to the page with the full list.

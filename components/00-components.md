@@ -2,7 +2,7 @@
 
 Components are small groups of Parts that work as one unit with one job: a field made of a label, a control and a hint; a row of connected buttons; a stack of avatars. Each Component page is a **complete component canvas**, built with the same page template as the Parts, plus one extra block that shows which Parts it is made of.
 
-Components are not built during Initiate unless the user selects them. They are added later when the user selects them in the questionnaire (`INITIATOR.md`) or when `EXTEND.md` adds them.
+Components are not built during Initiate unless the user selects them. They are added later when the user selects them in the questionnaire (`INITIATOR.md`) or when `workflow/EXTEND.md` adds them.
 
 # 1. Component pages
 
@@ -29,7 +29,7 @@ Components are not built during Initiate unless the user selects them. They are 
 | 3.7 Social button | `components/3.7-social-button.md` |
 | 3.8 Badge group | `components/3.8-badge-group.md` |
 
-New Components take the next free ID (`3.9`, `3.10`, …) through `EXTEND.md`. IDs are never reused.
+New Components take the next free ID (`3.9`, `3.10`, …) through `workflow/EXTEND.md`. IDs are never reused.
 
 # 2. What a Component may contain
 
@@ -115,7 +115,7 @@ The template frames are fixed. The topics inside them come from the Component's 
 
 # 5. Implementation mode
 
-Components use the same implementation mode as the Parts (`QUESTIONNAIRE.md` §8): **YOLO everything** or **One by one**. The mode changes pacing only. In One by one, the Parts a Component needs are built first when they are missing; unrelated Components are not prebuilt.
+Components use the same implementation mode as the Parts (`workflow/QUESTIONNAIRE.md` §8): **YOLO everything** or **One by one**. The mode changes pacing only. In One by one, the Parts a Component needs are built first when they are missing; unrelated Components are not prebuilt.
 
 Neither mode changes the order. A Component page starts only when every earlier step of the build sequence (`INITIATOR.md` Part B §6) is done in the ledger, every Part in scope included. It is done only after its own file and the files of the Parts it contains were loaded at its step and the page gate passed.
 

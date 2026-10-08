@@ -8,7 +8,7 @@ const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 /**
  * App products: the docs site previews the components in React Native, rendered with
- * react-native-web (WEB.md §7.1). `@app` points at that React Native source: `./react-native`
+ * react-native-web (workflow/WEB.md §7.1). `@app` points at that React Native source: `./react-native`
  * inside a build (part of this docs project), `../app/react-native` in ds-create, or DS_APP_SRC.
  * Nothing native is installed or built: `react-native` is aliased to `react-native-web`.
  */

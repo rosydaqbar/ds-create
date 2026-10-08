@@ -1,17 +1,15 @@
 # Output
 
-Everything ds-create generates goes here, never into the executor folders (`web/`, `app/`, `templates/`, `tools/`, the page specs) and never into `examples/`. Nothing in this folder is committed except this file: `.gitignore` ignores `output/*`.
+Everything ds-create generates goes here, never into the executor folders (`web/`, `app/`, `templates/`, `tools/`, `workflow/`, the page specs) and never into `examples/`. What the user provides goes into `input/` (`input/README.md`), not here. Nothing in this folder is committed except this file: `.gitignore` ignores `output/*`.
 
 ```text
 output/
-├─ {system-slug}/                one folder per design system, e.g. output/acme/
+├─ {system-slug}/                one folder per design system, e.g. output/acme/ (the same slug as input/acme/)
 │  ├─ ds-create-ledger.json      progress ledger (INITIATOR.md Part B §0)
-│  ├─ figma/                     figma-variables.json (the export), figma-audit results
-│  ├─ web/                       the web project (WEB.md), when Web is a target
-│  ├─ native/                    the React Native project (APP.md), when chosen
-│  ├─ ios/                       the SwiftUI project (APP.md), when chosen
-│  ├─ android/                   the Jetpack Compose project (APP.md), when chosen
-│  └─ reports/                   QA reports and reviews for this system
+│  ├─ copy/                      one copy file per page: every sentence on the Figma frames and the docs site (workflow/COPY.md)
+│  ├─ figma/                     figma-variables.json (the export), set snapshots, figma-audit results
+│  ├─ web/                       the docs site for every product type (workflow/WEB.md); App previews in web/react-native/ (workflow/APP.md)
+│  └─ reports/                   build notes, QA reports and reviews for this system
 └─ reports/                      reviews of ds-create itself
 ```
 

@@ -10,7 +10,7 @@
 //                          effects without an effect style, layer opacity, default layer names,
 //                          variant naming and the Part C §4.2 property vocabulary.
 // Run one page per call (the page is switched once). Output stays small: counts plus a few examples.
-// A result with "fail" > 0 fails the page's QA (INITIATOR Part B §8, EXTEND step 11, DOCFRAMES.md §14).
+// A result with "fail" > 0 fails the page's QA (INITIATOR Part B §8, EXTEND step 11, workflow/DOCFRAMES.md §14).
 // Save each result as output/{system-slug}/figma/audit-{page or file}.json and record it in the ledger.
 const PAGE = null;
 const MAX_EXAMPLES = 6;

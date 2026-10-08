@@ -169,7 +169,7 @@ const CODE_PLATFORMS: { value: CodePlatform; label: string; lang: string; app: b
   { value: 'kotlin', label: 'Kotlin', lang: 'kotlin', app: true },
 ];
 
-/** Install lines for the app packages (APP.md §2). */
+/** Install lines for the app packages (workflow/APP.md §2). */
 export function ComponentPage({ doc }: { doc: ComponentDoc }) {
   const meta = pageMeta[doc.id];
   const pkg = config.packageName;

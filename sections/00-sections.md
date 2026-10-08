@@ -2,7 +2,7 @@
 
 Sections are larger blocks of an interface with their own layout and behavior: an editor with its toolbar, a video player with its controls. They combine Components, Parts and private parts into one working region. Each Section page is a **complete component canvas**, built with the same page template as Parts and Components, plus the Composition block, plus examples in use that show the Section inside a realistic screen area.
 
-Sections are not built during Initiate unless the user selects them. They are added later when the user selects them in the questionnaire (`INITIATOR.md`) or when `EXTEND.md` adds them.
+Sections are not built during Initiate unless the user selects them. They are added later when the user selects them in the questionnaire (`INITIATOR.md`) or when `workflow/EXTEND.md` adds them.
 
 # 1. Section pages
 
@@ -17,7 +17,7 @@ Sections are not built during Initiate unless the user selects them. They are ad
 | 4.1 Rich text editor | `sections/4.1-rich-text-editor.md` |
 | 4.2 Video player | `sections/4.2-video-player.md` |
 
-New Sections take the next free ID (`4.3`, `4.4`, …) through `EXTEND.md`. IDs are never reused.
+New Sections take the next free ID (`4.3`, `4.4`, …) through `workflow/EXTEND.md`. IDs are never reused.
 
 # 2. What a Section may contain
 
@@ -55,7 +55,7 @@ The **Composition block** at the top of `· Anatomy` works as for Components (`c
 
 # 5. Implementation mode
 
-Sections use the same implementation mode as Parts and Components (`QUESTIONNAIRE.md` §8). In One by one, the Components and Parts a Section needs are built first when they are missing.
+Sections use the same implementation mode as Parts and Components (`workflow/QUESTIONNAIRE.md` §8). In One by one, the Components and Parts a Section needs are built first when they are missing.
 
 Neither mode changes the order. A Section page starts only when every earlier step of the build sequence (`INITIATOR.md` Part B §6) is done in the ledger, every Component in scope included. It is done only after its own file and the files of the Components and Parts it contains were loaded at its step and the page gate passed.
 

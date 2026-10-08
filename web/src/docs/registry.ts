@@ -1,14 +1,15 @@
 import type { ComponentType } from 'react';
 import type { ComponentDoc } from './types';
+import { withCopy } from './copy';
 
-/** Every `stories/*.doc.tsx` registers itself; no shared list to edit. */
+/** Every `stories/*.doc.tsx` registers itself; no shared list to edit. Its sentences come from the page copy file when there is one (workflow/COPY.md). */
 const modules = import.meta.glob<{ default: ComponentDoc }>('./stories/*.doc.tsx', { eager: true });
 
 const idKey = (id: string) => id.split('.').map((n) => n.padStart(3, '0')).join('.');
 export const slugOf = (id: string, name: string) => `${id}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '')}`;
 
 export const componentDocs = Object.values(modules)
-  .map((m) => m.default)
+  .map((m) => withCopy(m.default))
   .sort((a, b) => idKey(a.id).localeCompare(idKey(b.id)));
 
 export interface StaticPage {

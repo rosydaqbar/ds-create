@@ -1,21 +1,21 @@
 # Screens
 
-Screens are Layouts filled with the real content of one product view: the account settings page, the sign-in flow, the project list. They show what people actually see, with real copy and realistic data, in every state the view can be in: with content, empty, loading and failed. Screens are where the library is proven: if a view can't be built from the Layouts, Sections, Components and Parts in the file, the gap is found here and closed through `EXTEND.md`.
+Screens are Layouts filled with the real content of one product view: the account settings page, the sign-in flow, the project list. They show what people actually see, with real copy and realistic data, in every state the view can be in: with content, empty, loading and failed. Screens are where the library is proven: if a view can't be built from the Layouts, Sections, Components and Parts in the file, the gap is found here and closed through `workflow/EXTEND.md`.
 
 Each Screen page holds the screen itself, ready to prototype and hand off, plus the documentation that explains its content, states and flow.
 
-Screens are never built during Initiate. They are added only through `EXTEND.md`, when the user asks for a product view or a flow.
+Screens are never built during Initiate. They are added only through `workflow/EXTEND.md`, when the user asks for a product view or a flow.
 
 # 1. Screen pages
 
 ```text
 ── 6 · Screens ──
-(no pages in the base tree; each Screen is added through EXTEND.md)
+(no pages in the base tree; each Screen is added through workflow/EXTEND.md)
 ```
 
 | Page | File |
 | --- | --- |
-| `6.1 {Name}`, `6.2 {Name}`, … | `screens/6.x-{kebab-name}.md`, written by `EXTEND.md` step 8 |
+| `6.1 {Name}`, `6.2 {Name}`, … | `screens/6.x-{kebab-name}.md`, written by `workflow/EXTEND.md` step 8 |
 
 - New Screens take the next free ID (`6.1`, `6.2`, …). IDs are never reused or renumbered.
 - The `── 6 · Screens ──` separator exists only once the first Screen page exists (`SYSTEM.md` Part A §1).
@@ -30,11 +30,11 @@ Screens are never built during Initiate. They are added only through `EXTEND.md`
 | Is it only the arrangement of regions, with placeholder content? | Layout (`5.x`) |
 | Is it one region with its own behavior that other screens could reuse? | Section (`4.x`) |
 
-This is the same test as `EXTEND.md` §3. When two levels fit, ask the user once.
+This is the same test as `workflow/EXTEND.md` §3. When two levels fit, ask the user once.
 
 # 2. What a Screen may contain
 
-- **Exactly one Layout (`5.x`) instance per screen frame**, never detached. When no Layout fits, one is added through `EXTEND.md` first.
+- **Exactly one Layout (`5.x`) instance per screen frame**, never detached. When no Layout fits, one is added through `workflow/EXTEND.md` first.
 - Sections (`4.x`), Components (`3.x`) and Parts (`2.x`) as **instances**, in the Layout's regions.
 - Foundations: tokens, text styles, effect styles, icons, brand assets and approved imagery.
 - Its own private parts (`.Main/{Screen} {region}`): the content of one region, built once and reused across the screen's breakpoints, states and modes.
@@ -84,7 +84,7 @@ Why `.Main` is always there: the same content appears in several frames (desktop
 5. Focus order: numbered `Doc/Callout` markers in tab order, from the skip link to the last element.
 6. State triggers: what moves the screen from one `Data` state to another, and what the screen announces when it does.
 
-**· Guidelines**: a reading-oriented frame (`DOCFRAMES.md` §7) with the topics in the Screen's file, each with its visual built from the screen's own instances, and `Doc/Do-dont` under each pair.
+**· Guidelines**: a reading-oriented frame (`workflow/DOCFRAMES.md` §7) with the topics in the Screen's file, each with its visual built from the screen's own instances, and `Doc/Do-dont` under each pair.
 
 Every documented frame ends with `Doc/Footer`.
 
@@ -93,9 +93,9 @@ Every documented frame ends with `Doc/Footer`.
 ## 4.1 Real content
 
 - **Real copy, never filler.** Headings, labels, buttons, messages and data are what the product would show. Never lorem ipsum, "Item 1, Item 2", "Title goes here" or "Text".
-- **Follow the guidance that exists.** Copy follows the brand's tone of voice (`QUESTIONNAIRE.md` §2) and the Content topic of every component it uses (button labels from 2.1, field labels and hints from 3.2). Sentence case, in the product's language.
+- **Follow the guidance that exists.** Copy follows the brand's tone of voice (`workflow/QUESTIONNAIRE.md` §2) and the Content topic of every component it uses (button labels from 2.1, field labels and hints from 3.2). Sentence case, in the product's language.
 - **Realistic data.** Names, dates, amounts and counts are plausible for the product and vary in length. Include at least one long value (a long name, a large number) so wrapping and truncation are shown. People in examples are fictional; never use real personal data.
-- **Ask, don't invent.** Content the agent can't infer from the product brief (prices, plan names, legal text, policy rules) is asked for (`EXTEND.md` step 1).
+- **Ask, don't invent.** Content the agent can't infer from the product brief (prices, plan names, legal text, policy rules) is asked for (`workflow/EXTEND.md` step 1).
 - **Images** come from `1.8 Brand assets` or the product's approved imagery. Where none exist, use the Avatar (2.6) placeholder and neutral image fills, never stock photos from other brands.
 
 ## 4.2 States
@@ -130,7 +130,7 @@ Every screen that loads, saves or shows data has these states, set by `Data`:
 | Layers | the Layout's region names (`layouts/00-layouts.md` §4.2), then the anatomy tree in the Screen's file |
 
 - `Breakpoint` uses the values in `SYSTEM.md` Part C §4.2.
-- `Data` (`default, empty, loading, error`) is not in Part C §4.2 yet; add it there before the first Screen is built (`EXTEND.md` step 7). It is never `State`, which is for interaction states.
+- `Data` (`default, empty, loading, error`) is not in Part C §4.2 yet; add it there before the first Screen is built (`workflow/EXTEND.md` step 7). It is never `State`, which is for interaction states.
 - `{View}` is a short sentence-case name of a step in the flow ("Enter code").
 
 ## 4.5 Accessibility at page level
@@ -145,7 +145,7 @@ The Layout gives the landmarks, skip link, reflow and target sizes (`layouts/00-
 
 ## 4.6 Promote repeated compositions
 
-A composition on a Screen becomes a library component through `EXTEND.md` §6 when it appears on a second Screen page, appears three or more times on one screen, or the user asks. `.Main/{Screen} {region}` parts can't be shared between Screen pages, so a region that repeats is the usual case: it is promoted at the level `EXTEND.md` §3 gives (often a Section), keeps its look, and its copies are swapped for instances after the user confirms. Two Screens that arrange regions the same way without a Layout promote that arrangement to a Layout.
+A composition on a Screen becomes a library component through `workflow/EXTEND.md` §6 when it appears on a second Screen page, appears three or more times on one screen, or the user asks. `.Main/{Screen} {region}` parts can't be shared between Screen pages, so a region that repeats is the usual case: it is promoted at the level `workflow/EXTEND.md` §3 gives (often a Section), keeps its look, and its copies are swapped for instances after the user confirms. Two Screens that arrange regions the same way without a Layout promote that arrangement to a Layout.
 
 ## 4.7 Documentation density
 
@@ -166,7 +166,7 @@ Each Screen file specifies, where relevant:
 
 # 5. Screen file sections
 
-A `screens/6.x-{kebab-name}.md` file follows `DOCFRAMES.md` §13, adapted to real content. It contains, in this order:
+A `screens/6.x-{kebab-name}.md` file follows `workflow/DOCFRAMES.md` §13, adapted to real content. It contains, in this order:
 
 ```text
 Purpose (task, people, entry points, what done looks like)
@@ -188,7 +188,7 @@ A file that only lists the components on the screen is incomplete.
 
 # 6. Implementation mode
 
-Screens use the same implementation mode as the other levels (`QUESTIONNAIRE.md` §8 and `INITIATOR.md` Part B §3): **YOLO everything** or **One by one**. If the user already chose a mode in the current request, reuse it. The mode changes pacing only. In One by one, the Layout and any missing Sections, Components or Parts a Screen needs are built first; unrelated pages are not prebuilt.
+Screens use the same implementation mode as the other levels (`workflow/QUESTIONNAIRE.md` §8 and `INITIATOR.md` Part B §3): **YOLO everything** or **One by one**. If the user already chose a mode in the current request, reuse it. The mode changes pacing only. In One by one, the Layout and any missing Sections, Components or Parts a Screen needs are built first; unrelated pages are not prebuilt.
 
 Neither mode changes the order. A Screen page starts only when every earlier step of the build sequence (`INITIATOR.md` Part B §6) is done in the ledger, every Layout in scope included. It is done only after its own file and the file of its Layout were loaded at its step and the page gate passed.
 
@@ -210,4 +210,4 @@ A Screen page fails QA when:
 - a composition meets the threshold in §4.6 and was neither promoted nor raised with the user;
 - any topic, example or QA rule in the Screen's file is missing from the canvas.
 
-When the system has a web implementation, the Screen is documented on the site like the other levels (`WEB.md`) and its page passes `npm run qa`: no horizontal overflow at 390 px and no axe-core violations, in Light and Dark.
+When the system has a web implementation, the Screen is documented on the site like the other levels (`workflow/WEB.md`) and its page passes `npm run qa`: no horizontal overflow at 390 px and no axe-core violations, in Light and Dark.

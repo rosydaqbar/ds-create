@@ -2,7 +2,7 @@
 
 This file turns a generated Figma design system into a **Tailwind-ready React library with its own documentation site**: a site where designers, product managers and developers browse every foundation and component, try every property, read the guidance and copy the code. It also produces an installable package for product teams.
 
-**The documentation site is built for every product type**: Web, App, or Web and App (`QUESTIONNAIRE.md` §10). Tokens, foundations and components are always documented here. For an App product, the component pages preview every component in React Native, rendered in the browser with react-native-web, and the Code tab shows React Native, Swift and Kotlin code (§7.1, `APP.md`). For a Web product, the site also ships the React library and its package.
+**The documentation site is built for every product type**: Web, App, or Web and App (`workflow/QUESTIONNAIRE.md` §10). Tokens, foundations and components are always documented here. For an App product, the component pages preview every component in React Native, rendered in the browser with react-native-web, and the Code tab shows React Native, Swift and Kotlin code (§7.1, `workflow/APP.md`). For a Web product, the site also ships the React library and its package.
 
 It is a reusable workflow. The starting point is the brand-agnostic template in `web/`; every build copies it and fills it from its own Figma file. Nothing in `web/` belongs to a brand: the tokens are neutral placeholders, the logo is a placeholder, and the brand's own sentences live in one file, `src/brand/copy.ts`, for the build to answer.
 
@@ -10,11 +10,11 @@ Figma stays the source of truth. The web version never invents values: tokens co
 
 # 1. When this runs
 
-- At initiation, for every product type in `QUESTIONNAIRE.md` §10. Web builds the site and the React library; App builds the site with App previews and app code; Web and App builds both.
+- At initiation, for every product type in `workflow/QUESTIONNAIRE.md` §10. Web builds the site and the React library; App builds the site with App previews and app code; Web and App builds both.
 - Later, at any time, as its own task ("implement the system for web", "build the docs site").
-- After a component is added through `EXTEND.md`.
+- After a component is added through `workflow/EXTEND.md`.
 
-It runs **after** the Figma pages it implements exist. A component is documented only when its Figma page is complete. When the product includes App (`APP.md`), the App previews use this same token export and changelog, and they fill in as `APP.md` A3 writes each component.
+It runs **after** the Figma pages it implements exist. A component is documented only when its Figma page is complete. When the product includes App (`workflow/APP.md`), the App previews use this same token export and changelog, and they fill in as `workflow/APP.md` A3 writes each component.
 
 # 2. What is produced
 
@@ -114,7 +114,7 @@ Exit check: the script reports every variable, text style and effect style of th
 ## W3 · Brand assets and identity
 
 1. Export from `1.8 Brand assets` the lockup for light and dark surfaces, the mark and any flags as SVG into `public/brand/` (flags in `public/brand/flags/{code}.svg`) with the names in `src/ds.config.ts`. Flags are inlined into the components, so they ship inside the package.
-2. Fill `ds.config.ts` from `00 Cover`: system name, version, `product` (`'web'`, `'app'` or `'both'`, from `QUESTIONNAIRE.md` §10), `modes` (`['Light', 'Dark']`, or `['Light']` when Dark isn't supported; the site then hides its Dark toggle and QA checks Light only), `packageName` (the npm name product teams will install, e.g. `@acme/design-system`), description (what the product is and what the system covers, in one or two sentences), and the Figma file link.
+2. Fill `ds.config.ts` from `00 Cover`: system name, version, `product` (`'web'`, `'app'` or `'both'`, from `workflow/QUESTIONNAIRE.md` §10), `modes` (`['Light', 'Dark']`, or `['Light']` when Dark isn't supported; the site then hides its Dark toggle and QA checks Light only), `packageName` (the npm name product teams will install, e.g. `@acme/design-system`), description (what the product is and what the system covers, in one or two sentences), and the Figma file link.
 3. When the brand typeface is a web font, add its stylesheet to `fontStylesheets`; the family names already come from `font/family/*`. When the brand typeface can't ship (licensing), name the stand-in in a comment and in the Typography page.
 4. Replace the icon imports in `src/icons/index.tsx` when 1.7 uses a library other than Lucide; keep the names.
 5. When the Figma file uses its own names for the main roles, point the four roots in `src/styles/chrome.css` at them (for example `--chrome-accent: var(--color-action-primary);`). Every other name the site chrome needs and the file lacks gets a site-only default from `npm run tokens`. Never type a hex value there.
@@ -128,12 +128,12 @@ Work in page order (2.x, then 3.x, then 4.x), only for pages in scope. For each 
 1. Load the page's spec (`parts/…`, `components/…`, `sections/…`) and read the published set in Figma.
 2. Load the Impeccable skill (`/impeccable`, product register) before writing UI or copy. Its design hook checks every edit to a UI file; fix each finding before moving on.
 3. Write the component in `src/components/{level}/{Name}.tsx` following §6.
-4. Write the documentation module `src/docs/stories/{id}-{slug}.doc.tsx` following §7, in the voice of `COPY-GUIDE.md`.
+4. Write the documentation module `src/docs/stories/{id}-{slug}.doc.tsx` following §7, in the voice of `COPY-GUIDE.md`. Its sentences go into the page's copy file as `web` or `both` lines (`workflow/COPY.md`): `npm run copy` lays them over the story, so a sentence that is only in the story is overwritten as soon as the copy file has that topic.
 5. Look at the page in both color modes, then run `npm run qa:dev` for it.
 
-On an App-only product, steps 3 and 4 are written for the app instead. The template's web components stay as the site's own controls (search, playgrounds, badges), styled by the brand's tokens, and they aren't adapted page by page. Each story gets the `app` block that `APP.md` A3 writes, and the page's text fields (summary, when to use, anatomy parts, props, tokens, guidelines) are written for the brand as usual. On a Web and App product, both versions are written.
+On an App-only product, steps 3 and 4 are written for the app instead. The template's web components stay as the site's own controls (search, playgrounds, badges), styled by the brand's tokens, and they aren't adapted page by page. Each story gets the `app` block that `workflow/APP.md` A3 writes, and the page's text fields (summary, when to use, anatomy parts, props, tokens, guidelines) are written for the brand as usual. On a Web and App product, both versions are written.
 
-Mode: the same choice as the Figma build (`QUESTIONNAIRE.md` §8). **YOLO everything** implements every page in one pass; **One by one** stops after each page for review.
+Mode: the same choice as the Figma build (`workflow/QUESTIONNAIRE.md` §8). **YOLO everything** implements every page in one pass; **One by one** stops after each page for review.
 
 Exit check per page: QA §9 passes.
 
@@ -141,7 +141,7 @@ Exit check per page: QA §9 passes.
 
 The template's Foundations (1.1–1.8), Getting started and Tokens pages are complete: their visuals, tables and contrast checks are computed from the tokens, and their guidance is the spec's brand-agnostic guidance. Make them the brand's:
 
-1. Run `npm run check:brand-copy -- --list`. It lists every slot in `src/brand/copy.ts` that still holds template text, with the question it answers (why this typeface, the corner character, the logo's clear space). Read only that file and the matching Figma Guidelines frames, not the page files. Answer each slot, then remove its `template(…)` wrapper; a template sentence that already fits stays, unwrapped. Slots that receive values (`({ name, character }) => …`) keep using them.
+1. Run `npm run check:brand-copy -- --list`. It lists every slot in `src/brand/copy.ts` that still holds template text, with the question it answers (why this typeface, the corner character, the logo's clear space). Read only that file, the matching Figma Guidelines frames and the brand and brief files listed in `input/{system-slug}/sources.md` (tone of voice, product facts), not the page files. Answer each slot, then remove its `template(…)` wrapper; a template sentence that already fits stays, unwrapped. Slots that receive values (`({ name, character }) => …`) keep using them.
 2. Set `brandCopy: 'written'` in `src/ds.config.ts`. From then on `npm run build` fails on any slot still marked or left empty.
 3. Read each Figma foundation page's Guidelines frame. Where it adds brand-specific guidance the page doesn't have, add it to the page's Guidelines tab in the same topic order.
 4. Keep every computed value computed: never replace a `${…}` value with a typed number.
@@ -285,7 +285,7 @@ Rules:
 
 ## 7.1 App products
 
-When the product includes App, the component pages preview every component in React Native and show its code in React Native, Swift and Kotlin (`APP.md`). The pages and tabs stay the same. Nothing native is provided or built: the React Native source exists only to render the previews.
+When the product includes App, the component pages preview every component in React Native and show its code in React Native, Swift and Kotlin (`workflow/APP.md`). The pages and tabs stay the same. Nothing native is provided or built: the React Native source exists only to render the previews.
 
 **Product mode.** `product` in `ds.config.ts` (or `VITE_DS_PRODUCT` for a one-off build):
 
@@ -306,7 +306,7 @@ Foundation, guidance and token pages are the same for every product, except the 
 
 Nothing native is installed or built.
 
-**In a story.** The `app` block of a `ComponentDoc` holds the app version of the page (`APP.md` §7):
+**In a story.** The `app` block of a `ComponentDoc` holds the app version of the page (`workflow/APP.md` §7):
 
 - `hero`, `examples` and `matrices`, rendered with the React Native component;
 - `anatomy`, with each part tagged by `anatomy('part')`;
@@ -327,7 +327,7 @@ Rules:
 - **A token is wrong (contrast, value): fix it in the Figma variable, then export.** Never patch `figma-variables.json` or the generated files — the next export would undo it silently.
 - Changed component properties: change the component and its doc module in the same task.
 - A change the web needs that Figma doesn't show yet (an accessibility fix that changes a layout, like a side-by-side stepper): update the page spec and the Figma component in the same task, and add a changelog item.
-- New component: `EXTEND.md` builds the Figma page, then W4 for that page.
+- New component: `workflow/EXTEND.md` builds the Figma page, then W4 for that page.
 - A difference between code and Figma is a bug in code, unless the user decides otherwise.
 
 # 9. QA

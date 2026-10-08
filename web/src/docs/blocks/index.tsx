@@ -265,7 +265,7 @@ export function Swatch({ name, mode = 'Light', size = 20 }: { name: string; mode
 }
 
 /**
- * App token names (APP.md §5): a Figma name as it appears in React Native, Swift and Kotlin. Members are
+ * App token names (workflow/APP.md §5): a Figma name as it appears in React Native, Swift and Kotlin. Members are
  * camelCase without the domain (`color/text/primary` → `textPrimary`); a member that would start with a
  * digit keeps its domain (`space/2xl` → `space2xl`). Same rules as app/scripts/build-rn-tokens.mjs.
  * Null for a name that has no app member.
@@ -597,7 +597,7 @@ export function NoAppVersion() {
   return (
     <div role="note" className="flex flex-col gap-xs rounded-surface border border-dashed border-border-default p-2xl">
       <h2 className="type-body-md-semibold text-text-primary">No app version yet</h2>
-      <P>This component has no app preview or app code yet. They’re added in page order (APP.md A3).</P>
+      <P>This component has no app preview or app code yet. They’re added in page order.</P>
     </div>
   );
 }

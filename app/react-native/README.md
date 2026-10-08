@@ -1,6 +1,6 @@
 # React Native preview source
 
-The React Native components the docs site previews for App products, rendered with react-native-web (`APP.md`, `WEB.md` §7.1). They exist only for the previews: this folder is never built into an app, published as a package or run on a device.
+The React Native components the docs site previews for App products, rendered with react-native-web (`workflow/APP.md`, `workflow/WEB.md` §7.1). They exist only for the previews: this folder is never built into an app, published as a package or run on a device.
 
 A build copies this folder to `output/{system-slug}/web/react-native/`, inside the docs project, and fills it from its own Figma file. The site imports it through its `@app` alias. Nothing here belongs to a brand: the tokens are placeholders.
 
@@ -20,12 +20,12 @@ react-native/
 
 ## How a build fills it
 
-| Step (APP.md §4) | What happens here |
+| Step (workflow/APP.md §4) | What happens here |
 | --- | --- |
 | A1 · Copy | Copy this folder to `output/{system-slug}/web/react-native/`. |
 | A2 · Tokens | `node ../../../app/scripts/build-rn-tokens.mjs --in tokens/figma-variables.json --out react-native/tokens`, from `web/`. |
 | A3 · Components | Page by page, following `components/COMPONENTS.md` and the Button reference: props are the Figma properties, values come from tokens only. Each page's story gets its `app` block, with the React Native, Swift and Kotlin code for every example. |
-| A4 · QA | The docs site's `npm run qa` in App preview (`APP.md` §9). |
+| A4 · QA | The docs site's `npm run qa` in App preview (`workflow/APP.md` §9). |
 
 ## Reading the theme
 

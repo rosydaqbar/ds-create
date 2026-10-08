@@ -1,7 +1,7 @@
 // ds-create Figma doc builder: shared code that draws documentation frames through `use_figma`.
-// It implements DOCFRAMES.md (how doc frames look), templates/structure.md (page → frame → block → items)
+// It implements workflow/DOCFRAMES.md (how doc frames look), templates/structure.md (page → frame → block → items)
 // and the frame lists of SYSTEM.md Part A §A3. Those files stay the spec: each rule below cites its section,
-// and agents read DOCFRAMES.md only when they change this file. Brand-agnostic: every color, text style and
+// and agents read workflow/DOCFRAMES.md only when they change this file. Brand-agnostic: every color, text style and
 // space comes from the file's own variables and styles, found by name (SYSTEM.md Part C §3).
 //
 // TWO FUNCTIONS, TWO KEYS. `docbuilder` (core: tokens, Doc kit, frames, blocks, tables, Guidelines, .Main,
@@ -60,7 +60,7 @@ async function docbuilder(figma, OPTS) {
   const ROOT = figma.root;
   const AF = Object.getPrototypeOf(async function () {}).constructor;
 
-  // ---- Variables by name, with fallbacks (DOCFRAMES.md §1: doc roles alias the brand; SYSTEM.md Part C §3).
+  // ---- Variables by name, with fallbacks (workflow/DOCFRAMES.md §1: doc roles alias the brand; SYSTEM.md Part C §3).
   const vars = await figma.variables.getLocalVariablesAsync();
   const cols = await figma.variables.getLocalVariableCollectionsAsync();
   const vByName = new Map(vars.map(v => [v.name, v])); const vById = new Map(vars.map(v => [v.id, v]));
@@ -74,7 +74,7 @@ async function docbuilder(figma, OPTS) {
     'doc/text/accent': ['color/text/brand'], 'doc/radius/surface': ['radius/surface'], 'doc/radius/badge': ['radius/indicator', 'radius/full'],
     'doc/space/canvas': ['space/11xl'], 'doc/space/frame': ['space/7xl'], 'doc/space/header': ['space/5xl'],
     'doc/space/block': ['space/4xl'], 'doc/space/group': ['space/3xl'], 'doc/space/row': ['space/xl'], 'doc/space/inline': ['space/md'],
-    // Not in DOCFRAMES.md §1: chip/list gaps, table cell padding and stroke width. Brand steps first.
+    // Not in workflow/DOCFRAMES.md §1: chip/list gaps, table cell padding and stroke width. Brand steps first.
     'doc/space/tight': ['space/xs', 'space/2xs'], 'doc/space/compact': ['doc/space/inline', 'space/md'],
     'doc/border/width': ['border/width/default', 'border/width/subtle'],
   };
@@ -100,7 +100,7 @@ async function docbuilder(figma, OPTS) {
   const num = role => { const x = valueOf(V(role)); return typeof x === 'number' ? x : DEF[role]; };
   const hex2rgb = h => ({ r: parseInt(h.slice(1, 3), 16) / 255, g: parseInt(h.slice(3, 5), 16) / 255, b: parseInt(h.slice(5, 7), 16) / 255 });
   const rgb2hex = c => '#' + ['r', 'g', 'b'].map(k => Math.round(c[k] * 255).toString(16).padStart(2, '0')).join('').toUpperCase();
-  // A role name or a local Variable → a paint bound to it (DOCFRAMES.md §5.1: specimens bound to their variable).
+  // A role name or a local Variable → a paint bound to it (workflow/DOCFRAMES.md §5.1: specimens bound to their variable).
   const paint = x => { const v = typeof x === 'string' ? V(x) : x; if (v) return figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }, 'color', v); return { type: 'SOLID', color: hex2rgb(DEF[x] || '#808080') }; };
   const fill = (n, x) => { n.fills = [paint(x)]; };
   // Bound paints drop opacity on assignment: assign, clone, set opacity, reassign.
@@ -150,7 +150,7 @@ async function docbuilder(figma, OPTS) {
   };
   const loadFontsIn = async root => { for (const t of root.findAllWithCriteria({ types: ['TEXT'] })) { if (t.fontName !== figma.mixed) await loadFont(t.fontName); else for (const s of t.getStyledTextSegments(['fontName'])) await loadFont(s.fontName); } };
 
-  // ---- Doc kit by name (DOCFRAMES.md §16; templates/structure.md §7). Index cached in 'dockit'.
+  // ---- Doc kit by name (workflow/DOCFRAMES.md §16; templates/structure.md §7). Index cached in 'dockit'.
   const KIT = ['Doc/Header', 'Doc/Footer', 'Doc/Family header', 'Doc/Block note', 'Doc/Row note', 'Doc/Badge', 'Doc/Token badge', 'Doc/Tree connector', 'Doc/Alias chip', 'Doc/Color swatch', 'Doc/Type row', 'Doc/Measure', 'Doc/Callout', 'Doc/Spec label', 'Doc/Do-dont', 'Doc/Axis label'];
   let idx = OPTS.kit || null;
   if (!idx) { try { idx = JSON.parse(ROOT.getSharedPluginData('dscreate', 'dockit') || 'null'); } catch (e) { idx = null; } }
@@ -186,7 +186,7 @@ async function docbuilder(figma, OPTS) {
   const spec = v => kit('Doc/Spec label', { Value: String(v) });
   const measure = (t, v) => kit('Doc/Measure', { Token: t, Value: String(v) });
   const axis = (p, v) => kit('Doc/Axis label', { Property: p, Value: v });
-  // Alias chip (DOCFRAMES.md §6.5): swatch bound to a local variable; a raw or library color is shown raw.
+  // Alias chip (workflow/DOCFRAMES.md §6.5): swatch bound to a local variable; a raw or library color is shown raw.
   const chip = async (name, v, rgb) => { const a = await kit('Doc/Alias chip', { Name: String(name || '—') }); const sw = a.type === 'INSTANCE' ? a.findOne(n => /swatch/i.test(n.name)) : null; if (sw) { if (v) sw.fills = [paint(v)]; else if (rgb) sw.fills = [{ type: 'SOLID', color: rgb }]; else sw.visible = false; } return a; };
   const blockNote = async (parent, title, desc, b) => { const n = await kit('Doc/Block note', { Title: title, Description: desc || '', 'Show description': !!desc, 'Show badge': !!b }); parent.appendChild(n); if (b && n.type === 'INSTANCE') { const bi = n.findOne(x => x.type === 'INSTANCE' && /badge/i.test(x.name)); if (bi) await setP(bi, { Label: b }); } return n; };
   const familyHeader = async (parent, eyebrow, title, desc) => { const f = await kit('Doc/Family header', { Eyebrow: eyebrow, Title: title, Description: desc }); parent.appendChild(f); fillW(f); return f; };
@@ -209,14 +209,14 @@ async function docbuilder(figma, OPTS) {
   // ---- Page, frame, block (templates/structure.md §1–§6; SYSTEM.md Part A §A3).
   const LEVEL = { 1: 'Foundations', 2: 'Parts', 3: 'Components', 4: 'Sections', 5: 'Layouts', 6: 'Screens', 9: 'Internal' };
   const pid = page => page.name.split(' ')[0];
-  const crumb = page => (LEVEL[pid(page).split('.')[0]] || 'Guidance') + ' › ' + page.name; // DOCFRAMES.md §2 header row
+  const crumb = page => (LEVEL[pid(page).split('.')[0]] || 'Guidance') + ' › ' + page.name; // workflow/DOCFRAMES.md §2 header row
   const titleOf = page => page.name.replace(/^[\d.]+ /, '');
   const owned = (page, n) => n.name === '.Main' || n.name.startsWith(page.name + ' · ');
   // Move every component or set out of a frame before it is removed: a doc rebuild never deletes a component.
   const rescue = (node, page) => { const cs = node.findAll(n => n.type === 'COMPONENT_SET' || (n.type === 'COMPONENT' && n.parent.type !== 'COMPONENT_SET')); for (const c of cs) { const ab = c.absoluteTransform; page.appendChild(c); c.x = ab[0][2]; c.y = ab[1][2]; } return cs.length; };
   const clearFrame = (page, name) => { let n = 0; for (const old of page.children.filter(x => x.type === 'FRAME' && x.name === name)) { n += rescue(old, page); old.remove(); } return n; };
   const rightEdge = page => page.children.reduce((m, n) => Math.max(m, n.x + n.width), 0);
-  // Documented frame (templates/structure.md §2): Doc/Header, Body, Doc/Footer; DOCFRAMES.md §1 frame families.
+  // Documented frame (templates/structure.md §2): Doc/Header, Body, Doc/Footer; workflow/DOCFRAMES.md §1 frame families.
   const newFrame = async (page, frameName, o) => {
     o = o || {}; const FN = page.name + ' · ' + frameName; clearFrame(page, FN);
     const fr = AL('VERTICAL', FN); fr.resize(o.width || num('doc/measure/frame'), 100); fr.counterAxisSizingMode = 'FIXED'; fr.primaryAxisSizingMode = 'AUTO'; fr.clipsContent = false; fill(fr, 'doc/surface/base');
@@ -226,8 +226,8 @@ async function docbuilder(figma, OPTS) {
     return { fr, body };
   };
   // A block without items keeps only its note: drop empty Items frames so they leave no gap (templates/structure.md §3).
-  const finish = async fr => { for (const it of fr.findAll(n => n.type === 'FRAME' && n.name === 'Items' && n.children.length === 0)) it.remove(); const f = await kit('Doc/Footer', {}); fr.appendChild(f); fillW(f); return fr; }; // DOCFRAMES.md §8
-  // Grow a frame to its widest content, never narrower than the frame measure (DOCFRAMES.md §1 frame families).
+  const finish = async fr => { for (const it of fr.findAll(n => n.type === 'FRAME' && n.name === 'Items' && n.children.length === 0)) it.remove(); const f = await kit('Doc/Footer', {}); fr.appendChild(f); fillW(f); return fr; }; // workflow/DOCFRAMES.md §8
+  // Grow a frame to its widest content, never narrower than the frame measure (workflow/DOCFRAMES.md §1 frame families).
   const growTo = (fr, w) => { fr.resize(Math.max(num('doc/measure/frame'), Math.ceil(w) + 2 * num('doc/space/frame')), fr.height); fr.primaryAxisSizingMode = 'AUTO'; };
   const divider = parent => { const r = figma.createRectangle(); r.name = 'Divider'; r.resize(100, 1); fill(r, 'doc/border/subtle'); parent.appendChild(r); fillW(r); return r; };
   // Block (templates/structure.md §2–§3): 'Block · {title}' → Doc/Block note → Items; one Divider between blocks.
@@ -239,12 +239,12 @@ async function docbuilder(figma, OPTS) {
     if (o.wrap) { items.layoutWrap = 'WRAP'; bindN(items, 'counterAxisSpacing', o.gap || 'doc/space/group'); }
     return items;
   };
-  // Stage: the surface real instances sit on (DOCFRAMES.md §1 doc/surface/stage); card: bordered specimen tile.
+  // Stage: the surface real instances sit on (workflow/DOCFRAMES.md §1 doc/surface/stage); card: bordered specimen tile.
   const stage = (name, dir, gap) => { const s = AL(dir || 'HORIZONTAL', name, gap || 'doc/space/row'); fill(s, 'doc/surface/stage'); radius(s, 'doc/radius/surface'); pad(s, 'doc/space/group'); s.counterAxisAlignItems = dir === 'VERTICAL' ? 'MIN' : 'CENTER'; return s; };
   const card = (name, gap) => { const c = AL('VERTICAL', name, gap || 'doc/space/inline'); fill(c, 'doc/surface/specimen'); radius(c, 'doc/radius/surface'); pad(c, 'doc/space/row'); stroke(c); return c; };
   const vstage = (parent, name, dir) => { const s = stage(name || 'Example', dir, 'doc/space/group'); parent.appendChild(s); fillW(s); if (!dir || dir === 'HORIZONTAL') { s.layoutWrap = 'WRAP'; bindN(s, 'counterAxisSpacing', 'doc/space/group'); } return s; };
 
-  // ---- Table (DOCFRAMES.md §6.2 rows of fixed-width cells, §6.3 rhythm, §6.4 token badges, §6.5 chips).
+  // ---- Table (workflow/DOCFRAMES.md §6.2 rows of fixed-width cells, §6.3 rhythm, §6.4 token badges, §6.5 chips).
   // cols: [{ label, w: number | 'fill' }]; a cell is a node, { token }, { chips: [[name, Variable|null, rgb?]] } or text.
   const CODEISH = /^[a-z0-9-]+\/|^Show |=|#[0-9A-F]{6}/;
   const table = async (parent, colsDef, rows, name) => {
@@ -271,7 +271,7 @@ async function docbuilder(figma, OPTS) {
     return rows.length ? table(parent, PROPCOLS, rows, 'Property table') : null;
   };
 
-  // ---- Guidelines: reading-oriented frame (DOCFRAMES.md §7, §15 visual right after its explanation).
+  // ---- Guidelines: reading-oriented frame (workflow/DOCFRAMES.md §7, §15 visual right after its explanation).
   const guideFrame = async (page, title, o) => {
     o = o || {}; const { fr, body } = await newFrame(page, 'Guidelines', { title: title || titleOf(page) + ' guidelines', desc: o.desc });
     const col = AL('VERTICAL', 'Rich text', 'doc/space/block'); body.appendChild(col);
@@ -281,7 +281,7 @@ async function docbuilder(figma, OPTS) {
   const topic = async (col, title, paras) => { if (col.children.length) divider(col); const t = AL('VERTICAL', 'Topic · ' + title, 'doc/space/row'); col.appendChild(t); fillW(t); await T(t, title, 'heading/lg', 'doc/text/primary', 'Title'); for (const p of paras || []) await T(t, p, 'body/md', 'doc/text/secondary', 'Paragraph', 'fill'); return t; };
   const caption = (t, s) => T(t, s, 'body/sm', 'doc/text/tertiary', 'Caption', 'fill');
   const bullets = async (t, items, numbered) => { const l = AL('VERTICAL', 'List', 'doc/space/tight'); t.appendChild(l); fillW(l); for (let i = 0; i < items.length; i++) await T(l, (numbered ? (i + 1) + '.  ' : '•  ') + items[i], 'body/md', 'doc/text/secondary', 'Item', 'fill'); return l; };
-  // Do / don't pair (DOCFRAMES.md §15 Comparison): two stages built from real instances, Doc/Do-dont under each.
+  // Do / don't pair (workflow/DOCFRAMES.md §15 Comparison): two stages built from real instances, Doc/Do-dont under each.
   const pairDD = async (parent, doBuild, doWhy, dontBuild, dontWhy) => {
     const r = AL('HORIZONTAL', 'Do and don’t', 'doc/space/group'); parent.appendChild(r); fillW(r); r.counterAxisAlignItems = 'MIN';
     for (const [kind, build, why, nm] of [['do', doBuild, doWhy, 'Do'], ['dont', dontBuild, dontWhy, 'Don’t']]) { const c = AL('VERTICAL', nm, 'doc/space/inline'); r.appendChild(c); fillW(c); const s = stage(kind === 'do' ? 'Example' : 'Don’t example', 'HORIZONTAL', 'doc/space/inline'); c.appendChild(s); fillW(s); await build(s); await dodont(c, kind, why); }
@@ -312,7 +312,7 @@ async function docbuilder(figma, OPTS) {
   };
   const autoName = root => { let n = 0; for (const r of root.type === 'COMPONENT_SET' ? root.children : [root]) { const q = [...(r.children || [])]; while (q.length) { const c = q.shift(); const nn = roleFor(c, r, c.type === 'INSTANCE' ? topName(mainOf(c)) : null); if (nn && nn !== c.name) { c.name = nn; n++; } if ('children' in c && c.type !== 'INSTANCE') q.push(...c.children); } } return n; };
 
-  // ---- .Main (DOCFRAMES.md §9 .Main frame, §12.2 private header). parts: [[id, newName|null, purpose]].
+  // ---- .Main (workflow/DOCFRAMES.md §9 .Main frame, §12.2 private header). parts: [[id, newName|null, purpose]].
   const mainFrame = async (page, parts) => {
     clearFrame(page, '.Main');
     const m = AL('VERTICAL', '.Main', 'doc/space/block'); page.appendChild(m); m.resize(num('doc/measure/reading'), 100); m.counterAxisSizingMode = 'AUTO'; m.primaryAxisSizingMode = 'AUTO'; m.minWidth = num('doc/measure/reading'); fill(m, 'doc/surface/base'); m.clipsContent = false;
@@ -322,7 +322,7 @@ async function docbuilder(figma, OPTS) {
     await finish(m); return m;
   };
 
-  // ---- Arrange and audit (templates/structure.md §1; SYSTEM.md Part A §A3 order; DOCFRAMES.md §14).
+  // ---- Arrange and audit (templates/structure.md §1; SYSTEM.md Part A §A3 order; workflow/DOCFRAMES.md §14).
   const ORDER = { component: ['Overview', 'Component', 'Anatomy', 'Guidelines'], layout: ['Overview', 'Layout', 'Anatomy', 'Guidelines'], foundation: ['Overview', 'Tokens', 'Guidelines'] };
   const typeOf = page => { const l = pid(page).split('.')[0]; return /^[234]$/.test(l) ? 'component' : l === '5' ? 'layout' : l === '1' ? 'foundation' : 'other'; };
   const finishPage = async (page, o) => {
@@ -353,7 +353,7 @@ async function docpages(figma, D) {
     pid, crumb, titleOf, newFrame, block, finish, growTo, stage, card, table, propTable, defsOf, varName, vById, tsName, esName, rgb2hex,
     mainOf, topName, autoName, mainFrame, guideTopics, finishPage } = D;
 
-  // ---- Matrix with axis labels (DOCFRAMES.md §9 Component frame, §12.3). Axis tiers come from run lengths:
+  // ---- Matrix with axis labels (workflow/DOCFRAMES.md §9 Component frame, §12.3). Axis tiers come from run lengths:
   // a property constant within each column (row) line becomes a label tier; tiers whose value changes least
   // often sit outermost. When the innermost tier changes every line it uses Doc/Spec label, with a key.
   const axisTiers = (vs, key, props) => {
@@ -382,7 +382,7 @@ async function docpages(figma, D) {
     return { m, colProps: cols.cand, rowProps: rows.cand };
   };
 
-  // ---- Component frame (SYSTEM.md Part A §A3; DOCFRAMES.md §9, §12.1 family header, §12.3 full matrix).
+  // ---- Component frame (SYSTEM.md Part A §A3; workflow/DOCFRAMES.md §9, §12.1 family header, §12.3 full matrix).
   // sets: [{ id, title, desc }]; extra: async (body) => more blocks (content options, color modes…).
   const compFrame = async (page, sets, o) => {
     o = o || {}; const { fr, body } = await newFrame(page, o.frameName || 'Component', { title: o.title, desc: o.desc }); let maxW = 0;
@@ -408,7 +408,7 @@ async function docpages(figma, D) {
     await finish(fr); return fr;
   };
 
-  // ---- Anatomy (DOCFRAMES.md §12.4, §15 Anatomy diagram: labels, connector lines, layer names, roles).
+  // ---- Anatomy (workflow/DOCFRAMES.md §12.4, §15 Anatomy diagram: labels, connector lines, layer names, roles).
   const describe = n => { const p = []; if ('layoutMode' in n && n.layoutMode !== 'NONE') p.push((n.layoutMode === 'HORIZONTAL' ? 'horizontal' : 'vertical') + ' auto layout'); if (n.parent && 'layoutMode' in n.parent && n.parent.layoutMode !== 'NONE' && 'layoutSizingHorizontal' in n) p.push('W ' + n.layoutSizingHorizontal.toLowerCase() + ' · H ' + n.layoutSizingVertical.toLowerCase()); if (n.type === 'TEXT') p.push(typeof n.textStyleId === 'string' && tsName.get(n.textStyleId) || 'no text style'); if (n.type === 'INSTANCE') p.push('instance of ' + topName(mainOf(n))); for (const [k, v] of Object.entries(n.componentPropertyReferences || {})) p.push(k + ' ← ' + v.split('#')[0]); return p.join(' · '); };
   const treeText = (n, d, pre) => { pre = pre || ''; let s = ''; const kids = 'children' in n && n.type !== 'INSTANCE' ? n.children : []; kids.forEach((c, i) => { const last = i === kids.length - 1; s += pre + (last ? '└─ ' : '├─ ') + c.name + '   ' + describe(c) + '\n'; if (d > 1) s += treeText(c, d - 1, pre + (last ? '   ' : '│  ')); }); return s; };
   const anatomyDiagram = async (parent, comp, scale, depth) => {
@@ -561,7 +561,7 @@ async function docpages(figma, D) {
 }
 
 // =====================================================================================================
-// PART 3 · docfoundations: foundation and guidance specimens (DOCFRAMES.md §5 palette rows, §6 variable
+// PART 3 · docfoundations: foundation and guidance specimens (workflow/DOCFRAMES.md §5 palette rows, §6 variable
 // tables, foundations/00-foundations.md · Overview / · Tokens). Cache it like the other parts:
 //   figma.root.setSharedPluginData('dscreate', 'docfoundations', docfoundations.toString());
 // Load: const F = await (new AF('figma', 'D', 'return await (' + L('docfoundations') + ')(figma, D);'))(figma, D);
@@ -574,7 +574,7 @@ async function docfoundations(figma, D) {
   const lum = c => { const f = x => x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
   const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return Math.round((x + 0.05) / (y + 0.05) * 10) / 10; };
   const WHITE = { r: 1, g: 1, b: 1 }, BLACK = { r: 0, g: 0, b: 0 };
-  // Palette row (DOCFRAMES.md §5): Doc/Row note at doc/measure/row-note, then Doc/Color swatch per step, bound (§5.1).
+  // Palette row (workflow/DOCFRAMES.md §5): Doc/Row note at doc/measure/row-note, then Doc/Color swatch per step, bound (§5.1).
   const paletteRow = async (parent, title, desc, vars, badgeLabel) => {
     const row = AL('HORIZONTAL', 'Palette row · ' + title, 'doc/space/group'); parent.appendChild(row); fillW(row); row.counterAxisAlignItems = 'MIN';
     const note = await kit('Doc/Row note', { Heading: title, Body: desc || '', 'Show badge': !!badgeLabel }); row.appendChild(note);
@@ -588,7 +588,7 @@ async function docfoundations(figma, D) {
     }
     return row;
   };
-  // Variable table (DOCFRAMES.md §6): Name (token badge; children with Doc/Tree connector) │ one column per mode │ Usage.
+  // Variable table (workflow/DOCFRAMES.md §6): Name (token badge; children with Doc/Tree connector) │ one column per mode │ Usage.
   const varTable = async (parent, vars, o) => {
     o = o || {}; const modes = o.modes || modesOf(vars[0]); const nameW = o.nameW || 360, modeW = o.modeW || 300;
     const t = AL('VERTICAL', o.name || 'Variable table'); parent.appendChild(t); fillW(t); stroke(t); radius(t, 'doc/radius/surface'); t.clipsContent = true;
@@ -640,7 +640,7 @@ async function docfoundations(figma, D) {
     }
     return list;
   };
-  // Effect tiles: a card per effect style, the style applied (DOCFRAMES.md §5.1 visual).
+  // Effect tiles: a card per effect style, the style applied (workflow/DOCFRAMES.md §5.1 visual).
   const effectTiles = async (parent, styles) => {
     const list = AL('HORIZONTAL', 'Effects', 'doc/space/block'); parent.appendChild(list); fillW(list); list.layoutWrap = 'WRAP'; bindN(list, 'counterAxisSpacing', 'doc/space/block'); pad(list, 'doc/space/group');
     for (const s of styles) { const c = AL('VERTICAL', 'Effect · ' + s.name, 'doc/space/inline'); list.appendChild(c); const box = figma.createFrame(); box.name = 'Surface'; box.resize(200, 120); fill(box, 'doc/surface/specimen'); radius(box, 'doc/radius/surface'); await box.setEffectStyleIdAsync(s.id); c.appendChild(box); c.appendChild(await tokenBadge(s.name)); if (s.description) await T(c, s.description, 'body/sm', 'doc/text/secondary', 'Usage', 200); }

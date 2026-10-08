@@ -1,6 +1,6 @@
 # Roadmap
 
-What ds-create plans to add or change next. Items move into the specs (and, when a system has a web implementation, into `web/` and `WEB.md`) only when they are written to the same depth as existing pages. Nothing here is built by Initiate or Extend until its spec exists.
+What ds-create plans to add or change next. Items move into the specs (and, when a system has a web implementation, into `web/` and `workflow/WEB.md`) only when they are written to the same depth as existing pages. Nothing here is built by Initiate or Extend until its spec exists.
 
 # 1. Coverage
 
@@ -20,7 +20,7 @@ What ds-create plans to add or change next. Items move into the specs (and, when
 | Components | Tabs, Breadcrumbs, Pagination, Accordion, Popover, Banner / Inline message, Toast |
 | Sections | Dialog / Modal, Data table, Side navigation, Date picker, Empty state |
 
-Each needs its page spec under the existing level, following `EXTEND.md` §4.
+Each needs its page spec under the existing level, following `workflow/EXTEND.md` §4.
 
 # 2. Planned renames (next major version)
 

@@ -109,7 +109,7 @@ Items are the things a block shows, exactly as the spec describes them: for exam
 
 ## 7. Structure components
 
-Part of the template; they live on `9.1 Doc kit` and bind only to `doc/*` variables and the brand's text styles (`DOCFRAMES.md` §1).
+Part of the template; they live on `9.1 Doc kit` and bind only to `doc/*` variables and the brand's text styles (`workflow/DOCFRAMES.md` §1).
 
 ```text
 Doc/Header           COMPONENT  V  fill  hug   pad 64 64 0 64

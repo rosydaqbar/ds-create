@@ -96,6 +96,40 @@ const pageTo = (id: string) => {
   const d = componentDocs.find((c) => c.id === id);
   return d ? `/${d.level}/${slugOf(d.id, d.name)}` : '/';
 };
+
+/* Modes topic (guidance/01-getting-started.md, Modes): every collection with more than one mode, in collection order. */
+const MODE_USE: Record<string, string> = {
+  Color: 'every color role has a value in each, so no component needs a separate version per mode',
+  Motion: 'Reduced swaps movement for instant changes or short fades, for people who turn on reduced motion',
+  Space: 'each mode changes gaps and padding together',
+  Size: 'each mode changes control and target sizes together',
+  Border: 'each mode changes every outline width together',
+};
+const MODE_PAGE: Record<string, string> = { Color: '1.1', Typography: '1.2', Space: '1.3', Size: '1.3', Shape: '1.4', Border: '1.4', Motion: '1.6' };
+const modeCollections = tokens.collections
+  .filter((c) => c.name !== 'Documentation')
+  .map((c) =>
+    c.name === 'Color'
+      ? { name: c.name, modes: colorModes as string[], unsupported: unsupportedModes as string[] }
+      : { name: c.name, modes: c.modes, unsupported: c.unsupportedModes ?? [] },
+  )
+  .filter((c) => c.modes.length > 1 || c.unsupported.length > 0);
+const modeSentences = modeCollections.flatMap((c) => [
+  ...(c.modes.length > 1 ? [`${c.name} has ${joinList(c.modes)}${MODE_USE[c.name] ? `: ${MODE_USE[c.name]}` : ''}.`] : []),
+  ...c.unsupported.map((m) => `The ${c.name} collection has a ${m} column, but ${m} isn’t supported yet: its values are placeholders, so keep frames on ${c.modes[0]}.`),
+]);
+const modeTables = modeCollections
+  .filter((c) => c.name !== 'Color' && c.modes.length > 1)
+  .map((c) => {
+    const vars = tokens.variables.filter((t) => t.collection === c.name);
+    const durations = vars.filter((t) => t.name.includes('/duration/'));
+    return { ...c, rows: (durations.length ? durations : vars).slice(0, 4) };
+  });
+const modePages = [...new Set(modeCollections.map((c) => MODE_PAGE[c.name]).filter((id): id is string => !!id && pageExists(id)))];
+const pageLabel = (id: string) => {
+  const p = staticPages.find((s) => s.id === id);
+  return p ? `${p.id} ${p.name}` : id;
+};
 const docsOf = (level: string) => componentDocs.filter((d) => d.level === level);
 /** The ids a level spans in this build ("2.1 · 2.11"), or the fallback when it has one page or none. */
 const idRange = (items: { id: string }[], fallback: string) => (items.length > 1 ? `${items[0].id} · ${items.at(-1)!.id}` : (items[0]?.id ?? fallback));
@@ -228,6 +262,22 @@ function Chain({ items }: { items: string[] }) {
           <span className="type-code-sm-regular rounded-indicator border border-border-subtle bg-surface-raised px-md py-xxs text-text-primary">{it}</span>
         </Fragment>
       ))}
+    </div>
+  );
+}
+/** A recreated Figma "Appearance" panel: the mode each collection uses on a frame. */
+function AppearancePanel({ rows }: { rows: [string, string][] }) {
+  return (
+    <div className="flex w-full max-w-[17rem] flex-col rounded-surface border border-border-subtle bg-surface-raised shadow-raised">
+      <span className="type-body-sm-semibold border-b border-border-subtle px-lg py-md text-text-primary">Frame · Appearance</span>
+      <dl className="flex flex-col gap-sm p-lg">
+        {rows.map(([k, val]) => (
+          <div key={k} className="flex items-center justify-between gap-md">
+            <dt className="type-body-xs-medium text-text-tertiary">{k}</dt>
+            <dd className="type-body-xs-medium rounded-xs bg-surface-sunken px-sm py-xxs text-text-primary">{val}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
@@ -673,39 +723,6 @@ function ForDesigners() {
         </Caption>
       </Topic>
 
-      <Topic title="Every page has the same frames">
-        <P>Every Figma page lays out its frames from left to right, always in the same order. Most frames match a tab on this site, so you can move between the two without hunting.</P>
-        <TableRegion label="Figma frames and site tabs">
-          <table className="w-full border-collapse text-left">
-            <thead className="bg-surface-sunken">
-              <tr>
-                <Th>Figma frame</Th>
-                <Th>On this site</Th>
-                <Th>What it holds</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['.Main', '—', 'Private building blocks that make up the published component. Edit them to change it, but don’t use them in screens.'],
-                ['Overview', 'Overview tab', 'The component or foundation in real examples.'],
-                ['Component', 'Component tab', 'The published component set with every variant.'],
-                ['Tokens', 'Tokens tables', 'Foundation pages only: every variable with its values.'],
-                ['Anatomy', 'Anatomy tab', 'Parts, properties, sizes, states and tokens.'],
-                ['Guidelines', 'Guidelines tab', 'When and how to use it, dos and don’ts, content and accessibility.'],
-                ['—', 'Code tab', 'Site only: copy-ready code for developers.'],
-              ].map(([f, s, d]) => (
-                <tr key={f + s} className="border-t border-border-subtle">
-                  <Td code>{f}</Td>
-                  <Td className="whitespace-nowrap">{s}</Td>
-                  <Td>{d}</Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </TableRegion>
-        <Caption>Component pages: .Main → Overview → Component → Anatomy → Guidelines. Foundation pages: .Main → Overview → Tokens → Guidelines.</Caption>
-      </Topic>
-
       <Topic title="Components and properties">
         <P>Each component is a single component set. Its properties come from a small, shared vocabulary, named the same way on every component:</P>
         <Bullets
@@ -838,64 +855,68 @@ function ForDesigners() {
         </P>
         <BrandSwapDemo />
         <Caption>
-          One change to <InlineCode>color/fill/brand/solid</InlineCode> updates the button, checkbox, switch and progress bar at once. The preview changes only the resting color,
+          Example: one change to <InlineCode>color/fill/brand/solid</InlineCode> updates the button, checkbox, switch and progress bar at once. The preview changes only the resting color,
           because hover and pressed have their own variables.
         </Caption>
       </Topic>
 
       <Topic title="Modes">
-        <P>
-          {colorModes.length > 1 ? (
-            <>
-              Each variable holds one value per mode. The <strong className="text-text-primary">Color</strong> collection has {joinList(colorModes)}. Set a frame to{' '}
-              {colorModes[1]} and every variable switches to its {colorModes[1].toLowerCase()} value, so you never need a separate “{colorModes[1].toLowerCase()}” version of a
-              component.
-            </>
-          ) : (
-            <>
-              The <strong className="text-text-primary">Color</strong> collection has one supported mode, {colorModes[0]}
-              {unsupportedModes.length ? `: its ${joinList(unsupportedModes)} mode isn’t supported, so frames stay on ${colorModes[0]}` : ''}.
-            </>
-          )}
-        </P>
-        {/* An explicit width: with brand spacing tokens, max-w-md would be the md space step, not 28 rem. */}
-        <div className={colorModes.length > 1 ? 'grid gap-xl md:grid-cols-2' : 'grid max-w-[28rem] gap-xl'}>
-          {colorModes.map((m) => (
-            <ModeFrame key={m} mode={m as 'Light' | 'Dark'}>
-              <InviteCard />
-            </ModeFrame>
-          ))}
-        </div>
-        <P>
-          The <strong className="text-text-primary">Motion</strong> collection has Standard and Reduced. Reduced swaps movement for instant changes or short fades, for people who turn on
-          reduced motion. Set it on a frame the same way to check what they see.
-        </P>
-        <TableRegion label="Motion values in Standard and Reduced">
-          <table className="w-full border-collapse text-left">
-            <thead className="bg-surface-sunken">
-              <tr>
-                <Th>Variable</Th>
-                <Th>Standard</Th>
-                <Th>Reduced</Th>
-                <Th>Used for</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {tokens.variables
-                .filter((t) => t.name.startsWith('motion/duration/'))
-                .map((t) => (
+        <P>A collection can hold several modes: one column of values per mode. Set a mode on a frame and everything inside it switches, without touching a component.</P>
+        <P>{modeSentences.length ? modeSentences.join(' ') : 'Every collection in this system has one mode.'}</P>
+        {modeTables.map((c) => (
+          <TableRegion key={c.name} label={`${c.name} values per mode`}>
+            <table className="w-full border-collapse text-left">
+              <thead className="bg-surface-sunken">
+                <tr>
+                  <Th>Variable</Th>
+                  {c.modes.map((m) => (
+                    <Th key={m}>{m}</Th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {c.rows.map((t) => (
                   <tr key={t.name} className="border-t border-border-subtle">
                     <Td code>{t.name}</Td>
-                    <Td code>{t.modes.Standard?.value}</Td>
-                    <Td code>{t.modes.Reduced?.value}</Td>
-                    <Td>{t.description}</Td>
+                    {c.modes.map((m) => (
+                      <Td key={m} code>
+                        {t.modes[m]?.value}
+                      </Td>
+                    ))}
                   </tr>
                 ))}
-            </tbody>
-          </table>
-        </TableRegion>
+              </tbody>
+            </table>
+          </TableRegion>
+        ))}
+        {modeSentences.length > 0 && (
+          <div className={colorModes.length > 1 ? 'grid gap-xl md:grid-cols-2' : 'flex flex-col items-start gap-xl md:flex-row'}>
+            {colorModes.length === 1 && <AppearancePanel rows={modeCollections.map((c) => [c.name, c.modes[0]] as [string, string])} />}
+            {colorModes.map((m) => (
+              <div key={m} className={colorModes.length > 1 ? 'min-w-0' : 'w-full max-w-[28rem]'}>
+                <ModeFrame mode={m === 'Dark' ? 'Dark' : 'Light'}>
+                  <InviteCard />
+                </ModeFrame>
+              </div>
+            ))}
+          </div>
+        )}
+        {modeSentences.length > 0 && (
+          <Caption>
+            Example: the mode switch sits on the frame, not on the components.
+            {modeTables.length ? ` ${joinList(modeTables.map((c) => c.name))} ${modeTables.length === 1 ? 'switches' : 'switch'} the same way.` : ''}
+          </Caption>
+        )}
         <Caption>
-          See <TextLink to={pageTo('1.6')}>1.6 Motion</TextLink> for more.
+          See{' '}
+          {modePages.map((id, i) => (
+            <Fragment key={id}>
+              {i ? ', ' : ''}
+              <TextLink to={pageTo(id)}>{pageLabel(id)}</TextLink>
+            </Fragment>
+          ))}
+          {modePages.length ? ' and ' : ''}
+          <TextLink to="/guidance/02-tokens">02 Tokens</TextLink>.
         </Caption>
       </Topic>
 

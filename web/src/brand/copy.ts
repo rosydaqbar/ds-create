@@ -4,7 +4,7 @@
  * on those pages is the spec's brand-agnostic guidance, and every value in them is computed from
  * the tokens.
  *
- * WEB.md W5 fills this file from the Figma Guidelines frames, answering the question above each
+ * workflow/WEB.md W5 fills this file from the Figma Guidelines frames, answering the question above each
  * slot. Rules:
  * - Remove the `template(…)` wrapper from a slot once it holds the brand's answer. A slot whose
  *   template text already fits may keep it: remove the wrapper to confirm it.

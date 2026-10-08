@@ -158,7 +158,7 @@ const INDEX: Record<Interaction, number> = { rest: 0, hover: 1, pressed: 2 };
 
 /**
  * Animates between rest, hover and pressed colors with the press-feedback pairing
- * (motion/duration/fast · motion/easing/standard, APP.md §6.3). Reduced motion makes it instant.
+ * (motion/duration/fast · motion/easing/standard, workflow/APP.md §6.3). Reduced motion makes it instant.
  * Returns `color(pick)`: the animated color of one part.
  */
 export function useStateColors<K extends string>(states: Record<Interaction, Record<K, string>>, interaction: Interaction, pinned: boolean) {
@@ -182,7 +182,7 @@ export function useStateColors<K extends string>(states: Record<Interaction, Rec
 
 /**
  * Grows the hit area to the platform touch target (44 pt iOS, 48 dp Android) without changing the
- * visible size (APP.md §6.2).
+ * visible size (workflow/APP.md §6.2).
  */
 export function touchSlop(touchTarget: number, height: number, width?: number): Insets | undefined {
   const y = Math.max(0, (touchTarget - height) / 2);
@@ -191,7 +191,7 @@ export function touchSlop(touchTarget: number, height: number, width?: number): 
 }
 
 /**
- * Keyboard focus ring for hardware keyboards (APP.md §6.2): a border in the focus color, drawn just
+ * Keyboard focus ring for hardware keyboards (workflow/APP.md §6.2): a border in the focus color, drawn just
  * outside the part. Used when the Figma file has no focus variant; the platform rule still applies.
  */
 export function FocusRing({ radius, color }: { radius: number; color?: string }) {

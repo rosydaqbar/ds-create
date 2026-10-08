@@ -1,8 +1,10 @@
 # Questionnaire
 
-The questions asked once, at initiation, before anything is built: platforms, scope, mode, naming, tokens, formats, product type, documentation depth, and the confirmation summary. This was `INITIATOR.md` Part A; its section numbers are unchanged, so `QUESTIONNAIRE.md` §12 is the old Part A §12.
+The questions asked once, at initiation, before anything is built: platforms, scope, mode, naming, tokens, formats, product type, documentation depth, and the confirmation summary. This was `INITIATOR.md` Part A; its section numbers are unchanged, so `workflow/QUESTIONNAIRE.md` §12 is the old Part A §12.
 
 **Load it** at initiation (steps 1–3 of `INITIATOR.md` Part B §6) and whenever the user changes an answer. The build itself follows `INITIATOR.md`.
+
+**Answer from the inputs first** (`input/README.md`). Before the first question, read every file in `input/{system-slug}/`: briefs, brand files, the existing system, references and earlier chat notes. Pre-fill every question an input answers, and note its source. Ask only what the inputs leave open or where they conflict. When the user has added nothing yet, ask them to put their documents in `input/{system-slug}/` (or paste them in chat, which the agent saves under `chat/`) before going on. Each answer the user gives here is also written to `input/{system-slug}/chat/` (`input/README.md` I3).
 
 The questionnaire decides what gets preserved, audited, generated or rebuilt. Structure and naming are fixed by `SYSTEM.md`; the questionnaire decides **scope** and **values**, never page names, frame names or token grammar.
 
@@ -276,13 +278,13 @@ Optional at initiation:
 4.2 Video player       Video player
 ```
 
-A selected Component or Section also builds the Parts it contains. Unselected Components and Sections can be added later through `EXTEND.md`. Layouts and Screens are only added through `EXTEND.md`.
+A selected Component or Section also builds the Parts it contains. Unselected Components and Sections can be added later through `workflow/EXTEND.md`. Layouts and Screens are only added through `workflow/EXTEND.md`.
 
 The complete set and private-part inventory of every page is defined by its Markdown file.
 
 # 8. Component implementation mode
 
-If any Part, Component or Section is selected, explicitly ask (the same choice applies later to Layouts and Screens added through `EXTEND.md`):
+If any Part, Component or Section is selected, explicitly ask (the same choice applies later to Layouts and Screens added through `workflow/EXTEND.md`):
 
 **How do you want to implement the components?**
 
@@ -331,19 +333,19 @@ Never rename silently during Keep, Audit or Improve. Product-specific concepts r
 Every format is an export of the same names (`SYSTEM.md` Part C §5).
 
 **Product type** (single choice; always ask, never infer from the platforms answer in §1):
-- **Web**: the Figma file for a web product, the documentation site, and a Tailwind-ready React library with an installable package (`WEB.md`, template `web/`).
-- **App**: the Figma file adapted for iOS and Android apps (`SYSTEM.md` Part A §A5), and the documentation site with every component previewed in React Native and its code in React Native, Swift and Kotlin (`APP.md`). All three are always shown; there is no framework choice. Nothing native is provided or built.
+- **Web**: the Figma file for a web product, the documentation site, and a Tailwind-ready React library with an installable package (`workflow/WEB.md`, template `web/`).
+- **App**: the Figma file adapted for iOS and Android apps (`SYSTEM.md` Part A §A5), and the documentation site with every component previewed in React Native and its code in React Native, Swift and Kotlin (`workflow/APP.md`). All three are always shown; there is no framework choice. Nothing native is provided or built.
 - **Web and App**: both, from one Figma file with one brand look. The documentation site switches each component page between Web and App, and the React library is built for the web.
 
 Suggest the default from §1 Platforms (web platforms → Web, iOS or Android → App, both → Web and App), but let the user choose. The product type adapts the Figma file (`SYSTEM.md` Part A §A5); the scope of pages and components stays the same.
 
 **Code** (single choice):
 - **Figma and code** (default): everything the product type includes. The documentation site is always on the web, whatever the product type: it is where tokens, foundations and components are browsed.
-- **Figma only for now**: only the Figma file, already adapted to the product type. Code can be added later with `WEB.md` and `APP.md`.
+- **Figma only for now**: only the Figma file, already adapted to the product type. Code can be added later with `workflow/WEB.md` and `workflow/APP.md`.
 
 The project is created in `output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`web/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
 
-Nothing native is installed, created or built: no Xcode, Android SDK, simulators, emulators or app projects (`APP.md`, "Nothing is installed or built").
+Nothing native is installed, created or built: no Xcode, Android SDK, simulators, emulators or app projects (`workflow/APP.md`, "Nothing is installed or built").
 
 # 11. Documentation depth
 
@@ -362,6 +364,8 @@ Never remove the template frames, headers, Design notes, the Usage column of var
 # 12. Confirmation summary
 
 Before generation, present:
+- the inputs read (`input/{system-slug}/sources.md`), and for each answer below, whether it came from an input (with its file) or from the user in this conversation;
+- any open conflict between inputs (`input/README.md` I4), with the resolution the user must choose;
 - product and brand summary;
 - platforms and modes;
 - existing-page mapping and actions;

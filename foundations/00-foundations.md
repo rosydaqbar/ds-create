@@ -105,7 +105,7 @@ Brand tokens: Primitives → Color, Typography (variables and text styles), Spac
 → Parts
 ```
 
-The brand's tokens come first because the documentation is styled with them (`DOCFRAMES.md` §1). The doc kit comes next, before any foundation page, so every page is documented with the same components in the brand's own look.
+The brand's tokens come first because the documentation is styled with them (`workflow/DOCFRAMES.md` §1). The doc kit comes next, before any foundation page, so every page is documented with the same components in the brand's own look.
 
 Each foundation page is its own step. It starts only when the step before it is done in the ledger, and it is done only by the page gate (`INITIATOR.md` Part B §6, *Gates*). No Part page is documented while a foundation step, or `00`–`02`, is still open.
 

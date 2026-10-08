@@ -1,6 +1,6 @@
 # Components
 
-The React Native preview components, one file per published Figma set, in page order (APP.md A3, §6). Button is the complete reference: copy its structure (props = Figma properties, tokens through `useTheme()`, platform states, touch target, accessibility, motion, `anatomy()` tags) for every other page in scope. The platform notes come from APP.md §6.2; each one also goes in the "In apps" notes of the page's story (`app.notes`).
+The React Native preview components, one file per published Figma set, in page order (workflow/APP.md A3, §6). Button is the complete reference: copy its structure (props = Figma properties, tokens through `useTheme()`, platform states, touch target, accessibility, motion, `anatomy()` tags) for every other page in scope. The platform notes come from workflow/APP.md §6.2; each one also goes in the "In apps" notes of the page's story (`app.notes`).
 
 | Page | File | Status | Platform notes |
 | --- | --- | --- | --- |
@@ -34,4 +34,4 @@ The React Native preview components, one file per published Figma set, in page o
 | 4.1 Rich text editor | `sections/RichTextEditor.tsx` | to build | Wrap the platform's own rich text view and keep the Figma toolbar chrome. |
 | 4.2 Video player | `sections/VideoPlayer.tsx` | to build | Wrap the platform media view and keep the Figma controls. System fullscreen and picture-in-picture where allowed. |
 
-For each page you build: add the export to `index.ts`, the `app` block in the page's story (previews plus React Native, Swift and Kotlin code for every example) and its line in the docs site's `src/docs/app/app.d.ts` (`WEB.md` §7.1), then change its status here.
+For each page you build: add the export to `index.ts`, the `app` block in the page's story (previews plus React Native, Swift and Kotlin code for every example) and its line in the docs site's `src/docs/app/app.d.ts` (`workflow/WEB.md` §7.1), then change its status here.
