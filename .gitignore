@@ -70,13 +70,13 @@ input/*
 !input/README.md
 
 # 8. Agent settings
-# Local agent settings and installed skills stay out of git. The ds-create skill lives in skills/ds-create/;
-# .claude/skills/ds-create is only the link Claude Code loads it through, and ships with the repo.
-.claude/*
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/ds-create
+# Local agent settings and installed skills never go into git. The ds-create skill lives in skills/ds-create/;
+# each user links it into .claude/skills/ on their own machine (README, Start here).
+.claude/
 CLAUDE.local.md
 
 # 9. Local session notes
 SESSION.md
+
+# Design hook (impeccable): local settings, never in git.
+.impeccable/

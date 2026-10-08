@@ -15,7 +15,13 @@ ds-create is used through its skill, `skills/ds-create/`: four commands that run
 | `/ds-create qa` | runs the full checks, only when you ask |
 | `/ds-create status` | shows where the build stands and what to run next |
 
-The skill ships with the repo and stays brand-agnostic. Open the repo in Claude Code and the commands are there (`.claude/skills/ds-create` links to `skills/ds-create`).
+The skill ships with the repo in `skills/ds-create/` and stays brand-agnostic. Claude Code finds project skills in `.claude/skills/`, which is never committed, so link it once after cloning:
+
+```bash
+mkdir -p .claude/skills && ln -s ../../skills/ds-create .claude/skills/ds-create
+```
+
+Then open the repo in Claude Code: the `/ds-create` commands are there.
 
 ## Add your context to `input/`
 
@@ -102,7 +108,7 @@ INITIATOR.md     generation logic: loading, ledger, build sequence, gates (alway
 GOTCHAS.md       lessons from real builds as fixed, numbered rules; new agnostic lessons are added after every build (always loaded)
 
 skills/          ds-create/: the ds-create skill, the way in: /ds-create init · build · qa · status (SKILL.md and one reference
-                 file per command). Claude Code loads it through the link .claude/skills/ds-create → skills/ds-create
+                 file per command). Link it into .claude/skills/ once after cloning (Start here); .claude/ is never committed
 
 input/           what the user provides for each system: briefs, brand files, the existing system, references, chat notes (git-ignored except input/README.md)
 workflow/        the specs loaded at the steps that need them
