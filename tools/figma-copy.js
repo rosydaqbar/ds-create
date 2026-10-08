@@ -28,7 +28,7 @@ const figmaCopy = async (figma, MODE, PAGE, COPY) => {
   await page.loadAsync();
 
   // Prose roles by layer name (DOCFRAMES.md, templates/structure.md). Other text is a visual label.
-  const TEXT_ROLE = { Paragraph: '', 'Connecting paragraph': '', Purpose: '', 'What it means': '', 'In this file': '', Caption: 'caption', Note: 'caption', Item: 'item' };
+  const TEXT_ROLE = { Paragraph: '', 'Connecting paragraph': '', Purpose: '', 'What it means': '', 'In this file': '', Meaning: '', Use: '', Caption: 'caption', Note: 'caption', Item: 'item' };
   // Doc kit instances whose text property is prose, and the role it plays.
   const KIT_PROP = { 'Doc/Block note': ['Description', ''], 'Doc/Row note': ['Body', ''], 'Doc/Family header': ['Description', ''], 'Doc/Do-dont': ['Reason', null] };
   const CONTAINER = /^(Topic|Block|Example) · (.+)$/;

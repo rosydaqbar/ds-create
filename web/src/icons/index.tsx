@@ -2,8 +2,9 @@
  * Icon registry — the one place that maps the system's icon names (`Icon/{category}/{name}`
  * on 1.7 Iconography) to an icon library. Components only ever use <Icon name="general/check" />.
  *
- * The default library is Lucide (ISC). To use the library chosen for a brand, change the
- * imports below and keep the names: no component needs to change.
+ * The library is Lucide (ISC). This registry is also the icon set of the Figma file:
+ * tools/icons-lucide.mjs builds Icon/{category}/{name} on 1.7 from it, so add new icons here.
+ * Only an existing file with its own icon library changes the imports; keep the names.
  */
 import type { LucideIcon } from 'lucide-react';
 import {

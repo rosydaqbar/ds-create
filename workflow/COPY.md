@@ -16,6 +16,19 @@ output/{system-slug}/copy/
 - **What a copy file holds:** prose only. Summaries, descriptions, paragraphs, captions, list items, do and don't reasons, accessibility and in-app notes, and anatomy part descriptions.
 - **What it never holds:** values, which stay computed from tokens and components; code, which stays in the stories; or labels inside a visual (a token badge, an axis label, a measurement).
 - **When it is written:** the copy file for a page is written before the page is drawn (`INITIATOR.md` Part B §6) and kept current after every review.
+- **Where the "why" comes from.** Before writing a page's copy, read the `knowledge/` topics its index lists for the page (`knowledge/README.md` §3). They are the reasoning behind the specs. Write that reasoning into the copy as the system's own explanation, in its own words and with its own values. For example, a Button page says why its label sits in a small frame of its own, using the system's numbers. The reader should meet a designer's reasoning, never its source:
+  - no principle ids (`B1`), knowledge file names, or the word "knowledge";
+  - no citing ("according to the principle…", "as the rationale says…");
+  - no sentence copied from `knowledge/`, and none of its example numbers: the system's tokens and values only;
+  - the spec still decides what the page says. Knowledge only explains why, and fills in reasoning the spec leaves out.
+  `tools/copy-guard.mjs` checks this (§7).
+- **Hard rule in fast mode and in YOLO.** No page is drawn until:
+  1. its knowledge topics are read, and listed under the page's `loaded` in the ledger;
+  2. its copy carries their reasoning;
+  3. `node tools/copy-guard.mjs --slug {slug} --page {id}` passes.
+
+  `tools/fast-pack.mjs` refuses `--check`, `--page` and `--call` for a page that fails any of these.
+- **The citing ban holds in fast mode too.** The guard reads the copy files, the fast-mode manifests, the packed payload of each page (every string that reaches Figma) and the site's stories. Knowledge names and ids may appear only in internal records: the ledger's `loaded`, the build notes and reports to the user. They never appear in anything a reader of the docs sees. In YOLO with the standard engine, run the same check before the page's first drawing call. A failure is fixed on the spot, never noted for later, and YOLO never skips it to save time.
 
 # 2. Format
 
@@ -115,3 +128,4 @@ Topics that exist on only one surface, or that say different things, are listed 
 - Every item that appears in Figma has a `figma:` source, and every item that appears on the site has a `web:` source.
 - `tools/figma-copy.js` `diff` reports 0 differences on every page.
 - `npm run copy` reports no unknown section, role or surface.
+- `node tools/copy-guard.mjs --slug {slug}` reports nothing: no copy line or site string cites `knowledge/` or copies it word for word (§1). `tools/fast-pack.mjs --check` runs it too.

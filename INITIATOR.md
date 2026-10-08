@@ -20,10 +20,14 @@ SYSTEM.md
 INITIATOR.md
 GOTCHAS.md
 templates/structure.md
+knowledge/README.md   the reasoning behind the specs (rationale and examples, never rules): its index says which topic relates to which page
 input/{system-slug}/sources.md   once the system has a slug (input/README.md)
+input/{system-slug}/knowledge/system.md   when it exists (input/README.md I7)
 ```
 
-The user's inputs are the ground truth of a build: briefs, brand files, the existing system, references and what the user says in chat, all in `input/{system-slug}/` (`input/README.md`). At initiation, read every file there before the first question. In later sessions, `sources.md` points to the files a step needs. Anything the user says in chat that shapes the system is written to `input/{system-slug}/chat/` in the same turn (`input/README.md` I3).
+The user's inputs are the ground truth of a build: briefs, brand files, the existing system, references and what the user says in chat, all in `input/{system-slug}/` (`input/README.md`). At initiation, read every file there before the first question. In later sessions, `sources.md` points to the files a step needs. Anything the user says in chat that shapes the system is written to `input/{system-slug}/chat/` in the same turn (`input/README.md` I3). A lasting rule the user teaches is also written to `input/{system-slug}/knowledge/`, applied to what is built, and followed from then on (I7).
+
+**The system's knowledge comes before the spec.** Before a page is built, rebuilt or edited, load the system's knowledge file (`input/{system-slug}/knowledge/{id}-{name}.md`). Its rules and frozen values win over the spec for that system. The repo's `knowledge/` is different: it explains the reasoning behind the specs with examples, and never overrides them. Read the topics its index lists for a page before writing the page's copy file: the docs explain the page with that reasoning, in the system's own words and values, and never cite it (`workflow/COPY.md` §1). It also helps with a judgment call the spec leaves open (`knowledge/README.md` §1).
 
 Every page is built with `templates/structure.md`: page → frames → blocks → items. SYSTEM.md Part A gives the frames; the page file gives what they hold.
 
@@ -53,7 +57,7 @@ The exact page → file mapping is in `README.md`.
 
 The full specification is large (several hundred KB). Loading every page file at the start of a long run fills the context, and when it is compacted, page rules get lost. So:
 - load the global set (`README.md`, `SYSTEM.md`, `INITIATOR.md`, `GOTCHAS.md`, `templates/structure.md`, and `input/{system-slug}/sources.md` once the slug exists) once at the start, and again after any context compaction or new session. `workflow/QUESTIONNAIRE.md` and `workflow/DOCFRAMES.md` are not part of it: load them at the steps that need them;
-- load each folder file and page file at the generation step that builds that page (§6), not all at once. A page is built only after its own file and the files of the components it contains are loaded in the current context;
+- load each folder file and page file at the generation step that builds that page (§6), not all at once, together with the page's knowledge file when it exists. A page is built only after its own file and the files of the components it contains are loaded in the current context;
 - after a page passes QA, its file can drop out of context; the ledger keeps what matters.
 
 ## Progress ledger
@@ -235,17 +239,18 @@ Which steps are in scope:
 - **One step at a time.** A step starts only when every step above it in the ledger is `done` or `skip`. Re-read the ledger before every step and start the first open one, never a later one.
 - **One page per step.** Steps 7–15 and 19 each build exactly one page. A shared script may draw headers, tables or footers, but it never builds a page whose file isn't loaded, and never several pages in one step. A page made by a generic builder without its own page file is not done, whatever it looks like.
 - **A page is done** only when:
-  1. its page file, its folder file and the files of the components it contains were loaded in the current context, and the ledger lists them under `loaded`;
+  1. its page file, its folder file, the files of the components it contains and its `knowledge/` topics (`node tools/copy-guard.mjs --slug {slug} --page {id}` lists them) were loaded in the current context, and the ledger lists them under `loaded`. In fast mode and in YOLO, this is checked before the page is drawn, not after (`workflow/COPY.md` §1);
   2. its frames match `SYSTEM.md` Part A §A3: names, order, `y = 0`, the canvas gap;
   3. the page file's QA list and the folder file's completion criteria pass;
   4. `tools/figma-audit.js` on the page reports `fail` = 0, saved in `output/{system-slug}/figma/`;
   5. pages with component sets (steps 11–15): every set is exported with `tools/figma-export-sets.js` to `output/{system-slug}/figma/sets/{set-id}.json` (`:` written as `-`). Docs agents (step 19) read these files and open Figma only for screenshots;
-  6. its copy file exists with the sections of its page type, and `tools/figma-copy.js` in `diff` mode reports 0 differences (`workflow/COPY.md` §7).
+  6. its copy file exists with the sections of its page type, `tools/figma-copy.js` in `diff` mode reports 0 differences, and `tools/copy-guard.mjs` finds no citation of `knowledge/` (`workflow/COPY.md` §1, §7);
+  7. every knowledge rule that applies to it (`knowledge/system.md` and its own file) is followed, and each entry's *Status* says `applied` (`input/README.md` I7). The ledger lists the knowledge files under `loaded`.
 - **Approved exceptions.** When an audit fail can't be fixed without a change the user ruled out (for example existing values that must stay), ask the user. An approved exception is recorded in the ledger under `auditExceptions` (contrast pairs, unsupported modes, collections that aren't tokens) with the date and reason, documented on the page it belongs to (contrast pairs on 1.1 Color, an unsupported mode on 02 Tokens), and copied into the `ACCEPTED` block of `tools/figma-audit.js` for the run. The audit then reports it as `info`, not `fail`. An exception the user didn't approve is a fail.
 - **Keep and Audit pages take their step too.** Load the file, compare, run the audit and record the findings. They change nothing, and they are done when the findings are recorded.
 - **No spec, no page.** A page with no spec file (an existing family that isn't in the tree) gets its file first, through `workflow/EXTEND.md` steps 1–8. Then the page is built at its place in the sequence.
 - **Structure early, documentation in order.** Renaming pages and moving component sets is step 5 and may come before a page's own step. Building or filling any frame of a page happens only at that page's step.
-- **YOLO is pacing, not order.** YOLO everything removes the pause between pages. It never allows skipping, reordering or merging steps. One by one stops after each step and proposes the next one.
+- **YOLO is pacing, not order.** YOLO everything removes the pause between pages. It never allows skipping, reordering or merging steps, and never skips reading a page's knowledge topics or its copy guard (`workflow/COPY.md` §1). One by one stops after each step and proposes the next one.
 - **Only the user changes the order.** The user may skip a page, or move a page later within its level. Record it under `decisions` with the date and update `sequence`. The order of the levels never changes.
 - **Out of order is a stop.** When the agent finds it skipped or reordered a step: stop, set the affected entries back to `building` (work done out of order is never `done`), record what happened under `decisions`, tell the user, and resume from the earliest open step. Work done early is checked against its page file at its own step, like any other page.
 
@@ -328,6 +333,7 @@ Do not mark generation complete until:
 - for App and Web and App, every in-scope page has its React Native preview and an `app` block with React Native, Swift and Kotlin code, and `workflow/APP.md` §9 passes;
 - every entry of the ledger's `sequence` is `done` or `skip`, in order, and every `done` entry has its evidence (`loaded`, `audit.fail` = 0);
 - `input/{system-slug}/sources.md` lists every file in the input folder, every chat instruction is captured in `chat/`, and *Open conflicts* is empty (`input/README.md` I3–I5);
+- no knowledge entry for a built page is still `pending` (`input/README.md` I7);
 - every lesson the build learned (a retry, a rollback, an audit failure or a user correction) is in `output/{slug}/reports/build-notes.md`, and each one that applies to any brand is added to `GOTCHAS.md` as its next rule (`GOTCHAS.md` §0);
 - when code is in scope, `npm run build` passes (including `check:contrast`), the package installs in a fresh app (Web and Web and App), and every in-scope page passes `workflow/WEB.md` §9;
 - the on-call checks that haven't run since the last change were offered to the user, and every run the user asked for is in the ledger with its result (*QA on call*).

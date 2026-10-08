@@ -10,7 +10,8 @@ Fast mode changes how pages are drawn, not what they contain. The specs (`SYSTEM
 | --- | --- |
 | `tools/figma-fastbuild.js` | the renderer: `render(payload)` draws one page of any type, from data |
 | `tools/fast-pack.mjs` | checks a page's manifest and copy file, and prints its payload or its whole page call (`--call`) |
-| `tools/fast-cache.mjs` | writes the five calls that cache the doc builder, the renderer and the audit in the file |
+| `tools/fast-cache.mjs` | writes the calls that cache the doc builder, the renderer and the audit in the file, plus a status call that says which are missing |
+| `tools/icons-lucide.mjs` | writes the calls that create the icon library on 1.7 from Lucide, from the site's icon registry (`foundations/1.7-iconography.md` §1) |
 | `tools/figma-dockit.js` | creates the `Documentation` collection and the Doc kit in a file that has none |
 | `templates/fast/` | the default manifest of every reading page (`00`–`02`, `1.1`–`1.8`) and example manifests for component and layout pages |
 
@@ -123,15 +124,19 @@ The steps are those of `INITIATOR.md` Part B §6. Fast mode changes only steps 6
 
 **F1 · Data (before step 6, no Figma calls).**
 1. Run `node tools/fast-pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `output/{slug}/fast/`.
-2. Write the copy file of every in-scope page (`workflow/COPY.md`), with the block and topic titles the manifests use.
+2. Write the copy file of every in-scope page (`workflow/COPY.md`), with the block and topic titles the manifests use. Read the page's knowledge first (`input/{slug}/knowledge/`, `input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
 3. Fill each manifest's `todo` visuals with real sets, or remove the visual. Write one manifest per component and layout page (`templates/fast/component.example.json`, `layout.example.json`).
 4. Run `node tools/fast-pack.mjs --slug {slug} --check` until every page is ready.
 
 **F2 · Review (optional).** When the user chose a review checkpoint at initiation, stop here. The user reads and edits the copy files and manifests before any page is drawn. Record their changes in `input/{system-slug}/chat/` (`input/README.md` I3).
 
 **F3 · Bootstrap (step 6).**
-- Run `node tools/fast-cache.mjs --out output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions). Send its five calls one at a time; each answers `stored: true`, or refuses to save when the code arrived changed (`GOTCHAS.md` G41).
+- Run `node tools/fast-cache.mjs --out output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
+- Send `cache-status.js` first. It is read-only and answers which keys the file still needs. Send only those calls, one at a time; each answers `stored: true`, or refuses to save when the code arrived changed (`GOTCHAS.md` G41).
+- Caching costs time: the calls hold about 75 KB of code that is typed out in full, roughly 6–8 minutes for a full set. The status call makes a retry or a resumed session skip what is already current. A new round still sends everything, because step F5 clears the keys (`GOTCHAS.md` G8).
 - When the file has no Doc kit or `Documentation` collection, create them with `tools/figma-dockit.js`: first `{ only: 'collection' }`, then `{ only: 'kit', page, mark, system, footer, meta }`. Every doc variable aliases the brand token `workflow/DOCFRAMES.md` §1 names; the result lists any that fell back to a default.
+
+**Icons (before 1.7).** A new system's icon library comes from `node tools/icons-lucide.mjs --slug {slug}`: send its calls (usually one, about 30 KB), then render 1.7. The agent doesn't pick, map or draw icons.
 
 **F4 · Pages (steps 7–16).** One page per call, in build-sequence order. `node tools/fast-pack.mjs --slug {slug} --page {id} --call` prints the call: it loads the cached renderer and sends only the page's data (usually 4–9 KB).
 
@@ -147,6 +152,9 @@ The call returns the page's frame ids, its audit and its warnings. The page gate
 - A call that runs past about 120 s may lose its response: verify read-only before resending (`GOTCHAS.md` G3).
 - A return is at most 20 KB: the renderer returns ids and counts, never node dumps.
 - All rules of `GOTCHAS.md` §1 apply unchanged.
+- **No repo edits during a build.** The spec files and tools stay as they are until the round ends.
+  - A lesson, a missing catalog entry or a tool bug goes into the build notes, and is folded into the repo after the round, when the maintainer asks.
+  - When a tool bug blocks the build, patch the cached copy in the file once (one call), note it, and carry on. Don't re-cache, re-read or re-patch in a loop: after a second failure on the same page, build that page with the standard engine (§7).
 
 # 7. Fallback and escape hatch
 

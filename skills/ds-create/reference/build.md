@@ -2,7 +2,7 @@
 
 Asks four questions, then builds exactly the pages the answers allow, in the fixed order of `INITIATOR.md` Part B §6. Run it as often as needed: each run is one build round, and a later round adds pages to the same system.
 
-**Load:** the global set (`SKILL.md` §1), `INITIATOR.md` (all of Part B), and `workflow/QUESTIONNAIRE.md` §4, §6, §7, §8, §10 and §11. Then, per page, the files `INITIATOR.md` Part B §0 lists for it. In fast mode, also `workflow/FAST.md`. With the docs site, also `workflow/WEB.md` (and `workflow/APP.md` for App).
+**Load:** the global set (`SKILL.md` §1), `INITIATOR.md` (all of Part B), and `workflow/QUESTIONNAIRE.md` §4, §6, §7, §8, §10 and §11. Then, per page, the files `INITIATOR.md` Part B §0 lists for it, and the system's knowledge: `input/{slug}/knowledge/system.md` and the page's own file (`input/README.md` I7), which override the page spec and its fast-mode manifest. The repo's `knowledge/` topics for the page are read before its copy is written: they give the docs their reasoning, which is written in the system's own words and never cited (`workflow/COPY.md` §1). In fast mode, also `workflow/FAST.md`. With the docs site, also `workflow/WEB.md` (and `workflow/APP.md` for App).
 
 # 1. Gate check
 

@@ -12,6 +12,7 @@ ds-create is used through its skill, `skills/ds-create/`: four commands that run
 | --- | --- |
 | `/ds-create init` | checks what the build needs, reads your files in `input/`, asks only what is missing, and sets up the foundations as Figma variables and styles |
 | `/ds-create build` | asks how to draw the pages (Default or Fast mode), how far to go, where (Figma only, or with the docs site) and the pace, then builds exactly that |
+| `/ds-create learn` | keeps a rule you teach about your system (for example "buttons align left") in `input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build |
 | `/ds-create qa` | runs the full checks, only when you ask |
 | `/ds-create status` | shows where the build stands and what to run next |
 
@@ -107,9 +108,10 @@ SYSTEM.md        page tree, page templates, token and component naming, audit ro
 INITIATOR.md     generation logic: loading, ledger, build sequence, gates (always loaded)
 GOTCHAS.md       lessons from real builds as fixed, numbered rules; new agnostic lessons are added after every build (always loaded)
 
-skills/          ds-create/: the ds-create skill, the way in: /ds-create init · build · qa · status (SKILL.md and one reference
+skills/          ds-create/: the ds-create skill, the way in: /ds-create init · build · learn · qa · status (SKILL.md and one reference
                  file per command). Link it into .claude/skills/ once after cloning (Start here); .claude/ is never committed
 
+knowledge/       the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules (buttons.md, color.md, motion.md, radius.md, spacing.md)
 input/           what the user provides for each system: briefs, brand files, the existing system, references, chat notes (git-ignored except input/README.md)
 workflow/        the specs loaded at the steps that need them
   QUESTIONNAIRE.md   the questions asked at initiation and the confirmation summary (loaded at initiation)
@@ -123,7 +125,7 @@ workflow/        the specs loaded at the steps that need them
 guidance/ foundations/ parts/ components/ sections/ layouts/ screens/
                  one spec per page, plus a 00 index per level (see the file map below)
 templates/       structure.md: the structure every page is built with (page → frames → blocks → items; no content); agent-brief.md: the brief for docs-site page agents; fast/: the default fast-mode manifests (structure only)
-tools/           figma-audit.js: read-only audit that every page call runs on its page (QA gate; the file-wide sweep runs on call); figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js: read-only JSON snapshot of each component set for the docs site; figma-copy.js: reads, checks and applies the page copy files on the doc frames; figma-fastbuild.js, fast-pack.mjs, fast-cache.mjs, figma-dockit.js: fast mode (workflow/FAST.md)
+tools/           figma-audit.js: read-only audit that every page call runs on its page (QA gate; the file-wide sweep runs on call); figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js: read-only JSON snapshot of each component set for the docs site; figma-copy.js: reads, checks and applies the page copy files on the doc frames; figma-fastbuild.js, fast-pack.mjs, fast-cache.mjs, figma-dockit.js: fast mode (workflow/FAST.md); icons-lucide.mjs: the icon library on 1.7, from Lucide; copy-guard.mjs: checks the docs explain with knowledge/ without citing it
 web/             brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that workflow/WEB.md copies and fills
 app/             brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
 examples/        finished builds made with ds-create, for reference only (never copied into a new build)

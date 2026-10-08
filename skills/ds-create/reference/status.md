@@ -2,7 +2,7 @@
 
 Read-only. Shows where a system stands, from its ledger and its answers files. It makes no Figma calls and changes nothing.
 
-**Load:** `output/{slug}/ds-create-ledger.json`, the files in `input/{slug}/answers/`, and `input/{slug}/sources.md`.
+**Load:** `output/{slug}/ds-create-ledger.json`, the files in `input/{slug}/answers/`, `input/{slug}/sources.md`, and the files in `input/{slug}/knowledge/`.
 
 **Report:**
 
@@ -15,6 +15,7 @@ Pages        {done}/{in scope} done · building: {page} · next: {page}
              Foundations {d}/{n} · Parts {d}/{n} · Components {d}/{n} · Sections {d}/{n} · Layouts {d}/{n}
 Docs site    {not in scope | {d}/{n} pages | built}
 QA           last run {date, scope, result} · not run since: {pages changed after it}
+Knowledge    {n} rules · {p} pending: {K-numbers and pages}
 Open         {conflicts in sources.md, spec gaps, approvals waiting}
 Next         {the one command to run next}
 ```

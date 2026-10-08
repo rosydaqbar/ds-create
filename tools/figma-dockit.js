@@ -88,7 +88,7 @@ async function dockit(figma, OPTS) {
   // Text styles by role and size, nearest match: the brand's own styles (SYSTEM.md Part C §3.2).
   const styles = await figma.getLocalTextStylesAsync();
   const SIZES = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'];
-  const style = (role, size) => { const si = SIZES.indexOf(size); for (const r of [role, role === 'overline' ? 'label' : 'body']) { const hits = styles.filter(s => s.name.startsWith('type/' + r + '/')); if (!hits.length) continue; hits.sort((a, b) => Math.abs(SIZES.indexOf(a.name.split('/')[2]) - si) - Math.abs(SIZES.indexOf(b.name.split('/')[2]) - si)); return hits[0]; } return styles[0] || null; };
+  const style = (role, size) => { const si = SIZES.indexOf(size); for (const r of [role, ...(role === 'overline' ? ['label'] : []), 'body']) { const hits = styles.filter(s => s.name.startsWith('type/' + r + '/')); if (!hits.length) continue; hits.sort((a, b) => Math.abs(SIZES.indexOf(a.name.split('/')[2]) - si) - Math.abs(SIZES.indexOf(b.name.split('/')[2]) - si)); return hits[0]; } return styles[0] || null; };
   for (const s of styles) { try { await figma.loadFontAsync(s.fontName); } catch (e) {} }
   await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
   const T = async (parent, chars, role, size, color, name, fillW) => { const t = figma.createText(); t.name = name; const s = style(role, size); if (s) await t.setTextStyleIdAsync(s.id); t.characters = chars; t.fills = [paint(color)]; parent.appendChild(t); if (fillW) { t.layoutSizingHorizontal = 'FILL'; t.textAutoResize = 'HEIGHT'; } return t; };
@@ -138,9 +138,9 @@ async function dockit(figma, OPTS) {
     const b = made.badge.createInstance(); c.appendChild(b); bool(c, b, 'Show badge');
     txt(c, await T(c, 'Short explanation of the row.', 'body', 'sm', 'doc/text/secondary', 'Body', true), 'Body'); made.row = c; }
   { const tree = last => { const c = figma.createComponent(); c.name = 'Type=' + (last ? 'last' : 'middle'); c.resize(16, 56); c.fills = [];
-      const v = figma.createRectangle(); v.name = 'Line'; c.appendChild(v); v.resize(1, last ? 28 : 56); v.x = 7; v.y = 0; v.fills = [paint('doc/border/subtle')];
+      const v = figma.createRectangle(); v.name = 'Stem'; c.appendChild(v); v.resize(1, last ? 28 : 56); v.x = 7; v.y = 0; v.fills = [paint('doc/border/subtle')];
       const h = figma.createRectangle(); h.name = 'Elbow'; c.appendChild(h); h.resize(9, 1); h.x = 7; h.y = 28; h.fills = [paint('doc/border/subtle')]; return c; };
-    const set = figma.combineAsVariants([tree(false), tree(true)], page); set.name = 'Doc/Tree connector'; set.layoutMode = 'HORIZONTAL'; bind(set, 'itemSpacing', 'doc/space/row'); set.primaryAxisSizingMode = 'AUTO'; set.counterAxisSizingMode = 'AUTO'; set.fills = []; made.tree = set; }
+    const set = figma.combineAsVariants([tree(false), tree(true)], page); set.name = 'Doc/Tree connector'; set.cornerRadius = 0; set.layoutMode = 'HORIZONTAL'; bind(set, 'itemSpacing', 'doc/space/row'); set.primaryAxisSizingMode = 'AUTO'; set.counterAxisSizingMode = 'AUTO'; set.fills = []; made.tree = set; }
   { const c = comp('Doc/Alias chip', 'HORIZONTAL', 'doc/space/inline'); c.counterAxisAlignItems = 'CENTER';
     const sw = figma.createRectangle(); sw.name = 'Swatch'; c.appendChild(sw); sw.resize(16, 16); rad(sw, 'doc/radius/chip'); sw.fills = [paint('doc/surface/specimen')]; stroke(sw, 'doc/border/specimen');
     txt(c, await T(c, 'palette/neutral/900', 'code', 'sm', 'doc/text/primary', 'Name'), 'Name'); made.alias = c; }
@@ -166,7 +166,7 @@ async function dockit(figma, OPTS) {
       const row = AL('HORIZONTAL', 'Row', 'doc/space/inline'); c.appendChild(row); row.layoutSizingHorizontal = 'FILL';
       await T(row, dont ? "Don't" : 'Do', 'label', 'sm', dont ? 'doc/status/dont' : 'doc/status/do', 'Label');
       txt(c, await T(row, 'One line on why.', 'body', 'sm', 'doc/text/secondary', 'Reason', true), 'Reason'); return c; };
-    const set = figma.combineAsVariants([await dd(false), await dd(true)], page); set.name = 'Doc/Do-dont'; set.layoutMode = 'HORIZONTAL'; bind(set, 'itemSpacing', 'doc/space/group'); set.primaryAxisSizingMode = 'AUTO'; set.counterAxisSizingMode = 'AUTO'; set.fills = []; made.dodont = set; }
+    const set = figma.combineAsVariants([await dd(false), await dd(true)], page); set.name = 'Doc/Do-dont'; set.cornerRadius = 0; set.layoutMode = 'HORIZONTAL'; bind(set, 'itemSpacing', 'doc/space/group'); set.primaryAxisSizingMode = 'AUTO'; set.counterAxisSizingMode = 'AUTO'; set.fills = []; made.dodont = set; }
   { const c = comp('Doc/Axis label', 'VERTICAL', 'doc/space/hairline');
     txt(c, await T(c, 'SIZE', 'overline', 'xs', 'doc/text/tertiary', 'Property'), 'Property');
     txt(c, await T(c, 'md', 'label', 'sm', 'doc/text/primary', 'Value'), 'Value'); made.axis = c; }

@@ -83,7 +83,7 @@ Fixed for every build, so every build reads the same way:
 | Language and UI | TypeScript, React 19 |
 | Styling | Tailwind CSS v4, configured in CSS (`@theme`), no `tailwind.config.js` |
 | Variants | `class-variance-authority` (`cva`) and `clsx` |
-| Icons | one registry (`src/icons`); Lucide by default, swapped for the library chosen on 1.7 |
+| Icons | one registry (`src/icons`), Lucide; the same registry feeds the Figma icon library (`tools/icons-lucide.mjs`) |
 | Site | Vite and React Router; static build that works from any folder |
 | Package | Vite library mode + TypeScript declarations (`npm run build:package`) |
 | App previews | `react-native-web` (+ `react-native-svg`, `lucide-react-native`) renders the React Native source; `react-native` itself is never installed (§7.1) |
@@ -116,7 +116,7 @@ Exit check: the script reports every variable, text style and effect style of th
 1. Export from `1.8 Brand assets` the lockup for light and dark surfaces, the mark and any flags as SVG into `public/brand/` (flags in `public/brand/flags/{code}.svg`) with the names in `src/ds.config.ts`. Flags are inlined into the components, so they ship inside the package.
 2. Fill `ds.config.ts` from `00 Cover`: system name, version, `product` (`'web'`, `'app'` or `'both'`, from `workflow/QUESTIONNAIRE.md` §10), `modes` (`['Light', 'Dark']`, or `['Light']` when Dark isn't supported; the site then hides its Dark toggle and QA checks Light only), `packageName` (the npm name product teams will install, e.g. `@acme/design-system`), description (what the product is and what the system covers, in one or two sentences), and the Figma file link.
 3. When the brand typeface is a web font, add its stylesheet to `fontStylesheets`; the family names already come from `font/family/*`. When the brand typeface can't ship (licensing), name the stand-in in a comment and in the Typography page.
-4. Replace the icon imports in `src/icons/index.tsx` when 1.7 uses a library other than Lucide; keep the names.
+4. Keep `src/icons/index.tsx` on Lucide. Add the icons the product needs there (they reach Figma through `tools/icons-lucide.mjs`). Only an existing file with its own icon library replaces the imports; keep the names.
 5. When the Figma file uses its own names for the main roles, point the four roots in `src/styles/chrome.css` at them (for example `--chrome-accent: var(--color-action-primary);`). Every other name the site chrome needs and the file lacks gets a site-only default from `npm run tokens`. Never type a hex value there.
 
 Exit check: the header shows the real logo in both color modes; text renders in the brand typeface or its named stand-in.

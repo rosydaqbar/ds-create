@@ -183,7 +183,7 @@ if (PAGE) {
       if ('effects' in n && Array.isArray(n.effects) && n.effects.some((e) => e.visible !== false) && !n.effectStyleId)
         hit(`${where}-effect-no-style`, lvl, 'Effects come from effect styles', pathOf(n));
       if ('opacity' in n && n.opacity < 1 && !bound(n, 'opacity')) hit(`${where}-layer-opacity`, comp && ACCEPTED.frozenComponentValues ? 'info' : 'warn', 'No opacity on layers; use a color role', `${Math.round(n.opacity * 100)}% on ${pathOf(n)}`);
-      if (comp && DEFAULT_NAME.test(n.name)) hit('default-layer-name', 'fail', 'Layers inside components use anatomy names (SYSTEM Part C §4.1)', pathOf(n));
+      if (comp && !isComp && DEFAULT_NAME.test(n.name)) hit('default-layer-name', 'fail', 'Layers inside components use anatomy names (SYSTEM Part C §4.1)', pathOf(n));
     }
     if (n.type === 'COMPONENT_SET') {
       const defs = n.componentPropertyDefinitions;

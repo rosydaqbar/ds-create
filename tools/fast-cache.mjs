@@ -4,8 +4,14 @@
  * (workflow/FAST.md F3). One file per key, each one `use_figma` call:
  *
  *   node tools/fast-cache.mjs --out output/{slug}/fast/cache [--accepted output/{slug}/figma/audit-accepted.json]
+ *                             [--pages reading|components|all]
  *
- * Keys, in the order to send them: docbuilder, docpages, docfoundations, fastkit, audit.
+ * Keys, in the order to send them: docbuilder, docpages, docfoundations, fastkit, audit. `--pages reading` leaves out
+ * docpages, which only Parts to Layouts need (default: all).
+ *
+ * SEND THE STATUS CALL FIRST: cache-status.js (read-only, tiny) answers which keys are missing or outdated in the
+ * file. Send only those: re-typing a 20 KB call that is already in the file is the slowest part of a fast build.
+ * Every caching call also stores a version stamp (`{key}.v`), so a retry or a new session skips what is current.
  * Each function is minified when a minifier is installed (rolldown, from web/node_modules or a build's site), which
  * keeps every call under the 50,000-character limit. Without one, the source is used as it is.
  *
@@ -38,6 +44,7 @@ if (accepted) {
   const acc = fs.readFileSync(path.resolve(accepted), 'utf8').trim();
   audit = audit.replace(/const ACCEPTED = \{[\s\S]*?\n\};/, `const ACCEPTED = ${acc};`);
 }
+const want = arg('--pages') || 'all';
 const SOURCES = {
   docbuilder: fnFrom(builder, 'docbuilder'),
   docpages: fnFrom(builder, 'docpages'),
@@ -45,6 +52,8 @@ const SOURCES = {
   fastkit: fnFrom(read('tools/figma-fastbuild.js'), 'fastkit'),
   audit: `async function audit(figma, PAGE) {\n${audit}\n}\n`,
 };
+if (want === 'reading') delete SOURCES.docpages;
+const stamps = {};
 
 // A minifier, when one is installed next to a docs site.
 async function loadRolldown() {
@@ -84,15 +93,23 @@ for (const [key, src] of Object.entries(SOURCES)) {
     local = m[1];
     code = code.slice(0, m.index).trim();
   }
+  // A raw control character in the code is lost on the way into Figma (GOTCHAS.md G46): send its escape instead.
+  code = code.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, (ch) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
   const text = new Function(`${code};return ${local}`)().toString();
   const letters = text.replace(/[^A-Za-z]/g, '');
   const call = `${code}
 const __L = ${local}.toString().replace(/[^A-Za-z]/g, ''); let __h = 0x811c9dc5; for (let i = 0; i < __L.length; i++) { __h ^= __L.charCodeAt(i); __h = Math.imul(__h, 0x01000193) >>> 0; }
 if (__L.length !== ${letters.length} || __h !== ${fnv(letters)}) return { key: '${key}', stored: false, letters: __L.length, want: ${letters.length} };
-figma.root.setSharedPluginData('dscreate', '${key}', ${local}.toString()); return { key: '${key}', stored: true, len: ${local}.toString().length };
+figma.root.setSharedPluginData('dscreate', '${key}', ${local}.toString()); figma.root.setSharedPluginData('dscreate', '${key}.v', '${fnv(letters)}'); return { key: '${key}', stored: true, len: ${local}.toString().length };
 `;
+  stamps[key] = String(fnv(letters));
   if (call.length > 49000) throw new Error(`${key}: the call is ${call.length} characters, over the 50,000 limit`);
   fs.writeFileSync(path.join(OUT, `cache-${key}.js`), call);
   console.log(`${key}: ${call.length} characters${rd ? ' (minified)' : ''} → ${path.relative(ROOT, path.join(OUT, `cache-${key}.js`))}`);
 }
-console.log('fast-cache: send the five calls in this order, one at a time; each answers stored: true. Clear the dscreate keys at step 17.');
+// The status call: which keys the file still needs. Read-only and a few hundred characters.
+fs.writeFileSync(path.join(OUT, 'cache-status.js'), `const want = ${JSON.stringify(stamps)};
+const need = Object.keys(want).filter((k) => figma.root.getSharedPluginData('dscreate', k + '.v') !== want[k] || !figma.root.getSharedPluginData('dscreate', k));
+return { need, current: Object.keys(want).filter((k) => !need.includes(k)) };
+`);
+console.log(`cache-status.js → send it first; then send only the keys it lists in "need", one at a time, in this order: ${Object.keys(SOURCES).join(', ')}. Clear the dscreate keys at step 17.`);

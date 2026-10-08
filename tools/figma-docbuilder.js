@@ -574,6 +574,8 @@ async function docfoundations(figma, D) {
   const lum = c => { const f = x => x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
   const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return Math.round((x + 0.05) / (y + 0.05) * 10) / 10; };
   const WHITE = { r: 1, g: 1, b: 1 }, BLACK = { r: 0, g: 0, b: 0 };
+  // A resolved value is a color only when it is an object with channels: strings, numbers and booleans are not (`in` throws on them).
+  const isRGB = x => !!x && typeof x === 'object' && 'r' in x;
   // Palette row (workflow/DOCFRAMES.md §5): Doc/Row note at doc/measure/row-note, then Doc/Color swatch per step, bound (§5.1).
   const paletteRow = async (parent, title, desc, vars, badgeLabel) => {
     const row = AL('HORIZONTAL', 'Palette row · ' + title, 'doc/space/group'); parent.appendChild(row); fillW(row); row.counterAxisAlignItems = 'MIN';
@@ -581,7 +583,7 @@ async function docfoundations(figma, D) {
     if (badgeLabel && note.type === 'INSTANCE') { const b = note.findOne(x => x.type === 'INSTANCE'); if (b) await setP(b, { Label: badgeLabel }); }
     const sw = AL('HORIZONTAL', 'Swatches', 'doc/space/inline'); row.appendChild(sw); // one row: a long family widens the frame (call growTo), never wraps
     for (const v of vars) {
-      const c = resolve(v, modesOf(v)[0].modeId); const rgb = c && 'r' in c ? c : null;
+      const c = resolve(v, modesOf(v)[0].modeId); const rgb = isRGB(c) ? c : null;
       const s = await kit('Doc/Color swatch', { Step: v.name.split('/').pop(), Value: rgb ? rgb2hex(rgb) : '—', Contrast: rgb ? ('W ' + ratio(rgb, WHITE) + ' · B ' + ratio(rgb, BLACK)) : '' });
       sw.appendChild(s); const sp = s.type === 'INSTANCE' ? s.findOne(n => n.name === 'Specimen') : null; if (sp) sp.fills = [figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }, 'color', v)];
       if (sp && rgb) { const ct = sp.findOne(n => n.type === 'TEXT'); if (ct) { await loadFontsIn(sp); fill(ct, ratio(rgb, WHITE) >= ratio(rgb, BLACK) ? 'color/text/on-solid' : 'doc/text/specimen'); } }
@@ -599,8 +601,8 @@ async function docfoundations(figma, D) {
     const h = await mkRow(true); await T(cell(h, 'Name', nameW), 'Name', 'label/sm', 'doc/text/primary'); for (const m of modes) await T(cell(h, m.name, modeW), m.name + (o.unsupported && o.unsupported.includes(m.name) ? ' (not supported)' : ''), 'label/sm', 'doc/text/primary'); const uh = await T(cell(h, 'Usage', 'fill'), 'Usage', 'label/sm', 'doc/text/primary');
     const valueCell = async (c, v, m) => {
       const raw = v.valuesByMode[m.modeId] !== undefined ? v.valuesByMode[m.modeId] : v.valuesByMode[colById.get(v.variableCollectionId).defaultModeId];
-      if (raw && raw.type === 'VARIABLE_ALIAS') { const tv = vById.get(raw.id); const res = resolve(v, m.modeId); c.appendChild(await chip(tv ? tv.name : 'external', tv && tv.resolvedType === 'COLOR' ? tv : null, res && 'r' in res ? res : null)); if (tv && tv.resolvedType !== 'COLOR') await T(c, '= ' + JSON.stringify(res), 'code/sm', 'doc/text/tertiary'); return; }
-      if (raw && typeof raw === 'object' && 'r' in raw) { c.appendChild(await chip(rgb2hex(raw), null, raw)); return; }
+      if (raw && raw.type === 'VARIABLE_ALIAS') { const tv = vById.get(raw.id); const res = resolve(v, m.modeId); c.appendChild(await chip(tv ? tv.name : 'external', tv && tv.resolvedType === 'COLOR' ? tv : null, isRGB(res) ? res : null)); if (tv && tv.resolvedType !== 'COLOR') await T(c, '= ' + JSON.stringify(res), 'code/sm', 'doc/text/tertiary'); return; }
+      if (isRGB(raw)) { c.appendChild(await chip(rgb2hex(raw), null, raw)); return; }
       await T(c, raw === undefined ? '—' : String(raw), 'code/sm', 'doc/text/secondary');
     };
     const emit = async (v, depth, last) => {
@@ -656,5 +658,5 @@ async function docfoundations(figma, D) {
   const stepKey = n => { const l = n.split('/').pop(); return l === 'white' ? -1 : l === 'black' ? 1e6 : /^\d+$/.test(l) ? +l : 5e5; };
   const byStep = (a, b) => { const pa = a.name.split('/').slice(0, -1).join('/'), pb = b.name.split('/').slice(0, -1).join('/'); return pa === pb ? stepKey(a.name) - stepKey(b.name) : (pa < pb ? -1 : 1); };
   const varsIn = async (collectionName, prefix) => { const all = await figma.variables.getLocalVariablesAsync(); const col = cols.find(c => c.name === collectionName); return all.filter(v => col && v.variableCollectionId === col.id && (!prefix || v.name.startsWith(prefix))).sort(byStep); }; // step order (50 before 100), not creation order
-  return Object.assign(D, { lhText, byStep, resolve, ratio, paletteRow, varTable, typeRows, measureRows, effectTiles, paintTiles, varsIn, modesOf });
+  return Object.assign(D, { isRGB, lhText, byStep, resolve, ratio, paletteRow, varTable, typeRows, measureRows, effectTiles, paintTiles, varsIn, modesOf });
 }

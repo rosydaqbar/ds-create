@@ -17,13 +17,17 @@
  *   - a set name that isn't in the build's snapshots (output/{slug}/figma/sets/);
  *   - an instances visual without items, and do / don't pairs that don't match the copy's do and don't lines;
  *   - a copy line taken word for word from a reference build in examples/, and any copy or manifest line that names
- *     one: examples are references, never sources (GOTCHAS.md G43).
+ *     one: examples are references, never sources (GOTCHAS.md G43);
+ *   - a copy line that cites knowledge/ instead of explaining it (tools/copy-guard.mjs, workflow/COPY.md §1);
+ *   - HARD RULE: a page whose knowledge topics (knowledge/README.md §3) aren't in its ledger entry's `loaded`: the copy
+ *     is written from that reasoning, so it is read first. --check, --page and --call all refuse it.
  * Values are never in a manifest: sets are named, and the renderer reads everything else from the file.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseCopy, forSurface } from '../web/scripts/build-copy.mjs';
+import { checkBuild as knowledgeCheck, evidenceErrors, checkPage, knowledgeErrors, jsonStrings } from './copy-guard.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -158,8 +162,10 @@ function checkVisual(v, errs, where, copyLines) {
   if (v.type === 'compare') out.columns = (v.columns || []).map((c) => ({ ...c, items: recipes(c.items, errs, where) }));
   if (v.type === 'do-dont') {
     out.pairs = (v.pairs || []).map((p) => ({ ...p, do: recipes(p.do, errs, where), dont: recipes(p.dont, errs, where) }));
-    const dos = ofRole(copyLines, 'do').length;
-    if (dos !== out.pairs.length) errs.push(`${where}: ${out.pairs.length} do / don't pairs, the copy has ${dos} do lines`);
+    const dos = ofRole(copyLines, 'do'), donts = ofRole(copyLines, "don't");
+    if (dos.length !== out.pairs.length) errs.push(`${where}: ${out.pairs.length} do / don't pairs, the copy has ${dos.length} do lines`);
+    // Reasons travel with the visual, so component pages (which have no topic lines in the renderer) get them too.
+    out.reasons = dos.map((d, k) => ({ do: d, dont: donts[k] || '' }));
   }
   if (v.type === 'states' || v.type === 'callouts') {
     if (v.set) out.set = resolveSet(v.set, errs, where);
@@ -245,6 +251,11 @@ function packComponent(m, copy, errs) {
       g.dont = { items: recipes(t.dont, errs, where), reason: nl[0] || '', dir: t.dir };
     }
     if (t.visual) g.visual = checkVisual(t.visual, errs, `${where} › ${ci.title}`, ci.lines);
+    // Column labels of a compare visual come from the topic's caption lines, so the copy check sees them.
+    if (g.visual?.type === 'compare' && !g.visual.texts) {
+      g.visual.texts = ofRole(ci.lines, 'caption');
+      delete g.caption;
+    }
     return g;
   });
   const listOf = (name) => {
@@ -309,13 +320,20 @@ if (args.includes('--check')) {
   } else console.log(`✓ reference check (${reference.sentences.size} sentences from ${reference.names.size ? [...reference.names].join(', ') : 'no examples'})`);
   for (const f of files) {
     const { id, errs } = pack(f);
+    errs.push(...evidenceErrors(slug, id).errs);
     if (errs.length) {
       bad++;
       console.log(`✕ ${id} (${path.basename(f)}): ${errs.length} problem(s)\n  ` + errs.slice(0, 30).join('\n  '));
     } else console.log(`✓ ${id}`);
   }
-  const refBad = refErrs.length ? 1 : 0;
-  console.log(`fast-pack: ${files.length - (bad - refBad)} of ${files.length} manifest(s) ready${refBad ? '; the reference check failed' : ''}`);
+  // The docs explain with the reasoning of knowledge/, never cite it (workflow/COPY.md §1).
+  const kErrs = knowledgeCheck(slug);
+  if (kErrs.length) {
+    bad++;
+    console.log(`✕ copy guard: ${kErrs.length} problem(s)\n  ` + kErrs.slice(0, 30).join('\n  '));
+  } else console.log('✓ copy guard');
+  const refBad = (refErrs.length ? 1 : 0) + (kErrs.length ? 1 : 0);
+  console.log(`fast-pack: ${files.length - (bad - refBad)} of ${files.length} manifest(s) ready${refBad ? '; the reference check or the copy guard failed' : ''}`);
   process.exit(bad ? 1 : 0);
 }
 const want = arg('--page');
@@ -326,6 +344,11 @@ if (want) {
     process.exit(1);
   }
   const { payload, errs } = pack(f);
+  const ev = evidenceErrors(slug, want);
+  errs.push(...ev.errs, ...checkPage(slug, want));
+  // Last gate: every string that would reach Figma, after packing (workflow/COPY.md §1).
+  if (payload) errs.push(...knowledgeErrors(jsonStrings(payload).join('\n'), `payload ${want}`));
+  if (!ev.ledger && ev.topics.length) console.error(`fast-pack: no ledger, so reading knowledge/${ev.topics.join(', knowledge/')} for ${want} is not checked`);
   if (errs.length) {
     console.error(`fast-pack: page ${want} is not ready:\n  ` + errs.join('\n  '));
     process.exit(1);

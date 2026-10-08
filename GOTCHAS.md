@@ -65,6 +65,14 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 *Why:* a renderer that passed a width through node plugin data failed on its first page.
 *Check:* the tools in `tools/` call only `getSharedPluginData` / `setSharedPluginData`.
 
+**G44. Clear the radius of every set made with `combineAsVariants`.** Set `cornerRadius = 0` on the new component set, or bind it, in the same call that combines the variants.
+*Why:* `combineAsVariants` gives the set frame a default corner radius of 5. The audit failed it as an unbound radius on the first Doc kit build of a new file.
+*Check:* the Doc kit page and every component page report no `component-unbound-radius` on a set frame.
+
+**G46. Escape control characters before pasting minified code.** After minifying a tool for a `use_figma` call, replace every raw control character (U+0000 to U+001F, except newline and tab) with its `\uXXXX` escape before sending it.
+*Why:* the minifier wrote a `'\u0001'` separator as a raw character inside a template literal, and the character was lost on the way. The cached copy check then hashed lines differently from the fingerprints, and every multi-line item reported a false mismatch.
+*Check:* `grep -P '[\x00-\x08\x0b-\x1f]'` finds nothing in the code that is sent.
+
 # 2. Component files and frozen values
 
 **G10. Frozen values mean frozen.** Never unbind, unlink, detach or change a value of an existing component, variable or style. Renaming and moving are allowed. A new variant may be added only when the user asked for it, built as copies of existing variants bound to existing variables.
@@ -102,6 +110,31 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 **G17. Record brand gaps, never fix them with values.** Contrast below AA on a brand fill, a missing logo version for a surface, a component without a focus state, raw values instead of tokens: write each as a finding on the page it affects and in the build notes, for the owner to decide.
 *Why:* fixing them would break G10; hiding them would mislead the reader.
 *Check:* every finding appears both on its page and in the build notes.
+
+**G47. Never override a size on styled text in a component.** Changing `fontSize`, `lineHeight` or `letterSpacing` on a text that has a text style detaches the style. To get smaller text, pick a smaller style, or let the container hug the style's size.
+*Why:* count indicators shrunk with a fontSize override failed the page audit (`component-text-no-style`).
+*Check:* the page audit reports no `component-text-no-style`.
+
+**G48. Set `autoRename = false` on every text layer you name in a component.** Figma renames a text layer after its characters while autoRename is on, even after you set a name.
+*Why:* the Tooltip's `Text` layer came out named "This is a tooltip", which broke the anatomy names the spec and the docs read.
+*Check:* each set's snapshot lists its text layers by their anatomy names.
+
+**G49. An open arc is an ellipse with `innerRadius` near 1 and a centered stroke, not `innerRadius: 0`.** With `arcData.innerRadius = 0`, Figma strokes the arc as a pie wedge, with two lines to the center. Set `innerRadius: 0.999`, `strokeAlign: 'CENTER'`, `strokeJoin` and `strokeCap: 'ROUND'`. Inset the ellipse by half the stroke on every side, so the arc stays inside the box and lines up with an inside-stroked ring.
+*Why:* the Spinner's active segment first rendered as a wedge in every variant.
+*Check:* a screenshot of the set shows an arc with round ends and no lines to the center.
+
+**G50. A drop-shadow focus ring doesn't render on a fully transparent fill.** Figma draws a shadow from the fill's alpha, so a frame filled with a transparent variable (`color/fill/none`) shows no ring. This happens even with clip content on and `showShadowBehindNode` true. Forcing the paint opacity to 1 makes the fill opaque instead. Give the focus state of a containerless control a real subtle fill, such as its hover fill, and record the change as a gap.
+*Why:* every tertiary Button focus variant first showed no focus ring at all.
+Also turn clip content on: `figma.createComponent()` starts with it off, and the ring doesn't render until it is on (the Tag set).
+*Check:* a screenshot of the focus column shows the ring on every emphasis.
+
+**G51. Never set `textDecoration` directly on a text layer bound to a component text property.** Binding `characters` to a TEXT property makes Figma sync the decoration override across every variant bound to that property, and a later rebind can also reset the text style. Put the decoration in a text style, such as an underlined copy of the body style, and bind the property once.
+*Why:* the Link set first came out with no underline anywhere, then with an underline everywhere, and a rebind reset several labels to one style.
+*Check:* each variant's label reports the expected text style and decoration after the set is built.
+
+**G52. Size a component before you add children that scale.** `figma.createComponent()` starts at 100 × 100. Children with `SCALE` constraints that are added first get scaled again when you resize the root to its real size. Resize the root first, or resize it with `resizeWithoutConstraints`.
+*Why:* every Progress ring came out 0.6 to 2.8 times its intended diameter, with the number off-center.
+*Check:* a screenshot of the set shows each ring inside its own box.
 
 # 3. Documentation frames
 
@@ -157,6 +190,10 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 *Why:* a copy extract walked into a component set displayed on its doc page and picked up the component's own layer text. An apply would have changed the main component.
 *Check:* an extract of a page with sets returns only doc-kit and doc-frame text.
 
+**G45. Keep wide tables out of reading columns.** In a topics frame (the 720 reading column), use a table of three columns or fewer. A `token-table`, with its name, mode and usage columns, belongs in a blocks frame.
+*Why:* a variable table in a reading column squeezed its Usage cell to a few characters per line, and the frame grew to over 7,000 px.
+*Check:* no reading frame is taller than its content warrants, and no table cell wraps one word per line.
+
 **G43. Use finished builds as references, never as sources.** `examples/` may be read to understand a pattern. Nothing is copied from it (sentences, manifests, page data, values, code), and it never replaces a step: every page is still written from its spec, the templates and tools, this system's inputs and its own Figma file. Other systems' `input/` and `output/` folders are not read at all.
 *Why:* in fast mode, an agent filled pages from a finished example instead of writing the manifests and copy from the build's own sources, which made the fast-mode rules pointless.
 *Check:* `tools/fast-pack.mjs --check` reports no copy line taken word for word from an example and no line naming one.
@@ -198,6 +235,14 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 **G39. Stop every QA server, and never check one you didn't start.** QA scripts start their preview on a free port and stop it on any exit.
 *Why:* a preview left running after a failed run held the fixed QA port. The next run then silently checked that old server.
 *Check:* after a run, no preview server from it is still listening.
+
+**G53. Copy the web template without `node_modules`, then run `npm ci`.** A copied `node_modules` can miss packages: imports such as `lucide-react` and `react-router` fail to resolve, and the error looks like a broken template.
+*Why:* W1 failed `npm run build` on an untouched copy until `node_modules` was removed and reinstalled.
+*Check:* `npm run build` passes on the untouched copy before W2.
+
+**G54. Check descriptions for HTML entities before the token export.** A description written through an HTML-escaping path keeps `&#39;` or `&amp;` as literal text. The export then carries it into the site and the token files. Replace entities with the real characters in Figma, then export.
+*Why:* two variable descriptions showed `don&#39;t` on the docs site.
+*Check:* no variable or style description matches `/&(#\d+|quot|amp|lt|gt);/`.
 
 # 5. Component snapshots
 
