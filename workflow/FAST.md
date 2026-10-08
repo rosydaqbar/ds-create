@@ -46,6 +46,11 @@ Style comes from the brand through the `Documentation` collection, which aliases
 
 Two files per page, both in `output/{system-slug}/`. Neither holds a value: values are always read from the file.
 
+**Where the data comes from.**
+- **Sources, only from this build:** the page spec, the default manifest (`templates/fast/`), this system's inputs and copy files, its set snapshots (`output/{slug}/figma/sets/`) and its Figma file.
+- **`examples/` is a reference only.** It may be read to understand how a page or visual works. Nothing is copied from it, and it never replaces writing the manifest and copy file from the sources above: a page filled from a finished example skips the rules this mode exists for.
+- `tools/fast-pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`GOTCHAS.md` G43).
+
 **The copy file**, `copy/{id}-{kebab name}.md`, holds every sentence (`workflow/COPY.md`).
 
 **The page manifest**, `fast/{id}-{kebab name}.json`, says what goes where:

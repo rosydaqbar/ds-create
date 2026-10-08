@@ -15,7 +15,9 @@
  *   - a visual still marked `todo` (fill its inputs or remove it);
  *   - a block or topic title that the copy file doesn't have, and a copy topic the manifest doesn't place;
  *   - a set name that isn't in the build's snapshots (output/{slug}/figma/sets/);
- *   - an instances visual without items, and do / don't pairs that don't match the copy's do and don't lines.
+ *   - an instances visual without items, and do / don't pairs that don't match the copy's do and don't lines;
+ *   - a copy line taken word for word from a reference build in examples/, and any copy or manifest line that names
+ *     one: examples are references, never sources (GOTCHAS.md G43).
  * Values are never in a manifest: sets are named, and the renderer reads everything else from the file.
  */
 import fs from 'node:fs';
@@ -38,6 +40,62 @@ const SETS = path.join(OUT, 'figma', 'sets');
 const TEMPL = path.join(ROOT, 'templates', 'fast');
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+/**
+ * Reference builds (GOTCHAS.md G43): their names and their sentences, read by this tool so the agent doesn't have to.
+ * A sentence is a string of 40 or more characters with spaces, from the example's source, docs and copy files.
+ */
+const EXAMPLES = path.join(ROOT, 'examples');
+const reference = (() => {
+  const names = new Set();
+  const sentences = new Map();
+  if (!fs.existsSync(EXAMPLES)) return { names, sentences };
+  const walk = (dir, out) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (['node_modules', 'dist', 'package', '.git'].includes(e.name)) continue;
+      const f = path.join(dir, e.name);
+      if (e.isDirectory()) walk(f, out);
+      else if (/\.(tsx?|md|json)$/.test(e.name) && !/lock|tsbuildinfo|qa-report/.test(e.name)) out.push(f);
+    }
+    return out;
+  };
+  for (const ex of fs.readdirSync(EXAMPLES, { withFileTypes: true }).filter((d) => d.isDirectory())) {
+    if (norm(ex.name) === norm(slug) || norm(slug).includes(norm(ex.name))) continue;
+    names.add(ex.name.toLowerCase());
+    try {
+      const pkg = JSON.parse(fs.readFileSync(path.join(EXAMPLES, ex.name, 'package.json'), 'utf8'));
+      for (const part of String(pkg.name || '').replace(/^@/, '').split(/[\/-]/)) if (part.length > 3 && !['design', 'system', 'tokens', 'docs'].includes(part)) names.add(part.toLowerCase());
+    } catch {}
+    for (const f of walk(path.join(EXAMPLES, ex.name), [])) {
+      const src = fs.readFileSync(f, 'utf8');
+      for (const m of src.matchAll(/(["'`])((?:(?!\1)[^\\\n]|\\.){40,}?)\1/g)) if (/\s/.test(m[2])) sentences.set(norm(m[2]), ex.name);
+      if (f.endsWith('.md')) for (const line of src.split('\n')) { const t = line.replace(/^\[[^\]]*\]\s+|^[-*#>\d.\s]+/, ''); if (t.length >= 40) sentences.set(norm(t), ex.name); }
+    }
+  }
+  // Text the repo itself gives every build (specs, templates, tools, the web and app templates) is a shared source,
+  // not copying: drop any example sentence that also appears there.
+  const own = [];
+  const ownWalk = (dir) => { if (!fs.existsSync(dir)) return; for (const e of fs.readdirSync(dir, { withFileTypes: true })) { if (['node_modules', 'dist', 'package'].includes(e.name)) continue; const f = path.join(dir, e.name); if (e.isDirectory()) ownWalk(f); else if (/\.(tsx?|md|mjs|js|json)$/.test(e.name)) own.push(norm(fs.readFileSync(f, 'utf8'))); } };
+  for (const d of ['guidance', 'foundations', 'parts', 'components', 'sections', 'layouts', 'screens', 'workflow', 'templates', 'tools', 'web/src', 'app']) ownWalk(path.join(ROOT, d));
+  for (const f of ['SYSTEM.md', 'README.md', 'INITIATOR.md', 'GOTCHAS.md']) if (fs.existsSync(path.join(ROOT, f))) own.push(norm(fs.readFileSync(path.join(ROOT, f), 'utf8')));
+  const corpus = own.join(' | ');
+  for (const k of [...sentences.keys()]) if (corpus.includes(k)) sentences.delete(k);
+  return { names, sentences };
+})();
+const nameRe = reference.names.size ? new RegExp('\\b(' + [...reference.names].map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b', 'i') : null;
+/** Lines of one text (a copy file or a manifest) that come from or name a reference build. */
+function referenceErrors(text, where) {
+  const errs = [];
+  for (const raw of text.split('\n')) {
+    const line = raw.replace(/^\[[^\]]*\]\s+/, '').trim();
+    if (!line) continue;
+    const ex = line.length >= 40 && reference.sentences.get(norm(line));
+    if (ex) errs.push(`${where}: copied word for word from examples/${ex}: "${line.slice(0, 80)}" (examples are references, never sources: GOTCHAS.md G43)`);
+    const nm = nameRe && line.match(nameRe);
+    if (nm) errs.push(`${where}: names the reference build "${nm[1]}": "${line.slice(0, 80)}"`);
+  }
+  return errs;
+}
 const idOf = (page) => String(page || '').split(' ')[0];
 
 /** The renderer's catalog: the keys of VIS in tools/figma-fastbuild.js, plus `custom`. */
@@ -241,6 +299,14 @@ if (args.includes('--init')) {
 const files = fs.existsSync(FAST) ? fs.readdirSync(FAST).filter((x) => x.endsWith('.json')).map((x) => path.join(FAST, x)) : [];
 if (args.includes('--check')) {
   let bad = 0;
+  // Every copy file and manifest of this build, against the reference builds (GOTCHAS.md G43).
+  const refErrs = [];
+  if (fs.existsSync(COPY)) for (const f of fs.readdirSync(COPY).filter((x) => x.endsWith('.md'))) refErrs.push(...referenceErrors(fs.readFileSync(path.join(COPY, f), 'utf8'), `copy/${f}`));
+  for (const f of files) refErrs.push(...referenceErrors(fs.readFileSync(f, 'utf8'), `fast/${path.basename(f)}`));
+  if (refErrs.length) {
+    bad++;
+    console.log(`✕ reference check: ${refErrs.length} problem(s)\n  ` + refErrs.slice(0, 30).join('\n  '));
+  } else console.log(`✓ reference check (${reference.sentences.size} sentences from ${reference.names.size ? [...reference.names].join(', ') : 'no examples'})`);
   for (const f of files) {
     const { id, errs } = pack(f);
     if (errs.length) {
@@ -248,7 +314,8 @@ if (args.includes('--check')) {
       console.log(`✕ ${id} (${path.basename(f)}): ${errs.length} problem(s)\n  ` + errs.slice(0, 30).join('\n  '));
     } else console.log(`✓ ${id}`);
   }
-  console.log(`fast-pack: ${files.length - bad} of ${files.length} manifest(s) ready`);
+  const refBad = refErrs.length ? 1 : 0;
+  console.log(`fast-pack: ${files.length - (bad - refBad)} of ${files.length} manifest(s) ready${refBad ? '; the reference check failed' : ''}`);
   process.exit(bad ? 1 : 0);
 }
 const want = arg('--page');

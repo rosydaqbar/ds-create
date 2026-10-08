@@ -157,6 +157,10 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 *Why:* a copy extract walked into a component set displayed on its doc page and picked up the component's own layer text. An apply would have changed the main component.
 *Check:* an extract of a page with sets returns only doc-kit and doc-frame text.
 
+**G43. Use finished builds as references, never as sources.** `examples/` may be read to understand a pattern. Nothing is copied from it (sentences, manifests, page data, values, code), and it never replaces a step: every page is still written from its spec, the templates and tools, this system's inputs and its own Figma file. Other systems' `input/` and `output/` folders are not read at all.
+*Why:* in fast mode, an agent filled pages from a finished example instead of writing the manifests and copy from the build's own sources, which made the fast-mode rules pointless.
+*Check:* `tools/fast-pack.mjs --check` reports no copy line taken word for word from an example and no line naming one.
+
 # 4. Docs site
 
 **G28. Link only to Figma files the owner approved.** With `figmaUrl` empty, every Figma link is hidden. A one-off approved link is a named constant in the page that uses it.

@@ -1,4 +1,4 @@
 # Search-tool ignore file (ripgrep, fd, ag, and the agent's Grep and Glob tools).
 # examples/ holds finished reference builds: ~558k tokens of text that a build never needs.
-# They stay in git and can still be opened on purpose by path; they just don't flood repo-wide searches.
+# They stay in git as references: open one by path to understand a pattern, never to copy from it (GOTCHAS.md G43).
 examples/

@@ -44,6 +44,11 @@ Then, per step:
 
 The exact page → file mapping is in `README.md`.
 
+**Examples are references, never sources.**
+- `examples/` (finished reference builds) may be read to understand a pattern, but nothing is copied from it: no sentences, page data, values or code.
+- A page is never filled from an example in place of its spec and this system's own inputs and file.
+- The `input/` and `output/` folders of other systems are not read at all (`GOTCHAS.md` G43).
+
 ## Loading per step
 
 The full specification is large (several hundred KB). Loading every page file at the start of a long run fills the context, and when it is compacted, page rules get lost. So:

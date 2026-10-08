@@ -44,7 +44,13 @@ One skill, four commands. Each command has its own reference file. Load it befor
 5. **QA on call.** The slow checks run only through `qa` (`INITIATOR.md` Part B, *QA on call*). The cheap ones run inside `build`: each page's own audit, the copy check at the end of a level, and `npm run build`. At the end of `build`, offer `qa` in one line, and never run it unasked.
 6. **Figma.** Load the `figma-use` skill before the first `use_figma` call. Send one writing call at a time, and follow `GOTCHAS.md` §1.
 7. **The repo stays brand-agnostic.** Brand names, file keys and product copy live only in `input/`, `output/` and the Figma file (`input/README.md` I6).
-8. **Report plainly.** Each command ends with a short report:
+8. **Examples are references, never sources.**
+   - `examples/` may be read to understand a pattern: how a kind of page reads, or how a visual is composed.
+   - Nothing is copied from it: no sentences, manifests, page data, values or code.
+   - It never replaces a step. Every page is still written from its spec, the templates and tools, this system's `input/{slug}/` and `output/{slug}/`, and its own Figma file, through the same manifest and copy-file rules.
+   - Other systems' `input/` and `output/` folders are not read at all.
+   - `tools/fast-pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`GOTCHAS.md` G43).
+9. **Report plainly.** Each command ends with a short report:
    - what was done, with links;
    - what is still open;
    - the next command to run.

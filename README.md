@@ -211,7 +211,7 @@ Every page is built with the structure in `templates/structure.md` (page → fra
 | Parts, Components, Sections and Layouts in Figma | `tools/figma-docbuilder.js`, cached once at step 6 (`INITIATOR.md` Part B §6) |
 | Docs site (`workflow/WEB.md`, `workflow/APP.md`) | `workflow/WEB.md`, plus `workflow/APP.md` for App products; docs agents start from `templates/agent-brief.md` |
 
-Never load `examples/` during a build: it holds finished reference builds, not inputs. Never open generated files (`web/src/tokens/tokens.gen.ts`, `web/tokens/tokens.dtcg.json`, `web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
+`examples/` holds finished reference builds, not inputs: read one only to understand a pattern, and never copy from it (`GOTCHAS.md` G43). Never open generated files (`web/src/tokens/tokens.gen.ts`, `web/tokens/tokens.dtcg.json`, `web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
 
 Load page files at the step that builds them, not all at once, and keep the progress ledger on disk (`INITIATOR.md` Part B §0: *Loading per step* and *Progress ledger*). After any context compaction, re-read the global files and the ledger before continuing.
 
@@ -334,6 +334,8 @@ npx impeccable install --project --providers=claude -y
 # Example: Syncium
 
 Syncium is a complete example built with ds-create from one set of brand guidelines: a Figma design system (YOLO mode, every page in the tree) and its web version, made with the `workflow/WEB.md` workflow.
+
+This example is a reference. An agent may read it to understand a pattern, but never copies from it and never uses it in place of a page's spec and the system's own inputs (`GOTCHAS.md` G43).
 
 The web version is in [`examples/syncium`](examples/syncium). It has the explorer site and an installable package, `@syncium/design-system`. The explorer covers:
 - Getting started for designers, developers and product managers;
