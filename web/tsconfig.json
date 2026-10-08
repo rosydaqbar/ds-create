@@ -16,7 +16,7 @@
     "noEmit": true,
     "types": ["vite/client"],
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"], "@app": ["src/docs/app/app.d.ts"] }
+    "paths": { "@/*": ["src/*"], "@app": ["src/docs/app/app.d.ts"], "react-native": ["src/docs/app/rn-types.ts"] }
   },
   "include": ["src"]
 }

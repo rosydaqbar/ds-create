@@ -1,17 +1,8 @@
-import React, { useEffect, useRef, useState, type ReactNode } from 'react';
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  View,
-  type GestureResponderEvent,
-  type Insets,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
-import { dimensions } from '../../tokens/tokens';
+import React, { useEffect, useRef, type ReactNode } from 'react';
+import { Animated, Pressable, StyleSheet, View, type GestureResponderEvent, type StyleProp, type ViewStyle } from 'react-native';
 import { anatomy, toEasing, useTheme, type TextStyleName, type Theme, type ThemeShadows } from '../../theme';
 import { Icon, type IconName } from '../../icons';
+import { a11yState, dim, FocusRing, num, role, touchSlop, useInteraction, useStateColors, type Interaction } from './_shared';
 
 /**
  * 2.1 Button: actions people can take.
@@ -20,6 +11,10 @@ import { Icon, type IconName } from '../../icons';
  * Props are the Figma properties (APP.md §6.1). Figma `State` is not a prop: pressed, hovered
  * (iPad pointer) and focused (hardware keyboard) come from the platform; `disabled` and
  * `loading` are props; `previewState` pins a state on the web docs site only.
+ *
+ * Tokens are read with a fallback (`num`, `dim`, `role` in ./_shared): a Figma file without
+ * component tokens (`button/*`, `size/control/*`) still gets a working button from its semantic
+ * tokens. Replace the fallbacks with the file's own tokens when the brand has them.
  */
 
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -63,9 +58,6 @@ export interface ButtonProps {
   testID?: string;
 }
 
-type Interaction = 'rest' | 'hover' | 'pressed';
-const INTERACTION_INDEX: Record<Interaction, number> = { rest: 0, hover: 1, pressed: 2 };
-
 interface StateColors {
   fill: string;
   border: string;
@@ -73,70 +65,77 @@ interface StateColors {
   icon: string;
 }
 
-/** `size/control/*`, `button/padding-x/*`, `button/gap/*` and the label style for each size (spec §4). */
+/**
+ * `size/control/*`, `button/padding-x/*`, `button/gap/*` and the label style for each size (spec §4).
+ * Without component tokens: the control size, then the space scale.
+ */
 function sizeTokens(theme: Theme, size: ButtonSize) {
   const c = theme.component;
   const table = {
-    xs: { height: dimensions.size.controlXs, paddingX: c.buttonPaddingXXs, gap: c.buttonGapXs, text: 'bodySmSemibold' },
-    sm: { height: dimensions.size.controlSm, paddingX: c.buttonPaddingXSm, gap: c.buttonGapSm, text: 'bodySmSemibold' },
-    md: { height: dimensions.size.controlMd, paddingX: c.buttonPaddingXMd, gap: c.buttonGapMd, text: 'bodySmSemibold' },
-    lg: { height: dimensions.size.controlLg, paddingX: c.buttonPaddingXLg, gap: c.buttonGapLg, text: 'bodyMdSemibold' },
-    xl: { height: dimensions.size.controlXl, paddingX: c.buttonPaddingXXl, gap: c.buttonGapXl, text: 'bodyMdSemibold' },
-  } satisfies Record<ButtonSize, { height: number; paddingX: number; gap: number; text: TextStyleName }>;
+    xs: { height: dim('size', 'controlXs', 32), paddingX: num(c.buttonPaddingXXs, dim('space', 'md', 8)), gap: num(c.buttonGapXs, dim('space', 'xs', 4)), text: 'bodySmSemibold' },
+    sm: { height: dim('size', 'controlSm', 36), paddingX: num(c.buttonPaddingXSm, dim('space', 'lg', 12)), gap: num(c.buttonGapSm, dim('space', 'xs', 4)), text: 'bodySmSemibold' },
+    md: { height: dim('size', 'controlMd', 40), paddingX: num(c.buttonPaddingXMd, dim('space', 'lg', 12)), gap: num(c.buttonGapMd, dim('space', 'sm', 6)), text: 'bodySmSemibold' },
+    lg: { height: dim('size', 'controlLg', 44), paddingX: num(c.buttonPaddingXLg, dim('space', 'xl', 16)), gap: num(c.buttonGapLg, dim('space', 'sm', 6)), text: 'bodyMdSemibold' },
+    xl: { height: dim('size', 'controlXl', 48), paddingX: num(c.buttonPaddingXXl, dim('space', 'xl', 16)), gap: num(c.buttonGapXl, dim('space', 'md', 8)), text: 'bodyMdSemibold' },
+  } satisfies Record<ButtonSize, { height: number; paddingX: number; gap: number; text: string }>;
   return table[size];
 }
 
-/** The token map (spec §7): rest, hover and pressed colors for one emphasis and tone. */
+/**
+ * The token map (spec §7): rest, hover and pressed colors for one emphasis and tone. Each part takes
+ * the first role the brand has (`role` in ./_shared), so a file without hover or pressed roles keeps
+ * its rest color instead of drawing nothing.
+ */
 function interactionColors(theme: Theme, emphasis: ButtonEmphasis, tone: ButtonTone): Record<Interaction, StateColors> {
-  const c = theme.color;
-  const none = c.fillNone;
-  if (tone === 'brand') {
-    switch (emphasis) {
-      case 'primary': {
-        const fg = { border: none, label: c.textOnSolid, icon: c.iconOnSolid };
-        return { rest: { ...fg, fill: c.fillBrandSolid }, hover: { ...fg, fill: c.fillBrandSolidHover }, pressed: { ...fg, fill: c.fillBrandSolidPressed } };
-      }
-      case 'secondary':
-        return {
-          rest: { fill: c.surfaceBase, border: c.borderDefault, label: c.textSecondary, icon: c.textSecondary },
-          hover: { fill: c.surfaceBaseHover, border: c.borderDefault, label: c.textPrimary, icon: c.textPrimary },
-          pressed: { fill: c.surfaceBasePressed, border: c.borderDefault, label: c.textPrimary, icon: c.textPrimary },
-        };
-      case 'tertiary':
-        return {
-          rest: { fill: none, border: none, label: c.textSecondary, icon: c.textSecondary },
-          hover: { fill: c.fillNeutralSubtleHover, border: none, label: c.textPrimary, icon: c.textPrimary },
-          pressed: { fill: c.fillNeutralSubtlePressed, border: none, label: c.textPrimary, icon: c.textPrimary },
-        };
-    }
-  }
+  const r = (...keys: string[]) => role(theme, keys);
+  const none = r('fillNone');
+  const danger = tone === 'danger';
+  // The solid fill, then the names other files give the action color, then a role every file has.
+  const solid = danger ? 'fillDangerSolid' : 'fillBrandSolid';
+  const solidChain = danger ? [solid, 'fillDanger', 'textDanger', 'textPrimary'] : [solid, 'fillPrimarySolid', 'fillPrimary', 'fillAccentSolid', 'fillAccent', 'surfaceBrandSolid', 'textBrand', 'textPrimary'];
   switch (emphasis) {
     case 'primary': {
-      const fg = { border: none, label: c.textOnSolid, icon: c.iconOnSolid };
-      return { rest: { ...fg, fill: c.fillDangerSolid }, hover: { ...fg, fill: c.fillDangerSolidHover }, pressed: { ...fg, fill: c.fillDangerSolidPressed } };
+      const fg = { border: none, label: r('textOnSolid', 'textInverse', 'surfaceBase'), icon: r('iconOnSolid', 'textOnSolid', 'textInverse', 'surfaceBase') };
+      return {
+        rest: { ...fg, fill: r(...solidChain) },
+        hover: { ...fg, fill: r(`${solid}Hover`, ...solidChain) },
+        pressed: { ...fg, fill: r(`${solid}Pressed`, `${solid}Hover`, ...solidChain) },
+      };
     }
     case 'secondary':
+      if (danger)
+        return {
+          rest: { fill: r('surfaceBase'), border: r('borderDangerSubtle', 'borderDanger'), label: r('textDanger'), icon: r('iconDanger', 'textDanger') },
+          hover: { fill: r('fillDangerSubtleHover', 'fillDangerSubtle', 'surfaceBase'), border: r('borderDangerSubtle', 'borderDanger'), label: r('textDangerHover', 'textDanger'), icon: r('textDangerHover', 'textDanger') },
+          pressed: { fill: r('fillDangerSubtlePressed', 'fillDangerSubtle', 'surfaceBase'), border: r('borderDangerSubtle', 'borderDanger'), label: r('textDanger'), icon: r('iconDanger', 'textDanger') },
+        };
       return {
-        rest: { fill: c.surfaceBase, border: c.borderDangerSubtle, label: c.textDanger, icon: c.textDanger },
-        hover: { fill: c.fillDangerSubtleHover, border: c.borderDangerSubtle, label: c.textDangerHover, icon: c.textDangerHover },
-        pressed: { fill: c.fillDangerSubtlePressed, border: c.borderDangerSubtle, label: c.textDanger, icon: c.textDanger },
+        rest: { fill: r('surfaceBase'), border: r('borderDefault'), label: r('textSecondary', 'textPrimary'), icon: r('iconSecondary', 'textSecondary', 'textPrimary') },
+        hover: { fill: r('surfaceBaseHover', 'surfaceBase'), border: r('borderDefault'), label: r('textPrimary'), icon: r('iconPrimary', 'textPrimary') },
+        pressed: { fill: r('surfaceBasePressed', 'surfaceBaseHover', 'surfaceBase'), border: r('borderDefault'), label: r('textPrimary'), icon: r('iconPrimary', 'textPrimary') },
       };
     case 'tertiary':
+      if (danger)
+        return {
+          rest: { fill: none, border: none, label: r('textDanger'), icon: r('iconDanger', 'textDanger') },
+          hover: { fill: r('fillDangerSubtleHover', 'fillDangerSubtle', 'fillNone'), border: none, label: r('textDangerHover', 'textDanger'), icon: r('textDangerHover', 'textDanger') },
+          pressed: { fill: r('fillDangerSubtlePressed', 'fillDangerSubtle', 'fillNone'), border: none, label: r('textDanger'), icon: r('iconDanger', 'textDanger') },
+        };
       return {
-        rest: { fill: none, border: none, label: c.textDanger, icon: c.textDanger },
-        hover: { fill: c.fillDangerSubtleHover, border: none, label: c.textDangerHover, icon: c.textDangerHover },
-        pressed: { fill: c.fillDangerSubtlePressed, border: none, label: c.textDanger, icon: c.textDanger },
+        rest: { fill: none, border: none, label: r('textSecondary', 'textPrimary'), icon: r('iconSecondary', 'textSecondary', 'textPrimary') },
+        hover: { fill: r('fillNeutralSubtleHover', 'surfaceBaseHover', 'fillNone'), border: none, label: r('textPrimary'), icon: r('iconPrimary', 'textPrimary') },
+        pressed: { fill: r('fillNeutralSubtlePressed', 'fillNeutralSubtleHover', 'surfaceBasePressed', 'fillNone'), border: none, label: r('textPrimary'), icon: r('iconPrimary', 'textPrimary') },
       };
   }
 }
 
 /** Disabled colors (all emphasis, both tones). */
 function disabledColors(theme: Theme, emphasis: ButtonEmphasis): StateColors {
-  const c = theme.color;
-  const fg = { label: c.textDisabled, icon: c.textDisabled };
-  if (emphasis === 'primary') return { ...fg, fill: c.fillNeutralSubtleDisabled, border: c.borderDisabled };
-  if (emphasis === 'secondary') return { ...fg, fill: c.surfaceBase, border: c.borderDisabled };
-  return { ...fg, fill: c.fillNone, border: c.fillNone };
+  const r = (...keys: string[]) => role(theme, keys);
+  const fg = { label: r('textDisabled', 'textTertiary', 'textSecondary'), icon: r('iconDisabled', 'textDisabled', 'textTertiary', 'textSecondary') };
+  if (emphasis === 'primary') return { ...fg, fill: r('fillNeutralSubtleDisabled', 'fillDisabled', 'surfaceSunken', 'surfaceBase'), border: r('borderDisabled', 'borderSubtle', 'fillNone') };
+  if (emphasis === 'secondary') return { ...fg, fill: r('surfaceBase'), border: r('borderDisabled', 'borderSubtle', 'borderDefault') };
+  return { ...fg, fill: r('fillNone'), border: r('fillNone') };
 }
 
 export function Button({
@@ -161,55 +160,25 @@ export function Button({
 }: ButtonProps) {
   const theme = useTheme();
   const s = sizeTokens(theme, size);
-
-  const [pressed, setPressed] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
   const interactive = !disabled && !loading;
 
-  const interaction: Interaction =
-    previewState === 'pressed' || previewState === 'hover'
-      ? previewState
-      : interactive && pressed
-        ? 'pressed'
-        : interactive && hovered
-          ? 'hover'
-          : 'rest';
-  const showFocus = !disabled && (previewState === 'focus' || focused);
+  // Platform states (pressed, pointer hover, keyboard focus); `previewState` pins one on the docs site.
+  const { interaction, focused, handlers } = useInteraction(!interactive, previewState);
+  const showFocus = !disabled && focused;
 
   // Press feedback: fast · standard (APP.md §6.3). Previews jump straight to the pinned state.
-  const progress = useRef(new Animated.Value(INTERACTION_INDEX[interaction])).current;
-  useEffect(() => {
-    const toValue = INTERACTION_INDEX[interaction];
-    if (previewState) {
-      progress.setValue(toValue);
-      return;
-    }
-    const animation = Animated.timing(progress, {
-      toValue,
-      duration: theme.motion.durationFast,
-      easing: toEasing(theme.motion.easingStandard),
-      useNativeDriver: false, // colors can't run on the native driver
-    });
-    animation.start();
-    return () => animation.stop();
-  }, [interaction, previewState, progress, theme.motion.durationFast, theme.motion.easingStandard]);
-
   const states = interactionColors(theme, emphasis, tone);
   const current: StateColors = disabled ? disabledColors(theme, emphasis) : states[interaction];
-  const animate = (pick: (c: StateColors) => string) =>
-    disabled
-      ? pick(current)
-      : progress.interpolate({ inputRange: [0, 1, 2], outputRange: [pick(states.rest), pick(states.hover), pick(states.pressed)] });
+  const stateColor = useStateColors(states as Record<Interaction, Record<keyof StateColors, string>>, interaction, !!previewState);
+  const animate = (pick: keyof StateColors) => (disabled ? current[pick] : stateColor(pick));
 
   // Depth only on primary and secondary, never when disabled (spec §7). Absent when the brand has no depth.
   const elevation: Partial<ThemeShadows> = theme.shadows;
-  const depth = !disabled && emphasis !== 'tertiary' ? elevation.elevationControl : undefined;
+  const depth = !disabled && emphasis !== 'tertiary' ? (elevation as Record<string, ViewStyle | undefined>).elevationControl : undefined;
 
   // Touch target: grow the hit area, never the visual size (APP.md §6.2).
-  const slopY = Math.max(0, (theme.touchTarget - s.height) / 2);
-  const slopX = iconOnly ? slopY : 0;
-  const hitSlop: Insets | undefined = slopY > 0 ? { top: slopY, bottom: slopY, left: slopX, right: slopX } : undefined;
+  const hitSlop = touchSlop(theme.touchTarget, s.height, iconOnly ? s.height : undefined);
+  const radius = dim('radius', 'control', 8);
 
   const showText = !iconOnly && (!loading || showLoadingText);
   const leading = loading ? (
@@ -218,26 +187,20 @@ export function Button({
     leadingVisual ?? ((leadingIcon || iconOnly) && <Icon name={leadingIcon ?? 'general/plus'} size="md" color={current.icon} anatomyPart="leading-icon" />)
   );
 
-  const focusInset = dimensions.space.xxs + dimensions.borderWidth.focus;
-
   return (
     <Pressable
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled, busy: loading }}
+      // iOS and Android read accessibilityState; react-native-web reads the aria-* props it also sets.
+      {...a11yState({ disabled, busy: loading })}
       disabled={disabled}
       focusable={!disabled}
       hitSlop={hitSlop}
       onPress={interactive ? onPress : undefined}
       onLongPress={interactive ? onLongPress : undefined}
-      onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      {...handlers}
       style={[fullWidth ? styles.fullWidth : styles.hug, style]}
     >
       <Animated.View
@@ -248,10 +211,10 @@ export function Button({
             minHeight: s.height,
             gap: s.gap,
             paddingHorizontal: iconOnly ? 0 : s.paddingX,
-            borderRadius: dimensions.radius.control,
-            borderWidth: dimensions.borderWidth.default,
-            backgroundColor: animate((c) => c.fill),
-            borderColor: animate((c) => c.border),
+            borderRadius: radius,
+            borderWidth: dim('borderWidth', 'default', 1),
+            backgroundColor: animate('fill'),
+            borderColor: animate('border'),
           },
           iconOnly && { width: s.height, height: s.height },
           depth,
@@ -259,34 +222,14 @@ export function Button({
       >
         {leading || null}
         {showText && (
-          <View {...anatomy('text-padding')} style={[styles.textPadding, { paddingHorizontal: dimensions.space.optical }]}>
-            <Animated.Text
-              {...anatomy('label')}
-              allowFontScaling
-              style={[theme.text(s.text), styles.label, { color: animate((c) => c.label) }]}
-            >
+          <View {...anatomy('text-padding')} style={[styles.textPadding, { paddingHorizontal: dim('space', 'optical', 2) }]}>
+            <Animated.Text {...anatomy('label')} allowFontScaling style={[theme.text(s.text as TextStyleName), styles.label, { color: animate('label') }]}>
               {label}
             </Animated.Text>
           </View>
         )}
         {!iconOnly && !loading && trailingIcon && <Icon name={trailingIcon} size="md" color={current.icon} anatomyPart="trailing-icon" />}
-        {showFocus && (
-          <View
-            pointerEvents="none"
-            style={[
-              styles.focusRing,
-              {
-                top: -focusInset,
-                bottom: -focusInset,
-                left: -focusInset,
-                right: -focusInset,
-                borderRadius: dimensions.radius.control + focusInset,
-                borderWidth: dimensions.borderWidth.focus,
-                borderColor: tone === 'danger' ? theme.color.borderDanger : theme.color.borderFocus,
-              },
-            ]}
-          />
-        )}
+        {showFocus && <FocusRing radius={radius} color={tone === 'danger' ? role(theme, ['borderDanger', 'textDanger']) : undefined} />}
       </Animated.View>
     </Pressable>
   );
@@ -299,23 +242,19 @@ export function Button({
  */
 function ButtonSpinner({ color }: { color: string }) {
   const theme = useTheme();
+  const motion = theme.motion as unknown as Record<string, number | readonly number[] | undefined>;
+  const duration = num(motion.durationLoop, 900);
+  const easing = (motion.easingLinear as readonly number[] | undefined) ?? [0, 0, 1, 1];
   const turn = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     turn.setValue(0);
-    const loop = Animated.loop(
-      Animated.timing(turn, {
-        toValue: 1,
-        duration: theme.motion.durationLoop,
-        easing: toEasing(theme.motion.easingLinear),
-        useNativeDriver: true,
-      }),
-    );
+    const loop = Animated.loop(Animated.timing(turn, { toValue: 1, duration, easing: toEasing(easing), useNativeDriver: true }));
     loop.start();
     return () => loop.stop();
-  }, [turn, theme.motion.durationLoop, theme.motion.easingLinear]);
+  }, [turn, duration, easing]);
 
-  const box = dimensions.size.iconMd;
-  const ring: ViewStyle = { borderRadius: dimensions.radius.full, borderWidth: theme.component.spinnerThicknessMd };
+  const box = dim('size', 'iconMd', 20);
+  const ring: ViewStyle = { borderRadius: dim('radius', 'full', 9999), borderWidth: num(theme.component.spinnerThicknessMd, 2) };
   const rotate = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
   return (
     <View
@@ -330,7 +269,7 @@ function ButtonSpinner({ color }: { color: string }) {
         style={[
           StyleSheet.absoluteFill,
           ring,
-          { borderColor: theme.color.fillNone, borderTopColor: color, transform: [{ rotate }] },
+          { borderColor: role(theme, ['fillNone']), borderTopColor: color, transform: [{ rotate }] },
         ]}
       />
     </View>
@@ -346,5 +285,4 @@ const styles = StyleSheet.create({
   // The label may wrap only at the largest accessibility text sizes; it never clips (APP.md §6.2).
   textPadding: { flexShrink: 1 },
   label: { textAlign: 'center' },
-  focusRing: { position: 'absolute' },
 });

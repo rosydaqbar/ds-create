@@ -115,7 +115,9 @@ The template frames are fixed. The topics inside them come from the Component's 
 
 # 5. Implementation mode
 
-Components use the same implementation mode as the Parts (`INITIATOR.md` §8): **YOLO everything** or **One by one**. The mode changes pacing only. In One by one, the Parts a Component needs are built first when they are missing; unrelated Components are not prebuilt.
+Components use the same implementation mode as the Parts (`QUESTIONNAIRE.md` §8): **YOLO everything** or **One by one**. The mode changes pacing only. In One by one, the Parts a Component needs are built first when they are missing; unrelated Components are not prebuilt.
+
+Neither mode changes the order. A Component page starts only when every earlier step of the build sequence (`INITIATOR.md` Part B §6) is done in the ledger, every Part in scope included. It is done only after its own file and the files of the Parts it contains were loaded at its step and the page gate passed.
 
 # 6. Completion criteria
 

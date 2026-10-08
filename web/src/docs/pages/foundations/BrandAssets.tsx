@@ -8,6 +8,7 @@ import { AnchorHeading, DocPage, Topics } from '../../DocPage';
 import { Caption, CodeBlock, InlineCode, P } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import type { Topic } from '../../types';
+import { brandCopy } from '@/brand/copy';
 
 /* ---------- data ---------- */
 const base = import.meta.env.BASE_URL;
@@ -89,8 +90,8 @@ function Pending({ children }: { children: ReactNode }) {
   );
 }
 
-/** Minimum logo sizes in pixels (spec defaults). BRAND: replace with the brand's own rules when the guideline sets them. */
-const MIN = { mark: 16, lockup: 24 };
+/** Minimum logo sizes in pixels (brandCopy.logoMinSize). */
+const MIN = brandCopy.logoMinSize;
 
 /* ---------- Overview ---------- */
 function LogoSection() {
@@ -140,11 +141,7 @@ function ClearSpace() {
   return (
     <section className="flex flex-col gap-lg">
       <AnchorHeading>Clear space and minimum size</AnchorHeading>
-      {/* BRAND: clear space and minimum sizes are the spec defaults. Rewrite them (here, in MIN and in the Resizing topic) from the logo rules in the Figma Guidelines frame. */}
-      <P>
-        Leave empty space around the logo equal to the mark’s height on every side, so nothing crowds it. Keep the mark at {MIN.mark} pixels or larger and the
-        lockup at least {MIN.lockup} pixels high. Any smaller and its details stop reading.
-      </P>
+      <P>{brandCopy.logoClearSpace(MIN)}</P>
       <div className="grid gap-lg lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col items-center justify-center gap-md rounded-surface border border-border-subtle bg-surface-sunken p-xl">
           <div className="relative max-w-full overflow-hidden border border-dashed border-border-brand p-10" aria-label={`${product} lockup with clear space equal to the mark height`} role="img">
@@ -260,7 +257,7 @@ function Overview() {
 
 /* ---------- Guidelines ---------- */
 const logoCount = [hasLockup && 'Two lockups', hasMark && 'a mark'].filter(Boolean).join(' and ');
-// BRAND: the asset kinds in scope. Logo, social marks and flags are computed; add or rename the other kinds (and their status) from the Figma 1.8 Brand assets page.
+/** The asset kinds in scope: logo, social marks and flags are computed; the rest come from brandCopy.otherAssetKinds. */
 const INVENTORY: { kind: string; sample: ReactNode; count: string; use: string; status: string; tone: 'ok' | 'warn' | 'off' }[] = [
   {
     kind: 'Product logo',
@@ -279,7 +276,7 @@ const INVENTORY: { kind: string; sample: ReactNode; count: string; use: string; 
     status: flagCodes.length ? 'Supplied' : 'Not supplied yet',
     tone: flagCodes.length ? 'ok' : 'off',
   },
-  { kind: 'Partner, payment and app-store marks, file types', sample: <Icon name="files/file" size="xl" className="text-icon-disabled" />, count: '—', use: 'Added when the product needs them', status: 'Not in scope yet', tone: 'off' },
+  ...brandCopy.otherAssetKinds.map((k) => ({ ...k, sample: <Icon name="files/file" size="xl" className={k.tone === 'off' ? 'text-icon-disabled' : 'text-icon-secondary'} /> })),
 ];
 
 function Inventory() {
@@ -294,7 +291,7 @@ function Inventory() {
           <span
             className={cn(
               'type-body-xs-semibold self-start rounded-indicator px-md py-xxs',
-              i.tone === 'ok' ? 'bg-fill-success-subtle text-text-success' : i.tone === 'warn' ? 'bg-fill-warning-subtle text-text-warning' : 'bg-fill-neutral-subtle text-text-secondary',
+              i.tone === 'ok' ? 'bg-fill-success-subtle text-site-success-on-tint' : i.tone === 'warn' ? 'bg-fill-warning-subtle text-site-warning-on-tint' : 'bg-fill-neutral-subtle text-text-secondary',
             )}
           >
             {i.status}
@@ -353,7 +350,7 @@ function Steps({ items }: { items: string[] }) {
     <ol className="grid w-full gap-lg sm:grid-cols-2 lg:grid-cols-4">
       {items.map((t, i) => (
         <li key={t} className="flex flex-col gap-sm rounded-surface border border-border-subtle bg-surface-base p-lg">
-          <span className="inline-flex size-(--size-control-xs) items-center justify-center rounded-full bg-fill-brand-subtle type-body-sm-semibold text-text-brand">{i + 1}</span>
+          <span className="inline-flex size-(--size-control-xs) items-center justify-center rounded-full bg-fill-brand-subtle type-body-sm-semibold text-site-brand-on-tint">{i + 1}</span>
           <span className="type-body-sm-regular text-text-primary">{t}</span>
         </li>
       ))}
@@ -364,11 +361,11 @@ function Steps({ items }: { items: string[] }) {
 /**
  * Optical sizing: the same marks forced to one box, then given their own heights.
  * Heights are computed from each mark's drawn area (its bounding box inside the 24 box), so marks that fill less
- * of the box grow and marks that fill all of it shrink. BRAND: if the Figma Guidelines frame sets hand-tuned heights,
- * put them in OPTICAL_OVERRIDE; they win over the computed ones.
+ * of the box grow and marks that fill all of it shrink. Hand-tuned heights from the Figma Guidelines frame
+ * (brandCopy.socialMarkHeights) win over the computed ones.
  */
 const OPTICAL_BASE = 31;
-const OPTICAL_OVERRIDE: Partial<Record<SocialProvider, number>> = {};
+const OPTICAL_OVERRIDE: Partial<Record<SocialProvider, number>> = brandCopy.socialMarkHeights;
 function useOpticalHeights(ref: RefObject<HTMLDivElement | null>) {
   const [heights, setHeights] = useState<Partial<Record<SocialProvider, number>>>({});
   useLayoutEffect(() => {
@@ -432,8 +429,8 @@ function OpticalSizing() {
   );
 }
 
-/** BRAND: the flag set's source and license, e.g. the library the flags came from. */
-const FLAG_SOURCE = 'Supplied with the build · record the source';
+/** The flag set's source and license (brandCopy.flagSource). */
+const FLAG_SOURCE = brandCopy.flagSource;
 
 const TOPICS: Topic[] = [
   {
@@ -479,7 +476,7 @@ logo: { light: '${config.logo.light}', dark: '${config.logo.dark}', mark: '${con
           { ok: false, t: 'Don’t recolor it.', node: <Lockup className="h-8" style={{ filter: 'hue-rotate(150deg) saturate(1.6)' }} /> },
         ].map((v) => (
           <div key={v.t} className="flex flex-col gap-sm">
-            <div className={cn('flex h-24 items-center justify-center overflow-hidden rounded-control border-b-4 bg-surface-base', v.ok ? 'border-b-border-success' : 'border-b-border-danger')}>{v.node}</div>
+            <div className="flex h-24 items-center justify-center overflow-hidden rounded-control border border-border-subtle bg-surface-base">{v.node}</div>
             <span className="flex items-center gap-sm type-body-sm-regular text-text-secondary">
               <Icon name={v.ok ? 'alerts/check-circle' : 'alerts/x-circle'} size="sm" className={v.ok ? 'text-icon-success' : 'text-icon-danger'} />
               {v.t}
@@ -512,7 +509,7 @@ logo: { light: '${config.logo.light}', dark: '${config.logo.dark}', mark: '${con
   },
   {
     title: 'Resizing, clear space and minimum size',
-    body: `Always resize proportionally: set the height and let the width follow. Leave clear space equal to the mark’s height on every side. Keep the mark at ${MIN.mark} pixels or more and the lockup at least ${MIN.lockup} pixels high. When a mark’s owner publishes their own rules, follow those.`,
+    body: brandCopy.logoResizing(MIN),
     do: { caption: 'Set the height and let the width follow.', render: () => <Lockup className="h-8" /> },
     dont: { caption: 'Don’t set both width and height to fit a box. The logo gets squashed.', render: () => <Lockup className="h-14 w-36 object-fill" /> },
   },

@@ -11,3 +11,5 @@ export type {
 } from './ThemeProvider';
 export { useTheme } from './useTheme';
 export { anatomy } from './anatomy';
+export { HeadingLevelProvider, SubHeadings, headingProps, useHeading } from './heading';
+export type { HeadingLevel } from './heading';

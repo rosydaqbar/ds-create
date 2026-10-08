@@ -7,6 +7,14 @@ import { tokens } from '@/tokens/tokens.gen';
 import { usePresence } from '@/lib/motion';
 import { componentDocs, levelLabel, slugOf, staticPages } from './registry';
 import { pageMeta } from './meta';
+import { appTokenNames, productHasWeb } from './blocks';
+
+/** The code names a token result shows and matches: CSS and Tailwind on a web product; React Native, Swift and Kotlin on an App product. */
+function codeNames(v: { name: string; css: string; tailwind: string | null }): string[] {
+  if (productHasWeb) return [v.css, v.tailwind ?? ''].filter(Boolean);
+  const a = appTokenNames(v.name);
+  return a ? [a.rn, a.swift, a.kotlin] : [];
+}
 
 /**
  * Site search: titles, summaries, aliases ("dropdown" → Select), section headings, props and
@@ -64,10 +72,10 @@ function buildIndex(): Entry[] {
       title: v.name,
       group: `Token · ${v.collection}`,
       to: `/guidance/02-tokens?tab=reference&q=${encodeURIComponent(v.name)}`,
-      hint: [v.css, v.tailwind].filter(Boolean).join(' · '),
+      hint: codeNames(v).join(' · '),
       fields: [
         { text: v.name, weight: 60 },
-        { text: `${v.css} ${v.tailwind ?? ''}`, weight: 50 },
+        { text: codeNames(v).join(' '), weight: 50 },
       ],
     });
   }

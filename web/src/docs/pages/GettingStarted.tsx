@@ -9,6 +9,8 @@ import { AnchorHeading, DocPage } from '../DocPage';
 import { APP_PLATFORMS, Bullets, Caption, CodeBlock, DoDont, H3, InlineCode, P, productHasApp, productHasWeb, Segmented, type AppPlatform } from '../blocks';
 import { componentDocs, levelLabel, slugOf, staticPages } from '../registry';
 import { figmaNodeFor, pageMeta, statusInfo, StatusPill } from '../meta';
+import { siteHasDark, supportedModes, unsupportedModes } from '../modes';
+import { brandCopy } from '@/brand/copy';
 
 /* ---------- data (everything below is read from the tokens, the config and the page registry) ---------- */
 const byName = new Map(tokens.variables.map((t) => [t.name, t]));
@@ -79,7 +81,8 @@ const typeSentence = !webFonts.length
   : `Text is set in ${mainFace.prose}${otherFaces.length ? `, with ${joinList(otherFaces.map((f) => `${f.prose} for ${f.role === 'mono' ? 'code' : f.use.toLowerCase()}`))}` : ''}.`;
 
 const modesOf = (collection: string) => tokens.collections.find((c) => c.name === collection)?.modes ?? [];
-const colorModes = modesOf('Color');
+/** The supported color modes (src/docs/modes.ts): a mode Figma has but the owner approved as unsupported is left out. */
+const colorModes = supportedModes;
 const motionModes = modesOf('Motion');
 const spaceSteps = tokens.variables.filter((t) => /^space\/[^/]+$/.test(t.name) && !/\/(none|optical)$/.test(t.name)).map((t) => t.name.split('/')[1]);
 /** Short brand name for the library-split example: "Acme Design System" → "Acme". */
@@ -94,6 +97,8 @@ const pageTo = (id: string) => {
   return d ? `/${d.level}/${slugOf(d.id, d.name)}` : '/';
 };
 const docsOf = (level: string) => componentDocs.filter((d) => d.level === level);
+/** The ids a level spans in this build ("2.1 · 2.11"), or the fallback when it has one page or none. */
+const idRange = (items: { id: string }[], fallback: string) => (items.length > 1 ? `${items[0].id} · ${items.at(-1)!.id}` : (items[0]?.id ?? fallback));
 /** A few example names for a level, preferring the most familiar pages when the build has them. */
 const examples = (items: { id: string; name: string }[], prefer: string[], n: number) => {
   const picked = [...prefer.map((id) => items.find((i) => i.id === id)).filter((i) => !!i), ...items].filter((i, k, all) => all.indexOf(i) === k);
@@ -163,7 +168,7 @@ function Steps({ items }: { items: ReactNode[] }) {
     <ol className="flex max-w-(--size-measure-reading) flex-col gap-md">
       {items.map((it, i) => (
         <li key={i} className="flex gap-md">
-          <span aria-hidden className="type-body-xs-semibold inline-flex size-(--size-control-xs) shrink-0 items-center justify-center rounded-full bg-fill-brand-subtle text-text-brand">
+          <span aria-hidden className="type-body-xs-semibold inline-flex size-(--size-control-xs) shrink-0 items-center justify-center rounded-full bg-fill-brand-subtle text-site-brand-on-tint">
             {i + 1}
           </span>
           <span className="type-body-md-regular pt-xxs text-text-secondary">{it}</span>
@@ -248,9 +253,12 @@ function InviteCard() {
 }
 
 /* ---------- Overview ---------- */
-// BRAND: rewrite from the Figma "01 Getting started · Overview" Welcome topic: name the product this system serves and its platforms (one or two sentences).
 const productScreens = productHasWeb && productHasApp ? 'web screens and iOS and Android apps' : productHasApp ? 'iOS and Android apps' : 'responsive web screens';
-const welcomeIntro = `${config.name} is the shared library of tokens, components and guidance for designing and building ${productScreens} in ${joinList(colorModes)}.`;
+const welcomeIntro = brandCopy.welcome({
+  name: config.name,
+  platforms: productScreens,
+  modes: `${joinList(colorModes)}${unsupportedModes.length ? ` (${joinList(unsupportedModes)} isn’t supported)` : ''}`,
+});
 /** What developers get, by product type (ds.config `product`). */
 const codeHome =
   productHasWeb && productHasApp
@@ -263,9 +271,7 @@ const developerStart = productHasApp
     ? 'Install the web package, or copy the code for React Native, Swift or Kotlin. Props match the Figma properties, and every value comes from a token.'
     : 'Copy the code for React Native, Swift or Kotlin from each component page. Props match the Figma properties, and every value comes from a token.'
   : 'Install one package and start building. Props match the Figma properties, and every value comes from a token.';
-// BRAND: rewrite from the Figma "The brand at a glance" topic: where the brand colors come from, and the corner and depth character.
-const brandSummary =
-  'The brand color becomes the brand ramp, and the neutrals carry text, borders and surfaces. The corner scale and the elevation styles give every component the same shape and depth.';
+const brandSummary = brandCopy.brandAtAGlance;
 
 function Overview() {
   const fill = lightOf('color/fill/brand/solid');
@@ -283,8 +289,7 @@ function Overview() {
           {welcomeIntro} {typeSentence}
         </P>
         <P>
-          The system lives in two places: the Figma library for designers, and {codeHome}. Both use the same names, so a design and its code
-          always describe the same thing.
+          The system lives in two places: the Figma library for designers, and {codeHome}. Use the property tables and token Reference to map Figma names to code. Review both when a design changes.
         </P>
         <div className="grid gap-md sm:grid-cols-3">
           {[
@@ -492,7 +497,7 @@ function Overview() {
 
       <Topic title="Asking for a change">
         <P>
-          Missing a component, a variant or a token? Ask before you build your own. Every change flows the same way, from Figma to the spec to code, so the two never drift apart.
+          Check the library before requesting a new component, variant or token. Describe the gap and the screen it affects, then review the Figma design, spec and code together.
         </P>
         <ol className="grid gap-md sm:grid-cols-2 lg:grid-cols-4">
           {[
@@ -589,7 +594,14 @@ function ForDesigners() {
               Turn on the library in your team’s files: Assets panel → Libraries → <strong className="text-text-primary">{config.name}</strong>.
             </>,
             <>When the system changes, accept the library update and read its notes in the update dialog.</>,
-            <>Set the color mode (Light or Dark) on the page or frame you’re designing, not on each layer.</>,
+            colorModes.length > 1 ? (
+              <>Set the color mode ({colorModes.join(' or ')}) on the page or frame you’re designing, not on each layer.</>
+            ) : (
+              <>
+                Set the color mode to {colorModes[0]} on the page or frame you’re designing, not on each layer
+                {unsupportedModes.length ? `. ${joinList(unsupportedModes)} isn’t supported` : ''}.
+              </>
+            ),
             <>Insert components from the Assets panel, and adjust them in the property panel rather than in the layers.</>,
           ]}
         />
@@ -614,7 +626,7 @@ function ForDesigners() {
           {[
             {
               title: 'Foundations',
-              ids: '1.1 · 1.7',
+              ids: idRange(foundationPages, '1.1'),
               node: (
                 <div className="flex items-center gap-md">
                   <Icon name="communication/mail" size="lg" className="text-icon-secondary" />
@@ -624,7 +636,7 @@ function ForDesigners() {
             },
             {
               title: 'Parts',
-              ids: '2.1 · 2.11',
+              ids: idRange(docsOf('parts'), '2.1'),
               node: (
                 <div className="flex flex-col items-start gap-sm">
                   <Label as="span" label="Email" />
@@ -632,10 +644,10 @@ function ForDesigners() {
                 </div>
               ),
             },
-            { title: 'Components', ids: '3.2', node: <TextField size="sm" label="Email" placeholder="you@company.com" inputType="email" /> },
+            { title: 'Components', ids: idRange(docsOf('components'), '3.2'), node: <TextField size="sm" label="Email" placeholder="you@company.com" inputType="email" /> },
             {
               title: 'Sections',
-              ids: 'Sign-in form',
+              ids: idRange(docsOf('sections'), '4.x'),
               node: (
                 <div className="flex w-full flex-col gap-sm rounded-sm border border-border-subtle bg-surface-base p-md">
                   <span className="type-body-sm-semibold text-text-primary">Sign in</span>
@@ -650,7 +662,7 @@ function ForDesigners() {
                 <span className="type-body-sm-semibold text-text-primary">{l.title}</span>
                 <span className="type-code-sm-regular text-text-tertiary">{l.ids}</span>
               </span>
-              <div className="flex min-h-28 items-center">{l.node}</div>
+              <div className="flex min-h-28 min-w-0 items-center *:w-full">{l.node}</div>
               {i < 3 && <span className="type-body-xs-regular text-text-tertiary">Used by the next level →</span>}
             </div>
           ))}
@@ -732,8 +744,8 @@ function ForDesigners() {
             ))}
           </div>
         </Visual>
-        <H3>The same names in code</H3>
-        <P>Developers use the property names you see in Figma, so a hand-off needs no translation table. What you set in the property panel is what they type.</P>
+        <H3>Map properties to code</H3>
+        <P>Use the table to map Figma properties to code props. Names can differ; token code names are listed in Reference.</P>
         <TableRegion label="Figma properties and code props">
           <table className="w-full border-collapse text-left">
             <thead className="bg-surface-sunken">
@@ -833,16 +845,26 @@ function ForDesigners() {
 
       <Topic title="Modes">
         <P>
-          Each variable holds one value per mode. The <strong className="text-text-primary">Color</strong> collection has Light and Dark. Set a frame to Dark and every variable switches
-          to its dark value, so you never need a separate “dark” version of a component.
+          {colorModes.length > 1 ? (
+            <>
+              Each variable holds one value per mode. The <strong className="text-text-primary">Color</strong> collection has {joinList(colorModes)}. Set a frame to{' '}
+              {colorModes[1]} and every variable switches to its {colorModes[1].toLowerCase()} value, so you never need a separate “{colorModes[1].toLowerCase()}” version of a
+              component.
+            </>
+          ) : (
+            <>
+              The <strong className="text-text-primary">Color</strong> collection has one supported mode, {colorModes[0]}
+              {unsupportedModes.length ? `: its ${joinList(unsupportedModes)} mode isn’t supported, so frames stay on ${colorModes[0]}` : ''}.
+            </>
+          )}
         </P>
-        <div className="grid gap-xl md:grid-cols-2">
-          <ModeFrame mode="Light">
-            <InviteCard />
-          </ModeFrame>
-          <ModeFrame mode="Dark">
-            <InviteCard />
-          </ModeFrame>
+        {/* An explicit width: with brand spacing tokens, max-w-md would be the md space step, not 28 rem. */}
+        <div className={colorModes.length > 1 ? 'grid gap-xl md:grid-cols-2' : 'grid max-w-[28rem] gap-xl'}>
+          {colorModes.map((m) => (
+            <ModeFrame key={m} mode={m as 'Light' | 'Dark'}>
+              <InviteCard />
+            </ModeFrame>
+          ))}
         </div>
         <P>
           The <strong className="text-text-primary">Motion</strong> collection has Standard and Reduced. Reduced swaps movement for instant changes or short fades, for people who turn on
@@ -885,7 +907,7 @@ function ForDesigners() {
               Choose a collection, for example <strong className="text-text-primary">Color</strong>.
             </>,
             <>Find the variable by name, then change its value or alias in the column for the mode you want.</>,
-            <>Check real components in both modes before you publish the library update.</>,
+            <>Check real components in {colorModes.length > 1 ? 'every mode' : colorModes[0]} before you publish the library update.</>,
           ]}
         />
         <TableRegion label="Color collection as seen in the variables panel">
@@ -893,8 +915,9 @@ function ForDesigners() {
             <thead className="bg-surface-sunken">
               <tr>
                 <Th>Name</Th>
-                <Th>Light</Th>
-                <Th>Dark</Th>
+                {colorModes.map((m) => (
+                  <Th key={m}>{m}</Th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -903,7 +926,7 @@ function ForDesigners() {
                 return (
                   <tr key={n} className="border-t border-border-subtle">
                     <Td code>{n}</Td>
-                    {(['Light', 'Dark'] as const).map((m) => (
+                    {colorModes.map((m) => (
                       <Td key={m} code>
                         <span className="inline-flex items-center gap-sm">
                           <span aria-hidden className="size-4 rounded-xs border border-border-subtle" style={{ background: t?.modes[m]?.value }} />
@@ -985,7 +1008,7 @@ function ForDevelopers() {
         <P>In your app’s main CSS file, import Tailwind first, then the system’s stylesheet. That one import gives you everything the components need:</P>
         <Bullets
           items={[
-            <>The tokens as CSS variables, with Light, Dark and Reduced motion values</>,
+            <>The tokens as CSS variables, with {joinList(colorModes)} and Reduced motion values</>,
             <>The Tailwind theme mapping, so token names become utilities</>,
             <>
               The state variants <InlineCode>is-hover</InlineCode>, <InlineCode>is-pressed</InlineCode>, <InlineCode>is-focus</InlineCode>, <InlineCode>is-focus-within</InlineCode>,{' '}
@@ -1061,15 +1084,24 @@ function ForDevelopers() {
       </Topic>
 
       <Topic title="Switch color and motion modes">
-        <P>
-          Color modes follow the <InlineCode>data-theme</InlineCode> attribute. Set it on <InlineCode>&lt;html&gt;</InlineCode> for the whole app, or on any element to theme only that
-          part of the page.
-        </P>
-        <CodeBlock
-          code={`document.documentElement.dataset.theme = 'dark'; // 'light' | 'dark'
+        {siteHasDark ? (
+          <>
+            <P>
+              Color modes follow the <InlineCode>data-theme</InlineCode> attribute. Set it on <InlineCode>&lt;html&gt;</InlineCode> for the whole app, or on any element to theme
+              only that part of the page.
+            </P>
+            <CodeBlock
+              code={`document.documentElement.dataset.theme = 'dark'; // 'light' | 'dark'
 
 <section data-theme="dark">…always dark…</section>`}
-        />
+            />
+          </>
+        ) : (
+          <P>
+            {config.name} supports {colorModes[0]} only{unsupportedModes.length ? `; ${joinList(unsupportedModes)} isn’t supported` : ''}. Leave{' '}
+            <InlineCode>data-theme</InlineCode> unset, or set it to <InlineCode>'{colorModes[0].toLowerCase()}'</InlineCode>.
+          </P>
+        )}
         <P>
           Reduced motion follows the operating system setting. To force it, for example from an in-app preference, set <InlineCode>data-motion="reduced"</InlineCode>.
         </P>
@@ -1133,7 +1165,7 @@ function ForDevelopers() {
               Run <InlineCode>npm run tokens</InlineCode>. It writes <InlineCode>src/styles/tokens.css</InlineCode>, <InlineCode>src/tokens/tokens.gen.ts</InlineCode> and{' '}
               <InlineCode>tokens/tokens.dtcg.json</InlineCode>.
             </>,
-            <>Check the changed components on this site in both modes, then publish the release with its changelog entry.</>,
+            <>Check the changed components on this site in {colorModes.length > 1 ? 'every mode' : colorModes[0]}, then publish the release with its changelog entry.</>,
           ]}
         />
         <CodeBlock lang="sh" code="npm run tokens" />
@@ -1158,17 +1190,17 @@ function ForAppDevelopers() {
 
       <Topic title="Code on this site">
         <P>
-          Every component page has a Code tab with each example in React Native, Swift (SwiftUI) and Kotlin (Jetpack Compose). The previews are the React Native version, and the
-          Swift and Kotlin code uses the same props, so all three look and behave the same.
+          Every component page has a Code tab with each example in React Native, Swift (SwiftUI) and Kotlin (Jetpack Compose). Previews use React Native. Swift and Kotlin examples show the corresponding implementation; verify behavior in the target app.
         </P>
         <Caption>
           Try <TextLink to={`${pageTo('2.1')}?tab=code`}>2.1 Button → Code</TextLink>.
         </Caption>
       </Topic>
 
-      <Topic title="Props are the Figma properties">
+      <span id="props-are-the-figma-properties" aria-hidden="true" className="scroll-mt-36" />
+      <Topic title="Map Figma properties to app props">
         <P>
-          Props use the Figma property names, in each language’s own style, so you can read values straight from a design: <InlineCode>Size=lg</InlineCode> is{' '}
+          Use the component’s property table to map Figma properties to app props. Props without a Figma entry are code-specific. For example, <InlineCode>Size=lg</InlineCode> is{' '}
           <InlineCode>size="lg"</InlineCode> in React Native, <InlineCode>size: .lg</InlineCode> in Swift and <InlineCode>DsSize.Lg</InlineCode> in Kotlin.
         </P>
         <AppCodeBlock
@@ -1210,21 +1242,43 @@ DsButton(label = "Save changes", onClick = ::save, size = DsSize.Lg, leadingIcon
       </Topic>
 
       <Topic title="Color mode, text size and motion">
-        <P>
-          Components follow the phone’s Light or Dark setting, its text size and its Reduce motion setting. To keep one part of a screen in one mode, like a dark promo card in a
-          light screen, the code wraps that part:
-        </P>
-        <AppCodeBlock
-          platform={platform}
-          code={{
-            reactNative: `<ThemeScope scheme="dark">{/* always dark */}</ThemeScope>`,
-            swift: `PromoCard()
+        {siteHasDark ? (
+          <>
+            <P>
+              Components follow the phone’s Light or Dark setting, its text size and its Reduce motion setting. To keep one part of a screen in one mode, like a dark promo card in
+              a light screen, the code wraps that part:
+            </P>
+            <AppCodeBlock
+              platform={platform}
+              code={{
+                reactNative: `<ThemeScope scheme="dark">{/* always dark */}</ThemeScope>`,
+                swift: `PromoCard()
     .dsTheme(colorScheme: .dark)`,
-            kotlin: `DsTheme(darkTheme = true, reducedMotion = DsTheme.reducedMotion) {
+                kotlin: `DsTheme(darkTheme = true, reducedMotion = DsTheme.reducedMotion) {
     PromoCard()
 }`,
-          }}
-        />
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <P>
+              The app is {colorModes[0]} only{unsupportedModes.length ? `: ${joinList(unsupportedModes)} isn’t supported` : ''}, so the theme is pinned to{' '}
+              {colorModes[0].toLowerCase()} whatever the phone’s setting. Components still follow the phone’s text size and Reduce motion setting.
+            </P>
+            <AppCodeBlock
+              platform={platform}
+              code={{
+                reactNative: `<ThemeProvider colorScheme="light">{/* the app */}</ThemeProvider>`,
+                swift: `ContentView()
+    .dsTheme(colorScheme: .light)`,
+                kotlin: `DsTheme(darkTheme = false, reducedMotion = DsTheme.reducedMotion) {
+    App()
+}`,
+              }}
+            />
+          </>
+        )}
         <Caption>
           How each component behaves on iOS and Android, like its touch area and what screen readers announce, is in the “In apps” section of its Guidelines tab.
         </Caption>

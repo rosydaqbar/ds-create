@@ -18,7 +18,10 @@ export interface TokenVariable {
 export interface TokenTextStyle {
   name: string;
   className: string;
+  /** Variables the style binds (empty for a style with raw values). */
   bound: Record<string, string>;
+  /** The style's own family, as Figma has it (null when the export has none). */
+  fontFamily?: string | null;
   fontSize: string;
   lineHeight: string;
   fontWeight: string;
@@ -36,7 +39,8 @@ export interface TokenData {
   /** Figma pages (id, name) from the export; used for "Open in Figma" links. */
   pages?: { id: string; name: string }[];
   source: string;
-  collections: { name: string; modes: string[] }[];
+  /** `unsupportedModes`: modes Figma has but the owner approved as not supported (tokens/accepted.json); left out of `modes`. */
+  collections: { name: string; modes: string[]; unsupportedModes?: string[] }[];
   variables: TokenVariable[];
   textStyles: TokenTextStyle[];
   effectStyles: TokenEffectStyle[];

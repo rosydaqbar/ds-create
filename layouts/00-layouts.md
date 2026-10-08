@@ -84,7 +84,7 @@ All five are **documented frames** (header, blocks, footer). The breadcrumb is `
 7. Landmarks, headings and focus order: landmark labels on every region, the H1 slot, numbered focus order, the skip link at `State=focus` (§4.5).
 8. Token map: region × property → `Doc/Token badge` with `Doc/Alias chip`.
 
-**· Guidelines**: a reading-oriented frame (`SYSTEM.md` Part B §7) with the topics in the Layout's file, each with its visual built from real instances and `Doc/Do-dont` under each pair.
+**· Guidelines**: a reading-oriented frame (`DOCFRAMES.md` §7) with the topics in the Layout's file, each with its visual built from real instances and `Doc/Do-dont` under each pair.
 
 Every frame ends with `Doc/Footer`.
 
@@ -104,7 +104,7 @@ A Layout has one variant per breakpoint in scope on `1.3 Space & layout`, and ea
 - Columns, gutters, margins and minimum widths are the ones on 1.3. Drawing widths and viewport heights are defaults; the Layout's file may change them for the product's real devices.
 - At wide, the `desktop` variant keeps its arrangement and its content centers at `size/container/max`. A Layout whose arrangement changes at wide (a third column appears) needs a `wide` value; add it to `Breakpoint` in `SYSTEM.md` Part C §4.2 first.
 - Each variant is at least one viewport tall. Fixed regions (navigation, side panel) fill that height; `Main` hugs its content and the page scrolls.
-- The Layout's file names its **main breakpoint**: the one most people use, from the platforms in `INITIATOR.md` Part A §1. Overview and Screens start there.
+- The Layout's file names its **main breakpoint**: the one most people use, from the platforms in `QUESTIONNAIRE.md` §1. Overview and Screens start there.
 
 ## 4.2 Regions
 
@@ -205,7 +205,7 @@ Each Layout file specifies, where relevant:
 
 # 5. Layout file sections
 
-A `layouts/5.x-{kebab-name}.md` file follows `SYSTEM.md` Part B §13, adapted to page arrangement. It contains, in this order:
+A `layouts/5.x-{kebab-name}.md` file follows `DOCFRAMES.md` §13, adapted to page arrangement. It contains, in this order:
 
 ```text
 Purpose (and when to use it versus the neighboring Layouts)
@@ -231,7 +231,9 @@ A file that only lists regions and breakpoints is incomplete.
 
 # 6. Implementation mode
 
-Layouts use the same implementation mode as the other levels (`INITIATOR.md` §8 and Part B §3): **YOLO everything** or **One by one**. If the user already chose a mode in the current request, reuse it. The mode changes pacing only. In One by one, the Sections, Components and Parts a Layout needs are built first when they are missing; unrelated pages are not prebuilt.
+Layouts use the same implementation mode as the other levels (`QUESTIONNAIRE.md` §8 and `INITIATOR.md` Part B §3): **YOLO everything** or **One by one**. If the user already chose a mode in the current request, reuse it. The mode changes pacing only. In One by one, the Sections, Components and Parts a Layout needs are built first when they are missing; unrelated pages are not prebuilt.
+
+Neither mode changes the order. A Layout page starts only when every earlier step of the build sequence (`INITIATOR.md` Part B §6) is done in the ledger, every Section in scope included. It is done only after its own file and the files of the Sections and Components it contains were loaded at its step and the page gate passed.
 
 # 7. Completion criteria
 

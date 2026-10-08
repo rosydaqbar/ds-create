@@ -58,6 +58,8 @@ export interface MatrixSpec {
 
 export interface Guideline {
   title: string;
+  /** Previous heading IDs retained when related topics are consolidated. */
+  aliases?: readonly string[];
   body: string;
   /** Optional visual for the topic. */
   render?: () => ReactNode;

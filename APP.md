@@ -19,7 +19,7 @@ The only things that run are the docs site (`npm run dev`, `npm run build`, `npm
 
 # 1. When this runs
 
-- At initiation, when the product type in `INITIATOR.md` Part A §10 is **App** or **Web and App**, right after the docs site is set up (`WEB.md` W1–W3).
+- At initiation, when the product type in `QUESTIONNAIRE.md` §10 is **App** or **Web and App**, right after the docs site is set up (`WEB.md` W1–W3).
 - Later, as its own task ("add the app previews").
 - After a component is added through `EXTEND.md`, when the product includes App.
 
@@ -55,6 +55,8 @@ Don't build the previews on a third-party UI kit (no NativeBase, no React Native
 
 # 4. Workflow
 
+At initiation, A1–A2 run in step 18 of the build sequence (`INITIATOR.md` Part B §6), A3 in step 19 with each page, and A4 in step 21. The same gates apply.
+
 ## A1 · Copy the preview source
 
 After `WEB.md` W1, copy `ds-create/app/react-native/` to `output/{system-slug}/web/react-native/`. The docs site finds it there by itself (`@app` alias). Never build inside `ds-create/app/`.
@@ -67,7 +69,7 @@ From `output/{system-slug}/web/`, generate the React Native tokens from the same
 node ../../../app/scripts/build-rn-tokens.mjs --in tokens/figma-variables.json --out react-native/tokens
 ```
 
-(Or copy `app/scripts/build-rn-tokens.mjs` into `web/scripts/` and run it from there.) Never edit `tokens.ts`; fix values in Figma and export again.
+(Or copy `app/scripts/build-rn-tokens.mjs` into `web/scripts/` and run it from there.) Never edit `tokens.ts`; fix values in Figma and export again. Modes listed in `tokens/accepted.json` `unsupportedModes` are left out, and `darkColors` then repeats Light.
 
 ## A3 · Components
 
@@ -82,7 +84,7 @@ The mode (YOLO everything, or One by one) is the same as the Figma build.
 
 ## A4 · QA
 
-Run §9. Save the results in `output/{system-slug}/reports/`.
+Run §9, the Impeccable design detector included (`WEB.md` W7). Write the React Native previews with the Impeccable skill loaded, as in `WEB.md` W4. Save the results in `output/{system-slug}/reports/`.
 
 # 5. Token names in code
 
@@ -123,6 +125,8 @@ Two helpers exist only for the docs site:
 - `previewState` pins a state (hover, pressed or focus) for the variant matrices.
 - `anatomy('part')` names a part for the Anatomy markers (`data-anatomy` on the web).
 
+Read tokens the brand may not have (component tokens, size steps) through `num`, `dim` and `role` from `components/parts/_shared.tsx`, as Button does, so an existing file without component tokens still renders.
+
 ## 6.2 Platform behavior
 
 The look comes from the system, and the behavior follows iOS and Android. The React Native preview component follows these rules, and each one is written in the component's "In apps" notes (§7):
@@ -130,7 +134,7 @@ The look comes from the system, and the behavior follows iOS and Android. The Re
 - **Touch targets.** At least 44 × 44 pt on iOS (`size/touch-min`) and 48 × 48 dp on Android (`size/touch-min-android`), even when the visual control is smaller. The hit area grows, never the visual size. This is stricter than the web's 24 × 24.
 - **Text size.** Every text style scales with the system text size. A fixed control height from the spec becomes a minimum height, so the control grows with its text instead of clipping.
 - **Color mode and reduced motion.** Follow the system, and use the Reduced motion tokens when the system asks for it.
-- **Screen readers.** Every control has a role, a name and its state for VoiceOver and TalkBack. Icon-only controls take their name from `label`. Decorative images are hidden.
+- **Screen readers.** Every control has a role, a name and its state for VoiceOver and TalkBack. Icon-only controls take their name from `label`. Decorative images are hidden. react-native-web ignores `accessibilityState` and `accessibilityValue`, so spread `a11yState({…})` / `a11yValue({…})` from `components/parts/_shared.tsx`, which set the matching `aria-*` props too. A part inside a larger control (a Radio in a selectable row) is wrapped in `DecorativeControl` and takes `decorativeControlProps`, so the row is the only focus stop. Titles use `useHeading()` (`theme/heading.tsx`), never a bare `accessibilityRole="header"`, so they render at the right level on the web.
 - **Hover-only content.** There is no hover on touch: tooltips show on long-press, and the control gets an accessibility hint with the same text.
 - **Keyboard focus.** With a hardware keyboard, controls are focusable and show the focus ring, drawn as a border from `color/border/focus` and `border/width/focus`.
 - **Native patterns.** A component may use the platform's own pattern where the spec allows, such as a Select opening a sheet on phones. The notes say so.

@@ -92,9 +92,12 @@ The reading frame (Part B §7): `doc/measure/frame` wide, a rich-text column at 
 
 ## Build order
 
+The order is the build sequence in `INITIATOR.md` Part B §6. This is its foundation part:
+
 ```text
 Brand tokens: Primitives → Color, Typography (variables and text styles), Space, Size, Shape
 → Documentation collection (aliases those tokens) → 9.1 Doc kit
+→ 00 Cover → 01 Getting started → 02 Tokens
 → 1.1 Color → 1.2 Typography → 1.3 Space & layout → 1.4 Shape pages
 → 1.5 Elevation (needs color shadow roles and focus colors)
 → 1.6 Motion
@@ -102,9 +105,11 @@ Brand tokens: Primitives → Color, Typography (variables and text styles), Spac
 → Parts
 ```
 
-The brand's tokens come first because the documentation is styled with them (SYSTEM.md Part B §1). The doc kit comes next, before any foundation page, so every page is documented with the same components in the brand's own look.
+The brand's tokens come first because the documentation is styled with them (`DOCFRAMES.md` §1). The doc kit comes next, before any foundation page, so every page is documented with the same components in the brand's own look.
 
-Some Guidelines examples show real components (a button with a focus ring, a menu with spacing callouts, an input in two neutral palettes). Build those examples after the Parts they use exist, as the last step of the run, using real instances. Never draw a stand-in component to finish a foundation page early.
+Each foundation page is its own step. It starts only when the step before it is done in the ledger, and it is done only by the page gate (`INITIATOR.md` Part B §6, *Gates*). No Part page is documented while a foundation step, or `00`–`02`, is still open.
+
+Some Guidelines examples show real components (a button with a focus ring, a menu with spacing callouts, an input in two neutral palettes). Build those examples after the Parts they use exist, at step 16 of the build sequence, using real instances. When the foundation page is done, list them in the ledger so they are not lost. Never draw a stand-in component to finish a foundation page early.
 
 ## Every value is bound
 

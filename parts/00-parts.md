@@ -53,8 +53,8 @@ Do not infer or silently default the mode. If the user already explicitly select
 ## YOLO everything
 
 When YOLO is selected:
-- load this file and every selected page's Markdown file before implementation;
-- implement all confirmed selected pages in the order of §1 (Parts before Components, Components before Sections), building the dependencies in §3 first;
+- load this file and each page's Markdown file at that page's step (`INITIATOR.md` Part B §0, *Loading per step*);
+- implement all confirmed selected pages in the build sequence (`INITIATOR.md` Part B §6): Parts in the order of §1 with the dependencies in §3 first, then Components, then Sections;
 - do not stop for per-page confirmation;
 - run every page's full specification and QA;
 - do not interpret YOLO as permission to simplify matrices, anatomy, documentation, states, examples or accessibility requirements.
@@ -67,10 +67,12 @@ When One by one is selected:
 - build only the private parts and dependencies that page needs (for example Spinner before Button's loading state);
 - run the page's complete QA before considering it complete;
 - report the completed page and the remaining confirmed pages;
-- stop after completion and ask which page to implement next, unless the user already explicitly named the next page in the same request;
+- stop after completion and propose the next step in the build sequence; continue when the user confirms it;
 - do not prebuild unrelated selected pages.
 
-The mode changes **execution pacing only**. Scope, fidelity, documentation completeness, token behavior and QA requirements stay identical in both modes.
+The mode changes **execution pacing only**. Scope, order, fidelity, documentation completeness, token behavior and QA requirements stay identical in both modes.
+
+In both modes, a Part page starts only when every earlier step of the build sequence is done in the ledger: tokens, the Doc kit, `00`–`02` and every foundation page in scope. It is done only by the page gate (`INITIATOR.md` Part B §6, *Gates*).
 
 # 3. Dependencies between Parts
 
@@ -131,7 +133,7 @@ What goes in each frame:
 - token map: part × state → `Doc/Token badge` with a swatch (`Doc/Alias chip`).
 
 **· Guidelines**
-- reading-oriented frame (SYSTEM.md Part B §7);
+- reading-oriented frame (`DOCFRAMES.md` §7);
 - every guideline topic and visual teaching module from the Part's file, in the order the file lists them;
 - do / don't pairs built from real instances, each with `Doc/Do-dont` underneath;
 - for App products, an **In apps** topic after Accessibility (`SYSTEM.md` Part A §A5).

@@ -5,8 +5,10 @@ import { cn } from '@/lib/cn';
 import { config } from '@/ds.config';
 import { Badge, Button, Checkbox, Divider, HelpText, Icon, Label, Link, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { Bullets, Caption, DoDont, InlineCode, P, TokenTable } from '../../blocks';
+import { Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenTable } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
+import { supportedModes, unsupportedModes } from '../../modes';
+import { brandCopy } from '@/brand/copy';
 
 /*
  * Everything on this page is computed from the token export. Any palette family, role or effect
@@ -19,7 +21,12 @@ const byName = new Map(tokens.variables.map((v) => [v.name, v]));
 const has = (name: string | null | undefined): name is string => !!name && byName.has(name);
 const tok = (name: string) => byName.get(name) as TokenVariable;
 type Mode = 'Light' | 'Dark';
-const MODES: Mode[] = ['Light', 'Dark'];
+/** The supported color modes (src/docs/modes.ts): Light and Dark, or Light only. */
+const MODES = supportedModes as Mode[];
+/** "Light and Dark", "Light". */
+const MODES_TEXT = MODES.length > 1 ? `${MODES.slice(0, -1).join(', ')} and ${MODES.at(-1)}` : MODES[0];
+/** "both modes", "every mode", or "Light". */
+const IN_EACH = MODES.length === 2 ? 'both modes' : MODES.length > 2 ? 'every mode' : MODES[0];
 /** Resolved value of a variable in a mode (single-mode primitives fall back to their one value); '' when missing. */
 const val = (name: string, mode: Mode = 'Light') => {
   const v = byName.get(name);
@@ -97,9 +104,8 @@ const CATEGORY = [...new Set(tokens.variables.filter((v) => v.name.startsWith('c
 const themed = tokens.variables.filter((v) => v.collection === 'Color' || v.collection === 'Components');
 const rolesUsing = (fam: string) => themed.filter((v) => Object.values(v.modes).some((m) => m.alias?.startsWith(`palette/${fam}/`))).map((v) => v.name);
 
-// BRAND: optional one-line row notes per palette family (e.g. { pink: 'Charts and measurement overlays in docs.' }),
-// taken from the Figma Guidelines frame. Families without a note get the computed default below.
-const FAMILY_NOTES: Record<string, string> = {};
+/** Row notes per palette family (brandCopy.paletteNotes); families without one get the computed default below. */
+const FAMILY_NOTES: Record<string, string> = brandCopy.paletteNotes;
 const supportingNote = (f: string) => {
   if (FAMILY_NOTES[f]) return FAMILY_NOTES[f];
   if (CATEGORY.includes(f)) return 'Categories, tags and charts only.';
@@ -600,7 +606,17 @@ function Overview() {
               <strong className="font-semibold text-text-primary">Pick by purpose, not by hue.</strong> Choose the role that matches the job (text, border, fill, surface) rather than a palette step that happens to look right.
             </>,
             <>
-              <strong className="font-semibold text-text-primary">Every role works in Light and Dark.</strong> Each role has a value for each mode, so a screen built from roles needs no Dark overrides.
+              {MODES.length > 1 ? (
+                <>
+                  <strong className="font-semibold text-text-primary">Every role works in {MODES_TEXT}.</strong> Each role has a value for each mode, so a screen built from roles needs no{' '}
+                  {MODES[1]} overrides.
+                </>
+              ) : (
+                <>
+                  <strong className="font-semibold text-text-primary">Every role has one value, in {MODES[0]}.</strong>
+                  {unsupportedModes.length ? ` ${unsupportedModes.join(' and ')} isn’t supported.` : ''} When a mode is added, a screen built from roles follows it with no overrides.
+                </>
+              )}
             </>,
             <>
               <strong className="font-semibold text-text-primary">Color never carries meaning alone.</strong> Always pair a status color with text or an icon, so people who can’t see the difference still get the message.
@@ -632,8 +648,15 @@ function Overview() {
         </div>
       </Block>
 
-      <Block title="Roles in Light and Dark" intro="Both panels below use only color roles. The Dark panel is the Light panel with the mode switched, and nothing else changed.">
-        <div className="grid min-w-0 gap-xl lg:grid-cols-2">
+      <Block
+        title={`Roles in ${MODES_TEXT}`}
+        intro={
+          MODES.length > 1
+            ? `Both panels below use only color roles. The ${MODES[1]} panel is the ${MODES[0]} panel with the mode switched, and nothing else changed.`
+            : 'The panel below uses only color roles: every color in it comes from a role.'
+        }
+      >
+        <div className={cn('grid min-w-0 gap-xl', MODES.length > 1 ? 'lg:grid-cols-2' : 'max-w-[40rem]')}>
           {MODES.map((m) => (
             <ModePanel key={m} mode={m} />
           ))}
@@ -641,7 +664,7 @@ function Overview() {
       </Block>
 
       {PAIRS.length > 0 && (
-        <Block title="Contrast pairs" intro="These are the text and icon pairs the product uses, tested in both modes. Text needs 4.5:1 (AA). Large text, icons and borders that identify a control need 3:1.">
+        <Block title="Contrast pairs" intro={`These are the text and icon pairs the product uses, tested in ${IN_EACH}. Text needs 4.5:1 (AA). Large text, icons and borders that identify a control need 3:1.`}>
           <PairTable />
           <Caption>Ratios are rounded down, so a pair never looks better than it is. Alpha colors are measured over the surface they sit on. Disabled text is exempt from contrast rules, but people still need to see it.</Caption>
         </Block>
@@ -685,7 +708,8 @@ function TokensTab() {
   return (
     <div className="flex flex-col gap-5xl">
       <P>
-        Each role in the <InlineCode>Color</InlineCode> collection is listed with its Light and Dark values, the primitive it points to, its CSS variable and its Tailwind class. Variants of a role (hover, pressed, on-brand) follow right after it.
+        Each role in the <InlineCode>Color</InlineCode> collection is listed with its {MODES_TEXT} {MODES.length > 1 ? 'values' : 'value'}, the primitive it points to
+        {productHasWeb ? ', its CSS variable and its Tailwind class' : ' and its React Native, Swift and Kotlin names'}. Variants of a role (hover, pressed, on-brand) follow right after it.
       </P>
       {groups.map((g) =>
         g.title === 'Fill' ? (
@@ -1034,8 +1058,9 @@ function EditingWorkflow() {
       title: '2 · Color collection',
       body: (
         <span className="flex flex-wrap gap-xs">
-          <Badge size="sm" tone="neutral" label="Light" />
-          <Badge size="sm" tone="neutral" label="Dark" />
+          {[...MODES, ...unsupportedModes].map((m) => (
+            <Badge key={m} size="sm" tone="neutral" label={MODES.includes(m as Mode) ? m : `${m} · not supported`} />
+          ))}
         </span>
       ),
     },
@@ -1251,11 +1276,11 @@ function GuidelinesTab() {
               'Which product role does it serve?',
               'Which steps does it actually need?',
               'Does it need icon, border, surface or solid treatments?',
-              'Does it work in Light and Dark?',
+              `Does it work in ${MODES_TEXT}?`,
               'Do its important text and background pairs pass contrast?',
             ]}
           />
-          <P>Avoid purely decorative palettes, since every family adds upkeep in both modes. If a supporting palette is already approved, audit it rather than replace it.</P>
+          <P>Avoid purely decorative palettes, since every family adds upkeep in {IN_EACH === MODES[0] ? 'every mode' : IN_EACH}. If a supporting palette is already approved, audit it rather than replace it.</P>
         </>
       ),
       visual: EXAMPLE_FAMILY ? <AddingFamily family={EXAMPLE_FAMILY} /> : undefined,
@@ -1295,7 +1320,7 @@ function GuidelinesTab() {
         </>
       ),
       visual: <ContrastInContext />,
-      caption: 'Each pair sits on its real surface, with its ratio in both modes. Placeholder text disappears as people type, so keep a visible label even when the placeholder passes.',
+      caption: `Each pair sits on its real surface, with its ratio in ${IN_EACH}. Placeholder text disappears as people type, so keep a visible label even when the placeholder passes.`,
       do: {
         caption: 'Pair the status color with an icon and words.',
         render: () => <Badge tone="danger" leadingIcon="alerts/x-circle" label="Upload failed" />,
@@ -1313,8 +1338,7 @@ function GuidelinesTab() {
       title: 'Test contrast on real pairs',
       body: (
         <>
-          {/* BRAND: state the product's own accessibility target if the Figma Guidelines frame names one (WCAG AA is the ds-create default). */}
-          <P>This system targets WCAG AA: 4.5:1 for body text, and 3:1 for large text and UI parts such as control borders and icons. Test real semantic pairs in every mode rather than primitives on their own, because a step that passes on one surface can fail on another.</P>
+          <P>{brandCopy.accessibilityTarget}</P>
           <P>Automated checks help, but alpha colors, tinted surfaces, disabled states and nested surfaces all create pairs that a palette row never shows. You’ll find every tested pair in the contrast table on the Overview tab.</P>
         </>
       ),
@@ -1385,7 +1409,7 @@ export default function Color() {
       <DocPage
         eyebrow="Foundations › 1.1 Color"
         title="Color"
-        description="Color carries the brand and tells people what’s happening. Components use semantic roles instead of raw palette values, so every screen works in Light and Dark and the palette can change in one place."
+        description={`Color carries the brand and tells people what’s happening. Components use semantic roles instead of raw palette values, so every screen works in ${MODES_TEXT} and the palette can change in one place.`}
         figmaNode={figmaNodeFor('1.1')}
         tabs={[
           { label: 'Overview', render: () => <Overview /> },

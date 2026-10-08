@@ -10,10 +10,19 @@
 //                          effects without an effect style, layer opacity, default layer names,
 //                          variant naming and the Part C §4.2 property vocabulary.
 // Run one page per call (the page is switched once). Output stays small: counts plus a few examples.
-// A result with "fail" > 0 fails the page's QA (INITIATOR Part B §8, EXTEND step 11, SYSTEM Part B §14).
+// A result with "fail" > 0 fails the page's QA (INITIATOR Part B §8, EXTEND step 11, DOCFRAMES.md §14).
 // Save each result as output/{system-slug}/figma/audit-{page or file}.json and record it in the ledger.
 const PAGE = null;
 const MAX_EXAMPLES = 6;
+// Exceptions the user approved (INITIATOR Part B §6, Gates). Copy them from the ledger's `auditExceptions`;
+// they are reported as info, never as fail. Leave empty for a new system.
+const ACCEPTED = {
+  contrast: [],              // 'color/text/brand on color/surface/base'
+  unsupportedModes: {},      // { Color: ['Dark'] }
+  outOfScopeCollections: [], // collections that aren't tokens, e.g. prototype state
+  frozenComponentValues: false, // existing system whose component values must not change: raw values inside
+                                // components are reported as info (listed for the owner), doc frames stay strict
+};
 
 const out = { file: figma.root.name, mode: PAGE ? 'page' : 'file', page: PAGE, checks: {} };
 const check = (name, level, desc) => (out.checks[name] ??= { level, desc, count: 0, examples: [] });
@@ -40,6 +49,7 @@ if (!PAGE) {
 
   for (const v of vars) {
     const col = colById.get(v.variableCollectionId);
+    if (col && ACCEPTED.outOfScopeCollections.includes(col.name)) { hit('out-of-scope-collection', 'info', 'Approved: collections that are not tokens', col.name); continue; }
     if (v.scopes.includes('ALL_SCOPES') && col && col.name !== 'Primitives') hit('variable-all-scopes', 'fail', 'Variables must have explicit scopes (never ALL_SCOPES)', v.name);
     if (!v.codeSyntax || !v.codeSyntax.WEB) hit('variable-no-web-syntax', 'warn', 'Variables need WEB code syntax var(--name)', v.name);
   }
@@ -70,7 +80,9 @@ if (!PAGE) {
   const exceptions = { 'social-button/facebook/fg': 'Facebook brand rules fix the button blue and white' };
 
   let checked = 0;
-  for (const mode of colorCol ? colorCol.modes.map((m) => m.name) : ['Light']) {
+  const skipModes = (colorCol && ACCEPTED.unsupportedModes[colorCol.name]) || [];
+  for (const m of skipModes) hit('unsupported-mode', 'info', 'Approved: modes that are not supported', `Color: ${m}`);
+  for (const mode of (colorCol ? colorCol.modes.map((m) => m.name) : ['Light']).filter((m) => !skipModes.includes(m))) {
     const base = resolve(byName.get('color/surface/base'), mode) || { r: 1, g: 1, b: 1, a: 1 };
     for (const [fg, bg] of pairs) {
       const f = resolve(byName.get(fg), mode);
@@ -81,7 +93,8 @@ if (!PAGE) {
       const r = ratio(over(f, bgC), bgC);
       if (r >= 4.5) continue;
       const ex = `${mode}: ${fg} on ${bg} = ${r.toFixed(2)}:1`;
-      if (exceptions[fg]) hit('contrast-exception', 'info', 'Documented third-party exceptions', `${ex} (${exceptions[fg]})`);
+      if (ACCEPTED.contrast.includes(`${fg} on ${bg}`)) hit('contrast-accepted', 'info', 'Approved contrast exceptions, documented on 1.1 Color', ex);
+      else if (exceptions[fg]) hit('contrast-exception', 'info', 'Documented third-party exceptions', `${ex} (${exceptions[fg]})`);
       else hit('contrast-below-aa', 'fail', 'Text pairs below 4.5:1 (1.1 Color QA, Contrast pairs)', ex);
     }
   }
@@ -146,7 +159,8 @@ if (PAGE) {
     const comp = inComponent || isComp;
     const skip = exempt || EXEMPT.test(n.name);
     // Inside a component a raw value is a product bug (fail); in documentation frames it is a doc-kit gap (warn).
-    const lvl = comp ? 'fail' : 'warn';
+    // With frozenComponentValues the owner approved keeping component values as built: info, never fail.
+    const lvl = comp ? (ACCEPTED.frozenComponentValues ? 'info' : 'fail') : 'warn';
     const where = comp ? 'component' : 'doc';
     if (n.type !== 'INSTANCE' && !skip) {
       if ('fills' in n) checkPaints(n, 'fills', lvl, where);
@@ -154,11 +168,11 @@ if (PAGE) {
         checkPaints(n, 'strokes', lvl, where);
         const visibleStroke = Array.isArray(n.strokes) && n.strokes.some((p) => p.visible !== false);
         if (visibleStroke && typeof n.strokeWeight === 'number' && n.strokeWeight > 0 && !anyBound(n, ['strokeWeight', 'strokeTopWeight', 'strokeBottomWeight', 'strokeLeftWeight', 'strokeRightWeight']))
-          hit(`${where}-unbound-stroke-weight`, 'warn', 'Stroke widths use border/width/* variables', pathOf(n));
+          hit(`${where}-unbound-stroke-weight`, comp && ACCEPTED.frozenComponentValues ? 'info' : 'warn', 'Stroke widths use border/width/* variables', pathOf(n));
       }
       if (n.type === 'TEXT') {
         if (n.textStyleId === '') hit(`${where}-text-no-style`, lvl, 'Text uses a text style', pathOf(n));
-        else if (typeof n.textStyleId !== 'string') hit(`${where}-text-mixed-style`, 'warn', 'Text uses one text style', pathOf(n));
+        else if (typeof n.textStyleId !== 'string') hit(`${where}-text-mixed-style`, comp && ACCEPTED.frozenComponentValues ? 'info' : 'warn', 'Text uses one text style', pathOf(n));
       }
       if ('layoutMode' in n && n.layoutMode !== 'NONE') {
         for (const k of ['paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom', 'itemSpacing'])
@@ -168,7 +182,7 @@ if (PAGE) {
         hit(`${where}-unbound-radius`, lvl, 'Corner radius is bound to radius/* variables', `${n.cornerRadius} on ${pathOf(n)}`);
       if ('effects' in n && Array.isArray(n.effects) && n.effects.some((e) => e.visible !== false) && !n.effectStyleId)
         hit(`${where}-effect-no-style`, lvl, 'Effects come from effect styles', pathOf(n));
-      if ('opacity' in n && n.opacity < 1 && !bound(n, 'opacity')) hit(`${where}-layer-opacity`, 'warn', 'No opacity on layers; use a color role', `${Math.round(n.opacity * 100)}% on ${pathOf(n)}`);
+      if ('opacity' in n && n.opacity < 1 && !bound(n, 'opacity')) hit(`${where}-layer-opacity`, comp && ACCEPTED.frozenComponentValues ? 'info' : 'warn', 'No opacity on layers; use a color role', `${Math.round(n.opacity * 100)}% on ${pathOf(n)}`);
       if (comp && DEFAULT_NAME.test(n.name)) hit('default-layer-name', 'fail', 'Layers inside components use anatomy names (SYSTEM Part C §4.1)', pathOf(n));
     }
     if (n.type === 'COMPONENT_SET') {

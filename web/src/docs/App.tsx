@@ -9,11 +9,14 @@ import { Home } from './pages/Home';
 import { SearchDialog } from './Search';
 import { pageMeta } from './meta';
 import { Kbd } from '@/components/parts/Kbd';
+import { siteHasDark } from './modes';
 
 const lazyPages = new Map<string, ComponentType>(staticPages.map((p) => [slugOf(p.id, p.name), lazy(p.load)]));
 
 function useTheme() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    // A Light-only system (ds.config `modes`, or Dark approved as unsupported) always renders in Light.
+    if (!siteHasDark) return 'light';
     try {
       return (localStorage.getItem('ds-theme') as 'light' | 'dark') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     } catch {
@@ -55,14 +58,15 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    'type-body-sm-medium flex items-center gap-md rounded-sm px-md py-xs transition-colors duration-(--motion-duration-fast)',
-                    isActive ? 'bg-fill-brand-subtle text-text-brand' : 'text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary',
+                    'group type-body-sm-medium flex items-center gap-md rounded-sm px-md py-xs transition-colors duration-(--motion-duration-fast)',
+                    isActive ? 'bg-fill-brand-subtle text-site-brand-on-tint' : 'text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary',
                   )
                 }
               >
-                <span className="type-code-sm-regular w-8 shrink-0 text-text-tertiary">{i.id}</span>
+                {/* On the active item's tint, the id takes the item's own AA color. */}
+                <span className="type-code-sm-regular w-8 shrink-0 text-text-tertiary group-aria-[current=page]:text-inherit">{i.id}</span>
                 <span className="min-w-0 flex-1 truncate">{i.name}</span>
-                {pageMeta[i.id]?.status === 'beta' && <span className="type-body-xs-medium rounded-indicator bg-fill-warning-subtle px-sm text-text-warning">Beta</span>}
+                {pageMeta[i.id]?.status === 'beta' && <span className="type-body-xs-medium rounded-indicator bg-fill-warning-subtle px-sm text-site-warning-on-tint">Beta</span>}
               </NavLink>
             ))}
           </div>
@@ -164,15 +168,17 @@ export function App() {
               Figma<span className="sr-only"> (opens in a new tab)</span>
             </a>
           )}
-          <button
-            type="button"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default px-sm type-body-sm-medium text-text-secondary is-hover:bg-surface-base-hover is-focus:shadow-focus-default outline-none md:px-md"
-            aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-          >
-            <Icon name={theme === 'dark' ? 'weather/sun' : 'weather/moon'} size="sm" />
-            <span className="hidden md:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
-          </button>
+          {siteHasDark && (
+            <button
+              type="button"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default px-sm type-body-sm-medium text-text-secondary is-hover:bg-surface-base-hover is-focus:shadow-focus-default outline-none md:px-md"
+              aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+            >
+              <Icon name={theme === 'dark' ? 'weather/sun' : 'weather/moon'} size="sm" />
+              <span className="hidden md:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </button>
+          )}
         </div>
       </header>
       <div className="mx-auto flex max-w-[1600px]">

@@ -4,6 +4,8 @@ Extend adds a component to a design system that has already been initiated. It i
 
 Always load `README.md`, `SYSTEM.md`, `templates/structure.md` and the folder file of the target level (`parts/00-parts.md`, `components/00-components.md`, `sections/00-sections.md`, `layouts/00-layouts.md` or `screens/00-screens.md`) before extending.
 
+Extend runs the same gates as initiation (`INITIATOR.md` Part B §6, *Gates*). The new page gets its own entry in the ledger's `sequence`: at its ID position while the initial build is still open, or at the end once it is finished. A missing dependency (step 4) gets its own entry above it. The page starts only when every entry above it is done. Its file is written (step 8) and loaded before the page is built (step 9), and the page is done only when step 11 passes, with the loaded files and the audit result recorded in the ledger.
+
 # 1. When Extend runs
 
 | Situation | What the agent starts from |
@@ -49,7 +51,7 @@ When two levels fit, ask the user once. A component never uses components from i
 | 5 | Map values | Every value maps to an existing token or style. A value with no token is snapped to the nearest one, or proposed as a new token following `SYSTEM.md` Part C. | Yes, for any new token. |
 | 6 | Place it | Create the page with the next free ID of its level (`2.20`, `3.9`, `4.3`, …) under the level separator, in ID order. | No. |
 | 7 | Name it | Page `{ID} {Name}`, set `{Name}`, variants `Property=value` with the property vocabulary of `SYSTEM.md` Part C §4.2, private parts `.Main/{Component} {part}`, layers named as in the anatomy tree. A concept the vocabulary doesn't cover is added to Part C first. | No. |
-| 8 | Write its file | Write `{level folder}/{ID}-{kebab-name}.md` with every section of `SYSTEM.md` Part B §13, including the Template frames section and, for Components and Sections, the Composition block. | No; the file is shown in the report. |
+| 8 | Write its file | Write `{level folder}/{ID}-{kebab-name}.md` with every section of `DOCFRAMES.md` §13, including the Template frames section and, for Components and Sections, the Composition block. | No; the file is shown in the report. |
 | 9 | Build | Build the page with `templates/structure.md`, with the frames of the level's page template (`SYSTEM.md` Part A §A3): for Parts, Components and Sections `.Main` → `· Overview` → `· Component` → `· Anatomy` → `· Guidelines`; Layouts and Screens use their own templates. Use the Doc kit components. | No. |
 | 10 | Document | Fill every template frame: hero and 2–4 compositions in Overview, the full matrix in Component, the anatomy and token map in Anatomy, do / don't and accessibility in Guidelines. | Only copy that can't be inferred (usage rules, do / don't). |
 | 11 | QA | Run the QA list in the new file, the completion criteria of the level's folder file, and `tools/figma-audit.js` on the page (`fail` must be 0) and on the file when tokens changed. Fix and re-run. | Only for failures the agent can't fix. |

@@ -3,8 +3,9 @@ import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, Icon, IconButton, Kbd, Menu, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { Bullets, Caption, DoDont, InlineCode, P, TokenBadge } from '../../blocks';
+import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
+import { brandCopy } from '@/brand/copy';
 
 /* ---------- token lookups ---------- */
 const byName = new Map(tokens.variables.map((v) => [v.name, v]));
@@ -270,7 +271,7 @@ function ContainerSpecimen() {
           <div aria-hidden className="absolute inset-y-0 right-0 bg-category-pink-subtle" style={{ width: `${(margin / CONTAINER) * 100}%` }} />
           <div className="mx-auto flex flex-col gap-sm rounded-xs bg-fill-brand-subtle p-md" style={{ width: `${(reading / (CONTAINER - 2 * margin)) * 100}%`, minWidth: 'min(100%, 12rem)' }}>
             <Spec>size/measure/reading · {reading}</Spec>
-            <p className="type-body-sm-regular text-text-secondary">Running text stops at the reading measure, even when the container is wider. Lines stay long enough to read in a steady rhythm and short enough to find the next one.</p>
+            <p className="type-body-sm-regular text-text-primary">Running text stops at the reading measure, even when the container is wider. Lines stay long enough to read in a steady rhythm and short enough to find the next one.</p>
           </div>
         </div>
       </div>
@@ -327,10 +328,7 @@ function Grids() {
 function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
-      {
-        // BRAND: replace the second sentence with the system's density from the Figma Guidelines frame (for example roomy, balanced or compact, and why).
-      }
-      <Block title="How space works" intro={`This page covers the ${BASE}-point space scale, size roles, widths, the page container and the grid for each breakpoint. The same steps work for roomy pages and dense data views, so density comes from which steps you pick.`}>
+      <Block title="How space works" intro={`This page covers the ${BASE}-point space scale, size roles, widths, the page container and the grid for each breakpoint. ${brandCopy.density}`}>
         <Bullets
           items={[
             <>
@@ -382,8 +380,11 @@ function ValueTable({ list, label }: { list: string[]; label: string }) {
           <tr className="type-body-xs-semibold text-text-tertiary">
             <th scope="col" className="px-lg py-md">Token</th>
             <th scope="col" className="px-lg py-md">Value</th>
-            <th scope="col" className="px-lg py-md">CSS</th>
-            <th scope="col" className="px-lg py-md">Tailwind</th>
+            {tokenCodeColumns.map((c) => (
+              <th key={c} scope="col" className="px-lg py-md">
+                {c}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -400,8 +401,11 @@ function ValueTable({ list, label }: { list: string[]; label: string }) {
                   <span className="type-code-sm-medium text-text-primary">{parseFloat(m.value)}</span>
                   {m.alias && <span className="type-code-sm-regular block text-text-tertiary">{m.alias}</span>}
                 </td>
-                <td className="type-code-sm-regular px-lg py-md text-text-secondary">var({v.css})</td>
-                <td className="type-code-sm-regular px-lg py-md text-text-brand">{v.tailwind?.startsWith('h-(') ? `h-(${v.css}) · w-(${v.css})` : (v.tailwind ?? '—')}</td>
+                {tokenCodeNames({ ...v, tailwind: v.tailwind?.startsWith('h-(') ? `h-(${v.css}) · w-(${v.css})` : v.tailwind }).map((c, i) => (
+                  <td key={tokenCodeColumns[i]} className={cn('type-code-sm-regular px-lg py-md', i === 1 && productHasWeb ? 'text-text-brand' : 'text-text-secondary')}>
+                    {breakable(c)}
+                  </td>
+                ))}
               </tr>
             );
           })}
@@ -665,7 +669,7 @@ function PaddingAnatomy() {
     seg('optical', 'space/optical', 'opt'),
     seg('padding', 'button/padding-x/md', 'pad'),
   ];
-  const tone = { pad: 'bg-category-pink-subtle text-category-pink-text', part: 'bg-fill-brand-subtle text-text-brand', opt: 'bg-fill-warning-subtle text-text-warning' };
+  const tone = { pad: 'bg-category-pink-subtle text-category-pink-text', part: 'bg-fill-brand-subtle text-site-brand-on-tint', opt: 'bg-fill-warning-subtle text-site-warning-on-tint' };
   const perceived = num('button/padding-x/md') + num('space/optical');
   return (
     <Panel>

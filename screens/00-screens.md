@@ -84,7 +84,7 @@ Why `.Main` is always there: the same content appears in several frames (desktop
 5. Focus order: numbered `Doc/Callout` markers in tab order, from the skip link to the last element.
 6. State triggers: what moves the screen from one `Data` state to another, and what the screen announces when it does.
 
-**· Guidelines**: a reading-oriented frame (`SYSTEM.md` Part B §7) with the topics in the Screen's file, each with its visual built from the screen's own instances, and `Doc/Do-dont` under each pair.
+**· Guidelines**: a reading-oriented frame (`DOCFRAMES.md` §7) with the topics in the Screen's file, each with its visual built from the screen's own instances, and `Doc/Do-dont` under each pair.
 
 Every documented frame ends with `Doc/Footer`.
 
@@ -93,7 +93,7 @@ Every documented frame ends with `Doc/Footer`.
 ## 4.1 Real content
 
 - **Real copy, never filler.** Headings, labels, buttons, messages and data are what the product would show. Never lorem ipsum, "Item 1, Item 2", "Title goes here" or "Text".
-- **Follow the guidance that exists.** Copy follows the brand's tone of voice (`INITIATOR.md` Part A §2) and the Content topic of every component it uses (button labels from 2.1, field labels and hints from 3.2). Sentence case, in the product's language.
+- **Follow the guidance that exists.** Copy follows the brand's tone of voice (`QUESTIONNAIRE.md` §2) and the Content topic of every component it uses (button labels from 2.1, field labels and hints from 3.2). Sentence case, in the product's language.
 - **Realistic data.** Names, dates, amounts and counts are plausible for the product and vary in length. Include at least one long value (a long name, a large number) so wrapping and truncation are shown. People in examples are fictional; never use real personal data.
 - **Ask, don't invent.** Content the agent can't infer from the product brief (prices, plan names, legal text, policy rules) is asked for (`EXTEND.md` step 1).
 - **Images** come from `1.8 Brand assets` or the product's approved imagery. Where none exist, use the Avatar (2.6) placeholder and neutral image fills, never stock photos from other brands.
@@ -166,7 +166,7 @@ Each Screen file specifies, where relevant:
 
 # 5. Screen file sections
 
-A `screens/6.x-{kebab-name}.md` file follows `SYSTEM.md` Part B §13, adapted to real content. It contains, in this order:
+A `screens/6.x-{kebab-name}.md` file follows `DOCFRAMES.md` §13, adapted to real content. It contains, in this order:
 
 ```text
 Purpose (task, people, entry points, what done looks like)
@@ -188,7 +188,9 @@ A file that only lists the components on the screen is incomplete.
 
 # 6. Implementation mode
 
-Screens use the same implementation mode as the other levels (`INITIATOR.md` §8 and Part B §3): **YOLO everything** or **One by one**. If the user already chose a mode in the current request, reuse it. The mode changes pacing only. In One by one, the Layout and any missing Sections, Components or Parts a Screen needs are built first; unrelated pages are not prebuilt.
+Screens use the same implementation mode as the other levels (`QUESTIONNAIRE.md` §8 and `INITIATOR.md` Part B §3): **YOLO everything** or **One by one**. If the user already chose a mode in the current request, reuse it. The mode changes pacing only. In One by one, the Layout and any missing Sections, Components or Parts a Screen needs are built first; unrelated pages are not prebuilt.
+
+Neither mode changes the order. A Screen page starts only when every earlier step of the build sequence (`INITIATOR.md` Part B §6) is done in the ledger, every Layout in scope included. It is done only after its own file and the file of its Layout were loaded at its step and the page gate passed.
 
 # 7. Completion criteria
 

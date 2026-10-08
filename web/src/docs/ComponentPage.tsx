@@ -19,6 +19,11 @@ const tw = new Map<string, { css: string; tailwind: string | null }>([
 ]);
 
 /** Section with an anchorable H2 (feeds "On this page" and deep links). */
+/** An h2 styled like H3, for the "When to use" boxes when no section heading comes before them. */
+function BoxH2({ children }: { children: ReactNode }) {
+  return <h2 className="type-heading-xs-semibold text-text-primary">{children}</h2>;
+}
+
 function DocSection({ title, description, children }: { title: string; description?: ReactNode; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-lg">
@@ -183,16 +188,20 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
   const [codePlatform, setCodePlatform] = useState<CodePlatform>(platform === 'app' ? 'reactNative' : codeOptions[0].value);
   const app = doc.app;
 
+  // With no examples section above (an App product with no app examples), these headings follow the
+  // page title directly, so they are h2 to keep the heading order.
+  const exampleCount = platform === 'app' ? (app?.examples.length ?? 0) : doc.examples.length;
+  const UseHeading = exampleCount > 0 ? H3 : BoxH2;
   const whenToUse = doc.whenToUse && (
     <div className="grid gap-xl md:grid-cols-2">
       {(['use', 'dont'] as const).map((k) => (
         <div key={k} className="flex flex-col gap-md rounded-surface bg-surface-sunken p-2xl">
-          <H3>
+          <UseHeading>
             <span className="inline-flex items-center gap-sm">
               <Icon name={k === 'use' ? 'alerts/check-circle' : 'alerts/x-circle'} className={k === 'use' ? 'text-icon-success' : 'text-icon-danger'} />
               {k === 'use' ? 'When to use' : 'When not to use'}
             </span>
-          </H3>
+          </UseHeading>
           <Bullets items={doc.whenToUse![k]} />
         </div>
       ))}
@@ -207,7 +216,8 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
           <div className="flex flex-col gap-4xl">
             {app ? (
               <>
-                <AppStage className="min-h-56 bg-surface-sunken" label={`${doc.name}, app version`}>
+                {/* Right under the page title (h1): the preview's titles start at h2. */}
+                <AppStage className="min-h-56 bg-surface-sunken" label={`${doc.name}, app version`} headingLevel={2}>
                   {app.hero()}
                 </AppStage>
                 {app.examples.length > 0 && (
@@ -305,13 +315,13 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
             title="Properties"
             description={
               productHasApp
-                ? 'Each prop matches one Figma property, and the values are spelled the same way. The app code uses the same names: Size=md is size="md" in React Native, size: .md in Swift and DsSize.Md in Kotlin.'
-                : 'Each prop matches one Figma property, and the values are spelled the same way.'
+                ? 'Use this table to map Figma properties to code props. Names and value syntax can differ across React Native, Swift and Kotlin. Props without a Figma entry are code-specific.'
+                : 'Use this table to map Figma properties to code props. Props without a Figma entry are code-specific.'
             }
           >
             <PropsTable props={doc.props} />
           </DocSection>
-          <DocSection title="Token map" description="The component takes every value from these tokens. To change how it looks, change the token rather than the component.">
+          <DocSection title="Token map" description="These tokens supply shared values used by the component. Review documented overrides and raw-value exceptions when changing a token.">
             <TokenTable names={doc.tokens} />
           </DocSection>
         </div>
@@ -324,7 +334,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
           {productHasApp && app?.notes && app.notes.length > 0 && (
             <section className="flex flex-col gap-lg">
               <AnchorHeading>In apps</AnchorHeading>
-              <P>How this component behaves on iOS and Android. It looks the same on both; these are the platform behaviors.</P>
+              <P>Review the interaction and accessibility notes for iOS and Android. Verify them in the target app before release.</P>
               <Bullets items={app.notes} />
             </section>
           )}
@@ -391,7 +401,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
               <NoAppVersion />
             ) : (
               <>
-                <P>Every example in {cp.label}. The preview is the React Native version; the Swift and Kotlin code uses the same props and looks the same.</P>
+                <P>Code examples in {cp.label}. The preview uses React Native. Review the platform notes for interaction and accessibility details.</P>
                 {app.examples.map((e) => (
                   <DocSection key={e.title} title={e.title}>
                     {e.caption && <Caption>{e.caption}</Caption>}

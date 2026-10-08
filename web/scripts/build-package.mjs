@@ -96,7 +96,7 @@ fs.writeFileSync(path.join(out, 'tokens.css'), `/* ${displayName} tokens as plai
 const indexCss = fs.readFileSync(path.join(root, 'src/styles/index.css'), 'utf8');
 const rest = indexCss
   .split('\n')
-  .filter((l) => !/^@import\s+["'](tailwindcss|\.\/tokens\.css)["'];/.test(l.trim()))
+  .filter((l) => !/^@import\s+["'](tailwindcss|\.\/tokens\.css|\.\/chrome(\.gen)?\.css)["'];/.test(l.trim())) // the docs site's chrome layer stays out of the package
   .join('\n');
 fs.writeFileSync(
   path.join(out, 'styles.css'),

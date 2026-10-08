@@ -1,4 +1,3 @@
-import { Badge } from '@/components/parts/Badge';
 import { tokens } from '@/tokens/tokens.gen';
 
 /**
@@ -7,8 +6,8 @@ import { tokens } from '@/tokens/tokens.gen';
  * (`tokens.pages`), matched by the page id at the start of the Figma page name ("2.1 Button").
  *
  * Status (shown in every page header and on the home page):
- * - stable — matches Figma, passes the automated accessibility checks and keyboard review; the API will not change without a major version.
- * - beta — complete and usable, but complex interaction that still needs testing with real screen readers and products; props may change in a minor version.
+ * - stable — documented API is stable; accessibility and platform limitations remain in each component’s notes.
+ * - beta — available for evaluation; interactions need testing in the target product and props may change.
  */
 export type Status = 'stable' | 'beta' | 'deprecated';
 
@@ -20,14 +19,31 @@ export interface PageMeta {
 }
 
 export const statusInfo: Record<Status, { label: string; tone: 'success' | 'warning' | 'danger'; description: string }> = {
-  stable: { label: 'Stable', tone: 'success', description: 'Ready for production. It matches Figma and passes the accessibility checks. Breaking changes come only in a major version.' },
-  beta: { label: 'Beta', tone: 'warning', description: 'You can use it in production, but its more complex interactions are still being tested with screen readers and in real products. Props may change in a minor version.' },
+  stable: { label: 'Stable', tone: 'success', description: 'The documented API is stable. Review the component’s accessibility notes and platform guidance before release.' },
+  beta: { label: 'Beta', tone: 'warning', description: 'The component is available for evaluation. Its interactions still need testing with screen readers and in the target product; props may change.' },
   deprecated: { label: 'Deprecated', tone: 'danger', description: 'Scheduled for removal. Switch to the suggested replacement.' },
+};
+
+/**
+ * Site chrome, not a design-system component: App products have no web Badge to show here, and a
+ * brand's status roles can miss AA on their own tints. The text uses the site's on-tint roles
+ * (src/styles/chrome.css), pulled toward the primary text color so it passes on each tint.
+ */
+const pillTone: Record<'success' | 'warning' | 'danger', { box: string; dot: string }> = {
+  success: { box: 'bg-fill-success-subtle text-site-success-on-tint', dot: 'bg-icon-success' },
+  warning: { box: 'bg-fill-warning-subtle text-site-warning-on-tint', dot: 'bg-icon-warning' },
+  danger: { box: 'bg-fill-danger-subtle text-site-danger-on-tint', dot: 'bg-icon-danger' },
 };
 
 export function StatusPill({ status }: { status: Status }) {
   const s = statusInfo[status];
-  return <Badge size="md" type="pill" tone={s.tone} showDot label={s.label} title={s.description} />;
+  const t = pillTone[s.tone];
+  return (
+    <span title={s.description} className={`type-body-xs-semibold inline-flex shrink-0 items-center gap-xs rounded-full px-md py-xxs ${t.box}`}>
+      <span aria-hidden className={`size-(--size-indicator-xs) rounded-full ${t.dot}`} />
+      {s.label}
+    </span>
+  );
 }
 
 export const pageMeta: Record<string, PageMeta> = {

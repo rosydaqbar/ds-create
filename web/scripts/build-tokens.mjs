@@ -2,6 +2,7 @@
 //
 //   tokens/figma-variables.json   input: run scripts/figma-export.js on the Figma file
 //   src/styles/tokens.css         CSS custom properties (spec code syntax) + Tailwind v4 theme + text-style utilities
+//   src/styles/chrome.gen.css     site-only defaults for the names the docs chrome uses that this file lacks
 //   src/tokens/tokens.gen.ts      token data for the explorer pages
 //   tokens/tokens.dtcg.json       DTCG (Design Tokens Community Group) JSON with modes in $extensions
 //
@@ -11,9 +12,27 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import * as chrome from './chrome-fallbacks.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = JSON.parse(readFileSync(join(root, 'tokens/figma-variables.json'), 'utf8'));
+
+// Modes the owner approved as not supported (tokens/accepted.json, copied from the build ledger) are left
+// out of the generated CSS, site data and DTCG. The Figma export itself is never edited. The site data keeps
+// them as `collections[].unsupportedModes`, so the pages can say which modes exist in Figma but aren't supported.
+//   tokens/accepted.json: { "unsupportedModes": { "Color": ["Dark"] }, "contrast": ["color/text/x on color/fill/y"] }
+try {
+  const acc = JSON.parse(readFileSync(join(root, 'tokens/accepted.json'), 'utf8'));
+  for (const [colName, drop] of Object.entries(acc.unsupportedModes || {})) {
+    const col = src.collections.find((c) => c.name === colName);
+    if (!col || !Array.isArray(drop) || !drop.length) continue;
+    col.modes = col.modes.filter((m) => !drop.includes(m));
+    col.unsupportedModes = drop;
+    for (const v of src.variables) if (v.collection === colName) for (const m of drop) delete v.values[m];
+  }
+} catch {
+  /* no accepted.json: every mode in the export is supported */
+}
 
 const byName = new Map(src.variables.map((v) => [v.name, v]));
 const cssName = (name) => '--' + name.replaceAll('/', '-').replaceAll('.', '_');
@@ -143,8 +162,57 @@ for (const s of src.effectStyles) {
   tw.push(`--shadow-${k}: var(${effectName(s)});`);
   twNames[s.name] = `shadow-${k}`;
 }
+
+// Raw text styles (not bound to variables): weight from the style name, family with a fallback stack.
+const WEIGHTS = { thin: 100, hairline: 100, extralight: 200, ultralight: 200, light: 300, regular: 400, normal: 400, book: 400, medium: 500, semibold: 600, demibold: 600, bold: 700, extrabold: 800, ultrabold: 800, black: 900, heavy: 900 };
+const styleWeight = (style) => WEIGHTS[String(style || '').replace(/italic|oblique|\s|-|_/gi, '').toLowerCase() || 'regular'] ?? null;
+const familyStack = (family) => `"${family}", ${/mono|code/i.test(family) ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'}`;
 tw.push('--font-sans: var(--font-family-ui);');
 tw.push('--default-font-family: var(--font-family-ui);');
+
+// No font family variables (raw text styles): the UI family is the one most text styles use.
+let rawUiFamily = null;
+if (!src.variables.some((v) => cssName(v.name) === '--font-family-ui') && src.textStyles.length) {
+  const count = {};
+  for (const t of src.textStyles) if (t.fontFamily && !/mono|code/i.test(t.fontFamily)) count[t.fontFamily] = (count[t.fontFamily] || 0) + 1;
+  const ui = Object.entries(count).sort((a, b) => b[1] - a[1])[0]?.[0];
+  if (ui) rawUiFamily = familyStack(ui);
+}
+
+// ---------- site chrome fallbacks ----------
+// The docs site's own UI uses a fixed set of names (scripts/chrome-fallbacks.mjs). Only the names this
+// file doesn't define get a default, so the brand's own values always win and never show a default.
+const defined = new Set([...src.variables.map((v) => cssName(v.name)), ...src.effectStyles.map((s) => effectName(s)), ...(rawUiFamily ? ['--font-family-ui'] : [])]);
+const definedUtils = new Set(src.textStyles.map((t) => t.name.replaceAll('/', '-')));
+const chromeTw = [];
+const chromeLight = [];
+const chromeDark = [];
+const chromeUtils = [];
+for (const [name, value] of chrome.colors) {
+  if (defined.has(name)) continue;
+  if (name.startsWith('--color-')) chromeTw.push(`${name}: var(${name});`);
+  chromeLight.push(`${name}: ${value};`);
+  chromeDark.push(`${name}: ${value};`);
+}
+for (const [name, value, key] of chrome.values) {
+  if (defined.has(name)) continue;
+  if (key) chromeTw.push(`${key}: var(${name});`);
+  chromeLight.push(`${name}: ${value};`);
+}
+for (const [name, value, key] of chrome.effects) {
+  if (defined.has(name)) continue;
+  chromeTw.push(`${key}: var(${name});`);
+  chromeLight.push(`${name}: ${value};`);
+  chromeDark.push(`${name}: ${value};`);
+}
+for (const [cls, [size, lh, weight, mono]] of Object.entries(chrome.textStyles)) {
+  if (definedUtils.has(cls)) continue;
+  const key = cls.replace(/^type-/, '').replace(/-[a-z]+$/, ''); // type-body-xs-semibold → body-xs
+  const w = { 400: 'regular', 500: 'medium', 600: 'semibold', 700: 'bold' }[weight];
+  chromeUtils.push(
+    `@utility ${cls} {\n  font-family: var(${mono ? '--font-family-mono' : '--font-family-ui'});\n  font-size: var(--font-size-${key}, ${size}px);\n  line-height: var(--font-line-height-${key}, ${lh}px);\n  font-weight: var(--font-weight-${w}, ${weight});\n}`,
+  );
+}
 
 // ---------- css blocks ----------
 const lines = [];
@@ -161,6 +229,7 @@ const lightDecl = [];
 for (const v of primitives) lightDecl.push(`${cssName(v.name)}: ${cssValue(v, LIGHT)};`);
 for (const v of others) lightDecl.push(`${cssName(v.name)}: ${cssValue(v, LIGHT)};`);
 for (const s of src.effectStyles) lightDecl.push(`${effectName(s)}: ${shadowCss(s, LIGHT)};`);
+if (rawUiFamily) lightDecl.push(`--font-family-ui: ${rawUiFamily};`);
 lines.push(':root,\n[data-theme="light"] {\n  color-scheme: light;\n  ' + lightDecl.join('\n  ') + '\n}');
 lines.push('');
 
@@ -180,12 +249,19 @@ lines.push('/* Text styles: one utility per Figma text style. */');
 for (const t of src.textStyles) {
   const b = t.bound || {};
   const decl = [];
+  // Bound values use their variable; unbound ones (raw values in Figma) keep the style's own value,
+  // so every utility sets family, size, line height, spacing and weight.
   if (b.fontFamily) decl.push(`font-family: var(${cssName(b.fontFamily)});`);
-  else if (t.fontFamily) decl.push(`font-family: ${t.fontFamily};`);
+  else if (t.fontFamily) decl.push(`font-family: ${familyStack(t.fontFamily)};`);
   if (b.fontSize) decl.push(`font-size: var(${cssName(b.fontSize)});`);
+  else if (typeof t.fontSize === 'number') decl.push(`font-size: ${t.fontSize}px;`);
   if (b.lineHeight) decl.push(`line-height: var(${cssName(b.lineHeight)});`);
+  else if (typeof t.lineHeight === 'number') decl.push(`line-height: ${t.lineHeight}px;`);
   if (b.letterSpacing) decl.push(`letter-spacing: var(${cssName(b.letterSpacing)});`);
+  else if (typeof t.letterSpacing === 'number' && t.letterSpacing !== 0) decl.push(`letter-spacing: ${t.letterSpacing}px;`);
   if (b.fontWeight) decl.push(`font-weight: var(${cssName(b.fontWeight)});`);
+  else if (styleWeight(t.fontStyle)) decl.push(`font-weight: ${styleWeight(t.fontStyle)};`);
+  if (/italic|oblique/i.test(t.fontStyle || '')) decl.push('font-style: italic;');
   const cls = t.name.replaceAll('/', '-');
   twNames[t.name] = cls;
   lines.push(`@utility ${cls} {\n  ${decl.join('\n  ')}\n}`);
@@ -195,6 +271,16 @@ lines.push('');
 mkdirSync(join(root, 'src/styles'), { recursive: true });
 writeFileSync(join(root, 'src/styles/tokens.css'), lines.join('\n') + '\n');
 
+// Site chrome fallbacks: a separate file, so they never ship in the package or count as tokens.
+const chromeCss = ['/* GENERATED by scripts/build-tokens.mjs — do not edit. Site chrome fallbacks (scripts/chrome-fallbacks.mjs): */'];
+chromeCss.push('/* the names the docs site uses that this Figma file does not define. Docs site only: not tokens, not in the package. */');
+if (chromeTw.length) chromeCss.push('@theme inline {\n  ' + chromeTw.join('\n  ') + '\n}');
+if (chromeLight.length) chromeCss.push(':root,\n[data-theme="light"] {\n  ' + chromeLight.join('\n  ') + '\n}');
+if (chromeDark.length) chromeCss.push('[data-theme="dark"] {\n  ' + chromeDark.join('\n  ') + '\n}');
+chromeCss.push(...chromeUtils);
+if (chromeCss.length === 2) chromeCss.push('/* Nothing missing: this file defines every name the site uses. */');
+writeFileSync(join(root, 'src/styles/chrome.gen.css'), chromeCss.join('\n') + '\n');
+
 // ---------- data for the explorer ----------
 const data = {
   source: src.file,
@@ -202,18 +288,21 @@ const data = {
   variables: src.variables.map((v) => {
     const modes = {};
     for (const [m, r] of Object.entries(v.values)) {
+      // Custom modes (such as Border S/M/L) must resolve their own value first.
       const fam = DARK.includes(m) ? DARK : REDUCED.includes(m) ? REDUCED : LIGHT;
-      modes[m] = { alias: r && typeof r === 'object' ? r.alias : null, value: String(resolvedLiteral(v.name, fam)) };
+      modes[m] = { alias: r && typeof r === 'object' ? r.alias : null, value: String(resolvedLiteral(v.name, [m, ...fam])) };
     }
     return { name: v.name, collection: v.collection, type: v.type, description: v.description, css: cssName(v.name), tailwind: twNames[v.name] || null, modes };
   }),
   textStyles: src.textStyles.map((t) => ({
     name: t.name,
     className: t.name.replaceAll('/', '-'),
-    bound: t.bound,
+    bound: t.bound || {},
+    // Raw text styles: the family as Figma has it, so pages can name it without a font variable.
+    fontFamily: t.fontFamily ?? null,
     fontSize: t.bound && t.bound.fontSize ? String(resolvedLiteral(t.bound.fontSize, LIGHT)) : t.fontSize + 'px',
     lineHeight: t.bound && t.bound.lineHeight ? String(resolvedLiteral(t.bound.lineHeight, LIGHT)) : t.lineHeight + 'px',
-    fontWeight: t.bound && t.bound.fontWeight ? String(resolvedLiteral(t.bound.fontWeight, LIGHT)) : t.fontStyle,
+    fontWeight: t.bound && t.bound.fontWeight ? String(resolvedLiteral(t.bound.fontWeight, LIGHT)) : String(styleWeight(t.fontStyle) ?? t.fontStyle),
     letterSpacing: t.bound && t.bound.letterSpacing ? String(resolvedLiteral(t.bound.letterSpacing, LIGHT)) : t.letterSpacing + 'px',
   })),
   effectStyles: src.effectStyles.map((s) => ({ name: s.name, css: effectName(s), tailwind: twNames[s.name], effects: s.effects, light: shadowCss(s, LIGHT), dark: shadowCss(s, DARK) })),
@@ -266,4 +355,5 @@ for (const v of src.variables) {
 })(dtcg);
 writeFileSync(join(root, 'tokens/tokens.dtcg.json'), JSON.stringify(dtcg, null, 2) + '\n');
 
+if (chromeLight.length || chromeUtils.length) console.log(`site chrome: ${chromeLight.length + chromeUtils.length} name(s) this file doesn't define got a site-only default (scripts/chrome-fallbacks.mjs)`);
 console.log(`tokens: ${src.variables.length} variables, ${src.textStyles.length} text styles, ${src.effectStyles.length} effect styles → src/styles/tokens.css, src/tokens/tokens.gen.ts, tokens/tokens.dtcg.json`);

@@ -18,7 +18,7 @@ Use this guide when you write a page (WEB.md W4–W6), and as the checklist for 
 
 ## Voice
 
-- **Second person.** Talk to the reader: "Use a switch when the change applies straight away." Not "Switches are used for…".
+- **Direct guidance.** Talk to the reader when it makes the action clear: "Use a switch when the change applies straight away." Not "Switches are used for…".
 - **Purpose first, then the how, then the exception.**
 - **Plain, specific verbs.** Pick, show, open, close, add, remove, group, separate, warn, confirm.
 - **Contractions are fine** (it's, don't, you'll). They make guidance sound human.
@@ -48,10 +48,10 @@ Use this guide when you write a page (WEB.md W4–W6), and as the checklist for 
 
 ## Terminology (use one term, everywhere)
 
-- **Figma file** / **Figma library** (not "the file", "the kit"). **Variables** (Figma) and **tokens** (code): "Figma variables become CSS variables and Tailwind classes."
+- **Figma file** / **Figma library** (not "the file", "the kit"). **Variables** and **styles** (Figma) vs exported **tokens** (code). Show the actual mapping for the supported platform.
 - **Light and Dark** (capitalised as mode names). **Standard and Reduced** motion.
 - **Stable / Beta** status (capitalised as labels).
-- **Props** (code) vs **properties** (Figma). "Props match the Figma properties."
+- **Props** (code) vs **properties** (Figma). "The property table maps Figma properties to code props."
 - **Component page tabs**: Overview, Component, Anatomy, Guidelines, Code.
 - Levels: **Foundations, Parts, Components, Sections** (capitalised as level names).
 - "Sign in" (not log in / login as a verb).
@@ -80,8 +80,46 @@ Use this guide when you write a page (WEB.md W4–W6), and as the checklist for 
 - Change only string content: JSX text, string literals that are displayed (summary, caption, title, body, description, use/dont, accessibility, labels shown on the page, intro/note props, alt text, aria-labels **only if** they're robotic and the change keeps them accurate).
 - **Do not change**: code samples (`code:` strings and `CodeBlock code={…}`), prop names/types/defaults in props tables, token names inside `tokens: [...]` arrays and token tables, `target:` values, ids, keys, slugs, class names, imports, component props passed to components, numbers and ratios, sample data inside live examples (names like "Olivia Rhye", "Save changes" button labels inside rendered components), matrix titles/axis names (`Tone=brand · Emphasis=primary`, `rows`, `columns`), and the Figma property names in `figma:` fields.
 - **Guideline and section titles become anchor ids** (slugified for deep links and "On this page"). Changing them is fine; just keep each title unique within its page.
-- Keep facts exactly: contrast ratios, counts, sizes, durations, version numbers, which component to use instead.
+- Verify facts against source: contrast ratios, counts, sizes, durations, version numbers and alternatives. Preserve the source values; correct a prose mismatch with its evidence recorded.
 - Keep `${…}` template expressions intact — they insert live token values.
 - Keep apostrophes valid in TS strings: if a single-quoted string gains an apostrophe, use the typographic ’ (U+2019) or switch the literal to double quotes / a template literal. Prefer ’ in displayed prose (the site already uses it).
 - Don't make text much longer. Rewrites should be the same length or shorter on average; long paragraphs can wrap badly on phones.
-- After editing, run `npx tsc -p tsconfig.json --noEmit` from the web project root and fix any error.
+- After editing, run the project’s typecheck and build scripts, then inspect the affected pages. Check regenerated outputs for token changes; a successful web build does not establish native parity or accessibility conformance.
+
+
+## Evidence and decision quality
+
+Before publishing a page, verify every count, token name, prop mapping and platform claim against the current source. A copy edit can correct a documented fact when that source establishes the correction; it must not silently change a design value or invent a product rule.
+
+- Give the reader a condition, a decision and a reason or example. Add a boundary where the choice has an exception. Do not force all four into every sentence.
+- Describe the current implementation separately from a conceptual model or a future plan. Three possible token layers do not mean three layers are implemented.
+- Show mappings explicitly. Figma properties and code props can have different names; slash-separated token names can map to CSS or native identifiers.
+- Shared names and exported tokens do not guarantee automatic sync or identical native behavior. Describe the actual export, regeneration and review steps. A web preview is not a native platform test.
+- Status labels describe documented maturity. Do not equate Stable with WCAG conformance, production approval or verified platform parity.
+- Keep measured contrast ratios and their applicable text sizes. Design approval does not make a failing pair conformant. A second status cue does not fix low-contrast text.
+- Distinguish an estimate from a guaranteed outcome, and a transaction record from proof of a completed transfer. Use the actual product states.
+- Keep generator history, duplicate inventories and maintainer notes out of purpose summaries. Preserve that information in specs or known-issue records.
+- Keep useful technical fragments in tables. Do not rewrite good switch/checkbox, schedule or exact-value guidance just to make every paragraph sound different.
+- Consolidating topics is a structural change: preserve previous heading IDs or redirect their deep links, and check the resulting table of contents.
+
+### Terms with distinct meanings
+
+| Term | Meaning in these docs |
+|---|---|
+| Token | A named reusable design decision or value in the exported reference. |
+| Figma variable | A named value that can be bound to supported Figma properties and may have modes. |
+| Figma style | Shared typography or effects; not all styles are variables. |
+| Property / prop | Figma component property / code API prop. Use the mapping table rather than promising identical spelling. |
+| Theme / on-color surface | A supported color mode / a component appearance on a particular surface. A light calendar appearance does not establish app Dark mode support. |
+| Preview / platform verification | A rendered reference / evidence from the target platform. Keep those claims separate. |
+| Estimate / receipt status | A modeled result / the recorded transaction state, which may be pending or failed. |
+
+### Before → after: decisions and claims
+
+- Tokens: “A design and its build always match.” → “Use Reference to find the exported value and its code name. Regenerate token data after an approved Figma change.”
+- Mapping: “What you set in the property panel is what they type.” → “Show trailing icon maps to trailingIcon; check the property table for each component.”
+- Inventory: “Four tasks and Semua Menu.” → “Four items, including Semua Menu.” Verify the count against the actual example first.
+- Motion: “Motion never delays anyone.” → “Show feedback when an action starts. Avoid blocking the next action with a decorative transition.”
+- Receipt: “Ready to share as proof.” → “A shareable record of the transaction and its status. Pending and failed records do not confirm a completed transfer.”
+
+Use these as evidence patterns, not reusable product policy. Check the generated site's own names, modes, states and workflow before adapting them.

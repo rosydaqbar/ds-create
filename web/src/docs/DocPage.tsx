@@ -106,7 +106,7 @@ export function DocTabs({ tabs, label }: { tabs: DocTab[]; label: string }) {
                 tabIndex={on ? 0 : -1}
                 onClick={() => select(t)}
                 className={cn(
-                  'type-body-sm-semibold -mb-px shrink-0 cursor-pointer border-b-2 px-lg py-md outline-none transition-colors duration-(--motion-duration-fast) is-focus:rounded-t-control is-focus:shadow-focus-default',
+                  'type-body-sm-semibold -mb-px shrink-0 cursor-pointer border-b-2 px-lg py-md outline-none transition-colors duration-(--motion-duration-fast) is-focus:shadow-focus-default',
                   on ? 'border-border-brand text-text-brand' : 'border-transparent text-text-tertiary is-hover:text-text-primary',
                 )}
               >
@@ -142,7 +142,12 @@ function OnThisPage({ panel, deps }: { panel: React.RefObject<HTMLDivElement | n
   useEffect(() => {
     const read = () =>
       setItems(
-        [...(panel.current?.querySelectorAll('h2[id]') ?? [])].map((h) => ({ id: h.id, text: h.getAttribute('data-title') ?? h.textContent ?? '' })),
+        // A guideline can share its title with a page section ("Accessibility"): keep every id unique.
+        [...(panel.current?.querySelectorAll('h2[id]') ?? [])].map((h, _i, all) => {
+          const same = all.filter((o) => o.id.replace(/-\d+$/, '') === h.id.replace(/-\d+$/, ''));
+          if (same.length > 1 && same.indexOf(h) > 0 && !/-\d+$/.test(h.id)) h.id = `${h.id}-${same.indexOf(h) + 1}`;
+          return { id: h.id, text: h.getAttribute('data-title') ?? h.textContent ?? '' };
+        }),
       );
     read();
     const mo = new MutationObserver(read);
@@ -202,11 +207,13 @@ export function DocPage({
 }
 
 /* ---------- guideline topics (same layout as component Guidelines) ---------- */
-export function Topics({ items, children }: { items: Topic[]; children?: ReactNode }) {
+export function Topics({ items, children, intro }: { items: Topic[]; children?: ReactNode; intro?: ReactNode }) {
   return (
     <div className="flex max-w-[64rem] flex-col gap-4xl">
+      {intro}
       {items.map((g) => (
         <section key={g.title} className="flex flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0">
+          {g.aliases?.map((id) => <span key={id} id={id} aria-hidden="true" className="scroll-mt-36" />)}
           <AnchorHeading>{g.title}</AnchorHeading>
           {g.body.split('\n\n').map((para, i) => (
             <P key={i}>{para}</P>

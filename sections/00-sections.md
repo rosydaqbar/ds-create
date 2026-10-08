@@ -55,7 +55,9 @@ The **Composition block** at the top of `· Anatomy` works as for Components (`c
 
 # 5. Implementation mode
 
-Sections use the same implementation mode as Parts and Components (`INITIATOR.md` §8). In One by one, the Components and Parts a Section needs are built first when they are missing.
+Sections use the same implementation mode as Parts and Components (`QUESTIONNAIRE.md` §8). In One by one, the Components and Parts a Section needs are built first when they are missing.
+
+Neither mode changes the order. A Section page starts only when every earlier step of the build sequence (`INITIATOR.md` Part B §6) is done in the ledger, every Component in scope included. It is done only after its own file and the files of the Components and Parts it contains were loaded at its step and the page gate passed.
 
 # 6. Completion criteria
 

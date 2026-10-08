@@ -5,8 +5,9 @@ import { cn } from '@/lib/cn';
 import { config } from '@/ds.config';
 import { Badge, Button, Icon, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { Bullets, Caption, DoDont, InlineCode, P, TokenBadge } from '../../blocks';
+import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
+import { brandCopy } from '@/brand/copy';
 
 /*
  * Everything on this page is computed from the token export: family names come from font/family/*,
@@ -337,8 +338,7 @@ function HierarchyExample() {
 function Overview() {
   const jobs: Record<string, string> = { ui: FAMILIES.some((f) => f.key === 'display') ? 'the rest of the interface' : 'the interface', display: 'display and headline text', mono: 'code and data' };
   const families = FAMILIES.length <= 1 ? `One family, ${UI_FAMILY}, sets every interface role.` : `${list(FAMILIES.map((f) => `${f.label} sets ${jobs[f.key] ?? `${f.key} text`}`))}.`;
-  // BRAND: a real build may add one sentence on the typeface's character and why it was chosen, from the Figma Guidelines frame.
-  const intro = `${families} Every text style is built from these families, so changing a family variable restyles every screen at once.`;
+  const intro = `${families} ${brandCopy.typefaceIntro}`;
   return (
     <div className="flex flex-col gap-6xl">
       <Block title="How typography works" intro={intro}>
@@ -388,8 +388,11 @@ function ValueTable({ names, label }: { names: string[]; label: string }) {
           <tr className="type-body-xs-semibold text-text-tertiary">
             <th scope="col" className="px-lg py-md">Token</th>
             <th scope="col" className="px-lg py-md">Value</th>
-            <th scope="col" className="px-lg py-md">CSS</th>
-            <th scope="col" className="px-lg py-md">Tailwind</th>
+            {tokenCodeColumns.map((c) => (
+              <th key={c} scope="col" className="px-lg py-md">
+                {c}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -406,8 +409,11 @@ function ValueTable({ names, label }: { names: string[]; label: string }) {
                   <span className="type-code-sm-medium text-text-primary">{v.type === 'FLOAT' || m.value.endsWith('px') ? px(m.value) : m.value}</span>
                   {m.alias && <span className="type-code-sm-regular block text-text-tertiary">{m.alias}</span>}
                 </td>
-                <td className="type-code-sm-regular px-lg py-md text-text-secondary">var({v.css})</td>
-                <td className="type-code-sm-regular px-lg py-md text-text-brand">{v.tailwind ?? '—'}</td>
+                {tokenCodeNames(v).map((c, i) => (
+                  <td key={tokenCodeColumns[i]} className={cn('type-code-sm-regular px-lg py-md', i === 1 && productHasWeb ? 'text-text-brand' : 'text-text-secondary')}>
+                    {breakable(c)}
+                  </td>
+                ))}
               </tr>
             );
           })}
@@ -424,7 +430,11 @@ function StyleTable() {
         <thead className="bg-surface-sunken">
           <tr className="type-body-xs-semibold text-text-tertiary">
             <th scope="col" className="px-lg py-md">Text style</th>
-            <th scope="col" className="px-lg py-md">Utility</th>
+            {(productHasWeb ? ['Utility'] : tokenCodeColumns).map((c) => (
+              <th key={c} scope="col" className="px-lg py-md">
+                {c}
+              </th>
+            ))}
             <th scope="col" className="px-lg py-md">Size / line height</th>
             <th scope="col" className="px-lg py-md">Weight</th>
             <th scope="col" className="px-lg py-md">Letter spacing</th>
@@ -436,7 +446,15 @@ function StyleTable() {
               <td className="px-lg py-md">
                 <TokenBadge name={t.name} />
               </td>
-              <td className="type-code-sm-regular px-lg py-md text-text-brand">{t.className}</td>
+              {productHasWeb ? (
+                <td className="type-code-sm-regular px-lg py-md text-text-brand">{t.className}</td>
+              ) : (
+                tokenCodeNames(t).map((c, i) => (
+                  <td key={tokenCodeColumns[i]} className="type-code-sm-regular px-lg py-md text-text-secondary">
+                    {breakable(c)}
+                  </td>
+                ))
+              )}
               <td className="type-code-sm-regular px-lg py-md text-text-secondary">
                 {px(t.fontSize)} / {px(t.lineHeight)}
               </td>
@@ -881,14 +899,12 @@ function GuidelinesTab() {
       title: 'Choosing the typeface and its weights',
       body: (
         <>
-          {/* BRAND: replace with why this typeface was chosen (license, script coverage, character), from the Figma Guidelines frame. */}
-          <P>{UI_FAMILY} sets every interface role. Before you commit to a typeface, check that it covers the scripts and languages you need, every weight the scale uses, tabular figures for tables and readable text at small sizes.</P>
+          <P>{brandCopy.typefaceWhy({ family: UI_FAMILY })}</P>
           <P>Only use weights the font actually has, because faked weights look blurry or uneven. If a role needs a missing weight, map it to the nearest one and write that mapping down.</P>
         </>
       ),
       visual: WEIGHTS.length ? <WeightCoverage /> : undefined,
-      // BRAND: if the brand font lacks a weight, name the fallback mapping here (e.g. "semibold maps to bold, the font has no 600").
-      caption: `Each weight is set in ${UI_FAMILY} and labeled with the roles that use it.`,
+      caption: brandCopy.weightCaption({ family: UI_FAMILY }),
     },
     {
       title: 'Keep the number of families small',

@@ -1,0 +1,40 @@
+/*
+ * Site chrome layer: the docs site's own UI (navigation, tables, tabs, code blocks, doc visuals).
+ * None of this is a design-system token: it never appears in token tables, code examples, exports
+ * or the app previews.
+ *
+ * The chrome uses the template's names (text-text-tertiary, px-sm, type-body-xs-semibold…). When
+ * the brand's Figma file doesn't define one of them, `npm run tokens` gives it a site-only default
+ * (scripts/chrome-fallbacks.mjs), so an existing file with its own naming still renders a readable
+ * site. The brand's own values always win: defaults are written only for missing names.
+ *
+ * The defaults end at the four roots below. Per build, when the brand's main roles have other names
+ * than the template's, point the roots at them, e.g. `--chrome-accent: var(--color-action-primary);`.
+ * Never type a hex value or a palette step here.
+ */
+@layer base {
+  :root,
+  [data-theme] {
+    --chrome-ink: CanvasText; /* body text, when the file has no color/text/primary */
+    --chrome-paper: Canvas; /* page background, when it has no color/surface/base */
+    --chrome-accent: LinkText; /* the main action color, when it has no color/fill/brand/solid */
+    --chrome-on-accent: Canvas; /* text on the action color, when it has no color/text/on-solid */
+
+    /*
+     * Chrome text on tinted fills (the active navigation item, the Beta and status pills). A brand's
+     * role can miss AA on its own tint, so the chrome pulls it toward the primary text color, which
+     * raises contrast in Light and Dark alike. Site-only: no brand defines these names.
+     */
+    --site-brand-on-tint: color-mix(in oklab, var(--color-text-brand) 60%, var(--color-text-primary));
+    --site-success-on-tint: color-mix(in oklab, var(--color-text-success) 50%, var(--color-text-primary));
+    --site-warning-on-tint: color-mix(in oklab, var(--color-text-warning) 40%, var(--color-text-primary));
+    --site-danger-on-tint: color-mix(in oklab, var(--color-text-danger) 50%, var(--color-text-primary));
+  }
+}
+
+@theme inline {
+  --color-site-brand-on-tint: var(--site-brand-on-tint);
+  --color-site-success-on-tint: var(--site-success-on-tint);
+  --color-site-warning-on-tint: var(--site-warning-on-tint);
+  --color-site-danger-on-tint: var(--site-danger-on-tint);
+}

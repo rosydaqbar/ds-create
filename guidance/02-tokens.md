@@ -16,7 +16,7 @@ This page is built with `templates/structure.md`; the frames and what they hold 
 
 There is no `.Main` frame.
 
-Every frame has `Doc/Header` (breadcrumb `Guidance › 02 Tokens`) and `Doc/Footer`. The first three are reading frames (`SYSTEM.md` Part B §7): a rich-text column at `doc/measure/reading`, each topic heading → body → visual → caption. `· Primitive palette` starts with the same reading column and then adds full-width variable tables (Part B §6).
+Every frame has `Doc/Header` (breadcrumb `Guidance › 02 Tokens`) and `Doc/Footer`. The first three are reading frames (`DOCFRAMES.md` §7): a rich-text column at `doc/measure/reading`, each topic heading → body → visual → caption. `· Primitive palette` starts with the same reading column and then adds full-width variable tables (Part B §6).
 
 Every topic keeps its visual. Visuals are built from this file's own variables, collections and components; diagrams are real frames with cards and connectors, not paragraph text arranged to look like a diagram.
 

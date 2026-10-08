@@ -4,10 +4,12 @@ import { cn } from '@/lib/cn';
 import { Icon } from '@/icons';
 import { Button, Checkbox, IconButton, Switch, TextField, TooltipBubble } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
-import { Bullets, Caption, CodeBlock, H3, InlineCode, P, Swatch, TokenBadge, TokenTable } from '../../blocks';
+import { breakable, Bullets, Caption, CodeBlock, H3, InlineCode, P, productHasWeb, Swatch, TokenBadge, tokenCodeColumns, tokenCodeNames, TokenTable } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
+import { siteSchemes, supportedModes } from '../../modes';
 import type { Topic } from '../../types';
 import { config } from '@/ds.config';
+import { brandCopy } from '@/brand/copy';
 
 /* ---------- token helpers ---------- */
 type Mode = 'light' | 'dark';
@@ -241,11 +243,8 @@ function Overview() {
     <div className="flex flex-col gap-5xl">
       <section className="flex flex-col gap-lg">
         <AnchorHeading>How depth works</AnchorHeading>
-        {
-          // BRAND: replace the second sentence with the depth direction and its reason from the Figma Guidelines frame (1.5 · Depth is a choice).
-        }
         <P>
-          {`Elevation shows people what sits on top of what. ${config.name} uses ${DEPTH_PHRASE}. Above the page there ${raisedLevels === 1 ? 'is one shadow level' : `are ${countWord(raisedLevels)} shadow levels`}, each with its own job and its own surface color.`}
+          {`Elevation shows people what sits on top of what. ${brandCopy.depthDirection({ name: config.name, depth: DEPTH_PHRASE })} Above the page there ${raisedLevels === 1 ? 'is one shadow level' : `are ${countWord(raisedLevels)} shadow levels`}, each with its own job and its own surface color.`}
         </P>
         <Bullets
           items={[
@@ -272,7 +271,7 @@ function Overview() {
               <Meta k="Effect style">{l.style ? <TokenBadge name={l.style} /> : 'None'}</Meta>
             </div>
             <div className="grid gap-lg sm:grid-cols-2">
-              {(['light', 'dark'] as const).map((m) => (
+              {siteSchemes.map((m) => (
                 <Themed key={m} mode={m} className="min-h-44">
                   <div className="flex flex-1 items-center justify-center py-md">{l.specimen()}</div>
                 </Themed>
@@ -320,11 +319,14 @@ function Overview() {
         <H3>Focused controls on different surfaces</H3>
         <P className="type-body-sm-regular">The ring keeps at least 3:1 contrast with the surface behind it. The ratios below are calculated live from the current color tokens.</P>
         <div className="grid gap-lg lg:grid-cols-3">
-          {FOCUS_SURFACES.map((s) => (
+          {FOCUS_SURFACES.filter((s) => siteSchemes.includes(s.mode)).map((s) => (
             <div key={s.title} data-theme={s.mode} className={cn('flex flex-col gap-lg rounded-surface p-xl text-text-primary', s.className)}>
               <div className="flex flex-col gap-xxs">
                 <span className="type-body-sm-semibold text-text-primary">{s.title}</span>
-                <span className="type-body-xs-regular text-text-secondary">Ring {contrast(value('color/border/focus', s.mode), value(s.surface, s.mode)).toFixed(1)}:1 against the surface</span>
+                {/* On a tinted surface the caption takes the primary text color, so it stays AA whatever the tint. */}
+                <span className={cn('type-body-xs-regular', s.surface === 'color/surface/base' ? 'text-text-secondary' : 'text-text-primary')}>
+                  Ring {contrast(value('color/border/focus', s.mode), value(s.surface, s.mode)).toFixed(1)}:1 against the surface
+                </span>
               </div>
               <FocusSet />
             </div>
@@ -357,14 +359,8 @@ function Overview() {
       {blurs.length > 0 && (
         <section className="flex flex-col gap-lg">
           <AnchorHeading>Backdrop blur</AnchorHeading>
-          {
-            // BRAND: name the components that use backdrop blur in this system (from the Figma Guidelines frame).
-          }
-          <P>
-            Translucent panels over photos and video blur what’s behind them, so the controls on top stay readable. Use them for overlays and floating panels over
-            media, and pick a stronger blur over busier content.
-          </P>
-          {(['light', 'dark'] as const).map((m) => (
+          <P>{brandCopy.backdropBlurUse}</P>
+          {siteSchemes.map((m) => (
             <Themed key={m} mode={m}>
               <BlurBackdrop>
                 {blurs.map((b) => {
@@ -429,10 +425,16 @@ ${css('dark')}
               <tr className="type-body-xs-semibold text-text-tertiary">
                 <th className="px-lg py-md">Style</th>
                 <th className="px-lg py-md">Layers</th>
-                <th className="px-lg py-md">Light</th>
-                <th className="px-lg py-md">Dark</th>
-                <th className="px-lg py-md">CSS</th>
-                <th className="px-lg py-md">Tailwind</th>
+                {supportedModes.map((m) => (
+                  <th key={m} className="px-lg py-md">
+                    {m}
+                  </th>
+                ))}
+                {tokenCodeColumns.map((c) => (
+                  <th key={c} className="px-lg py-md">
+                    {c}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -443,8 +445,7 @@ ${css('dark')}
                   </td>
                   {[
                     e.effects.map(layerLine),
-                    e.effects.map((l) => (roleOf(l) ? alias(roleOf(l), 'light') : '—')),
-                    e.effects.map((l) => (roleOf(l) ? alias(roleOf(l), 'dark') : '—')),
+                    ...supportedModes.map((m) => e.effects.map((l) => (roleOf(l) ? alias(roleOf(l), m === 'Dark' ? 'dark' : 'light') : '—'))),
                   ].map((lines, i) => (
                     <td key={i} className="px-lg py-md">
                       {lines.map((t, j) => (
@@ -454,8 +455,11 @@ ${css('dark')}
                       ))}
                     </td>
                   ))}
-                  <td className="type-code-sm-regular whitespace-nowrap px-lg py-md text-text-secondary">var({e.css})</td>
-                  <td className="type-code-sm-regular whitespace-nowrap px-lg py-md text-text-brand">{e.tailwind}</td>
+                  {tokenCodeNames(e).map((c, i) => (
+                    <td key={tokenCodeColumns[i]} className={cn('type-code-sm-regular px-lg py-md', i === 1 && productHasWeb ? 'text-text-brand' : 'text-text-secondary')}>
+                      {breakable(c)}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -501,7 +505,7 @@ function PropagationDemo() {
 function ModePair({ render }: { render: () => ReactNode }) {
   return (
     <div className="grid h-28 w-full grid-cols-2 overflow-hidden rounded-surface">
-      {(['light', 'dark'] as const).map((m) => (
+      {siteSchemes.map((m) => (
         <div key={m} data-theme={m} className="flex flex-col items-center justify-center gap-xs bg-surface-sunken">
           {render()}
           <span className="type-body-xs-regular text-text-tertiary">{m === 'light' ? 'Light' : 'Dark'}</span>
@@ -585,8 +589,7 @@ const DEPTH_LABEL = { flat: 'Flat', layered: 'Layered depth', tactile: 'Tactile 
 const TOPICS: Topic[] = [
   {
     title: 'Depth is a choice',
-    // BRAND: replace the second sentence with why this depth direction suits the product (from the Figma Guidelines frame).
-    body: `A design system can be flat, subtly elevated, strongly layered or tactile. ${config.name} uses ${DEPTH_PHRASE}.\n\nUse elevation sparingly. A shadow signals that something sits above the page, and when everything has one, nothing stands out. Most content belongs on the base level, separated by space and borders.`,
+    body: `A design system can be flat, subtly elevated, strongly layered or tactile. ${brandCopy.depthWhy({ name: config.name, depth: DEPTH_PHRASE })}\n\nUse elevation sparingly. A shadow signals that something sits above the page, and when everything has one, nothing stands out. Most content belongs on the base level, separated by space and borders.`,
     render: () => (
       <div className={cn('grid w-full gap-xl', DEPTH !== 'flat' && 'md:grid-cols-2')}>
         {(DEPTH === 'flat'
@@ -631,7 +634,7 @@ const TOPICS: Topic[] = [
     }\n\nAvoid turning a shadow into a light glow: it reads as a highlight, not as depth.`,
     render: () => (
       <div className="grid w-full gap-lg sm:grid-cols-2">
-        {(['light', 'dark'] as const).map((m) => (
+        {siteSchemes.map((m) => (
           <Themed key={m} mode={m}>
             <div className="flex flex-col items-center gap-lg py-md">
               <ReportCard />

@@ -3,9 +3,10 @@ import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, ChoiceCard, Checkbox, Kbd, Switch, Tag, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { Bullets, Caption, DoDont, InlineCode, P, TokenBadge } from '../../blocks';
+import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { config } from '@/ds.config';
+import { brandCopy } from '@/brand/copy';
 
 /* ---------- token lookups ---------- */
 const byName = new Map(tokens.variables.map((v) => [v.name, v]));
@@ -176,12 +177,9 @@ function BorderLines() {
 function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
-      {
-        // BRAND: replace the first sentence with the corner character and its reason from the Figma Guidelines frame (1.4 · Corner character).
-      }
       <Block
         title="How shape works"
-        intro={`${config.name} uses ${CHARACTER} corners, applied to every role at once. Controls round at ${show('radius/control')}, surfaces at ${show('radius/surface')} and dialogs at ${show('radius/modal')}, while avatars, switches and dots are full pills.`}
+        intro={`${brandCopy.cornerCharacter({ name: config.name, character: CHARACTER })} Controls round at ${show('radius/control')}, surfaces at ${show('radius/surface')} and dialogs at ${show('radius/modal')}, while avatars, switches and dots are full pills.`}
       >
         <Bullets
           items={[
@@ -226,8 +224,11 @@ function ValueTable({ list, label }: { list: string[]; label: string }) {
           <tr className="type-body-xs-semibold text-text-tertiary">
             <th scope="col" className="px-lg py-md">Token</th>
             <th scope="col" className="px-lg py-md">Value</th>
-            <th scope="col" className="px-lg py-md">CSS</th>
-            <th scope="col" className="px-lg py-md">Tailwind</th>
+            {tokenCodeColumns.map((c) => (
+              <th key={c} scope="col" className="px-lg py-md">
+                {c}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -244,8 +245,11 @@ function ValueTable({ list, label }: { list: string[]; label: string }) {
                   <span className="type-code-sm-medium text-text-primary">{parseFloat(m.value)}</span>
                   {m.alias && <span className="type-code-sm-regular block text-text-tertiary">{m.alias}</span>}
                 </td>
-                <td className="type-code-sm-regular px-lg py-md text-text-secondary">var({v.css})</td>
-                <td className="type-code-sm-regular px-lg py-md text-text-brand">{v.tailwind ?? '—'}</td>
+                {tokenCodeNames(v).map((c, i) => (
+                  <td key={tokenCodeColumns[i]} className={cn('type-code-sm-regular px-lg py-md', i === 1 && productHasWeb ? 'text-text-brand' : 'text-text-secondary')}>
+                    {breakable(c)}
+                  </td>
+                ))}
               </tr>
             );
           })}
@@ -551,8 +555,7 @@ function GuidelinesTab() {
     },
     {
       title: 'Corner character',
-      // BRAND: replace the middle sentence with the reason for this system's corner character from the Figma Guidelines frame.
-      body: <P>{`Corners shape much of how an interface feels. Square reads as precise, soft as friendly, and fully round as playful and touch-first. ${config.name} uses ${CHARACTER} corners. Apply the choice to all the roles together, not to one component.`}</P>,
+      body: <P>{`Corners shape much of how an interface feels. Square reads as precise, soft as friendly, and fully round as playful and touch-first. ${brandCopy.cornerWhy({ name: config.name, character: CHARACTER })} Apply the choice to all the roles together, not to one component.`}</P>,
       visual: <CornerCharacter />,
       caption: `Content and color stay the same. The other two previews override the radius roles for comparison only. The selected option is what ${config.name} uses.`,
     },

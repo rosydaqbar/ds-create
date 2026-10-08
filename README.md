@@ -62,15 +62,16 @@ The full page tree rules, page templates, documentation system and naming contra
 
 ```text
 README.md      this file: structure and file map
-SYSTEM.md      page tree, page templates, documentation system, token and component naming
-INITIATOR.md   questionnaire and generation logic
+SYSTEM.md      page tree, page templates, token and component naming, audit routing (always loaded)
+INITIATOR.md   generation logic: loading, ledger, build sequence, gates (always loaded)
+QUESTIONNAIRE.md the questions asked at initiation and the confirmation summary (loaded at initiation)
+DOCFRAMES.md   how documentation frames look: styling, tables, matrices, anatomy, Doc kit (loaded when drawing frames)
 EXTEND.md      adding a component at any level after initiation
 WEB.md         the documentation site (every product type) and, for Web products, the Tailwind-ready React library and package
 APP.md         App products on the docs site: React Native previews (react-native-web) and React Native, Swift and Kotlin code
-templates/     templates/structure.md: the structure every page is built with (page → frames → blocks → items; no content)
-tools/         figma-audit.js: read-only use_figma audit run on every built page and once on the file (QA gate)
+templates/     structure.md: the structure every page is built with (page → frames → blocks → items; no content); agent-brief.md: the brief for docs-site page agents
+tools/         figma-audit.js: read-only audit run on every built page and once on the file (QA gate); figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js: read-only JSON snapshot of each component set for the docs site
 ROADMAP.md     planned levels, components, renames and tooling (not built until specified)
-archive/       superseded proposals, kept for history only (never loaded)
 web/           brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that WEB.md copies and fills
 app/           brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
 examples/      finished builds made with ds-create, for reference only (never copied into a new build)
@@ -127,7 +128,7 @@ output/        everything a build generates: one folder per system (git-ignored 
 | 4.2 Video player | `sections/4.2-video-player.md` |
 | Any Layout page | `layouts/00-layouts.md` (folder rules) |
 | Any Screen page | `screens/00-screens.md` (folder rules) |
-| 9.1 Doc kit | `SYSTEM.md` Part B §16 |
+| 9.1 Doc kit | `DOCFRAMES.md` §16 |
 | New components | `EXTEND.md`, then the new file in the level folder |
 | Docs site and web library | `WEB.md`, then the page file of each documented page; template in `web/` |
 | App previews and code (App products) | `APP.md`, then the page file of each page; preview source in `app/` |
@@ -148,6 +149,17 @@ templates/structure.md
 Every page is built with the structure in `templates/structure.md` (page → frames → blocks → items); SYSTEM.md Part A says which frames a page has and the page's own file says what they hold.
 
 `INITIATOR.md` includes the generation logic. Do not skip it. Load `EXTEND.md` as well when adding a component after initiation.
+
+## Per step
+
+| When | Load |
+| --- | --- |
+| Initiation, and whenever the user changes an answer | `QUESTIONNAIRE.md` |
+| Any step that draws frames the doc builder has no helper for (Doc kit, Cover, guidance pages, Foundations, Screens), or that changes the builder | `DOCFRAMES.md` |
+| Parts, Components, Sections and Layouts in Figma | `tools/figma-docbuilder.js`, cached once at step 6 (`INITIATOR.md` Part B §6) |
+| Docs site (`WEB.md`, `APP.md`) | `WEB.md`, plus `APP.md` for App products; docs agents start from `templates/agent-brief.md` |
+
+Never load `examples/` during a build: it holds finished reference builds, not inputs. Never open generated files (`web/src/tokens/tokens.gen.ts`, `web/tokens/tokens.dtcg.json`, `web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
 
 Load page files at the step that builds them, not all at once, and keep the progress ledger on disk (`INITIATOR.md` Part B §0: *Loading per step* and *Progress ledger*). After any context compaction, re-read the global files and the ledger before continuing.
 
@@ -182,9 +194,12 @@ Selected 1.1 Color + no foundations/1.1-color.md
 Selected 3.2 Text field + no parts/2.10-text-control.md
 Selected 6.x Screen + no layouts/5.x file of its Layout
 Any page + no templates/structure.md
+Drawing Doc kit, Cover, guidance, Foundation or Screen frames + no DOCFRAMES.md
+Drawing Part, Component, Section or Layout frames + doc builder not cached
+Initiation or changed answers + no QUESTIONNAIRE.md
 ```
 
-`SYSTEM.md` provides the global structure and grammar only. It does **not** replace the `guidance/`, `foundations/`, `parts/`, `components/` or `sections/` files.
+`SYSTEM.md` provides the global structure and grammar only, and `DOCFRAMES.md` how frames look. Neither replaces the `guidance/`, `foundations/`, `parts/`, `components/` or `sections/` files.
 
 ## Implementation checklist
 
@@ -195,6 +210,9 @@ Global
 [ ] README.md
 [ ] SYSTEM.md
 [ ] INITIATOR.md
+[ ] templates/structure.md
+[ ] QUESTIONNAIRE.md at initiation
+[ ] DOCFRAMES.md when drawing frames the doc builder has no helper for
 
 Guidance
 [ ] every selected guidance file
@@ -228,8 +246,19 @@ output/{system-slug}/
 
 `{system-slug}` is the system name in lowercase kebab case (`Acme Design System` → `acme`). `output/` is git-ignored, so no generated brand is ever committed. Never write a build into the executor folders or into `examples/`. Use another location only when the user explicitly asks for one; a finished build becomes a committed reference in `examples/` only when the user asks. The Figma file itself lives in Figma.
 
+**Design quality.** Every docs-site build is generated and checked with the [Impeccable](https://www.npmjs.com/package/impeccable) skill and its anti-AI-slop rules. Install it once per machine in this repo:
+
+```bash
+npx impeccable install --project --providers=claude -y
+.claude/skills/impeccable/scripts/impeccable hooks on
+```
+
+`.claude/` is git-ignored, so the skill and its hook stay local. The shared `.impeccable/config.json` only turns the hook on and holds no brand exceptions: a build records its own in `output/{system-slug}/web/.impeccable/config.json` (`WEB.md` W7).
+
 # 6. Non-negotiable
 
+- Build in the order of the build sequence in `INITIATOR.md` Part B §6, for a new system and an existing one. A step starts only when every step above it is done in the ledger. YOLO removes the pauses, never a step.
+- A page is done only after its own page file was loaded, its QA passed and `tools/figma-audit.js` reported `fail` = 0. No page is built from root files or by a generic script without its page file.
 - Use the exact page tree, page names and template frames in `SYSTEM.md` Part A.
 - Use the naming in `SYSTEM.md` Part C for tokens, styles, component sets, properties, parts and layers.
 - Never merge required pages into one page.

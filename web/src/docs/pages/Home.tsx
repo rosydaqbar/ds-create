@@ -4,9 +4,11 @@ import { Icon, type IconName } from '@/icons';
 import { componentDocs, levelLabel, slugOf, staticPages } from '../registry';
 import { pageMeta, StatusPill } from '../meta';
 import { releases } from '../changelog';
+import { AppTheme, productHasWeb } from '../blocks';
+import { modesLabel, supportedModes } from '../modes';
 
 const foundationBlurb: Record<string, { icon: IconName; text: string }> = {
-  '1.1': { icon: 'editor/palette', text: 'Palettes, color roles and contrast in Light and Dark.' },
+  '1.1': { icon: 'editor/palette', text: `Palettes, color roles and contrast in ${supportedModes.join(' and ')}.` },
   '1.2': { icon: 'editor/type', text: 'Typefaces, the type scale and how to build hierarchy.' },
   '1.3': { icon: 'layout/layout-grid', text: 'The spacing scale, sizes, grids and reading width.' },
   '1.4': { icon: 'shapes/square', text: 'Corner radius and border widths.' },
@@ -18,9 +20,20 @@ const foundationBlurb: Record<string, { icon: IconName; text: string }> = {
 
 const roles: { title: string; text: string; to: string; icon: IconName; cta: string }[] = [
   { title: 'Designers', text: 'Set up the Figma library and learn how its pages, components and variables are organized.', to: '/guidance/01-getting-started?tab=for-designers', icon: 'editor/palette', cta: 'Start designing' },
-  { title: 'Developers', text: 'Install the package, add the styles and use components whose props match Figma.', to: '/guidance/01-getting-started?tab=for-developers', icon: 'development/code', cta: 'Start building' },
+  {
+    title: 'Developers',
+    text: productHasWeb
+      ? 'Install the package, add the styles and use components whose props match Figma.'
+      : 'Use the React Native, Swift and Kotlin examples, with tables that map Figma properties and tokens to code.',
+    to: '/guidance/01-getting-started?tab=for-developers',
+    icon: 'development/code',
+    cta: 'Start building',
+  },
   { title: 'Product', text: 'See what exists, how ready each piece is and what changed in each release.', to: '/guidance/03-changelog?tab=status', icon: 'charts/chart-column', cta: 'See status' },
 ];
+
+/** Levels whose app previews are whole screens. */
+const wholeScreen = (lv: string) => lv === 'layouts' || lv === 'screens';
 
 export function Home() {
   const latest = releases[0];
@@ -28,7 +41,7 @@ export function Home() {
     <div className="flex flex-col gap-5xl">
       <section className="flex flex-col gap-xl rounded-modal bg-surface-brand-solid p-2xl text-text-primary-on-brand md:p-5xl">
         <span className="type-body-sm-semibold text-text-secondary-on-brand">
-          v{config.version} · Light & Dark · Figma and React in sync
+          v{config.version} · {modesLabel} · {productHasWeb ? 'Figma and React reference' : 'Figma and app code reference'}
         </span>
         <h1 className="type-display-md-semibold max-w-[48rem]">{config.name}</h1>
         <p className="type-body-lg-regular max-w-[42rem] text-text-secondary-on-brand">{config.description}</p>
@@ -111,8 +124,11 @@ export function Home() {
               .map((d) => (
                 <div key={d.id} className="group relative flex flex-col overflow-hidden rounded-surface border border-border-subtle bg-surface-raised transition-colors duration-(--motion-duration-fast) has-[a:hover]:border-border-brand has-[a:focus-visible]:shadow-focus-default">
                   {/* Live thumbnail of the hero instance; inert so it is never focused or announced. */}
-                  <span aria-hidden inert className="pointer-events-none flex h-28 items-center justify-center overflow-hidden bg-surface-sunken">
-                    <span className="flex w-[30rem] shrink-0 origin-center scale-[0.6] items-center justify-center">{d.hero()}</span>
+                  {/* App products show the React Native hero; whole screens (Layouts, Screens) are scaled to fit from the top. */}
+                  <span aria-hidden inert className={`pointer-events-none flex h-28 justify-center overflow-hidden bg-surface-sunken ${!productHasWeb && wholeScreen(lv) ? 'items-start' : 'items-center'}`}>
+                    <span className={`flex w-[30rem] shrink-0 items-center justify-center ${!productHasWeb && wholeScreen(lv) ? 'origin-top scale-[0.3]' : 'origin-center scale-[0.6]'}`}>
+                      {productHasWeb ? d.hero() : d.app ? <AppTheme>{d.app.hero()}</AppTheme> : null}
+                    </span>
                   </span>
                   <span className="flex flex-col gap-xs p-lg">
                     <span className="flex items-center gap-sm">

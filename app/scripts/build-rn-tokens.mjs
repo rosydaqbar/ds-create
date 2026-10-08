@@ -16,6 +16,20 @@ const arg = (k, d) => {
 const input = arg('in', 'tokens/figma-variables.json');
 const outDir = arg('out', '.');
 const src = JSON.parse(fs.readFileSync(input, 'utf8'));
+
+// Modes the owner approved as not supported (accepted.json next to the export, copied from the build
+// ledger: { "unsupportedModes": { "Color": ["Dark"] } }) are left out. Without a Dark mode, `darkColors`
+// repeats the Light values, so a device in dark mode still gets the supported colors.
+const accPath = [path.join(path.dirname(input), 'accepted.json'), arg('accepted', '')].find((p) => p && fs.existsSync(p));
+if (accPath) {
+  const acc = JSON.parse(fs.readFileSync(accPath, 'utf8'));
+  for (const [colName, drop] of Object.entries(acc.unsupportedModes || {})) {
+    if (!Array.isArray(drop) || !drop.length) continue;
+    const col = src.collections.find((c) => c.name === colName);
+    if (col) col.modes = col.modes.filter((m) => !drop.includes(m));
+    for (const v of src.variables) if (v.collection === colName) for (const m of drop) delete v.values[m];
+  }
+}
 const byName = new Map(src.variables.map((v) => [v.name, v]));
 
 /* ---------- resolve ---------- */
@@ -76,11 +90,25 @@ const motion = src.variables.filter((v) => v.collection === 'Motion').map((v) =>
   standard: resolve(v.name, 'Standard'),
   reduced: resolve(v.name, 'Reduced'),
 }));
+const STYLE_WEIGHTS = { thin: 100, hairline: 100, extralight: 200, ultralight: 200, light: 300, regular: 400, normal: 400, book: 400, medium: 500, semibold: 600, demibold: 600, bold: 700, extrabold: 800, ultrabold: 800, black: 900, heavy: 900 };
 const textStyles = (src.textStyles ?? []).map((t) => {
   const b = t.bound ?? {};
   const val = (k, fallback) => (b[k] ? resolve(b[k], 'Light') : fallback);
   const fam = families.find((f) => f.name === b.fontFamily);
-  return { name: t.name, key: member(t.name), family: fam?.family ?? null, mono: fam?.mono ?? false, size: Number(val('fontSize', t.fontSize)), lineHeight: Number(val('lineHeight', t.lineHeight)), letterSpacing: Number(val('letterSpacing', t.letterSpacing ?? 0)), weight: Number(val('fontWeight', 400)) };
+  // Unbound text styles (raw values in Figma): weight and family come from the style itself.
+  const ownWeight = STYLE_WEIGHTS[String(t.fontStyle || '').replace(/italic|oblique|\s|-|_/gi, '').toLowerCase() || 'regular'] ?? 400;
+  const ownFamily = t.fontFamily && !/^(ui-sans-serif|system-ui|-apple-system|sf pro( (text|display))?)$/i.test(t.fontFamily) ? t.fontFamily : null;
+  return {
+    name: t.name,
+    key: member(t.name),
+    family: fam ? fam.family : ownFamily,
+    mono: fam ? fam.mono : /mono|code/i.test(t.fontFamily || ''),
+    size: Number(val('fontSize', t.fontSize)),
+    lineHeight: Number(val('lineHeight', t.lineHeight)),
+    letterSpacing: Number(val('letterSpacing', t.letterSpacing ?? 0)),
+    weight: Number(val('fontWeight', ownWeight)),
+    italic: /italic|oblique/i.test(t.fontStyle || ''),
+  };
 });
 const colorOf = (c, mode) => (c && typeof c === 'object' && 'alias' in c ? hex(resolve(c.alias, mode)) : typeof c === 'string' ? hex(c) : '#000000');
 const shadows = (src.effectStyles ?? [])
@@ -99,7 +127,7 @@ let text;
   const colorObj = (mode) => Object.fromEntries(Object.entries(groups(colors)).map(([g, l]) => [g, Object.fromEntries(l.map((c) => [c.key, c[mode]]))]));
   const num = Object.fromEntries(Object.entries(groups(numbers)).map(([g, l]) => [g, Object.fromEntries(l.map((n) => [n.key, n.value]))]));
   const mo = (mode) => Object.fromEntries(motion.map((m) => [m.key, m.type === 'easing' ? cubic(m[mode]) : Number(m[mode])]));
-  const ts = Object.fromEntries(textStyles.map((t) => [t.key, { fontFamily: t.family ?? undefined, fontSize: t.size, lineHeight: t.lineHeight, letterSpacing: t.letterSpacing, fontWeight: String(t.weight) }]));
+  const ts = Object.fromEntries(textStyles.map((t) => [t.key, { fontFamily: t.family ?? undefined, fontSize: t.size, lineHeight: t.lineHeight, letterSpacing: t.letterSpacing, fontWeight: String(t.weight), ...(t.italic ? { fontStyle: 'italic' } : {}) }]));
   const sh = (mode) => Object.fromEntries(shadows.map((s) => {
     const l = s.layers[s.layers.length - 1] ?? { x: 0, y: 0, blur: 0, light: '#00000000', dark: '#00000000' };
     return [s.key, { shadowColor: l[mode], shadowOffset: { width: l.x, height: l.y }, shadowRadius: l.blur / 2, shadowOpacity: 1, elevation: Math.round(l.blur / 2) }];

@@ -2,383 +2,7 @@
 
 This is the canonical initiation and execution contract.
 
-# Part A — Design System Initiator Questionnaire
-
-The questionnaire decides what gets preserved, audited, generated or rebuilt. Structure and naming are fixed by `SYSTEM.md`; the questionnaire decides **scope** and **values**, never page names, frame names or token grammar.
-
-# 1. Product
-
-## Product status
-
-**Single select**
-- Existing product
-- New product
-- Multiple products under one brand
-- Brand-wide system
-- Internal tool
-- Design-system-only project
-- Other
-
-## Product information
-
-Ask for:
-- product name;
-- one-sentence product description;
-- product URL;
-- Figma product URL;
-- existing design-system/library URL;
-- existing code/component-library URL.
-
-## Primary users and tasks
-
-Ask:
-- who primarily uses the product;
-- their main tasks;
-- important accessibility or localization requirements.
-
-## Platforms
-
-**Multi-select**
-- Responsive web
-- Desktop web
-- Mobile web
-- iOS
-- Android
-- Tablet
-- Desktop app
-- Other
-
-# 2. Brand
-
-## Brand maturity
-
-- Established
-- Partially established
-- New
-- No brand layer required
-- Not sure
-
-## Existing brand inputs
-
-For each, select `Available`, `Partial`, `Missing` or `Not needed`:
-- logo;
-- brand colors;
-- neutral palette;
-- typography;
-- iconography;
-- illustration;
-- photography;
-- motion;
-- brand guidelines;
-- tone of voice.
-
-## Interface character
-
-Pick up to four:
-- Minimal
-- Dense
-- Spacious
-- Quiet
-- Bold
-- Friendly
-- Serious
-- Technical
-- Premium
-- Playful
-- Editorial
-- Utilitarian
-- Soft
-- Sharp
-- Expressive
-- Restrained
-
-## Modes
-
-- Light
-- Dark
-- High contrast
-- Multiple brands
-- White-label themes
-- User-selectable themes
-- Product-specific themes
-
-## Third-party providers
-
-Only when Social button (3.7) or brand assets with third-party marks are in scope, ask:
-- which sign-in providers the product offers (these become the `Provider` values);
-- which integrations, payment methods and app stores apply.
-
-# 3. Existing system inventory
-
-## Foundations
-
-For each page, mark `Existing`, `Partial`, `Missing` or `Not needed`:
-
-```text
-1.1 Color
-1.2 Typography
-1.3 Space & layout
-1.4 Shape
-1.5 Elevation
-1.6 Motion
-1.7 Iconography
-1.8 Brand assets
-```
-
-## Parts
-
-```text
-2.1 Button          2.8 Radio            2.15 Spinner
-2.2 Icon button     2.9 Switch           2.16 Divider
-2.3 Link            2.10 Text control    2.17 Kbd
-2.4 Badge           2.11 Label           2.18 Slider
-2.5 Tag             2.12 Help text       2.19 Featured icon
-2.6 Avatar          2.13 Tooltip
-2.7 Checkbox        2.14 Progress
-```
-
-## Components and Sections
-
-```text
-3.1 Button group    3.5 Select           4.1 Rich text editor
-3.2 Text field      3.6 Menu             4.2 Video player
-3.3 Choice field    3.7 Social button
-3.4 Avatar group    3.8 Badge group
-```
-
-An existing library rarely uses these names. Map each existing page or component family to the page it corresponds to, and show the mapping to the user ("Your `Inputs` page → 2.10 Text control + 3.2 Text field"). For any existing page, allow a second-level inventory of the component sets inside it.
-
-# 4. Action per existing item
-
-Each existing page or component family resolves to one action:
-
-- Keep
-- Audit
-- Improve
-- Refactor
-- Rebuild
-- Replace
-- Skip
-
-Each missing page or component family resolves to:
-- Build
-- Skip
-
-# 5. Build strategy
-
-- Build only selected pages
-- Audit first, then ask before changes
-- Preserve existing pages and fill missing families
-- Rebuild inconsistent parts only
-- Complete Foundations + Parts system
-- Complete Foundations + Parts + selected Components and Sections
-
-Default for existing systems: `Preserve existing pages and fill missing families`.
-
-`00 Cover`, `01 Getting started`, `02 Tokens` and `9.1 Doc kit` are always built for a new system; for an existing system they follow the same Keep / Audit / Improve / … actions.
-
-# 6. Foundation scope
-
-Allow selection at page level, then section level. The page's sections are listed in the order they appear in its frames.
-
-## 1.1 Color
-
-- Overview: Base colors · Extended palettes · Gradients
-- Tokens: Text · Icon · Border · Surface · Fill · Overlay · Shadow · Category
-- Guidelines: long-form color guidance
-
-## 1.2 Typography
-
-- Overview: Typefaces · Type scale
-- Tokens: font families, weights, sizes, line heights
-- Guidelines: long-form typography guidance
-
-## 1.3 Space & layout
-
-- Overview: Space scale · Sizes · Widths · Containers and reading measure · Grids
-- Tokens: space and size variables
-- Guidelines: long-form spacing and layout guidance
-
-## 1.4 Shape
-
-- Overview: Radius roles · Radius in use · Border widths
-- Tokens: radius and border-width variables
-- Guidelines: long-form shape guidance
-
-## 1.5 Elevation
-
-- Overview: Shadows · Focus rings · Backdrop blurs
-- Guidelines: long-form effects guidance
-
-## 1.6 Motion
-
-- Overview: Durations · Easings · Pairings
-- Tokens: motion variables
-- Guidelines: long-form motion guidance
-
-## 1.7 Iconography
-
-- Overview: Icon library · Sizes · Colors · Utility marks
-- Guidelines: long-form icon guidance
-
-## 1.8 Brand assets
-
-Select the asset kinds that apply:
-- Product logo
-- Partner and customer logos
-- Press logos
-- Social marks
-- Integration marks
-- App icons
-- App-store badges
-- Payment marks
-- Flags
-- File types
-- Folders
-- Emoji
-
-# 7. Component scope
-
-## Parts
-
-Select Parts at page level; for pages with more than one set, allow set-level selection:
-
-```text
-2.6 Avatar         Avatar · Profile photo
-2.13 Tooltip       Tooltip · Help icon
-```
-
-Every other Part page holds one published set with the page's name.
-
-Parts that other Parts instance are built even when not selected, as dependencies (for example Spinner for Button's loading state, Help icon for Label). The dependency list is in `parts/00-parts.md`.
-
-## Components
-
-Optional at initiation. Select at page level, then set level:
-
-```text
-3.1 Button group     Button group
-3.2 Text field       Text field · Textarea field · Code field
-3.3 Choice field     Choice field · Choice card · Choice group
-3.4 Avatar group     Avatar group · Avatar label
-3.5 Select           Select · Multi-select
-3.6 Menu             Menu · Context menu
-3.7 Social button    Social button · Social button group
-3.8 Badge group      Badge group
-```
-
-## Sections
-
-Optional at initiation:
-
-```text
-4.1 Rich text editor   Rich text toolbar · Rich text floating toolbar · Rich text editor
-4.2 Video player       Video player
-```
-
-A selected Component or Section also builds the Parts it contains. Unselected Components and Sections can be added later through `EXTEND.md`. Layouts and Screens are only added through `EXTEND.md`.
-
-The complete set and private-part inventory of every page is defined by its Markdown file.
-
-# 8. Component implementation mode
-
-If any Part, Component or Section is selected, explicitly ask (the same choice applies later to Layouts and Screens added through `EXTEND.md`):
-
-**How do you want to implement the components?**
-
-- **YOLO everything** — implement every confirmed selected component page continuously without stopping for per-page approval.
-- **One by one** — implement exactly one confirmed component page at a time, run that page's QA, report what is complete and what remains, then stop for the user to choose or confirm the next page.
-
-Rules:
-- do not infer the mode from build strategy, project size, or phrases such as "complete the design system";
-- do not silently default to YOLO;
-- if the user already explicitly chose YOLO or One by one in the current request, reuse that choice and do not ask again;
-- implementation mode controls execution pacing only; it does not reduce specification loading, anatomy fidelity, documentation depth, matrix completeness or QA;
-- in **One by one**, do not prebuild unrelated selected pages; Parts and private parts the active page depends on may be built as dependencies;
-- in **YOLO everything**, every selected page still follows its complete Markdown file and QA before the run is considered complete.
-
-# 9. Token architecture and naming
-
-For **new systems**, architecture and naming are fixed by `SYSTEM.md` Part C:
-- layers: Primitives → Semantic → Components (component tokens only where needed);
-- collections, in order, created only when needed: `Primitives`, `Color`, `Typography`, `Space`, `Size`, `Shape`, `Motion`, `Components`, `Documentation`;
-- token grammar `{domain}/{group}/{role}[/{emphasis}][/{state}]`;
-- component and property names from Part C §4.
-
-Nothing to ask; state it in the confirmation summary.
-
-For **existing systems**, ask:
-
-**Naming action**
-- **Keep existing naming** — preserve existing collections, variables, styles and component properties; new additions follow the existing pattern.
-- **Normalize** — migrate to `SYSTEM.md` Part C and record every rename in a rename list shown to the user.
-
-Default for an existing library: `Keep existing naming`.
-
-Never rename silently during Keep, Audit or Improve. Product-specific concepts remain groups inside the relevant collection; they never become their own collection.
-
-# 10. Output formats and product type
-
-**Multi-select** (Figma Variables are always produced):
-- CSS custom properties
-- Tailwind theme
-- JSON
-- DTCG JSON
-- JavaScript / TypeScript
-- Android
-- iOS
-
-Every format is an export of the same names (`SYSTEM.md` Part C §5).
-
-**Product type** (single choice; always ask, never infer from the platforms answer in §1):
-- **Web**: the Figma file for a web product, the documentation site, and a Tailwind-ready React library with an installable package (`WEB.md`, template `web/`).
-- **App**: the Figma file adapted for iOS and Android apps (`SYSTEM.md` Part A §A5), and the documentation site with every component previewed in React Native and its code in React Native, Swift and Kotlin (`APP.md`). All three are always shown; there is no framework choice. Nothing native is provided or built.
-- **Web and App**: both, from one Figma file with one brand look. The documentation site switches each component page between Web and App, and the React library is built for the web.
-
-Suggest the default from §1 Platforms (web platforms → Web, iOS or Android → App, both → Web and App), but let the user choose. The product type adapts the Figma file (`SYSTEM.md` Part A §A5); the scope of pages and components stays the same.
-
-**Code** (single choice):
-- **Figma and code** (default): everything the product type includes. The documentation site is always on the web, whatever the product type: it is where tokens, foundations and components are browsed.
-- **Figma only for now**: only the Figma file, already adapted to the product type. Code can be added later with `WEB.md` and `APP.md`.
-
-The project is created in `output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`web/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
-
-Nothing native is installed, created or built: no Xcode, Android SDK, simulators, emulators or app projects (`APP.md`, "Nothing is installed or built").
-
-# 11. Documentation depth
-
-The **page templates and their frames are fixed** (`SYSTEM.md` Part A §3). This selector only controls optional explanatory depth inside the frames.
-
-Selectable extras:
-- Long-form guidance
-- Resource links
-- Accessibility callouts
-- Do / Don't examples
-- Developer notes
-- QA notes
-
-Never remove the template frames, headers, Design notes, the Usage column of variable tables, tree connectors, alias chips, the Composition block, or component matrices.
-
-# 12. Confirmation summary
-
-Before generation, present:
-- product and brand summary;
-- platforms and modes;
-- existing-page mapping and actions;
-- selected Foundation pages and sections;
-- selected Parts, Components and Sections, with their sets;
-- dependencies that will be built automatically;
-- component implementation mode: YOLO everything or One by one;
-- naming: fixed contract (new) or Keep / Normalize (existing);
-- output formats;
-- product type (Web, App, or Web and App), what that means for Figma and for code (the docs site, the React library for Web, the App previews and code for App), Figma and code or Figma only, and the system slug for `output/{system-slug}/`;
-- optional documentation depth.
-
-Final actions:
-- **Confirm and generate**
-- **Change answers**
-
----
+The questionnaire that produces the generation contract is in `QUESTIONNAIRE.md` (formerly Part A), loaded only at initiation and when an answer changes. This file is the generation logic, Part B, loaded on every step.
 
 # Part B — Generation Decision Logic
 
@@ -399,8 +23,10 @@ templates/structure.md
 
 Every page is built with `templates/structure.md`: page → frames → blocks → items. SYSTEM.md Part A gives the frames; the page file gives what they hold.
 
-Then:
+Then, per step:
 
+- Initiation, and any change to an answer → load `QUESTIONNAIRE.md`
+- Any step that draws frames the doc builder has no helper for (Doc kit, Cover, guidance pages, Foundations, Screens), or that changes the builder → load `DOCFRAMES.md`. Parts, Components, Sections and Layouts are drawn with `tools/figma-docbuilder.js` (§6, *Figma tools*)
 - `01 Getting started` in scope → load `guidance/01-getting-started.md`
 - `02 Tokens` in scope → load `guidance/02-tokens.md`
 - Any Foundation selected → load `foundations/00-foundations.md` **and every selected Foundation page file**
@@ -415,17 +41,23 @@ The exact page → file mapping is in `README.md`.
 ## Loading per step
 
 The full specification is large (several hundred KB). Loading every page file at the start of a long run fills the context, and when it is compacted, page rules get lost. So:
-- load the global set (`README.md`, `SYSTEM.md`, `INITIATOR.md`, `templates/structure.md`) once at the start, and again after any context compaction or new session;
+- load the global set (`README.md`, `SYSTEM.md`, `INITIATOR.md`, `templates/structure.md`) once at the start, and again after any context compaction or new session. `QUESTIONNAIRE.md` and `DOCFRAMES.md` are not part of it: load them at the steps that need them;
 - load each folder file and page file at the generation step that builds that page (§6), not all at once. A page is built only after its own file and the files of the components it contains are loaded in the current context;
 - after a page passes QA, its file can drop out of context; the ledger keeps what matters.
 
 ## Progress ledger
 
-Keep a ledger on disk at `output/{system-slug}/ds-create-ledger.json` (README §5), even for a Figma-only build. Write it after the questionnaire and update it after every page:
+Keep a ledger on disk at `output/{system-slug}/ds-create-ledger.json` (README §5), even for a Figma-only build. Write it after the questionnaire and update it after every step and every page:
 
 ```text
-scope            the confirmed summary (Part A §12): pages, mode, formats, product type, code
-step             current generation step (§6) and page
+scope            the confirmed summary (`QUESTIONNAIRE.md` §12): pages, mode, formats, product type, code
+sequence[]       the build sequence (§6), written once at step 3, in the order it runs. Per entry:
+                 step, page or task, status (todo, building, qa, done, skip),
+                 loaded (the spec files loaded for it in the current context),
+                 audit (fail, warn and the saved result file), date done,
+                 note (one line at most);
+                 for skip, the user decision that skipped it
+step             the first entry in sequence that is not done or skip, and its page
 pages[]          id, name, status (todo, building, qa, done), Figma page id, published sets with ids and variant counts, audit result (fail, warn), open issues
 tokens           collections and variable counts; last check-contrast / audit result
 web              per page: documented, implemented on the web (Web products), qa result
@@ -433,7 +65,22 @@ app              per page: React Native preview component, story app block with 
 decisions        anything the user decided during the run (with the date)
 ```
 
-At the start of every step, and after any compaction, re-read the ledger and the global set before touching Figma. Never rebuild a page the ledger marks `done` unless the user asks; never mark a page `done` before its QA and `tools/figma-audit.js` pass.
+Keep the ledger to status and evidence: it is re-read after every compaction. Anything longer than one line (what changed on a page, gaps, workarounds, values kept as built) goes to `output/{system-slug}/reports/build-notes.md` under the page's id, and the entry's `note` points there.
+
+A `sequence` entry looks like this:
+
+```json
+{ "step": 10, "page": "1.2 Typography", "status": "done",
+  "loaded": ["foundations/00-foundations.md", "foundations/1.2-typography.md"],
+  "audit": { "fail": 0, "warn": 1, "file": "figma/audit-1.2-typography.json" },
+  "done": "YYYY-MM-DD" }
+```
+
+The ledger enforces the order:
+- Before every step, and after any compaction, re-read the ledger and the global set before touching Figma.
+- Start only the first entry in `sequence` that is not `done` or `skip`. Refuse any later entry, and tell the user which earlier entries are still open.
+- Mark an entry `done` only with its evidence: `loaded` lists its page file, its folder file and the files of the components it contains, and `audit.fail` is 0 (§6, *Gates*).
+- Never rebuild a page the ledger marks `done` unless the user asks.
 
 **Root-only implementation is forbidden.**
 
@@ -456,6 +103,8 @@ A local correction does not cancel unrelated approved requirements.
 
 # 2. Inspect first
 
+This is step 2 of the build sequence (§6). It is read-only: nothing in Figma changes before the user confirms the summary.
+
 Only after the mandatory specifications are loaded:
 - inventory pages and top-level frames and component sets;
 - inventory variables, modes and local styles;
@@ -469,8 +118,8 @@ Only after the mandatory specifications are loaded:
 Before implementing any selected Part, Component or Section, the implementation mode must be resolved.
 
 ## YOLO everything
-- load every required component specification first;
-- implement every confirmed selected page continuously in the generation order;
+- load each page's files at its own step (§0, *Loading per step*);
+- implement every confirmed selected page continuously, in the build sequence (§6), without skipping or reordering a step;
 - do not pause for per-page confirmation;
 - run each page's complete QA;
 - do not treat continuous execution as permission to skip documentation, matrices, states, anatomy or QA.
@@ -481,9 +130,9 @@ Before implementing any selected Part, Component or Section, the implementation 
 - include only the Parts and private parts the active page depends on;
 - run that page's complete QA;
 - report the completed page and the remaining confirmed pages;
-- stop and ask which page to implement next, unless the user already named the next page in the same request.
+- stop and propose the next step in the build sequence (§6); continue when the user confirms it, or record the change they ask for (§6, *Gates*).
 
-Do not infer or default this mode. If the user has not explicitly chosen one, ask before component implementation begins.
+Do not infer or default this mode. If the user has not explicitly chosen one, ask before component implementation begins. Neither mode changes the order of the build sequence.
 
 # 4. Page actions
 
@@ -520,25 +169,66 @@ Before generating variables and components:
 4. apply `guidance/02-tokens.md` when `02 Tokens` is in scope;
 5. keep product-specific concepts inside the appropriate collection.
 
-# 6. Generation order
+# 6. Build sequence
 
-```text
-1. Load all mandatory specifications
-2. Variables and styles (Primitives → Semantic), then the Documentation collection (aliasing them) and 9.1 Doc kit (structure components from templates/structure.md §7), so the docs take the brand's look
-3. 00 Cover, 01 Getting started, 02 Tokens
-4. Foundations 1.1 → 1.8 (selected), using foundations/00-foundations.md + each page file
-5. Resolve the component implementation mode
-6. Parts in ID order, dependencies first (parts/00-parts.md + each page file)
-7. Selected Components in ID order (components/00-components.md + each page file)
-8. Selected Sections in ID order (sections/00-sections.md + each page file)
-9. Documentation, examples, diagrams, matrices and QA required by each loaded file, then `tools/figma-audit.js` on every built page and once on the file (`fail` must be 0)
-10. Documentation site, whenever code is in scope: WEB.md W1–W8 (template copy, token export with the contrast gate, brand assets, components in page order, foundation and guidance pages, docs data, build and QA, publish). `product` in `ds.config.ts` is the product type; the web package is built for Web and Web and App
-11. App previews, for App and Web and App: APP.md A1–A4 (copy the React Native preview source into the docs project, React Native tokens, each component's preview and its `app` block with React Native, Swift and Kotlin code, QA). Nothing native is installed or built
+The build is one numbered sequence. It is the only order, for a new system and for an existing one. Step 3 writes it into the ledger's `sequence` (§0, *Progress ledger*) with every step in scope, steps 1–3 already done, and the run follows it from top to bottom. Every other file that mentions order points here.
 
-Every page in steps 3–8 is built with templates/structure.md. Layouts (5.x) and Screens (6.x) are not built at initiation; they are added later through EXTEND.md.
-```
+| # | Step | Load at this step | Done when |
+| --- | --- | --- | --- |
+| 1 | **Global set** | `README.md`, `SYSTEM.md`, `INITIATOR.md`, `templates/structure.md`; at initiation also `QUESTIONNAIRE.md` | all four (five at initiation) are in the current context |
+| 2 | **Inventory** (existing system only). Read pages, frames, component sets and properties, variables, modes, styles and naming, and map them to the page tree (§2). Read-only. | — | the mapping is ready for the confirmation summary. A family with no page in the tree gets the next free ID of its level and is marked *spec to write*. |
+| 3 | **Confirmation** (`QUESTIONNAIRE.md` §12): scope, page actions, implementation mode, naming (fixed, or Keep / Normalize with the rename list), product type, code, system slug | `QUESTIONNAIRE.md` | the user confirmed; the ledger holds `scope` and the full `sequence` |
+| 4 | **Tokens.** New system: Primitives → Color, Typography (variables and text styles), Space, Size, Shape, in the `SYSTEM.md` Part C order. Existing system: the renames on the confirmed rename list (Normalize only), then the missing tokens. Effect styles, Motion, grid styles, icons and assets are made at the step of the foundation page that owns them. | `SYSTEM.md` Part C, `guidance/02-tokens.md` | `tools/figma-audit.js` in file mode reports `fail` = 0; collections and counts are in the ledger |
+| 5 | **Page tree.** Create the in-scope pages in tree order, with separators. Existing system: rename pages and move existing component sets onto their pages. Structure only: no frame is documented and no page is marked done. | `SYSTEM.md` Part A §A1–§A2 | every in-scope page exists with its exact name, in order |
+| 6 | **Documentation collection** (aliases the step 4 tokens) **and 9.1 Doc kit** | `DOCFRAMES.md` §1 and §16, `templates/structure.md` §7 | the Doc kit page passes `tools/figma-audit.js`, and the doc builder is cached: `tools/figma-docbuilder.js` (two calls, `docbuilder` and `docpages`) and `tools/figma-audit.js` (one call), as its header describes |
+| 7 | **00 Cover** | `SYSTEM.md` Part A §A3, `DOCFRAMES.md` | the page gate below |
+| 8 | **01 Getting started** | `guidance/01-getting-started.md`, `DOCFRAMES.md` | the page gate |
+| 9 | **02 Tokens** | `guidance/02-tokens.md`, `DOCFRAMES.md` | the page gate |
+| 10 | **Foundations**, one step per page: 1.1 → 1.2 → … → 1.8 | `foundations/00-foundations.md`, the page file, `DOCFRAMES.md` | the page gate, except the Guidelines examples that need components: they are listed in the ledger for step 16 |
+| 11 | **Parts**, one step per page, in ID order with the dependencies of `parts/00-parts.md` §3 first | `parts/00-parts.md`, the page file, the files of the Parts it instances, `tools/figma-docbuilder.js` (cached) | the page gate |
+| 12 | **Components**, one step per page, in ID order | `components/00-components.md`, the page file, `parts/00-parts.md` and the files of the Parts it contains, `tools/figma-docbuilder.js` (cached) | the page gate |
+| 13 | **Sections**, one step per page, in ID order | `sections/00-sections.md`, the page file, the folder and page files of the Components and Parts it contains, `tools/figma-docbuilder.js` (cached) | the page gate |
+| 14 | **Layouts**, one step per page, in ID order | `layouts/00-layouts.md`, the page file, the files of the Sections and Components it contains, `tools/figma-docbuilder.js` (cached) | the page gate |
+| 15 | **Screens**, one step per page, in ID order | `screens/00-screens.md`, the page file, the file of its Layout, `DOCFRAMES.md` | the page gate |
+| 16 | **Foundation examples that use components** (`foundations/00-foundations.md`, *Build order*) | the foundation page file again, `DOCFRAMES.md` | every example the ledger lists for it is built from real instances, and the page audit passes again |
+| 17 | **File audit**: `tools/figma-audit.js` on every built page and once on the file | `tools/figma-audit.js` | `fail` = 0 on every page and on the file |
+| 18 | **Docs site setup**: `WEB.md` W1–W3; App: `APP.md` A1–A2 | `WEB.md`; App: `APP.md` | the exit checks of W1–W3 |
+| 19 | **Docs pages**, one step per page, in ID order: `WEB.md` W4; App: `APP.md` A3 | `WEB.md` (and `APP.md`), the page file; agents working in parallel start from `templates/agent-brief.md` | `WEB.md` §9 (and `APP.md` §9) pass for the page |
+| 20 | **Foundation and guidance pages, docs data**: `WEB.md` W5–W6 | `WEB.md`, the foundation and guidance files | the exit checks of W5–W6 |
+| 21 | **Build, package and QA**: `WEB.md` W7; App: `APP.md` A4 | `WEB.md`; App: `APP.md` | the exit check of W7; App: `APP.md` §9 |
+| 22 | **Publish**: `WEB.md` W8 | `WEB.md` | the location is reported and the QA results are saved |
 
-Pages are created in the order of the page tree, with separators, whatever order they are built in. Do not substitute a different taxonomy, page name or frame name.
+**Figma tools.** Steps 11–14 draw frames with `tools/figma-docbuilder.js`, cached once at step 6: Parts, Components and Sections use `sectionPage`, Layouts use `layoutPage`. Each page body is small and comes from the page file, and `finishPage` arranges the frames and runs the audit. Steps 6–10, 15 and 16 draw frames the builder has no helper for yet (Doc kit, Cover, guidance pages, foundation palette rows and variable tables, Screens), so they load `DOCFRAMES.md`. Load it too when changing the builder. If a call drops after about 120 s, first make a read-only call that lists the page's frames, then re-run. `use_figma` rejects return values over 20 KB, so tools return compact results and page themselves. After step 17, clear the `dscreate` plugin data on the document root.
+
+Which steps are in scope:
+- Step 2 runs only for an existing system.
+- Steps 10–15 hold only the pages in scope. A new system has no Layouts or Screens at initiation; an existing system has them when the inventory maps them. Pages added later through `EXTEND.md` get their own entry (`EXTEND.md`).
+- Steps 18–22 run only when code is in scope; the App parts only for App and Web and App. Nothing native is installed or built.
+- A step out of scope is written as `skip`, with the reason from the confirmed summary.
+
+## Gates
+
+- **One step at a time.** A step starts only when every step above it in the ledger is `done` or `skip`. Re-read the ledger before every step and start the first open one, never a later one.
+- **One page per step.** Steps 7–15 and 19 each build exactly one page. A shared script may draw headers, tables or footers, but it never builds a page whose file isn't loaded, and never several pages in one step. A page made by a generic builder without its own page file is not done, whatever it looks like.
+- **A page is done** only when:
+  1. its page file, its folder file and the files of the components it contains were loaded in the current context, and the ledger lists them under `loaded`;
+  2. its frames match `SYSTEM.md` Part A §A3: names, order, `y = 0`, the canvas gap;
+  3. the page file's QA list and the folder file's completion criteria pass;
+  4. `tools/figma-audit.js` on the page reports `fail` = 0, saved in `output/{system-slug}/figma/`;
+  5. pages with component sets (steps 11–15): every set is exported with `tools/figma-export-sets.js` to `output/{system-slug}/figma/sets/{set-id}.json` (`:` written as `-`). Docs agents (step 19) read these files and open Figma only for screenshots.
+- **Approved exceptions.** When an audit fail can't be fixed without a change the user ruled out (for example existing values that must stay), ask the user. An approved exception is recorded in the ledger under `auditExceptions` (contrast pairs, unsupported modes, collections that aren't tokens) with the date and reason, documented on the page it belongs to (contrast pairs on 1.1 Color, an unsupported mode on 02 Tokens), and copied into the `ACCEPTED` block of `tools/figma-audit.js` for the run. The audit then reports it as `info`, not `fail`. An exception the user didn't approve is a fail.
+- **Keep and Audit pages take their step too.** Load the file, compare, run the audit and record the findings. They change nothing, and they are done when the findings are recorded.
+- **No spec, no page.** A page with no spec file (an existing family that isn't in the tree) gets its file first, through `EXTEND.md` steps 1–8. Then the page is built at its place in the sequence.
+- **Structure early, documentation in order.** Renaming pages and moving component sets is step 5 and may come before a page's own step. Building or filling any frame of a page happens only at that page's step.
+- **YOLO is pacing, not order.** YOLO everything removes the pause between pages. It never allows skipping, reordering or merging steps. One by one stops after each step and proposes the next one.
+- **Only the user changes the order.** The user may skip a page, or move a page later within its level. Record it under `decisions` with the date and update `sequence`. The order of the levels never changes.
+- **Out of order is a stop.** When the agent finds it skipped or reordered a step: stop, set the affected entries back to `building` (work done out of order is never `done`), record what happened under `decisions`, tell the user, and resume from the earliest open step. Work done early is checked against its page file at its own step, like any other page.
+
+## Progress reports
+
+Report progress against the sequence: the step, the page and its place in the level ("Step 11 · Parts · 2.1 Button, 6 of 19, QA"), then the steps done and the next step. A level is reported as finished only when all its steps are done and no earlier step is open. A count of pages built is not progress while an earlier step is open.
+
+Pages are created in the order of the page tree, with separators, whatever order they are built in. Every page in steps 7–15 is built with `templates/structure.md`. Do not substitute a different taxonomy, page name or frame name.
 
 # 7. Build completeness
 
@@ -562,6 +252,8 @@ Resolve every item to Keep / Audit / Improve / Refactor / Rebuild / Replace / Bu
 # 8. Validation
 
 Validation fails immediately if:
+- a step started before every step above it in the ledger's `sequence` was `done` or `skip`, or a page was built or filled outside its own step;
+- a page was produced by a generic builder without its own page file loaded;
 - component implementation began without an explicit YOLO everything or One by one choice;
 - any required folder file was not loaded;
 - any selected page file was not loaded;
@@ -590,5 +282,5 @@ Do not mark generation complete until:
 - every checklist item is resolved;
 - every applicable global, folder-level and page-level QA rule passes, and `tools/figma-audit.js` reports `fail` = 0 on every built page and on the file;
 - for App and Web and App, every in-scope page has its React Native preview and an `app` block with React Native, Swift and Kotlin code, and `APP.md` §9 passes;
-- the progress ledger marks every in-scope page `done`;
+- every entry of the ledger's `sequence` is `done` or `skip`, in order, and every `done` entry has its evidence (`loaded`, `audit.fail` = 0);
 - when code is in scope, `npm run build` passes (including `check:contrast`), `npm run qa` reports 0 problems, the package installs in a fresh app (Web and Web and App), and every in-scope page passes `WEB.md` §9.

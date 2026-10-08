@@ -15,7 +15,7 @@ This page is built with `templates/structure.md`; the frames and what they hold 
 
 There is no `.Main` frame and no `· Tokens` frame.
 
-Every frame is a reading frame (`SYSTEM.md` Part B §7):
+Every frame is a reading frame (`DOCFRAMES.md` §7):
 - `Doc/Header` with breadcrumb `Guidance › 01 Getting started`;
 - one section with a rich-text column at `doc/measure/reading`, padded by `doc/space/block`;
 - each topic is heading → body → visual example → links, with the visual directly after the text it supports;

@@ -5,9 +5,11 @@ import type { TokenVariable } from '@/tokens/types';
 import { Icon } from '@/icons';
 import { Button, Progress, Select, Switch, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../DocPage';
-import { Bullets, Caption, DoDont, H3, InlineCode, P, Swatch, TokenTable } from '../blocks';
+import { appTokenNames, breakable, Bullets, Caption, DoDont, H3, InlineCode, P, productHasWeb, Swatch, TokenTable } from '../blocks';
+import { siteHasDark, supportedModes, unsupportedModes } from '../modes';
 import { componentDocs, slugOf, staticPages } from '../registry';
 import { figmaNodeFor } from '../meta';
+import { brandCopy } from '@/brand/copy';
 
 /* ---------- data ---------- */
 const byName = new Map(tokens.variables.map((t) => [t.name, t]));
@@ -145,7 +147,7 @@ function Td({ children, code, className = '' }: { children: ReactNode; code?: bo
 function Badge({ children, tone = 'default' }: { children: ReactNode; tone?: 'default' | 'brand' }) {
   return (
     <span
-      className={`type-code-sm-regular inline-flex max-w-full items-center gap-sm break-all rounded-indicator border px-md py-xxs ${tone === 'brand' ? 'border-border-brand-subtle bg-fill-brand-subtle text-text-brand' : 'border-border-subtle bg-surface-raised text-text-primary'}`}
+      className={`type-code-sm-regular inline-flex max-w-full items-center gap-sm break-all rounded-indicator border px-md py-xxs ${tone === 'brand' ? 'border-border-brand-subtle bg-fill-brand-subtle text-site-brand-on-tint' : 'border-border-subtle bg-surface-raised text-text-primary'}`}
     >
       {children}
     </span>
@@ -165,8 +167,7 @@ function ValueChip({ name, mode }: { name: string; mode?: string }) {
 }
 
 /* ---------- Overview ---------- */
-// BRAND: replace with one sentence on the character of this brand's neutral and brand ramps, from the Figma "02 Tokens" primitive palette topic.
-const paletteCharacter = 'The neutral ramp carries text, borders and surfaces, and the brand ramp carries actions and selection.';
+const paletteCharacter = brandCopy.paletteCharacter;
 
 function LayerStep({ layer, name, children }: { layer: string; name?: string; children?: ReactNode }) {
   return (
@@ -227,7 +228,7 @@ function SegmentAnatomy() {
         <Fragment key={s}>
           {i > 0 && <span className="type-code-md-regular pb-xl text-text-tertiary">/</span>}
           <div className="flex flex-col items-center gap-xs">
-            <span className="type-code-md-medium rounded-sm border border-border-brand-subtle bg-fill-brand-subtle px-md py-xs text-text-brand">{s}</span>
+            <span className="type-code-md-medium rounded-sm border border-border-brand-subtle bg-fill-brand-subtle px-md py-xs text-site-brand-on-tint">{s}</span>
             <span className="type-body-xs-medium text-text-tertiary">{l}</span>
           </div>
         </Fragment>
@@ -255,15 +256,14 @@ function Overview() {
     <div className="flex max-w-[64rem] flex-col gap-4xl">
       <Topic title="What the token system is for">
         <P>
-          Every screen is built from named values for color, type, space, size, corners, depth and motion. Designers pick them as Figma variables and developers use the same names in
-          code, so a design and its build always match. Four goals shape the system.
+          Choose tokens by purpose, such as text, surface or a primary action. Use Reference to find the exported value and its code name. Typography and elevation are also documented as Figma styles.
         </P>
         <div className="grid gap-md sm:grid-cols-2">
           {[
-            ['Simplicity', 'Each concept has one name, there are only a few collections, and the structure is the same everywhere.'],
-            ['Accessibility', 'Color pairs are tested in every mode before any component uses them.'],
-            ['Aesthetics', 'The brand’s character lives in the primitives and roles, so every component carries it.'],
-            ['Scalability', 'You can add modes, brands and components without renaming anything that exists.'],
+            ['Choose a role', 'Use semantic color tokens for their intended purpose, such as text or a surface.'],
+            ['Check the pair', 'Read the Color contrast notes before choosing foreground and background tokens.'],
+            ['Follow the mapping', 'Use the code name shown in Reference; Figma and code can use different naming formats.'],
+            ['Extend deliberately', 'Check for an existing role before adding a token. Document its purpose and code mapping.'],
           ].map(([t, d]) => (
             <div key={t} className="flex flex-col gap-xs rounded-surface border border-border-subtle p-xl">
               <H3>{t}</H3>
@@ -378,7 +378,7 @@ function Overview() {
       </Topic>
 
       <Topic title="Scopes">
-        <P>Figma offers each variable only for the properties it belongs to, so pickers show sensible choices and nobody picks a border color for text.</P>
+        <P>Scopes narrow the variables shown in Figma’s property pickers. Check the role and the actual foreground/background pairing as well.</P>
         <TableRegion label="Variable scopes">
           <table className="w-full border-collapse text-left">
             <thead className="bg-surface-sunken">
@@ -414,7 +414,7 @@ function Overview() {
       </Topic>
 
       <Topic title="Naming">
-        <P>Every token name has the same shape. Each segment narrows the one before it, so you can guess a name before you look it up.</P>
+        <P>Names group tokens by domain and purpose. Check the domain-specific patterns below and use Reference for the exact name.</P>
         <Visual className="flex flex-col gap-xl">
           <span className="type-code-md-regular text-text-secondary">{'{domain}/{group}/{role}[/{emphasis}][/{state}]'}</span>
           <SegmentAnatomy />
@@ -479,33 +479,72 @@ function Overview() {
           <DoDont kind="dont" caption="gray-text-2 · space-8px · button-radius-login" />
         </div>
         <H3>From Figma to code</H3>
-        <P>
-          In code, the same segments are joined with hyphens. Color, space, radius, font, shadow and easing tokens become Tailwind theme keys. Use everything else through its CSS variable.
-        </P>
-        <TableRegion label="Figma names, CSS variables and Tailwind classes">
-          <table className="w-full border-collapse text-left">
-            <thead className="bg-surface-sunken">
-              <tr>
-                <Th>Figma</Th>
-                <Th>CSS</Th>
-                <Th>Tailwind</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {MAP.map(([a, b, c]) => (
-                <tr key={a} className="border-t border-border-subtle">
-                  <Td code>{a}</Td>
-                  <Td code className="text-text-secondary">
-                    {b}
-                  </Td>
-                  <Td code className="text-text-brand">
-                    {c}
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </TableRegion>
+        {productHasWeb ? (
+          <>
+            <P>
+              In code, the same segments are joined with hyphens. Color, space, radius, font, shadow and easing tokens become Tailwind theme keys. Use everything else through its CSS
+              variable.
+            </P>
+            <TableRegion label="Figma names, CSS variables and Tailwind classes">
+              <table className="w-full border-collapse text-left">
+                <thead className="bg-surface-sunken">
+                  <tr>
+                    <Th>Figma</Th>
+                    <Th>CSS</Th>
+                    <Th>Tailwind</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MAP.map(([a, b, c]) => (
+                    <tr key={a} className="border-t border-border-subtle">
+                      <Td code>{a}</Td>
+                      <Td code className="text-text-secondary">
+                        {b}
+                      </Td>
+                      <Td code className="text-text-brand">
+                        {c}
+                      </Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </TableRegion>
+          </>
+        ) : (
+          <>
+            <P>
+              In app code, the segments become camelCase members, without the domain: <InlineCode>color/text/primary</InlineCode> is{' '}
+              <InlineCode>textPrimary</InlineCode>. A member that would start with a digit keeps its domain.
+            </P>
+            <TableRegion label="Figma names in React Native, Swift and Kotlin">
+              <table className="w-full border-collapse text-left">
+                <thead className="bg-surface-sunken">
+                  <tr>
+                    <Th>Figma</Th>
+                    <Th>React Native</Th>
+                    <Th>Swift</Th>
+                    <Th>Kotlin</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MAP.filter(([a]) => appTokenNames(a)).map(([a]) => {
+                    const n = appTokenNames(a)!;
+                    return (
+                      <tr key={a} className="border-t border-border-subtle">
+                        <Td code>{a}</Td>
+                        {[n.rn, n.swift, n.kotlin].map((c) => (
+                          <Td key={c} code className="text-text-secondary">
+                            {breakable(c)}
+                          </Td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </TableRegion>
+          </>
+        )}
         <Caption>
           Every semantic variable describes what it’s for in the UI. You’ll see the same text in Figma’s picker tooltip and in the <TextLink to="?tab=reference">Reference</TextLink> table.
         </Caption>
@@ -513,37 +552,50 @@ function Overview() {
 
       <Topic title="Modes">
         <P>
-          Color has a Light and a Dark mode, and every role has a value in both. Components don’t need a dark variant: in Dark, the role points to a different primitive and everything
-          that uses it follows.
+          {supportedModes.length > 1 ? (
+            <>
+              Color has {joinList(supportedModes)} modes, and every role has a value in each. Components don’t need a dark variant: in {supportedModes[1]}, the role points to a
+              different primitive and everything that uses it follows.
+            </>
+          ) : (
+            <>
+              Color is {supportedModes[0]} only
+              {unsupportedModes.length
+                ? `. The collection has a ${joinList(unsupportedModes)} column, but it isn’t supported, so keep frames on ${supportedModes[0]}`
+                : ''}
+              . Every role has one value, and everything that uses it follows when it changes.
+            </>
+          )}
         </P>
-        <TableRegion label="Color roles in Light and Dark">
+        <TableRegion label={`Color roles in ${joinList(supportedModes)}`}>
           <table className="w-full border-collapse text-left">
             <thead className="bg-surface-sunken">
               <tr>
                 <Th>Role</Th>
-                <Th>Light</Th>
-                <Th>Dark</Th>
+                {supportedModes.map((m) => (
+                  <Th key={m}>{m}</Th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {MODE_ROLES.map((n) => (
                 <tr key={n} className="border-t border-border-subtle">
                   <Td code>{n}</Td>
-                  <Td>
-                    <ValueChip name={n} mode="Light" />
-                  </Td>
-                  <Td>
-                    <ValueChip name={n} mode="Dark" />
-                  </Td>
+                  {supportedModes.map((m) => (
+                    <Td key={m}>
+                      <ValueChip name={n} mode={m} />
+                    </Td>
+                  ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </TableRegion>
-        <div className="grid gap-xl md:grid-cols-2">
-          {(['light', 'dark'] as const).map((m) => (
+        {/* An explicit width: with brand spacing tokens, max-w-md would be the md space step, not 28 rem. */}
+        <div className={supportedModes.length > 1 ? 'grid gap-xl md:grid-cols-2' : 'grid max-w-[28rem] gap-xl'}>
+          {supportedModes.map((mode) => mode.toLowerCase()).map((m) => (
             <div key={m} className="flex min-w-0 flex-col gap-sm">
-              <span className="type-body-xs-semibold text-text-tertiary">Color → {m === 'light' ? 'Light' : 'Dark'}</span>
+              <span className="type-body-xs-semibold text-text-tertiary">Color → {m === 'dark' ? 'Dark' : 'Light'}</span>
               <div data-theme={m} className="rounded-surface bg-surface-sunken p-xl">
                 <ModeCard />
               </div>
@@ -606,8 +658,17 @@ function Overview() {
                 <>Layouts change structure at each grid breakpoint, and tokens change only where a value really differs.</>
               )}
             </>,
-            <>Dark neutrals are solid colors, not transparent white, so contrast stays predictable and stacked layers don’t add up.</>,
-            <>Each mode is tested on its own, because a pair that passes in Light can fail in Dark.</>,
+            ...(siteHasDark
+              ? [
+                  <>Dark neutrals are solid colors, not transparent white, so contrast stays predictable and stacked layers don’t add up.</>,
+                  <>Each mode is tested on its own, because a pair that passes in Light can fail in Dark.</>,
+                ]
+              : [
+                  <>
+                    {unsupportedModes.length ? `${joinList(unsupportedModes)} isn’t supported yet. ` : ''}When a dark mode is added, start with solid neutrals rather than
+                    transparent white, and test each mode on its own.
+                  </>,
+                ]),
           ]}
         />
       </Topic>
@@ -658,10 +719,16 @@ interface Row {
   hay: string;
 }
 const ALL = 'All collections';
+/** The code names a token is found by: CSS and Tailwind on a web product, React Native, Swift and Kotlin on an App product. */
+function codeHay(name: string, web: string) {
+  if (productHasWeb) return web;
+  const a = appTokenNames(name);
+  return a ? `${a.rn} ${a.swift} ${a.kotlin}` : '';
+}
 const rows: Row[] = [
-  ...tokens.variables.map((t) => ({ name: t.name, collection: t.collection, hay: `${t.name} ${t.css} ${t.tailwind ?? ''}`.toLowerCase() })),
-  ...tokens.textStyles.map((t) => ({ name: t.name, collection: 'Text styles', hay: `${t.name} ${t.className}`.toLowerCase() })),
-  ...tokens.effectStyles.map((t) => ({ name: t.name, collection: 'Effect styles', hay: `${t.name} ${t.css} ${t.tailwind}`.toLowerCase() })),
+  ...tokens.variables.map((t) => ({ name: t.name, collection: t.collection, hay: `${t.name} ${codeHay(t.name, `${t.css} ${t.tailwind ?? ''}`)}`.toLowerCase() })),
+  ...tokens.textStyles.map((t) => ({ name: t.name, collection: 'Text styles', hay: `${t.name} ${codeHay(t.name, t.className)}`.toLowerCase() })),
+  ...tokens.effectStyles.map((t) => ({ name: t.name, collection: 'Effect styles', hay: `${t.name} ${codeHay(t.name, `${t.css} ${t.tailwind}`)}`.toLowerCase() })),
 ];
 const groups = [...tokens.collections.map((c) => c.name), 'Text styles', 'Effect styles'];
 const PAGE = 120;
@@ -685,14 +752,16 @@ function Reference() {
   return (
     <div className="flex flex-col gap-xl">
       <P>
-        Find any variable, text style or effect style by its Figma name, CSS variable or Tailwind class. Values are shown for Light and Dark, and tokens with a single mode show the same
-        value in both.
+        Find any variable, text style or effect style by its Figma name{productHasWeb ? ', CSS variable or Tailwind class' : ' or its React Native, Swift or Kotlin name'}.{' '}
+        {supportedModes.length > 1
+          ? `Values are shown for ${joinList(supportedModes)}, and tokens with a single mode show the same value in each.`
+          : `Values are shown for ${supportedModes[0]}, the only supported color mode.`}
       </P>
       <div className="grid gap-lg md:grid-cols-[minmax(0,1fr)_16rem]">
         <TextField
           label="Search tokens"
           leadingIcon="general/search"
-          placeholder="Try brand, --space-md or rounded-control"
+          placeholder={productHasWeb ? 'Try brand, --space-md or rounded-control' : 'Try brand, textPrimary or DsSpace'}
           value={q}
           onValueChange={(val) => {
             setQ(val);

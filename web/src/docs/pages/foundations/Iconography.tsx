@@ -6,8 +6,10 @@ import { Avatar, Badge, Button, FeaturedIcon, IconButton, Tooltip } from '@/comp
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
 import { Caption, CodeBlock, H3, InlineCode, P, TokenBadge } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
+import { siteSchemes } from '../../modes';
 import { config } from '@/ds.config';
 import type { Topic } from '../../types';
+import { brandCopy } from '@/brand/copy';
 
 /* ---------- data ---------- */
 const CATEGORIES: [string, string][] = [
@@ -37,14 +39,15 @@ const presentCats = CATEGORIES.filter(([c]) => iconNames.some((n) => catOf(n) ==
 
 const vars = new Map(tokens.variables.map((v) => [v.name, v]));
 const SIZES: IconSize[] = ['xs', 'sm', 'md', 'lg', 'xl'];
-const sizeVar = (s: IconSize) => vars.get(`size/icon/${s}`)!;
-const px = (s: IconSize) => parseFloat(sizeVar(s).modes.Value.value);
+/** Icon sizes when the file has no size/icon tokens (an existing file with raw icon boxes): the registry's own steps. */
+const DEFAULT_PX: Record<IconSize, number> = { xs: 12, sm: 16, md: 20, lg: 24, xl: 32 };
+const sizeVar = (s: IconSize) =>
+  vars.get(`size/icon/${s}`) ?? { name: `size/icon/${s}`, description: 'No size token in this file: the icon registry’s own step.', modes: { Value: { alias: null, value: `${DEFAULT_PX[s]}px` } } };
+const sizeValue = (s: IconSize) => Object.values(sizeVar(s).modes)[0]?.value ?? `${DEFAULT_PX[s]}px`;
+const px = (s: IconSize) => parseFloat(sizeValue(s));
 
-/**
- * BRAND: the icon library's drawing style. The defaults match the template registry (src/icons, outline icons
- * drawn with strokeWidth 2 on a 24 box). Rewrite them from the Figma Iconography page when the build picks another library or style.
- */
-const STYLE = { kind: 'outline', stroke: 2, box: px('lg'), liveArea: px('lg') - 4 };
+/** The icon library's drawing style (brandCopy.iconStyle), on the lg icon box. */
+const STYLE = { ...brandCopy.iconStyle, box: px('lg'), liveArea: px('lg') - 4 };
 
 /** Icon colour roles shown on the surface they are made for (hover and pressed steps are left out). */
 const ROLE_SURFACE: Record<string, string> = {
@@ -117,7 +120,7 @@ function NavList({ icons = true, active = 1 }: { icons?: boolean; active?: numbe
       {NAV.map(([icon, label], i) => (
         <li
           key={label}
-          className={cn('flex items-center gap-md rounded-control px-md py-sm type-body-sm-medium', i === active ? 'bg-fill-brand-subtle text-text-brand' : 'text-text-secondary')}
+          className={cn('flex items-center gap-md rounded-control px-md py-sm type-body-sm-medium', i === active ? 'bg-fill-brand-subtle text-site-brand-on-tint' : 'text-text-secondary')}
         >
           {icons && <Icon name={icon} size="md" className={i === active ? 'text-icon-brand' : 'text-icon-secondary'} />}
           {label}
@@ -141,7 +144,7 @@ function Library() {
   const chip = (on: boolean) =>
     cn(
       'type-body-xs-semibold inline-flex h-(--size-control-xs) cursor-pointer items-center gap-xs rounded-indicator border px-md outline-none is-focus:shadow-focus-default',
-      on ? 'border-border-brand bg-fill-brand-subtle text-text-brand' : 'border-border-subtle bg-surface-base text-text-secondary is-hover:bg-surface-base-hover',
+      on ? 'border-border-brand bg-fill-brand-subtle text-site-brand-on-tint' : 'border-border-subtle bg-surface-base text-text-secondary is-hover:bg-surface-base-hover',
     );
   return (
     <div className="flex flex-col gap-lg">
@@ -163,11 +166,11 @@ function Library() {
       </div>
       <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-xs">
         <button type="button" aria-pressed={!cat} onClick={() => setCat(null)} className={chip(!cat)}>
-          All <span className="text-text-tertiary">{iconNames.length}</span>
+          All <span className={cat ? 'text-text-tertiary' : undefined}>{iconNames.length}</span>
         </button>
         {presentCats.map(([c, label]) => (
           <button key={c} type="button" aria-pressed={cat === c} onClick={() => setCat(cat === c ? null : c)} className={chip(cat === c)}>
-            {label} <span className="text-text-tertiary">{iconNames.filter((n) => catOf(n) === c).length}</span>
+            {label} <span className={cat === c ? undefined : 'text-text-tertiary'}>{iconNames.filter((n) => catOf(n) === c).length}</span>
           </button>
         ))}
       </div>
@@ -226,7 +229,7 @@ function Sizes() {
               ))}
             </div>
             <TokenBadge name={v.name} />
-            <span className="type-code-sm-regular text-text-secondary">{v.modes.Value.value}</span>
+            <span className="type-code-sm-regular text-text-secondary">{sizeValue(s)}</span>
             <span className="type-body-xs-regular text-text-secondary">{v.description}</span>
           </div>
         );
@@ -238,7 +241,7 @@ function Sizes() {
 function Colours() {
   return (
     <div className="grid gap-lg">
-      {(['light', 'dark'] as const).map((m) => (
+      {siteSchemes.map((m) => (
         <Themed key={m} mode={m}>
           <div className="grid gap-sm sm:grid-cols-2 lg:grid-cols-3">
             {iconRoles.map((r) => (
@@ -601,7 +604,7 @@ function Anatomy() {
       </div>
       <ul className="flex flex-col gap-md">
         {[
-          ['Component box', `${sizeVar('lg').modes.Value.value} (size/icon/lg), shown at 4×, with no fill`],
+          ['Component box', `${sizeValue('lg')} (size/icon/lg), shown at 4×, with no fill`],
           ['Live area', `The inner dashed square, ${STYLE.liveArea}px. The glyph stays inside it.`],
           ['Vector “Icon”', `A ${STYLE.stroke}-pixel stroke in the current color role (color/icon/primary by default)`],
         ].map(([k, v]) => (

@@ -4,10 +4,11 @@ import { cn } from '@/lib/cn';
 import { Icon, type IconName } from '@/icons';
 import { Button, Checkbox, IconButton, Menu, Select, Spinner, Switch, Tooltip } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
-import { Caption, CodeBlock, InlineCode, P, TokenBadge } from '../../blocks';
+import { breakable, Caption, CodeBlock, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { config } from '@/ds.config';
 import type { Topic } from '../../types';
+import { brandCopy } from '@/brand/copy';
 
 /* ---------- token helpers ---------- */
 const motionVars = tokens.variables.filter((v) => v.collection === 'Motion');
@@ -123,8 +124,7 @@ const th = 'px-lg py-md';
 function Principles() {
   const items: { icon: IconName; title: string; text: string }[] = [
     { icon: 'general/refresh', title: 'Motion explains change', text: 'It shows what arrived, what left and what responded. A menu grows from its trigger, and a removed row closes its gap.' },
-    // BRAND: the motion character. Rewrite this card from the Figma Guidelines frame if the brand's motion is livelier (longer values, overshoot curves).
-    { icon: 'general/zap', title: 'Quick and calm', text: 'Durations are short and curves are gentle. The result is ready the moment someone acts, so the transition never makes them wait.' },
+    { icon: 'general/zap', ...brandCopy.motionCharacter },
     { icon: 'general/eye', title: 'Reduced on request', text: 'When people ask their device to reduce motion, movement becomes an instant change or a short fade.' },
   ];
   return (
@@ -207,11 +207,7 @@ function Overview() {
     <div className="flex flex-col gap-5xl">
       <section className="flex flex-col gap-lg">
         <AnchorHeading>Principles</AnchorHeading>
-        {/* BRAND: "calm and quick" describes the default tokens. Rewrite it from the Figma Guidelines frame if the brand's motion has another character. */}
-        <P>
-          Motion in the {config.name} is calm and quick. It explains change rather than decorating: where something came from, where it went, what responded. Every
-          transition also has a reduced version, so nobody needs movement to understand the screen.
-        </P>
+        <P>{brandCopy.motionPrinciple({ name: config.name })}</P>
         <Principles />
       </section>
 
@@ -301,8 +297,11 @@ function Tokens() {
                   <th className={th}>Token</th>
                   <th className={th}>Standard</th>
                   <th className={th}>Reduced</th>
-                  <th className={th}>CSS</th>
-                  <th className={th}>Tailwind</th>
+                  {tokenCodeColumns.map((c) => (
+                    <th key={c} className={th}>
+                      {c}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -317,8 +316,11 @@ function Tokens() {
                         {v.modes[m]?.value.replace(/^cubic-bezier\((.*)\)$/, '$1')}
                       </td>
                     ))}
-                    <td className="type-code-sm-regular whitespace-nowrap px-lg py-md text-text-secondary">var({v.css})</td>
-                    <td className="type-code-sm-regular whitespace-nowrap px-lg py-md text-text-brand">{v.tailwind}</td>
+                    {tokenCodeNames(v).map((c, i) => (
+                      <td key={tokenCodeColumns[i]} className={cn('type-code-sm-regular px-lg py-md', i === 1 && productHasWeb ? 'text-text-brand' : 'text-text-secondary')}>
+                        {breakable(c)}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -466,6 +468,7 @@ function ReflowDont() {
       <Button size="sm" emphasis="secondary" label="Resize" onClick={() => setNarrow((x) => !x)} />
       <p
         className="type-body-sm-regular rounded-control border border-border-subtle bg-surface-raised p-md text-text-secondary"
+        // impeccable-disable-next-line layout-transition -- the Don't demo: it shows the reflow this guideline warns against
         style={{ width: narrow ? '60%' : '100%', transition: `width ${cssVar('motion/duration/slow')} ${cssVar('motion/easing/standard')}` }}
       >
         Large folders upload in parts so a dropped connection never restarts.

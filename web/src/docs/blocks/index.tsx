@@ -12,6 +12,7 @@ import { Select } from '@/components/components/Select';
 import { TextField } from '@/components/components/TextField';
 import * as appLib from '@app';
 import { config } from '@/ds.config';
+import { supportedModes } from '../modes';
 
 /** `Danger tone` → `danger-tone`; used for tab keys and heading ids. */
 export const slugify = (s: string) =>
@@ -263,7 +264,72 @@ export function Swatch({ name, mode = 'Light', size = 20 }: { name: string; mode
   );
 }
 
-export function TokenTable({ names, modes = ['Light', 'Dark'] }: { names: string[]; modes?: string[] }) {
+/**
+ * App token names (APP.md §5): a Figma name as it appears in React Native, Swift and Kotlin. Members are
+ * camelCase without the domain (`color/text/primary` → `textPrimary`); a member that would start with a
+ * digit keeps its domain (`space/2xl` → `space2xl`). Same rules as app/scripts/build-rn-tokens.mjs.
+ * Null for a name that has no app member.
+ */
+export function appTokenNames(name: string): { rn: string; swift: string; kotlin: string } | null {
+  const camel = (parts: string[]) =>
+    parts
+      .join('-')
+      .split(/[-/ ]+/)
+      .filter(Boolean)
+      .map((w, i) => (i === 0 ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1)))
+      .join('');
+  const seg = name.split('/');
+  const [dom, ...rest] = seg;
+  const member = (parts: string[]) => {
+    const m = camel(parts);
+    return /^\d/.test(m) || !m ? camel([dom, ...parts]) : m;
+  };
+  if (tokens.effectStyles.some((e) => e.name === name)) {
+    const m = camel(seg);
+    return { rn: `theme.shadows.${m}`, swift: `DSTokens.Shadow.${m}`, kotlin: `DsShadows.${m}` };
+  }
+  if (tokens.textStyles.some((t) => t.name === name)) {
+    const m = member(rest);
+    return { rn: `theme.text('${m}')`, swift: `DSTokens.TextStyle.${m}`, kotlin: `DsTextStyles.${m}` };
+  }
+  const v = varByName.get(name);
+  if (v?.collection === 'Components') {
+    const m = camel(seg);
+    return { rn: `theme.component.${m}`, swift: `DSTokens.Component.${m}`, kotlin: `DsComponent.${m}` };
+  }
+  if (v?.collection === 'Primitives') return null;
+  if (dom === 'color') { const m = member(rest); return { rn: `theme.color.${m}`, swift: `DSTokens.Color.${m}`, kotlin: `DsTheme.colors.${m}` }; }
+  if (dom === 'space') { const m = member(rest); return { rn: `dimensions.space.${m}`, swift: `DSTokens.Space.${m}`, kotlin: `DsSpace.${m}` }; }
+  if (dom === 'size') { const m = member(rest); return { rn: m === 'touchMin' || m === 'touchMinAndroid' ? 'theme.touchTarget' : `dimensions.size.${m}`, swift: `DSTokens.Size.${m}`, kotlin: `DsSizes.${m}` }; }
+  if (dom === 'radius') { const m = member(rest); return { rn: `dimensions.radius.${m}`, swift: `DSTokens.Radius.${m}`, kotlin: `DsRadius.${m}` }; }
+  if (dom === 'border') { const m = member(rest.slice(1)); return { rn: `dimensions.borderWidth.${m}`, swift: `DSTokens.BorderWidth.${m}`, kotlin: `DsBorderWidth.${m}` }; }
+  if (dom === 'font' && rest.length > 1) {
+    const group = camel(['font', rest[0]]); // fontSize, fontLineHeight, fontWeight, fontFamily
+    const m = member(rest.slice(1));
+    const G = group[0].toUpperCase() + group.slice(1);
+    return { rn: `dimensions.${group}.${m}`, swift: `DSTokens.${G}.${m}`, kotlin: `Ds${G}.${m}` };
+  }
+  if (dom === 'motion') { const m = member(rest); return { rn: `theme.motion.${m}`, swift: `DSTokens.Motion.${m}`, kotlin: `DsTheme.motion.${m}` }; }
+  return null;
+}
+
+/** Code names wrap after `.` and `/` instead of overflowing narrow columns (`theme.color.<wbr>textPrimary`). */
+export function breakable(text: string): ReactNode {
+  const parts = text.split(/(?<=[./])/);
+  return parts.map((p, i) => (i < parts.length - 1 ? [p, <wbr key={i} />] : p));
+}
+
+/** The code-name columns of a token table: CSS and Tailwind on a web product, React Native, Swift and Kotlin on an App product. */
+export const tokenCodeColumns: readonly string[] = config.product === 'app' ? ['React Native', 'Swift', 'Kotlin'] : ['CSS', 'Tailwind'];
+
+/** The code names of one token for `tokenCodeColumns`, in the same order. */
+export function tokenCodeNames(r: { name: string; css?: string | null; tailwind?: string | null; className?: string }): string[] {
+  if (config.product !== 'app') return [r.css ? `var(${r.css})` : r.className ? `.${r.className}` : '—', r.tailwind ?? r.className ?? '—'];
+  const a = appTokenNames(r.name);
+  return a ? [a.rn, a.swift, a.kotlin] : ['—', '—', '—'];
+}
+
+export function TokenTable({ names, modes = supportedModes }: { names: string[]; modes?: string[] }) {
   const rows = names.map((n) => varByName.get(n) ?? tokens.effectStyles.find((e) => e.name === n) ?? tokens.textStyles.find((t) => t.name === n) ?? { name: n });
   return (
     <div tabIndex={0} role="region" aria-label="Tokens" className="overflow-x-auto rounded-surface border border-border-subtle outline-none focus-visible:shadow-focus-default">
@@ -276,8 +342,11 @@ export function TokenTable({ names, modes = ['Light', 'Dark'] }: { names: string
                 {m}
               </th>
             ))}
-            <th className="px-lg py-md">CSS</th>
-            <th className="px-lg py-md">Tailwind</th>
+            {tokenCodeColumns.map((c) => (
+              <th key={c} className="px-lg py-md">
+                {c}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -294,7 +363,7 @@ export function TokenTable({ names, modes = ['Light', 'Dark'] }: { names: string
                     {md ? (
                       <span className="inline-flex items-center gap-sm">
                         {r.type === 'COLOR' && <Swatch name={r.name} mode={r.modes[m] ? m : Object.keys(r.modes)[0]} />}
-                        <span className="type-code-sm-regular text-text-secondary">{md.alias ?? md.value}</span>
+                        <span className="type-code-sm-regular text-text-secondary">{breakable(String(md.alias ?? md.value))}</span>
                       </span>
                     ) : r.light ? (
                       <span className="type-code-sm-regular text-text-secondary">{m === modes[0] ? 'See 1.5 Elevation' : ''}</span>
@@ -304,12 +373,11 @@ export function TokenTable({ names, modes = ['Light', 'Dark'] }: { names: string
                   </td>
                 );
               })}
-              <td className="px-lg py-md">
-                <span className="type-code-sm-regular whitespace-nowrap text-text-secondary">{r.css ? `var(${r.css})` : r.className ? `.${r.className}` : '—'}</span>
-              </td>
-              <td className="px-lg py-md">
-                <span className="type-code-sm-regular whitespace-nowrap text-text-brand">{r.tailwind ?? r.className ?? '—'}</span>
-              </td>
+              {tokenCodeNames(r).map((c, i) => (
+                <td key={tokenCodeColumns[i]} className="px-lg py-md">
+                  <span className={cn('type-code-sm-regular', i === 1 && productHasWeb ? 'text-text-brand' : 'text-text-secondary')}>{breakable(c)}</span>
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
@@ -478,23 +546,43 @@ export function useDocsScheme(): 'light' | 'dark' {
   return scheme;
 }
 
-/** A stage that renders React Native components inside the app theme (react-native-web). */
-export function AppStage({ children, className, dark, label = 'App example' }: { children: ReactNode; className?: string; dark?: boolean; label?: string }) {
+/**
+ * React Native headers render as h1–h6 on the web (react-native-web). This sets the level the preview's
+ * titles start at, one below the page heading right above them, so the page outline stays in order.
+ * Without a React Native source (the fallback module) it renders the children as they are.
+ */
+function AppHeadings({ level, children }: { level: 2 | 3 | 4 | 5; children: ReactNode }) {
+  const Provider = appLib.HeadingLevelProvider;
+  return Provider ? <Provider level={level}>{children}</Provider> : <>{children}</>;
+}
+
+/**
+ * A stage that renders React Native components inside the app theme (react-native-web).
+ * `headingLevel`: where the preview's titles start. 3 under a section heading (h2), the default;
+ * 2 for a hero right under the page title (h1).
+ */
+export function AppStage({ children, className, dark, label = 'App example', headingLevel = 3 }: { children: ReactNode; className?: string; dark?: boolean; label?: string; headingLevel?: 2 | 3 | 4 }) {
   const scheme = useDocsScheme();
   return (
     <Stage className={className} dark={dark} label={label}>
       <appLib.ThemeProvider colorScheme={dark ? 'dark' : scheme}>
-        {/* React Native components hug with alignSelf: flex-start; this box keeps them centered on the stage. */}
-        <div className="flex max-w-full flex-wrap items-center justify-center-safe gap-xl">{children}</div>
+        <AppHeadings level={headingLevel}>
+          {/* React Native components hug with alignSelf: flex-start; this box keeps them centered on the stage. */}
+          <div className="flex max-w-full flex-wrap items-center justify-center-safe gap-xl">{children}</div>
+        </AppHeadings>
       </appLib.ThemeProvider>
     </Stage>
   );
 }
 
-/** The app theme for React Native content that sits outside an AppStage (variant grids). */
-export function AppTheme({ children }: { children: ReactNode }) {
+/** The app theme for React Native content that sits outside an AppStage (variant grids, Home thumbnails). */
+export function AppTheme({ children, headingLevel = 3 }: { children: ReactNode; headingLevel?: 2 | 3 | 4 | 5 }) {
   const scheme = useDocsScheme();
-  return <appLib.ThemeProvider colorScheme={scheme}>{children}</appLib.ThemeProvider>;
+  return (
+    <appLib.ThemeProvider colorScheme={scheme}>
+      <AppHeadings level={headingLevel}>{children}</AppHeadings>
+    </appLib.ThemeProvider>
+  );
 }
 
 export type AppPlatform = 'reactNative' | 'swift' | 'kotlin';
@@ -526,7 +614,7 @@ export function Segmented<T extends string>({ label, options, value, onChange }:
           onClick={() => onChange(o.value)}
           className={cn(
             'type-body-sm-semibold min-h-8 cursor-pointer rounded-sm px-md outline-none transition-colors duration-(--motion-duration-fast) is-focus:shadow-focus-default',
-            o.value === value ? 'bg-fill-brand-subtle text-text-brand' : 'text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary',
+            o.value === value ? 'bg-fill-brand-subtle text-site-brand-on-tint' : 'text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary',
           )}
         >
           {o.label}
