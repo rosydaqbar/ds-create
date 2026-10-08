@@ -1,0 +1,78 @@
+{
+  "page": "1.8 Brand assets",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "{asset set}",
+          "visual": {
+            "type": "variants",
+            "todo": "one block per asset set on this page: rename the block to the set's kind and list the set",
+            "sets": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "What is on this page and why"
+        },
+        {
+          "title": "Logos are shared assets",
+          "visual": {
+            "type": "instances",
+            "todo": "the logo instance in two places that use it",
+            "items": []
+          }
+        },
+        {
+          "title": "Replacing placeholder logos"
+        },
+        {
+          "title": "Choose the version by surface",
+          "visual": {
+            "type": "do-dont",
+            "todo": "the logo on a surface it fits (do) and one it doesn't (don't)",
+            "pairs": []
+          }
+        },
+        {
+          "title": "Optical sizing",
+          "visual": {
+            "type": "instances",
+            "todo": "several logos at one height and at optical heights",
+            "items": []
+          }
+        },
+        {
+          "title": "Resizing, clear space and minimum size",
+          "visual": {
+            "type": "instances",
+            "todo": "the logo with its clear space",
+            "items": []
+          }
+        },
+        {
+          "title": "Using flags, payment marks, file types and badges",
+          "visual": {
+            "type": "instances",
+            "todo": "a mark next to its label",
+            "items": []
+          }
+        },
+        {
+          "title": "Licensing and third-party marks"
+        },
+        {
+          "title": "Extending the asset library"
+        }
+      ]
+    }
+  ]
+}

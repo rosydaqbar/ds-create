@@ -1,0 +1,60 @@
+{
+  "page": "{id} {Name}",
+  "type": "component",
+  "sets": [
+    {
+      "set": "{Set name}"
+    },
+    {
+      "set": ".Main/{Private part}"
+    }
+  ],
+  "hero": {
+    "set": "{Set name}",
+    "props": {
+      "Emphasis": "primary"
+    },
+    "text": {
+      "Label": "{label}"
+    }
+  },
+  "examples": [
+    {
+      "title": "{Example title, as in the copy file}",
+      "items": [
+        {
+          "set": "{Set name}",
+          "props": {},
+          "text": {}
+        }
+      ],
+      "dir": "HORIZONTAL"
+    }
+  ],
+  "topics": {
+    "{Guideline title}": {
+      "do": [
+        {
+          "set": "{Set name}",
+          "props": {}
+        }
+      ],
+      "dont": [
+        {
+          "set": "{Set name}",
+          "props": {}
+        }
+      ]
+    },
+    "{Another guideline title}": {
+      "visual": {
+        "type": "states",
+        "set": "{Set name}",
+        "prop": "State"
+      }
+    }
+  },
+  "anat": {},
+  "rename": false,
+  "skip": []
+}

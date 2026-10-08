@@ -329,10 +329,11 @@ export function tokenCodeNames(r: { name: string; css?: string | null; tailwind?
   return a ? [a.rn, a.swift, a.kotlin] : ['—', '—', '—'];
 }
 
-export function TokenTable({ names, modes = supportedModes }: { names: string[]; modes?: string[] }) {
+/** `label` names the scrollable region; by default the group the tokens share, so two tables on a page never share a name. */
+export function TokenTable({ names, modes = supportedModes, label }: { names: string[]; modes?: string[]; label?: string }) {
   const rows = names.map((n) => varByName.get(n) ?? tokens.effectStyles.find((e) => e.name === n) ?? tokens.textStyles.find((t) => t.name === n) ?? { name: n });
   return (
-    <div tabIndex={0} role="region" aria-label="Tokens" className="overflow-x-auto rounded-surface border border-border-subtle outline-none focus-visible:shadow-focus-default">
+    <div tabIndex={0} role="region" aria-label={label ?? `${names[0]?.split('/').slice(0, -1).join('/') || 'Token'} tokens`} className="overflow-x-auto rounded-surface border border-border-subtle outline-none focus-visible:shadow-focus-default">
       <table className="w-full border-collapse text-left">
         <thead className="bg-surface-sunken">
           <tr className="type-body-xs-semibold text-text-tertiary">

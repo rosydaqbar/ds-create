@@ -1,0 +1,110 @@
+{
+  "page": "1.4 Shape",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Radius",
+          "badge": "Variables",
+          "visual": {
+            "type": "radius-tiles",
+            "collection": "Shape",
+            "prefix": "radius/"
+          }
+        },
+        {
+          "title": "Radius in use",
+          "visual": {
+            "type": "instances",
+            "todo": "one control, one indicator, a surface holding a control, and a dialog",
+            "items": []
+          }
+        },
+        {
+          "title": "Border widths",
+          "badge": "Variables",
+          "visual": {
+            "type": "border-lines",
+            "collection": "Border",
+            "prefix": "border/width/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tokens",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Radius — radius",
+          "visual": {
+            "type": "token-table",
+            "collection": "Shape",
+            "prefix": "radius/"
+          }
+        },
+        {
+          "title": "Border width — border/width",
+          "visual": {
+            "type": "token-table",
+            "collection": "Border",
+            "prefix": "border/width/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Radius is a role, not a number",
+          "visual": {
+            "type": "instances",
+            "todo": "two real components per radius role",
+            "items": []
+          }
+        },
+        {
+          "title": "Corner character",
+          "visual": {
+            "type": "compare",
+            "todo": "the same small composition, sharp, as built and round",
+            "columns": []
+          }
+        },
+        {
+          "title": "Nested corners",
+          "visual": {
+            "type": "nested-radius",
+            "inner": "radius/control",
+            "pad": "space/xs",
+            "outer": "radius/surface",
+            "todo": "the inner role, the padding and the outer role of this system"
+          }
+        },
+        {
+          "title": "Border widths",
+          "visual": {
+            "type": "states",
+            "todo": "a field at rest and focused",
+            "set": "",
+            "prop": "State"
+          }
+        },
+        {
+          "title": "Change shape from the source",
+          "visual": {
+            "type": "editor-panel",
+            "todo": "the radius role edited in the Shape collection",
+            "title": "",
+            "rows": []
+          }
+        }
+      ]
+    }
+  ]
+}

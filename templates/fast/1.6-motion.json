@@ -1,0 +1,123 @@
+{
+  "page": "1.6 Motion",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Duration",
+          "badge": "Variables",
+          "visual": {
+            "type": "motion-bars",
+            "collection": "Motion",
+            "prefix": "motion/duration/"
+          }
+        },
+        {
+          "title": "Easing",
+          "badge": "Variables",
+          "visual": {
+            "type": "easing-curves",
+            "collection": "Motion",
+            "prefix": "motion/easing/"
+          }
+        },
+        {
+          "title": "Pairings",
+          "visual": {
+            "type": "table",
+            "todo": "one row per pairing: purpose, duration, easing",
+            "columns": [
+              {
+                "label": "Purpose",
+                "w": 360
+              },
+              {
+                "label": "Duration",
+                "w": 260
+              },
+              {
+                "label": "Easing",
+                "w": "fill"
+              }
+            ],
+            "rows": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tokens",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Duration — motion/duration",
+          "visual": {
+            "type": "token-table",
+            "collection": "Motion",
+            "prefix": "motion/duration/"
+          }
+        },
+        {
+          "title": "Easing — motion/easing",
+          "visual": {
+            "type": "token-table",
+            "collection": "Motion",
+            "prefix": "motion/easing/"
+          }
+        },
+        {
+          "title": "Delay — motion/delay",
+          "visual": {
+            "type": "token-table",
+            "collection": "Motion",
+            "prefix": "motion/delay/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Motion explains change",
+          "visual": {
+            "type": "instances",
+            "todo": "a sheet or a toast in its place",
+            "items": []
+          }
+        },
+        {
+          "title": "Pick the pairing by purpose",
+          "visual": {
+            "type": "motion-bars",
+            "collection": "Motion",
+            "prefix": "motion/duration/"
+          }
+        },
+        {
+          "title": "What to animate",
+          "visual": {
+            "type": "do-dont",
+            "todo": "a fading tooltip (do) and reflowing text (don't)",
+            "pairs": []
+          }
+        },
+        {
+          "title": "Reduced motion",
+          "visual": {
+            "type": "token-table",
+            "collection": "Motion",
+            "prefix": "motion/duration/"
+          }
+        },
+        {
+          "title": "Motion accessibility"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "page": "1.2 Typography",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Typefaces",
+          "visual": {
+            "type": "typefaces",
+            "prefix": "type/"
+          },
+          "take": {
+            "role": "",
+            "skip": 1,
+            "count": "all"
+          }
+        },
+        {
+          "title": "Type scale",
+          "badge": "Text styles",
+          "visual": {
+            "type": "type-scale",
+            "prefix": "type/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tokens",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Typography",
+          "visual": {
+            "type": "token-table",
+            "collection": "Typography",
+            "prefix": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Establish a clear typographic hierarchy",
+          "visual": {
+            "type": "type-scale",
+            "prefix": "type/heading/"
+          }
+        },
+        {
+          "title": "Display text vs body and UI text",
+          "visual": {
+            "type": "compare",
+            "todo": "display used as a heading, as body, and body for reading",
+            "columns": []
+          },
+          "take": {
+            "role": "caption",
+            "count": "all"
+          }
+        },
+        {
+          "title": "Base font size",
+          "visual": {
+            "type": "type-samples",
+            "todo": "the body style and three sizes",
+            "style": "",
+            "columns": []
+          },
+          "take": {
+            "role": "caption",
+            "count": "all"
+          }
+        },
+        {
+          "title": "Line height",
+          "visual": {
+            "type": "type-samples",
+            "todo": "the body style with three line heights, the real one in the middle",
+            "style": "",
+            "columns": []
+          },
+          "take": {
+            "role": "caption",
+            "count": "all"
+          }
+        },
+        {
+          "title": "Letter spacing",
+          "visual": {
+            "type": "type-samples",
+            "todo": "a display style with three letter spacings",
+            "style": "",
+            "columns": []
+          },
+          "take": {
+            "role": "caption",
+            "count": "all"
+          }
+        },
+        {
+          "title": "Typeface suitability and weight coverage",
+          "visual": {
+            "type": "typefaces",
+            "prefix": "type/"
+          }
+        },
+        {
+          "title": "Keep the number of families intentional"
+        },
+        {
+          "title": "Change typography from the source",
+          "visual": {
+            "type": "editor-panel",
+            "todo": "a text style's properties",
+            "title": "",
+            "rows": []
+          }
+        },
+        {
+          "title": "Text size in apps",
+          "visual": {
+            "type": "type-samples",
+            "todo": "the body style at the default and two larger system sizes",
+            "style": "",
+            "columns": []
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,11 +1,13 @@
 // tools/figma-copy.js · the Figma side of the page copy files (workflow/COPY.md).
 //
-// Three modes, one page per call:
+// Four modes, one page per call:
 //   extract  read-only. Returns every prose text in the page's doc frames, grouped by frame and by
 //            container (Topic · X, Block · X, Example · X, the When to use cards), with node ids:
 //            the raw material for a copy file and its `figma:` source comments.
 //   diff     read-only. Compares the frames with one page's copy (figma surface) and lists every
 //            difference.
+//   verify   read-only and compact. Takes the page's fingerprints (web/scripts/build-copy.mjs --fingerprints)
+//            and returns only the targets whose roles or text differ (GOTCHAS.md G40). Use it for many pages.
 //   apply    writes text only. Sets the frames' text from the copy, by the node ids in its source
 //            comments. A container whose number of paragraphs, captions, items or do / don't
 //            reasons differs from the copy is skipped and reported: rebuild that page with the doc
@@ -18,6 +20,7 @@
 //   const r = await figmaCopy(figma, 'extract', '2.1 Button');
 //   const r = await figmaCopy(figma, 'diff', '2.1 Button', COPY);
 //   const r = await figmaCopy(figma, 'apply', '2.1 Button', COPY);
+//   const r = await figmaCopy(figma, 'verify', '2.1 Button', ROWS);   // ROWS = fingerprints['2.1 Button']
 // Values are never touched: only TEXT characters and the text properties of Doc kit instances.
 const figmaCopy = async (figma, MODE, PAGE, COPY) => {
   const page = figma.root.children.find((p) => p.name === PAGE);
@@ -83,7 +86,23 @@ const figmaCopy = async (figma, MODE, PAGE, COPY) => {
     };
   }
 
-  if (MODE !== 'diff' && MODE !== 'apply') return { error: 'MODE is extract, diff or apply' };
+  if (MODE === 'verify') {
+    if (!Array.isArray(COPY)) return { error: 'verify takes the page rows from build-copy.mjs --fingerprints' };
+    const fnv = (s) => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; };
+    const ids = new Set(frames.map((f) => f.id));
+    const bad = [];
+    for (const [id, roles, hAll, hHead] of COPY) {
+      const node = await figma.getNodeByIdAsync(id);
+      if (!node) { bad.push({ id, problem: 'missing' }); continue; }
+      if (ids.has(id)) { const h = headerOf(node); if (!h || fnv(h.text) !== hHead) bad.push({ id, problem: 'header', figma: h ? h.text.slice(0, 100) : '' }); continue; }
+      const s = slotsIn(node); const r = s.map((x) => x.role || 'p').join(',');
+      if (r !== roles) { bad.push({ id, problem: 'roles', figma: r, copy: roles }); continue; }
+      if (fnv(s.map((x) => x.text).join('\u0001')) !== hAll) bad.push({ id, problem: 'text', figma: s.map((x) => x.text.slice(0, 60)) });
+    }
+    return { page: PAGE, mode: MODE, checked: COPY.length, mismatches: bad.length, bad: bad.slice(0, 20) };
+  }
+
+  if (MODE !== 'diff' && MODE !== 'apply') return { error: 'MODE is extract, verify, diff or apply' };
   if (!COPY || !COPY.sections) return { error: 'COPY is one page from build-copy.mjs --surface figma' };
   const fonts = async (t) => { if (t.fontName !== figma.mixed) await figma.loadFontAsync(t.fontName); else for (const s of t.getStyledTextSegments(['fontName'])) await figma.loadFontAsync(s.fontName); };
   const setSlot = async (slot, text) => {

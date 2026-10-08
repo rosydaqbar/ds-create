@@ -7,6 +7,9 @@
  *   node scripts/build-copy.mjs --page 2.1 --surface figma
  *                                                   prints one page's lines for one surface as JSON,
  *                                                   for tools/figma-copy.js (apply) and the doc builder
+ *   node scripts/build-copy.mjs --fingerprints [2.1,3.2]
+ *                                                   prints compact Figma fingerprints per page (all pages, or the
+ *                                                   ids given) for tools/figma-copy.js `verify` (GOTCHAS.md G40)
  *
  * A missing copy folder writes an empty file, so a template without copy still builds.
  * Unknown surfaces or roles fail the run: they would silently drop text.
@@ -78,6 +81,32 @@ export function parseCopy(text, file = 'copy') {
 /** Lines one surface shows: its own and the shared ones, in file order. */
 export const linesFor = (lines, surface) => lines.filter((l) => l.surface === 'both' || l.surface === surface);
 
+/** FNV-1a over UTF-16 code units: the same number as tools/figma-copy.js computes in the plugin. */
+export const fnv = (s) => {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h >>> 0;
+};
+
+/**
+ * Figma fingerprints of one page: [node id, role sequence, hash of every line, hash of the paragraphs],
+ * one row per section or item with a `figma:` source. The plugin decides which hash applies: a doc frame id
+ * means the header description (the paragraphs), any other id means a container (every line).
+ */
+export function fingerprints(copy) {
+  const rows = [];
+  for (const s of forSurface(copy, 'figma').sections) {
+    for (const t of [s, ...s.items]) {
+      if (!t.figma || !t.lines.length) continue;
+      rows.push([t.figma, t.lines.map((l) => l.role || 'p').join(','), fnv(t.lines.map((l) => l.text).join('\u0001')), fnv(t.lines.filter((l) => l.role === '').map((l) => l.text).join(' '))]);
+    }
+  }
+  return rows;
+}
+
 /** One page reduced to one surface: { section: { lines, items: { title: lines } } }, the shape tools read. */
 export function forSurface(copy, surface) {
   const page = { id: copy.id, page: copy.page, figma: copy.figma, web: copy.web, sections: [] };
@@ -117,7 +146,12 @@ if (isMain) {
     console.error(`copy: ${errors.length} problem(s)\n  ` + errors.join('\n  '));
     process.exit(1);
   }
-  if (arg('--page')) {
+  if (args.includes('--fingerprints')) {
+    const want = (arg('--fingerprints') ?? '').startsWith('--') ? [] : (arg('--fingerprints') ?? '').split(',').filter(Boolean);
+    const out = {};
+    for (const [id, p] of Object.entries(pages)) if (!want.length || want.includes(id)) out[p.page] = fingerprints(p);
+    process.stdout.write(JSON.stringify(out));
+  } else if (arg('--page')) {
     const p = pages[arg('--page')];
     if (!p) {
       console.error(`copy: no page ${arg('--page')} in ${dir}`);

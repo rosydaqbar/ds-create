@@ -1,0 +1,43 @@
+{
+  "page": "00 Cover",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Cover",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Brand mark",
+          "visual": {
+            "type": "variants",
+            "todo": "the logo set from 1.8 (set name)",
+            "sets": []
+          }
+        },
+        {
+          "title": "At a glance"
+        },
+        {
+          "title": "Typefaces",
+          "visual": {
+            "type": "typefaces",
+            "prefix": "type/"
+          }
+        },
+        {
+          "title": "What is inside",
+          "visual": {
+            "type": "links",
+            "pages": [
+              "01 Getting started",
+              "02 Tokens",
+              "1.1 Color",
+              "2.1 Button"
+            ],
+            "todo": "the first page of every level in this file"
+          }
+        }
+      ]
+    }
+  ]
+}

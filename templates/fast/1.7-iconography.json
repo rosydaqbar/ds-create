@@ -1,0 +1,126 @@
+{
+  "page": "1.7 Iconography",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Icon library",
+          "visual": {
+            "type": "icon-grid",
+            "prefix": "Icon/"
+          }
+        },
+        {
+          "title": "Icon sizes",
+          "visual": {
+            "type": "instances",
+            "todo": "the same icon at the sizes components use",
+            "items": []
+          }
+        },
+        {
+          "title": "Icon colors",
+          "visual": {
+            "type": "instances",
+            "todo": "icons in the text color roles",
+            "items": []
+          }
+        },
+        {
+          "title": "Utility marks",
+          "badge": "Components",
+          "visual": {
+            "type": "variants",
+            "todo": "the utility mark sets (arrows, chevrons, spinner)",
+            "sets": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Icons make interfaces faster to scan",
+          "visual": {
+            "type": "instances",
+            "todo": "a menu of icons with labels",
+            "items": []
+          }
+        },
+        {
+          "title": "Use familiar symbols",
+          "visual": {
+            "type": "instances",
+            "todo": "home, search, close",
+            "items": []
+          }
+        },
+        {
+          "title": "Icons don't always replace text",
+          "visual": {
+            "type": "instances",
+            "todo": "icon only, icon with label, a familiar icon with its name",
+            "items": []
+          }
+        },
+        {
+          "title": "Compact and collapsed navigation",
+          "visual": {
+            "type": "instances",
+            "todo": "the navigation with labels",
+            "items": []
+          }
+        },
+        {
+          "title": "Icons with text",
+          "visual": {
+            "type": "instances",
+            "todo": "a button with an icon and a label",
+            "items": []
+          }
+        },
+        {
+          "title": "Icon sizing",
+          "visual": {
+            "type": "instances",
+            "todo": "one icon at its drawn size and in a container",
+            "items": []
+          }
+        },
+        {
+          "title": "One library, one style"
+        },
+        {
+          "title": "Stable swap overrides"
+        },
+        {
+          "title": "Icon anatomy",
+          "visual": {
+            "type": "instances",
+            "todo": "one icon",
+            "items": []
+          }
+        },
+        {
+          "title": "Clean construction for export"
+        },
+        {
+          "title": "Extending the library"
+        },
+        {
+          "title": "Utility marks",
+          "visual": {
+            "type": "variants",
+            "todo": "the utility mark sets",
+            "sets": []
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "page": "1.5 Elevation",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Elevation",
+          "badge": "Effect styles",
+          "visual": {
+            "type": "effect-tiles",
+            "prefix": "elevation/"
+          }
+        },
+        {
+          "title": "Focus",
+          "badge": "Effect styles",
+          "visual": {
+            "type": "effect-tiles",
+            "prefix": "focus/"
+          }
+        },
+        {
+          "title": "Backdrop blur",
+          "badge": "Effect styles",
+          "visual": {
+            "type": "effect-tiles",
+            "prefix": "blur/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Depth is a choice",
+          "visual": {
+            "type": "instances",
+            "todo": "a card and a raised surface on the page background",
+            "items": []
+          }
+        },
+        {
+          "title": "Effect-stack anatomy",
+          "visual": {
+            "type": "instances",
+            "todo": "one card with its fill, radius and shadow",
+            "items": []
+          }
+        },
+        {
+          "title": "Changing or removing the effect treatment",
+          "visual": {
+            "type": "effect-tiles",
+            "prefix": "elevation/"
+          }
+        },
+        {
+          "title": "Focus rings",
+          "visual": {
+            "type": "states",
+            "todo": "a control at rest and focused",
+            "set": "",
+            "prop": "State"
+          }
+        },
+        {
+          "title": "Applying and editing focus styles",
+          "visual": {
+            "type": "editor-panel",
+            "todo": "the focus color role",
+            "title": "",
+            "rows": []
+          }
+        },
+        {
+          "title": "Shadow and effect color dependencies"
+        }
+      ]
+    }
+  ]
+}

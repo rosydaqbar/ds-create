@@ -254,4 +254,4 @@ A Layout page fails QA when:
 - a drawer changes the layout height instead of overlaying;
 - any topic, example or QA rule in the Layout's file is missing from the canvas.
 
-When the system has a web implementation, the Layout is documented on the site like the other levels (`workflow/WEB.md`) and its page passes `npm run qa`: no horizontal overflow at 390 px and no axe-core violations, in Light and Dark.
+When the system has a web implementation, the Layout is documented on the site like the other levels (`workflow/WEB.md`) and its page passes `npm run qa` when QA is called (`INITIATOR.md` Part B, *QA on call*): no horizontal overflow at 390 px and no axe-core violations, in Light and Dark.

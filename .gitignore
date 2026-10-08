@@ -70,7 +70,12 @@ input/*
 !input/README.md
 
 # 8. Agent settings
-.claude/
+# Local agent settings and installed skills stay out of git. The ds-create skill lives in skills/ds-create/;
+# .claude/skills/ds-create is only the link Claude Code loads it through, and ships with the repo.
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/ds-create
 CLAUDE.local.md
 
 # 9. Local session notes

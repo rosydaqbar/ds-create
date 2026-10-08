@@ -129,7 +129,7 @@ Work in page order (2.x, then 3.x, then 4.x), only for pages in scope. For each 
 2. Load the Impeccable skill (`/impeccable`, product register) before writing UI or copy. Its design hook checks every edit to a UI file; fix each finding before moving on.
 3. Write the component in `src/components/{level}/{Name}.tsx` following §6.
 4. Write the documentation module `src/docs/stories/{id}-{slug}.doc.tsx` following §7, in the voice of `COPY-GUIDE.md`. Its sentences go into the page's copy file as `web` or `both` lines (`workflow/COPY.md`): `npm run copy` lays them over the story, so a sentence that is only in the story is overwritten as soon as the copy file has that topic.
-5. Look at the page in both color modes, then run `npm run qa:dev` for it.
+5. Look at the page in both color modes. Full QA runs on call (`INITIATOR.md` Part B, *QA on call*): when the user asks, `npm run qa -- --pages {id}` checks only this page.
 
 On an App-only product, steps 3 and 4 are written for the app instead. The template's web components stay as the site's own controls (search, playgrounds, badges), styled by the brand's tokens, and they aren't adapted page by page. Each story gets the `app` block that `workflow/APP.md` A3 writes, and the page's text fields (summary, when to use, anatomy parts, props, tokens, guidelines) are written for the brand as usual. On a Web and App product, both versions are written.
 
@@ -162,10 +162,15 @@ Exit check: every component has a status; the Changelog page lists this release.
 ## W7 · Build, package and QA
 
 1. `npm run build` runs the gates — tokens, index, `check:effects`, `check:brand-copy`, `check:contrast`, typecheck — and writes the static site to `dist/`.
-2. `npm run qa` builds and checks every page and every tab in each supported color mode (Light and Dark, or Light only): no console errors, no horizontal overflow at 390 px, and **zero** axe-core WCAG 2.2 AA violations. Documented exceptions are third-party brand colors listed in `scripts/qa.mjs` with their reason, and the owner-approved pairs in `tokens/accepted.json`, matched by color and counted in `qa-report.json` (`approvedContrast`). The same run scans `src/` and `react-native/` with the Impeccable design detector (anti-AI-slop and design-quality rules), and every finding fails QA. A finding caused by the brand's frozen Figma values (for example an approved typeface the detector calls overused) becomes an exception in the build's own `web/.impeccable/config.json`, written with `npx impeccable ignores add-value <rule> <value> --file <glob> --reason "…"` and listed in the ledger. Brand exceptions never go into the ds-create repo.
+2. **On call** (`INITIATOR.md` Part B, *QA on call*): `npm run qa` runs only when the user asks, or before a publish they asked for.
+   - Options: `--pages 2.1,3.2` checks only those pages and their tabs, `--quick` checks errors and overflow only, `--workers N` sets how many browser tabs run in parallel (default 4).
+   - `--baseline` saves the current failures as known (`qa-baseline.json`). Use it only for findings that come from frozen values the owner won't change, and list them in the ledger. Later runs show known failures apart and fail only on new ones.
+   - The script starts its own preview server on a free port and always stops it.
+
+   What it checks: it builds the site, then checks every page and every tab in each supported color mode (Light and Dark, or Light only): no console errors, no horizontal overflow at 390 px, and **zero** axe-core WCAG 2.2 AA violations. Documented exceptions are third-party brand colors listed in `scripts/qa.mjs` with their reason, and the owner-approved pairs in `tokens/accepted.json`, matched by color and counted in `qa-report.json` (`approvedContrast`). The same run scans `src/` and `react-native/` with the Impeccable design detector (anti-AI-slop and design-quality rules), and every finding fails QA. A finding caused by the brand's frozen Figma values (for example an approved typeface the detector calls overused) becomes an exception in the build's own `web/.impeccable/config.json`, written with `npx impeccable ignores add-value <rule> <value> --file <glob> --reason "…"` and listed in the ledger. Brand exceptions never go into the ds-create repo.
 3. Web and Web and App products: `npm run build:package`, then `npm pack ./package`. Install the tarball in a fresh Vite + React + Tailwind app (as the Getting started developer tab describes) and confirm it builds and renders. An App-only product has no web package.
 
-Exit check: build passes, `qa` reports 0 problems (design detector included), and (when the product includes Web) the package installs and renders in a fresh app.
+Exit check: the build passes, and (when the product includes Web) the package installs and renders in a fresh app. When the user called QA, it reports 0 new problems (design detector included).
 
 ## W8 · Publish
 
@@ -332,10 +337,11 @@ Rules:
 
 # 9. QA
 
-Automated gates (all must pass):
+Automated gates. `npm run build` runs on every build; `npm run qa` runs on call (`INITIATOR.md` Part B, *QA on call*). Each must pass when it runs:
 - `npm run build`: tokens, index, `check:effects`, `check:brand-copy`, `check:contrast`, typecheck, site build.
-- `npm run qa`: every page and tab in each supported color mode with zero console errors, zero horizontal overflow at 390 px and zero axe-core WCAG 2.2 AA violations (documented third-party exceptions and the pairs approved in `tokens/accepted.json` only). On a Web and App product it checks every tab in App preview too; on an App-only product, every page is App preview.
+- `npm run qa`, when called: every page and tab in each supported color mode with zero console errors, zero horizontal overflow at 390 px and zero axe-core WCAG 2.2 AA violations (documented third-party exceptions and the pairs approved in `tokens/accepted.json` only). On a Web and App product it checks every tab in App preview too; on an App-only product, every page is App preview.
 - `npm run qa` also runs the Impeccable design detector over `src/` and `react-native/`: zero findings, or only the build's recorded exceptions (W7).
+- Known failures in `qa-baseline.json` don't fail a run; each one is listed in the ledger with its reason.
 - Web products: the package installs from `npm pack` into a fresh app and renders.
 
 Also fail QA when:

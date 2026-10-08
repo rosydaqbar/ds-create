@@ -1,0 +1,16 @@
+{
+  "page": "{id} {Name}",
+  "type": "layout",
+  "sets": [
+    {
+      "set": "{Layout set name}",
+      "title": "{Block title}",
+      "keep": null
+    }
+  ],
+  "examples": [],
+  "topics": {},
+  "fixed": "status|header|navigation|footer|bottom",
+  "scale": 0.6,
+  "skip": []
+}

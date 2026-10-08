@@ -4,7 +4,20 @@ This repository is the specification an agent follows to build a design system i
 
 The repository is **not executable from root files alone**. Root files define the global structure; the requirements for each page live in its own Markdown file and must be loaded before that page is built.
 
-# Start here: add your context to `input/`
+# Start here: the `ds-create` skill
+
+ds-create is used through its skill, `skills/ds-create/`: four commands that run the whole workflow and keep every answer you give.
+
+| Command | What it does |
+| --- | --- |
+| `/ds-create init` | checks what the build needs, reads your files in `input/`, asks only what is missing, and sets up the foundations as Figma variables and styles |
+| `/ds-create build` | asks how to draw the pages (Default or Fast mode), how far to go, where (Figma only, or with the docs site) and the pace, then builds exactly that |
+| `/ds-create qa` | runs the full checks, only when you ask |
+| `/ds-create status` | shows where the build stands and what to run next |
+
+The skill ships with the repo and stays brand-agnostic. Open the repo in Claude Code and the commands are there (`.claude/skills/ds-create` links to `skills/ds-create`).
+
+## Add your context to `input/`
 
 Before the first build, give the agent what you know about the system. Everything goes into `input/`, one folder per design system (see `input/README.md`):
 
@@ -14,7 +27,11 @@ Before the first build, give the agent what you know about the system. Everythin
    - `brand/`: brand guidelines, logo files, typefaces, color specs, tone of voice
    - `design-system/`: your existing system (docs, token exports, component lists, Figma library and code links)
    - `references/`: systems and products you like, used as inspiration only
-3. Start the build. The agent reads every file before asking anything, writes an index (`sources.md`), and only asks what your files leave open.
+3. Start with **`/ds-create init`**. The agent checks that everything is ready, reads every file before asking anything, writes an index (`sources.md`), asks only what your files leave open, and sets up the foundations as Figma variables and styles. It ends with a report: where the Figma file is and what it now holds.
+4. Then run **`/ds-create build`**. It asks four questions: how to draw the pages (Default or Fast mode), how far to go (foundations, Parts, Components, everything, or only the pages you name), where (Figma only, or Figma and the docs site), and the pace. Then it builds exactly that. Run it again later to add more.
+5. Run **`/ds-create qa`** whenever you want the full checks, and **`/ds-create status`** to see where the build stands.
+
+Every answer you give is saved in `input/{your-system-slug}/answers/`, so a later session doesn't ask again.
 
 Context you give in chat is saved too: the agent writes it to `input/{your-system-slug}/chat/`, so it is remembered in later sessions. Leave out a folder you have nothing for. With no input at all, the agent asks every question in `workflow/QUESTIONNAIRE.md`.
 
@@ -84,6 +101,9 @@ SYSTEM.md        page tree, page templates, token and component naming, audit ro
 INITIATOR.md     generation logic: loading, ledger, build sequence, gates (always loaded)
 GOTCHAS.md       lessons from real builds as fixed, numbered rules; new agnostic lessons are added after every build (always loaded)
 
+skills/          ds-create/: the ds-create skill, the way in: /ds-create init · build · qa · status (SKILL.md and one reference
+                 file per command). Claude Code loads it through the link .claude/skills/ds-create → skills/ds-create
+
 input/           what the user provides for each system: briefs, brand files, the existing system, references, chat notes (git-ignored except input/README.md)
 workflow/        the specs loaded at the steps that need them
   QUESTIONNAIRE.md   the questions asked at initiation and the confirmation summary (loaded at initiation)
@@ -92,11 +112,12 @@ workflow/        the specs loaded at the steps that need them
   WEB.md             the documentation site (every product type) and, for Web products, the Tailwind-ready React library and package
   APP.md             App products on the docs site: React Native previews (react-native-web) and React Native, Swift and Kotlin code
   COPY.md            the page copy files: one Markdown file per page holding every sentence for Figma and the docs site
+  FAST.md            fast mode: an optional engine where a fixed renderer draws every doc page from data (copy files and page manifests)
   ROADMAP.md         planned levels, components, renames and tooling (not built until specified)
 guidance/ foundations/ parts/ components/ sections/ layouts/ screens/
                  one spec per page, plus a 00 index per level (see the file map below)
-templates/       structure.md: the structure every page is built with (page → frames → blocks → items; no content); agent-brief.md: the brief for docs-site page agents
-tools/           figma-audit.js: read-only audit run on every built page and once on the file (QA gate); figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js: read-only JSON snapshot of each component set for the docs site; figma-copy.js: reads, checks and applies the page copy files on the doc frames
+templates/       structure.md: the structure every page is built with (page → frames → blocks → items; no content); agent-brief.md: the brief for docs-site page agents; fast/: the default fast-mode manifests (structure only)
+tools/           figma-audit.js: read-only audit that every page call runs on its page (QA gate; the file-wide sweep runs on call); figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js: read-only JSON snapshot of each component set for the docs site; figma-copy.js: reads, checks and applies the page copy files on the doc frames; figma-fastbuild.js, fast-pack.mjs, fast-cache.mjs, figma-dockit.js: fast mode (workflow/FAST.md)
 web/             brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that workflow/WEB.md copies and fills
 app/             brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
 examples/        finished builds made with ds-create, for reference only (never copied into a new build)

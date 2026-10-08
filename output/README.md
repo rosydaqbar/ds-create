@@ -7,9 +7,10 @@ output/
 ├─ {system-slug}/                one folder per design system, e.g. output/acme/ (the same slug as input/acme/)
 │  ├─ ds-create-ledger.json      progress ledger (INITIATOR.md Part B §0)
 │  ├─ copy/                      one copy file per page: every sentence on the Figma frames and the docs site (workflow/COPY.md)
+│  ├─ fast/                      fast mode only: one page manifest per page (workflow/FAST.md)
 │  ├─ figma/                     figma-variables.json (the export), set snapshots, figma-audit results
 │  ├─ web/                       the docs site for every product type (workflow/WEB.md); App previews in web/react-native/ (workflow/APP.md)
-│  └─ reports/                   build notes, QA reports and reviews for this system
+│  └─ reports/                   init.md, build-{date}.md and qa-{date}.md (the skill's reports), build notes and reviews
 └─ reports/                      reviews of ds-create itself
 ```
 

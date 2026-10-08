@@ -20,11 +20,14 @@ input/
    ├─ brand/                   brand guidelines, logo files, typefaces, color specs, tone of voice, imagery rules
    ├─ design-system/           the existing system: docs, token exports, component inventories, library and code links
    ├─ references/              reference systems and inspiration (used as a method, never copied, never named in the output)
+   │  └─ components/{id}-{name}/   references for one page, attached in a build round (for example components/2.1-button/)
+   ├─ answers/                 the answers to the ds-create skill's questions, one file per round (written by the agent)
    └─ chat/                    what the user said in chat, captured by the agent: one file per date, YYYY-MM-DD.md
 ```
 
 - The user adds files to `brief/`, `brand/`, `design-system/` and `references/`, in any format the agent can read: Markdown, text, PDF, images, office documents, exported JSON, or a file of links.
-- The agent writes only `sources.md` and `chat/`. It never edits, renames or deletes a file the user added.
+- The agent writes only `sources.md`, `answers/` and `chat/`. It never edits, renames or deletes a file the user added.
+- `answers/` holds the gates of a build: `01-init.md` for `/ds-create init`, then `02-build-YYYY-MM-DD.md` and so on, one per `/ds-create build` round. Every answer says who decided it (the user, or the AI in YOLO with its reason) and which steps it opens. The format is in `skills/ds-create/SKILL.md` §3.
 - A folder with nothing to put in it is left out.
 
 # 2. Rules

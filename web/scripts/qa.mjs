@@ -5,25 +5,44 @@
  *   - no horizontal overflow at desktop (1440) and phone (390) widths
  *   - axe-core WCAG 2.2 AA (+ best practice) finds no violations
  * Web and App products (ds.config `product: 'both'`) are checked in Web and App preview.
+ * QA runs on call (INITIATOR.md Part B, *QA on call*): when the user asks, or before a publish they asked for.
  * Usage:
- *   npm run qa                      builds, serves dist/ on :4319 and checks it
+ *   npm run qa                      builds, serves dist/ on a free port and checks it
  *   npm run qa -- --url http://localhost:5173/    checks a running dev server instead
+ *   --pages 2.1,3.2                 only these pages (by id or route prefix), plus their tabs
+ *   --quick                         errors and overflow only: no axe, no design detector
+ *   --workers 6                     browser tabs in parallel (default 4)
+ *   --baseline                      saves the current failures as known (qa-baseline.json); later runs
+ *                                   list known failures apart and fail only on new ones
  * A browser is needed once: `npx playwright install chromium` (or set PW_CHROMIUM_PATH).
- * Exits 1 on any failure and writes qa-report.json.
+ * Exits 1 on any new failure and writes qa-report.json. The preview server is always stopped.
  */
 import { chromium } from 'playwright';
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import net from 'node:net';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const axe = fs.readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
-const argUrl = process.argv.indexOf('--url');
-let base = argUrl > 0 ? process.argv[argUrl + 1] : null;
+const argv = process.argv.slice(2);
+const opt = (k) => (argv.includes(k) ? argv[argv.indexOf(k) + 1] : undefined);
+let base = opt('--url') ?? null;
+const onlyPages = (opt('--pages') ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+const quick = argv.includes('--quick');
+const workers = Math.max(1, Number(opt('--workers') ?? 4));
+const saveBaseline = argv.includes('--baseline');
+const t0 = Date.now();
 let server;
+// A preview server left running blocks the port for the next run: stop it however the script ends.
+const stopServer = () => server?.kill();
+process.on('exit', stopServer);
+for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => process.exit(130));
 if (!base) {
-  server = spawn('npx', ['vite', 'preview', '--port', '4319', '--strictPort'], { stdio: 'ignore' });
-  base = 'http://localhost:4319/';
+  // A free port, so a server left over from another run is never checked by mistake.
+  const port = await new Promise((res) => { const srv = net.createServer().listen(0, () => { const p = srv.address().port; srv.close(() => res(p)); }); });
+  server = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], { stdio: 'ignore' });
+  base = `http://localhost:${port}/`;
   for (let i = 0; i < 50; i++) {
     try {
       await fetch(base);
@@ -84,80 +103,99 @@ const approvedPairs = (() => {
 })();
 const approvedHits = {};
 
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-let where = '';
-page.on('pageerror', (e) => fail(where, `exception: ${e.message}`));
-page.on('console', (m) => m.type() === 'error' && fail(where, `console: ${m.text().slice(0, 200)}`));
+/** One browser tab with its own error listeners; `where` names what it is checking. */
+async function tab() {
+  const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  p.where = '';
+  p.on('pageerror', (e) => fail(p.where, `exception: ${e.message}`));
+  p.on('console', (m) => m.type() === 'error' && fail(p.where, `console: ${m.text().slice(0, 200)}`));
+  return p;
+}
+/** Runs `fn` over `items` with `workers` tabs in parallel. */
+async function pool(items, fn) {
+  const tabs = await Promise.all(Array.from({ length: Math.min(workers, items.length || 1) }, tab));
+  let i = 0;
+  await Promise.all(tabs.map(async (p) => { while (i < items.length) await fn(p, items[i++]); }));
+  await Promise.all(tabs.map((p) => p.close()));
+}
 
-await page.goto(base);
-await page.waitForTimeout(500);
-const pages = await page.$$eval('nav[aria-label="Design system"] a', (as) => as.map((a) => a.getAttribute('href').replace(/^#/, '')));
-const tabsOf = async () => page.$$eval('[role=tablist] [role=tab]', (ts) => ts.map((t) => t.id.split('-tab-')[1]));
+/** Wait for lazy pages and every running animation (page and tab fades, popups) to finish. Never a fixed delay (GOTCHAS G33). */
+async function settle(p) {
+  await p.waitForLoadState('networkidle');
+  await p.waitForSelector('main', { timeout: 10000 }).catch(() => {});
+  await p.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {}))));
+}
 
-const routes = ['/'];
-for (const p of pages) {
-  await page.goto(base + '#' + p);
-  await page.waitForTimeout(250);
-  const tabs = await tabsOf();
-  routes.push(p, ...tabs.slice(1).map((t) => `${p}?tab=${t}`));
+const first = await tab();
+await first.goto(base);
+await settle(first);
+let pages = await first.$$eval('nav[aria-label="Design system"] a', (as) => as.map((a) => a.getAttribute('href').replace(/^#/, '')));
+await first.close();
+// Routes look like /parts/2.1-button: match the page id (2.1) or the whole last segment.
+if (onlyPages.length) pages = pages.filter((p) => { const seg = p.split('/').pop(); return onlyPages.some((id) => seg === id || seg.startsWith(id + '-')); });
+
+const routes = onlyPages.length ? [] : ['/'];
+const found = {};
+await pool(pages, async (p, route) => {
+  p.where = `discover ${route}`;
+  await p.goto(base + '#' + route);
+  await settle(p);
+  const tabs = await p.$$eval('[role=tablist] [role=tab]', (ts) => ts.map((t) => t.id.split('-tab-')[1]));
+  const list = [route, ...tabs.slice(1).map((t) => `${route}?tab=${t}`)];
   // Web and App products: every tab again in App preview (React Native via react-native-web).
-  if (await page.$('[role=group][aria-label=Preview]')) routes.push(`${p}?platform=app`, ...tabs.slice(1).map((t) => `${p}?platform=app&tab=${t}`));
-}
+  if (await p.$('[role=group][aria-label=Preview]')) list.push(`${route}?platform=app`, ...tabs.slice(1).map((t) => `${route}?platform=app&tab=${t}`));
+  found[route] = list;
+});
+for (const p of pages) routes.push(...(found[p] ?? []));
 
-/** Wait for lazy pages and every running animation (page and tab fades, popups) to finish. */
-async function settle() {
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(150);
-  await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {}))));
-}
-
+// One pass per route: each theme at desktop width (errors, axe), then phone width for overflow, in the same tab.
 let views = 0;
-for (const theme of themes) {
-  await page.evaluate((t) => localStorage.setItem('ds-theme', t), theme);
-  for (const r of routes) {
-    where = `${theme} ${r}`;
-    await page.goto(base + '#' + r);
-    await page.reload();
-    await settle();
-    await page.addScriptTag({ content: axe });
-    const { v, approved } = await page.evaluate(
-      async ({ exc, pairs }) => {
-        const res = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] } });
-        const approved = [];
-        const isApproved = (x, n) => {
-          if (x.id !== 'color-contrast') return false;
-          const d = n.any?.[0]?.data ?? {};
-          const hit = pairs.find((p) => p.fg === String(d.fgColor).toLowerCase() && p.bg === String(d.bgColor).toLowerCase());
-          if (hit) approved.push(hit.pair);
-          return !!hit;
-        };
-        const v = res.violations
-          .map((x) => ({ ...x, nodes: x.nodes.filter((n) => !isApproved(x, n) && !exc.some((e) => e.rule === x.id && n.target.some((t) => document.querySelector(t)?.closest(e.selector)))) }))
-          .filter((x) => x.nodes.length)
-          .map((x) => `${x.id} (${x.nodes.length}): ${x.nodes[0].target.join(' ')} — ${x.nodes[0].failureSummary?.split('\n')[1]?.trim() ?? ''}`);
-        return { v, approved };
-      },
-      { exc: exceptions, pairs: approvedPairs[theme] },
-    );
-    v.forEach((x) => fail(where, `axe ${x}`));
-    approved.forEach((p) => (approvedHits[p] = (approvedHits[p] ?? 0) + 1));
+await pool(routes, async (p, r) => {
+  for (const [ti, theme] of themes.entries()) {
+    p.where = `${theme} ${r}`;
+    await p.goto(base + '#' + r);
+    await p.evaluate((t) => localStorage.setItem('ds-theme', t), theme);
+    await p.reload();
+    await settle(p);
+    if (!quick) {
+      await p.addScriptTag({ content: axe });
+      const { v, approved } = await p.evaluate(
+        async ({ exc, pairs }) => {
+          const res = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] } });
+          const approved = [];
+          const isApproved = (x, n) => {
+            if (x.id !== 'color-contrast') return false;
+            const d = n.any?.[0]?.data ?? {};
+            const hit = pairs.find((q) => q.fg === String(d.fgColor).toLowerCase() && q.bg === String(d.bgColor).toLowerCase());
+            if (hit) approved.push(hit.pair);
+            return !!hit;
+          };
+          const v = res.violations
+            .map((x) => ({ ...x, nodes: x.nodes.filter((n) => !isApproved(x, n) && !exc.some((e) => e.rule === x.id && n.target.some((t) => document.querySelector(t)?.closest(e.selector)))) }))
+            .filter((x) => x.nodes.length)
+            .map((x) => `${x.id} (${x.nodes.length}): ${x.nodes[0].target.join(' ')} — ${x.nodes[0].failureSummary?.split('\n')[1]?.trim() ?? ''}`);
+          return { v, approved };
+        },
+        { exc: exceptions, pairs: approvedPairs[theme] },
+      );
+      v.forEach((x) => fail(p.where, `axe ${x}`));
+      approved.forEach((q) => (approvedHits[q] = (approvedHits[q] ?? 0) + 1));
+    }
     views++;
+    if (ti === 0) {
+      // Phone width, same load: no second pass over every route.
+      p.where = `390px ${r}`;
+      await p.setViewportSize({ width: 390, height: 844 });
+      await settle(p);
+      const ov = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      if (ov > 0) fail(p.where, `horizontal overflow ${ov}px`);
+      await p.setViewportSize({ width: 1440, height: 900 });
+    }
   }
-}
-
-// Phone width: overflow on every page.
-await page.setViewportSize({ width: 390, height: 844 });
-for (const r of routes) {
-  where = `390px ${r}`;
-  await page.goto(base + '#' + r);
-  await page.reload();
-  await settle();
-  const ov = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
-  if (ov > 0) fail(where, `horizontal overflow ${ov}px`);
-}
+});
 
 await browser.close();
-server?.kill();
+stopServer();
 
 /**
  * Design detector (Impeccable): the anti-AI-slop and design-quality rules over the site source.
@@ -166,7 +204,7 @@ server?.kill();
  * build-level exception in this project's `.impeccable/config.json` (`npx impeccable ignores add-value …
  * --reason …`), never in the ds-create repo.
  */
-const design = (() => {
+const design = quick ? [] : (() => {
   let dir = process.cwd(), bin = null;
   for (let i = 0; i < 8 && !bin; i++) {
     const cand = `${dir}/.claude/skills/impeccable/scripts/impeccable`;
@@ -187,9 +225,16 @@ const design = (() => {
 })();
 for (const f of design) fail('design', `${f.antipattern} ${String(f.file).replace(process.cwd() + '/', '')}:${f.line} (${f.snippet ?? ''}): ${f.name}`);
 console.log(`design detector: ${design.length} finding(s)`);
-fs.writeFileSync('qa-report.json', JSON.stringify({ base, routes: routes.length, themes, views, exceptions, approvedContrast: approvedHits, failures }, null, 1));
+// Known failures (qa-baseline.json, written by --baseline) are listed apart; only new ones fail the run.
+const key = (f) => `${f.where} | ${f.what}`;
+const baseFile = 'qa-baseline.json';
+if (saveBaseline) fs.writeFileSync(baseFile, JSON.stringify(failures.map(key).sort(), null, 1) + '\n');
+const known = new Set(!saveBaseline && fs.existsSync(baseFile) ? JSON.parse(fs.readFileSync(baseFile, 'utf8')) : []);
+const fresh = failures.filter((f) => !known.has(key(f)));
+const secs = Math.round((Date.now() - t0) / 1000);
+fs.writeFileSync('qa-report.json', JSON.stringify({ base, pages: onlyPages.length ? onlyPages : 'all', quick, routes: routes.length, themes, views, seconds: secs, exceptions, approvedContrast: approvedHits, known: failures.length - fresh.length, failures: fresh }, null, 1));
 if (Object.keys(approvedHits).length) console.log(`approved brand contrast pairs (documented exceptions): ${Object.entries(approvedHits).map(([p, n]) => `${p} ×${n}`).join('; ')}`);
-console.log(`qa: ${routes.length} routes × ${themes.length} theme(s) = ${views} views, phone overflow on ${routes.length} routes → ${failures.length} problems`);
-for (const f of failures.slice(0, 40)) console.log(`  ✕ ${f.where}: ${f.what}`);
-if (failures.length > 40) console.log(`  … ${failures.length - 40} more in qa-report.json`);
-process.exit(failures.length ? 1 : 0);
+console.log(`qa${quick ? ' (quick)' : ''}: ${routes.length} routes × ${themes.length} theme(s) = ${views} views and phone overflow, ${workers} tabs, ${secs} s → ${fresh.length} new problem(s)${known.size ? `, ${failures.length - fresh.length} known (qa-baseline.json)` : ''}${saveBaseline ? `; baseline saved: ${failures.length}` : ''}`);
+for (const f of fresh.slice(0, 40)) console.log(`  ✕ ${f.where}: ${f.what}`);
+if (fresh.length > 40) console.log(`  … ${fresh.length - 40} more in qa-report.json`);
+process.exit(fresh.length && !saveBaseline ? 1 : 0);

@@ -210,4 +210,4 @@ A Screen page fails QA when:
 - a composition meets the threshold in §4.6 and was neither promoted nor raised with the user;
 - any topic, example or QA rule in the Screen's file is missing from the canvas.
 
-When the system has a web implementation, the Screen is documented on the site like the other levels (`workflow/WEB.md`) and its page passes `npm run qa`: no horizontal overflow at 390 px and no axe-core violations, in Light and Dark.
+When the system has a web implementation, the Screen is documented on the site like the other levels (`workflow/WEB.md`) and its page passes `npm run qa` when QA is called (`INITIATOR.md` Part B, *QA on call*): no horizontal overflow at 390 px and no axe-core violations, in Light and Dark.

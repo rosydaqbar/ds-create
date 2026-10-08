@@ -53,6 +53,18 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 *Why:* ids taken from a test copy pointed at nothing in the real file.
 *Check:* every replayed or reused script looks its targets up by name first.
 
+**G40. Verify many pages read-only with compact fingerprints, not by pasting their data.** To check that the file matches local data (copy files, snapshots), send each target's node id, its role sequence and a short hash of its text. Compare them in the plugin, and return only the mismatches.
+*Why:* pasting each page's full copy into the check would have cost tens of kilobytes per call. Fingerprints checked 716 targets on 64 pages in two calls.
+*Check:* a whole-file verification takes one to three calls, and returns only mismatches.
+
+**G41. Check cached code by its letters, not its bytes.** The `use_figma` tool reformats code before it runs, so `toString()` never matches the source byte for byte. A caching call compares a hash of the function's letters only, and refuses to save on a mismatch (`tools/fast-cache.mjs`).
+*Why:* the first byte-hash check failed although the code arrived intact. A check that always fails would have been dropped, letting a real typo through.
+*Check:* every caching call answers `stored: true`.
+
+**G42. Keep run-time state in memory, not in node plugin data.** `getPluginData` and `setPluginData` are not available in this runtime. Shared plugin data on the document root is only for cached code and indexes, cleared at the end.
+*Why:* a renderer that passed a width through node plugin data failed on its first page.
+*Check:* the tools in `tools/` call only `getSharedPluginData` / `setSharedPluginData`.
+
 # 2. Component files and frozen values
 
 **G10. Frozen values mean frozen.** Never unbind, unlink, detach or change a value of an existing component, variable or style. Renaming and moving are allowed. A new variant may be added only when the user asked for it, built as copies of existing variants bound to existing variables.
@@ -174,6 +186,14 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 **G34. Read a text style's family from the style itself.** Never infer the family from its role.
 *Why:* a two-family system was labeled with one family everywhere.
 *Check:* the typography page shows each style's real family.
+
+**G38. Baseline the QA findings that frozen values cause.** When the owner keeps values that fail a check (a brand fill below AA), save the findings once with `npm run qa -- --baseline`, list them in the ledger, and let later runs fail only on new findings.
+*Why:* the same 237 contrast findings in frozen components came back on every run, and any new finding was lost among them.
+*Check:* `qa-report.json` shows `known` and `failures` apart, and every known finding has an approved reason in the ledger.
+
+**G39. Stop every QA server, and never check one you didn't start.** QA scripts start their preview on a free port and stop it on any exit.
+*Why:* a preview left running after a failed run held the fixed QA port. The next run then silently checked that old server.
+*Check:* after a run, no preview server from it is still listening.
 
 # 5. Component snapshots
 

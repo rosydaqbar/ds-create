@@ -171,7 +171,7 @@ Stories import the previews as a namespace (`import * as App from '@app'`) and u
 # 9. QA
 
 Automated (all in `web/`):
-- `npm run qa` checks every page and tab in App preview, in Light and Dark: no errors, no overflow at phone width, and zero axe WCAG 2.2 AA violations. On a Web and App product it checks both previews.
+- `npm run qa`, when the user calls it (`INITIATOR.md` Part B, *QA on call*), checks every page and tab in App preview, in Light and Dark: no errors, no overflow at phone width, and zero axe WCAG 2.2 AA violations. On a Web and App product it checks both previews.
 - `npm run check:contrast`: every color pair AA in every mode.
 
 Review the Code tab against the Figma set: the React Native, Swift and Kotlin code uses the same props and values, and only tokens.

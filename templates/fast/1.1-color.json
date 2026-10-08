@@ -1,0 +1,207 @@
+{
+  "page": "1.1 Color",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Base colors",
+          "badge": "Primitives",
+          "visual": {
+            "type": "palette",
+            "collection": "Primitives",
+            "include": [
+              "palette/neutral",
+              "palette/brand"
+            ],
+            "todo": "the base families of this palette"
+          },
+          "take": {
+            "role": "",
+            "skip": 1,
+            "count": "all"
+          }
+        },
+        {
+          "title": "Extended palettes",
+          "badge": "Primitives",
+          "visual": {
+            "type": "palette",
+            "collection": "Primitives",
+            "exclude": [
+              "palette/neutral",
+              "palette/brand"
+            ]
+          },
+          "take": {
+            "role": "",
+            "skip": 1,
+            "count": "all"
+          }
+        },
+        {
+          "title": "Gradients",
+          "badge": "Styles",
+          "visual": {
+            "type": "paint-tiles"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tokens",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Text — color/text",
+          "visual": {
+            "type": "token-table",
+            "collection": "Color",
+            "prefix": "color/text/"
+          }
+        },
+        {
+          "title": "Icon — color/icon",
+          "visual": {
+            "type": "token-table",
+            "collection": "Color",
+            "prefix": "color/icon/"
+          }
+        },
+        {
+          "title": "Border — color/border",
+          "visual": {
+            "type": "token-table",
+            "collection": "Color",
+            "prefix": "color/border/"
+          }
+        },
+        {
+          "title": "Surface — color/surface",
+          "visual": {
+            "type": "token-table",
+            "collection": "Color",
+            "prefix": "color/surface/"
+          }
+        },
+        {
+          "title": "Fill — color/fill",
+          "visual": {
+            "type": "token-table",
+            "collection": "Color",
+            "prefix": "color/fill/"
+          }
+        },
+        {
+          "title": "Overlay — color/overlay",
+          "visual": {
+            "type": "token-table",
+            "collection": "Color",
+            "prefix": "color/overlay/"
+          }
+        },
+        {
+          "title": "Shadow — color/shadow",
+          "visual": {
+            "type": "token-table",
+            "collection": "Color",
+            "prefix": "color/shadow/"
+          }
+        },
+        {
+          "title": "Category — color/category",
+          "visual": {
+            "type": "token-table",
+            "collection": "Color",
+            "prefix": "color/category/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Defining the color palette",
+          "visual": {
+            "type": "palette",
+            "collection": "Primitives",
+            "include": [
+              "palette/brand"
+            ]
+          }
+        },
+        {
+          "title": "Choosing additional colors",
+          "visual": {
+            "type": "instances",
+            "todo": "a component that would use the new color",
+            "items": []
+          }
+        },
+        {
+          "title": "Define the color system before component work",
+          "visual": {
+            "type": "token-chain",
+            "todo": "primitive → role → a real component",
+            "chains": []
+          }
+        },
+        {
+          "title": "Color accessibility",
+          "visual": {
+            "type": "instances",
+            "todo": "a field or message where color is not the only signal",
+            "items": []
+          }
+        },
+        {
+          "title": "Contrast requirements and testing",
+          "visual": {
+            "type": "contrast-pairs",
+            "todo": "the role pairs to test",
+            "pairs": []
+          }
+        },
+        {
+          "title": "Managing colors through variables",
+          "visual": {
+            "type": "editor-panel",
+            "todo": "a color role and its alias per mode",
+            "title": "",
+            "rows": []
+          }
+        },
+        {
+          "title": "Changing the brand palette",
+          "visual": {
+            "type": "palette",
+            "collection": "Primitives",
+            "include": [
+              "palette/brand"
+            ]
+          }
+        },
+        {
+          "title": "Changing the neutral palette",
+          "visual": {
+            "type": "palette",
+            "collection": "Primitives",
+            "include": [
+              "palette/neutral"
+            ]
+          }
+        },
+        {
+          "title": "Updating color-dependent effects",
+          "visual": {
+            "type": "effect-tiles"
+          }
+        }
+      ]
+    }
+  ]
+}

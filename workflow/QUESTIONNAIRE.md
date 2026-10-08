@@ -8,6 +8,21 @@ The questions asked once, at initiation, before anything is built: platforms, sc
 
 The questionnaire decides what gets preserved, audited, generated or rebuilt. Structure and naming are fixed by `SYSTEM.md`; the questionnaire decides **scope** and **values**, never page names, frame names or token grammar.
 
+# 0. Who asks what
+
+The `ds-create` skill asks these questions in two rounds (`skills/ds-create/`). The questions stay as written here; the skill decides when each one is asked, and saves the answers in `input/{slug}/answers/`.
+
+| Section | Asked by | When |
+| --- | --- | --- |
+| §1 Product, §2 Brand, §3 Existing system inventory, §9 Token architecture and naming | `/ds-create init` | once, before the tokens exist |
+| §10 Output formats and product type: Web, App, or Web and App | `/ds-create init` | settled before init ends |
+| §8 engine (Default or Fast mode) | `/ds-create build`, Q1 | every round; always the user's choice |
+| §5 Build strategy, §6 Foundation scope, §7 Component scope, §4 Action per existing item | `/ds-create build`, Q2 (how far) | every round |
+| §10 docs site or Figma only | `/ds-create build`, Q3 (where) | every round |
+| §8 pace (YOLO everything or One by one) | `/ds-create build`, Q4 | every round |
+| §11 Documentation depth | `/ds-create build` | only when the user brings it up |
+| §12 Confirmation summary | both | split: the init summary, then each build round's summary |
+
 # 1. Product
 
 ## Product status
@@ -298,6 +313,15 @@ Rules:
 - implementation mode controls execution pacing only; it does not change the order of the build sequence (`INITIATOR.md` Part B §6), and it does not reduce specification loading, anatomy fidelity, documentation depth, matrix completeness or QA;
 - in **One by one**, do not prebuild unrelated selected pages; Parts and private parts the active page depends on may be built as dependencies;
 - in **YOLO everything**, every selected page still follows its complete Markdown file and QA before the run is considered complete.
+
+**Which engine draws the documentation pages?** Ask only when `tools/figma-fastbuild.js` exists in the repo (`workflow/FAST.md` §10). Otherwise, record `engine: "standard"` without asking.
+
+- **Standard** (default): each page is drawn by its own build step, with the doc builder and `workflow/DOCFRAMES.md`.
+- **Fast mode**: the agent writes a copy file and a manifest per page, and a fixed renderer draws every page the same way (`workflow/FAST.md`). It is faster, and it covers only the page types the renderer supports; the other pages use Standard.
+
+When Fast mode is chosen, also ask: **Review the text and page plans before anything is drawn?** (yes or no; `workflow/FAST.md` F2).
+
+The engine is separate from the pacing: YOLO everything or One by one applies with either engine.
 
 # 9. Token architecture and naming
 

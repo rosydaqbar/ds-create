@@ -1,0 +1,186 @@
+{
+  "page": "02 Tokens",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Collections",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "What the token system is for",
+          "visual": {
+            "type": "goal-tiles",
+            "todo": "four goals: label and the page to see",
+            "goals": []
+          },
+          "take": {
+            "role": "",
+            "skip": 1,
+            "count": 8
+          }
+        },
+        {
+          "title": "The collections",
+          "visual": {
+            "type": "collection-cards",
+            "exclude": [],
+            "pages": {
+              "Primitives": "02 Tokens",
+              "Color": "1.1 Color",
+              "Typography": "1.2 Typography",
+              "Space": "1.3 Space & layout",
+              "Size": "1.3 Space & layout",
+              "Shape": "1.4 Shape",
+              "Border": "1.4 Shape",
+              "Motion": "1.6 Motion"
+            }
+          }
+        },
+        {
+          "title": "Three layers",
+          "visual": {
+            "type": "token-chain",
+            "todo": "primitive → role → component for one color and one space token",
+            "chains": []
+          }
+        },
+        {
+          "title": "Scopes",
+          "visual": {
+            "type": "scope-table"
+          }
+        },
+        {
+          "title": "Adding to a collection"
+        }
+      ]
+    },
+    {
+      "name": "Naming",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "The grammar",
+          "visual": {
+            "type": "name-anatomy",
+            "todo": "one real token name and a label per segment",
+            "example": "",
+            "labels": []
+          }
+        },
+        {
+          "title": "Roles and children",
+          "visual": {
+            "type": "token-table",
+            "todo": "one role family with children",
+            "collection": "Color",
+            "prefix": ""
+          }
+        },
+        {
+          "title": "Names describe purpose, not values",
+          "visual": {
+            "type": "do-dont",
+            "todo": "role names (do) against value names (don't)",
+            "pairs": []
+          }
+        },
+        {
+          "title": "Code syntax",
+          "visual": {
+            "type": "code-syntax"
+          }
+        },
+        {
+          "title": "Descriptions"
+        }
+      ]
+    },
+    {
+      "name": "Modes",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Color modes",
+          "visual": {
+            "type": "mode-frames",
+            "todo": "two or three components in each supported Color mode",
+            "collection": "Color",
+            "items": []
+          }
+        },
+        {
+          "title": "Themes without variable modes"
+        },
+        {
+          "title": "Density modes",
+          "visual": {
+            "type": "mode-table"
+          }
+        },
+        {
+          "title": "Breakpoints are not just modes",
+          "visual": {
+            "type": "grids",
+            "prefix": "grid/"
+          }
+        },
+        {
+          "title": "Dark neutrals: solid or transparent",
+          "visual": {
+            "type": "palette",
+            "collection": "Primitives",
+            "include": [
+              "palette/neutral"
+            ]
+          }
+        },
+        {
+          "title": "Trying an alternate dark strategy"
+        },
+        {
+          "title": "Motion modes",
+          "visual": {
+            "type": "token-table",
+            "collection": "Motion",
+            "prefix": "motion/duration/"
+          }
+        },
+        {
+          "title": "Modes and accessibility",
+          "visual": {
+            "type": "contrast-pairs",
+            "todo": "the text and surface pairs to show",
+            "pairs": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Primitive palette",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "What primitives are"
+        },
+        {
+          "title": "Primitive tables",
+          "visual": {
+            "type": "token-table",
+            "collection": "Primitives",
+            "prefix": ""
+          }
+        },
+        {
+          "title": "Neutral character"
+        },
+        {
+          "title": "Transparent shades"
+        },
+        {
+          "title": "Changing primitives"
+        }
+      ]
+    }
+  ]
+}

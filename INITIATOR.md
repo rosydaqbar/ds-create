@@ -31,6 +31,7 @@ Then, per step:
 
 - Initiation, and any change to an answer → load `workflow/QUESTIONNAIRE.md`
 - Any step that draws frames the doc builder has no helper for (Doc kit, Cover, guidance pages, Foundations, Screens), or that changes the builder → load `workflow/DOCFRAMES.md`. Parts, Components, Sections and Layouts are drawn with `tools/figma-docbuilder.js` (§6, *Figma tools*)
+- Fast mode chosen (`engine: "fast"` in the ledger) → load `workflow/FAST.md` from step 6 to step 16
 - Writing or changing any sentence on a doc frame or a docs-site page → load `workflow/COPY.md`. The sentences live in the page's copy file, `output/{system-slug}/copy/`
 - `01 Getting started` in scope → load `guidance/01-getting-started.md`
 - `02 Tokens` in scope → load `guidance/02-tokens.md`
@@ -57,6 +58,9 @@ Keep a ledger on disk at `output/{system-slug}/ds-create-ledger.json` (README §
 ```text
 scope            the confirmed summary (`workflow/QUESTIONNAIRE.md` §12): pages, mode, formats, product type, code
 inputs           input/{system-slug}/sources.md: the date it was last read, and the input file each scope answer came from
+answers[]        the answers files in input/{system-slug}/answers/, in order (01-init.md, 02-build-YYYY-MM-DD.md, …)
+engine           "standard" or "fast" (the latest build round's Q1); per page, the engine that drew it
+qa[]             each on-call QA run: date, what ran, scope, result, known findings (*QA on call*)
 sequence[]       the build sequence (§6), written once at step 3, in the order it runs. Per entry:
                  step, page or task, status (todo, building, qa, done, skip),
                  loaded (the spec files loaded for it in the current context),
@@ -177,6 +181,13 @@ Before generating variables and components:
 
 # 6. Build sequence
 
+**Who runs which steps.** The `ds-create` skill (`skills/ds-create/`) is the way in. Its commands run the steps below:
+- `/ds-create init` runs steps 1–4.
+- `/ds-create build` runs steps 5–21 that its four answers allow (`skills/ds-create/reference/build.md` §4), in rounds.
+- `/ds-create qa` runs the on-call checks (*QA on call*).
+
+The order, the gates and the ledger are the same whichever command runs a step.
+
 The build is one numbered sequence. It is the only order, for a new system and for an existing one. Step 3 writes it into the ledger's `sequence` (§0, *Progress ledger*) with every step in scope, steps 1–3 already done, and the run follows it from top to bottom. Every other file that mentions order points here.
 
 | # | Step | Load at this step | Done when |
@@ -197,14 +208,14 @@ The build is one numbered sequence. It is the only order, for a new system and f
 | 14 | **Layouts**, one step per page, in ID order | `layouts/00-layouts.md`, the page file, the files of the Sections and Components it contains, `tools/figma-docbuilder.js` (cached) | the page gate |
 | 15 | **Screens**, one step per page, in ID order | `screens/00-screens.md`, the page file, the file of its Layout, `workflow/DOCFRAMES.md` | the page gate |
 | 16 | **Foundation examples that use components** (`foundations/00-foundations.md`, *Build order*) | the foundation page file again, `workflow/DOCFRAMES.md` | every example the ledger lists for it is built from real instances, and the page audit passes again |
-| 17 | **File audit**: `tools/figma-audit.js` on every built page and once on the file | `tools/figma-audit.js` | `fail` = 0 on every page and on the file |
+| 17 | **Close Figma**: clear the `dscreate` plugin data. The file-wide audit of every page runs on call (*QA on call*) | `tools/figma-audit.js` (on call) | plugin data cleared; every page's own audit is `fail` = 0 in the ledger |
 | 18 | **Docs site setup**: `workflow/WEB.md` W1–W3; App: `workflow/APP.md` A1–A2 | `workflow/WEB.md`; App: `workflow/APP.md` | the exit checks of W1–W3 |
 | 19 | **Docs pages**, one step per page, in ID order: `workflow/WEB.md` W4; App: `workflow/APP.md` A3 | `workflow/WEB.md` (and `workflow/APP.md`), the page file; agents working in parallel start from `templates/agent-brief.md` | `workflow/WEB.md` §9 (and `workflow/APP.md` §9) pass for the page |
 | 20 | **Foundation and guidance pages, docs data**: `workflow/WEB.md` W5–W6 | `workflow/WEB.md`, the foundation and guidance files | the exit checks of W5–W6 |
-| 21 | **Build, package and QA**: `workflow/WEB.md` W7; App: `workflow/APP.md` A4 | `workflow/WEB.md`; App: `workflow/APP.md` | the exit check of W7; App: `workflow/APP.md` §9 |
+| 21 | **Build and package**: `workflow/WEB.md` W7; App: `workflow/APP.md` A4. Full QA runs on call | `workflow/WEB.md`; App: `workflow/APP.md` | the exit check of W7; App: `workflow/APP.md` §9 |
 | 22 | **Publish**: `workflow/WEB.md` W8 | `workflow/WEB.md` | the location is reported and the QA results are saved |
 
-**Figma tools.** Steps 11–14 draw frames with `tools/figma-docbuilder.js`, cached once at step 6: Parts, Components and Sections use `sectionPage`, Layouts use `layoutPage`. Each page body is small and comes from the page file, and `finishPage` arranges the frames and runs the audit. Steps 6–10, 15 and 16 draw frames the builder has no helper for yet (Doc kit, Cover, guidance pages, foundation palette rows and variable tables, Screens), so they load `workflow/DOCFRAMES.md`. Load it too when changing the builder. If a call drops after about 120 s, first make a read-only call that lists the page's frames, then re-run. `use_figma` rejects return values over 20 KB, so tools return compact results and page themselves. After step 17, clear the `dscreate` plugin data on the document root.
+**Figma tools.** Steps 11–14 draw frames with `tools/figma-docbuilder.js`, cached once at step 6: Parts, Components and Sections use `sectionPage`, Layouts use `layoutPage`. Each page body is small and comes from the page file, and `finishPage` arranges the frames and runs the audit. Steps 6–10, 15 and 16 draw frames the builder has no helper for yet (Doc kit, Cover, guidance pages, foundation palette rows and variable tables, Screens), so they load `workflow/DOCFRAMES.md`. Load it too when changing the builder. If a call drops after about 120 s, first make a read-only call that lists the page's frames, then re-run. `use_figma` rejects return values over 20 KB, so tools return compact results and page themselves. At step 17, clear the `dscreate` plugin data on the document root.
 
 **Page copy.** Every sentence on a page comes from its copy file, `output/{system-slug}/copy/{id}-{kebab name}.md` (`workflow/COPY.md`). Write the file before the page is drawn: the builder's page text is taken from its `both` and `figma` lines, and its node ids are added once the frames exist. The site's text comes from the `both` and `web` lines of the same file (steps 19–20). After a review, change the copy file first, then apply it to Figma with `tools/figma-copy.js`.
 
@@ -232,6 +243,25 @@ Which steps are in scope:
 - **YOLO is pacing, not order.** YOLO everything removes the pause between pages. It never allows skipping, reordering or merging steps. One by one stops after each step and proposes the next one.
 - **Only the user changes the order.** The user may skip a page, or move a page later within its level. Record it under `decisions` with the date and update `sequence`. The order of the levels never changes.
 - **Out of order is a stop.** When the agent finds it skipped or reordered a step: stop, set the affected entries back to `building` (work done out of order is never `done`), record what happened under `decisions`, tell the user, and resume from the earliest open step. Work done early is checked against its page file at its own step, like any other page.
+
+## QA on call
+
+QA has two tiers, so a build never waits on slow checks the user didn't ask for.
+
+**Always (part of the build, no extra wait).**
+- Figma: the audit that each page call runs on its own page (`finishPage`, or `render` in fast mode); a page is done when it reports `fail` = 0 (*Gates*).
+- Copy: the batched read-only check of the copy files against the frames, at the end of a level or the build (`workflow/COPY.md` §7).
+- Site: `npm run build`, which runs the token, copy, effect, brand-copy and contrast checks and the type check.
+
+**On call (only when the user asks, or before a publish they asked for).**
+- `npm run qa`: every page and tab, errors, overflow, axe, design detector. Scope it with `--pages {ids}` to the pages that changed, or use `--quick` for errors and overflow only (`workflow/WEB.md` W7).
+- The file-wide audit of every page (step 17), set snapshot re-checks, screenshot review passes and keyboard reviews.
+
+Rules:
+- At the end of a level or of the build, say in one line which on-call checks haven't run since the last change, and offer them. Never run them unasked.
+- Record each on-call run in the ledger: `qa: [{ date, what, scope, result, known }]`.
+- Findings that can't be fixed because the values are frozen go into the QA baseline (`qa-baseline.json`, `GOTCHAS.md` G38). Later runs then report only new problems.
+- A component is marked **Stable** (`workflow/WEB.md` W6) only after an on-call QA run of its page.
 
 ## Progress reports
 
@@ -289,9 +319,10 @@ Do not mark generation complete until:
 - the component implementation mode is resolved whenever components are in scope;
 - every required specification is confirmed loaded;
 - every checklist item is resolved;
-- every applicable global, folder-level and page-level QA rule passes, and `tools/figma-audit.js` reports `fail` = 0 on every built page and on the file;
+- every applicable global, folder-level and page-level QA rule passes, and `tools/figma-audit.js` reports `fail` = 0 on every built page (each page's own audit; the file-wide sweep is on call);
 - for App and Web and App, every in-scope page has its React Native preview and an `app` block with React Native, Swift and Kotlin code, and `workflow/APP.md` §9 passes;
 - every entry of the ledger's `sequence` is `done` or `skip`, in order, and every `done` entry has its evidence (`loaded`, `audit.fail` = 0);
 - `input/{system-slug}/sources.md` lists every file in the input folder, every chat instruction is captured in `chat/`, and *Open conflicts* is empty (`input/README.md` I3–I5);
 - every lesson the build learned (a retry, a rollback, an audit failure or a user correction) is in `output/{slug}/reports/build-notes.md`, and each one that applies to any brand is added to `GOTCHAS.md` as its next rule (`GOTCHAS.md` §0);
-- when code is in scope, `npm run build` passes (including `check:contrast`), `npm run qa` reports 0 problems, the package installs in a fresh app (Web and Web and App), and every in-scope page passes `workflow/WEB.md` §9.
+- when code is in scope, `npm run build` passes (including `check:contrast`), the package installs in a fresh app (Web and Web and App), and every in-scope page passes `workflow/WEB.md` §9;
+- the on-call checks that haven't run since the last change were offered to the user, and every run the user asked for is in the ledger with its result (*QA on call*).

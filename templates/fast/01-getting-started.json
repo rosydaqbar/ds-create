@@ -1,0 +1,123 @@
+{
+  "page": "01 Getting started",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Welcome",
+          "visual": {
+            "type": "links",
+            "pages": [],
+            "todo": "one link per level: the first page of each level"
+          }
+        },
+        {
+          "title": "The brand at a glance",
+          "visual": {
+            "type": "color-cards",
+            "todo": "the brand's main color roles: [[name, role]]",
+            "roles": []
+          },
+          "take": {
+            "role": "",
+            "skip": 1,
+            "count": "all"
+          }
+        },
+        {
+          "title": "Setting up",
+          "visual": {
+            "type": "editor-panel",
+            "todo": "the properties panel of a real component: title and rows",
+            "title": "",
+            "rows": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "How the file works",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "The page tree",
+          "visual": {
+            "type": "links",
+            "pages": [],
+            "todo": "one link per level"
+          }
+        },
+        {
+          "title": "Components and properties",
+          "visual": {
+            "type": "instances",
+            "todo": "a component with several properties, in two or three variants",
+            "items": []
+          }
+        },
+        {
+          "title": "Auto Layout",
+          "visual": {
+            "type": "instances",
+            "todo": "the same component with a short and a long label",
+            "items": []
+          }
+        },
+        {
+          "title": "One library or several"
+        }
+      ]
+    },
+    {
+      "name": "Working with variables",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "What variables are",
+          "visual": {
+            "type": "token-chain",
+            "todo": "one role and two components that use it",
+            "chains": []
+          }
+        },
+        {
+          "title": "Modes",
+          "visual": [
+            {
+              "type": "mode-table"
+            },
+            {
+              "type": "mode-frames",
+              "todo": "two or three components shown in each supported Color mode",
+              "collection": "Color",
+              "items": []
+            }
+          ]
+        },
+        {
+          "title": "Opening and editing variables",
+          "visual": {
+            "type": "editor-panel",
+            "todo": "the local variables panel: a role and its alias per mode",
+            "title": "",
+            "rows": []
+          }
+        },
+        {
+          "title": "Variables and styles",
+          "visual": {
+            "type": "do-dont",
+            "todo": "a role name (do) and a raw palette name (don't), as instances or token badges",
+            "pairs": []
+          }
+        },
+        {
+          "title": "Do you need variables?"
+        }
+      ]
+    }
+  ]
+}

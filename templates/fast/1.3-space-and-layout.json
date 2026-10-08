@@ -1,0 +1,154 @@
+{
+  "page": "1.3 Space & layout",
+  "type": "reading",
+  "frames": [
+    {
+      "name": "Overview",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Space",
+          "badge": "Variables",
+          "visual": {
+            "type": "scale-bars",
+            "collection": "Space",
+            "prefix": "space/",
+            "unit": 4
+          }
+        },
+        {
+          "title": "Sizes",
+          "badge": "Variables",
+          "visual": {
+            "type": "scale-bars",
+            "collection": "Size",
+            "prefix": "size/"
+          }
+        },
+        {
+          "title": "Widths",
+          "visual": {
+            "type": "scale-bars",
+            "collection": "Size",
+            "prefix": "size/width/"
+          }
+        },
+        {
+          "title": "Containers",
+          "visual": {
+            "type": "scale-bars",
+            "collection": "Size",
+            "prefix": "size/container/"
+          }
+        },
+        {
+          "title": "Grids",
+          "badge": "Styles",
+          "visual": {
+            "type": "grids",
+            "prefix": "grid/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tokens",
+      "kind": "blocks",
+      "items": [
+        {
+          "title": "Space — space",
+          "visual": {
+            "type": "token-table",
+            "collection": "Space",
+            "prefix": "space/"
+          }
+        },
+        {
+          "title": "Size — size",
+          "visual": {
+            "type": "token-table",
+            "collection": "Size",
+            "prefix": "size/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guidelines",
+      "kind": "topics",
+      "items": [
+        {
+          "title": "Why the spacing system matters",
+          "visual": {
+            "type": "compare",
+            "todo": "the same card with arbitrary values and with scale values",
+            "columns": []
+          }
+        },
+        {
+          "title": "The base unit and the scale",
+          "visual": {
+            "type": "scale-bars",
+            "collection": "Space",
+            "prefix": "space/",
+            "unit": 4
+          }
+        },
+        {
+          "title": "Spacing inside components",
+          "visual": {
+            "type": "callouts",
+            "todo": "a real section or component with bound space tokens",
+            "item": {}
+          }
+        },
+        {
+          "title": "Optical exceptions",
+          "visual": {
+            "type": "instances",
+            "todo": "an icon-and-label control",
+            "items": []
+          }
+        },
+        {
+          "title": "Component padding",
+          "visual": {
+            "type": "callouts",
+            "todo": "one control, e.g. the md primary button",
+            "item": {}
+          }
+        },
+        {
+          "title": "Control sizes and touch targets",
+          "visual": {
+            "type": "instances",
+            "todo": "controls of the same size in one row",
+            "items": []
+          }
+        },
+        {
+          "title": "Reading width and line length"
+        },
+        {
+          "title": "Containers and grids",
+          "visual": {
+            "type": "grids",
+            "prefix": "grid/"
+          }
+        },
+        {
+          "title": "Exceptions and best practices"
+        },
+        {
+          "title": "Nudge setting (optional)",
+          "visual": {
+            "type": "editor-panel",
+            "todo": "the nudge settings",
+            "title": "",
+            "rows": []
+          }
+        }
+      ]
+    }
+  ]
+}

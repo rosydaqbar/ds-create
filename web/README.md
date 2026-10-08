@@ -11,7 +11,8 @@ npm install
 npm run dev            # regenerate tokens, start the site
 npm run build          # tokens, index, effect and contrast gates, typecheck, static site in dist/
 npm run build:package  # the installable package in package/ (then: npm pack ./package)
-npm run qa             # build, then every page and tab in Light and Dark: errors, overflow, axe WCAG 2.2 AA
+npm run qa             # on call: build, then every page and tab in Light and Dark: errors, overflow, axe WCAG 2.2 AA
+                       #   --pages 2.1,3.2 · --quick · --workers 6 · --baseline (see scripts/qa.mjs)
 npm run qa:dev         # the same checks against the running dev server
 ```
 
@@ -51,4 +52,4 @@ Props are the Figma properties (`Size=lg` → `size="lg"`). Color mode: `data-th
 1. `src/components/{parts|components|sections}/{Name}.tsx` — tokens only, props from the Figma properties, `is-hover:` / `is-pressed:` / `is-focus:` / `is-disabled:` state variants, `forceState` for the docs, `data-anatomy` on every part, and the accessibility rules in workflow/WEB.md §6.4.
 2. `src/docs/stories/{id}-{slug}.doc.tsx` — a `defineDoc({...})` module written in the voice of `COPY-GUIDE.md`; it appears on the site automatically. `src/docs/stories/2.1-button.doc.tsx` is the reference.
 3. Add the page to `src/docs/meta.tsx` (status, since, aliases) and a line to `src/docs/changelog.ts`.
-4. `npm run build`, then `npm run qa`.
+4. `npm run build`. When the user calls QA, `npm run qa -- --pages {id}` for the new page.
