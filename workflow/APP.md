@@ -15,7 +15,7 @@ Figma stays the source of truth. The previews and the code never invent values: 
 - Never create an app project, a build file (Gradle, `Package.swift`, `package.json` for an app) or a package.
 - Never run an app build, an app test runner or a device.
 
-The only things that run are the docs site (`npm run dev`, `npm run build`, `npm run qa` in `web/`) and the Node token script in §4 A2. react-native-web renders the previews without `react-native` itself (`workflow/WEB.md` §7.1).
+The only things that run are the docs site (`npm run dev`, `npm run build`, `npm run qa` in `kit/web/`) and the Node token script in §4 A2. react-native-web renders the previews without `react-native` itself (`workflow/WEB.md` §7.1).
 
 # 1. When this runs
 
@@ -35,7 +35,7 @@ output/{system-slug}/web/            the docs site (workflow/WEB.md), product 'a
 │  ├─ tokens/tokens.ts               generated from the Figma export
 │  ├─ theme/                         ThemeProvider, useTheme: color mode, reduced motion, text size; anatomy()
 │  ├─ icons/                         icon registry (system icon names → lucide-react-native)
-│  └─ components/{parts,components,sections}/   one file per published set
+│  └─ specs/components/{parts,components,sections}/   one file per published set
 └─ src/docs/stories/                 each component page's story, with its `app` block (§7)
 ```
 
@@ -46,7 +46,7 @@ There are no `ios/`, `android/` or `native/` folders, and no app package.
 | Concern | Choice |
 | --- | --- |
 | Preview components | TypeScript React Native components (`View`, `Text`, `Pressable`, `Animated`), styled with `StyleSheet` values from the tokens |
-| Rendering on the site | react-native-web, set up in `web/vite.config.ts` (`workflow/WEB.md` §7.1) |
+| Rendering on the site | react-native-web, set up in `kit/web/vite.config.ts` (`workflow/WEB.md` §7.1) |
 | Icons | lucide-react-native with react-native-svg, behind one registry with the web icon names |
 | Swift code | SwiftUI, written as `DSButton(…)` with `DSTokens.*` (§5) |
 | Kotlin code | Jetpack Compose, written as `DsButton(…)` with `DsTheme.*` (§5) |
@@ -55,7 +55,7 @@ Don't build the previews on a third-party UI kit (no NativeBase, no React Native
 
 # 4. Workflow
 
-At initiation, A1–A2 run in step 18 of the build sequence (`INITIATOR.md` Part B §6), A3 in step 19 with each page, and A4 in step 21. The same gates apply.
+At initiation, A1–A2 run in step 18 of the build sequence (`workflow/INITIATOR.md` Part B §6), A3 in step 19 with each page, and A4 in step 21. The same gates apply.
 
 ## A1 · Copy the preview source
 
@@ -66,10 +66,10 @@ After `workflow/WEB.md` W1, copy `ds-create/app/react-native/` to `output/{syste
 From `output/{system-slug}/web/`, generate the React Native tokens from the same export the docs use (`workflow/WEB.md` W2, contrast gate included):
 
 ```sh
-node ../../../app/scripts/build-rn-tokens.mjs --in tokens/figma-variables.json --out react-native/tokens
+node ../../../kit/app/scripts/build-rn-tokens.mjs --in tokens/figma-variables.json --out react-native/tokens
 ```
 
-(Or copy `app/scripts/build-rn-tokens.mjs` into `web/scripts/` and run it from there.) Never edit `tokens.ts`; fix values in Figma and export again. Modes listed in `tokens/accepted.json` `unsupportedModes` are left out, and `darkColors` then repeats Light.
+(Or copy `kit/app/scripts/build-rn-tokens.mjs` into `kit/web/scripts/` and run it from there.) Never edit `tokens.ts`; fix values in Figma and export again. Modes listed in `tokens/accepted.json` `unsupportedModes` are left out, and `darkColors` then repeats Light.
 
 ## A3 · Components
 
@@ -118,7 +118,7 @@ Swift          DSButton("Save", size: .md, emphasis: .primary, tone: .brand, lea
 Kotlin         DsButton(label = "Save", onClick = save, size = DsSize.Md, emphasis = DsEmphasis.Primary, tone = DsTone.Brand, leadingIcon = DsIcons.Check)
 ```
 
-Variant properties take the Figma values (`Size`, `Emphasis`, `Tone`, …, `SYSTEM.md` Part C §4.2). A `Show {part}` toggle and its swap become one optional prop. `State` is not a prop: pressed, focused and hovered come from the platform, while `disabled` and `loading` are props. Private parts (`.Main/…`) are internal.
+Variant properties take the Figma values (`Size`, `Emphasis`, `Tone`, …, `specs/SYSTEM.md` Part C §4.2). A `Show {part}` toggle and its swap become one optional prop. `State` is not a prop: pressed, focused and hovered come from the platform, while `disabled` and `loading` are props. Private parts (`.Main/…`) are internal.
 
 Two helpers exist only for the docs site:
 
@@ -152,7 +152,7 @@ Pressed, disabled, focused, selected and loading look exactly like the Figma var
 
 # 7. Documentation contract
 
-Each component page's story (`web/src/docs/stories/{id}-{slug}.doc.tsx`) gets an `app` block (`workflow/WEB.md` §7.1):
+Each component page's story (`kit/web/src/docs/stories/{id}-{slug}.doc.tsx`) gets an `app` block (`workflow/WEB.md` §7.1):
 
 - **`hero` and `examples`**: the same situations as the web examples, rendered with the React Native component. Each example has its `code` in React Native, Swift and Kotlin, which the Code tab shows.
 - **`matrices`**: every variant, rendered with the React Native component, pinning states with `previewState`.
@@ -170,8 +170,8 @@ Stories import the previews as a namespace (`import * as App from '@app'`) and u
 
 # 9. QA
 
-Automated (all in `web/`):
-- `npm run qa`, when the user calls it (`INITIATOR.md` Part B, *QA on call*), checks every page and tab in App preview, in Light and Dark: no errors, no overflow at phone width, and zero axe WCAG 2.2 AA violations. On a Web and App product it checks both previews.
+Automated (all in `kit/web/`):
+- `npm run qa`, when the user calls it (`workflow/INITIATOR.md` Part B, *QA on call*), checks every page and tab in App preview, in Light and Dark: no errors, no overflow at phone width, and zero axe WCAG 2.2 AA violations. On a Web and App product it checks both previews.
 - `npm run check:contrast`: every color pair AA in every mode.
 
 Review the Code tab against the Figma set: the React Native, Swift and Kotlin code uses the same props and values, and only tokens.

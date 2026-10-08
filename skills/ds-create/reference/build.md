@@ -1,8 +1,8 @@
 # `/ds-create build`
 
-Asks four questions, then builds exactly the pages the answers allow, in the fixed order of `INITIATOR.md` Part B §6. Run it as often as needed: each run is one build round, and a later round adds pages to the same system.
+Asks four questions, then builds exactly the pages the answers allow, in the fixed order of `workflow/INITIATOR.md` Part B §6. Run it as often as needed: each run is one build round, and a later round adds pages to the same system.
 
-**Load:** the global set (`SKILL.md` §1), `INITIATOR.md` (all of Part B), and `workflow/QUESTIONNAIRE.md` §4, §6, §7, §8, §10 and §11. Then, per page, the files `INITIATOR.md` Part B §0 lists for it, and the system's knowledge: `input/{slug}/knowledge/system.md` and the page's own file (`input/README.md` I7), which override the page spec and its fast-mode manifest. The repo's `knowledge/` topics for the page are read before its copy is written: they give the docs their reasoning, which is written in the system's own words and never cited (`workflow/COPY.md` §1). In fast mode, also `workflow/FAST.md`. With the docs site, also `workflow/WEB.md` (and `workflow/APP.md` for App).
+**Load:** the global set (`SKILL.md` §1), `workflow/INITIATOR.md` (all of Part B), and `workflow/QUESTIONNAIRE.md` §4, §6, §7, §8, §10 and §11. Then, per page, the files `workflow/INITIATOR.md` Part B §0 lists for it, and the system's knowledge: `input/{slug}/knowledge/system.md` and the page's own file (`input/README.md` I7), which override the page spec and its fast-mode manifest. The repo's `knowledge/` topics for the page are read before its copy is written: they give the docs their reasoning, which is written in the system's own words and never cited (`workflow/COPY.md` §1). In fast mode, also `workflow/FAST.md`. With the docs site, also `workflow/WEB.md` (and `workflow/APP.md` for App).
 
 # 1. Gate check
 
@@ -27,7 +27,7 @@ Ask them in this order, one message each, or all in one message when the user pr
 
 Rules:
 - Q1 is never answered by the AI, even in YOLO. Wait for the user's choice.
-- Offer Fast mode only when `tools/figma-fastbuild.js` exists. Otherwise say "Fast mode isn't available in this copy of ds-create" and use Default mode.
+- Offer Fast mode only when `kit/tools/figma-fastbuild.js` exists. Otherwise say "Fast mode isn't available in this copy of ds-create" and use Default mode.
 - In fast mode, also ask: **Read all the text and page plans before anything is drawn?** This is the F2 checkpoint of `workflow/FAST.md`.
 
 ## Q2 · How far
@@ -40,7 +40,7 @@ Rules:
 > - Only the pages I name, for example "only Button" or "Text field and Toast"
 
 - **Named pages.**
-  - Add what they need: the Parts a page instances (`parts/00-parts.md` §3, and the *Composition* section of each page file).
+  - Add what they need: the Parts a page instances (`specs/parts/00-parts.md` §3, and the *Composition* section of each page file).
   - List every added page in the summary, with why it was added.
   - Foundation documentation pages are not added for a named page; the tokens from init are enough.
 - **References.**
@@ -84,7 +84,7 @@ Then:
 
 # 4. How the answers gate the steps
 
-The steps are those of `INITIATOR.md` Part B §6. Steps 1–4 belong to init.
+The steps are those of `workflow/INITIATOR.md` Part B §6. Steps 1–4 belong to init.
 
 | Answer | Steps that run | Steps skipped |
 | --- | --- | --- |
@@ -102,12 +102,12 @@ Steps 5 and 6 run once per system: a later round reuses the page tree and the Do
 
 # 5. Build
 
-Work through `sequence` in order, following `INITIATOR.md` Part B §6 and its gates.
+Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 and its gates.
 
 For every page:
 1. Write its copy file first (`workflow/COPY.md`).
 2. Draw the page with the engine from Q1.
-3. Check that the page's own audit reports `fail` = 0. In fast mode, also check that the manifest passes `tools/fast-pack.mjs --check`.
+3. Check that the page's own audit reports `fail` = 0. In fast mode, also check that the manifest passes `kit/tools/fast-pack.mjs --check`.
 4. Mark the page `done` in the ledger, with its evidence.
 
 **Pace.** In YOLO, go on to the next page. One page at a time: stop after each page and report it.
@@ -129,4 +129,4 @@ Decided by the AI  {each with its reason, or none}
 QA                 hasn't run since these changes. Run /ds-create qa?
 ```
 
-Save it to `output/{slug}/reports/build-{YYYY-MM-DD}.md`, and record anything longer than one line in `output/{slug}/reports/build-notes.md`. Add every lesson that applies to any brand to `GOTCHAS.md` (`GOTCHAS.md` §0).
+Save it to `output/{slug}/reports/build-{YYYY-MM-DD}.md`, and record anything longer than one line in `output/{slug}/reports/build-notes.md`. Add every lesson that applies to any brand to `workflow/GOTCHAS.md` (`workflow/GOTCHAS.md` §0).

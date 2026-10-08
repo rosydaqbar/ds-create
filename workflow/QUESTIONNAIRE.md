@@ -1,12 +1,12 @@
 # Questionnaire
 
-The questions asked once, at initiation, before anything is built: platforms, scope, mode, naming, tokens, formats, product type, documentation depth, and the confirmation summary. This was `INITIATOR.md` Part A; its section numbers are unchanged, so `workflow/QUESTIONNAIRE.md` §12 is the old Part A §12.
+The questions asked once, at initiation, before anything is built: platforms, scope, mode, naming, tokens, formats, product type, documentation depth, and the confirmation summary. This was `workflow/INITIATOR.md` Part A; its section numbers are unchanged, so `workflow/QUESTIONNAIRE.md` §12 is the old Part A §12.
 
-**Load it** at initiation (steps 1–3 of `INITIATOR.md` Part B §6) and whenever the user changes an answer. The build itself follows `INITIATOR.md`.
+**Load it** at initiation (steps 1–3 of `workflow/INITIATOR.md` Part B §6) and whenever the user changes an answer. The build itself follows `workflow/INITIATOR.md`.
 
 **Answer from the inputs first** (`input/README.md`). Before the first question, read every file in `input/{system-slug}/`: briefs, brand files, the existing system, references and earlier chat notes. Pre-fill every question an input answers, and note its source. Ask only what the inputs leave open or where they conflict. When the user has added nothing yet, ask them to put their documents in `input/{system-slug}/` (or paste them in chat, which the agent saves under `chat/`) before going on. Each answer the user gives here is also written to `input/{system-slug}/chat/` (`input/README.md` I3).
 
-The questionnaire decides what gets preserved, audited, generated or rebuilt. Structure and naming are fixed by `SYSTEM.md`; the questionnaire decides **scope** and **values**, never page names, frame names or token grammar.
+The questionnaire decides what gets preserved, audited, generated or rebuilt. Structure and naming are fixed by `specs/SYSTEM.md`; the questionnaire decides **scope** and **values**, never page names, frame names or token grammar.
 
 # 0. Who asks what
 
@@ -267,7 +267,7 @@ Select Parts at page level; for pages with more than one set, allow set-level se
 
 Every other Part page holds one published set with the page's name.
 
-Parts that other Parts instance are built even when not selected, as dependencies (for example Spinner for Button's loading state, Help icon for Label). The dependency list is in `parts/00-parts.md`.
+Parts that other Parts instance are built even when not selected, as dependencies (for example Spinner for Button's loading state, Help icon for Label). The dependency list is in `specs/parts/00-parts.md`.
 
 ## Components
 
@@ -303,18 +303,18 @@ If any Part, Component or Section is selected, explicitly ask (the same choice a
 
 **How do you want to implement the components?**
 
-- **YOLO everything** — implement every confirmed selected component page continuously, in the build sequence (`INITIATOR.md` Part B §6), without stopping for per-page approval.
+- **YOLO everything** — implement every confirmed selected component page continuously, in the build sequence (`workflow/INITIATOR.md` Part B §6), without stopping for per-page approval.
 - **One by one** — implement exactly one confirmed component page at a time, run that page's QA, report what is complete and what remains, then stop for the user to confirm the next page in the build sequence.
 
 Rules:
 - do not infer the mode from build strategy, project size, or phrases such as "complete the design system";
 - do not silently default to YOLO;
 - if the user already explicitly chose YOLO or One by one in the current request, reuse that choice and do not ask again;
-- implementation mode controls execution pacing only; it does not change the order of the build sequence (`INITIATOR.md` Part B §6), and it does not reduce specification loading, anatomy fidelity, documentation depth, matrix completeness or QA;
+- implementation mode controls execution pacing only; it does not change the order of the build sequence (`workflow/INITIATOR.md` Part B §6), and it does not reduce specification loading, anatomy fidelity, documentation depth, matrix completeness or QA;
 - in **One by one**, do not prebuild unrelated selected pages; Parts and private parts the active page depends on may be built as dependencies;
 - in **YOLO everything**, every selected page still follows its complete Markdown file and QA before the run is considered complete.
 
-**Which engine draws the documentation pages?** Ask only when `tools/figma-fastbuild.js` exists in the repo (`workflow/FAST.md` §10). Otherwise, record `engine: "standard"` without asking.
+**Which engine draws the documentation pages?** Ask only when `kit/tools/figma-fastbuild.js` exists in the repo (`workflow/FAST.md` §10). Otherwise, record `engine: "standard"` without asking.
 
 - **Standard** (default): each page is drawn by its own build step, with the doc builder and `workflow/DOCFRAMES.md`.
 - **Fast mode**: the agent writes a copy file and a manifest per page, and a fixed renderer draws every page the same way (`workflow/FAST.md`). It is faster, and it covers only the page types the renderer supports; the other pages use Standard.
@@ -325,7 +325,7 @@ The engine is separate from the pacing: YOLO everything or One by one applies wi
 
 # 9. Token architecture and naming
 
-For **new systems**, architecture and naming are fixed by `SYSTEM.md` Part C:
+For **new systems**, architecture and naming are fixed by `specs/SYSTEM.md` Part C:
 - layers: Primitives → Semantic → Components (component tokens only where needed);
 - collections, in order, created only when needed: `Primitives`, `Color`, `Typography`, `Space`, `Size`, `Shape`, `Motion`, `Components`, `Documentation`;
 - token grammar `{domain}/{group}/{role}[/{emphasis}][/{state}]`;
@@ -337,7 +337,7 @@ For **existing systems**, ask:
 
 **Naming action**
 - **Keep existing naming** — preserve existing collections, variables, styles and component properties; new additions follow the existing pattern.
-- **Normalize** — migrate to `SYSTEM.md` Part C and record every rename in a rename list shown to the user.
+- **Normalize** — migrate to `specs/SYSTEM.md` Part C and record every rename in a rename list shown to the user.
 
 Default for an existing library: `Keep existing naming`.
 
@@ -354,26 +354,26 @@ Never rename silently during Keep, Audit or Improve. Product-specific concepts r
 - Android
 - iOS
 
-Every format is an export of the same names (`SYSTEM.md` Part C §5).
+Every format is an export of the same names (`specs/SYSTEM.md` Part C §5).
 
 **Product type** (single choice; always ask, never infer from the platforms answer in §1):
-- **Web**: the Figma file for a web product, the documentation site, and a Tailwind-ready React library with an installable package (`workflow/WEB.md`, template `web/`).
-- **App**: the Figma file adapted for iOS and Android apps (`SYSTEM.md` Part A §A5), and the documentation site with every component previewed in React Native and its code in React Native, Swift and Kotlin (`workflow/APP.md`). All three are always shown; there is no framework choice. Nothing native is provided or built.
+- **Web**: the Figma file for a web product, the documentation site, and a Tailwind-ready React library with an installable package (`workflow/WEB.md`, template `kit/web/`).
+- **App**: the Figma file adapted for iOS and Android apps (`specs/SYSTEM.md` Part A §A5), and the documentation site with every component previewed in React Native and its code in React Native, Swift and Kotlin (`workflow/APP.md`). All three are always shown; there is no framework choice. Nothing native is provided or built.
 - **Web and App**: both, from one Figma file with one brand look. The documentation site switches each component page between Web and App, and the React library is built for the web.
 
-Suggest the default from §1 Platforms (web platforms → Web, iOS or Android → App, both → Web and App), but let the user choose. The product type adapts the Figma file (`SYSTEM.md` Part A §A5); the scope of pages and components stays the same.
+Suggest the default from §1 Platforms (web platforms → Web, iOS or Android → App, both → Web and App), but let the user choose. The product type adapts the Figma file (`specs/SYSTEM.md` Part A §A5); the scope of pages and components stays the same.
 
 **Code** (single choice):
 - **Figma and code** (default): everything the product type includes. The documentation site is always on the web, whatever the product type: it is where tokens, foundations and components are browsed.
 - **Figma only for now**: only the Figma file, already adapted to the product type. Code can be added later with `workflow/WEB.md` and `workflow/APP.md`.
 
-The project is created in `output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`web/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
+The project is created in `output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`kit/web/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
 
 Nothing native is installed, created or built: no Xcode, Android SDK, simulators, emulators or app projects (`workflow/APP.md`, "Nothing is installed or built").
 
 # 11. Documentation depth
 
-The **page templates and their frames are fixed** (`SYSTEM.md` Part A §3). This selector only controls optional explanatory depth inside the frames.
+The **page templates and their frames are fixed** (`specs/SYSTEM.md` Part A §3). This selector only controls optional explanatory depth inside the frames.
 
 Selectable extras:
 - Long-form guidance
@@ -401,7 +401,7 @@ Before generation, present:
 - output formats;
 - product type (Web, App, or Web and App), what that means for Figma and for code (the docs site, the React library for Web, the App previews and code for App), Figma and code or Figma only, and the system slug for `output/{system-slug}/`;
 - optional documentation depth;
-- the build sequence (`INITIATOR.md` Part B §6): every step in scope, in the order it will run, with the pages under each level.
+- the build sequence (`workflow/INITIATOR.md` Part B §6): every step in scope, in the order it will run, with the pages under each level.
 
 Final actions:
 - **Confirm and generate**

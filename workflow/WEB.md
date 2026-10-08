@@ -4,7 +4,7 @@ This file turns a generated Figma design system into a **Tailwind-ready React li
 
 **The documentation site is built for every product type**: Web, App, or Web and App (`workflow/QUESTIONNAIRE.md` §10). Tokens, foundations and components are always documented here. For an App product, the component pages preview every component in React Native, rendered in the browser with react-native-web, and the Code tab shows React Native, Swift and Kotlin code (§7.1, `workflow/APP.md`). For a Web product, the site also ships the React library and its package.
 
-It is a reusable workflow. The starting point is the brand-agnostic template in `web/`; every build copies it and fills it from its own Figma file. Nothing in `web/` belongs to a brand: the tokens are neutral placeholders, the logo is a placeholder, and the brand's own sentences live in one file, `src/brand/copy.ts`, for the build to answer.
+It is a reusable workflow. The starting point is the brand-agnostic template in `kit/web/`; every build copies it and fills it from its own Figma file. Nothing in `kit/web/` belongs to a brand: the tokens are neutral placeholders, the logo is a placeholder, and the brand's own sentences live in one file, `src/brand/copy.ts`, for the build to answer.
 
 Figma stays the source of truth. The web version never invents values: tokens come from the Figma variables, component properties come from the Figma component sets, documentation comes from the page specs and the Figma Guidelines frames.
 
@@ -49,11 +49,11 @@ output/{system-slug}/web/        a copy of ds-create/web, filled for the brand (
    ├─ tokens/tokens.gen.ts       generated: token data and Figma page ids for the site
    ├─ icons/index.tsx            icon registry: system icon names → icon library
    ├─ lib/                       cn(), shared prop types, forced-state helper, motion and popup hooks
-   ├─ components/
+   ├─ specs/components/
    │  ├─ assets/                 Flag, SocialMark
-   │  ├─ parts/                  2.x, one file per published set (private parts in _ files)
-   │  ├─ components/             3.x
-   │  ├─ sections/               4.x
+   │  ├─ specs/parts/                  2.x, one file per published set (private parts in _ files)
+   │  ├─ specs/components/             3.x
+   │  ├─ specs/sections/               4.x
    │  └─ index.ts                generated exports
    └─ docs/                      the documentation site
       ├─ App.tsx                 shell: skip link, header, search, sidebar, routes
@@ -64,7 +64,7 @@ output/{system-slug}/web/        a copy of ds-create/web, filled for the brand (
       ├─ changelog.ts            release notes
       ├─ registry.ts, types.ts
       ├─ blocks/                 stage, matrix, playground, props and token tables, do / don't, code, App stage
-      ├─ app/                    App products: @app types, react-native types, the no-app fallback, web shims
+      ├─ kit/app/                    App products: @app types, react-native types, the no-app fallback, web shims
       ├─ pages/                  Home, Getting started, Tokens, Changelog, Foundations 1.1–1.8
       └─ stories/                one {id}-{slug}.doc.tsx per component page
 ```
@@ -83,7 +83,7 @@ Fixed for every build, so every build reads the same way:
 | Language and UI | TypeScript, React 19 |
 | Styling | Tailwind CSS v4, configured in CSS (`@theme`), no `tailwind.config.js` |
 | Variants | `class-variance-authority` (`cva`) and `clsx` |
-| Icons | one registry (`src/icons`), Lucide; the same registry feeds the Figma icon library (`tools/icons-lucide.mjs`) |
+| Icons | one registry (`src/icons`), Lucide; the same registry feeds the Figma icon library (`kit/tools/icons-lucide.mjs`) |
 | Site | Vite and React Router; static build that works from any folder |
 | Package | Vite library mode + TypeScript declarations (`npm run build:package`) |
 | App previews | `react-native-web` (+ `react-native-svg`, `lucide-react-native`) renders the React Native source; `react-native` itself is never installed (§7.1) |
@@ -93,7 +93,7 @@ Do not add a CSS-in-JS library, a second styling system or a component library u
 
 # 4. Workflow
 
-Run the steps in order. Each step names its exit check. At initiation they are steps 18–22 of the build sequence (`INITIATOR.md` Part B §6): they start only when every Figma step is done in the ledger, the file audit included, and they follow the same gates.
+Run the steps in order. Each step names its exit check. At initiation they are steps 18–22 of the build sequence (`workflow/INITIATOR.md` Part B §6): they start only when every Figma step is done in the ledger, the file audit included, and they follow the same gates.
 
 ## W1 · Copy the template
 
@@ -103,7 +103,7 @@ Exit check: `npm run build` passes on the untouched copy.
 
 ## W2 · Export tokens from Figma
 
-1. Run `web/scripts/figma-export.js` as a `use_figma` script on the generated Figma file. It is read-only.
+1. Run `kit/web/scripts/figma-export.js` as a `use_figma` script on the generated Figma file. It is read-only.
 2. Save the returned JSON as `output/{system-slug}/figma/figma-variables.json` (the one export every target shares) and copy it to the project's `tokens/figma-variables.json`. It includes `pages` (page ids and names): the site uses them for every "Open in Figma" button.
 3. Tool output is capped at about 20 KB. When the file is bigger, set `PART` at the top of the script and export in slices — for example `Color` in two halves, then the other collections, then `styles: true` — saving each result as `tokens/parts/01.json`, `02.json`, …, then run `npm run tokens:merge`.
 4. Run `npm run tokens`, then `npm run check:contrast`.
@@ -116,7 +116,7 @@ Exit check: the script reports every variable, text style and effect style of th
 1. Export from `1.8 Brand assets` the lockup for light and dark surfaces, the mark and any flags as SVG into `public/brand/` (flags in `public/brand/flags/{code}.svg`) with the names in `src/ds.config.ts`. Flags are inlined into the components, so they ship inside the package.
 2. Fill `ds.config.ts` from `00 Cover`: system name, version, `product` (`'web'`, `'app'` or `'both'`, from `workflow/QUESTIONNAIRE.md` §10), `modes` (`['Light', 'Dark']`, or `['Light']` when Dark isn't supported; the site then hides its Dark toggle and QA checks Light only), `packageName` (the npm name product teams will install, e.g. `@acme/design-system`), description (what the product is and what the system covers, in one or two sentences), and the Figma file link.
 3. When the brand typeface is a web font, add its stylesheet to `fontStylesheets`; the family names already come from `font/family/*`. When the brand typeface can't ship (licensing), name the stand-in in a comment and in the Typography page.
-4. Keep `src/icons/index.tsx` on Lucide. Add the icons the product needs there (they reach Figma through `tools/icons-lucide.mjs`). Only an existing file with its own icon library replaces the imports; keep the names.
+4. Keep `src/icons/index.tsx` on Lucide. Add the icons the product needs there (they reach Figma through `kit/tools/icons-lucide.mjs`). Only an existing file with its own icon library replaces the imports; keep the names.
 5. When the Figma file uses its own names for the main roles, point the four roots in `src/styles/chrome.css` at them (for example `--chrome-accent: var(--color-action-primary);`). Every other name the site chrome needs and the file lacks gets a site-only default from `npm run tokens`. Never type a hex value there.
 
 Exit check: the header shows the real logo in both color modes; text renders in the brand typeface or its named stand-in.
@@ -129,7 +129,7 @@ Work in page order (2.x, then 3.x, then 4.x), only for pages in scope. For each 
 2. Load the Impeccable skill (`/impeccable`, product register) before writing UI or copy. Its design hook checks every edit to a UI file; fix each finding before moving on.
 3. Write the component in `src/components/{level}/{Name}.tsx` following §6.
 4. Write the documentation module `src/docs/stories/{id}-{slug}.doc.tsx` following §7, in the voice of `COPY-GUIDE.md`. Its sentences go into the page's copy file as `web` or `both` lines (`workflow/COPY.md`): `npm run copy` lays them over the story, so a sentence that is only in the story is overwritten as soon as the copy file has that topic.
-5. Look at the page in both color modes. Full QA runs on call (`INITIATOR.md` Part B, *QA on call*): when the user asks, `npm run qa -- --pages {id}` checks only this page.
+5. Look at the page in both color modes. Full QA runs on call (`workflow/INITIATOR.md` Part B, *QA on call*): when the user asks, `npm run qa -- --pages {id}` checks only this page.
 
 On an App-only product, steps 3 and 4 are written for the app instead. The template's web components stay as the site's own controls (search, playgrounds, badges), styled by the brand's tokens, and they aren't adapted page by page. Each story gets the `app` block that `workflow/APP.md` A3 writes, and the page's text fields (summary, when to use, anatomy parts, props, tokens, guidelines) are written for the brand as usual. On a Web and App product, both versions are written.
 
@@ -162,12 +162,12 @@ Exit check: every component has a status; the Changelog page lists this release.
 ## W7 · Build, package and QA
 
 1. `npm run build` runs the gates — tokens, index, `check:effects`, `check:brand-copy`, `check:contrast`, typecheck — and writes the static site to `dist/`.
-2. **On call** (`INITIATOR.md` Part B, *QA on call*): `npm run qa` runs only when the user asks, or before a publish they asked for.
+2. **On call** (`workflow/INITIATOR.md` Part B, *QA on call*): `npm run qa` runs only when the user asks, or before a publish they asked for.
    - Options: `--pages 2.1,3.2` checks only those pages and their tabs, `--quick` checks errors and overflow only, `--workers N` sets how many browser tabs run in parallel (default 4).
    - `--baseline` saves the current failures as known (`qa-baseline.json`). Use it only for findings that come from frozen values the owner won't change, and list them in the ledger. Later runs show known failures apart and fail only on new ones.
    - The script starts its own preview server on a free port and always stops it.
 
-   What it checks: it builds the site, then checks every page and every tab in each supported color mode (Light and Dark, or Light only): no console errors, no horizontal overflow at 390 px, and **zero** axe-core WCAG 2.2 AA violations. Documented exceptions are third-party brand colors listed in `scripts/qa.mjs` with their reason, and the owner-approved pairs in `tokens/accepted.json`, matched by color and counted in `qa-report.json` (`approvedContrast`). The same run scans `src/` and `react-native/` with the Impeccable design detector (anti-AI-slop and design-quality rules), and every finding fails QA. A finding caused by the brand's frozen Figma values (for example an approved typeface the detector calls overused) becomes an exception in the build's own `web/.impeccable/config.json`, written with `npx impeccable ignores add-value <rule> <value> --file <glob> --reason "…"` and listed in the ledger. Brand exceptions never go into the ds-create repo.
+   What it checks: it builds the site, then checks every page and every tab in each supported color mode (Light and Dark, or Light only): no console errors, no horizontal overflow at 390 px, and **zero** axe-core WCAG 2.2 AA violations. Documented exceptions are third-party brand colors listed in `scripts/qa.mjs` with their reason, and the owner-approved pairs in `tokens/accepted.json`, matched by color and counted in `qa-report.json` (`approvedContrast`). The same run scans `src/` and `react-native/` with the Impeccable design detector (anti-AI-slop and design-quality rules), and every finding fails QA. A finding caused by the brand's frozen Figma values (for example an approved typeface the detector calls overused) becomes an exception in the build's own `kit/web/.impeccable/config.json`, written with `npx impeccable ignores add-value <rule> <value> --file <glob> --reason "…"` and listed in the ledger. Brand exceptions never go into the ds-create repo.
 3. Web and Web and App products: `npm run build:package`, then `npm pack ./package`. Install the tarball in a fresh Vite + React + Tailwind app (as the Getting started developer tab describes) and confirm it builds and renders. An App-only product has no web package.
 
 Exit check: the build passes, and (when the product includes Web) the package installs and renders in a fresh app. When the user called QA, it reports 0 new problems (design detector included).
@@ -179,7 +179,7 @@ Exit check: the build passes, and (when the product includes Web) the package in
 
 # 5. Token contract in code
 
-Names are the Figma variable names with `/` replaced by `-` (SYSTEM.md Part C §3).
+Names are the Figma variable names with `/` replaced by `-` (specs/SYSTEM.md Part C §3).
 
 | Figma | CSS variable | Tailwind |
 | --- | --- | --- |
@@ -337,7 +337,7 @@ Rules:
 
 # 9. QA
 
-Automated gates. `npm run build` runs on every build; `npm run qa` runs on call (`INITIATOR.md` Part B, *QA on call*). Each must pass when it runs:
+Automated gates. `npm run build` runs on every build; `npm run qa` runs on call (`workflow/INITIATOR.md` Part B, *QA on call*). Each must pass when it runs:
 - `npm run build`: tokens, index, `check:effects`, `check:brand-copy`, `check:contrast`, typecheck, site build.
 - `npm run qa`, when called: every page and tab in each supported color mode with zero console errors, zero horizontal overflow at 390 px and zero axe-core WCAG 2.2 AA violations (documented third-party exceptions and the pairs approved in `tokens/accepted.json` only). On a Web and App product it checks every tab in App preview too; on an App-only product, every page is App preview.
 - `npm run qa` also runs the Impeccable design detector over `src/` and `react-native/`: zero findings, or only the build's recorded exceptions (W7).

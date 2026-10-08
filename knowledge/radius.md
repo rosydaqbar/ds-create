@@ -128,5 +128,5 @@ Radius is a tool for hierarchy and grouping, not a finish applied to everything.
 - Every group of siblings shares one radius.
 - When two elements differ in radius, there is a reason you can name.
 
-**Related specs:** `foundations/1.4-shape.md`: the radius steps by role (control, surface, modal, indicator), and the nested-radius visual, where outer = inner + padding. The spec sets the system's own steps, named by role rather than by size.
+**Related specs:** `specs/foundations/1.4-shape.md`: the radius steps by role (control, surface, modal, indicator), and the nested-radius visual, where outer = inner + padding. The spec sets the system's own steps, named by role rather than by size.
 **Source:** maintainer, 2026-10-09

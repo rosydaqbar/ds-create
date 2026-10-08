@@ -91,5 +91,5 @@ Hover feedback changes the element itself, never the layout around it.
 **What to look for**
 - Moving the pointer along a menu, tabs or a list leaves everything else perfectly still.
 
-**Related specs:** `foundations/1.6-motion.md`. The spec sets the system's own durations and easings, pairs them by purpose and makes exits faster than enters. This file explains the reasoning behind those choices with a different set of numbers.
+**Related specs:** `specs/foundations/1.6-motion.md`. The spec sets the system's own durations and easings, pairs them by purpose and makes exits faster than enters. This file explains the reasoning behind those choices with a different set of numbers.
 **Source:** maintainer, 2026-10-09

@@ -61,5 +61,5 @@ Not every combination of L, C and H can be shown on every screen.
 - No color the system depends on is clipped on an sRGB screen.
 - The OKLCH value of each primitive is recorded next to its hex.
 
-**Related specs:** `foundations/1.1-color.md`: the palette families, the 11 default steps (`50`–`950`), the semantic roles and the contrast checks. A brand's own colors always stay as they are; this reasoning applies only to the colors the brand leaves open.
+**Related specs:** `specs/foundations/1.1-color.md`: the palette families, the 11 default steps (`50`–`950`), the semantic roles and the contrast checks. A brand's own colors always stay as they are; this reasoning applies only to the colors the brand leaves open.
 **Source:** maintainer, 2026-10-09

@@ -1,8 +1,8 @@
 # Documentation frames
 
-How every Figma documentation frame looks: brand styling, frame families, headers, tables, swatches, matrices, anatomy, the reading pattern and the Doc kit. This was `SYSTEM.md` Part B; its section numbers are unchanged, so `workflow/DOCFRAMES.md` §6.4 is the old Part B §6.4.
+How every Figma documentation frame looks: brand styling, frame families, headers, tables, swatches, matrices, anatomy, the reading pattern and the Doc kit. This was `specs/SYSTEM.md` Part B; its section numbers are unchanged, so `workflow/DOCFRAMES.md` §6.4 is the old Part B §6.4.
 
-**Load it** at the build steps that draw frames the doc builder has no helper for: the Doc kit, Cover, guidance pages, foundation palette rows and variable tables, and Screens (`INITIATOR.md` Part B §6). Load it also to change or review the builder. `tools/figma-docbuilder.js` implements this file for Parts, Components, Sections and Layouts, and each of its rules cites a section here. A change here is made in the builder in the same change. The page tree, the frames each page has and the token contract stay in `SYSTEM.md`.
+**Load it** at the build steps that draw frames the doc builder has no helper for: the Doc kit, Cover, guidance pages, foundation palette rows and variable tables, and Screens (`workflow/INITIATOR.md` Part B §6). Load it also to change or review the builder. `kit/tools/figma-docbuilder.js` implements this file for Parts, Components, Sections and Layouts, and each of its rules cites a section here. A change here is made in the builder in the same change. The page tree, the frames each page has and the token contract stay in `specs/SYSTEM.md`.
 
 # 0. Terminology contract
 
@@ -25,7 +25,7 @@ Measured dimensions from the source analysis are intentionally excluded from gen
 
 # 1. Documentation styling follows the brand
 
-The page tree, the template frames and the composition of every frame are fixed (`SYSTEM.md` Part A). How they **look** is not: documentation is styled with the brand being built, so a system for one brand and a system for another have the same structure but different fonts, colors, corners and density.
+The page tree, the template frames and the composition of every frame are fixed (`specs/SYSTEM.md` Part A). How they **look** is not: documentation is styled with the brand being built, so a system for one brand and a system for another have the same structure but different fonts, colors, corners and density.
 
 Every documentation value comes from the `Documentation` collection (`doc/{group}/{role}`). Those variables alias the brand's own tokens; they never hold their own colors, fonts or radii. Change the brand and the documentation changes with it, in every mode.
 
@@ -67,7 +67,7 @@ Rules:
 
 ## Frame families
 
-Each template frame (`SYSTEM.md` Part A §3) has one sizing behavior:
+Each template frame (`specs/SYSTEM.md` Part A §3) has one sizing behavior:
 
 | Template frame | Sizing behavior |
 | --- | --- |
@@ -496,7 +496,7 @@ Rules:
 
 # 9. Component canvas grammar
 
-Component pages (Parts, Components, Sections) use the component page template (`SYSTEM.md` Part A §3): `.Main` → `· Overview` → `· Component` → `· Anatomy` → `· Guidelines`, left to right.
+Component pages (Parts, Components, Sections) use the component page template (`specs/SYSTEM.md` Part A §3): `.Main` → `· Overview` → `· Component` → `· Anatomy` → `· Guidelines`, left to right.
 
 ## .Main frame
 
@@ -668,7 +668,7 @@ Every component Markdown file (Parts, Components, Sections) must include:
 Purpose
 Template frames (what goes in · Overview, · Component, · Anatomy, · Guidelines)
 Published sets and private parts
-Property inventory (`SYSTEM.md` Part C §4 vocabulary)
+Property inventory (`specs/SYSTEM.md` Part C §4 vocabulary)
 Anatomy tree
 Auto Layout relationship
 Flexible vs fixed children
@@ -681,7 +681,7 @@ QA
 
 For complex Figma Pages, document each component family separately.
 
-Layout and Screen files use the section lists in `layouts/00-layouts.md` §5 and `screens/00-screens.md` §5.
+Layout and Screen files use the section lists in `specs/layouts/00-layouts.md` §5 and `specs/screens/00-screens.md` §5.
 
 A file that only lists component-set names and variant axes is incomplete.
 
@@ -697,11 +697,11 @@ Global QA:
 - when documentation is rendered in code, show specimens of private parts that carry a child role (an option, a menu item) inside their parent container (a list box, a menu); a demo never places an option or a menu item on its own;
 - check every documentation claim before publishing it: a sentence such as "every state meets contrast" is verified in every mode (1.1 Color QA, *Contrast pairs*), never assumed.
 
-All component-specific QA belongs to the corresponding file under `parts/`, `components/`, `sections/`, `layouts/` or `screens/` and must be executed from there.
+All component-specific QA belongs to the corresponding file under `specs/parts/`, `specs/components/`, `specs/sections/`, `specs/layouts/` or `specs/screens/` and must be executed from there.
 
-Run `tools/figma-audit.js` (a read-only `use_figma` script) on every built page and once on the file. A page with `fail` > 0 fails QA: raw values inside components, unbound fills, text without a text style, effects without an effect style, wrong variant names, loose nodes or overlapping frames on the canvas, missing template frames, and color pairs below AA. Warnings (raw spacing in documentation frames, variant names outside the vocabulary) are reviewed and either fixed or explained in the page report.
+Run `kit/tools/figma-audit.js` (a read-only `use_figma` script) on every built page and once on the file. A page with `fail` > 0 fails QA: raw values inside components, unbound fills, text without a text style, effects without an effect style, wrong variant names, loose nodes or overlapping frames on the canvas, missing template frames, and color pairs below AA. Warnings (raw spacing in documentation frames, variant names outside the vocabulary) are reviewed and either fixed or explained in the page report.
 
-`finishPage` in `tools/figma-docbuilder.js` runs the cached audit on every page it arranges.
+`finishPage` in `kit/tools/figma-docbuilder.js` runs the cached audit on every page it arranges.
 
 # 15. Visual teaching is part of documentation
 
@@ -892,7 +892,7 @@ A long-form documentation Frame fails QA when:
 
 # 16. Doc kit
 
-Every documentation frame is built from one fixed set of components on `9.1 Doc kit`. The structure components (header, footer, block note, badge) are specified in `templates/structure.md` §7. They use the system's own tokens and text styles, so documentation follows the brand and the modes. Build them first, before any foundation page.
+Every documentation frame is built from one fixed set of components on `9.1 Doc kit`. The structure components (header, footer, block note, badge) are specified in `workflow/templates/structure.md` §7. They use the system's own tokens and text styles, so documentation follows the brand and the modes. Build them first, before any foundation page.
 
 | Component | Used for | Anatomy |
 | --- | --- | --- |

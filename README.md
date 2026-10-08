@@ -96,96 +96,110 @@ Foundation page   .Main → {ID} {Name} · Overview → · Tokens → · Guideli
 Component page    .Main → {ID} {Name} · Overview → · Component → · Anatomy → · Guidelines
 ```
 
-The full page tree rules, page templates, documentation system and naming contract are in `SYSTEM.md`.
+The full page tree rules, page templates, documentation system and naming contract are in `specs/SYSTEM.md`.
 
 # 2. Root files and folders
 
-The root holds only the four files every session loads. Everything else sits in a folder by job.
+The root holds the README and one folder per job: what to build, how, why, the code, and the per-system folders.
 
 ```text
-README.md        this file: structure and file map (always loaded)
-SYSTEM.md        page tree, page templates, token and component naming, audit routing (always loaded)
-INITIATOR.md     generation logic: loading, ledger, build sequence, gates (always loaded)
-GOTCHAS.md       lessons from real builds as fixed, numbered rules; new agnostic lessons are added after every build (always loaded)
+README.md            this file: structure and file map (always loaded)
+skills/              ds-create/: the ds-create skill, the way in: /ds-create init · build · learn · qa · status (SKILL.md and one
+                     reference file per command). Link it into .claude/skills/ once after cloning (Start here); .claude/ is never committed
 
-skills/          ds-create/: the ds-create skill, the way in: /ds-create init · build · learn · qa · status (SKILL.md and one reference
-                 file per command). Link it into .claude/skills/ once after cloning (Start here); .claude/ is never committed
+specs/               WHAT to build: the design system tree
+  SYSTEM.md          page tree, page templates, token and component naming, audit routing (always loaded)
+  guidance/ foundations/ parts/ components/ sections/ layouts/ screens/
+                     one spec per page, plus a 00 index per level (see the file map below)
 
-knowledge/       the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules (buttons.md, color.md, motion.md, radius.md, spacing.md)
-input/           what the user provides for each system: briefs, brand files, the existing system, references, chat notes (git-ignored except input/README.md)
-workflow/        the specs loaded at the steps that need them
+workflow/            HOW to build it: process, gates and lessons
+  INITIATOR.md       generation logic: loading, ledger, build sequence, gates (always loaded)
+  GOTCHAS.md         lessons from real builds as fixed, numbered rules; new agnostic lessons are added after every build (always loaded)
   QUESTIONNAIRE.md   the questions asked at initiation and the confirmation summary (loaded at initiation)
   DOCFRAMES.md       how documentation frames look: styling, tables, matrices, anatomy, Doc kit (loaded when drawing frames)
-  EXTEND.md          adding a component at any level after initiation
-  WEB.md             the documentation site (every product type) and, for Web products, the Tailwind-ready React library and package
-  APP.md             App products on the docs site: React Native previews (react-native-web) and React Native, Swift and Kotlin code
   COPY.md            the page copy files: one Markdown file per page holding every sentence for Figma and the docs site
   FAST.md            fast mode: an optional engine where a fixed renderer draws every doc page from data (copy files and page manifests)
+  WEB.md             the documentation site (every product type) and, for Web products, the Tailwind-ready React library and package
+  APP.md             App products on the docs site: React Native previews (react-native-web) and React Native, Swift and Kotlin code
+  EXTEND.md          adding a component at any level after initiation
   ROADMAP.md         planned levels, components, renames and tooling (not built until specified)
-guidance/ foundations/ parts/ components/ sections/ layouts/ screens/
-                 one spec per page, plus a 00 index per level (see the file map below)
-templates/       structure.md: the structure every page is built with (page → frames → blocks → items; no content); agent-brief.md: the brief for docs-site page agents; fast/: the default fast-mode manifests (structure only)
-tools/           figma-audit.js: read-only audit that every page call runs on its page (QA gate; the file-wide sweep runs on call); figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js: read-only JSON snapshot of each component set for the docs site; figma-copy.js: reads, checks and applies the page copy files on the doc frames; figma-fastbuild.js, fast-pack.mjs, fast-cache.mjs, figma-dockit.js: fast mode (workflow/FAST.md); icons-lucide.mjs: the icon library on 1.7, from Lucide; copy-guard.mjs: checks the docs explain with knowledge/ without citing it
-web/             brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that workflow/WEB.md copies and fills
-app/             brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
-examples/        finished builds made with ds-create, for reference only (never copied into a new build)
-output/          everything a build generates: one folder per system (git-ignored except output/README.md)
+  templates/         structure.md: the structure every page is built with (page → frames → blocks → items; no content);
+                     agent-brief.md: the brief for docs-site page agents; fast/: the default fast-mode manifests (structure only)
+
+knowledge/           WHY: the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules
+                     (buttons.md, color.md, motion.md, radius.md, spacing.md)
+
+kit/                 the CODE that builds
+  tools/             figma-audit.js: read-only audit that every page call runs on its page (QA gate; the file-wide sweep runs on call);
+                     figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js:
+                     read-only JSON snapshot of each component set for the docs site; figma-copy.js: reads, checks and applies the page
+                     copy files on the doc frames; figma-fastbuild.js, fast-pack.mjs, fast-cache.mjs, figma-dockit.js: fast mode
+                     (workflow/FAST.md); icons-lucide.mjs: the icon library on 1.7, from Lucide; copy-guard.mjs: checks the docs
+                     explain with knowledge/ without citing it
+  web/               brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that
+                     workflow/WEB.md copies and fills
+  app/               brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
+
+examples/            finished builds made with ds-create, for reference only (never copied into a new build)
+input/               what the user provides for each system: briefs, brand files, the existing system, references, chat notes
+                     (git-ignored except input/README.md)
+output/              everything a build generates: one folder per system (git-ignored except output/README.md)
 ```
 
 # 3. File map
 
 | Page | File |
 | --- | --- |
-| 00 Cover | `SYSTEM.md` Part A §3 |
-| 01 Getting started | `guidance/01-getting-started.md` |
-| 02 Tokens | `guidance/02-tokens.md` |
-| Any Foundation page | `foundations/00-foundations.md` (folder rules) |
-| 1.1 Color | `foundations/1.1-color.md` |
-| 1.2 Typography | `foundations/1.2-typography.md` |
-| 1.3 Space & layout | `foundations/1.3-space-and-layout.md` |
-| 1.4 Shape | `foundations/1.4-shape.md` |
-| 1.5 Elevation | `foundations/1.5-elevation.md` |
-| 1.6 Motion | `foundations/1.6-motion.md` |
-| 1.7 Iconography | `foundations/1.7-iconography.md` |
-| 1.8 Brand assets | `foundations/1.8-brand-assets.md` |
-| Any Part page | `parts/00-parts.md` (folder rules) |
-| 2.1 Button | `parts/2.1-button.md` |
-| 2.2 Icon button | `parts/2.2-icon-button.md` |
-| 2.3 Link | `parts/2.3-link.md` |
-| 2.4 Badge | `parts/2.4-badge.md` |
-| 2.5 Tag | `parts/2.5-tag.md` |
-| 2.6 Avatar | `parts/2.6-avatar.md` |
-| 2.7 Checkbox | `parts/2.7-checkbox.md` |
-| 2.8 Radio | `parts/2.8-radio.md` |
-| 2.9 Switch | `parts/2.9-switch.md` |
-| 2.10 Text control | `parts/2.10-text-control.md` |
-| 2.11 Label | `parts/2.11-label.md` |
-| 2.12 Help text | `parts/2.12-help-text.md` |
-| 2.13 Tooltip | `parts/2.13-tooltip.md` |
-| 2.14 Progress | `parts/2.14-progress.md` |
-| 2.15 Spinner | `parts/2.15-spinner.md` |
-| 2.16 Divider | `parts/2.16-divider.md` |
-| 2.17 Kbd | `parts/2.17-kbd.md` |
-| 2.18 Slider | `parts/2.18-slider.md` |
-| 2.19 Featured icon | `parts/2.19-featured-icon.md` |
-| Any Component page | `components/00-components.md` (folder rules) |
-| 3.1 Button group | `components/3.1-button-group.md` |
-| 3.2 Text field | `components/3.2-text-field.md` |
-| 3.3 Choice field | `components/3.3-choice-field.md` |
-| 3.4 Avatar group | `components/3.4-avatar-group.md` |
-| 3.5 Select | `components/3.5-select.md` |
-| 3.6 Menu | `components/3.6-menu.md` |
-| 3.7 Social button | `components/3.7-social-button.md` |
-| 3.8 Badge group | `components/3.8-badge-group.md` |
-| Any Section page | `sections/00-sections.md` (folder rules) |
-| 4.1 Rich text editor | `sections/4.1-rich-text-editor.md` |
-| 4.2 Video player | `sections/4.2-video-player.md` |
-| Any Layout page | `layouts/00-layouts.md` (folder rules) |
-| Any Screen page | `screens/00-screens.md` (folder rules) |
+| 00 Cover | `specs/SYSTEM.md` Part A §3 |
+| 01 Getting started | `specs/guidance/01-getting-started.md` |
+| 02 Tokens | `specs/guidance/02-tokens.md` |
+| Any Foundation page | `specs/foundations/00-foundations.md` (folder rules) |
+| 1.1 Color | `specs/foundations/1.1-color.md` |
+| 1.2 Typography | `specs/foundations/1.2-typography.md` |
+| 1.3 Space & layout | `specs/foundations/1.3-space-and-layout.md` |
+| 1.4 Shape | `specs/foundations/1.4-shape.md` |
+| 1.5 Elevation | `specs/foundations/1.5-elevation.md` |
+| 1.6 Motion | `specs/foundations/1.6-motion.md` |
+| 1.7 Iconography | `specs/foundations/1.7-iconography.md` |
+| 1.8 Brand assets | `specs/foundations/1.8-brand-assets.md` |
+| Any Part page | `specs/parts/00-parts.md` (folder rules) |
+| 2.1 Button | `specs/parts/2.1-button.md` |
+| 2.2 Icon button | `specs/parts/2.2-icon-button.md` |
+| 2.3 Link | `specs/parts/2.3-link.md` |
+| 2.4 Badge | `specs/parts/2.4-badge.md` |
+| 2.5 Tag | `specs/parts/2.5-tag.md` |
+| 2.6 Avatar | `specs/parts/2.6-avatar.md` |
+| 2.7 Checkbox | `specs/parts/2.7-checkbox.md` |
+| 2.8 Radio | `specs/parts/2.8-radio.md` |
+| 2.9 Switch | `specs/parts/2.9-switch.md` |
+| 2.10 Text control | `specs/parts/2.10-text-control.md` |
+| 2.11 Label | `specs/parts/2.11-label.md` |
+| 2.12 Help text | `specs/parts/2.12-help-text.md` |
+| 2.13 Tooltip | `specs/parts/2.13-tooltip.md` |
+| 2.14 Progress | `specs/parts/2.14-progress.md` |
+| 2.15 Spinner | `specs/parts/2.15-spinner.md` |
+| 2.16 Divider | `specs/parts/2.16-divider.md` |
+| 2.17 Kbd | `specs/parts/2.17-kbd.md` |
+| 2.18 Slider | `specs/parts/2.18-slider.md` |
+| 2.19 Featured icon | `specs/parts/2.19-featured-icon.md` |
+| Any Component page | `specs/components/00-components.md` (folder rules) |
+| 3.1 Button group | `specs/components/3.1-button-group.md` |
+| 3.2 Text field | `specs/components/3.2-text-field.md` |
+| 3.3 Choice field | `specs/components/3.3-choice-field.md` |
+| 3.4 Avatar group | `specs/components/3.4-avatar-group.md` |
+| 3.5 Select | `specs/components/3.5-select.md` |
+| 3.6 Menu | `specs/components/3.6-menu.md` |
+| 3.7 Social button | `specs/components/3.7-social-button.md` |
+| 3.8 Badge group | `specs/components/3.8-badge-group.md` |
+| Any Section page | `specs/sections/00-sections.md` (folder rules) |
+| 4.1 Rich text editor | `specs/sections/4.1-rich-text-editor.md` |
+| 4.2 Video player | `specs/sections/4.2-video-player.md` |
+| Any Layout page | `specs/layouts/00-layouts.md` (folder rules) |
+| Any Screen page | `specs/screens/00-screens.md` (folder rules) |
 | 9.1 Doc kit | `workflow/DOCFRAMES.md` §16 |
 | New components | `workflow/EXTEND.md`, then the new file in the level folder |
-| Docs site and web library | `workflow/WEB.md`, then the page file of each documented page; template in `web/` |
-| App previews and code (App products) | `workflow/APP.md`, then the page file of each page; preview source in `app/` |
+| Docs site and web library | `workflow/WEB.md`, then the page file of each documented page; template in `kit/web/` |
+| App previews and code (App products) | `workflow/APP.md`, then the page file of each page; preview source in `kit/app/` |
 
 # 4. Mandatory loading
 
@@ -195,14 +209,14 @@ Before any implementation or modification:
 
 ```text
 README.md
-SYSTEM.md
-INITIATOR.md
-templates/structure.md
+specs/SYSTEM.md
+workflow/INITIATOR.md
+workflow/templates/structure.md
 ```
 
-Every page is built with the structure in `templates/structure.md` (page → frames → blocks → items); SYSTEM.md Part A says which frames a page has and the page's own file says what they hold.
+Every page is built with the structure in `workflow/templates/structure.md` (page → frames → blocks → items); specs/SYSTEM.md Part A says which frames a page has and the page's own file says what they hold.
 
-`INITIATOR.md` includes the generation logic. Do not skip it. Load `workflow/EXTEND.md` as well when adding a component after initiation.
+`workflow/INITIATOR.md` includes the generation logic. Do not skip it. Load `workflow/EXTEND.md` as well when adding a component after initiation.
 
 ## Per step
 
@@ -210,25 +224,25 @@ Every page is built with the structure in `templates/structure.md` (page → fra
 | --- | --- |
 | Initiation, and whenever the user changes an answer | `workflow/QUESTIONNAIRE.md` |
 | Any step that draws frames the doc builder has no helper for (Doc kit, Cover, guidance pages, Foundations, Screens), or that changes the builder | `workflow/DOCFRAMES.md` |
-| Parts, Components, Sections and Layouts in Figma | `tools/figma-docbuilder.js`, cached once at step 6 (`INITIATOR.md` Part B §6) |
-| Docs site (`workflow/WEB.md`, `workflow/APP.md`) | `workflow/WEB.md`, plus `workflow/APP.md` for App products; docs agents start from `templates/agent-brief.md` |
+| Parts, Components, Sections and Layouts in Figma | `kit/tools/figma-docbuilder.js`, cached once at step 6 (`workflow/INITIATOR.md` Part B §6) |
+| Docs site (`workflow/WEB.md`, `workflow/APP.md`) | `workflow/WEB.md`, plus `workflow/APP.md` for App products; docs agents start from `workflow/templates/agent-brief.md` |
 
-`examples/` holds finished reference builds, not inputs: read one only to understand a pattern, and never copy from it (`GOTCHAS.md` G43). Never open generated files (`web/src/tokens/tokens.gen.ts`, `web/tokens/tokens.dtcg.json`, `web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
+`examples/` holds finished reference builds, not inputs: read one only to understand a pattern, and never copy from it (`workflow/GOTCHAS.md` G43). Never open generated files (`kit/web/src/tokens/tokens.gen.ts`, `kit/web/tokens/tokens.dtcg.json`, `kit/web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
 
-Load page files at the step that builds them, not all at once, and keep the progress ledger on disk (`INITIATOR.md` Part B §0: *Loading per step* and *Progress ledger*). After any context compaction, re-read the global files and the ledger before continuing.
+Load page files at the step that builds them, not all at once, and keep the progress ledger on disk (`workflow/INITIATOR.md` Part B §0: *Loading per step* and *Progress ledger*). After any context compaction, re-read the global files and the ledger before continuing.
 
 ## Per level
 
 | In scope | Load first | Then |
 | --- | --- | --- |
-| 01 Getting started | — | `guidance/01-getting-started.md` |
-| 02 Tokens | — | `guidance/02-tokens.md` |
-| Any Foundation page | `foundations/00-foundations.md` | every selected Foundation page file |
-| Any Part page | `parts/00-parts.md` | every selected Part page file |
-| Any Component page | `components/00-components.md` | every selected Component page file and the files of the Parts it contains |
-| Any Section page | `sections/00-sections.md` | every selected Section page file and the files of the Components and Parts it contains |
-| Any Layout page | `layouts/00-layouts.md` | the page file and the files of the Sections and Components it contains |
-| Any Screen page | `screens/00-screens.md` | the page file and the file of its Layout |
+| 01 Getting started | — | `specs/guidance/01-getting-started.md` |
+| 02 Tokens | — | `specs/guidance/02-tokens.md` |
+| Any Foundation page | `specs/foundations/00-foundations.md` | every selected Foundation page file |
+| Any Part page | `specs/parts/00-parts.md` | every selected Part page file |
+| Any Component page | `specs/components/00-components.md` | every selected Component page file and the files of the Parts it contains |
+| Any Section page | `specs/sections/00-sections.md` | every selected Section page file and the files of the Components and Parts it contains |
+| Any Layout page | `specs/layouts/00-layouts.md` | the page file and the files of the Sections and Components it contains |
+| Any Screen page | `specs/screens/00-screens.md` | the page file and the file of its Layout |
 
 ## Hard loading rule
 
@@ -241,19 +255,19 @@ README + SYSTEM only
 README + SYSTEM + INITIATOR only
 Root files + no selected Foundation files
 Root files + no selected component files
-Selected 2.1 Button + no parts/00-parts.md
-Selected 2.1 Button + no parts/2.1-button.md
-Selected 1.1 Color + no foundations/00-foundations.md
-Selected 1.1 Color + no foundations/1.1-color.md
-Selected 3.2 Text field + no parts/2.10-text-control.md
-Selected 6.x Screen + no layouts/5.x file of its Layout
-Any page + no templates/structure.md
+Selected 2.1 Button + no specs/parts/00-parts.md
+Selected 2.1 Button + no specs/parts/2.1-button.md
+Selected 1.1 Color + no specs/foundations/00-foundations.md
+Selected 1.1 Color + no specs/foundations/1.1-color.md
+Selected 3.2 Text field + no specs/parts/2.10-text-control.md
+Selected 6.x Screen + no specs/layouts/5.x file of its Layout
+Any page + no workflow/templates/structure.md
 Drawing Doc kit, Cover, guidance, Foundation or Screen frames + no workflow/DOCFRAMES.md
 Drawing Part, Component, Section or Layout frames + doc builder not cached
 Initiation or changed answers + no workflow/QUESTIONNAIRE.md
 ```
 
-`SYSTEM.md` provides the global structure and grammar only, and `workflow/DOCFRAMES.md` how frames look. Neither replaces the `guidance/`, `foundations/`, `parts/`, `components/` or `sections/` files.
+`specs/SYSTEM.md` provides the global structure and grammar only, and `workflow/DOCFRAMES.md` how frames look. Neither replaces the `specs/guidance/`, `specs/foundations/`, `specs/parts/`, `specs/components/` or `specs/sections/` files.
 
 ## Implementation checklist
 
@@ -262,10 +276,10 @@ Before generating, create a loaded-spec checklist:
 ```text
 Global
 [ ] README.md
-[ ] SYSTEM.md
-[ ] INITIATOR.md
-[ ] GOTCHAS.md
-[ ] templates/structure.md
+[ ] specs/SYSTEM.md
+[ ] workflow/INITIATOR.md
+[ ] workflow/GOTCHAS.md
+[ ] workflow/templates/structure.md
 [ ] input/{system-slug}/sources.md (at initiation: every file in input/{system-slug}/)
 [ ] workflow/QUESTIONNAIRE.md at initiation
 [ ] workflow/DOCFRAMES.md when drawing frames the doc builder has no helper for
@@ -274,15 +288,15 @@ Guidance
 [ ] every selected guidance file
 
 Foundations
-[ ] foundations/00-foundations.md when any Foundation is selected
+[ ] specs/foundations/00-foundations.md when any Foundation is selected
 [ ] every selected Foundation page file
 
 Parts
-[ ] parts/00-parts.md when any Part is selected
+[ ] specs/parts/00-parts.md when any Part is selected
 [ ] every selected Part page file
 
 Components and Sections
-[ ] components/00-components.md / sections/00-sections.md when any is selected
+[ ] specs/components/00-components.md / specs/sections/00-sections.md when any is selected
 [ ] every selected page file, and the files of every component it contains
 ```
 
@@ -291,7 +305,7 @@ Do not begin implementation until every applicable box is checked.
 # 5. Executor, input and output
 
 The repo is split in three.
-- The **executor** is everything an agent reads and copies: the root files, `workflow/`, the page specs, `templates/`, `tools/`, and the `web/` and `app/` templates. It is brand-agnostic.
+- The **executor** is everything an agent reads and copies: the root files, `workflow/`, the page specs, `workflow/templates/`, `kit/tools/`, and the `kit/web/` and `kit/app/` templates. It is brand-agnostic.
 - The **input** is everything the user provides for one system: briefs and PRDs, brand files, the existing design system, references, and what the user says in chat. It goes into `input/{system-slug}/` and is the ground truth of the build (`input/README.md`):
 
 ```text
@@ -307,7 +321,7 @@ input/{system-slug}/
 output/{system-slug}/
 ├─ ds-create-ledger.json   progress ledger
 ├─ figma/                  the Figma export and figma-audit results
-├─ web/                    the docs site, for every product type (the React library for Web; web/react-native/ for App previews)
+├─ kit/web/                    the docs site, for every product type (the React library for Web; kit/web/react-native/ for App previews)
 └─ reports/                QA reports and reviews
 ```
 
@@ -324,10 +338,10 @@ npx impeccable install --project --providers=claude -y
 
 # 6. Non-negotiable
 
-- Build in the order of the build sequence in `INITIATOR.md` Part B §6, for a new system and an existing one. A step starts only when every step above it is done in the ledger. YOLO removes the pauses, never a step.
-- A page is done only after its own page file was loaded, its QA passed and `tools/figma-audit.js` reported `fail` = 0. No page is built from root files or by a generic script without its page file.
-- Use the exact page tree, page names and template frames in `SYSTEM.md` Part A.
-- Use the naming in `SYSTEM.md` Part C for tokens, styles, component sets, properties, parts and layers.
+- Build in the order of the build sequence in `workflow/INITIATOR.md` Part B §6, for a new system and an existing one. A step starts only when every step above it is done in the ledger. YOLO removes the pauses, never a step.
+- A page is done only after its own page file was loaded, its QA passed and `kit/tools/figma-audit.js` reported `fail` = 0. No page is built from root files or by a generic script without its page file.
+- Use the exact page tree, page names and template frames in `specs/SYSTEM.md` Part A.
+- Use the naming in `specs/SYSTEM.md` Part C for tokens, styles, component sets, properties, parts and layers.
 - Never merge required pages into one page.
 - Never drop approved Guidelines topics, diagrams, examples, matrices, anatomy or QA.
 - Page-specific requirements come from the page files, not from root-file summaries.
@@ -337,7 +351,7 @@ npx impeccable install --project --providers=claude -y
 
 Syncium is a complete example built with ds-create from one set of brand guidelines: a Figma design system (YOLO mode, every page in the tree) and its web version, made with the `workflow/WEB.md` workflow.
 
-This example is a reference. An agent may read it to understand a pattern, but never copies from it and never uses it in place of a page's spec and the system's own inputs (`GOTCHAS.md` G43).
+This example is a reference. An agent may read it to understand a pattern, but never copies from it and never uses it in place of a page's spec and the system's own inputs (`workflow/GOTCHAS.md` G43).
 
 The web version is in [`examples/syncium`](examples/syncium). It has the explorer site and an installable package, `@syncium/design-system`. The explorer covers:
 - Getting started for designers, developers and product managers;

@@ -27,5 +27,5 @@ A button with an icon should look as if it has the same space on both sides. Equ
 - The label doesn't jump when an icon is switched on.
 - The label is wrapped in its own small frame, never a bare text layer next to the icons.
 
-**Related specs:** `parts/2.1-button.md` §3 (the `Text padding` wrapper and its reason), `components/3.1-button-group.md`, `components/3.7-social-button.md`. The specs set their own values: the same idea with different numbers.
+**Related specs:** `specs/parts/2.1-button.md` §3 (the `Text padding` wrapper and its reason), `specs/components/3.1-button-group.md`, `specs/components/3.7-social-button.md`. The specs set their own values: the same idea with different numbers.
 **Source:** maintainer, 2026-10-09

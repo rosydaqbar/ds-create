@@ -19,10 +19,10 @@ When it is unclear whether the user means "always" or "this once", ask in one li
 
 1. **Chat.** The user's words, verbatim, in `chat/YYYY-MM-DD.md` (I3).
 2. **Find its home.** The page it is about (`input/{slug}/knowledge/{id}-{name}.md`, with the id and name of the page in the build sequence), or `input/{slug}/knowledge/system.md` when it holds across the system.
-3. **Check what it touches.** List every page and the docs site that the rule affects: the page itself, the pages that instance it (`parts/00-parts.md` §3, the *Composition* section of each page file), and the Layouts and Screens that use it.
+3. **Check what it touches.** List every page and the docs site that the rule affects: the page itself, the pages that instance it (`specs/parts/00-parts.md` §3, the *Composition* section of each page file), and the Layouts and Screens that use it.
 4. **Check for conflicts.**
    - With an earlier entry: the new rule replaces it (`Replaces K{m}`, and the old one gets `Replaced by K{n}`).
-   - With a hard requirement (a contrast minimum, a target size, a gate, a frozen value): say what it breaks, with the fact, and ask. Apply it only after the user confirms, and record the confirmation on the entry and, for an audit check, as an approved exception (`INITIATOR.md` Part B, *Gates*).
+   - With a hard requirement (a contrast minimum, a target size, a gate, a frozen value): say what it breaks, with the fact, and ask. Apply it only after the user confirms, and record the confirmation on the entry and, for an audit check, as an approved exception (`workflow/INITIATOR.md` Part B, *Gates*).
 5. **Write the entry** in the format of `input/README.md` §4, with the next free `K` number, `Status: pending`. Update the *Knowledge* table in `sources.md`.
 
 # 3. Apply it
@@ -32,7 +32,7 @@ For each built page it touches, in build-sequence order:
 1. **Figma.** Change the components, examples and doc frames so they follow the rule. Changing an existing value of a frozen system needs the user's explicit OK, which the rule itself is when it names that value.
 2. **Copy.** When the page's text should say it (a guideline, a do and don't, a usage note), change the line in the page's copy file and apply it to Figma (`workflow/COPY.md` §6).
 3. **Docs site.** When the site exists, update the page's data and copy, and the component code when the rule changes behavior or a default. Run `npm run build`.
-4. **Checks.** The page's own audit and the copy check, as in the page gate (`INITIATOR.md` Part B, *Gates*). The slow checks stay on call.
+4. **Checks.** The page's own audit and the copy check, as in the page gate (`workflow/INITIATOR.md` Part B, *Gates*). The slow checks stay on call.
 5. **Status.** `applied YYYY-MM-DD: {what changed, where}`. The ledger entry of each page lists the knowledge file under `loaded`.
 
 A page that isn't built yet keeps `pending`; its build step applies the rule.

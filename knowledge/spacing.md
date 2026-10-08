@@ -39,5 +39,5 @@ The scale grows by small steps at the small end and by big jumps at the large en
 - Neighboring sections never differ by a step so small that the difference looks like a mistake.
 - Inside a component, the steps chosen are distinguishable at a glance: a gap and the padding around it read as intentionally different or intentionally equal.
 
-**Related specs:** `foundations/1.3-space-and-layout.md` (§1 the default scale and its multiples of the base, §2 the base unit and the scale). The spec keeps the existing system's or product's own scale first, and doesn't assume every brand uses a base of 4.
+**Related specs:** `specs/foundations/1.3-space-and-layout.md` (§1 the default scale and its multiples of the base, §2 the base unit and the scale). The spec keeps the existing system's or product's own scale first, and doesn't assume every brand uses a base of 4.
 **Source:** maintainer, 2026-10-09

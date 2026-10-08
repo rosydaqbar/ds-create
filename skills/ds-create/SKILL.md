@@ -25,8 +25,8 @@ One skill, five commands. Each command has its own reference file. Load it befor
 
 # 1. Where things are
 
-- **The repo root** is the folder that holds `INITIATOR.md`, `SYSTEM.md` and `workflow/`. Work from there.
-- **Specs.** Each command's reference says which spec files to load. Always load the global set first (`INITIATOR.md` Part B §0): `README.md`, `SYSTEM.md`, `INITIATOR.md`, `GOTCHAS.md`, `templates/structure.md`, and `input/{slug}/sources.md` once it exists.
+- **The repo root** is the folder that holds `workflow/INITIATOR.md`, `specs/SYSTEM.md` and `workflow/`. Work from there.
+- **Specs.** Each command's reference says which spec files to load. Always load the global set first (`workflow/INITIATOR.md` Part B §0): `README.md`, `specs/SYSTEM.md`, `workflow/INITIATOR.md`, `workflow/GOTCHAS.md`, `workflow/templates/structure.md`, and `input/{slug}/sources.md` once it exists.
 - **The slug.**
   - The system's slug is its folder name in `input/` and `output/`.
   - When `input/` holds more than one system folder, ask which one, unless the request names it.
@@ -34,7 +34,7 @@ One skill, five commands. Each command has its own reference file. Load it befor
 - **Inputs.** `input/{slug}/` holds the ground truth (`input/README.md`). The user's answers go into `input/{slug}/answers/` (§3).
 - **Design knowledge.** `knowledge/` at the repo root holds the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules (`knowledge/README.md`).
 - **System knowledge.** `input/{slug}/knowledge/` holds the system's standing rules, taught by the user over time: `system.md`, and one file per page (`input/README.md` I7, §4).
-- **Outputs.** `output/{slug}/` holds the ledger (`ds-create-ledger.json`), the copy files (`copy/`), the fast-mode manifests (`fast/`), the Figma exports (`figma/`), the docs site (`web/`) and reports (`reports/`).
+- **Outputs.** `output/{slug}/` holds the ledger (`ds-create-ledger.json`), the copy files (`copy/`), the fast-mode manifests (`fast/`), the Figma exports (`figma/`), the docs site (`kit/web/`) and reports (`reports/`).
 
 # 2. Rules for every command
 
@@ -46,22 +46,22 @@ One skill, five commands. Each command has its own reference file. Load it befor
    - what the product is: one sentence from the user or an input;
    - the Figma file: a link, or permission to create one.
 
-   YOLO never skips a check to save time. In particular, a page is drawn only after its `knowledge/` topics are read, recorded under `loaded`, and its copy passes `tools/copy-guard.mjs --page` (`workflow/COPY.md` §1). This is a hard rule in YOLO and in fast mode.
-5. **Gates.** `build` runs only after `init` is done. It runs only the steps its answers allow (`reference/build.md` §4). The page gates of `INITIATOR.md` Part B §6 apply to every page.
-6. **QA on call.** The slow checks run only through `qa` (`INITIATOR.md` Part B, *QA on call*). The cheap ones run inside `build`: each page's own audit, the copy check at the end of a level, and `npm run build`. At the end of `build`, offer `qa` in one line, and never run it unasked.
-7. **Figma.** Load the `figma-use` skill before the first `use_figma` call. Send one writing call at a time, and follow `GOTCHAS.md` §1.
+   YOLO never skips a check to save time. In particular, a page is drawn only after its `knowledge/` topics are read, recorded under `loaded`, and its copy passes `kit/tools/copy-guard.mjs --page` (`workflow/COPY.md` §1). This is a hard rule in YOLO and in fast mode.
+5. **Gates.** `build` runs only after `init` is done. It runs only the steps its answers allow (`reference/build.md` §4). The page gates of `workflow/INITIATOR.md` Part B §6 apply to every page.
+6. **QA on call.** The slow checks run only through `qa` (`workflow/INITIATOR.md` Part B, *QA on call*). The cheap ones run inside `build`: each page's own audit, the copy check at the end of a level, and `npm run build`. At the end of `build`, offer `qa` in one line, and never run it unasked.
+7. **Figma.** Load the `figma-use` skill before the first `use_figma` call. Send one writing call at a time, and follow `workflow/GOTCHAS.md` §1.
 8. **The repo stays brand-agnostic.** Brand names, file keys, product copy and knowledge rules live only in `input/`, `output/` and the Figma file (`input/README.md` I6, I7).
 9. **Examples are references, never sources.**
    - `examples/` may be read to understand a pattern: how a kind of page reads, or how a visual is composed.
    - Nothing is copied from it: no sentences, manifests, page data, values or code.
    - It never replaces a step. Every page is still written from its spec, the templates and tools, this system's `input/{slug}/` and `output/{slug}/`, and its own Figma file, through the same manifest and copy-file rules.
    - Other systems' `input/` and `output/` folders are not read at all.
-   - `tools/fast-pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`GOTCHAS.md` G43).
+   - `kit/tools/fast-pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`workflow/GOTCHAS.md` G43).
 10. **No repo edits during a build.** The specs, templates and tools are read, never changed, while `init`, `build` or `qa` runs.
    - Lessons and tool bugs go into the build notes (`output/{slug}/reports/`), and into the repo only after the round, when the maintainer asks.
    - A blocking tool bug is patched once in the file's cached copy (`workflow/FAST.md` §6), or the page falls back to the standard engine. Never loop on it.
 11. **Keep going.** A context summary is not a stopping point. With YOLO or a no-stop pace, resume from the ledger and carry on; stop only at a gate, a blocker, or the end of the round.
-12. **Icons are Lucide.** A new system's icon library comes from `tools/icons-lucide.mjs` (`foundations/1.7-iconography.md` §1). Never ask which library, and never draw or map icons by hand.
+12. **Icons are Lucide.** A new system's icon library comes from `kit/tools/icons-lucide.mjs` (`specs/foundations/1.7-iconography.md` §1). Never ask which library, and never draw or map icons by hand.
 13. **Report plainly.** Each command ends with a short report:
    - what was done, with links;
    - what is still open;

@@ -4,7 +4,7 @@ Sets up the baseline of a design system: the inputs are read, the basics are set
 
 **Init never** draws a doc page, creates the page tree or the Doc kit, builds a component, or changes a frozen value.
 
-**Load:** the global set (`SKILL.md` §1), `input/README.md`, `workflow/QUESTIONNAIRE.md` §1, §2, §3, §9 and §10, `SYSTEM.md` Part C and `guidance/02-tokens.md`. For an existing file, also `INITIATOR.md` Part B §2 (*Inspect first*).
+**Load:** the global set (`SKILL.md` §1), `input/README.md`, `workflow/QUESTIONNAIRE.md` §1, §2, §3, §9 and §10, `specs/SYSTEM.md` Part C and `specs/guidance/02-tokens.md`. For an existing file, also `workflow/INITIATOR.md` Part B §2 (*Inspect first*).
 
 # 1. Readiness check
 
@@ -54,10 +54,10 @@ Write the answers to `input/{slug}/answers/01-init.md` (`SKILL.md` §3).
 
 # 5. Set up the foundations
 
-This is build step 4 of `INITIATOR.md` Part B §6. Write the ledger first (`INITIATOR.md` Part B §0): `scope` so far, `inputs`, `answers`, and `sequence` steps 1–4.
+This is build step 4 of `workflow/INITIATOR.md` Part B §6. Write the ledger first (`workflow/INITIATOR.md` Part B §0): `scope` so far, `inputs`, `answers`, and `sequence` steps 1–4.
 
 **New system.**
-- Create the collections in the `SYSTEM.md` Part C order:
+- Create the collections in the `specs/SYSTEM.md` Part C order:
   - Primitives first;
   - then Color, Typography, Space, Size, Shape, Border and Motion, aliasing the primitives where Part C says so.
 - Create the text styles and the effect styles.
@@ -69,7 +69,7 @@ This is build step 4 of `INITIATOR.md` Part B §6. Write the ledger first (`INIT
 - Map the file's names to the ds-create grammar, and list each rename it proposes. Apply a rename only when the user approves it. In YOLO, names are kept.
 - Record the frozen state in `output/{slug}/figma/figma-variables.json` (`workflow/WEB.md` W2 explains the export).
 
-**Check.** `tools/figma-audit.js` in file mode reports `fail` = 0 for the variables and styles. Otherwise list the approved exceptions in the ledger (`auditExceptions`). Then mark steps 1–4 `done` in the ledger.
+**Check.** `kit/tools/figma-audit.js` in file mode reports `fail` = 0 for the variables and styles. Otherwise list the approved exceptions in the ledger (`auditExceptions`). Then mark steps 1–4 `done` in the ledger.
 
 # 6. Report
 
