@@ -1,6 +1,6 @@
 ---
 name: ds-create
-version: 0.1.1
+version: 0.1.2
 description: Builds a brand-agnostic design system in Figma for any brand, and optionally its documentation site. Five commands, init, build, learn, qa and status, take a brand's context to Figma variables and styles, a component library (Parts, Components, Sections, Layouts) and a documented page for every item, always in the same structure. Use when someone wants to start or continue a design system ("ds-create", "design system for {brand}", "start the DS", "build the Button page", "build the foundations"), teach it a lasting rule ("remember that buttons align left"), check a build ("run QA on the DS"), or see how far it is ("where is the DS build"). Needs the Figma MCP with use_figma and a Figma file with edit access. Not for a single screen, mockup or one-off component in Figma (figma-generate-design, edit-figma-design), Antikode corporate websites on ATOMS (crea-corp-web), or a code-only component library with no Figma file.
 user-invocable: true
 argument-hint: "init · build · learn · qa · status"
