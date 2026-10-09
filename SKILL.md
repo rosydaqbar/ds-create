@@ -1,7 +1,7 @@
 ---
 name: ds-create
-version: 0.1.0
-description: Builds a brand-agnostic design system in Figma for any brand, and optionally its documentation site, from the ds-create repo (github.com/rosydaqbar/ds-create). Five commands, init, build, learn, qa and status, take a brand's context to Figma variables and styles, a component library (Parts, Components, Sections, Layouts) and a documented page for every item, always in the same structure. Use when someone wants to start or continue a design system ("ds-create", "design system for {brand}", "start the DS", "build the Button page", "build the foundations"), teach it a lasting rule ("remember that buttons align left"), check a build ("run QA on the DS"), or see how far it is ("where is the DS build"). Needs the Figma MCP with use_figma and a Figma file with edit access. Not for a single screen, mockup or one-off component in Figma (figma-generate-design, edit-figma-design), Antikode corporate websites on ATOMS (crea-corp-web), or a code-only component library with no Figma file.
+version: 0.1.1
+description: Builds a brand-agnostic design system in Figma for any brand, and optionally its documentation site. Five commands, init, build, learn, qa and status, take a brand's context to Figma variables and styles, a component library (Parts, Components, Sections, Layouts) and a documented page for every item, always in the same structure. Use when someone wants to start or continue a design system ("ds-create", "design system for {brand}", "start the DS", "build the Button page", "build the foundations"), teach it a lasting rule ("remember that buttons align left"), check a build ("run QA on the DS"), or see how far it is ("where is the DS build"). Needs the Figma MCP with use_figma and a Figma file with edit access. Not for a single screen, mockup or one-off component in Figma (figma-generate-design, edit-figma-design), Antikode corporate websites on ATOMS (crea-corp-web), or a code-only component library with no Figma file.
 user-invocable: true
 argument-hint: "init · build · learn · qa · status"
 ---
@@ -10,20 +10,20 @@ argument-hint: "init · build · learn · qa · status"
 
 ds-create turns a brand's context into a documented design system in Figma. Every system it builds has the same pages, in the same order, with the same frames and names. Only the brand's values change: colors, typefaces, radius, density and assets. From the same file it can also build a documentation site: React and Tailwind for Web, or React Native previews with React Native, Swift and Kotlin code for App.
 
-This file is the overview. The system itself lives in the repo, **github.com/rosydaqbar/ds-create**: the specs, the workflow, the tools and the full skill. Everything below happens in a working copy of that repo.
+This file is the overview. The installed skill folder, the folder this file is in, holds the whole system: the specs, the workflow, the tools and the full skill. Everything below happens in a workspace copy of that folder.
 
 # 1. Get the workspace first
 
-The installed skill folder is a read-only copy of the repo, and `anti-skill update` replaces it. A build writes `input/{slug}/` and `output/{slug}/` into the repo it runs in, so it never runs inside the installed skill folder.
+`anti-skill update` replaces the installed skill folder. A build writes `input/{slug}/` and `output/{slug}/` into the folder it runs in, so it never runs inside the installed skill folder.
 
-1. **Find the repo.** If the current folder, or one above it, holds `workflow/INITIATOR.md` and `specs/SYSTEM.md`, that folder is the workspace. Go to step 3.
-2. **Clone it when there is none.** Ask once where it should live (default `~/ds-create`), then:
+1. **Find the workspace.** If the current folder, or one above it, holds `workflow/INITIATOR.md` and `specs/SYSTEM.md`, and is not the installed skill folder, that folder is the workspace. Go to step 3.
+2. **Copy it when there is none.** Ask once where it should live (default `~/ds-create`), then copy the installed skill folder there:
 
    ```bash
-   git clone https://github.com/rosydaqbar/ds-create.git ~/ds-create
+   cp -R "<installed skill folder>" ~/ds-create
    ```
 
-3. **Link the full skill** so Claude Code finds the commands in the workspace (once per clone):
+3. **Link the full skill** so Claude Code finds the commands in the workspace (once per workspace):
 
    ```bash
    mkdir -p .claude/skills && ln -s ../../skills/ds-create .claude/skills/ds-create
@@ -32,7 +32,11 @@ The installed skill folder is a read-only copy of the repo, and `anti-skill upda
    Other agents read `skills/ds-create/SKILL.md` directly.
 4. **Work from the workspace root,** and follow `skills/ds-create/SKILL.md` there. It routes each command to its reference file in `skills/ds-create/reference/`.
 
-**Updating.** Run `git pull` in the workspace. `input/` and `output/` are git-ignored, so a system's files and builds stay as they are.
+**Updating.** Run `anti-skill update ds-create`, then copy the new version over the workspace without touching `input/` and `output/`, so a system's files and builds stay as they are:
+
+```bash
+rsync -a --exclude input/ --exclude output/ "<installed skill folder>/" ~/ds-create/
+```
 
 # 2. What it needs
 
@@ -42,7 +46,6 @@ The installed skill folder is a read-only copy of the repo, and `anti-skill upda
 | A Figma file with edit access, or permission to create one | the system is built in it |
 | The brand's typefaces installed | the type styles use them |
 | Node 20 or later | the tools in `kit/tools/` and the docs site |
-| git | to get and update the workspace |
 
 `/ds-create init` checks each of these before it starts, and says how to fix what's missing.
 
@@ -96,7 +99,7 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 - **No repo edits during a build.** Lessons go into the build notes, and into the repo after the round, when the maintainer asks.
 - **The specs win.** A system's own knowledge and frozen values come first, then the specs. The repo's `knowledge/` explains the reasoning, and never overrides a spec.
 
-# 7. The repo
+# 7. The folders
 
 | Folder | Holds |
 | --- | --- |
