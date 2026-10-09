@@ -104,6 +104,7 @@ The root holds the README and one folder per job: what to build, how, why, the c
 
 ```text
 README.md            this file: structure and file map (always loaded)
+SKILL.md             the overview skill published to the Antikode skill vault: what ds-create is, and how to clone and link this repo
 skills/              ds-create/: the ds-create skill, the way in: /ds-create init · build · learn · qa · status (SKILL.md and one
                      reference file per command). Link it into .claude/skills/ once after cloning (Start here); .claude/ is never committed
 
