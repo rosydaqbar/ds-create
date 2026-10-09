@@ -58,7 +58,7 @@ The kind of site follows from init:
 - App gets React Native previews with React Native, Swift and Kotlin code (`workflow/APP.md`).
 - Web and App gets both.
 
-The site covers the same pages as Q2. Publishing (step 22) happens only when the user asks for it.
+The site covers the same pages as Q2. Publishing (step 26) happens only when the user asks for it.
 
 ## Q4 · Pace
 
@@ -70,7 +70,7 @@ In YOLO the AI also answers Q2 and Q3 when the user left them open, as AI decisi
 
 Show the summary and wait for the user's OK. It lists:
 - the engine;
-- the pages in build order, with the added dependencies marked;
+- the library steps, then the docs steps, in build order, with the added dependencies and the sets added for a page marked;
 - the page actions on an existing file;
 - the references;
 - Figma only, or with the site and its kind;
@@ -86,35 +86,47 @@ Then:
 
 The steps are those of `workflow/INITIATOR.md` Part B §6. Steps 1–4 belong to init.
 
+Every round runs the library phase before the documentation phase: the sets a page shows exist before the page is drawn.
+
 | Answer | Steps that run | Steps skipped |
 | --- | --- | --- |
-| Q2 = Foundations | 5 page tree · 6 Documentation collection and Doc kit · 7–9 Cover, Getting started, Tokens · 10 foundations | 11–16 |
-| Q2 = up to Parts | as above + 11 Parts | 12–16 |
-| Q2 = up to Components | + 12 Components | 13–16 |
-| Q2 = Everything | + 13 Sections · 14 Layouts · 15 Screens · 16 foundation examples | — |
-| Q2 = named pages | 5 and 6 for those pages, then each page's own step and its dependencies | every other page |
-| Q1 = Fast | steps 6–16 follow `workflow/FAST.md` | — |
-| Q3 = Figma and site | 18 site setup · 19 site pages · 20 foundation and guidance site pages · 21 build and package | 22 until the user asks |
-| Q3 = Figma only | — | 18–22 |
-| (always) | 17 closing step: clear the plugin data | — |
+| Q2 = Foundations | 5 page tree · 6 foundation styles and assets · 7–10 the sets the foundation and guidance pages show · 11 Documentation collection and Doc kit · 12–14 Cover, Getting started, Tokens · 15 foundations | the docs of Parts and later (16–20) |
+| Q2 = up to Parts | as above, with every Part's sets at 7 · + 16 Parts | 17–20 |
+| Q2 = up to Components | + every Component's sets at 8 · + 17 Components | 18–20 |
+| Q2 = Everything | + Sections and Layouts sets at 9–10 · + 18 Sections · 19 Layouts · 20 Screens | — |
+| Q2 = named pages | 5, 6 and 11 for those pages; the library steps of those pages and of every set they show or contain; then each page's docs step | every other page |
+| Q1 = Fast | steps 11–20 follow `workflow/FAST.md`; steps 5–10 always use the standard engine | — |
+| Q3 = Figma and site | 22 site setup · 23 site pages · 24 foundation and guidance site pages · 25 build and package | 26 until the user asks |
+| Q3 = Figma only | — | 22–26 |
+| (always) | 21 closing step: clear the plugin data | — |
 
-Steps 5 and 6 run once per system: a later round reuses the page tree and the Doc kit, and adds only the pages it needs. A page the ledger marks `done` is not built again unless the user asks.
+**The sets a round needs.** Before the summary, list every set the round's doc pages show: their Overview compositions, Guidelines examples and visuals, from each page file. Every such set gets its library step in this round, even when its own docs aren't in scope (01 Getting started shows `Button` and `Text field`, so a Foundations round builds those sets and the Parts they contain). Show them in the summary as "added for {page}". Their docs steps are added in the round that documents them.
+
+Steps 5, 6 and 11 run once per system: a later round reuses the page tree, the foundation assets and the Doc kit, and adds only the pages it needs. A step the ledger marks `done` is not run again unless the user asks.
 
 # 5. Build
 
 Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 and its gates.
 
-For every page:
+**Library phase (steps 5–10), standard engine.** For every set, bottom-up:
+1. Build its private parts and sets from the page file, into the page's holding frames (`workflow/INITIATOR.md` Part B §6, *Figma tools*).
+2. Run `kit/tools/figma-audit.js` on the page with `LIBRARY = true`; it must report `fail` = 0.
+3. Export its sets with `kit/tools/figma-export-sets.js`.
+4. Mark the library entry `done`, with its evidence.
+
+**Documentation phase (steps 11–20).** For every page:
 1. Write its copy file first (`workflow/COPY.md`).
-2. Draw the page with the engine from Q1.
+2. Draw the page with the engine from Q1, using only sets from the snapshots.
 3. Check that the page's own audit reports `fail` = 0. In fast mode, also check that the manifest passes `kit/tools/fast-pack.mjs --check`.
-4. Mark the page `done` in the ledger, with its evidence.
+4. Mark the docs entry `done` in the ledger, with its evidence.
+
+**A missing set never stops the round.** When a page needs a set that isn't built, add its library entry before the current step, build it, record it under `decisions` and resume (`workflow/INITIATOR.md` Part B §6, *Gates*). Never draw a stand-in.
 
 **Pace.** In YOLO, go on to the next page. One page at a time: stop after each page and report it.
 
 **After each level.** Run the batched copy check (`workflow/COPY.md` §7). It is a cheap check, so it is part of build.
 
-**Docs site.** With the site in scope (Q3), steps 18–21 follow `workflow/WEB.md`. `npm run build` must pass. `npm run qa` is not run here.
+**Docs site.** With the site in scope (Q3), steps 22–25 follow `workflow/WEB.md`. `npm run build` must pass. `npm run qa` is not run here.
 
 # 6. Report
 

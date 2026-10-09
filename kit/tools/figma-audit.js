@@ -9,10 +9,14 @@
 //                          text without a text style, padding/gap/radius/stroke without a variable,
 //                          effects without an effect style, layer opacity, default layer names,
 //                          variant naming and the Part C §4.2 property vocabulary.
+//   LIBRARY = true         with PAGE, at a library step (INITIATOR Part B §6, steps 6–10): the same checks, except
+//                          that only the holding frames are expected (Component or Layout, and .Main); the doc frames
+//                          come at the page's docs step.
 // Run one page per call (the page is switched once). Output stays small: counts plus a few examples.
 // A result with "fail" > 0 fails the page's QA (INITIATOR Part B §8, EXTEND step 11, workflow/DOCFRAMES.md §14).
 // Save each result as output/{system-slug}/figma/audit-{page or file}.json and record it in the ledger.
 const PAGE = null;
+const LIBRARY = false;
 const MAX_EXAMPLES = 6;
 // Exceptions the user approved (INITIATOR Part B §6, Gates). Copy them from the ledger's `auditExceptions`;
 // they are reported as info, never as fail. Leave empty for a new system.
@@ -130,7 +134,9 @@ if (PAGE) {
   });
 
   // Frame names for the page type (SYSTEM Part A §A3).
-  const expected = type === 'component' ? ['Overview', 'Component', 'Anatomy', 'Guidelines'] : type === 'foundation' ? ['Overview', 'Guidelines'] : [];
+  const expected = LIBRARY ? (type === 'component' ? ['Component'] : type === 'layout' ? ['Layout'] : [])
+    : type === 'component' ? ['Overview', 'Component', 'Anatomy', 'Guidelines'] : type === 'foundation' ? ['Overview', 'Guidelines'] : [];
+  out.library = LIBRARY;
   const names = frames.map((f) => f.name);
   for (const e of expected) if (!names.includes(`${id} ${name} · ${e}`)) hit('frame-missing', 'fail', 'Template frames from SYSTEM Part A §A3', `${id} ${name} · ${e}`);
   for (const n of names) if (n !== '.Main' && !n.startsWith(`${id} ${name} · `)) hit('frame-name', 'warn', 'Frame names are ".Main" or "{ID} {Name} · {Frame}"', n);

@@ -55,7 +55,7 @@ Don't build the previews on a third-party UI kit (no NativeBase, no React Native
 
 # 4. Workflow
 
-At initiation, A1–A2 run in step 18 of the build sequence (`workflow/INITIATOR.md` Part B §6), A3 in step 19 with each page, and A4 in step 21. The same gates apply.
+At initiation, A1–A2 run in step 22 of the build sequence (`workflow/INITIATOR.md` Part B §6), A3 in step 23 with each page, and A4 in step 25. The same gates apply.
 
 ## A1 · Copy the preview source
 

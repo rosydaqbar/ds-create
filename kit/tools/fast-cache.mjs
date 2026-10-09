@@ -112,4 +112,4 @@ fs.writeFileSync(path.join(OUT, 'cache-status.js'), `const want = ${JSON.stringi
 const need = Object.keys(want).filter((k) => figma.root.getSharedPluginData('dscreate', k + '.v') !== want[k] || !figma.root.getSharedPluginData('dscreate', k));
 return { need, current: Object.keys(want).filter((k) => !need.includes(k)) };
 `);
-console.log(`cache-status.js → send it first; then send only the keys it lists in "need", one at a time, in this order: ${Object.keys(SOURCES).join(', ')}. Clear the dscreate keys at step 17.`);
+console.log(`cache-status.js → send it first; then send only the keys it lists in "need", one at a time, in this order: ${Object.keys(SOURCES).join(', ')}. Clear the dscreate keys at step 21.`);

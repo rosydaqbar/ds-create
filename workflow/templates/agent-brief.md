@@ -1,6 +1,6 @@
 # Docs-site agent brief
 
-Give this file to every agent that builds docs-site pages (`workflow/INITIATOR.md` Part B §6, step 19), together with the list of pages it owns. It holds what a page agent needs from `workflow/WEB.md`, `workflow/APP.md` and `kit/web/COPY-GUIDE.md`. When a case isn't covered here, open the section it links to. Fill the `{…}` values before handing it over.
+Give this file to every agent that builds docs-site pages (`workflow/INITIATOR.md` Part B §6, step 23), together with the list of pages it owns. It holds what a page agent needs from `workflow/WEB.md`, `workflow/APP.md` and `kit/web/COPY-GUIDE.md`. When a case isn't covered here, open the section it links to. Fill the `{…}` values before handing it over.
 
 ## The build
 

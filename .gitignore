@@ -80,3 +80,4 @@ SESSION.md
 
 # Design hook (impeccable): local settings, never in git.
 .impeccable/
+.orca/

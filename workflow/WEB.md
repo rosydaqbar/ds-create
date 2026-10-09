@@ -93,7 +93,7 @@ Do not add a CSS-in-JS library, a second styling system or a component library u
 
 # 4. Workflow
 
-Run the steps in order. Each step names its exit check. At initiation they are steps 18–22 of the build sequence (`workflow/INITIATOR.md` Part B §6): they start only when every Figma step is done in the ledger, the file audit included, and they follow the same gates.
+Run the steps in order. Each step names its exit check. At initiation they are steps 22–26 of the build sequence (`workflow/INITIATOR.md` Part B §6): they start only when every Figma step is done in the ledger, the file audit included, and they follow the same gates.
 
 ## W1 · Copy the template
 

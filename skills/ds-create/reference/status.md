@@ -11,6 +11,7 @@ System       {name} ({slug}) · {Web | App | Web and App} · {new system | exist
 Figma        {link}
 Init         {done YYYY-MM-DD | not done}
 Engine       {Default | Fast} (from the latest build round)
+Library      {d}/{n} sets ready · next: {page} (the library phase runs before any doc page)
 Pages        {done}/{in scope} done · building: {page} · next: {page}
              Foundations {d}/{n} · Parts {d}/{n} · Components {d}/{n} · Sections {d}/{n} · Layouts {d}/{n}
 Docs site    {not in scope | {d}/{n} pages | built}

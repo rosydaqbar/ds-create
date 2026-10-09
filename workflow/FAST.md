@@ -22,10 +22,10 @@ The build status is in §10.
 | Use fast mode for | Keep the standard engine for |
 | --- | --- |
 | Documentation pages of the types the renderer covers (§10): guidance, foundations, Parts, Components, Sections, Layouts | Inventory, renames and moving sets in an existing file (`workflow/INITIATOR.md` Part B §6, steps 2–5) |
-| New systems and existing systems alike, once the page tree, tokens and component sets exist | Creating tokens, styles and component sets |
+| New systems and existing systems alike, once the page tree, tokens and component sets exist (the library phase, steps 4–10) | Creating tokens, styles and component sets: the library phase always uses the standard engine |
 | Rebuilding a page after a review that changed its structure | A page whose manifest needs something the renderer can't draw (§7) |
 
-Fast mode starts at the first step that draws doc frames (step 6) and ends with the last doc page (step 16). Everything before and after runs as usual.
+Fast mode covers the documentation phase: it starts at the first step that draws doc frames (step 11) and ends with the last doc page (step 20). The library phase before it, and everything after it, runs as usual. A page type the renderer doesn't cover (Screens) falls back to the standard engine (§7).
 
 # 2. What the skeleton fixes
 
@@ -120,9 +120,9 @@ Named visuals, each always drawn the same way from its inputs. The renderer impl
 
 # 5. Steps
 
-The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes only steps 6–16, as follows.
+The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes only steps 11–20, as follows.
 
-**F1 · Data (before step 6, no Figma calls).**
+**F1 · Data (after the library phase, before step 11, no Figma calls).** The manifests name real sets, so they are written once steps 6–10 are done and the set snapshots exist.
 1. Run `node kit/tools/fast-pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `output/{slug}/fast/`.
 2. Write the copy file of every in-scope page (`workflow/COPY.md`), with the block and topic titles the manifests use. Read the page's knowledge first (`input/{slug}/knowledge/`, `input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
 3. Fill each manifest's `todo` visuals with real sets, or remove the visual. Write one manifest per component and layout page (`workflow/templates/fast/component.example.json`, `layout.example.json`).
@@ -130,19 +130,19 @@ The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes onl
 
 **F2 · Review (optional).** When the user chose a review checkpoint at initiation, stop here. The user reads and edits the copy files and manifests before any page is drawn. Record their changes in `input/{system-slug}/chat/` (`input/README.md` I3).
 
-**F3 · Bootstrap (step 6).**
+**F3 · Bootstrap (step 11).**
 - Run `node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
 - Send `cache-status.js` first. It is read-only and answers which keys the file still needs. Send only those calls, one at a time; each answers `stored: true`, or refuses to save when the code arrived changed (`workflow/GOTCHAS.md` G41).
 - Caching costs time: the calls hold about 75 KB of code that is typed out in full, roughly 6–8 minutes for a full set. The status call makes a retry or a resumed session skip what is already current. A new round still sends everything, because step F5 clears the keys (`workflow/GOTCHAS.md` G8).
 - When the file has no Doc kit or `Documentation` collection, create them with `kit/tools/figma-dockit.js`: first `{ only: 'collection' }`, then `{ only: 'kit', page, mark, system, footer, meta }`. Every doc variable aliases the brand token `workflow/DOCFRAMES.md` §1 names; the result lists any that fell back to a default.
 
-**Icons (before 1.7).** A new system's icon library comes from `node kit/tools/icons-lucide.mjs --slug {slug}`: send its calls (usually one, about 30 KB), then render 1.7. The agent doesn't pick, map or draw icons.
+**Icons (step 6, library).** A new system's icon library comes from `node kit/tools/icons-lucide.mjs --slug {slug}` at its library step, before any Part: send its calls (usually one, about 30 KB). The 1.7 doc page is rendered later, at step 15. The agent doesn't pick, map or draw icons.
 
-**F4 · Pages (steps 7–16).** One page per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --page {id} --call` prints the call: it loads the cached renderer and sends only the page's data (usually 4–9 KB).
+**F4 · Pages (steps 12–20).** One page per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --page {id} --call` prints the call: it loads the cached renderer and sends only the page's data (usually 4–9 KB).
 
 The call returns the page's frame ids, its audit and its warnings. The page gate is the same as in the standard engine (`workflow/INITIATOR.md` Part B, *Gates*).
 
-**F5 · Close.** Check every page's copy against Figma in one or two batched read-only calls (`workflow/COPY.md` §7). Export the set snapshots, then clear the `dscreate` plugin data.
+**F5 · Close.** Check every page's copy against Figma in one or two batched read-only calls (`workflow/COPY.md` §7). Re-export any set snapshot a docs step changed, then clear the `dscreate` plugin data (step 21).
 
 **Ledger.** `engine: "fast"` at the top. For each page, the engine that drew it (`fast` or `standard`) and any `custom` visuals it used.
 

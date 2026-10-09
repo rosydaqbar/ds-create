@@ -127,7 +127,7 @@ workflow/            HOW to build it: process, gates and lessons
                      agent-brief.md: the brief for docs-site page agents; fast/: the default fast-mode manifests (structure only)
 
 knowledge/           WHY: the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules
-                     (buttons.md, color.md, motion.md, radius.md, spacing.md)
+                     (badges-and-tags.md, buttons.md, color.md, motion.md, radius.md, spacing.md)
 
 kit/                 the CODE that builds
   tools/             figma-audit.js: read-only audit that every page call runs on its page (QA gate; the file-wide sweep runs on call);
@@ -224,7 +224,7 @@ Every page is built with the structure in `workflow/templates/structure.md` (pag
 | --- | --- |
 | Initiation, and whenever the user changes an answer | `workflow/QUESTIONNAIRE.md` |
 | Any step that draws frames the doc builder has no helper for (Doc kit, Cover, guidance pages, Foundations, Screens), or that changes the builder | `workflow/DOCFRAMES.md` |
-| Parts, Components, Sections and Layouts in Figma | `kit/tools/figma-docbuilder.js`, cached once at step 6 (`workflow/INITIATOR.md` Part B §6) |
+| Parts, Components, Sections and Layouts in Figma | `kit/tools/figma-docbuilder.js`, cached once at step 11 (`workflow/INITIATOR.md` Part B §6) |
 | Docs site (`workflow/WEB.md`, `workflow/APP.md`) | `workflow/WEB.md`, plus `workflow/APP.md` for App products; docs agents start from `workflow/templates/agent-brief.md` |
 
 `examples/` holds finished reference builds, not inputs: read one only to understand a pattern, and never copy from it (`workflow/GOTCHAS.md` G43). Never open generated files (`kit/web/src/tokens/tokens.gen.ts`, `kit/web/tokens/tokens.dtcg.json`, `kit/web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
@@ -338,7 +338,7 @@ npx impeccable install --project --providers=claude -y
 
 # 6. Non-negotiable
 
-- Build in the order of the build sequence in `workflow/INITIATOR.md` Part B §6, for a new system and an existing one. A step starts only when every step above it is done in the ledger. YOLO removes the pauses, never a step.
+- Build in the order of the build sequence in `workflow/INITIATOR.md` Part B §6, for a new system and an existing one. The library comes first: every style, asset and component set is built before any doc page, so every example on a page is a real instance and no step waits on a later one. A step starts only when every step above it is done in the ledger. YOLO removes the pauses, never a step.
 - A page is done only after its own page file was loaded, its QA passed and `kit/tools/figma-audit.js` reported `fail` = 0. No page is built from root files or by a generic script without its page file.
 - Use the exact page tree, page names and template frames in `specs/SYSTEM.md` Part A.
 - Use the naming in `specs/SYSTEM.md` Part C for tokens, styles, component sets, properties, parts and layers.

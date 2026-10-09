@@ -92,24 +92,31 @@ The reading frame (Part B §7): `doc/measure/frame` wide, a rich-text column at 
 
 ## Build order
 
-The order is the build sequence in `workflow/INITIATOR.md` Part B §6. This is its foundation part:
+The order is the build sequence in `workflow/INITIATOR.md` Part B §6: library first, then documentation. This is its foundation part:
 
 ```text
-Brand tokens: Primitives → Color, Typography (variables and text styles), Space, Size, Shape
-→ Documentation collection (aliases those tokens) → 9.1 Doc kit
-→ 00 Cover → 01 Getting started → 02 Tokens
-→ 1.1 Color → 1.2 Typography → 1.3 Space & layout → 1.4 Shape pages
-→ 1.5 Elevation (needs color shadow roles and focus colors)
-→ 1.6 Motion
-→ 1.7 Iconography → 1.8 Brand assets
-→ Parts
+Library
+  Brand tokens: Primitives → Color, Typography, Space, Size, Shape, Border, Motion
+  → text styles → effect styles (need color shadow roles and focus colors)                        (step 4)
+  → page tree                                                                                     (step 5)
+  → 1.3 grid styles → 1.7 icon library → 1.8 brand asset components                               (step 6)
+  → Parts, Components, Sections and Layouts sets                                                  (steps 7–10)
+
+Documentation
+  Documentation collection (aliases the brand tokens) → 9.1 Doc kit                               (step 11)
+  → 00 Cover → 01 Getting started → 02 Tokens                                                     (steps 12–14)
+  → 1.1 Color → 1.2 Typography → 1.3 Space & layout → 1.4 Shape → 1.5 Elevation
+  → 1.6 Motion → 1.7 Iconography → 1.8 Brand assets                                               (step 15)
+  → Parts, Components, Sections, Layouts and Screens pages                                        (steps 16–20)
 ```
 
-The brand's tokens come first because the documentation is styled with them (`workflow/DOCFRAMES.md` §1). The doc kit comes next, before any foundation page, so every page is documented with the same components in the brand's own look.
+The brand's tokens come first because every style, set and doc frame binds to them (`workflow/DOCFRAMES.md` §1). The styles and assets a component uses (effect styles, Motion, grids, icons, flags and logos) are made before any Part, because the Parts bind to them.
 
-Each foundation page is its own step. It starts only when the step before it is done in the ledger, and it is done only by the page gate (`workflow/INITIATOR.md` Part B §6, *Gates*). No Part page is documented while a foundation step, or `00`–`02`, is still open.
+The Doc kit comes before any doc page, so every page is documented with the same components in the brand's own look.
 
-Some Guidelines examples show real components (a button with a focus ring, a menu with spacing callouts, an input in two neutral palettes). Build those examples after the Parts they use exist, at step 16 of the build sequence, using real instances. When the foundation page is done, list them in the ledger so they are not lost. Never draw a stand-in component to finish a foundation page early.
+Each foundation doc page is its own step. It starts only when the step before it is done in the ledger, and it is done only by the page gate (`workflow/INITIATOR.md` Part B §6, *Gates*).
+
+Some Guidelines examples show real components (a button with a focus ring, a menu with spacing callouts, an input in two neutral palettes). Their sets exist since the library phase, so these examples are built at the foundation page's own step, from real instances. Never draw a stand-in component.
 
 ## Every value is bound
 

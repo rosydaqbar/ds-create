@@ -97,7 +97,8 @@ export function evidenceErrors(slug, id) {
   const lp = path.join(ROOT, 'output', slug, 'ds-create-ledger.json');
   if (!fs.existsSync(lp)) return { errs: [], topics, ledger: false };
   const L = JSON.parse(fs.readFileSync(lp, 'utf8'));
-  const e = (L.sequence || []).find((x) => String(x.page || '').split(' ')[0] === id);
+  // A page with sets has a library entry and a docs entry (workflow/INITIATOR.md Part B §0); the copy belongs to the docs entry.
+  const e = (L.sequence || []).find((x) => String(x.page || '').split(' ')[0] === id && x.phase !== 'library');
   const loaded = (e && e.loaded) || [];
   const missing = topics.filter((t) => !loaded.some((l) => String(l).replace(/^knowledge\//, '') === t));
   return {

@@ -82,7 +82,7 @@ Each answer has the same four lines:
 ## Q1 · Engine
 Answer: Default mode
 Decided by: user (chat/2026-10-08.md)        ← or: AI (YOLO): {one-line reason}
-Gates: steps 6–16 use the standard engine
+Gates: steps 11–20 use the standard engine
 ```
 
 - When an answer changes later, append the new answer below the old one, with its date. Never delete the old one.
