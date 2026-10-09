@@ -21,6 +21,10 @@ output/{system-slug}/copy/
   - no citing ("according to the principle…", "as the rationale says…");
   - no sentence copied from `knowledge/`, and none of its example numbers: the system's tokens and values only;
   - the spec still decides what the page says. Knowledge only explains why, and fills in reasoning the spec leaves out.
+- **Which reasoning wins, topic by topic.** For each description, take the first source that covers the topic:
+  1. **The system's own knowledge** (`input/{slug}/knowledge/`) and what its inputs say about the topic (a brand guideline that explains a choice). The user's reasoning always comes first.
+  2. **The repo's `knowledge/`**, when the system has nothing on the topic. It is then the benchmark for the description: the copy follows its reasoning, in the system's words and values, never cited.
+  3. **Your own reasoning**, only when neither has the topic. Write it the same way, as a designer who knows the craft, and note it in the build notes as a judgment.
   `kit/tools/copy-guard.mjs` checks this (§7).
 - **Hard rule in fast mode and in YOLO.** No page is drawn until:
   1. its knowledge topics are read, and listed under the page's `loaded` in the ledger;
