@@ -124,8 +124,6 @@ Topics that exist on only one surface, or that say different things, are listed 
 
 # 7. QA
 
-These checks run on call, through `/ds-create qa` (`workflow/INITIATOR.md` Part B, *QA on call*). Only the copy guard runs during a build, before a page is drawn (§1).
-
 - Every in-scope page has a copy file, with the sections of its page type in order.
 - Every item that appears in Figma has a `figma:` source, and every item that appears on the site has a `web:` source.
 - `kit/tools/figma-copy.js` `diff` reports 0 differences on every page.

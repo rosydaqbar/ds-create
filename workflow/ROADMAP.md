@@ -36,5 +36,5 @@ Renames break instances in product files and props in code, so they wait for a m
 | Item | Status |
 | --- | --- |
 | Fast mode (`workflow/FAST.md`) | Built: the renderer, the manifest checks, the cache calls and the Doc kit builder, tried on a copy (1.4, 1.6, 2.1 and the kit). Next: a full fast build on a copy of an existing file, then story skeletons for the docs site (`workflow/FAST.md` §10). |
-| `kit/tools/figma-audit.js` checks per page and per file | In use (on call, `/ds-create qa`). Next: check variant counts against each page spec's matrix, and doc frames bound to `doc/*`. |
+| `kit/tools/figma-audit.js` checks per page and per file | In use (QA gate). Next: check variant counts against each page spec's matrix, and doc frames bound to `doc/*`. |
 | Binding documentation frames to `doc/*` spacing | Generated files leave many doc-frame paddings raw (the audit reports them as warnings). Fix in the Doc kit build step. |

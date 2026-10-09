@@ -46,7 +46,7 @@ Ask:
 **How do you want to implement the components?**
 
 - **YOLO everything** — implement all confirmed selected Parts (and components/Sections in scope) continuously.
-- **One by one** — implement one confirmed component page at a time and stop after it before continuing.
+- **One by one** — implement one confirmed component page at a time and stop after its QA before continuing.
 
 Do not infer or silently default the mode. If the user already explicitly selected a mode in the current request, reuse it without asking again.
 
@@ -56,7 +56,7 @@ When YOLO is selected:
 - load this file and each page's Markdown file at that page's step (`workflow/INITIATOR.md` Part B §0, *Loading per step*);
 - implement all confirmed selected pages in the build sequence (`workflow/INITIATOR.md` Part B §6): Parts in the order of §1 with the dependencies in §3 first, then Components, then Sections;
 - do not stop for per-page confirmation;
-- generate every page to its full specification; QA runs on call (`workflow/INITIATOR.md` Part B, *QA on call*);
+- run every page's full specification and QA;
 - do not interpret YOLO as permission to simplify matrices, anatomy, documentation, states, examples or accessibility requirements.
 
 ## One by one
@@ -65,7 +65,7 @@ When One by one is selected:
 - implement exactly one confirmed page in the current iteration;
 - load that page's Markdown file before implementation;
 - build only the private parts and dependencies that page needs (for example Spinner before Button's loading state);
-- generate the page to its full specification; its QA runs on call;
+- run the page's complete QA before considering it complete;
 - report the completed page and the remaining confirmed pages;
 - stop after completion and propose the next step in the build sequence; continue when the user confirms it;
 - do not prebuild unrelated selected pages.

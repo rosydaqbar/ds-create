@@ -1,6 +1,6 @@
 # `/ds-create qa`
 
-Runs every audit and QA check, only because the user asked for them (`workflow/INITIATOR.md` Part B, *QA on call*). A build never runs them, so a page is unchecked until a QA run covers it. Nothing is changed while checking. Fixes come after the report, and only with the user's OK.
+Runs every audit and QA check, only because the user asked for them (`workflow/INITIATOR.md` Part B, *QA on call*). A Default-mode build runs the cheap ones (page audits, the copy check); a fast build runs none, so its pages are unchecked until a QA run covers them. Nothing is changed while checking. Fixes come after the report, and only with the user's OK.
 
 **Load:** the global set (`SKILL.md` §1), `workflow/INITIATOR.md` Part B (*Gates*, *QA on call*), `workflow/COPY.md` §7, and `workflow/GOTCHAS.md` §1 and §4. When the site is in scope, also `workflow/WEB.md` W7 and §9 (and `workflow/APP.md` §9 for App).
 

@@ -160,7 +160,7 @@ Also turn clip content on: `figma.createComponent()` starts with it off, and the
 
 **G23. Name doc kit layers by role too.** Use `Divider`, not `Line`. The audit treats default names as failures everywhere, documentation included.
 *Why:* one default-named layer in the doc kit failed every page that used it.
-*Check:* in a QA run, the doc kit page passes its audit.
+*Check:* the doc kit page passes its audit before any page is built.
 
 **G24. Never invent tokens to fill a visual.** When the file lacks what a spec visual needs (density modes, alpha scales, a dark palette, font variables), say so in the topic and show the current state.
 *Why:* invented values read as real tokens and contradict the frozen system.

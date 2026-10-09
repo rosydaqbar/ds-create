@@ -166,7 +166,7 @@ The call returns the page's frame ids and its warnings; it doesn't audit. The pa
 # 8. QA
 
 QA follows *QA on call* (`workflow/INITIATOR.md` Part B):
-- a render call draws; it doesn't audit;
+- the whole fast round generates without auditing, library phase included (`workflow/INITIATOR.md` Part B §6, *Gates*, *Fast mode*); a render call draws, it doesn't audit;
 - the page audits, the copy check and the slow checks run only when the user asks (`/ds-create qa`).
 
 # 9. Decisions

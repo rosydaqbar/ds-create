@@ -701,7 +701,7 @@ All component-specific QA belongs to the corresponding file under `specs/parts/`
 
 Run `kit/tools/figma-audit.js` (a read-only `use_figma` script) on every built page and once on the file. A page with `fail` > 0 fails QA: raw values inside components, unbound fills, text without a text style, effects without an effect style, wrong variant names, loose nodes or overlapping frames on the canvas, missing template frames, and color pairs below AA. Warnings (raw spacing in documentation frames, variant names outside the vocabulary) are reviewed and either fixed or explained in the page report.
 
-The audit runs on call (`workflow/INITIATOR.md` Part B, *QA on call*). `finishPage` in `kit/tools/figma-docbuilder.js` runs it only in a QA run, when the audit is cached and the call passes `{ audit: true }`.
+`finishPage` in `kit/tools/figma-docbuilder.js` runs the cached audit on every page it arranges.
 
 # 15. Visual teaching is part of documentation
 
