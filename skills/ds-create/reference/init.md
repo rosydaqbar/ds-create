@@ -69,7 +69,7 @@ This is build step 4 of `workflow/INITIATOR.md` Part B §6. Write the ledger fir
 - Map the file's names to the ds-create grammar, and list each rename it proposes. Apply a rename only when the user approves it. In YOLO, names are kept.
 - Record the frozen state in `output/{slug}/figma/figma-variables.json` (`workflow/WEB.md` W2 explains the export).
 
-**Check.** `kit/tools/figma-audit.js` in file mode reports `fail` = 0 for the variables and styles. Otherwise list the approved exceptions in the ledger (`auditExceptions`). Then mark steps 1–4 `done` in the ledger.
+**Done.** Record the collections, styles and counts in the ledger, then mark steps 1–4 `done`. The token audit (contrast, scopes, code syntax) runs on call through `qa`, in file mode.
 
 # 6. Report
 

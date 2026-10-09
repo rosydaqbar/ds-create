@@ -8,7 +8,7 @@
  *   node kit/tools/fast-pack.mjs --slug acme --check           check every manifest in output/acme/fast/
  *   node kit/tools/fast-pack.mjs --slug acme --page 1.4        print the payload of one page (checked first)
  *   node kit/tools/fast-pack.mjs --slug acme --page 1.4 --call print the whole page call: load the cached renderer,
- *                                                           render the payload, return frame ids, audit and warnings
+ *                                                           render the payload, return frame ids and warnings
  *
  * What the check refuses:
  *   - a visual type the renderer doesn't have (the catalog is read from kit/tools/figma-fastbuild.js);

@@ -13,8 +13,9 @@
 //     figma.root.setSharedPluginData('dscreate', 'docbuilder', docbuilder.toString()); return docbuilder.toString().length;
 //   Call 2: paste from "async function docpages" to the end, then
 //     figma.root.setSharedPluginData('dscreate', 'docpages', docpages.toString()); return docpages.toString().length;
-//   Each stored text is ~30 kB, under the 100 kB limit per plugin-data entry. Cache kit/tools/figma-audit.js
-//   too, so finishPage audits every page it arranges (call 3):
+//   Each stored text is ~30 kB, under the 100 kB limit per plugin-data entry. A build doesn't audit (audits are on
+//   call). Only a QA run that wants finishPage to audit caches kit/tools/figma-audit.js (call 3) and passes
+//   finishPage(page, { audit: true }):
 //     const audit = async (figma, PAGE) => { <figma-audit.js without its "const PAGE = …;" line> };
 //     figma.root.setSharedPluginData('dscreate', 'audit', audit.toString()); return 'ok';
 //   fn.toString() keeps backticks and ${ as written, so nothing needs escaping. (The code itself has none,
@@ -333,8 +334,9 @@ async function docbuilder(figma, OPTS) {
     const other = page.children.filter(n => !mine.includes(n)); if (other.length) { const minX = Math.min(...other.map(n => n.x)); if (minX < x) for (const n of other) n.x += x - minX; }
     const res = { page: page.name, frames: Object.fromEntries(mine.map(f => [f.name, f.id])), foreign: other.map(n => n.type + ' ' + n.name).slice(0, 10), warnings: W };
     const src = ROOT.getSharedPluginData('dscreate', 'audit');
-    if (src && o.audit !== false) { const au = await (new AF('figma', 'PAGE', 'return await (' + src + ')(figma, PAGE);'))(figma, page.name); res.audit = au.result; res.checks = Object.fromEntries(Object.entries(au.checks || {}).filter(([, c]) => c.level !== 'info').map(([k, c]) => [k, c.level + ' ' + c.count + (c.examples && c.examples[0] ? ' · ' + c.examples[0] : '')])); }
-    else res.audit = 'not run: cache kit/tools/figma-audit.js under the "audit" key, or run it separately';
+    // Audits are on call (workflow/INITIATOR.md Part B, QA on call): a build page never audits unless asked with { audit: true }.
+    if (src && o.audit === true) { const au = await (new AF('figma', 'PAGE', 'return await (' + src + ')(figma, PAGE);'))(figma, page.name); res.audit = au.result; res.checks = Object.fromEntries(Object.entries(au.checks || {}).filter(([, c]) => c.level !== 'info').map(([k, c]) => [k, c.level + ' ' + c.count + (c.examples && c.examples[0] ? ' · ' + c.examples[0] : '')])); }
+    else res.audit = 'not run: audits are on call (/ds-create qa)';
     return res;
   };
 

@@ -3,7 +3,7 @@
 // the page's copy file (output/{slug}/copy/). Values are never typed: every number, color and style is read from the
 // file. Brand-agnostic: styling comes from the doc/* variables and the brand's text styles, like the doc builder.
 //
-// NEEDS the doc builder (kit/tools/figma-docbuilder.js: docbuilder, docpages, docfoundations) and the audit, cached as
+// NEEDS the doc builder (kit/tools/figma-docbuilder.js: docbuilder, docpages, docfoundations), cached as
 // that file's header says. This file adds one more key:
 //   Call: paste this file's function, then
 //     figma.root.setSharedPluginData('dscreate', 'fastkit', fastkit.toString()); return fastkit.toString().length;
@@ -12,7 +12,7 @@
 //   const AF = Object.getPrototypeOf(async function () {}).constructor; const L = k => figma.root.getSharedPluginData('dscreate', k);
 //   const D = await (new AF('figma', 'OPTS', 'let D = await (' + L('docbuilder') + ')(figma, OPTS); D = await (' + L('docpages') + ')(figma, D); D = await (' + L('docfoundations') + ')(figma, D); return await (' + L('fastkit') + ')(figma, D);'))(figma, {});
 //   return await D.render(PAYLOAD);
-// The result is the page's frame ids, its audit and its warnings (D.finishPage).
+// The result is the page's frame ids and its warnings (D.finishPage). Audits are on call, not part of a page call.
 //
 // PAYLOAD (printed by kit/tools/fast-pack.mjs):
 //   { page: '{page id}', type: 'component' | 'layout', ...adapter fields }           Parts to Layouts (§ adapter below)
@@ -217,7 +217,7 @@ async function fastkit(figma, D) {
     return { rename: c.rename, sets: P.sets.map(s => ({ id: s.id, title: s.title, desc: s.family || '', keep: s.keep })), desc: c.desc, examples: c.examples, when: c.when, whenNot: c.whenNot, topics: c.topics, scale: P.scale, fixed: P.fixed ? new RegExp(P.fixed, 'i') : undefined, landmarks: P.landmarks, skip: P.skip };
   };
 
-  // ---- render(payload): one page, every frame from data, then arrange and audit.
+  // ---- render(payload): one page, every frame from data, then arrange.
   const render = async (P, opts) => {
     opts = opts || {};
     const page = /^\d+:\d+$/.test(P.page) ? await G(P.page) : ROOT.children.find(p => p.name === P.page);

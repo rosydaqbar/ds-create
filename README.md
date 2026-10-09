@@ -130,7 +130,7 @@ knowledge/           WHY: the reasoning behind the specs, from the maintainer's 
                      (badges-and-tags.md, buttons.md, color.md, motion.md, radius.md, spacing.md)
 
 kit/                 the CODE that builds
-  tools/             figma-audit.js: read-only audit that every page call runs on its page (QA gate; the file-wide sweep runs on call);
+  tools/             figma-audit.js: read-only audit of a page or the whole file, run on call through /ds-create qa;
                      figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js:
                      read-only JSON snapshot of each component set for the docs site; figma-copy.js: reads, checks and applies the page
                      copy files on the doc frames; figma-fastbuild.js, fast-pack.mjs, fast-cache.mjs, figma-dockit.js: fast mode
@@ -339,7 +339,8 @@ npx impeccable install --project --providers=claude -y
 # 6. Non-negotiable
 
 - Build in the order of the build sequence in `workflow/INITIATOR.md` Part B §6, for a new system and an existing one. The library comes first: every style, asset and component set is built before any doc page, so every example on a page is a real instance and no step waits on a later one. A step starts only when every step above it is done in the ledger. YOLO removes the pauses, never a step.
-- A page is done only after its own page file was loaded, its QA passed and `kit/tools/figma-audit.js` reported `fail` = 0. No page is built from root files or by a generic script without its page file.
+- A page is generated only after its own page file was loaded. No page is built from root files or by a generic script without its page file.
+- Generate first, check on call: a build never audits. `kit/tools/figma-audit.js`, the QA lists and the copy check run only through `/ds-create qa`, and a system is verified only after that run reports `fail` = 0.
 - Use the exact page tree, page names and template frames in `specs/SYSTEM.md` Part A.
 - Use the naming in `specs/SYSTEM.md` Part C for tokens, styles, component sets, properties, parts and layers.
 - Never merge required pages into one page.

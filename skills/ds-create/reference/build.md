@@ -110,21 +110,19 @@ Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 a
 
 **Library phase (steps 5–10), standard engine.** For every set, bottom-up:
 1. Build its private parts and sets from the page file, into the page's holding frames (`workflow/INITIATOR.md` Part B §6, *Figma tools*).
-2. Run `kit/tools/figma-audit.js` on the page with `LIBRARY = true`; it must report `fail` = 0.
-3. Export its sets with `kit/tools/figma-export-sets.js`.
-4. Mark the library entry `done`, with its evidence.
+2. Export its sets with `kit/tools/figma-export-sets.js`.
+3. Mark the library entry `done`, with its evidence.
 
 **Documentation phase (steps 11–20).** For every page:
 1. Write its copy file first (`workflow/COPY.md`).
 2. Draw the page with the engine from Q1, using only sets from the snapshots.
-3. Check that the page's own audit reports `fail` = 0. In fast mode, also check that the manifest passes `kit/tools/fast-pack.mjs --check`.
-4. Mark the docs entry `done` in the ledger, with its evidence.
+3. Mark the docs entry `done` in the ledger, with its evidence. In fast mode the manifest has passed `kit/tools/fast-pack.mjs --check` before the call.
 
 **A missing set never stops the round.** When a page needs a set that isn't built, add its library entry before the current step, build it, record it under `decisions` and resume (`workflow/INITIATOR.md` Part B §6, *Gates*). Never draw a stand-in.
 
 **Pace.** In YOLO, go on to the next page. One page at a time: stop after each page and report it.
 
-**After each level.** Run the batched copy check (`workflow/COPY.md` §7). It is a cheap check, so it is part of build.
+**No audits during a build.** The page audits, the copy check and the QA lists run only through `qa`, when the user asks (`SKILL.md` §2.6). Don't cache the audit, and don't stop to fix findings.
 
 **Docs site.** With the site in scope (Q3), steps 22–25 follow `workflow/WEB.md`. `npm run build` must pass. `npm run qa` is not run here.
 
@@ -133,12 +131,12 @@ Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 a
 End every round with:
 
 ```text
-Built this round   {pages, each with its audit result}
+Built this round   {pages, library and docs}
 Engine             {Default | Fast}; pages that fell back to Default: {list or none}
 Docs site          {not in scope | built at output/{slug}/web/ (npm run dev)}
 Still open         {pages not done, conflicts, spec gaps}
 Decided by the AI  {each with its reason, or none}
-QA                 hasn't run since these changes. Run /ds-create qa?
+QA                 not checked yet: no audit or QA has run on these pages. Run /ds-create qa?
 ```
 
 Save it to `output/{slug}/reports/build-{YYYY-MM-DD}.md`, and record anything longer than one line in `output/{slug}/reports/build-notes.md`. Add every lesson that applies to any brand to `workflow/GOTCHAS.md` (`workflow/GOTCHAS.md` §0).

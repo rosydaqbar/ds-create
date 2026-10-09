@@ -32,7 +32,7 @@ For each built page it touches, in build-sequence order:
 1. **Figma.** Change the components, examples and doc frames so they follow the rule. Changing an existing value of a frozen system needs the user's explicit OK, which the rule itself is when it names that value.
 2. **Copy.** When the page's text should say it (a guideline, a do and don't, a usage note), change the line in the page's copy file and apply it to Figma (`workflow/COPY.md` §6).
 3. **Docs site.** When the site exists, update the page's data and copy, and the component code when the rule changes behavior or a default. Run `npm run build`.
-4. **Checks.** The page's own audit and the copy check, as in the page gate (`workflow/INITIATOR.md` Part B, *Gates*). The slow checks stay on call.
+4. **Checks.** None here: the audit and the copy check run on call through `qa` (`workflow/INITIATOR.md` Part B, *QA on call*).
 5. **Status.** `applied YYYY-MM-DD: {what changed, where}`. The ledger entry of each page lists the knowledge file under `loaded`.
 
 A page that isn't built yet keeps `pending`; its build step applies the rule.
@@ -46,5 +46,5 @@ Learned      K{n} · {rule} ({file})
 Applied to   {pages, with links} · docs site {updated | not built}
 Pending      {pages not built yet, which follow it when built}
 Replaced     {K{m}, or none}
-Checks       audit {fail/warn per page} · copy {mismatches}
+Checks       not run (on call: /ds-create qa)
 ```

@@ -10,7 +10,7 @@ Fast mode changes how pages are drawn, not what they contain. The specs (`specs/
 | --- | --- |
 | `kit/tools/figma-fastbuild.js` | the renderer: `render(payload)` draws one page of any type, from data |
 | `kit/tools/fast-pack.mjs` | checks a page's manifest and copy file, and prints its payload or its whole page call (`--call`) |
-| `kit/tools/fast-cache.mjs` | writes the calls that cache the doc builder, the renderer and the audit in the file, plus a status call that says which are missing |
+| `kit/tools/fast-cache.mjs` | writes the calls that cache the doc builder and the renderer in the file, plus a status call that says which are missing. The audit is cached only with `--audit`, for a QA run |
 | `kit/tools/icons-lucide.mjs` | writes the calls that create the icon library on 1.7 from Lucide, from the site's icon registry (`specs/foundations/1.7-iconography.md` §1) |
 | `kit/tools/figma-dockit.js` | creates the `Documentation` collection and the Doc kit in a file that has none |
 | `workflow/templates/fast/` | the default manifest of every reading page (`00`–`02`, `1.1`–`1.8`) and example manifests for component and layout pages |
@@ -133,16 +133,16 @@ The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes onl
 **F3 · Bootstrap (step 11).**
 - Run `node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
 - Send `cache-status.js` first. It is read-only and answers which keys the file still needs. Send only those calls, one at a time; each answers `stored: true`, or refuses to save when the code arrived changed (`workflow/GOTCHAS.md` G41).
-- Caching costs time: the calls hold about 75 KB of code that is typed out in full, roughly 6–8 minutes for a full set. The status call makes a retry or a resumed session skip what is already current. A new round still sends everything, because step F5 clears the keys (`workflow/GOTCHAS.md` G8).
+- Caching costs time: the calls hold about 75 KB of code (minified, about 74 KB over four calls) that is typed out in full, roughly 6–8 minutes for a full set. The status call makes a retry or a resumed session skip what is already current. A new round still sends everything, because step F5 clears the keys (`workflow/GOTCHAS.md` G8).
 - When the file has no Doc kit or `Documentation` collection, create them with `kit/tools/figma-dockit.js`: first `{ only: 'collection' }`, then `{ only: 'kit', page, mark, system, footer, meta }`. Every doc variable aliases the brand token `workflow/DOCFRAMES.md` §1 names; the result lists any that fell back to a default.
 
 **Icons (step 6, library).** A new system's icon library comes from `node kit/tools/icons-lucide.mjs --slug {slug}` at its library step, before any Part: send its calls (usually one, about 30 KB). The 1.7 doc page is rendered later, at step 15. The agent doesn't pick, map or draw icons.
 
 **F4 · Pages (steps 12–20).** One page per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --page {id} --call` prints the call: it loads the cached renderer and sends only the page's data (usually 4–9 KB).
 
-The call returns the page's frame ids, its audit and its warnings. The page gate is the same as in the standard engine (`workflow/INITIATOR.md` Part B, *Gates*).
+The call returns the page's frame ids and its warnings; it doesn't audit. The page gate is the same as in the standard engine (`workflow/INITIATOR.md` Part B, *Gates*).
 
-**F5 · Close.** Check every page's copy against Figma in one or two batched read-only calls (`workflow/COPY.md` §7). Re-export any set snapshot a docs step changed, then clear the `dscreate` plugin data (step 21).
+**F5 · Close.** Re-export any set snapshot a docs step changed, then clear the `dscreate` plugin data (step 21). The copy check against Figma runs on call (`workflow/COPY.md` §7).
 
 **Ledger.** `engine: "fast"` at the top. For each page, the engine that drew it (`fast` or `standard`) and any `custom` visuals it used.
 
@@ -166,9 +166,8 @@ The call returns the page's frame ids, its audit and its warnings. The page gate
 # 8. QA
 
 QA follows *QA on call* (`workflow/INITIATOR.md` Part B):
-- every render call audits its own page;
-- the copy check runs in step F5;
-- the slow checks run only when the user asks.
+- a render call draws; it doesn't audit;
+- the page audits, the copy check and the slow checks run only when the user asks (`/ds-create qa`).
 
 # 9. Decisions
 

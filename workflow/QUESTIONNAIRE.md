@@ -304,7 +304,7 @@ If any Part, Component or Section is selected, explicitly ask (the same choice a
 **How do you want to implement the components?**
 
 - **YOLO everything** — implement every confirmed selected component page continuously, in the build sequence (`workflow/INITIATOR.md` Part B §6), without stopping for per-page approval.
-- **One by one** — implement exactly one confirmed component page at a time, run that page's QA, report what is complete and what remains, then stop for the user to confirm the next page in the build sequence.
+- **One by one** — implement exactly one confirmed component page at a time, report what is complete and what remains, then stop for the user to confirm the next page in the build sequence.
 
 Rules:
 - do not infer the mode from build strategy, project size, or phrases such as "complete the design system";

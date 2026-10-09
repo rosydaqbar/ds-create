@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
- * Writes the calls that cache the doc builder, the fast-mode renderer and the audit in the Figma file's plugin data
+ * Writes the calls that cache the doc builder and the fast-mode renderer in the Figma file's plugin data
  * (workflow/FAST.md F3). One file per key, each one `use_figma` call:
  *
  *   node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache [--accepted output/{slug}/figma/audit-accepted.json]
- *                             [--pages reading|components|all]
+ *                             [--pages reading|components|all] [--audit]
  *
- * Keys, in the order to send them: docbuilder, docpages, docfoundations, fastkit, audit. `--pages reading` leaves out
- * docpages, which only Parts to Layouts need (default: all).
+ * Keys, in the order to send them: docbuilder, docpages, docfoundations, fastkit. `--pages reading` leaves out
+ * docpages, which only Parts to Layouts need (default: all). A build never audits (workflow/INITIATOR.md Part B, QA on
+ * call), so the audit key is written only with `--audit`, for a QA run.
  *
  * SEND THE STATUS CALL FIRST: cache-status.js (read-only, tiny) answers which keys are missing or outdated in the
  * file. Send only those: re-typing a 20 KB call that is already in the file is the slowest part of a fast build.
@@ -53,6 +54,7 @@ const SOURCES = {
   audit: `async function audit(figma, PAGE) {\n${audit}\n}\n`,
 };
 if (want === 'reading') delete SOURCES.docpages;
+if (!process.argv.includes('--audit')) delete SOURCES.audit;
 const stamps = {};
 
 // A minifier, when one is installed next to a docs site.
