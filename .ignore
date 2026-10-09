@@ -2,3 +2,9 @@
 # examples/ holds finished reference builds: ~558k tokens of text that a build never needs.
 # They stay in git as references: open one by path to understand a pattern, never to copy from it (workflow/GOTCHAS.md G43).
 examples/
+
+# input/ is git-ignored (client files never go into git), but a build must read it.
+# Un-ignore it for search tools only. Ripgrep still drops these files when it is given
+# several paths at once, so agents list inputs with `find input -type f` (workflow/GOTCHAS.md G55).
+!/input/
+!/input/**

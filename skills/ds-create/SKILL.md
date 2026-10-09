@@ -30,15 +30,15 @@ One skill, five commands. Each command has its own reference file. Load it befor
 - **The slug.**
   - The system's slug is its folder name in `input/` and `output/`.
   - When `input/` holds more than one system folder, ask which one, unless the request names it.
-  - With no folder yet, `init` creates it from the system name (lowercase, kebab case).
-- **Inputs.** `input/{slug}/` holds the ground truth (`input/README.md`). The user's answers go into `input/{slug}/answers/` (§3).
+  - With no folder yet, `init` creates it from the system name (lowercase, kebab case), and saves what came with the command in it (`reference/init.md` §0).
+- **Inputs.** `input/{slug}/` holds the ground truth (`input/README.md`), with any loose file the user dropped straight into `input/` (`reference/init.md` §0). List them with `find input -type f`: git ignores `input/` and `output/`, so `rg`, `fd`, Glob and Grep show them empty (`workflow/GOTCHAS.md` G55). The user's answers go into `input/{slug}/answers/` (§3).
 - **Design knowledge.** `knowledge/` at the repo root holds the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules (`knowledge/README.md`).
 - **System knowledge.** `input/{slug}/knowledge/` holds the system's standing rules, taught by the user over time: `system.md`, and one file per page (`input/README.md` I7, §4).
 - **Outputs.** `output/{slug}/` holds the ledger (`ds-create-ledger.json`), the copy files (`copy/`), the fast-mode manifests (`fast/`), the Figma exports (`figma/`), the docs site (`kit/web/`) and reports (`reports/`).
 
 # 2. Rules for every command
 
-1. **Inputs first.** Read `input/{slug}/` before asking. Ask only what the inputs leave open, and show each answer an input gives with its source (`input/README.md` I1, I2).
+1. **Inputs first.** Save what the user pasted or attached into `input/{slug}/`, creating the folder when needed, then read the whole folder before asking. Ask only what the inputs leave open, and show each answer an input gives with its source (`input/README.md` I1, I2). The user never has to make the folder.
 2. **The system's knowledge before the spec.** Before building, rebuilding or editing a page, read `input/{slug}/knowledge/system.md` and the page's knowledge file. Their rules override the spec, templates and manifests for that system, and never change the repo (`input/README.md` I7). The repo's `knowledge/` explains why the specs are as they are. Read a page's topics before writing its copy, and let that reasoning shape the docs in the system's own words, without ever naming or citing it (`workflow/COPY.md` §1). Use it to apply a rule with its intent or to make a call the spec leaves open, never to override a spec (`knowledge/README.md` §1).
 3. **Save every answer.** Every answer to a skill question is written to `input/{slug}/answers/` in the same turn (§3). Anything else the user says that shapes the system goes to `input/{slug}/chat/` (`input/README.md` I3).
 4. **YOLO.** When the user says YOLO, the AI answers the open questions itself. It writes each answer as an AI decision with a one-line reason, and doesn't stop between pages. Three things are never decided by the AI:

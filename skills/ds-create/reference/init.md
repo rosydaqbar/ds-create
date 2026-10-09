@@ -6,9 +6,21 @@ Sets up the baseline of a design system: the inputs are read, the basics are set
 
 **Load:** the global set (`SKILL.md` §1), `input/README.md`, `workflow/QUESTIONNAIRE.md` §1, §2, §3, §9 and §10, `specs/SYSTEM.md` Part C and `specs/guidance/02-tokens.md`. For an existing file, also `workflow/INITIATOR.md` Part B §2 (*Inspect first*).
 
+**Order.** Steps 0, 1 and 2 run before anything is asked. The first reply is always the start report (§2), and no question comes before it.
+
+# 0. Take in what came with the command
+
+The user never has to prepare a folder. Whatever comes with the command, or later in chat, is an input:
+- **The slug.** Take the system name from the request or the pasted text (lowercase, kebab case). Ask for it only when neither gives one.
+- **The folder.** Create `input/{slug}/` when it doesn't exist.
+- **Pasted text** (a brief, a PRD, brand notes, a list of links): save it word for word in `input/{slug}/chat/YYYY-MM-DD.md` (`input/README.md` I3), then read it like any other input. A brief pasted in chat is the system's brief.
+- **Attached files:** save each one in the folder that fits (`brief/`, `brand/`, `design-system/`, `references/`), under its own name.
+- **A Figma link:** record it in the same chat file. It is the file for the readiness check.
+- **Files dropped straight into `input/`,** outside any system folder: they belong to this system when `input/` holds no other system folder; otherwise ask which system they belong to. Read them where they are, and list them in `sources.md` by their path from `input/`. Never move or rename them.
+
 # 1. Readiness check
 
-Run every check, then report them all together. A failed check stops init until it is fixed; the report says how to fix it.
+Run every check before asking anything, and report them all together in the start report (§2). A failed check stops init until it is fixed; the report says how to fix it.
 
 | Check | How | Fix to suggest |
 | --- | --- | --- |
@@ -16,15 +28,36 @@ Run every check, then report them all together. A failed check stops init until 
 | The file is editable | A read-only `use_figma` call on the file returns its pages | Share the file with edit access, or allow a new file |
 | Brand typefaces are installed | `figma.listAvailableFontsAsync()` has every family the brand names, with the styles the type scale needs | Install the font, or choose a stand-in and record it as an answer |
 | Node 20 or later | `node -v`, only when the docs site may be built | Install Node 20 or later |
-| Input folder | `input/{slug}/` exists | Create it; init can start with chat answers alone |
+| Inputs | `input/{slug}/` holds at least what came with the command (§0) | Nothing to fix: with no input at all, the questions in §3 cover it |
 
-# 2. Read the inputs
+# 2. Read the inputs, then show the start report
 
-Read every file in `input/{slug}/`, then write or update `sources.md` (`input/README.md` I1, I5). List any conflict between inputs under *Open conflicts*, and raise it before the questions.
+List the files with `find input -type f`, never with `rg`, `fd`, Glob or Grep: git ignores `input/`, and those tools skip git-ignored files, so they show an empty folder (`workflow/GOTCHAS.md` G55). Read every file in `input/{slug}/` and every loose file in `input/` that belongs to this system (§0), then write or update `sources.md` (`input/README.md` I1, I5). List any conflict between inputs under *Open conflicts*.
+
+Then show the start report. It is init's first reply, and the questions in §3 come after it, in the same reply or the next:
+
+```text
+Readiness
+  Figma tools     {ok | fail: how to fix}
+  File            {link} · {editable | read-only: how to fix} · {empty | n pages}
+  Typefaces       {each family: installed | missing | none named yet}
+  Node            {version | not needed yet}
+
+Inputs (input/{slug}/)
+  {file}          {what it decides, e.g. "product, users, core features"}
+  …
+
+Already answered by the inputs
+  {question}      {answer}  ({source})
+  …
+
+Open conflicts    {each, or "none"}
+Still open        {the questions §3 asks next}
+```
 
 # 3. Ask what is missing
 
-Init owns these questionnaire sections. Show every question an input answers already filled in, with its source, and ask only the open ones:
+Init owns these questionnaire sections. Ask only the questions the start report lists as still open. Never ask what an input already answers, and never put forward a brand value (a color, a typeface) as if it were decided: that is an AI decision in YOLO, or an option the user picks.
 
 | Section | What it settles |
 | --- | --- |

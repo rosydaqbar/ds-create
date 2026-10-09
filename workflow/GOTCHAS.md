@@ -253,3 +253,13 @@ Also turn clip content on: `figma.createComponent()` starts with it off, and the
 
 *Why:* large sets could not be returned in one piece, and a set changed after export left a stale snapshot.
 *Check:* each snapshot's variant count equals the set's variant count in the file.
+
+# 6. Inputs and local files
+
+**G55. List `input/` and `output/` with `find`, never with a search tool.**
+- Git ignores `input/*` and `output/*`, so client files are never committed. `rg`, `fd`, `ag` and the agent's Glob and Grep tools skip git-ignored files.
+- List inputs with `find input -type f`, and open each file by its path. Use the same for anything in `output/{slug}/` that has no fixed path.
+- The `.ignore` whitelist for `input/` helps a whole-tree search, but ripgrep still drops the files when it gets several paths at once. Never rely on it.
+
+*Why:* an init listed `input/` with `rg --files`, saw only the README, and asked for a brand identity that was sitting in the folder as a file.
+*Check:* `sources.md` lists every file that `find input -type f` returns for the system, README excepted.

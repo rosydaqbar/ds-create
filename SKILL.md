@@ -51,9 +51,11 @@ rsync -a --exclude input/ --exclude output/ "<installed skill folder>/" ~/ds-cre
 
 # 3. Commands
 
+**Before any command, read `skills/ds-create/SKILL.md` in the workspace**, then the command's reference file. The rules there apply to every command, even when the workspace was already set up.
+
 | Command | What it does |
 | --- | --- |
-| `/ds-create init` | Checks readiness, reads everything in `input/{slug}/`, asks only what the inputs leave open, and sets up the foundations as Figma variables and styles. Runs once per system. |
+| `/ds-create init` | Saves what you paste or attach into `input/{slug}/` (it makes the folder), checks readiness, reads every input, asks only what the inputs leave open, and sets up the foundations as Figma variables and styles. Runs once per system. |
 | `/ds-create build` | Asks four questions: the engine (Default or Fast), how far to go, Figma only or with the docs site, and the pace. Then builds exactly that. Run it again to add more. |
 | `/ds-create learn` | Keeps a lasting rule the user teaches about their system ("buttons align left") in `input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build. |
 | `/ds-create qa` | Runs the checks the user asks for: page and file audits, spec checklists, the copy check, and the site's QA. Only on call. |
@@ -80,7 +82,7 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 
 # 5. What goes in and what comes out
 
-**In: `input/{slug}/`**, one folder per system (`input/README.md`):
+**In: `input/{slug}/`**, one folder per system (`input/README.md`). Nobody has to make it: init creates it and saves what the user pastes or attaches.
 - `brief/`: product brief, goals, users, scope, research;
 - `brand/`: guidelines, logos, typefaces, colors, tone of voice;
 - `design-system/`: an existing system, its docs, token exports and Figma links;

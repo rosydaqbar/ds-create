@@ -5,8 +5,8 @@ Everything the user provides for a design system goes here: product briefs, bran
 Nothing in this folder is committed except this file: `.gitignore` ignores `input/*`. Brand content stays here and in `output/`, never in the executor (`README.md` §5).
 
 **For the user.**
-- Make a folder named after your system (`input/acme/`) and drop in what you have: a PRD or brief in `brief/`, brand guidelines in `brand/`, your current design system in `design-system/`, and anything you like in `references/`.
-- You don't need every folder, and you don't need to rename your files.
+- You don't have to set anything up. Paste your brief or attach files when you run `/ds-create init`, and the agent creates `input/{your-system}/` and saves them there.
+- If you'd rather prepare it yourself, make a folder named after your system (`input/acme/`) and drop in what you have: a PRD or brief in `brief/`, brand guidelines in `brand/`, your current design system in `design-system/`, and anything you like in `references/`. You don't need every folder, and you don't need to rename your files.
 - Anything you tell the agent in chat is saved in `chat/` for you.
 - When you teach the agent a lasting rule about your system, for example "buttons align left, it's in our brand guidelines", it is kept in `knowledge/`, applied to what is already built, and followed in every later build. You can also write or edit those files yourself (I7).
 - This folder ships empty: in the repo it holds only this README.
@@ -30,7 +30,7 @@ input/
 ```
 
 - The user adds files to `brief/`, `brand/`, `design-system/` and `references/`, in any format the agent can read: Markdown, text, PDF, images, office documents, exported JSON, or a file of links.
-- The agent writes only `sources.md`, `answers/`, `knowledge/` and `chat/`. It never edits, renames or deletes a file the user added.
+- The agent writes `sources.md`, `answers/`, `knowledge/` and `chat/`. It also creates the system's folder when there is none, and saves files the user attaches in chat into the folder that fits (`skills/ds-create/reference/init.md` §0). It never edits, renames or deletes a file the user added.
 - `knowledge/` is shared: the user may write or edit it, and the agent adds entries and updates their status. Neither side deletes an entry: a rule that no longer holds is replaced (I7).
 - `answers/` holds the gates of a build: `01-init.md` for `/ds-create init`, then `02-build-YYYY-MM-DD.md` and so on, one per `/ds-create build` round. Every answer says who decided it (the user, or the AI in YOLO with its reason) and which steps it opens. The format is in `skills/ds-create/SKILL.md` §3.
 - A folder with nothing to put in it is left out.
@@ -38,6 +38,9 @@ input/
 # 2. Rules
 
 **I1. Read the inputs before asking.**
+- List the files with `find input -type f`. Git ignores this folder, so `rg`, `fd`, Glob and Grep skip every file in it and show it empty (`workflow/GOTCHAS.md` G55).
+- A file the user drops straight into `input/`, outside any system folder, is an input of the system being built when there is only one; otherwise ask which system it belongs to. It is read where it is and listed in `sources.md` by its path from `input/`.
+- What the user pastes or attaches with a command is an input too. It is saved into `input/{slug}/` first (`chat/` for pasted text, the fitting folder for files), creating the folder when needed, and read with the rest.
 - At initiation (`INITIATOR.md` Part B §6, steps 1–3), read every file in `input/{slug}/` before the first question. Then write `sources.md`.
 - In every later session, `sources.md` is part of the global set: read it, and open the files it points to at the steps that need them.
 
