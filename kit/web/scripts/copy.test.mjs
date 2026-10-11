@@ -81,7 +81,7 @@ for (const level of ['parts','components','sections','layouts','screens']) {
 }
 
 test('authored reading sections replace prose in fragments while retaining live references and old anchors', () => {
- const w=writer({'02':{sections:[{name:'Naming',web:'narrative',lines:[],items:[{title:'Role grammar',web:'',lines:[line('Choose a role by its intended consumer.')]}]}]}});
+ const w=writer({'02':{sections:[{name:'Naming',web:'narrative',lines:[line('Names distinguish a role from its source value.'),line('The table uses exported names.','both','caption')],items:[{title:'Role grammar',web:'',lines:[line('Choose a role by its intended consumer.')]}]}]}});
  const P=({children})=>React.createElement('p',null,children);
  const H3=({children})=>React.createElement('h3',null,children);
  const blocks={P,H3,Bullets:()=>null,Caption:P,slugify:s=>s.toLowerCase().replaceAll(' ','-')};
@@ -89,5 +89,26 @@ test('authored reading sections replace prose in fragments while retaining live 
  const exports={};
  new Function('exports','require',js)(exports,name=>({'react':React,'react/jsx-runtime':jsxRuntime,'./copy':w,'./blocks':blocks,'./DocPage':{AnchorHeading:H3,Topics:()=>null}})[name]);
  const html=renderToStaticMarkup(React.createElement(exports.ReadingTopic,{id:'02',title:'Naming'},React.createElement(React.Fragment,null,React.createElement(P,null,'Stale explanation.'),React.createElement(H3,null,'Previous reference'),React.createElement('table',null,React.createElement('tbody',null,React.createElement('tr',null,React.createElement('td',null,'Verified value')))))));
- assert.match(html,/Choose a role by its intended consumer/);assert.match(html,/<table>/);assert.match(html,/Verified value/);assert.match(html,/id="previous-reference"/);assert.doesNotMatch(html,/Stale explanation/);
+ assert.match(html,/Names distinguish a role/);assert.match(html,/The table uses exported names/);assert.match(html,/Choose a role by its intended consumer/);assert.match(html,/<table>/);assert.match(html,/Verified value/);assert.match(html,/id="previous-reference"/);assert.doesNotMatch(html,/Stale explanation/);
+});
+
+test('authored reading copy owns nested explanations, lists and captions while references stay live', () => {
+ const P=({children})=>React.createElement('p',null,children);
+ const H3=({children})=>React.createElement('h3',null,children);
+ const Bullets=({items})=>React.createElement('ul',null,items.map((s,i)=>React.createElement('li',{key:i},s)));
+ const Reference=()=>React.createElement('table',null,React.createElement('tbody',null,React.createElement('tr',null,React.createElement('td',null,'36px'))));
+ const blocks={P,H3,Bullets,Caption:({children})=>React.createElement('small',null,children),slugify:s=>s.toLowerCase().replaceAll(' ','-')};
+ const w=writer({'02':{sections:[{name:'Collections',web:'',lines:[],items:[{title:'Select by purpose',web:'Old topic',lines:[line('Choose the text role for the text’s purpose.'),line('Keep the corresponding state mapping.','both','item'),line('The table retains exported values.','both','caption'),line('Figma-only wording.','figma')]}]}]}});
+ const js=ts.transpileModule(fs.readFileSync(new URL('../src/docs/FoundationCopy.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText;
+ const exports={};new Function('exports','require',js)(exports,name=>({'react':React,'react/jsx-runtime':jsxRuntime,'./copy':w,'./blocks':blocks,'./DocPage':{AnchorHeading:H3,Topics:()=>null}})[name]);
+ const fallback=React.createElement('div',{className:'layout'},React.createElement('div',null,React.createElement(P,null,'Stale nested claim.'),React.createElement(Bullets,{items:['Stale list.']}),React.createElement(blocks.Caption,null,'Stale caption.')),React.createElement(Reference));
+ const render=(id)=>renderToStaticMarkup(React.createElement(exports.ReadingTopic,{id,title:'Old topic'},fallback));
+ const html=render('02');
+ assert.match(html,/Select by purpose/);assert.match(html,/id="old-topic"/);
+ assert.match(html,/Choose the text role/);assert.match(html,/<li>Keep the corresponding state mapping/);
+ assert.match(html,/<small>The table retains exported values/);assert.match(html,/<table>/);assert.match(html,/36px/);
+ assert.doesNotMatch(html,/Stale|Figma-only/);
+ const renamed=renderToStaticMarkup(React.createElement(exports.ReadingTopic,{id:'02',title:'New topic name',aliases:['Old topic']},fallback));
+ assert.match(renamed,/Choose the text role/);assert.match(renamed,/36px/);assert.doesNotMatch(renamed,/Stale/);
+ const legacy=render('missing');assert.match(legacy,/Stale nested claim/);assert.match(legacy,/Stale list/);assert.match(legacy,/Stale caption/);assert.match(legacy,/36px/);
 });

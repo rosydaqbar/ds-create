@@ -63,31 +63,38 @@ export const FoundationNarrative = ReadingNarrative;
 export const FoundationGuidelines = ReadingGuidelines;
 
 /** Existing reference/code children stay live; authored copy owns the explanation. */
-export function ReadingTopic({ id, title, children }: { id: string; title: string; children: ReactNode }) {
-  const item = readingTopic(id, title);
+export function ReadingTopic({ id, title, aliases = [], children }: { id: string; title: string; aliases?: string[]; children: ReactNode }) {
+  const item = readingTopic(id, title) ?? aliases.map((old) => readingTopic(id, old)).find(Boolean);
   const section = readingSection(id, title);
-  const paragraphs = item && text(item.lines);
-  // Walk fragments only: never inspect or replace a reference component's internals.
+  const paragraphs = section ? text(section.lines) : item && text(item.lines);
+  const authored = !!section || !!item?.lines.some((l) => l.surface !== 'figma');
+  // Layout wrappers are not references. Remove their fallback prose too, while
+  // leaving reference components (tables, specimens, diagrams) opaque and live.
   const references = (nodes: ReactNode): ReactNode => Children.map(nodes, (child) => {
     if (!isValidElement<{ children?: ReactNode }>(child)) return child;
-    if (child.type === Fragment) return cloneElement(child, {}, references(child.props.children));
-    if (child.type === P || (section && child.type === Bullets)) return null;
+    if (child.type === P || child.type === Bullets || child.type === Caption) return null;
     if (section && child.type === H3) {
       const old = child.props.children;
       return typeof old === 'string' && !section.items.some((it) => it.title === old) ? <span id={slugify(old)} /> : null;
     }
+    if (child.type === Fragment || typeof child.type === 'string') return cloneElement(child, {}, references(child.props.children));
     return child;
   });
-  const preserved = section || paragraphs?.length ? references(children) : children;
+  const preserved = authored ? references(children) : children;
   return <section className="docs-section flex flex-col gap-lg">
     <AnchorHeading>{item?.title ?? title}</AnchorHeading>
-    {item && item.web.split(';').map((old) => old.trim()).filter((old) => old && old !== item.title).map((old) => <span key={old} id={slugify(old)} />)}
+    {[...new Set([...aliases, ...(item?.web.split(';') ?? [])].map((old) => old.trim()).filter((old) => old && old !== (item?.title ?? title)))].map((old) => <span key={old} id={slugify(old)} />)}
     {paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
+    {item && text(item.lines, 'item').length > 0 && <Bullets items={text(item.lines, 'item')} />}
+    {section && text(section.lines, 'item').length > 0 && <Bullets items={text(section.lines, 'item')} />}
     {section?.items.map((topic) => <div key={topic.title} className="flex flex-col gap-md">
       <H3>{topic.title}</H3>
       {text(topic.lines).map((p, i) => <P key={i}>{p}</P>)}
       {text(topic.lines, 'item').length > 0 && <Bullets items={text(topic.lines, 'item')} />}
+      {text(topic.lines, 'caption').map((c, i) => <Caption key={i}>{c}</Caption>)}
     </div>)}
     {preserved}
+    {item && text(item.lines, 'caption').map((c, i) => <Caption key={i}>{c}</Caption>)}
+    {section && text(section.lines, 'caption').map((c, i) => <Caption key={i}>{c}</Caption>)}
   </section>;
 }

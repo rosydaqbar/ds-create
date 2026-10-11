@@ -33,6 +33,19 @@ export function editorialFindings(copies) {
     const seen = new Map();
     for (const copy of copies) {
       const paragraphs = prose(copy, surface);
+      // A run of tiny unlabelled paragraphs often comes from exporting card
+      // fields as prose. Review the grouping; short definitions and real lists
+      // remain valid and no fixed paragraph length is required.
+      let run = [];
+      const reviewRun = () => {
+        if (run.length >= 4) findings.push({ code: 'fragmented-explanation', surface, page: copy.id, location: run[0].location, message: 'Review these consecutive short paragraphs as one explanation or a structured comparison. Keep distinct facts; remove claim/restatement pairs.' });
+        run = [];
+      };
+      for (const p of paragraphs) {
+        if (p.role !== '' || normalized(p.text).split(' ').length > 18 || (run.length && run[0].location !== p.location)) reviewRun();
+        if (p.role === '' && normalized(p.text).split(' ').length <= 18) run.push(p);
+      }
+      reviewRun();
       paragraphs.forEach((p, i) => {
         const sentences = p.text.split(/(?<=[.!?])\s+/);
         for (const sentence of sentences) {

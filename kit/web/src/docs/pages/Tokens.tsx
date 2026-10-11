@@ -122,8 +122,8 @@ function TextLink({ to, children }: { to: string; children: ReactNode }) {
     </Link>
   );
 }
-function Topic({ title, children }: { title: string; children: ReactNode }) {
-  return <ReadingTopic id="02" title={title}>{children}</ReadingTopic>;
+function Topic({ title, aliases, children }: { title: string; aliases?: string[]; children: ReactNode }) {
+  return <ReadingTopic id="02" title={title} aliases={aliases}>{children}</ReadingTopic>;
 }
 function Visual({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <PreviewCard label="Example preview" className={className}>{children}</PreviewCard>;
@@ -248,83 +248,11 @@ function ModeCard() {
   );
 }
 
-/* What the token system is for (specs/guidance/02-tokens.md §2.1): four goals, each with what it means and where this system meets it. */
-const goalRole = ['color/fill/brand/solid', 'color/text/brand', 'color/fill/accent/solid'].find((n) => byName.has(n));
-const GOALS: { goal: string; means: string; here: string; see: string; to: string }[] = [
-  {
-    goal: 'Simplicity',
-    means: 'One name per concept, and only as many collections as there are domains.',
-    here: `${tokens.collections.length} collections (${joinList(tokens.collections.map((c) => c.name))}) share one naming grammar: domain, group, role, then emphasis or state.`,
-    see: 'Naming',
-    to: '#naming',
-  },
-  {
-    goal: 'Accessibility',
-    means: 'Measure each intended foreground/background pair, including state changes and composited layers.',
-    here: `Read the measured foreground/background pairs for ${joinList(supportedModes)} on 1.1 Color. Include interaction fills and composited layers when choosing a pair for a new composition.`,
-    see: '1.1 Color',
-    to: pageTo('1.1'),
-  },
-  {
-    goal: 'Aesthetics',
-    means: 'Change a shared source value when its dependent roles should change together.',
-    here: goalRole
-      ? `${families.length} palette families sit behind the color roles; ${goalRole} → ${primitiveOf(goalRole)} shows the source relationship for that fill.`
-      : `${families.length} palette families sit behind the color roles.`,
-    see: 'Primitive palette',
-    to: '#primitive-palette',
-  },
-  {
-    goal: 'Scalability',
-    means: 'Add roles for new responsibilities and retain names whose purposes remain unchanged.',
-    here: unsupportedModes.length
-      ? `Use ${joinList(supportedModes)} for resolved color roles. Complete the mappings for ${joinList(unsupportedModes)} before using those modes.`
-      : 'Review the intended consumers and complete mappings before adding another role or mode.',
-    see: 'Modes',
-    to: '#modes',
-  },
-];
-/* Legacy fallback when the page has no authored copy. */
-const GOALS_LINK = 'Choose a role by its intended use and follow its alias to inspect the source value. Change a primitive when its dependent uses should change together; change a narrower mapping when only one role needs to differ.';
-function HashOrPageLink({ to, children }: { to: string; children: ReactNode }) {
-  const cls = 'rounded-xs font-semibold text-text-brand underline decoration-1 underline-offset-2 outline-none is-hover:text-text-brand-hover is-focus:shadow-focus-default';
-  return to.startsWith('#') ? (
-    <a href={to} className={cls}>
-      {children}
-    </a>
-  ) : (
-    <Link to={to} className={cls}>
-      {children}
-    </Link>
-  );
-}
-
 function Overview() {
   return (
     <div className="flex flex-col gap-4xl">
-      <Topic title="What the token system is for">
-        <P>Four goals decide every token. Each one is a concrete rule with a place in this file where you can check it.</P>
-        <div className="grid gap-md sm:grid-cols-2">
-          {GOALS.map((g) => (
-            <div key={g.goal} className="flex flex-col gap-md rounded-surface border border-border-subtle p-xl">
-              <H3>{g.goal}</H3>
-              <dl className="flex flex-col gap-sm">
-                <div className="flex flex-col gap-xxs">
-                  <dt className="type-body-xs-semibold text-text-tertiary">What it means</dt>
-                  <dd className="type-body-sm-regular text-text-secondary">{g.means}</dd>
-                </div>
-                <div className="flex flex-col gap-xxs">
-                  <dt className="type-body-xs-semibold text-text-tertiary">In this system</dt>
-                  <dd className="type-body-sm-regular text-text-secondary">{g.here}</dd>
-                </div>
-              </dl>
-              <span className="type-body-sm-regular mt-auto">
-                <HashOrPageLink to={g.to}>See {g.see} →</HashOrPageLink>
-              </span>
-            </div>
-          ))}
-        </div>
-        <P>{GOALS_LINK}</P>
+      <Topic title="Selecting a token" aliases={['What the token system is for']}>
+        <P>Choose a token by the property and purpose of the element. For supporting text, use a secondary text role rather than selecting a palette swatch by eye. A role keeps that use connected to its source value when the palette changes.</P>
       </Topic>
 
       <Topic title="The collections">

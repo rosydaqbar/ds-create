@@ -7,17 +7,7 @@
       "kind": "topics",
       "items": [
         {
-          "title": "What the token system is for",
-          "visual": {
-            "type": "goal-tiles",
-            "todo": "four goals: label and the page to see",
-            "goals": []
-          },
-          "take": {
-            "role": "",
-            "skip": 1,
-            "count": 8
-          }
+          "title": "Selecting a token"
         },
         {
           "title": "The collections",

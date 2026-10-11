@@ -104,3 +104,16 @@ test('direct limitations, technical requirements and contributor procedures rema
   assert.deepEqual(editorialFindings([parse('# Guidelines\n## Grouping\n[both] This example establishes a relationship between a label and its associated control.\n# Properties\n## onComplete\n[web] A complete value is not a completed transaction; use the response status to confirm acceptance.')]), []);
   assert.deepEqual(editorialFindings([parse('# Guidelines\n## Correcting a value\n[both] Preserve the user’s correction while the field validates so an error response does not erase the new entry.')]), []);
 });
+
+test('fragmented card exports require regrouping without banning short prose or lists', () => {
+  const fragments = ['Four goals shape the token system.', 'Light and Dark come from one set of roles.', 'Color has Light and Dark modes; Dark is the default.', 'Every component draws from the same scales.', 'Space, Size and Shape roles are bound inside every set.'];
+  for (const id of ['02', '4.1', 'future-subject']) {
+    const bad = parse('# Overview\n## Choosing a configuration\n' + fragments.map(s => '[both] ' + s).join('\n'));
+    bad.id = id;
+    const findings = editorialFindings([bad]).filter(f => f.code === 'fragmented-explanation');
+    assert.equal(findings.length, 2); // The same review applies to Figma and web.
+  }
+  assert.deepEqual(editorialFindings([parse('# Overview\n## Scope\n[both] Color supports Dark.\n[both] Measurement collections use Value.')]), []);
+  assert.deepEqual(editorialFindings([parse('# Procedure\n' + fragments.map(s => '[both item] ' + s).join('\n'))]), []);
+  assert.deepEqual(editorialFindings([parse('# Overview\n' + fragments.map((s,i) => '## Topic ' + i + '\n[both] ' + s).join('\n'))]), []);
+});

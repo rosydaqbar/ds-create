@@ -8,7 +8,7 @@ This page is built with `workflow/templates/structure.md`; the frames and what t
 
 ```text
 02 Tokens
-├─ 02 Tokens · Collections        system goals, the collections, layers, scopes, adding to a collection
+├─ 02 Tokens · Collections        token selection, the collections, layers, scopes, adding to a collection
 ├─ 02 Tokens · Naming             the grammar, children, layers in names, code syntax, descriptions
 ├─ 02 Tokens · Modes              color modes, themes without modes, density, breakpoints, dark neutrals, motion
 └─ 02 Tokens · Primitive palette  every primitive group as a table, neutral character, transparent shades
@@ -22,28 +22,13 @@ Every topic keeps its visual. Visuals are built from this file's own variables, 
 
 # 2. 02 Tokens · Collections
 
-## 1. What the token system is for
+## 1. Selecting a token
 
-Four goals decide every token. Each goal is stated concretely, then shown in this file, never as a slogan: words such as consistent, robust or flexible only appear next to the mechanism that makes them true.
+Explain how readers choose a token from this system: identify the element’s property and intended purpose, then select an existing role that expresses that use. Use an exported role to clarify the decision when useful; do not introduce a plausible token name that is absent from the source.
 
-**Visual: goal tiles.** One tile per goal, in this order, each with the same four lines filled from this file:
+The opening establishes selection. The collection map explains ownership, the alias diagram explains dependencies and the scopes reference explains picker restrictions. Keep those explanations in their respective topics rather than summarizing all of them twice.
 
-```text
-Goal tile
-├─ Goal          Simplicity · Accessibility · Aesthetics · Scalability
-├─ What it means one sentence: what the goal asks of every token
-├─ In this file  how this file meets it, with real collection, role and mode names
-└─ See           a link to the page that shows it
-```
-
-| Goal | What it means | In this file (fill with real names) | See |
-| --- | --- | --- | --- |
-| Simplicity | One name per concept, and only as many collections as there are domains. | The collections that exist, by name, and the one grammar they share. | `02 Tokens · Naming` |
-| Accessibility | Every text and surface pair passes contrast in each supported mode before a component uses it. | The modes that are tested, and each accepted exception with its usage rule. | `1.1 Color · Guidelines` |
-| Aesthetics | The brand's character lives in the primitives and the roles that alias them, never on layers. | The brand families and the roles that carry them (brand, accent, neutral). | `02 Tokens · Primitive palette` |
-| Scalability | New modes, brands and components add values without renaming anything. | What is ready to grow: unsupported modes waiting for values, groups with room for new roles. | `02 Tokens · Modes` |
-
-**How they connect.** After the tiles, one paragraph (no list) ties the four goals together in this order, with this file's real names: simple, predictable names mean each role exists once → so each foreground and background pair is checked once, in every supported mode (accessibility) → the brand sits in the primitives behind those roles, so restyling never touches a component (aesthetics) → so growth only adds values and modes, never renames (scalability).
+Do not require a goal count, goal tiles, a principle label or a sentence quota. Simplicity, accessibility, visual treatment and extension requirements belong with the concrete decisions they affect. Document supported modes from the actual export, and distinguish required checks from completed validation. Existing goal-tile manifests remain supported but are optional; retain one only when it contributes distinct, grounded guidance.
 
 ## 2. The collections
 
