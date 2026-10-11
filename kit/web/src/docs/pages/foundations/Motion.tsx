@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
 import { Icon, type IconName } from '@/icons';
 import { Button, Checkbox, IconButton, Menu, Select, Spinner, Switch, Tooltip } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
-import { breakable, Caption, CodeBlock, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
+import { PreviewCard, breakable, Caption, CodeBlock, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { config } from '@/ds.config';
 import type { Topic } from '../../types';
@@ -144,7 +144,7 @@ function Principles() {
 
 function DurationBars() {
   return (
-    <div className="flex flex-col gap-lg">
+    <PreviewCard label="Duration scale" className="flex flex-col gap-lg">
       {durations.map((d) => (
         <div key={d.name} className="grid items-center gap-sm md:grid-cols-[12rem_minmax(0,1fr)_5rem] md:gap-lg">
           <div className="flex flex-col">
@@ -157,14 +157,14 @@ function DurationBars() {
           <span className="type-code-sm-regular text-text-secondary md:text-right">{ms(d.name)} ms</span>
         </div>
       ))}
-    </div>
+    </PreviewCard>
   );
 }
 
 function TryIt() {
   const [on, setOn] = useState(false);
   return (
-    <div className="flex flex-col gap-lg rounded-surface border border-border-subtle p-xl">
+    <PreviewCard label="Motion preview" className="flex flex-col gap-lg">
       <div className="flex flex-wrap items-center justify-between gap-md">
         <span className="type-body-sm-semibold text-text-primary">Every duration with every curve</span>
         <PlayButton on={on} onClick={() => setOn((o) => !o)} />
@@ -183,13 +183,13 @@ function TryIt() {
             )),
           )}
       </div>
-    </div>
+    </PreviewCard>
   );
 }
 
 function LiveComponents() {
   return (
-    <div className="flex flex-wrap items-start gap-2xl rounded-surface border border-border-subtle bg-surface-sunken p-3xl">
+    <PreviewCard label="Component motion" className="flex flex-wrap items-start gap-2xl">
       <Button emphasis="secondary" label="Hover me" />
       <Switch defaultChecked aria-label="Notifications" />
       <Checkbox defaultChecked aria-label="Include shared folders" />
@@ -200,7 +200,7 @@ function LiveComponents() {
         <Select label="Select" options={[{ value: 'a', label: 'Daily' }, { value: 'b', label: 'Weekly' }, { value: 'c', label: 'Monthly' }]} placeholder="Choose" />
       </div>
       <Menu type="button-simple" />
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -224,7 +224,7 @@ function Overview() {
       <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Easings</AnchorHeading>
         <P>An easing sets how a change speeds up and slows down. Things arriving start fast and settle. Things leaving start gently and speed away.</P>
-        <div className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
+        <PreviewCard label="Easing curves" className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
           {easings.map((e) => (
             <div key={e.name} className="flex flex-col items-center gap-md rounded-surface border border-border-subtle p-xl text-center">
               <Curve name={e.name} />
@@ -233,7 +233,7 @@ function Overview() {
               <span className="type-body-sm-regular text-text-secondary">{EASE_USE[short(e.name)]}</span>
             </div>
           ))}
-        </div>
+        </PreviewCard>
         <TryIt />
       </section>
 

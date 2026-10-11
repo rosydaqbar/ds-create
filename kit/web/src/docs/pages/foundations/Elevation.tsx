@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
 import { Icon } from '@/icons';
 import { Button, Checkbox, IconButton, Switch, TextField, TooltipBubble } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
-import { breakable, Bullets, Caption, CodeBlock, H3, InlineCode, P, productHasWeb, Swatch, TokenBadge, tokenCodeColumns, tokenCodeNames, TokenTable } from '../../blocks';
+import { PreviewCard, breakable, Bullets, Caption, CodeBlock, H3, InlineCode, P, productHasWeb, Swatch, TokenBadge, tokenCodeColumns, tokenCodeNames, TokenTable } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { siteSchemes, supportedModes } from '../../modes';
 import type { Topic } from '../../types';
@@ -75,10 +75,9 @@ const ringPx = HAS_RING ? Math.max(...ringLayers.map((l) => l.spread)) - gapPx :
 /* ---------- small pieces ---------- */
 function Themed({ mode, children, className, label = true }: { mode: Mode; children: ReactNode; className?: string; label?: boolean }) {
   return (
-    <div data-theme={mode} className={cn('flex min-w-0 flex-col gap-lg rounded-surface bg-surface-sunken p-xl text-text-primary', className)}>
-      {label && <span className="type-body-xs-semibold text-text-tertiary">{mode === 'light' ? 'Light' : 'Dark'}</span>}
+    <PreviewCard scheme={mode} label={label ? `${mode === 'light' ? 'Light' : 'Dark'} elevation preview` : 'Elevation preview'} className={cn('flex flex-col gap-lg text-text-primary', className)}>
       {children}
-    </div>
+    </PreviewCard>
   );
 }
 

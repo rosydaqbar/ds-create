@@ -8,7 +8,7 @@ import type { AppVisual, ComponentDoc, Guideline, MatrixSpec } from './types';
 import { levelLabel } from './registry';
 import { figmaNodeFor, pageMeta } from './meta';
 import { AnchorHeading, DocTabs, PageHeader, Topics } from './DocPage';
-import { AppStage, AppTheme, Bullets, Caption, CodeBlock, ExampleBlock, H3, NoAppVersion, P, Playground, PreviewTabs, productHasApp, productHasWeb, PropsTable, Segmented, Stage, TokenTable, useScrollRegion } from './blocks';
+import { AppStage, AppTheme, Bullets, Caption, CodeBlock, ExampleBlock, H3, NoAppVersion, P, Playground, PreviewCard, PreviewTabs, productHasApp, productHasWeb, PropsTable, Segmented, Stage, TokenTable, useScrollRegion } from './blocks';
 
 export { PageHeader } from './DocPage';
 
@@ -41,15 +41,17 @@ function Specimen({ m }: { m: MatrixSpec }) {
   // Wide grids scroll inside their own region on small screens.
   const ref = useScrollRegion<HTMLDivElement>(m.title);
   return (
-    <div ref={ref} className="relative min-w-0 max-w-full overflow-x-auto rounded-surface outline-none focus-visible:shadow-focus-default">
-      {m.specimenRole ? (
-        <div role={m.specimenRole} aria-label={`${m.title} specimens`}>
-          {m.render()}
-        </div>
-      ) : (
-        m.render()
-      )}
-    </div>
+    <PreviewCard label={`${m.title} specimens`} padded={false}>
+      <div ref={ref} className="relative min-w-0 max-w-full overflow-x-auto outline-none focus-visible:shadow-focus-default">
+        {m.specimenRole ? (
+          <div role={m.specimenRole} aria-label={`${m.title} specimens`}>
+            {m.render()}
+          </div>
+        ) : (
+          m.render()
+        )}
+      </div>
+    </PreviewCard>
   );
 }
 

@@ -7,7 +7,7 @@ import type { TokenVariable } from '@/tokens/types';
 import { Icon } from '@/icons';
 import { Button, Progress, Select, Switch, TextField } from '@/components';
 import { DocPage } from '../DocPage';
-import { appTokenNames, breakable, Bullets, Caption, DoDont, H3, InlineCode, P, productHasWeb, Swatch, TokenTable } from '../blocks';
+import { PreviewCard, appTokenNames, breakable, Bullets, Caption, DoDont, H3, InlineCode, P, productHasWeb, Swatch, TokenTable } from '../blocks';
 import { siteHasDark, supportedModes, unsupportedModes } from '../modes';
 import { componentDocs, slugOf, staticPages } from '../registry';
 import { figmaNodeFor } from '../meta';
@@ -126,7 +126,7 @@ function Topic({ title, children }: { title: string; children: ReactNode }) {
   return <ReadingTopic id="02" title={title}>{children}</ReadingTopic>;
 }
 function Visual({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl ${className}`}>{children}</div>;
+  return <PreviewCard label="Example preview" className={className}>{children}</PreviewCard>;
 }
 function TableRegion({ label, children, className = '' }: { label: string; children: ReactNode; className?: string }) {
   return (

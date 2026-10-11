@@ -5,7 +5,7 @@ import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, Icon, IconButton, Kbd, Menu, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
+import { PreviewCard, breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { brandCopy } from '@/brand/copy';
 
@@ -97,7 +97,7 @@ function Block({ title, intro, children }: { title: string; intro?: ReactNode; c
   );
 }
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl', className)}>{children}</div>;
+  return <PreviewCard className={className}>{children}</PreviewCard>;
 }
 function Code({ children, className }: { children: ReactNode; className?: string }) {
   return <span className={cn('type-code-sm-regular min-w-0 text-text-tertiary', className)}>{children}</span>;
@@ -133,7 +133,7 @@ function Spec({ children }: { children: ReactNode }) {
 /* ---------- Overview ---------- */
 function SpaceScale() {
   return (
-    <div className="flex flex-col divide-y divide-border-subtle rounded-surface border border-border-subtle bg-surface-base">
+    <PreviewCard label="Spacing scale" padded={false} className="flex flex-col divide-y divide-border-subtle">
       {SPACE.map((s) => {
         const v = num(s);
         return (
@@ -146,7 +146,7 @@ function SpaceScale() {
           </div>
         );
       })}
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -161,7 +161,7 @@ function Specimen({ label, children }: { label: string; children: ReactNode }) {
 
 function Sizes() {
   return (
-    <div className="flex flex-col gap-xl">
+    <PreviewCard label="Size roles" className="flex flex-col gap-xl">
       <div className="flex flex-col gap-lg border-t border-border-subtle pt-xl">
         <RowNote title="Control height">Buttons, inputs and selects of the same size share a height, so a row of controls lines up. The dashed square on md shows the touch minimum.</RowNote>
         <div className="flex flex-wrap items-end gap-xl">
@@ -238,14 +238,14 @@ function Sizes() {
           <Code>size/touch-min · {num('size/touch-min')}</Code>
         </div>
       </div>
-    </div>
+    </PreviewCard>
   );
 }
 
 function Widths() {
   const max = Math.max(...SIZE_GROUPS.width.map(num));
   return (
-    <div className="flex flex-col gap-sm rounded-surface border border-border-subtle bg-surface-base p-lg">
+    <PreviewCard label="Width roles" className="flex flex-col gap-sm">
       {SIZE_GROUPS.width.map((w) => (
         <div key={w} className="grid grid-cols-[minmax(0,1fr)] gap-xxs md:grid-cols-[9rem_minmax(0,1fr)] md:items-center md:gap-md">
           <span className="type-code-sm-regular text-text-secondary">
@@ -254,7 +254,7 @@ function Widths() {
           <span aria-hidden className="block h-(--size-indicator-lg) rounded-xs bg-fill-brand-subtle ring-1 ring-border-brand-subtle ring-inset" style={{ width: `${(num(w) / max) * 100}%` }} />
         </div>
       ))}
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -286,18 +286,20 @@ function GridFrame({ g, children }: { g: Grid; children?: ReactNode }) {
   const inner = i.frame - 2 * i.margin;
   const style: CSSProperties = { marginInline: `${(i.margin / i.frame) * 100}%`, columnGap: `${(i.gutter / inner) * 100}%`, gridTemplateColumns: `repeat(${i.count}, minmax(0, 1fr))` };
   return (
-    <div className={cn('relative w-full overflow-hidden rounded-control border border-border-subtle bg-surface-base', i.maxW)}>
-      <div aria-hidden className={cn('grid', children ? 'absolute inset-0' : 'h-24')} style={style}>
-        {Array.from({ length: i.count }).map((_, k) => (
-          <span key={k} className="bg-category-pink-subtle ring-1 ring-category-pink-border ring-inset" />
-        ))}
-      </div>
-      {children && (
-        <div aria-hidden className="relative grid content-start gap-y-md py-md" style={style}>
-          {children}
+    <PreviewCard label={`${i.label} grid`}>
+      <div className={cn('relative w-full overflow-hidden rounded-control border border-border-subtle bg-surface-base', i.maxW)}>
+        <div aria-hidden className={cn('grid', children ? 'absolute inset-0' : 'h-24')} style={style}>
+          {Array.from({ length: i.count }).map((_, k) => (
+            <span key={k} className="bg-category-pink-subtle ring-1 ring-category-pink-border ring-inset" />
+          ))}
         </div>
-      )}
-    </div>
+        {children && (
+          <div aria-hidden className="relative grid content-start gap-y-md py-md" style={style}>
+            {children}
+          </div>
+        )}
+      </div>
+    </PreviewCard>
   );
 }
 

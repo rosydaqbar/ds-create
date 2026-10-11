@@ -2,7 +2,7 @@
  * Explorer building blocks. They mirror the Figma doc kit (9.1): stage, axis labels,
  * token badges, do/don't, tables. Doc pages compose these; components never import them.
  */
-import { Fragment, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, Fragment, useContext, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { tokens } from '@/tokens/tokens.gen';
 import { Icon, iconNames } from '@/icons';
@@ -148,15 +148,19 @@ export function useScrollRegion<T extends HTMLElement>(label: string) {
   return ref;
 }
 
-export function Stage({ children, className, padded = true, dark, scheme, label = 'Example' }: { children: ReactNode; className?: string; padded?: boolean; dark?: boolean; scheme?: 'light' | 'dark'; label?: string }) {
+const PreviewContext = createContext(false);
+
+export function Stage({ children, className, padded = true, dark, scheme, label = 'Example', flow = false }: { children: ReactNode; className?: string; padded?: boolean; dark?: boolean; scheme?: 'light' | 'dark'; label?: string; flow?: boolean }) {
   const ref = useScrollRegion<HTMLDivElement>(label);
-  return (
+  const framed = useContext(PreviewContext);
+  const surface = (
     <div
       ref={ref}
       data-theme={scheme ?? (dark && siteSchemes.includes('dark') ? 'dark' : undefined)}
       className={cn(
         // Wide examples scroll inside the stage instead of widening the page.
-        'docs-stage relative flex min-w-0 max-w-full flex-wrap items-center justify-center-safe gap-xl overflow-x-auto md:overflow-visible border border-border-subtle outline-none focus-visible:shadow-focus-default',
+        'docs-stage relative min-w-0 max-w-full overflow-x-auto md:overflow-visible border border-border-subtle outline-none focus-visible:shadow-focus-default',
+        !flow && 'flex flex-wrap items-center justify-center-safe gap-xl',
         padded && 'p-2xl md:p-4xl',
         className,
       )}
@@ -164,6 +168,7 @@ export function Stage({ children, className, padded = true, dark, scheme, label 
       {children}
     </div>
   );
+  return framed ? surface : <PreviewTabs label={label}>{surface}</PreviewTabs>;
 }
 
 /** Local preview tabs leave the page's documentation tab and URL untouched. */
@@ -185,10 +190,18 @@ export function PreviewTabs({ code, children, label }: { code?: string; children
         </div>}
         {!code && <span className="type-body-xs-medium text-text-primary">Preview</span>}
       </div>
-      <div id={`${id}-preview-panel`} role={code ? 'tabpanel' : undefined} aria-labelledby={code ? `${id}-preview-tab` : undefined} hidden={view !== 'preview'}>{children}</div>
+      <div id={`${id}-preview-panel`} role={code ? 'tabpanel' : undefined} aria-labelledby={code ? `${id}-preview-tab` : undefined} hidden={view !== 'preview'}><PreviewContext.Provider value={true}>{children}</PreviewContext.Provider></div>
       {code && <div id={`${id}-code-panel`} role="tabpanel" aria-labelledby={`${id}-code-tab`} hidden={view !== 'code'}><CodeBlock code={code} label={label} /></div>}
     </div>
   );
+}
+
+/** Shared specimen chrome for foundations, diagrams and component matrices.
+ * Nested specimens keep their layout without adding another toolbar or frame. */
+export function PreviewCard({ label = 'Foundation preview', children, className, scheme, padded = true }: { label?: string; children: ReactNode; className?: string; scheme?: 'light' | 'dark'; padded?: boolean }) {
+  const framed = useContext(PreviewContext);
+  if (framed) return <div data-theme={scheme} className={cn('min-w-0', scheme && 'bg-surface-base p-xl', className)}>{children}</div>;
+  return <PreviewTabs label={label}><Stage label={label} scheme={scheme} flow padded={false} className={cn(padded && 'p-xl md:p-3xl', className)}>{children}</Stage></PreviewTabs>;
 }
 
 export function ExampleBlock({ title, caption, code, children, full, app }: { title: string; caption?: string; code?: string; children: ReactNode; full?: boolean; app?: boolean }) {
@@ -234,12 +247,13 @@ export function Matrix<R extends string, C extends string>({
   cell: (row: R, col: C) => ReactNode;
   className?: string;
 }) {
+  const framed = useContext(PreviewContext);
   return (
     <div
       tabIndex={0}
       role="group"
       aria-label={`Variants: ${rowProp} by ${colProp}`}
-      className={cn('relative min-w-0 max-w-full overflow-x-auto docs-matrix rounded-surface border border-border-subtle p-xl outline-none focus-visible:shadow-focus-default', className)}
+      className={cn('relative min-w-0 max-w-full overflow-x-auto docs-matrix p-xl outline-none focus-visible:shadow-focus-default', !framed && 'rounded-surface border border-border-subtle', className)}
     >
       <div className={cn('grid w-max gap-x-2xl gap-y-lg', align === 'start' ? 'items-start' : 'items-center')} style={{ gridTemplateColumns: `auto repeat(${cols.length}, auto)` }}>
         <span />

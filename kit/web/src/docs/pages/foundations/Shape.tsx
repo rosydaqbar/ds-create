@@ -5,7 +5,7 @@ import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, ChoiceCard, Checkbox, Kbd, Switch, Tag, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
+import { PreviewCard, breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { config } from '@/ds.config';
 import { brandCopy } from '@/brand/copy';
@@ -69,7 +69,7 @@ function Block({ title, intro, children }: { title: string; intro?: ReactNode; c
   );
 }
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl', className)}>{children}</div>;
+  return <PreviewCard className={className}>{children}</PreviewCard>;
 }
 function Code({ children, className }: { children: ReactNode; className?: string }) {
   return <span className={cn('type-code-sm-regular min-w-0 text-text-tertiary', className)}>{children}</span>;
@@ -201,11 +201,11 @@ function Overview() {
       </>} />
 
       <Block title="Radius roles" intro="Each tile uses its role directly and lists where you’ll find it.">
-        <div className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
+        <PreviewCard label="Radius roles" className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
           {RADIUS.map((r) => (
             <RadiusTile key={r} name={r} />
           ))}
-        </div>
+        </PreviewCard>
       </Block>
 
       <Block title="Radius in use" intro="Here are the roles on plain shapes: a control, an indicator, a surface holding a control (with the padding between them) and a dialog.">

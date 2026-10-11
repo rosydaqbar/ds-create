@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
 import { Icon, iconNames, type IconName, type IconSize } from '@/icons';
 import { Avatar, Badge, Button, FeaturedIcon, IconButton, Tooltip } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
-import { Caption, CodeBlock, H3, InlineCode, P, TokenBadge } from '../../blocks';
+import { PreviewCard, Caption, CodeBlock, H3, InlineCode, P, TokenBadge } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { siteSchemes } from '../../modes';
 import { config } from '@/ds.config';
@@ -77,10 +77,9 @@ const CORE: [IconName[], string][] = [
 /* ---------- small pieces ---------- */
 function Themed({ mode, children }: { mode: 'light' | 'dark'; children: ReactNode }) {
   return (
-    <div data-theme={mode} className="flex min-w-0 flex-col gap-lg rounded-surface bg-surface-sunken p-xl text-text-primary">
-      <span className="type-body-xs-semibold text-text-tertiary">{mode === 'light' ? 'Light' : 'Dark'}</span>
+    <PreviewCard scheme={mode} label={`${mode === 'light' ? 'Light' : 'Dark'} icon preview`} className="flex flex-col gap-lg text-text-primary">
       {children}
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -149,7 +148,7 @@ function Library() {
       on ? 'border-border-brand bg-fill-brand-subtle text-site-brand-on-tint' : 'border-border-subtle bg-surface-base text-text-secondary is-hover:bg-surface-base-hover',
     );
   return (
-    <div className="flex flex-col gap-lg">
+    <PreviewCard label="Icon library" className="flex flex-col gap-lg">
       <div className="flex flex-col gap-xs">
         <label htmlFor="icon-search" className="type-body-sm-medium text-text-primary">
           Search icons
@@ -212,13 +211,13 @@ function Library() {
           );
         })}
       </div>
-    </div>
+    </PreviewCard>
   );
 }
 
 function Sizes() {
   return (
-    <div className="grid gap-lg sm:grid-cols-2 lg:grid-cols-5">
+    <PreviewCard label="Icon sizes" className="grid gap-lg sm:grid-cols-2 lg:grid-cols-5">
       {SIZES.map((s) => {
         const v = sizeVar(s);
         return (
@@ -236,7 +235,7 @@ function Sizes() {
           </div>
         );
       })}
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -325,7 +324,7 @@ function Overview() {
 
 function UtilityMarks() {
   return (
-    <div className="grid gap-lg md:grid-cols-3">
+    <PreviewCard label="Utility marks" className="grid gap-lg md:grid-cols-3">
       <div className="flex flex-col gap-md rounded-surface border border-border-subtle p-xl">
         <span className="type-body-xs-semibold text-text-tertiary">Check icon · feature list</span>
         <ul className="flex flex-col gap-sm">
@@ -352,7 +351,7 @@ function UtilityMarks() {
           <Badge tone="danger" showDot label="Failed" />
         </span>
       </div>
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -600,7 +599,7 @@ export const icons = {
 function Anatomy() {
   const box = 'calc(var(--size-icon-lg) * 4)';
   return (
-    <div className="flex w-full flex-wrap items-center justify-center gap-3xl">
+    <PreviewCard label="Icon anatomy" className="flex w-full flex-wrap items-center justify-center gap-3xl">
       <div className="relative" style={{ width: box, height: box }} aria-hidden>
         <span className="absolute inset-0 border border-dashed border-border-default" />
         <span className="absolute border border-dashed border-border-brand" style={{ inset: `${((STYLE.box - STYLE.liveArea) / 2) * 4}px` }} />
@@ -618,7 +617,7 @@ function Anatomy() {
           </li>
         ))}
       </ul>
-    </div>
+    </PreviewCard>
   );
 }
 

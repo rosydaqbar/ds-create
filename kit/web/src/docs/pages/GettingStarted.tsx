@@ -8,7 +8,7 @@ import { tokens } from '@/tokens/tokens.gen';
 import type { TokenVariable } from '@/tokens/types';
 import { Button, buttonVariants, Checkbox, FeaturedIcon, Label, Progress, Switch, TextField } from '@/components';
 import { DocPage } from '../DocPage';
-import { APP_PLATFORMS, Bullets, Caption, CodeBlock, DoDont, H3, InlineCode, P, productHasApp, productHasWeb, Segmented, type AppPlatform } from '../blocks';
+import { PreviewCard, APP_PLATFORMS, Bullets, Caption, CodeBlock, DoDont, H3, InlineCode, P, productHasApp, productHasWeb, Segmented, type AppPlatform } from '../blocks';
 import { componentDocs, levelLabel, slugOf, staticPages } from '../registry';
 import { figmaNodeFor, pageMeta, statusInfo, StatusPill } from '../meta';
 import { siteHasDark, supportedModes, unsupportedModes } from '../modes';
@@ -181,7 +181,7 @@ function Column({ children }: { children: ReactNode }) {
 }
 /** A visual example: a quiet stage that never forces horizontal scroll. */
 function Visual({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl ${className}`}>{children}</div>;
+  return <PreviewCard label="Example preview" className={className}>{children}</PreviewCard>;
 }
 function TextLink({ to, children }: { to: string; children: ReactNode }) {
   return (

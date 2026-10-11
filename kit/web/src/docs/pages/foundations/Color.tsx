@@ -6,7 +6,7 @@ import type { TokenVariable } from '@/tokens/types';
 import { cn } from '@/lib/cn';
 import { Badge, Button, Checkbox, Divider, HelpText, Icon, Label, Link, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenTable } from '../../blocks';
+import { PreviewCard, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenTable } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { supportedModes, unsupportedModes } from '../../modes';
 import { brandCopy } from '@/brand/copy';
@@ -234,7 +234,7 @@ function Block({ title, intro, children }: { title: string; intro?: ReactNode; c
   );
 }
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl', className)}>{children}</div>;
+  return <PreviewCard className={className}>{children}</PreviewCard>;
 }
 /** Token names may wrap after a slash, never mid-word. */
 function slashes(text: ReactNode): ReactNode {
@@ -317,7 +317,7 @@ function FamilyRow({ title, family, note, badges = [], dark = false }: { title: 
   const steps = familySteps(family);
   if (!steps.length) return null;
   return (
-    <div className="flex min-w-0 flex-col gap-lg border-t border-border-subtle pt-xl">
+    <div className="flex min-w-0 flex-col gap-lg">
       <div className="flex flex-col gap-xs">
         <div className="flex flex-wrap items-center gap-sm">
           <h3 className="type-heading-xs-semibold text-text-primary">{title}</h3>
@@ -328,13 +328,13 @@ function FamilyRow({ title, family, note, badges = [], dark = false }: { title: 
         </div>
         <p className="type-body-sm-regular max-w-(--size-measure-reading) text-text-secondary">{note}</p>
       </div>
-      <div className="@container min-w-0">
+      <PreviewCard label={`${title} palette`} scheme={dark ? 'dark' : undefined} className="@container min-w-0">
         <div className={cn('grid gap-sm', steps.length > 4 ? 'grid-cols-3 @md:grid-cols-6 @3xl:grid-cols-11' : 'grid-cols-3 @md:grid-cols-6')}>
           {steps.map((s) => (
             <PaletteSwatch key={s.name} v={s} dark={dark} />
           ))}
         </div>
-      </div>
+      </PreviewCard>
     </div>
   );
 }
@@ -373,7 +373,7 @@ function SampleLabel({ children }: { children: ReactNode }) {
 
 function ModePanel({ mode }: { mode: Mode }) {
   return (
-    <div data-theme={mode.toLowerCase()} className="flex min-w-0 flex-col gap-xl rounded-surface border border-border-subtle bg-surface-base p-xl">
+    <PreviewCard label={`${mode} color roles`} scheme={mode.toLowerCase() as 'light' | 'dark'} className="flex flex-col gap-xl">
       <span className="type-body-sm-semibold text-text-primary">{mode}</span>
 
       <div className="flex flex-col gap-sm">
@@ -434,7 +434,7 @@ function ModePanel({ mode }: { mode: Mode }) {
           </div>
         ))}
       </div>
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -633,7 +633,7 @@ function Overview() {
           <FamilyRow title="Brand" family="brand" badges={[{ label: 'Brand', tone: 'brand' }]} note={brandNote()} />
           <FamilyRow title="Alpha black" family="alpha-black" note="Black at set opacities, for the scrim behind dialogs and for shadow colors. Shown on a light surface." />
           {hasAlphaWhite && (
-            <div data-theme="dark" className="rounded-surface bg-surface-base px-lg pb-lg">
+            <div className="min-w-0">
               <FamilyRow title="Alpha white" family="alpha-white" dark note="White at set opacities, for hover tints over media and for video controls. Shown on a dark surface." />
             </div>
           )}

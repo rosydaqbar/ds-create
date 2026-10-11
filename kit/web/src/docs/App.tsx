@@ -162,7 +162,7 @@ export function App() {
           <img src={logo} alt="" className="h-6 md:h-7" />
           <span className="type-code-sm-regular hidden rounded-indicator bg-surface-sunken px-md py-xxs text-text-tertiary sm:inline">v{config.version}</span>
         </Link>
-        <div className="docs-top-actions ml-auto flex items-center gap-sm md:gap-md">
+        <div className={cn('docs-top-actions ml-auto flex items-center gap-sm md:gap-md', siteSchemes.length < 2 && 'lg:hidden')}>
           <button
             type="button"
             ref={searchTrigger}
@@ -178,11 +178,6 @@ export function App() {
               <Kbd size="sm" text="K" />
             </span>
           </button>
-          {config.figmaUrl && (
-            <a href={config.figmaUrl} target="_blank" rel="noreferrer" className="type-body-sm-medium hidden rounded-control px-xs text-text-secondary outline-none is-hover:text-text-primary is-focus:shadow-focus-default sm:inline">
-              Figma<span className="sr-only"> (opens in a new tab)</span>
-            </a>
-          )}
           {siteSchemes.length > 1 && (
             <button
               type="button"
@@ -205,7 +200,7 @@ export function App() {
           <Sidebar onNavigate={() => setOpen(false)} onSearch={() => { if (open) searchTrigger.current?.focus(); setOpen(false); setSearching(true); }} />
         </aside>
         <main ref={main} id="main" tabIndex={-1} className="docs-main min-w-0 flex-1 outline-none">
-          {/* 1.6 Motion: content swaps in place with a short fade. */}
+          {/* Page panels animate independently so sticky tabs remain above the header. */}
           <div key={loc.pathname}>
             <Routes>
               <Route path="/" element={<Home />} />

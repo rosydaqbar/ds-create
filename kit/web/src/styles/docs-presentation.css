@@ -84,6 +84,7 @@
   .docs-code pre { background: var(--color-surface-base); }
   .docs-code { overflow: hidden; border-radius: var(--docs-round); }
   .docs-matrix { background: var(--color-surface-raised); border-radius: var(--docs-round); }
+  .docs-preview .docs-matrix { background: transparent; border-radius: 0; }
   .docs-tool-button { display: inline-flex; align-items: center; gap: .25rem; padding: .375rem; cursor: pointer; border-radius: .5rem; }
   .docs-tool-button:hover { background: var(--color-fill-neutral-subtle-hover); }
   .docs-inspector { align-self: start; }

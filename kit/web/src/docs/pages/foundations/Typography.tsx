@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn';
 import { config } from '@/ds.config';
 import { Badge, Button, Icon, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
+import { PreviewCard, breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { brandCopy } from '@/brand/copy';
 
@@ -146,7 +146,7 @@ function Block({ title, intro, children }: { title: string; intro?: ReactNode; c
   );
 }
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl', className)}>{children}</div>;
+  return <PreviewCard className={className}>{children}</PreviewCard>;
 }
 function slashes(text: ReactNode): ReactNode {
   if (typeof text !== 'string') return text;
@@ -237,7 +237,7 @@ function TypefaceCard({ family }: { family: Family }) {
   /* Monospace glyphs run wider, so the mono card sets its sample lines in the code style. */
   const sample = (family.key === 'mono' ? pick('type/code/md/regular') : undefined) ?? BODY;
   return (
-    <div className="flex min-w-0 flex-col gap-lg rounded-surface border border-border-subtle bg-surface-base p-xl md:p-2xl">
+    <PreviewCard label={`${family.label} specimen`} className="flex flex-col gap-lg">
       <div className="flex flex-wrap items-baseline justify-between gap-sm">
         <h3 className="type-heading-sm-semibold text-text-primary">{family.label}</h3>
         <Code>{family.token}</Code>
@@ -253,7 +253,7 @@ function TypefaceCard({ family }: { family: Family }) {
       </div>
       <p className="type-body-sm-regular text-text-secondary">{familyUse(family)}</p>
       <p className="type-body-xs-regular text-text-tertiary">Set by {family.token}. Change its value and every style that uses it follows.</p>
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -266,7 +266,7 @@ function TypeScale() {
             <h3 className="type-heading-xs-semibold text-text-primary">{info(role).title}</h3>
             <p className="type-body-sm-regular max-w-(--size-measure-reading) text-text-secondary">{info(role).use}</p>
           </div>
-          <div className="flex flex-col divide-y divide-border-subtle rounded-surface border border-border-subtle bg-surface-base">
+          <PreviewCard label={`${info(role).title} styles`} padded={false} className="flex flex-col divide-y divide-border-subtle">
             {rows.map(({ size, styles }) => (
               <div key={size} className="grid min-w-0 gap-md p-lg md:grid-cols-[12rem_minmax(0,1fr)] md:items-center md:p-xl">
                 <div className="flex flex-col gap-xxs">
@@ -287,7 +287,7 @@ function TypeScale() {
                 </div>
               </div>
             ))}
-          </div>
+          </PreviewCard>
         </div>
       ))}
     </div>

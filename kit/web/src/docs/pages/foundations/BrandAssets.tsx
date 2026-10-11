@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn';
 import { Icon } from '@/icons';
 import { Avatar, Flag, SocialButton, SocialMark, socialProviderName, socialProviders, type SocialProvider } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
-import { Caption, CodeBlock, InlineCode, P } from '../../blocks';
+import { PreviewCard, Caption, CodeBlock, InlineCode, P } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import type { Topic } from '../../types';
 import { brandCopy } from '@/brand/copy';
@@ -38,10 +38,9 @@ const countryName = (code: string) => {
 type Mode = 'light' | 'dark';
 function Surface({ mode, children, className, label }: { mode: Mode; children: ReactNode; className?: string; label?: string }) {
   return (
-    <div data-theme={mode} className={cn('flex min-w-0 flex-col gap-lg rounded-surface border border-border-subtle bg-surface-base p-xl text-text-primary', className)}>
-      {label !== '' && <span className="type-body-xs-semibold text-text-tertiary">{label ?? (mode === 'light' ? 'Light surface' : 'Dark surface')}</span>}
+    <PreviewCard scheme={mode} label={label || (mode === 'light' ? 'Light surface' : 'Dark surface')} className={cn('flex flex-col gap-lg text-text-primary', className)}>
       {children}
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -209,17 +208,19 @@ function Flags() {
           country. Until then, the Flag component shows the country code in a neutral circle.
         </Pending>
       ) : (
-        <ul className="grid gap-sm sm:grid-cols-2 lg:grid-cols-4">
-          {flagCodes.map((c) => (
-            <li key={c} className="flex items-center gap-md rounded-control border border-border-subtle p-md">
-              <Flag country={c} size="lg" alt="" />
-              <span className="flex flex-col">
-                <span className="type-body-sm-medium text-text-primary">{countryName(c)}</span>
-                <span className="type-code-sm-regular text-text-tertiary">{c}.svg</span>
-              </span>
-            </li>
-          ))}
-        </ul>
+        <PreviewCard label="Country flags">
+          <ul className="grid gap-sm sm:grid-cols-2 lg:grid-cols-4">
+            {flagCodes.map((c) => (
+              <li key={c} className="flex items-center gap-md rounded-control border border-border-subtle p-md">
+                <Flag country={c} size="lg" alt="" />
+                <span className="flex flex-col">
+                  <span className="type-body-sm-medium text-text-primary">{countryName(c)}</span>
+                  <span className="type-code-sm-regular text-text-tertiary">{c}.svg</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </PreviewCard>
       )}
     </section>
   );
