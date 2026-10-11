@@ -9,22 +9,25 @@ import { Home } from './pages/Home';
 import { SearchDialog } from './Search';
 import { pageMeta } from './meta';
 import { Kbd } from '@/components/parts/Kbd';
-import { siteHasDark } from './modes';
+import { siteSchemes } from './modes';
 
 const lazyPages = new Map<string, ComponentType>(staticPages.map((p) => [slugOf(p.id, p.name), lazy(p.load)]));
 
 function useTheme() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    // A Light-only system (ds.config `modes`, or Dark approved as unsupported) always renders in Light.
-    if (!siteHasDark) return 'light';
+    const first = siteSchemes[0] ?? 'light';
     try {
-      return (localStorage.getItem('ds-theme') as 'light' | 'dark') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const saved = localStorage.getItem('ds-theme');
+      if (siteSchemes.includes(saved as 'light' | 'dark')) return saved as 'light' | 'dark';
+      const preferred = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      return siteSchemes.includes(preferred) ? preferred : first;
     } catch {
-      return 'light';
+      return first;
     }
   });
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
     try {
       localStorage.setItem('ds-theme', theme);
     } catch {
@@ -34,7 +37,8 @@ function useTheme() {
   return [theme, setTheme] as const;
 }
 
-function Sidebar({ onNavigate }: { onNavigate: () => void }) {
+function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSearch: () => void }) {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const groups: { label: string; items: { id: string; name: string; to: string }[] }[] = [
     { label: levelLabel.guidance, items: staticPages.filter((p) => p.group === 'guidance').map((p) => ({ id: p.id, name: p.name, to: `/guidance/${slugOf(p.id, p.name)}` })) },
     { label: levelLabel.foundations, items: staticPages.filter((p) => p.group === 'foundations').map((p) => ({ id: p.id, name: p.name, to: `/foundations/${slugOf(p.id, p.name)}` })) },
@@ -44,35 +48,40 @@ function Sidebar({ onNavigate }: { onNavigate: () => void }) {
     })),
   ];
   return (
-    <nav className="flex flex-col gap-xl" aria-label="Design system">
-      {groups.map((g) => {
-        const items = g.items;
-        if (!items.length) return null;
-        return (
-          <div key={g.label} className="flex flex-col gap-xxs">
-            <span className="type-body-xs-semibold px-md pb-xs uppercase tracking-wide text-text-tertiary">{g.label}</span>
-            {items.map((i) => (
-              <NavLink
-                key={i.to}
-                to={i.to}
-                onClick={onNavigate}
-                className={({ isActive }) =>
-                  cn(
-                    'group type-body-sm-medium flex items-center gap-md rounded-sm px-md py-xs transition-colors duration-(--motion-duration-fast)',
-                    isActive ? 'bg-fill-brand-subtle text-site-brand-on-tint' : 'text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary',
-                  )
-                }
-              >
-                {/* On the active item's tint, the id takes the item's own AA color. */}
-                <span className="type-code-sm-regular w-8 shrink-0 text-text-tertiary group-aria-[current=page]:text-inherit">{i.id}</span>
-                <span className="min-w-0 flex-1 truncate">{i.name}</span>
-                {pageMeta[i.id]?.status === 'beta' && <span className="type-body-xs-medium rounded-indicator bg-fill-warning-subtle px-sm text-site-warning-on-tint">Beta</span>}
-              </NavLink>
-            ))}
-          </div>
-        );
-      })}
-    </nav>
+    <div className="docs-navigation flex h-full flex-col gap-xl">
+      <button type="button" onClick={onSearch} aria-keyshortcuts="Meta+K Control+K /" className="docs-search type-body-sm-regular flex items-center gap-sm text-text-secondary" aria-label="Search documentation">
+        <Icon name="general/search" size="sm" />
+        <span className="flex-1 text-left">Search</span>
+        <Kbd size="sm" text="⌘ / Ctrl K" />
+      </button>
+      <nav className="flex flex-1 flex-col gap-lg" aria-label="Design system">
+        {groups.map((g, index) => {
+          if (!g.items.length) return null;
+          const expanded = !collapsed[g.label];
+          return (
+            <div key={g.label} className="flex flex-col gap-xs">
+              <button type="button" className="docs-nav-group type-body-sm-semibold flex w-full items-center gap-sm text-text-primary" aria-expanded={expanded} aria-controls={`nav-group-${index}`} onClick={() => setCollapsed((c) => ({ ...c, [g.label]: expanded }))}>
+                <Icon name={index < 2 ? 'education/book-open' : 'layout/layout-grid'} size="sm" />
+                <span className="flex-1 text-left">{g.label}</span>
+                <span className="docs-count type-body-xs-regular text-text-secondary">{g.items.length}</span>
+                <Icon name={expanded ? 'arrows/chevron-down' : 'arrows/chevron-right'} size="xs" />
+              </button>
+              <div id={`nav-group-${index}`} hidden={!expanded} className="docs-nav-rail">
+                {g.items.map((i) => (
+                  <NavLink key={i.to} to={i.to} onClick={onNavigate} className={({ isActive }) => cn('docs-nav-link type-body-sm-regular flex items-center gap-sm text-text-secondary', isActive && 'docs-nav-active text-text-primary')}>
+                    <span className="min-w-0 flex-1">{i.name}</span>
+                    {pageMeta[i.id]?.status === 'beta' && <span className="type-body-xs-regular text-text-tertiary">Beta</span>}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </nav>
+      <div className="docs-nav-footer type-body-xs-regular flex items-center justify-between text-text-secondary">
+        <span>{config.name}</span><span>v{config.version}</span>
+      </div>
+    </div>
   );
 }
 
@@ -109,6 +118,8 @@ export function App() {
   const [searching, setSearching] = useState(false);
   const loc = useLocation();
   const main = useRef<HTMLElement>(null);
+  const menuTrigger = useRef<HTMLButtonElement>(null);
+  const searchTrigger = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [loc.pathname]);
@@ -117,6 +128,9 @@ export function App() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setSearching(true);
+      } else if (e.key === 'Escape') {
+        if ((document.activeElement as HTMLElement)?.closest('aside')) menuTrigger.current?.focus();
+        setOpen(false);
       } else if (e.key === '/' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || (e.target as HTMLElement)?.isContentEditable)) {
         e.preventDefault();
         setSearching(true);
@@ -129,7 +143,7 @@ export function App() {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
   return (
-    <div className="min-h-screen bg-surface-base text-text-primary">
+    <div className="docs-shell min-h-screen bg-surface-base text-text-primary">
       <a
         href="#main"
         onClick={(e) => {
@@ -141,7 +155,7 @@ export function App() {
         Skip to content
       </a>
       <header className="sticky top-0 z-30 flex h-16 items-center gap-md border-b border-border-subtle bg-surface-base/90 px-lg backdrop-blur md:gap-lg md:px-xl">
-        <button type="button" className="cursor-pointer rounded-control p-xs text-icon-secondary outline-none is-hover:bg-fill-neutral-subtle-hover is-focus:shadow-focus-default lg:hidden" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <button ref={menuTrigger} type="button" className="cursor-pointer rounded-control p-xs text-icon-secondary outline-none is-hover:bg-fill-neutral-subtle-hover is-focus:shadow-focus-default lg:hidden" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
           <Icon name={open ? 'general/x' : 'general/menu'} />
         </button>
         <Link to="/" className="flex min-w-0 items-center gap-md rounded-control outline-none is-focus:shadow-focus-default" aria-label={`${config.name} home`}>
@@ -151,10 +165,11 @@ export function App() {
         <div className="ml-auto flex items-center gap-sm md:gap-md">
           <button
             type="button"
+            ref={searchTrigger}
             onClick={() => setSearching(true)}
             aria-label="Search"
             aria-keyshortcuts="Meta+K Control+K /"
-            className="type-body-sm-regular inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default bg-surface-base px-sm text-text-placeholder outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default md:w-64 md:px-md"
+            className="type-body-sm-regular inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default bg-surface-base px-sm text-text-placeholder outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default md:w-64 md:px-md lg:hidden"
           >
             <Icon name="general/search" size="sm" className="text-icon-tertiary" />
             <span className="hidden flex-1 text-left md:inline">Search</span>
@@ -168,7 +183,7 @@ export function App() {
               Figma<span className="sr-only"> (opens in a new tab)</span>
             </a>
           )}
-          {siteHasDark && (
+          {siteSchemes.length > 1 && (
             <button
               type="button"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -181,14 +196,15 @@ export function App() {
           )}
         </div>
       </header>
-      <div className="mx-auto flex max-w-[1600px]">
+      <div className="mx-auto flex max-w-[1680px]">
+        {open && <button type="button" aria-label="Close navigation" className="fixed inset-0 top-16 z-20 bg-black/40 lg:hidden" onClick={() => setOpen(false)} />}
         <aside
           aria-label="Site navigation"
-          className={cn('fixed inset-y-16 left-0 z-20 w-72 shrink-0 overflow-y-auto border-r border-border-subtle bg-surface-base p-lg lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)]', open ? 'block motion-enter-slow lg:animate-none' : 'hidden')}
+          className={cn('fixed inset-y-16 left-0 z-20 docs-sidebar w-64 shrink-0 overflow-y-auto border-r border-border-subtle bg-surface-base lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)]', open ? 'block motion-enter-slow lg:animate-none' : 'hidden')}
         >
-          <Sidebar onNavigate={() => setOpen(false)} />
+          <Sidebar onNavigate={() => setOpen(false)} onSearch={() => { if (open) searchTrigger.current?.focus(); setOpen(false); setSearching(true); }} />
         </aside>
-        <main ref={main} id="main" tabIndex={-1} className="min-w-0 flex-1 px-lg py-3xl outline-none md:px-xl md:py-4xl lg:px-6xl">
+        <main ref={main} id="main" tabIndex={-1} className="docs-main min-w-0 flex-1 px-lg py-3xl outline-none md:px-xl md:py-4xl lg:px-6xl">
           {/* 1.6 Motion: content swaps in place with a short fade. */}
           <div key={loc.pathname} className="motion-fade-in">
             <Routes>

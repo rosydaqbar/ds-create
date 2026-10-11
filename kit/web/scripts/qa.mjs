@@ -140,7 +140,7 @@ await pool(pages, async (p, route) => {
   p.where = `discover ${route}`;
   await p.goto(base + '#' + route);
   await settle(p);
-  const tabs = await p.$$eval('[role=tablist] [role=tab]', (ts) => ts.map((t) => t.id.split('-tab-')[1]));
+  const tabs = await p.$$eval('[role=tablist] [role=tab]', (ts) => ts.map((t) => t.id.split('-tab-')[1]).filter(Boolean));
   const list = [route, ...tabs.slice(1).map((t) => `${route}?tab=${t}`)];
   // Web and App products: every tab again in App preview (React Native via react-native-web).
   if (await p.$('[role=group][aria-label=Preview]')) list.push(`${route}?platform=app`, ...tabs.slice(1).map((t) => `${route}?platform=app&tab=${t}`));

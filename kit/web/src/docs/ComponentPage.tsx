@@ -8,7 +8,7 @@ import type { AppVisual, ComponentDoc, Guideline, MatrixSpec } from './types';
 import { levelLabel } from './registry';
 import { figmaNodeFor, pageMeta } from './meta';
 import { AnchorHeading, DocTabs, PageHeader, Topics } from './DocPage';
-import { AppStage, AppTheme, Bullets, Caption, CodeBlock, ExampleBlock, H3, NoAppVersion, P, Playground, productHasApp, productHasWeb, PropsTable, Segmented, Stage, TokenTable, useScrollRegion } from './blocks';
+import { AppStage, AppTheme, Bullets, Caption, CodeBlock, ExampleBlock, H3, NoAppVersion, P, Playground, PreviewTabs, productHasApp, productHasWeb, PropsTable, Segmented, Stage, TokenTable, useScrollRegion } from './blocks';
 
 export { PageHeader } from './DocPage';
 
@@ -239,7 +239,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
           </div>
         ) : (
           <div className="flex flex-col gap-4xl">
-            <Stage className="min-h-56 bg-surface-sunken">{doc.hero()}</Stage>
+            <PreviewTabs label="Component preview"><Stage className="min-h-72">{doc.hero()}</Stage></PreviewTabs>
             {doc.examples.length > 0 && (
               <DocSection title="Examples in use">
                 <div className="grid grid-cols-[minmax(0,1fr)] gap-3xl xl:grid-cols-2">

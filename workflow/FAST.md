@@ -29,7 +29,7 @@ Fast mode covers the documentation phase: it starts at the first step that draws
 
 # 2. What the skeleton fixes
 
-The skeleton is the structure of `workflow/templates/structure.md`: page → frame → block → items. It is made of plain frames, text and the Doc kit parts, and it has no style of its own.
+The skeleton is the structure of `workflow/templates/structure.md`: page → frame → block → items. It is made of plain frames, text and the Doc kit parts, and uses the shared presentation grammar in `workflow/DOCFRAMES.md`: unboxed titles, layered inset previews, and compact reference surfaces. Its colors, type and radii still come from the current brand.
 
 | Layer | Fixed by the renderer | From the brand | Filled per page |
 | --- | --- | --- | --- |

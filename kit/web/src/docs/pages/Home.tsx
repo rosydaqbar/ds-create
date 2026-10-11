@@ -40,17 +40,17 @@ export function Home() {
   const latest = releases[0];
   return (
     <div className="flex flex-col gap-5xl">
-      <section className="flex flex-col gap-xl rounded-modal bg-surface-brand-solid p-2xl text-text-primary-on-brand md:p-5xl">
-        <span className="type-body-sm-semibold text-text-secondary-on-brand">
+      <section className="docs-page-header flex flex-col gap-xl py-lg text-text-primary">
+        <span className="type-body-sm-semibold text-text-secondary">
           v{config.version} · {modesLabel} · {productHasWeb ? 'Figma and React reference' : 'Figma and app code reference'}
         </span>
-        <h1 className="type-display-md-semibold max-w-[48rem]">{config.name}</h1>
-        <p className="type-body-lg-regular max-w-[42rem] text-text-secondary-on-brand">{copySummary('00', config.description)}</p>
+        <h1 className="type-heading-xl-semibold max-w-[48rem]">{config.name}</h1>
+        <p className="type-body-lg-regular max-w-[42rem] text-text-secondary">{copySummary('00', config.description)}</p>
         <div className="flex flex-wrap gap-md">
           <Link to="/guidance/01-getting-started" className="type-body-md-semibold inline-flex h-(--size-control-lg) items-center gap-sm rounded-control bg-surface-base px-xl text-text-primary outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default">
             Get started <Icon name="arrows/arrow-right" />
           </Link>
-          <Link to={`/guidance/03-changelog`} className="type-body-md-semibold inline-flex h-(--size-control-lg) items-center gap-sm rounded-control border border-border-subtle/40 px-xl text-text-primary-on-brand outline-none is-hover:bg-fill-brand-solid-hover is-focus:shadow-focus-default">
+          <Link to={`/guidance/03-changelog`} className="type-body-md-semibold inline-flex h-(--size-control-lg) items-center gap-sm rounded-control border border-border-subtle/40 px-xl text-text-primary outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default">
             What’s new in {latest.version}
           </Link>
         </div>
@@ -62,8 +62,8 @@ export function Home() {
         </h2>
         <div className="grid gap-lg md:grid-cols-3">
           {roles.map((r) => (
-            <Link key={r.title} to={r.to} className="group flex flex-col gap-md rounded-surface border border-border-subtle bg-surface-raised p-xl shadow-raised outline-none transition-colors duration-(--motion-duration-fast) is-hover:border-border-brand is-focus:shadow-focus-default">
-              <span className="flex size-10 items-center justify-center rounded-control bg-fill-brand-subtle text-icon-brand">
+            <Link key={r.title} to={r.to} className="group flex flex-col gap-md rounded-surface border border-border-subtle docs-matrix bg-surface-raised p-xl outline-none transition-colors duration-(--motion-duration-fast) is-hover:border-border-strong is-focus:shadow-focus-default">
+              <span className="flex size-10 items-center justify-center rounded-control bg-surface-sunken text-icon-secondary">
                 <Icon name={r.icon} />
               </span>
               <span className="type-heading-xs-semibold text-text-primary">{r.title}</span>
@@ -103,7 +103,7 @@ export function Home() {
           {staticPages
             .filter((p) => p.group === 'foundations')
             .map((p) => (
-              <Link key={p.id} to={`/foundations/${slugOf(p.id, p.name)}`} className="flex flex-col gap-sm rounded-surface border border-border-subtle bg-surface-raised p-lg outline-none transition-colors duration-(--motion-duration-fast) is-hover:border-border-brand is-focus:shadow-focus-default">
+              <Link key={p.id} to={`/foundations/${slugOf(p.id, p.name)}`} className="flex flex-col gap-sm rounded-surface border border-border-subtle bg-surface-raised p-lg outline-none transition-colors duration-(--motion-duration-fast) is-hover:border-border-strong is-focus:shadow-focus-default">
                 <span className="flex items-center gap-sm">
                   <Icon name={foundationBlurb[p.id]?.icon ?? 'general/placeholder'} size="sm" className="text-icon-brand" />
                   <span className="type-body-md-semibold text-text-primary">{p.name}</span>

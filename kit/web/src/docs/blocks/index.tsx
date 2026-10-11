@@ -2,7 +2,7 @@
  * Explorer building blocks. They mirror the Figma doc kit (9.1): stage, axis labels,
  * token badges, do/don't, tables. Doc pages compose these; components never import them.
  */
-import { Fragment, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { tokens } from '@/tokens/tokens.gen';
 import { Icon, iconNames } from '@/icons';
@@ -12,7 +12,7 @@ import { Select } from '@/components/components/Select';
 import { TextField } from '@/components/components/TextField';
 import * as appLib from '@app';
 import { config } from '@/ds.config';
-import { supportedModes } from '../modes';
+import { supportedModes, siteSchemes } from '../modes';
 
 /** `Danger tone` → `danger-tone`; used for tab keys and heading ids. */
 export const slugify = (s: string) =>
@@ -79,17 +79,19 @@ export function CodeBlock({ code, lang = 'tsx', className, label }: { code: stri
   const [copied, setCopied] = useState(false);
   const text = code.trim();
   return (
-    <div className={cn('group relative min-w-0 rounded-surface border border-border-subtle bg-surface-sunken', className)}>
+    <div className={cn('docs-code group relative min-w-0 rounded-surface border border-border-subtle bg-surface-sunken', className)}>
       <div className="flex items-center justify-between border-b border-border-subtle px-lg py-xs">
         <span className="type-code-sm-regular text-text-tertiary">{lang}</span>
         <button
           type="button"
           aria-label={copied ? 'Copied' : `Copy ${label ?? lang} code`}
           className="type-body-xs-medium inline-flex min-h-6 cursor-pointer items-center gap-xs rounded-xs px-xs text-text-tertiary outline-none is-hover:text-text-primary is-focus:shadow-focus-default"
-          onClick={() => {
-            navigator.clipboard?.writeText(text).catch(() => {});
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1200);
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(text);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1200);
+            } catch { /* Clipboard access may be unavailable. */ }
           }}
         >
           <Icon name={copied ? 'general/check' : 'general/copy'} size="xs" />
@@ -146,15 +148,15 @@ export function useScrollRegion<T extends HTMLElement>(label: string) {
   return ref;
 }
 
-export function Stage({ children, className, padded = true, dark, label = 'Example' }: { children: ReactNode; className?: string; padded?: boolean; dark?: boolean; label?: string }) {
+export function Stage({ children, className, padded = true, dark, scheme, label = 'Example' }: { children: ReactNode; className?: string; padded?: boolean; dark?: boolean; scheme?: 'light' | 'dark'; label?: string }) {
   const ref = useScrollRegion<HTMLDivElement>(label);
   return (
     <div
       ref={ref}
-      data-theme={dark ? 'dark' : undefined}
+      data-theme={scheme ?? (dark && siteSchemes.includes('dark') ? 'dark' : undefined)}
       className={cn(
         // Wide examples scroll inside the stage instead of widening the page.
-        'relative flex min-w-0 max-w-full flex-wrap items-center justify-center-safe gap-xl overflow-x-auto md:overflow-visible rounded-surface border border-border-subtle bg-surface-sunken outline-none focus-visible:shadow-focus-default',
+        'docs-stage relative flex min-w-0 max-w-full flex-wrap items-center justify-center-safe gap-xl overflow-x-auto md:overflow-visible border border-border-subtle outline-none focus-visible:shadow-focus-default',
         padded && 'p-2xl md:p-4xl',
         className,
       )}
@@ -164,23 +166,38 @@ export function Stage({ children, className, padded = true, dark, label = 'Examp
   );
 }
 
+/** Local preview tabs leave the page's documentation tab and URL untouched. */
+export function PreviewTabs({ code, children, label }: { code?: string; children: ReactNode; label: string }) {
+  const [view, setView] = useState<'preview' | 'code'>('preview');
+  const id = useId();
+  return (
+    <div className="docs-preview">
+      <div className="docs-preview-toolbar flex items-center justify-between gap-md">
+        <span className="type-body-xs-medium flex min-w-0 items-center gap-sm text-text-secondary"><Icon name="development/code" size="sm" /><span className="truncate">{label}</span></span>
+        {code && <div role="tablist" aria-label={`${label} view`} className="docs-preview-tabs flex" onKeyDown={(e) => {
+          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+          e.preventDefault();
+          const next = e.key === 'Home' ? 'preview' : e.key === 'End' ? 'code' : view === 'preview' ? 'code' : 'preview';
+          setView(next);
+          document.getElementById(`${id}-${next}-tab`)?.focus();
+        }}>
+          {(['preview', 'code'] as const).map((v) => <button key={v} id={`${id}-${v}-tab`} type="button" role="tab" aria-selected={view === v} aria-controls={`${id}-${v}-panel`} tabIndex={view === v ? 0 : -1} onClick={() => setView(v)} className="type-body-xs-medium">{v === 'preview' ? 'Preview' : 'Code'}</button>)}
+        </div>}
+        {!code && <span className="type-body-xs-medium text-text-primary">Preview</span>}
+      </div>
+      <div id={`${id}-preview-panel`} role={code ? 'tabpanel' : undefined} aria-labelledby={code ? `${id}-preview-tab` : undefined} hidden={view !== 'preview'}>{children}</div>
+      {code && <div id={`${id}-code-panel`} role="tabpanel" aria-labelledby={`${id}-code-tab`} hidden={view !== 'code'}><CodeBlock code={code} label={label} /></div>}
+    </div>
+  );
+}
+
 export function ExampleBlock({ title, caption, code, children, full, app }: { title: string; caption?: string; code?: string; children: ReactNode; full?: boolean; app?: boolean }) {
-  const [show, setShow] = useState(false);
   return (
     <div className={cn('flex min-w-0 flex-col gap-md', full && 'col-span-full')}>
-      {app ? <AppStage className="min-h-40">{children}</AppStage> : <Stage className="min-h-40">{children}</Stage>}
-      <div className="flex items-start justify-between gap-lg">
-        <div className="flex flex-col gap-xxs">
-          <span className="type-body-sm-semibold text-text-primary">{title}</span>
-          {caption && <Caption>{caption}</Caption>}
-        </div>
-        {code && (
-          <button type="button" onClick={() => setShow((s) => !s)} className="type-body-xs-medium shrink-0 cursor-pointer text-text-brand is-hover:text-text-brand-hover">
-            {show ? 'Hide code' : 'Show code'}
-          </button>
-        )}
-      </div>
-      {show && code && <CodeBlock code={code} className="motion-enter" />}
+      <PreviewTabs code={code} label={title}>
+        {app ? <AppStage className="min-h-56" label={title}>{children}</AppStage> : <Stage className="min-h-56" label={title}>{children}</Stage>}
+      </PreviewTabs>
+      {caption && <Caption>{caption}</Caption>}
     </div>
   );
 }
@@ -222,7 +239,7 @@ export function Matrix<R extends string, C extends string>({
       tabIndex={0}
       role="group"
       aria-label={`Variants: ${rowProp} by ${colProp}`}
-      className={cn('relative min-w-0 max-w-full overflow-x-auto rounded-surface border border-dashed border-border-brand-subtle p-xl outline-none focus-visible:shadow-focus-default', className)}
+      className={cn('relative min-w-0 max-w-full overflow-x-auto docs-matrix rounded-surface border border-border-subtle p-xl outline-none focus-visible:shadow-focus-default', className)}
     >
       <div className={cn('grid w-max gap-x-2xl gap-y-lg', align === 'start' ? 'items-start' : 'items-center')} style={{ gridTemplateColumns: `auto repeat(${cols.length}, auto)` }}>
         <span />
@@ -452,7 +469,9 @@ export function Bullets({ items }: { items: ReactNode[] }) {
 export function Playground({ controls, render, code }: { controls: ControlDef[]; render: (a: Record<string, any>) => ReactNode; code: (a: Record<string, any>) => string }) {
   const init = useMemo(() => Object.fromEntries(controls.map((c) => [c.name, c.default])), [controls]);
   const [args, setArgs] = useState<Record<string, any>>(init);
-  const [dark, setDark] = useState(false);
+  const inheritedScheme = useDocsScheme();
+  const [scheme, setScheme] = useState<'light' | 'dark' | undefined>();
+  const instanceId = useId();
   const set = (k: string, v: unknown) => setArgs((a) => ({ ...a, [k]: v }));
   const label = (c: ControlDef) => (
     <span className="flex items-baseline justify-between gap-sm">
@@ -462,19 +481,24 @@ export function Playground({ controls, render, code }: { controls: ControlDef[];
   );
   return (
     <div className="flex flex-col gap-lg">
-      <div className="grid gap-lg lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="flex min-w-0 flex-col gap-sm">
-          <Stage dark={dark} className="min-h-72 bg-surface-base">
+      <div className="docs-playground grid gap-md 2xl:grid-cols-[minmax(0,1fr)_280px]">
+        <PreviewTabs code={code(args)} label="Component preview">
+          <Stage scheme={scheme} className="min-h-96" label="Component preview">
             {render(args)}
           </Stage>
-          <label className="type-body-sm-medium flex cursor-pointer items-center gap-sm self-end text-text-secondary">
-            <Switch size="sm" checked={dark} onCheckedChange={setDark} aria-label="Preview in Dark" /> Preview in Dark
-          </label>
-        </div>
-        <fieldset className="flex min-w-0 flex-col gap-lg rounded-surface border border-border-subtle p-lg">
-          <legend className="type-body-sm-semibold px-xs text-text-primary">Controls</legend>
+        </PreviewTabs>
+        <fieldset className="docs-inspector flex min-w-0 flex-col gap-lg p-xl">
+          <legend className="sr-only">Properties</legend>
+          <div className="flex items-center justify-between gap-sm">
+            <span className="type-body-md-semibold text-text-primary">Properties</span>
+            <button type="button" aria-label="Reset properties" className="docs-tool-button type-body-xs-medium text-text-secondary" onClick={() => setArgs({ ...init })}><Icon name="general/refresh" size="sm" /> Reset</button>
+          </div>
+          {siteSchemes.length > 1 && <div className="flex flex-wrap items-center justify-between gap-sm">
+            <span className="type-body-sm-regular text-text-secondary">Preview theme</span>
+            <Segmented label="Preview theme" options={siteSchemes.map((v) => ({ value: v, label: v === 'dark' ? 'Dark' : 'Light' }))} value={scheme ?? inheritedScheme} onChange={setScheme} />
+          </div>}
           {controls.map((c) => {
-            const id = `pg-${c.name}`;
+            const id = `${instanceId}-pg-${c.name}`;
             if (c.control.type === 'boolean')
               return (
                 <label key={c.name} className="flex cursor-pointer items-center justify-between gap-md">
@@ -518,7 +542,6 @@ export function Playground({ controls, render, code }: { controls: ControlDef[];
           })}
         </fieldset>
       </div>
-      <CodeBlock code={code(args)} label="Playground" />
     </div>
   );
 }
@@ -606,7 +629,7 @@ export function NoAppVersion() {
 /** Segmented choice for platform previews and code (Web / App, or React / React Native / Swift / Kotlin). */
 export function Segmented<T extends string>({ label, options, value, onChange }: { label: string; options: readonly { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
   return (
-    <div role="group" aria-label={label} className="inline-flex flex-wrap gap-xxs rounded-control border border-border-default bg-surface-base p-xxs">
+    <div role="group" aria-label={label} className="docs-segmented inline-flex flex-wrap gap-xxs rounded-control border border-border-subtle bg-surface-sunken p-xxs">
       {options.map((o) => (
         <button
           key={o.value}
@@ -615,7 +638,7 @@ export function Segmented<T extends string>({ label, options, value, onChange }:
           onClick={() => onChange(o.value)}
           className={cn(
             'type-body-sm-semibold min-h-8 cursor-pointer rounded-sm px-md outline-none transition-colors duration-(--motion-duration-fast) is-focus:shadow-focus-default',
-            o.value === value ? 'bg-fill-brand-subtle text-site-brand-on-tint' : 'text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary',
+            o.value === value ? 'bg-surface-raised text-text-primary shadow-sm' : 'text-text-secondary is-hover:bg-fill-neutral-subtle-hover is-hover:text-text-primary',
           )}
         >
           {o.label}

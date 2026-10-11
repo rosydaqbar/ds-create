@@ -357,3 +357,9 @@ Also fail QA when:
 - a component has no status in `meta.tsx`, or the release isn't in `changelog.ts`;
 - on an App product, a component page has no `app` block, or App preview shows a web component (§7.1);
 - a brand value is written into the template (`ds-create/web` stays placeholder-only).
+
+### Shared documentation presentation
+
+`src/styles/docs-presentation.css` styles the viewer, not the exported component library. Preserve its neutral navigation, unboxed page titles, inset Preview/Code cards and separate properties inspector when adapting a build. Palette, typography and component specimens still resolve from the project export. The mode switch and preview theme selector offer only supported Light/Dark modes, including Dark-only projects. Do not import a brand's values into this shared file or force both modes into a project that supports one.
+
+When refreshing an existing build, preserve its font imports, brand configuration, token export and authored stories. Add the shared presentation stylesheet import without replacing a customized `styles/index.css`.

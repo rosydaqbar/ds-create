@@ -1,0 +1,53 @@
+/* Viewer-only presentation. Product token values and component descendants stay intact. */
+@layer components {
+  .docs-shell {
+    --docs-panel: var(--color-surface-raised);
+    --docs-edge: var(--color-border-subtle);
+    --docs-round: max(1rem, var(--radius-surface));
+  }
+  .docs-main { padding-block: clamp(2rem, 5vw, 3.5rem); }
+  .docs-page-header { max-width: 64rem; }
+  .docs-page-header > p { max-width: 46rem; }
+  .docs-navigation { min-height: 0; }
+  .docs-navigation > nav { min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .docs-sidebar { padding: 1.25rem 1rem; }
+  .docs-search, .docs-nav-footer {
+    border: 1px solid var(--docs-edge);
+    background: var(--color-surface-sunken);
+    border-radius: max(.625rem, var(--radius-control));
+    padding: .5rem .625rem;
+  }
+  .docs-nav-group { padding: .375rem .5rem; cursor: pointer; border-radius: .5rem; }
+  .docs-count { border-radius: 1rem; background: var(--color-surface-sunken); padding-inline: .375rem; }
+  .docs-nav-rail { margin-left: 1rem; padding-left: .375rem; border-left: 1px solid var(--docs-edge); }
+  .docs-nav-link { position: relative; min-height: 2rem; padding: .375rem .625rem; margin-block: .125rem; border-radius: .5rem; }
+  .docs-nav-link:hover, .docs-nav-group:hover { background: var(--color-fill-neutral-subtle-hover); }
+  .docs-nav-active { background: color-mix(in oklab, var(--color-text-primary) 8%, var(--color-surface-base)); font-weight: 600; }
+  .docs-nav-active::before { content: ''; position: absolute; left: calc(-.375rem - 1px); top: .5rem; bottom: .5rem; width: 1px; background: var(--color-text-primary); }
+  .docs-nav-link:focus-visible, .docs-nav-group:focus-visible, .docs-search:focus-visible,
+  .docs-tool-button:focus-visible, .docs-preview-tabs button:focus-visible {
+    outline: 2px solid var(--color-border-focus, var(--color-text-primary)); outline-offset: 2px;
+  }
+  .docs-nav-footer { margin-top: 1rem; gap: .5rem; }
+  .docs-preview, .docs-inspector {
+    min-width: 0;
+    border: 1px solid var(--docs-edge);
+    border-radius: calc(var(--docs-round) + .25rem);
+    background: var(--docs-panel);
+  }
+  .docs-preview { width: 100%; max-width: 100%; padding: .25rem; align-self: start; }
+  .docs-preview-toolbar { min-height: 2.5rem; padding: 0 .625rem; }
+  .docs-preview-tabs button { position: relative; cursor: pointer; padding: .625rem .5rem; color: var(--color-text-secondary); }
+  .docs-preview-tabs button[aria-selected=true] { color: var(--color-text-primary); }
+  .docs-preview-tabs button[aria-selected=true]::after { content: ''; position: absolute; bottom: .125rem; left: .5rem; right: .5rem; height: 2px; border-radius: 1px; background: currentColor; }
+  .docs-stage { background: var(--color-surface-base); border-color: var(--color-border-subtle); border-radius: var(--docs-round, var(--radius-surface)); }
+  .docs-preview .docs-code { border-radius: var(--docs-round); }
+  .docs-code pre { background: var(--color-surface-base); }
+  .docs-code { overflow: hidden; border-radius: var(--docs-round); }
+  .docs-matrix { background: var(--color-surface-raised); border-radius: var(--docs-round); }
+  .docs-tool-button { display: inline-flex; align-items: center; gap: .25rem; padding: .375rem; cursor: pointer; border-radius: .5rem; }
+  .docs-tool-button:hover { background: var(--color-fill-neutral-subtle-hover); }
+  .docs-inspector { align-self: start; }
+  .docs-segmented, .docs-segmented button { border-radius: 999px; }
+  @media (min-width: 1180px) { .docs-playground { grid-template-columns: minmax(0, 1fr) 280px; } }
+}

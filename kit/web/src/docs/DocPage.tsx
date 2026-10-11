@@ -25,10 +25,10 @@ export function PageHeader({
   figmaNode?: string;
 }) {
   return (
-    <header className="flex flex-col gap-md rounded-surface bg-surface-sunken p-2xl md:p-4xl dark:bg-surface-raised">
-      <span className="type-body-sm-medium text-text-brand">{eyebrow}</span>
+    <header className="docs-page-header flex flex-col gap-md">
+      <span className="type-body-xs-regular text-text-tertiary">{eyebrow}</span>
       <div className="flex flex-wrap items-center gap-md">
-        <h1 className="type-display-sm-semibold text-text-primary">{title}</h1>
+        <h1 className="type-heading-xl-semibold text-text-primary">{title}</h1>
         {status && <StatusPill status={status} />}
       </div>
       <P className="type-body-lg-regular">{description}</P>
@@ -107,7 +107,7 @@ export function DocTabs({ tabs, label }: { tabs: DocTab[]; label: string }) {
                 onClick={() => select(t)}
                 className={cn(
                   'type-body-sm-semibold -mb-px shrink-0 cursor-pointer border-b-2 px-lg py-md outline-none transition-colors duration-(--motion-duration-fast) is-focus:shadow-focus-default',
-                  on ? 'border-border-brand text-text-brand' : 'border-transparent text-text-tertiary is-hover:text-text-primary',
+                  on ? 'border-text-primary text-text-primary' : 'border-transparent text-text-tertiary is-hover:text-text-primary',
                 )}
               >
                 {t.label}
@@ -118,7 +118,7 @@ export function DocTabs({ tabs, label }: { tabs: DocTab[]; label: string }) {
         {/* Edge fade on small screens: shows the row scrolls. */}
         <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-surface-base md:hidden" />
       </div>
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-4xl xl:grid-cols-[minmax(0,1fr)_200px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4xl 2xl:grid-cols-[minmax(0,1fr)_200px]">
         <div
           key={current.label}
           ref={panelRef}
@@ -154,10 +154,10 @@ function OnThisPage({ panel, deps }: { panel: React.RefObject<HTMLDivElement | n
     if (panel.current) mo.observe(panel.current, { childList: true, subtree: true });
     return () => mo.disconnect();
   }, [panel, deps]);
-  if (items.length < 3) return <div className="hidden xl:block" />;
+  if (items.length < 3) return <div className="hidden 2xl:block" />;
   return (
-    <nav aria-label="On this page" className="sticky top-36 hidden max-h-[calc(100vh-10rem)] self-start overflow-y-auto xl:flex xl:flex-col xl:gap-xs">
-      <span className="type-body-xs-semibold pb-xs uppercase tracking-wide text-text-tertiary">On this page</span>
+    <nav aria-label="On this page" className="sticky top-36 hidden max-h-[calc(100vh-10rem)] self-start overflow-y-auto 2xl:flex 2xl:flex-col 2xl:gap-xs">
+      <span className="type-body-xs-semibold pb-xs text-text-tertiary">On this page</span>
       {items.map((i) => (
         <a
           key={i.id}

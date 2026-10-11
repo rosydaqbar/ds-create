@@ -26,4 +26,6 @@ export const siteHasDark = supportedModes.includes('Dark');
 export const modesLabel = supportedModes.length > 1 ? supportedModes.join(' and ') : `${supportedModes[0] ?? 'Light'} only`;
 
 /** The `data-theme` values for side-by-side specimens: ['light', 'dark'], or ['light'] on a Light-only system. */
-export const siteSchemes: ('light' | 'dark')[] = siteHasDark ? ['light', 'dark'] : ['light'];
+export const siteSchemes: ('light' | 'dark')[] = supportedModes
+  .filter((m) => m === 'Light' || m === 'Dark')
+  .map((m) => m === 'Dark' ? 'dark' : 'light');

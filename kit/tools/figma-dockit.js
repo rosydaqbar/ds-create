@@ -27,6 +27,8 @@ async function dockit(figma, OPTS) {
     ['doc/surface/base', 'COLOR', ['color/surface/base'], C(255, 255, 255)],
     ['doc/surface/header', 'COLOR', ['color/surface/sunken'], C(244, 244, 245)],
     ['doc/surface/specimen', 'COLOR', ['color/surface/raised', 'color/surface/base'], C(255, 255, 255)],
+    ['doc/surface/panel', 'COLOR', ['color/surface/raised', 'color/surface/base'], C(255, 255, 255)],
+    ['doc/surface/viewport', 'COLOR', ['color/surface/base'], C(255, 255, 255)],
     ['doc/surface/stage', 'COLOR', ['color/surface/sunken'], C(244, 244, 245)],
     ['doc/status/do', 'COLOR', ['color/icon/success', 'color/text/success'], C(21, 128, 61)],
     ['doc/status/dont', 'COLOR', ['color/icon/danger', 'color/text/danger'], C(185, 28, 28)],
@@ -37,6 +39,7 @@ async function dockit(figma, OPTS) {
     ['doc/text/tertiary', 'COLOR', ['color/text/tertiary', 'color/text/secondary'], C(82, 82, 91)],
     ['doc/text/accent', 'COLOR', ['color/text/brand', 'color/text/accent'], C(29, 78, 216)],
     ['doc/text/specimen', 'COLOR', ['color/text/primary'], C(24, 24, 27)],
+    ['doc/radius/panel', 'FLOAT', ['radius/modal', 'radius/surface'], 16],
     ['doc/radius/surface', 'FLOAT', ['radius/surface'], 8],
     ['doc/radius/badge', 'FLOAT', ['radius/indicator', 'radius/full'], 4],
     ['doc/radius/chip', 'FLOAT', ['radius/xs', 'radius/sm'], 4],
@@ -53,7 +56,7 @@ async function dockit(figma, OPTS) {
     ['doc/border/width', 'FLOAT', ['border/width/default', 'border/width/subtle'], 1],
     // Measures describe the canvas, not the product: the same in every build (DOCFRAMES §1).
     ['doc/measure/frame', 'FLOAT', [], 1440], ['doc/measure/reading', 'FLOAT', [], 720], ['doc/measure/row-note', 'FLOAT', [], 320],
-    ['doc/measure/table', 'FLOAT', [], 1280], ['doc/measure/specimen', 'FLOAT', [], 160], ['doc/table/name', 'FLOAT', [], 320],
+    ['doc/measure/table', 'FLOAT', [], 1280], ['doc/measure/specimen', 'FLOAT', [], 160], ['doc/measure/preview', 'FLOAT', [], 320], ['doc/table/name', 'FLOAT', [], 320],
     ['doc/table/header', 'FLOAT', [], 40], ['doc/table/separator', 'FLOAT', [], 16], ['doc/table/row-min', 'FLOAT', [], 56],
   ];
   const SCOPES = n => /^doc\/(surface|status)\//.test(n) ? ['FRAME_FILL', 'SHAPE_FILL'] : /^doc\/text\//.test(n) ? ['TEXT_FILL', 'SHAPE_FILL'] : /^doc\/border\/(subtle|specimen)/.test(n) ? ['STROKE_COLOR', 'SHAPE_FILL'] : /^doc\/radius\//.test(n) ? ['CORNER_RADIUS'] : /^doc\/space\//.test(n) ? ['GAP'] : n === 'doc/border/width' ? ['STROKE_FLOAT'] : ['WIDTH_HEIGHT'];
@@ -80,7 +83,15 @@ async function dockit(figma, OPTS) {
   if (!page) return Object.assign(out, { error: 'No page named "' + (OPTS.page || '9.1 Doc kit') + '": create it with the page tree first' });
   await figma.setCurrentPageAsync(page);
   const existing = page.findAllWithCriteria({ types: ['COMPONENT', 'COMPONENT_SET'] }).filter(c => /^Doc\//.test(c.name) && !(c.parent && c.parent.type === 'COMPONENT_SET'));
-  if (existing.length) { out.kit = Object.fromEntries(existing.map(c => [c.name, c.id])); out.note = 'kit already on the page: nothing built'; figma.root.setSharedPluginData('dscreate', 'dockit', JSON.stringify(out.kit)); return out; }
+  if (existing.length) {
+    // Opt-in migration changes only documentation chrome, keeping component/property ids intact.
+    if (OPTS.refreshHeader) {
+      const h = existing.find(c => c.name === 'Doc/Header');
+      if (h) for (const t of h.findAll(n => n.type === 'TEXT')) for (const segment of t.getStyledTextSegments(['fontName'])) await figma.loadFontAsync(segment.fontName);
+      const card = h && h.findOne(n => n.name === 'Card');
+      if (card) { card.fills = []; for (const corner of ['topLeftRadius', 'topRightRadius', 'bottomLeftRadius', 'bottomRightRadius']) { card.setBoundVariable(corner, null); card[corner] = 0; } for (const field of ['paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom']) { card.setBoundVariable(field, null); card[field] = 0; } out.restyled = [card.id]; }
+    }
+    out.kit = Object.fromEntries(existing.map(c => [c.name, c.id])); out.note = 'kit already on the page: nothing built'; figma.root.setSharedPluginData('dscreate', 'dockit', JSON.stringify(out.kit)); return out; }
 
   const V = n => byName.get(n) || null;
   const paint = n => { const v = V(n); return v ? figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }, 'color', v) : { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 } }; };
@@ -111,7 +122,7 @@ async function dockit(figma, OPTS) {
   { const c = comp('Doc/Badge', 'HORIZONTAL'); pad(c, 'doc/space/hairline', 'doc/space/inline', 'doc/space/hairline', 'doc/space/inline'); rad(c, 'doc/radius/badge'); stroke(c, 'doc/border/subtle'); txt(c, await T(c, 'Badge', 'body', 'xs', 'doc/text/secondary', 'Label'), 'Label'); made.badge = c; }
   { const c = comp('Doc/Token badge', 'HORIZONTAL'); pad(c, 'doc/space/hairline', 'doc/space/inline', 'doc/space/hairline', 'doc/space/inline'); rad(c, 'doc/radius/chip'); stroke(c, 'doc/border/subtle'); c.fills = [paint('doc/surface/specimen')]; txt(c, await T(c, 'color/text/primary', 'code', 'sm', 'doc/text/primary', 'Token'), 'Token'); made.token = c; }
   { const c = comp('Doc/Header', 'VERTICAL'); pad(c, 'doc/space/frame', 'doc/space/frame', null, 'doc/space/frame'); fixW(c, 'doc/measure/frame');
-    const card = AL('VERTICAL', 'Card', 'doc/space/header'); c.appendChild(card); card.layoutSizingHorizontal = 'FILL'; pad(card, 'doc/space/header', 'doc/space/header', 'doc/space/header', 'doc/space/header'); card.fills = [paint('doc/surface/header')]; rad(card, 'doc/radius/surface');
+    const card = AL('VERTICAL', 'Card', 'doc/space/header'); c.appendChild(card); card.layoutSizingHorizontal = 'FILL'; card.fills = [];
     const top = AL('HORIZONTAL', 'Top row', 'doc/space/compact'); card.appendChild(top); top.layoutSizingHorizontal = 'FILL'; top.counterAxisAlignItems = 'CENTER'; top.appendChild(mark(32));
     txt(c, await T(top, 'Level › ID Name', 'body', 'sm', 'doc/text/tertiary', 'Breadcrumb', true), 'Breadcrumb');
     txt(c, await T(top, system, 'body', 'sm', 'doc/text/tertiary', 'System'), 'System');
