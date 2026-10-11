@@ -1,5 +1,6 @@
+import { copySummary } from '../../copy';
+import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
-import { tokens } from '@/tokens/tokens.gen';
 import { config } from '@/ds.config';
 import { cn } from '@/lib/cn';
 import { Icon } from '@/icons';
@@ -32,19 +33,6 @@ const countryName = (code: string) => {
     return code.toUpperCase();
   }
 };
-
-const vars = new Map(tokens.variables.map((v) => [v.name, v]));
-const hex = (name: string) => vars.get(name)?.modes.Light?.value ?? '#000000';
-function contrast(a: string, b: string) {
-  const lum = (h: string) => {
-    const x = h.replace('#', '').slice(0, 6);
-    const [r, g, bl] = [0, 2, 4].map((i) => parseInt(x.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
-  };
-  const [p, q] = [lum(a), lum(b)].sort((m, n) => n - m);
-  return (p + 0.05) / (q + 0.05);
-}
-const facebookRatio = contrast(hex('social-button/facebook/fill'), hex('social-button/facebook/fg'));
 
 /* ---------- small pieces ---------- */
 type Mode = 'light' | 'dark';
@@ -183,7 +171,7 @@ function SocialMarks() {
       <P>
         These are the sign-in providers the Social button (3.7) supports: {socialProviders.map((p) => socialProviderName[p]).join(', ')}. Each mark keeps its owner’s
         colors and proportions. For a quieter row, use the mono version: a single color that follows the icon color roles. Near-black marks follow the text color so
-        they stay visible on dark surfaces. Their owners allow either black or white.
+        they stay visible on dark surfaces. Check current owner guidance before adding or changing a treatment.
       </P>
       <div className="grid gap-lg md:grid-cols-2">
         {(['light', 'dark'] as const).map((m) => (
@@ -240,6 +228,7 @@ function Flags() {
 function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
+      <ReadingNarrative id="1.8" fallback={<>
       <section className="flex flex-col gap-lg">
         <AnchorHeading>About brand assets</AnchorHeading>
         <P>
@@ -247,6 +236,7 @@ function Overview() {
           owners. Each asset is a file in <InlineCode>public/brand/</InlineCode>, exported from the Figma file, so replacing a file updates it everywhere.
         </P>
       </section>
+      </>} />
       <LogoSection />
       <ClearSpace />
       <SocialMarks />
@@ -556,19 +546,15 @@ logo: { light: '${config.logo.light}', dark: '${config.logo.dark}', mark: '${con
   },
   {
     title: 'Partner marks follow their owners’ rules',
-    body: `Third-party marks keep their owners’ colors, proportions and wording, even where the system would choose differently.\n\nThe Facebook button is the documented exception. Facebook’s brand rules set its blue and its white label, which reach ${facebookRatio.toFixed(2)}:1 contrast, just under the 4.5:1 the system uses for text. It stays as a recorded exception because the owner’s rules require it, and the label is large, bold and paired with the mark.\n\nNear-black marks (Apple, X, GitHub) follow the text color instead, which their owners allow, so they never disappear on a dark surface.`,
+    body: 'Use the supplied provider treatments rather than recoloring a partner mark as an ordinary interface icon. Verify current owner guidance before adding or changing provider artwork; the available specimens establish the treatments in this library, not a blanket licensing or contrast exception.',
     render: () => (
       <div className="flex w-full flex-col items-center gap-lg">
-        {/* A specimen of the recorded exception, not a control: inert and described as one image. */}
-        <div role="img" aria-label={`Facebook and Apple sign-in buttons in their owners’ solid colors. Facebook’s white label on its blue is ${facebookRatio.toFixed(2)}:1.`} className="flex flex-wrap justify-center gap-md">
+        <div role="img" aria-label="Supplied provider sign-in treatments" className="flex flex-wrap justify-center gap-md">
           <span inert aria-hidden className="flex flex-wrap justify-center gap-md">
-            <SocialButton provider="facebook" type="solid" size="md" tabIndex={-1} />
-            <SocialButton provider="apple" type="solid" size="md" tabIndex={-1} />
+            {socialProviders.map((provider) => <SocialButton key={provider} provider={provider} type="solid" size="md" tabIndex={-1} />)}
           </span>
         </div>
-        <Caption>
-          Facebook solid: white on its brand blue, {facebookRatio.toFixed(2)}:1, set by Facebook’s brand rules.
-        </Caption>
+        <Caption>These specimens show the providers included in the current build. Authentication must be connected by the consuming application.</Caption>
       </div>
     ),
   },
@@ -614,11 +600,11 @@ export default function BrandAssets() {
     <DocPage
       eyebrow="Foundations › 1.8 Brand assets"
       title="Brand assets"
-      description="The product logo, sign-in provider marks and flags are artwork, not tokens. Each piece belongs to its owner, so it keeps their colors and proportions."
+      description={copySummary('1.8', "The product logo, sign-in provider marks and flags are artwork, not tokens. Each piece belongs to its owner, so it keeps their colors and proportions.")}
       figmaNode={figmaNodeFor('1.8')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
-        { label: 'Guidelines', render: () => <Topics items={TOPICS} /> },
+        { label: 'Guidelines', render: () => <ReadingGuidelines id="1.8" items={TOPICS} fallback={<Topics items={TOPICS} />} /> },
       ]}
     />
   );

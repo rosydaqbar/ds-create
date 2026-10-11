@@ -1,8 +1,9 @@
+import { copySummary } from '../../copy';
+import { FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenVariable } from '@/tokens/types';
 import { cn } from '@/lib/cn';
-import { config } from '@/ds.config';
 import { Badge, Button, Checkbox, Divider, HelpText, Icon, Label, Link, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
 import { Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenTable } from '../../blocks';
@@ -536,13 +537,12 @@ const MODEL_ROLE = 'color/text/brand';
 function RoleModel() {
   if (!has(MODEL_ROLE)) return null;
   const aliases = MODES.map((m) => alias(MODEL_ROLE, m));
-  const perMode = aliases[0] !== aliases[1];
   return (
     <Panel>
       <div className="flex flex-col items-stretch gap-md md:flex-row">
         <div className="flex flex-1 flex-col gap-md rounded-control border border-border-subtle bg-surface-base p-lg">
           <span className="type-body-xs-semibold uppercase tracking-wide text-text-tertiary">1 · Primitives</span>
-          <p className="type-body-sm-regular text-text-secondary">The raw palette. It’s hidden from color pickers, and components don’t use it directly.</p>
+          <p className="type-body-sm-regular text-text-secondary">Raw palette values supply the aliases below. Choose semantic roles when composing interface elements.</p>
           {[...new Set(aliases)].map((a) =>
             a ? (
               <span key={a} className="flex items-center gap-sm">
@@ -555,7 +555,7 @@ function RoleModel() {
         <Arrow />
         <div className="flex flex-1 flex-col gap-md rounded-control border border-border-brand-subtle bg-surface-base p-lg">
           <span className="type-body-xs-semibold uppercase tracking-wide text-text-tertiary">2 · Semantic role</span>
-          <p className="type-body-sm-regular text-text-secondary">{perMode ? 'Names what the color is for and points to a different step in each mode.' : 'Names what the color is for and can point to a different step in each mode.'}</p>
+          <p className="type-body-sm-regular text-text-secondary">Names the intended use and references its palette value for each supported mode.</p>
           <span className="flex items-center gap-sm">
             <Dot name={MODEL_ROLE} />
             <Code>{MODEL_ROLE}</Code>
@@ -565,7 +565,7 @@ function RoleModel() {
         <Arrow />
         <div className="flex flex-1 flex-col gap-md rounded-control border border-border-subtle bg-surface-base p-lg">
           <span className="type-body-xs-semibold uppercase tracking-wide text-text-tertiary">3 · Component</span>
-          <p className="type-body-sm-regular text-text-secondary">A Link (2.3) uses the role, so it looks right in every mode with no extra work. Live sample:</p>
+          <p className="type-body-sm-regular text-text-secondary">A Link (2.3) uses this text role. Inspect the rendered link on its actual surface after changing the mapping.</p>
           <Link label="View shared files" href="#" onClick={(e) => e.preventDefault()} />
         </div>
       </div>
@@ -598,7 +598,8 @@ function Overview() {
   const hasAlphaWhite = familySteps('alpha-white').length > 0;
   return (
     <div className="flex flex-col gap-6xl">
-      <Block title="How color works" intro={`${config.name} color comes in two layers. Primitive palettes hold the raw values. Semantic roles say what each color is for, and they change with the mode. Components use only roles, so you can change a palette without touching a single component.`}>
+      <FoundationNarrative id="1.1" visuals={{'role-model': <RoleModel />}} fallback={<>
+      <Block title="Selecting color roles" intro="Select a role for the element and its context: a text color, for example, needs to be checked against the surface on which the text will appear.">
         <RoleModel />
         <Bullets
           items={[
@@ -614,7 +615,7 @@ function Overview() {
               ) : (
                 <>
                   <strong className="font-semibold text-text-primary">Every role has one value, in {MODES[0]}.</strong>
-                  {unsupportedModes.length ? ` ${unsupportedModes.join(' and ')} isn’t supported.` : ''} When a mode is added, a screen built from roles follows it with no overrides.
+                  {unsupportedModes.length ? ` ${unsupportedModes.join(' and ')} isn’t supported.` : ''} Adding a mode requires new role mappings and component verification.
                 </>
               )}
             </>,
@@ -624,6 +625,7 @@ function Overview() {
           ]}
         />
       </Block>
+      </>} />
 
       <Block title="Base colors" intro="These are the building blocks: white, black and transparent, the brand ramp, and the alpha scales for overlays and shadows. Each swatch lists its contrast on white and on black, and the label on the swatch shows the better of the two.">
         <div className="flex flex-col gap-xl">
@@ -1399,7 +1401,7 @@ function GuidelinesTab() {
       caption: 'Each effect reads its color from one role, so a palette change updates all three.',
     },
   ];
-  return <GuideList items={items} />;
+  return <FoundationGuidelines id="1.1" items={items} fallback={<GuideList items={items} />} />;
 }
 
 export default function Color() {
@@ -1409,7 +1411,7 @@ export default function Color() {
       <DocPage
         eyebrow="Foundations › 1.1 Color"
         title="Color"
-        description={`Color carries the brand and tells people what’s happening. Components use semantic roles instead of raw palette values, so every screen works in ${MODES_TEXT} and the palette can change in one place.`}
+        description={copySummary('1.1', `Raw palette values and semantic roles serve different purposes. Components reference roles for text, borders and surfaces; the exported mappings define their appearance in ${MODES_TEXT}.`)}
         figmaNode={figmaNodeFor('1.1')}
         tabs={[
           { label: 'Overview', render: () => <Overview /> },

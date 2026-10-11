@@ -1,3 +1,4 @@
+import { copySummary } from '../copy';
 import { Link } from 'react-router';
 import { config } from '@/ds.config';
 import { Icon, type IconName } from '@/icons';
@@ -44,7 +45,7 @@ export function Home() {
           v{config.version} · {modesLabel} · {productHasWeb ? 'Figma and React reference' : 'Figma and app code reference'}
         </span>
         <h1 className="type-display-md-semibold max-w-[48rem]">{config.name}</h1>
-        <p className="type-body-lg-regular max-w-[42rem] text-text-secondary-on-brand">{config.description}</p>
+        <p className="type-body-lg-regular max-w-[42rem] text-text-secondary-on-brand">{copySummary('00', config.description)}</p>
         <div className="flex flex-wrap gap-md">
           <Link to="/guidance/01-getting-started" className="type-body-md-semibold inline-flex h-(--size-control-lg) items-center gap-sm rounded-control bg-surface-base px-xl text-text-primary outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default">
             Get started <Icon name="arrows/arrow-right" />
@@ -107,7 +108,7 @@ export function Home() {
                   <Icon name={foundationBlurb[p.id]?.icon ?? 'general/placeholder'} size="sm" className="text-icon-brand" />
                   <span className="type-body-md-semibold text-text-primary">{p.name}</span>
                 </span>
-                <span className="type-body-sm-regular text-text-secondary">{foundationBlurb[p.id]?.text}</span>
+                <span className="type-body-sm-regular text-text-secondary">{copySummary(p.id, foundationBlurb[p.id]?.text ?? p.name)}</span>
               </Link>
             ))}
         </div>

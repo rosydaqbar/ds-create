@@ -1,10 +1,12 @@
+import { copySummary } from '../copy';
+import { ReadingTopic } from '../FoundationCopy';
 import { Fragment, useDeferredValue, useMemo, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenVariable } from '@/tokens/types';
 import { Icon } from '@/icons';
 import { Button, Progress, Select, Switch, TextField } from '@/components';
-import { AnchorHeading, DocPage } from '../DocPage';
+import { DocPage } from '../DocPage';
 import { appTokenNames, breakable, Bullets, Caption, DoDont, H3, InlineCode, P, productHasWeb, Swatch, TokenTable } from '../blocks';
 import { siteHasDark, supportedModes, unsupportedModes } from '../modes';
 import { componentDocs, slugOf, staticPages } from '../registry';
@@ -121,12 +123,7 @@ function TextLink({ to, children }: { to: string; children: ReactNode }) {
   );
 }
 function Topic({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0 last:pb-0">
-      <AnchorHeading>{title}</AnchorHeading>
-      {children}
-    </section>
-  );
+  return <ReadingTopic id="02" title={title}>{children}</ReadingTopic>;
 }
 function Visual({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <div className={`min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl ${className}`}>{children}</div>;
@@ -263,26 +260,26 @@ const GOALS: { goal: string; means: string; here: string; see: string; to: strin
   },
   {
     goal: 'Accessibility',
-    means: 'Every text and surface pair passes contrast in each supported mode before a component uses it.',
-    here: `Pairs are checked in ${joinList(supportedModes)}${unsupportedModes.length ? `; ${joinList(unsupportedModes)} is checked once it has real values` : ''}. Pairs below AA are listed on 1.1 Color with the rule that makes them safe.`,
+    means: 'Measure each intended foreground/background pair, including state changes and composited layers.',
+    here: `Pairs are checked in ${joinList(supportedModes)}${unsupportedModes.length ? `; ${joinList(unsupportedModes)} is checked once it has real values` : ''}. Read the measured pairs on 1.1 Color; a token-pair check does not establish complete accessibility.`,
     see: '1.1 Color',
     to: pageTo('1.1'),
   },
   {
     goal: 'Aesthetics',
-    means: 'The brand’s character lives in the primitives and the roles that alias them, never on layers.',
+    means: 'Change a shared source value when its dependent roles should change together.',
     here: goalRole
-      ? `${families.length} palette families sit behind the color roles; ${goalRole} → ${primitiveOf(goalRole)} carries the brand into every component that uses it.`
+      ? `${families.length} palette families sit behind the color roles; ${goalRole} → ${primitiveOf(goalRole)} shows the source relationship for that fill.`
       : `${families.length} palette families sit behind the color roles.`,
     see: 'Primitive palette',
     to: '#primitive-palette',
   },
   {
     goal: 'Scalability',
-    means: 'New modes, brands and components add values without renaming anything.',
+    means: 'Add roles for new responsibilities and retain names whose purposes remain unchanged.',
     here: unsupportedModes.length
       ? `The ${joinList(unsupportedModes)} column is already in the Color collection, waiting for values; new roles go into the groups that exist.`
-      : 'New roles go into the groups that exist, and new modes into the collections that exist.',
+      : 'Review the intended consumers and complete mappings before adding another role or mode.',
     see: 'Modes',
     to: '#modes',
   },
@@ -762,7 +759,7 @@ function Overview() {
           The number scales are {joinList(scales.map((s) => `scale/${s}`))}.
         </P>
         <Caption>
-          For every step with its value and contrast, see <TextLinkTo id="1.1" label="1.1 Color" />. Change a primitive only when the brand changes, then check the roles that use it and
+          For every step with its value and contrast, see <TextLinkTo id="1.1" label="1.1 Color" />. Before changing a primitive, inspect its dependent roles and
           rerun the contrast tests.
         </Caption>
       </Topic>
@@ -866,7 +863,7 @@ export default function Tokens() {
     <DocPage
       eyebrow="Guidance › 02 Tokens"
       title="Tokens"
-      description="Tokens are the named values behind every screen, shared by Figma and code. Here’s how they’re organized, named and switched between modes. Look up any token in the Reference tab."
+      description={copySummary('02', "Tokens are the named values behind every screen, shared by Figma and code. Here’s how they’re organized, named and switched between modes. Look up any token in the Reference tab.")}
       figmaNode={figmaNodeFor('02')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

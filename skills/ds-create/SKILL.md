@@ -61,8 +61,9 @@ One skill, five commands. Each command has its own reference file. Load it befor
    - Lessons and tool bugs go into the build notes (`output/{slug}/reports/`), and into the repo only after the round, when the maintainer asks.
    - A blocking tool bug is patched once in the file's cached copy (`workflow/FAST.md` §6), or the page falls back to the standard engine. Never loop on it.
 11. **Keep going.** A context summary is not a stopping point. With YOLO or a no-stop pace, resume from the ledger and carry on; stop only at a gate, a blocker, or the end of the round.
-12. **Icons are Lucide.** A new system's icon library comes from `kit/tools/icons-lucide.mjs` (`specs/foundations/1.7-iconography.md` §1). Never ask which library, and never draw or map icons by hand.
-13. **Report plainly.** Each command ends with a short report:
+12. **Plan guideline content before prose.** Follow `workflow/EDITORIAL.md`: verify facts, identify reader decisions, adapt topic organization and depth, then revise for redundancy. Preserve outer frames, tokens, APIs and references. New/revised pages save an internal plan checked by the existing copy guard; existing builds remain readable.
+13. **Icons are Lucide.** A new system's icon library comes from `kit/tools/icons-lucide.mjs` (`specs/foundations/1.7-iconography.md` §1). Never ask which library, and never draw or map icons by hand.
+14. **Report plainly.** Each command ends with a short report:
    - what was done, with links;
    - what is still open;
    - the next command to run.

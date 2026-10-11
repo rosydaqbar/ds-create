@@ -24,6 +24,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { parseCopy } from '../web/scripts/build-copy.mjs';
+import { editorialFindings, validatePlan } from './editorial.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const KNOW = path.join(ROOT, 'knowledge');
 const norm = (s) => s.toLowerCase().replace(/[`*_"'’“”]/g, '').replace(/\s+/g, ' ').trim();
@@ -116,9 +119,34 @@ export const jsonStrings = (v, out = []) => {
   return out;
 };
 
+/** Review every copy file. A missing plan never exempts prose from editorial checks. */
+export function checkEditorial(slug, ids = [], required = false) {
+  const errors = [], copies = [];
+  const dir = path.join(ROOT, 'output', slug, 'copy');
+  if (!fs.existsSync(dir)) return required ? ['No copy directory for editorial review'] : [];
+  const found = new Set();
+  for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.md'))) {
+    const { copy, errors: parseErrors } = parseCopy(fs.readFileSync(path.join(dir, file), 'utf8'), file);
+    if (ids.length && !ids.includes(copy.id)) continue;
+    found.add(copy.id);
+    errors.push(...parseErrors);
+    copies.push(copy);
+    const planFile = path.join(ROOT, 'output', slug, 'plans', file.replace(/\.md$/, '.json'));
+    if (!fs.existsSync(planFile)) {
+      if (required) errors.push(`${copy.id}: write the pre-draft editorial plan in plans/${path.basename(planFile)}`);
+      continue;
+    }
+    try { errors.push(...validatePlan(JSON.parse(fs.readFileSync(planFile, 'utf8')), copy, ROOT)); }
+    catch (e) { errors.push(`${copy.id}: cannot read editorial plan: ${e.message}`); }
+  }
+  for (const id of ids) if (!found.has(id)) errors.push(`${id}: no copy file for editorial review`);
+  errors.push(...editorialFindings(copies).map((f) => `${f.page} [${f.surface}] ${f.location}: ${f.code}: ${f.message}`));
+  return errors;
+}
+
 /** One page's copy file and its fast-mode manifest: everything that can reach its Figma frames or site page. */
 export function checkPage(slug, id) {
-  const errs = [];
+  const errs = checkEditorial(slug, [id]);
   const copy = path.join(ROOT, 'output', slug, 'copy');
   const f = fs.existsSync(copy) && fs.readdirSync(copy).find((x) => x.startsWith(id + '-') && x.endsWith('.md'));
   if (f) errs.push(...knowledgeErrors(fs.readFileSync(path.join(copy, f), 'utf8'), `copy/${f}`));
@@ -134,7 +162,7 @@ export function checkPage(slug, id) {
 
 /** Every copy file of a build, and the strings of its site stories. */
 export function checkBuild(slug) {
-  const errs = [];
+  const errs = checkEditorial(slug);
   const copy = path.join(ROOT, 'output', slug, 'copy');
   if (fs.existsSync(copy)) for (const f of fs.readdirSync(copy).filter((x) => x.endsWith('.md'))) errs.push(...knowledgeErrors(fs.readFileSync(path.join(copy, f), 'utf8'), `copy/${f}`));
   const fast = path.join(ROOT, 'output', slug, 'fast');
@@ -152,6 +180,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const slug = args.includes('--slug') ? args[args.indexOf('--slug') + 1] : null;
   if (!slug) { console.error('usage: node kit/tools/copy-guard.mjs --slug {slug}'); process.exit(1); }
   const page = args.includes('--page') ? args[args.indexOf('--page') + 1] : null;
+  if (args.includes('--editorial')) {
+    const ids = page ? [page] : (args.includes('--pages') ? args[args.indexOf('--pages') + 1].split(',') : []);
+    const errors = checkEditorial(slug, ids, true);
+    console.log(errors.length ? errors.join('\n') : '✓ editorial plans, coverage, evidence and redundancy checks');
+    process.exit(errors.length ? 1 : 0);
+  }
   if (page) {
     const ev = evidenceErrors(slug, page);
     const errs = [...ev.errs, ...checkPage(slug, page)];

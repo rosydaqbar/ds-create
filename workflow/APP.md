@@ -1,5 +1,7 @@
 # App products
 
+All documentation written through this workflow follows `workflow/EDITORIAL.md` and `kit/web/COPY-GUIDE.md`. The standard applies to every subject, platform and level, including new categories. Verify applicable facts and decisions before prose; preserve implementation references and adapt the organization to the subject.
+
 This file covers what changes on the documentation site when the product is an **App** (or **Web and App**). The docs site from `workflow/WEB.md` is the documentation for every product type. For an App product:
 
 - every component is **previewed in React Native**, rendered in the browser with react-native-web;

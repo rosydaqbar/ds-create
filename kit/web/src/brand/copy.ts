@@ -92,7 +92,7 @@ export const brandCopy: BrandCopy = {
   /* ---------- 1.2 Typography ---------- */
 
   /**
-   * What is the typeface's character? Follows the computed sentence that names the families.
+   * Which font-source or use constraint should accompany the typeface reference? Do not repeat an assignment inventory.
    * Keep the second sentence, and add one on the character when the Guidelines frame gives it.
    */
   typefaceIntro: template('Every text style is built from these families, so changing a family variable restyles every screen at once.'),
@@ -131,7 +131,7 @@ export const brandCopy: BrandCopy = {
   /* ---------- 1.5 Elevation ---------- */
 
   /**
-   * Which depth direction does the system take? Second sentence of "How depth works". `depth` is
+   * Which depth direction does the system take? Additional context for the elevation reference. `depth` is
    * computed from the elevation styles (flat surfaces, layered shadows or a tactile edge).
    */
   depthDirection: template(({ name, depth }: { name: string; depth: string }) => `${name} uses ${depth}.`),

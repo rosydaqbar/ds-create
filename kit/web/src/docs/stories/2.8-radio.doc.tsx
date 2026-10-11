@@ -62,7 +62,7 @@ export default defineDoc({
   examples: [
     {
       title: 'Billing period',
-      caption: 'One option is always checked, so people can see the current choice at a glance.',
+      caption: 'This billing example starts with Yearly selected; choosing another period replaces that value.',
       render: () => (
         <fieldset className="flex flex-col gap-md">
           <legend className="type-body-sm-semibold mb-md text-text-primary">Billing period</legend>
@@ -176,7 +176,7 @@ export default defineDoc({
   guidelines: [
     {
       title: 'Keep one option checked',
-      body: 'A radio group always has one option checked, so start with a sensible default. Picking an option clears the previous one. If people can choose several together, use checkboxes instead.',
+      body: 'Give related radios the same name and select an initial value only when the task has a legitimate default. Choosing another member clears the previous native selection. Use checkboxes for independent choices.',
       do: { caption: 'One option checked by default.', render: () => <div className="flex flex-col gap-sm"><Row label="Standard shipping"><Radio name="g-ship" defaultChecked /></Row><Row label="Express"><Radio name="g-ship" /></Row></div> },
       dont: { caption: 'Two radios checked in the same group.', render: () => <div className="flex flex-col gap-sm"><Row label="Standard shipping"><Radio checked /></Row><Row label="Express"><Radio checked /></Row></div> },
     },

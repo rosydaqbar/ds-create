@@ -1,3 +1,5 @@
+import { copySummary } from '../../copy';
+import { FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenTextStyle } from '@/tokens/types';
@@ -336,12 +338,10 @@ function HierarchyExample() {
 }
 
 function Overview() {
-  const jobs: Record<string, string> = { ui: FAMILIES.some((f) => f.key === 'display') ? 'the rest of the interface' : 'the interface', display: 'display and headline text', mono: 'code and data' };
-  const families = FAMILIES.length <= 1 ? `One family, ${UI_FAMILY}, sets every interface role.` : `${list(FAMILIES.map((f) => `${f.label} sets ${jobs[f.key] ?? `${f.key} text`}`))}.`;
-  const intro = `${families} ${brandCopy.typefaceIntro}`;
   return (
     <div className="flex flex-col gap-6xl">
-      <Block title="How typography works" intro={intro}>
+      <FoundationNarrative id="1.2" visuals={{'type-model': <LayerModel />}} fallback={<>
+      <Block title="Applying text styles" intro="Use a named style for a complete combination of family, size, weight and line height. Changing only the font size leaves the other settings outside the shared style.">
         <LayerModel />
         <Bullets
           items={[
@@ -357,6 +357,7 @@ function Overview() {
           ]}
         />
       </Block>
+      </>} />
 
       {FAMILIES.length > 0 && (
         <Block title="Typefaces" intro={`The product uses ${words(FAMILIES.length)} ${FAMILIES.length === 1 ? 'typeface' : 'typefaces'}. Each card is set in the typeface it describes.`}>
@@ -975,7 +976,7 @@ function GuidelinesTab() {
       caption: 'The same text capped at the reading measure and running full width. On wide screens, the uncapped line grows past 120 characters.',
     },
   ];
-  return <GuideList items={items} />;
+  return <FoundationGuidelines id="1.2" items={items} fallback={<GuideList items={items} />} />;
 }
 
 export default function Typography() {
@@ -983,7 +984,7 @@ export default function Typography() {
     <DocPage
       eyebrow="Foundations › 1.2 Typography"
       title="Typography"
-      description="Text styles set the hierarchy of every screen, from hero headlines to table data. Each Figma text style has a matching utility class: type/body/md/regular → type-body-md-regular."
+      description={copySummary('1.2', "Text styles define complete settings for display, headings, body text and code. Choose the role for the content before choosing its size or weight.")}
       figmaNode={figmaNodeFor('1.2')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

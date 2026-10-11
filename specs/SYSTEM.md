@@ -110,7 +110,7 @@ Every page uses the template of its type. Frames are top-level Frames on the pag
 └─ {ID} {Name} · Guidelines          long-form, reading-oriented documentation with visual teaching
 ```
 
-The page's Markdown file lists which specimen sections go in **Overview**, which variable groups go in **Tokens**, and which topics go in **Guidelines**, in order.
+The page’s Markdown file defines required specimen/reference coverage and the outer frames. Guideline topics are editorial starting points: use workflow/EDITORIAL.md to group and order the information by subject without dropping supported specifications or required visuals. Internal coverage goals do not prescribe visible headings. This standard applies universally, including guidance, foundations, Parts, Components, Sections, Layouts, Screens and future subjects; no example list or category limits editorial review.
 
 ### Component page template (Parts, Components, Sections)
 

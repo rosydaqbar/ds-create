@@ -1,3 +1,5 @@
+import { copySummary } from '../copy';
+import { ReadingTopic } from '../FoundationCopy';
 import { Fragment, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { config } from '@/ds.config';
@@ -5,7 +7,7 @@ import { Icon, type IconName } from '@/icons';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenVariable } from '@/tokens/types';
 import { Button, buttonVariants, Checkbox, FeaturedIcon, Label, Progress, Switch, TextField } from '@/components';
-import { AnchorHeading, DocPage } from '../DocPage';
+import { DocPage } from '../DocPage';
 import { APP_PLATFORMS, Bullets, Caption, CodeBlock, DoDont, H3, InlineCode, P, productHasApp, productHasWeb, Segmented, type AppPlatform } from '../blocks';
 import { componentDocs, levelLabel, slugOf, staticPages } from '../registry';
 import { figmaNodeFor, pageMeta, statusInfo, StatusPill } from '../meta';
@@ -17,7 +19,7 @@ const byName = new Map(tokens.variables.map((t) => [t.name, t]));
 const v = (name: string) => byName.get(name);
 const lightOf = (name: string) => {
   const t = v(name);
-  return t ? (t.modes.Light ?? Object.values(t.modes)[0]) : undefined;
+  return t ? (t.modes[supportedModes[0]] ?? Object.values(t.modes)[0]) : undefined;
 };
 const short = (alias?: string | null) => (alias ?? '').replace(/^palette\//, '');
 const px = (name: string) => {
@@ -52,7 +54,7 @@ const swapColor = (() => {
 
 /** Typefaces, from `font/family/*`. A stack that starts with a generic family is the platform's own font. */
 const SYSTEM_FONTS = new Set(['ui-sans-serif', 'ui-serif', 'ui-monospace', 'ui-rounded', 'system-ui', '-apple-system', 'blinkmacsystemfont', 'sans-serif', 'serif', 'monospace', 'sfmono-regular']);
-const FAMILY_USE: Record<string, string> = { ui: 'UI and content', mono: 'Code, tokens and numbers', display: 'Display text and headings', serif: 'Long-form reading', brand: 'Brand moments' };
+const FAMILY_USE: Record<string, string> = { ui: 'UI and content', mono: 'Code, tokens and numbers', display: 'Display text; inspect heading styles separately', serif: 'Long-form reading', brand: 'Brand moments' };
 const typefaces = tokens.variables
   .filter((t) => t.name.startsWith('font/family/'))
   .map((t) => {
@@ -163,7 +165,7 @@ const stableCount = componentDocs.filter((d) => pageMeta[d.id]?.status === 'stab
 const brandColors = [
   { label: 'Brand', role: 'color/fill/brand/solid', meaning: 'Primary actions, links, selected states' },
   { label: 'Brand subtle', role: 'color/fill/brand/subtle', meaning: 'Tinted backgrounds, badges, highlights' },
-  { label: 'Ink', role: 'color/text/primary', meaning: 'Primary text on light surfaces' },
+  { label: 'Ink', role: 'color/text/primary', meaning: 'Primary reading text on its supported surface' },
   { label: 'Neutral', role: 'color/border/default', meaning: 'Borders, dividers, secondary surfaces' },
   { label: 'Danger', role: 'color/fill/danger/solid', meaning: 'Errors and destructive actions' },
   { label: 'Warning', role: 'color/fill/warning/solid', meaning: 'Caution and beta notices' },
@@ -172,12 +174,7 @@ const brandColors = [
 
 /* ---------- layout helpers ---------- */
 function Topic({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0 last:pb-0">
-      <AnchorHeading>{title}</AnchorHeading>
-      {children}
-    </section>
-  );
+  return <ReadingTopic id="01" title={title}>{children}</ReadingTopic>;
 }
 function Column({ children }: { children: ReactNode }) {
   return <div className="flex max-w-[64rem] flex-col gap-4xl">{children}</div>;
@@ -320,7 +317,7 @@ const developerStart = productHasApp
   ? productHasWeb
     ? 'Install the web package, or copy the code for React Native, Swift or Kotlin. Props match the Figma properties, and every value comes from a token.'
     : 'Copy the code for React Native, Swift or Kotlin from each component page. Props match the Figma properties, and every value comes from a token.'
-  : 'Install one package and start building. Props match the Figma properties, and every value comes from a token.';
+  : 'Install the built package artifact and use the property tables to map Figma configurations to the supported code API.';
 const brandSummary = brandCopy.brandAtAGlance;
 
 function Overview() {
@@ -384,7 +381,7 @@ function Overview() {
                       <span>{prim !== c.role ? '→ ' : ''}{c.role}</span>
                     </span>
                     <span className="type-code-sm-regular text-text-tertiary">
-                      <span className="uppercase">{m.value}</span> in Light
+                      <span className="uppercase">{m.value}</span> in {supportedModes[0]}
                     </span>
                     <span className="type-body-xs-regular pt-xs text-text-secondary">{c.meaning}</span>
                   </div>
@@ -422,7 +419,7 @@ function Overview() {
           </div>
         </Visual>
         <Caption>
-          The swatches use the real variables, so they follow the color mode. The brand fill in Light is {fill?.value.toUpperCase()}. For more, see <PageLink id="1.1">1.1 Color</PageLink>,{' '}
+          The swatches use the real variables, so they follow the color mode. The brand fill in {supportedModes[0]} is {fill?.value.toUpperCase()}. For more, see <PageLink id="1.1">1.1 Color</PageLink>,{' '}
           <PageLink id="1.2">1.2 Typography</PageLink>, <PageLink id="1.4">1.4 Shape</PageLink> and <PageLink id="1.5">1.5 Elevation</PageLink>.
         </Caption>
       </Topic>
@@ -1263,7 +1260,7 @@ DsButton(label = "Save changes", onClick = ::save, size = DsSize.Lg, leadingIcon
       </Topic>
 
       <Topic title="Color mode, text size and motion">
-        {siteHasDark ? (
+        {colorModes.length > 1 ? (
           <>
             <P>
               Components follow the phone’s Light or Dark setting, its text size and its Reduce motion setting. To keep one part of a screen in one mode, like a dark promo card in
@@ -1290,10 +1287,10 @@ DsButton(label = "Save changes", onClick = ::save, size = DsSize.Lg, leadingIcon
             <AppCodeBlock
               platform={platform}
               code={{
-                reactNative: `<ThemeProvider colorScheme="light">{/* the app */}</ThemeProvider>`,
+                reactNative: `<ThemeProvider colorScheme="${colorModes[0].toLowerCase()}">{/* the app */}</ThemeProvider>`,
                 swift: `ContentView()
-    .dsTheme(colorScheme: .light)`,
-                kotlin: `DsTheme(darkTheme = false, reducedMotion = DsTheme.reducedMotion) {
+    .dsTheme(colorScheme: .${colorModes[0].toLowerCase()})`,
+                kotlin: `DsTheme(darkTheme = ${colorModes[0] === 'Dark'}, reducedMotion = DsTheme.reducedMotion) {
     App()
 }`,
               }}
@@ -1308,7 +1305,7 @@ DsButton(label = "Save changes", onClick = ::save, size = DsSize.Lg, leadingIcon
       <Topic title="Keeping in sync with Figma">
         <P>
           Figma is the source of truth. Component, prop and token names in the code are the Figma names, so when a variable or a component changes in Figma, this site and its code
-          change with it.
+          must be regenerated and reviewed after that change.
         </P>
       </Topic>
     </Column>
@@ -1348,7 +1345,7 @@ export default function GettingStarted() {
     <DocPage
       eyebrow="Guidance › 01 Getting started"
       title="Getting started"
-      description={`What’s in the ${config.name}, how mature each part is, and where designers, developers and product managers should start.`}
+      description={copySummary('01', `What’s in the ${config.name}, how mature each part is, and where designers, developers and product managers should start.`)}
       figmaNode={figmaNodeFor('01')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

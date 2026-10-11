@@ -1,3 +1,5 @@
+import { copySummary } from '../../copy';
+import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -241,6 +243,7 @@ function Overview() {
   const raisedLevels = LEVELS.filter((l) => l.style).length;
   return (
     <div className="flex flex-col gap-5xl">
+      <ReadingNarrative id="1.5" fallback={<>
       <section className="flex flex-col gap-lg">
         <AnchorHeading>How depth works</AnchorHeading>
         <P>
@@ -256,10 +259,11 @@ function Overview() {
           ]}
         />
       </section>
+      </>} />
 
       <section className="flex flex-col gap-2xl">
         <AnchorHeading>Levels</AnchorHeading>
-        <P>The levels run from lowest to highest. Each one shows the same example in Light and Dark.</P>
+        <P>The levels run from lowest to highest. Each one shows the same example in the supported color modes.</P>
         {LEVELS.map((l) => (
           <div key={l.name} className="grid gap-xl border-t border-border-subtle pt-2xl lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
             <div className="flex flex-col gap-md">
@@ -759,12 +763,12 @@ export default function Elevation() {
     <DocPage
       eyebrow="Foundations › 1.5 Elevation"
       title="Elevation"
-      description={`Elevation shows what sits above what. ${DEPTH === 'flat' ? 'Borders separate surfaces and only floating panels cast a shadow' : 'Shadows lift cards and menus'}${blurs.length ? ', a two-part focus ring stays visible on any surface, and backdrop blur keeps controls over media readable.' : ', and a two-part focus ring stays visible on any surface.'}`}
+      description={copySummary('1.5', `Elevation shows what sits above what. ${DEPTH === 'flat' ? 'Borders separate surfaces and only floating panels cast a shadow' : 'Shadows lift cards and menus'}${blurs.length ? ', a two-part focus ring separates focus from elevation, and backdrop blur keeps controls over media readable.' : ', and a two-part focus ring separates focus from elevation.'}`)}
       figmaNode={figmaNodeFor('1.5')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Tokens', render: () => <Tokens /> },
-        { label: 'Guidelines', render: () => <Topics items={TOPICS} /> },
+        { label: 'Guidelines', render: () => <ReadingGuidelines id="1.5" items={TOPICS} fallback={<Topics items={TOPICS} />} /> },
       ]}
     />
   );

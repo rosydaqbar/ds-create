@@ -1,3 +1,5 @@
+import { copySummary } from '../../copy';
+import { FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -228,7 +230,7 @@ function Sizes() {
       </div>
 
       <div className="flex flex-col gap-lg border-t border-border-subtle pt-xl">
-        <RowNote title="Touch minimum">{`Every tap target on a touch screen is at least ${num('size/touch-min')}. A compact control gets there with an invisible hit area, not a bigger icon.`}</RowNote>
+        <RowNote title="Touch minimum">{`Use size/touch-min (${num('size/touch-min')}) when checking touch targets. The dashed box illustrates the intended area; inspect the actual control before assuming an expanded target is implemented.`}</RowNote>
         <div className="flex items-center gap-lg">
           <span className="flex size-(--size-touch-min) items-center justify-center rounded-xs border border-dashed border-border-strong">
             <IconButton size="xs" icon="general/more-horizontal" label="More actions (sample)" />
@@ -328,21 +330,11 @@ function Grids() {
 function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
-      <Block title="How space works" intro={`This page covers the ${BASE}-point space scale, size roles, widths, the page container and the grid for each breakpoint. ${brandCopy.density}`}>
-        <Bullets
-          items={[
-            <>
-              <strong className="font-semibold text-text-primary">One scale for every gap.</strong> Padding, gaps and margins all come from the space scale, so design and code share one rhythm.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Closer means related.</strong> Put items in a group closer to each other than to the next group.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Sizes are named by their job.</strong> Control heights, icon boxes and widths are named for what they do, so an md button, field and select always line up.
-            </>,
-          ]}
-        />
+      <FoundationNarrative id="1.3" fallback={<>
+      <Block title="Grouping and dimensions" intro="Choose gaps according to the relationship between elements. A label should sit closer to its control than to the next field; use a separate size role to set the control’s dimensions.">
+        <P>{brandCopy.density}</P>
       </Block>
+      </>} />
 
       <Block
         title="Space scale"
@@ -922,7 +914,7 @@ function GuidelinesTab() {
       ),
     },
   ];
-  return <GuideList items={items} />;
+  return <FoundationGuidelines id="1.3" items={items} fallback={<GuideList items={items} />} />;
 }
 
 export default function Space() {
@@ -930,7 +922,7 @@ export default function Space() {
     <DocPage
       eyebrow="Foundations › 1.3 Space & layout"
       title="Space & layout"
-      description="Space sets the rhythm of every screen. Use one spacing scale for gaps and padding, and the size roles for controls, icons, avatars, widths and the reading measure."
+      description={copySummary('1.3', "Spacing tokens define gaps and padding; size roles define control dimensions, widths and reading measure. Adjust the separation of content independently from the dimensions of its controls.")}
       figmaNode={figmaNodeFor('1.3')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

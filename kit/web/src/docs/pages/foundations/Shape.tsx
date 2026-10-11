@@ -1,3 +1,5 @@
+import { copySummary } from '../../copy';
+import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -177,6 +179,7 @@ function BorderLines() {
 function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
+      <ReadingNarrative id="1.4" fallback={<>
       <Block
         title="How shape works"
         intro={`${brandCopy.cornerCharacter({ name: config.name, character: CHARACTER })} Controls round at ${show('radius/control')}, surfaces at ${show('radius/surface')} and dialogs at ${show('radius/modal')}, while avatars, switches and dots are full pills.`}
@@ -195,6 +198,7 @@ function Overview() {
           ]}
         />
       </Block>
+      </>} />
 
       <Block title="Radius roles" intro="Each tile uses its role directly and lists where you’ll find it.">
         <div className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
@@ -578,7 +582,7 @@ function GuidelinesTab() {
       caption: `The same three controls before and after one edit. The ${PREVIEW_CONTROL} is a preview, not a value from the Shape collection.`,
     },
   ];
-  return <GuideList items={items} />;
+  return <ReadingGuidelines id="1.4" items={items} fallback={<GuideList items={items} />} />;
 }
 
 export default function Shape() {
@@ -586,7 +590,7 @@ export default function Shape() {
     <DocPage
       eyebrow="Foundations › 1.4 Shape"
       title="Shape"
-      description="Shape covers corner radius and border width. Each kind of element, from controls to dialogs, has its own radius role, so you can reshape a whole family of components in one place."
+      description={copySummary('1.4', "Shape covers corner radius and border width. Each kind of element, from controls to dialogs, has its own radius role, so you can reshape a whole family of components in one place.")}
       figmaNode={figmaNodeFor('1.4')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

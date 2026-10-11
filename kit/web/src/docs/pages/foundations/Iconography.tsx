@@ -1,3 +1,5 @@
+import { copySummary } from '../../copy';
+import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -264,11 +266,13 @@ function Overview() {
     <div className="flex flex-col gap-5xl">
       <section className="flex flex-col gap-lg">
         <AnchorHeading>Icon library</AnchorHeading>
+      <ReadingNarrative id="1.7" fallback={<>
         <P>
           All icons share one {STYLE.kind} style, drawn with {STYLE.stroke}-pixel rounded strokes. There are {iconNames.length} icons in{' '}
           {presentCats.length} categories, sorted alphabetically. An icon’s code name, <InlineCode>{'{category}/{name}'}</InlineCode>, matches its Figma name,{' '}
           <InlineCode>{'Icon/{category}/{name}'}</InlineCode>.
         </P>
+      </>} />
         <Library />
       </section>
 
@@ -284,7 +288,7 @@ function Overview() {
       <section className="flex flex-col gap-lg">
         <AnchorHeading>Colors</AnchorHeading>
         <P>
-          Give icons a color role rather than a raw color, so they adapt to Light and Dark. Use primary for the main meaning and secondary inside buttons and
+          Give icons a color role rather than a raw color, and check them on their intended surface. Use primary for the main meaning and secondary inside buttons and
           inputs. Tertiary supports, and the status roles signal danger, warning, success and info. Roles made for other surfaces are shown on their own surface.
         </P>
         <Colours />
@@ -639,11 +643,11 @@ export default function Iconography() {
     <DocPage
       eyebrow="Foundations › 1.7 Iconography"
       title="Iconography"
-      description="Icons help people scan a screen and recognize actions quickly. They share one outline style, and their sizes and colors come from tokens, so each icon fits the text and surface around it."
+      description={copySummary('1.7', "Icons help people scan a screen and recognize actions quickly. They share one outline style, and their sizes and colors come from tokens, so each icon fits the text and surface around it.")}
       figmaNode={figmaNodeFor('1.7')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
-        { label: 'Guidelines', render: () => <Topics items={TOPICS} /> },
+        { label: 'Guidelines', render: () => <ReadingGuidelines id="1.7" items={TOPICS} fallback={<Topics items={TOPICS} />} /> },
       ]}
     />
   );
