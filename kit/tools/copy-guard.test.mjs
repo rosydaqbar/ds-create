@@ -17,3 +17,9 @@ test('legacy input remains supported without imposing a new visible outline',()=
  assert.deepEqual(checkEditorial(slug),[]);
  assert.ok(checkEditorial(slug,[],true).some(e=>e.includes('pre-draft editorial plan')));
 });
+test('the existing guard rejects review notes without requiring a new plan or category',()=>{
+ write('# Supporting guidance\n## Compatibility\n[web caption] This specimen does not establish native parity.');
+ assert.ok(checkEditorial(slug).some(e=>e.includes('review-provenance')));
+ write('# Supporting guidance\n## Compatibility\n[web caption] Use the supported web properties and supply application validation rules.');
+ assert.deepEqual(checkEditorial(slug),[]);
+});

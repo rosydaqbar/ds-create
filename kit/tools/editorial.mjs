@@ -10,6 +10,14 @@ const overlap = (a, b) => {
   const x = words(a), y = words(b);
   return [...x].filter((w) => y.has(w)).length / Math.max(1, Math.min(x.size, y.size));
 };
+// Narrow signals of an author's investigation reaching published copy. These
+// deliberately leave direct limitations and contributor procedures to context.
+const REVIEW_PROVENANCE = [
+  /\bthe user[’']s correction (?:excludes|requires|overrides|supersedes)\b/i,
+  /\b(?:this|the) (?:source inspection|build|specimen|page|cover|deck)\b[^.!?]*(?:does not (?:establish|prove)|is not (?:evidence|proof))|\bsupplied (?:source|deck)\b[^.!?]*does not (?:establish|prove)/i,
+  /\b(?:neither|this|that) (?:scenario|example)\b[^.!?]*\b(?:establishes?|proves?)\b[^.!?]*\b(?:shipped|implemented|product screen)\b/i,
+  /\bnot a completed [^.!?]*certification\b|\bdoes not establish (?:full conformance|accessibility conformance|native parity)\b|\bno [^.!?]{0,35}(?:behavior|behaviour) is established\b/i,
+];
 
 /** All reader-visible writing is in scope, including examples and accessibility lists. */
 export function prose(copy, surface) {
@@ -46,6 +54,12 @@ export function editorialFindings(copies) {
         }
         if (/^(?:Explain (?:why|how)|Create an? (?:annotated |button|diagram|example)|This section is mandatory|Modules? §|Only when the brand uses)|\bVisual:|\bModules? §/i.test(p.text)) {
           findings.push({ code: 'author-instruction', surface, page: copy.id, location: p.location, message: 'Authoring instructions reached the documentation; write the actual guidance.' });
+        }
+        // Flag explicit author/review provenance, not technical language or a
+        // useful limitation (e.g. supported modes or application responsibilities).
+        // Maintenance placement still needs audience-aware editorial review.
+        if (REVIEW_PROVENANCE.some((pattern) => pattern.test(p.text))) {
+          findings.push({ code: 'review-provenance', surface, page: copy.id, location: p.location, message: 'Review evidence and author history belong in the internal plan/report. State the reader-relevant rule or limitation directly.' });
         }
       });
     }

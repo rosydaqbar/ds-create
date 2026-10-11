@@ -36,6 +36,8 @@ Before drafting, follow `workflow/EDITORIAL.md`: examine the subject, read curre
 
 The section names below are transport slots for Figma frames and web tabs, not an editorial outline. Choose the topics within them for the subject. Default manifests are visual starting points: merge, remove or reorder topics together with the copy while retaining required specifications and visuals. A frame header may have no paragraph when its topics already establish the context.
 
+Write for the task of the page's intended reader. Keep evidence classification, chat history, source-inspection findings and verification caveats in the internal plan/report. State supported design rules and consequential limitations directly. Put export/rebuild and library-maintenance procedures in contributor or implementation guidance when relevant; do not substitute them for design decisions. Review every rendered slot, including text retained inside shared visuals, for the same audience fit.
+
 ```markdown
 ---
 page: 2.1 Button

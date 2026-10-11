@@ -15,6 +15,8 @@ Use this guide when you write a page (workflow/WEB.md W4–W6), and as the check
 7. **Unclear responsibilities.** Identify what changes and which element or reader owns that change. Prefer active voice, but do not rewrite a precise technical construction merely to vary its words.
 8. **Capitalised component names as proper nouns everywhere.** In general prose, components are ordinary words: "a tooltip", "the menu", "a button". Capitalise and add the page number only when you point the reader to that page: "use a Link (2.3)", "see 1.6 Motion".
 9. **Unexplained technical distinctions.** Explain technical terms when the audience needs them. Keep precise names such as accessible name, aria-busy or DOM where they clarify a decision; their relevance determines placement, not a fixed section restriction.
+10. **An investigation presented as a guideline.** “The supplied source does not establish…”, “an illustrative scenario, not a shipped feature”, chat corrections and certification disclaimers describe the author's review. Keep them in the plan/report. State a consequential limit directly when readers need it, such as the supported mode or the responsibility for validation.
+11. **Maintenance in place of design guidance.** A designer choosing a treatment needs its meaning, conditions and consequences. Source replacement, export, rebuild and deployment procedures answer a contributor's task; keep those in the appropriate implementation/contributor reference. Do not remove relevant keyboard, accessibility or token guidance merely because it is technical.
 
 ## Voice
 
@@ -95,7 +97,7 @@ Before publishing a page, verify every count, token name, prop mapping and platf
 - Give the reader a condition, a decision and a reason or example. Add a boundary where the choice has an exception. Do not force all four into every sentence.
 - Describe the current implementation separately from a conceptual model or a future plan. Three possible token layers do not mean three layers are implemented.
 - Show mappings explicitly. Figma properties and code props can have different names; slash-separated token names can map to CSS or native identifiers.
-- Shared names and exported tokens do not guarantee automatic sync or identical native behavior. Describe the actual export, regeneration and review steps. A web preview is not a native platform test.
+- Shared names and exported tokens do not guarantee automatic sync or identical native behavior. Explain actual regeneration steps in the relevant implementation/contributor guide. Record platform-test limitations in internal review; include a supported-platform boundary in published guidance when it affects the reader's task.
 - Status labels describe documented maturity. Do not equate Stable with WCAG conformance, production approval or verified platform parity.
 - Keep measured contrast ratios and their applicable text sizes. Design approval does not make a failing pair conformant. A second status cue does not fix low-contrast text.
 - Distinguish an estimate from a guaranteed outcome, and a transaction record from proof of a completed transfer. Use the actual product states.
@@ -132,3 +134,5 @@ Apply the same quality objectives to every subject and every prose-bearing slot.
 Neither the documentation category nor the teaching examples determine the outline. Topics absent from examples receive the same review. Do not infer behavior from a category name or from another component. Use only supported facts, identify consequential unknowns, and label recommendations as guidance.
 
 Review accuracy, completeness, specificity, usefulness, clarity, naturalness, organization and appropriate depth. Remove claims such as “carries the brand”, “sets the visual rhythm” or “enhances usability” when they replace an actual fact. Avoid mini-slogans and repeated sentence constructions. Every paragraph must add a fact, distinction, decision, example, constraint or implementation detail. Improve the explanation rather than swapping vocabulary or padding it.
+
+Read the final page as its intended audience would, without the author's source notes. It should explain the system rather than narrate how it was inspected. Keep missing evidence and verification results in the existing plan/report, and state supported behavior directly. Use examples naturally to clarify choices without claiming a product screen exists or adding a disclaimer after every scenario. Review surrounding prose against live references: a table supplies the facts; prose should explain a relationship or choice rather than restating the inventory.

@@ -261,7 +261,7 @@ const GOALS: { goal: string; means: string; here: string; see: string; to: strin
   {
     goal: 'Accessibility',
     means: 'Measure each intended foreground/background pair, including state changes and composited layers.',
-    here: `Pairs are checked in ${joinList(supportedModes)}${unsupportedModes.length ? `; ${joinList(unsupportedModes)} is checked once it has real values` : ''}. Read the measured pairs on 1.1 Color; a token-pair check does not establish complete accessibility.`,
+    here: `Read the measured foreground/background pairs for ${joinList(supportedModes)} on 1.1 Color. Include interaction fills and composited layers when choosing a pair for a new composition.`,
     see: '1.1 Color',
     to: pageTo('1.1'),
   },
@@ -278,14 +278,14 @@ const GOALS: { goal: string; means: string; here: string; see: string; to: strin
     goal: 'Scalability',
     means: 'Add roles for new responsibilities and retain names whose purposes remain unchanged.',
     here: unsupportedModes.length
-      ? `The ${joinList(unsupportedModes)} column is already in the Color collection, waiting for values; new roles go into the groups that exist.`
+      ? `Use ${joinList(supportedModes)} for resolved color roles. Complete the mappings for ${joinList(unsupportedModes)} before using those modes.`
       : 'Review the intended consumers and complete mappings before adding another role or mode.',
     see: 'Modes',
     to: '#modes',
   },
 ];
-/* The connecting paragraph: each goal makes the next one possible. */
-const GOALS_LINK = `Because each concept has one name, each role exists once, so each foreground and background pair is checked once, in ${joinList(supportedModes)}. The brand sits in the primitives behind those roles, so restyling never touches a component, and growth only adds values and modes, never renames what exists.`;
+/* Legacy fallback when the page has no authored copy. */
+const GOALS_LINK = 'Choose a role by its intended use and follow its alias to inspect the source value. Change a primitive when its dependent uses should change together; change a narrower mapping when only one role needs to differ.';
 function HashOrPageLink({ to, children }: { to: string; children: ReactNode }) {
   const cls = 'rounded-xs font-semibold text-text-brand underline decoration-1 underline-offset-2 outline-none is-hover:text-text-brand-hover is-focus:shadow-focus-default';
   return to.startsWith('#') ? (

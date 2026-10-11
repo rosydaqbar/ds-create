@@ -90,3 +90,17 @@ test('shared API explanations may repeat only at the same factual reference loca
  unrelated.id='2.3';
  assert.ok(editorialFindings([reference,unrelated]).some(f=>f.code==='repeated-sentence'));
 });
+
+test('review provenance is caught on both surfaces and in supporting copy', () => {
+  const notes = parse('# Summary\n[figma] The user’s correction excludes green surfaces.\n[web] This build does not establish accessibility conformance.\n# Examples\n## Decision\n[both caption] Neither scenario establishes a shipped product screen.\n# Accessibility\n[both item] These code paths are not a completed screen-reader certification.');
+  const findings = editorialFindings([notes]).filter(f => f.code === 'review-provenance');
+  assert.equal(findings.length, 6);
+  assert.deepEqual(new Set(findings.map(f => f.surface)), new Set(['figma', 'web']));
+});
+
+test('direct limitations, technical requirements and contributor procedures remain valid', () => {
+  const useful = parse('# Summary\n[both] Color supports Dark.\n# Guidelines\n## Keyboard selection\n[both] Arrow keys select the adjacent radio; the focus ring and checked dot can appear together.\n## Validation\n[both] Supply validation rules in the application and associate the correction message with its control.\n# For developers\n## Rebuild after a source change\n[web] Export the approved values and rebuild the package before adopting the update.\n# Properties\n## aria-describedby\n[web] Identifies the supporting message; it does not supply the control’s accessible name.');
+  assert.deepEqual(editorialFindings([useful]), []);
+  assert.deepEqual(editorialFindings([parse('# Guidelines\n## Grouping\n[both] This example establishes a relationship between a label and its associated control.\n# Properties\n## onComplete\n[web] A complete value is not a completed transaction; use the response status to confirm acceptance.')]), []);
+  assert.deepEqual(editorialFindings([parse('# Guidelines\n## Correcting a value\n[both] Preserve the user’s correction while the field validates so an error response does not erase the new entry.')]), []);
+});

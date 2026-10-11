@@ -279,8 +279,8 @@ Each component page is one `ComponentDoc` (`src/docs/types.ts`), registered by f
 Layouts (5.x) and Screens (6.x) use the same `ComponentDoc` with `level: 'layouts'` or `'screens'`. A Layout's `· Layout` frame maps to the Component tab (one matrix per breakpoint). A Screen's state frames map to the Component tab as one matrix of `Data` × `Breakpoint`; Screens are documentation, not exported from the package.
 
 Rules:
-- **Words.** Every summary, caption, guideline, anatomy note and prop description follows `COPY-GUIDE.md`: purpose first, full sentences, no token names or Figma build terms in running prose, US English. A doc module that reads like a spec sheet fails QA.
-- **Claims are checked.** A sentence like "every state meets contrast" must be true in both modes; `npm run qa` and `check:contrast` are the proof.
+- **Words.** Every summary, caption, guideline, anatomy note and prop description follows `COPY-GUIDE.md` and `workflow/EDITORIAL.md`. Start with useful subject-specific information and organize it for the reader's task. Keep exact tokens and Figma terms when they clarify a decision; put exhaustive values in references. Use professional US English, connected explanations and appropriate depth rather than a prescribed opening or paragraph shape.
+- **Claims are checked.** A sentence like "every state meets contrast" needs evidence for the claimed states and supported modes. `check:contrast` verifies its configured pairs; runtime QA checks the exercised interactions. Keep wider verification limits in the internal review rather than making unsupported compliance claims or appending audit caveats to design guidance.
 - **Matrices** show every variant the Figma set has — never a reduced demo row. Private parts that carry a child role (an option, a menu item) set `specimenRole: 'listbox' | 'menu'` so the site wraps them in their parent role.
 - **Props** list only the public API; `forceState` and other documentation-only props stay out (`internal: true` or the `force…State` name).
 - **Section and guideline titles** become anchor ids for deep links and "On this page": keep them unique on a page.
