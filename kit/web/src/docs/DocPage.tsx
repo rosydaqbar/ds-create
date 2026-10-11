@@ -218,7 +218,7 @@ export function DocPage({
 }
 
 /* ---------- guideline topics (same layout as component Guidelines) ---------- */
-export function Topics({ items, children, intro }: { items: Topic[]; children?: ReactNode; intro?: ReactNode }) {
+export function Topics({ items, children, intro, flow = false }: { items: Topic[]; children?: ReactNode; intro?: ReactNode; flow?: boolean }) {
   return (
     <div className="flex flex-col gap-4xl">
       {intro}
@@ -229,7 +229,7 @@ export function Topics({ items, children, intro }: { items: Topic[]; children?: 
           {g.body.split('\n\n').map((para, i) => (
             <P key={i}>{para}</P>
           ))}
-          {g.render && <Stage>{g.render()}</Stage>}
+          {g.render && <Stage flow={flow} className={flow ? 'flex flex-col gap-xl' : undefined} label={flow ? g.title : 'Example'}>{g.render()}</Stage>}
           {(g.do || g.dont) && (
             <div className="grid grid-cols-[minmax(0,1fr)] gap-xl md:grid-cols-2">
               {g.do && <DoDont kind="do" caption={g.do.caption}>{g.do.render?.()}</DoDont>}

@@ -39,7 +39,7 @@ const referenceBody = (nodes: ReactNode): ReactNode => Children.map(nodes, (chil
   if (child.type === Fragment) return cloneElement(child, {}, referenceBody(child.props.children));
   return child;
 });
-const detailContent = (details: Detail[]) => details.map((d, i) => <div key={i} data-reading-detail={d.names[0]} className="flex min-w-0 flex-col gap-lg">{referenceBody(d.content)}</div>);
+const detailContent = (details: Detail[]) => details.map((d, i) => <div key={i} data-reading-detail={d.names[0]} className="flex min-w-0 w-full max-w-full flex-col gap-lg">{referenceBody(d.content)}</div>);
 
 /** Replace prose only when the existing copy file explicitly owns the narrative.
  * Numeric references, diagrams, palettes, style specimens and token tables stay in their renderers.
@@ -67,7 +67,7 @@ export function ReadingNarrative({ id, section: name = 'Overview', fallback, vis
   });
   // Keep additional live references as named topics, never an anonymous appendix.
   for (const d of details) if (!used.has(d)) items.push({ title: d.names[0], body: '', render: () => <>{detailContent([d])}</> });
-  return <Topics intro={<>{text(section.lines).map((p, i) => <P key={i}>{p}</P>)}{text(section.lines, 'item').length > 0 && <Bullets items={text(section.lines, 'item')} />}</>} items={items} />;
+  return <Topics flow intro={<>{text(section.lines).map((p, i) => <P key={i}>{p}</P>)}{text(section.lines, 'item').length > 0 && <Bullets items={text(section.lines, 'item')} />}</>} items={items} />;
 }
 
 interface ReferenceTopic {
