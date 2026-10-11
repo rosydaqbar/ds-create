@@ -19,18 +19,17 @@ const foundationBlurb: Record<string, { icon: IconName; text: string }> = {
   '1.8': { icon: 'images/image', text: 'Logo, mark, flags and partner logos.' },
 };
 
-const roles: { title: string; text: string; to: string; icon: IconName; cta: string }[] = [
-  { title: 'Designers', text: 'Set up the Figma library and learn how its pages, components and variables are organized.', to: '/guidance/01-getting-started?tab=for-designers', icon: 'editor/palette', cta: 'Start designing' },
+const roles: { title: string; text: string; to: string; icon: IconName }[] = [
+  { title: 'Designers', text: 'Set up the Figma library and find components and variables.', to: '/guidance/01-getting-started?tab=for-designers', icon: 'editor/palette' },
   {
     title: 'Developers',
     text: productHasWeb
-      ? 'Install the package, add the styles and use components whose props match Figma.'
-      : 'Use the React Native, Swift and Kotlin examples, with tables that map Figma properties and tokens to code.',
+      ? 'Install the package and connect Figma properties to code.'
+      : 'Find app code examples and Figma property mappings.',
     to: '/guidance/01-getting-started?tab=for-developers',
     icon: 'development/code',
-    cta: 'Start building',
   },
-  { title: 'Product', text: 'See what exists, how ready each piece is and what changed in each release.', to: '/guidance/03-changelog?tab=status', icon: 'charts/chart-column', cta: 'See status' },
+  { title: 'Product', text: 'Check component readiness and release status.', to: '/guidance/03-changelog?tab=status', icon: 'charts/chart-column' },
 ];
 
 /** Levels whose app previews are whole screens. */
@@ -39,87 +38,64 @@ const wholeScreen = (lv: string) => lv === 'layouts' || lv === 'screens';
 export function Home() {
   const latest = releases[0];
   return (
-    <div className="flex flex-col gap-5xl">
-      <section className="docs-page-header flex flex-col gap-xl py-lg text-text-primary">
-        <span className="type-body-sm-semibold text-text-secondary">
-          v{config.version} · {modesLabel} · {productHasWeb ? 'Figma and React reference' : 'Figma and app code reference'}
-        </span>
-        <h1 className="type-heading-xl-semibold max-w-[48rem]">{config.name}</h1>
-        <p className="type-body-lg-regular max-w-[42rem] text-text-secondary">{copySummary('00', config.description)}</p>
-        <div className="flex flex-wrap gap-md">
-          <Link to="/guidance/01-getting-started" className="type-body-md-semibold inline-flex h-(--size-control-lg) items-center gap-sm rounded-control bg-surface-base px-xl text-text-primary outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default">
-            Get started <Icon name="arrows/arrow-right" />
-          </Link>
-          <Link to={`/guidance/03-changelog`} className="type-body-md-semibold inline-flex h-(--size-control-lg) items-center gap-sm rounded-control border border-border-subtle/40 px-xl text-text-primary outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default">
-            What’s new in {latest.version}
-          </Link>
+    <article className="docs-reading-card docs-home" aria-labelledby="home-title">
+      <header className="docs-home-hero docs-home-section">
+        <div className="flex min-w-0 flex-col items-start gap-xl">
+          <h1 id="home-title" className="type-display-sm-semibold">{config.name}</h1>
+          <p className="type-body-lg-regular max-w-[42rem] text-text-secondary">{copySummary('00', config.description)}</p>
+          <div className="flex flex-wrap items-center gap-md">
+            <Link to="/guidance/01-getting-started" className="docs-home-primary type-body-md-semibold inline-flex min-h-(--size-control-lg) items-center gap-sm rounded-control px-xl py-sm outline-none is-focus:shadow-focus-default">
+              Get started <Icon name="arrows/arrow-right" />
+            </Link>
+            <Link to="/guidance/03-changelog" className="docs-home-link type-body-sm-semibold inline-flex items-center gap-sm px-md py-sm text-text-secondary">
+              Changelog <Icon name="arrows/arrow-right" size="sm" />
+            </Link>
+          </div>
+          <p className="type-body-sm-regular text-text-secondary">
+            Library v{config.version} · {modesLabel} · {productHasWeb ? 'Figma and React' : 'Figma and app code'}
+          </p>
         </div>
-      </section>
-
-      <section className="flex flex-col gap-lg" aria-labelledby="start">
-        <h2 id="start" className="type-heading-md-semibold">
-          Start here
-        </h2>
-        <div className="grid gap-lg md:grid-cols-3">
+        <nav className="docs-home-start" aria-labelledby="start">
+          <h2 id="start" className="type-heading-xs-semibold">Start here</h2>
           {roles.map((r) => (
-            <Link key={r.title} to={r.to} className="group flex flex-col gap-md rounded-surface border border-border-subtle docs-matrix bg-surface-raised p-xl outline-none transition-colors duration-(--motion-duration-fast) is-hover:border-border-strong is-focus:shadow-focus-default">
-              <span className="flex size-10 items-center justify-center rounded-control bg-surface-sunken text-icon-secondary">
-                <Icon name={r.icon} />
+            <Link key={r.title} to={r.to} className="docs-home-entry docs-home-link">
+              <Icon name={r.icon} size="sm" className="mt-xxs text-icon-secondary" />
+              <span className="flex min-w-0 flex-col gap-xs">
+                <span className="type-body-md-semibold text-text-primary">{r.title}</span>
+                <span className="type-body-sm-regular text-text-secondary">{r.text}</span>
               </span>
-              <span className="type-heading-xs-semibold text-text-primary">{r.title}</span>
-              <span className="type-body-sm-regular flex-1 text-text-secondary">{r.text}</span>
-              <span className="type-body-sm-semibold inline-flex items-center gap-xs text-text-brand">
-                {r.cta} <Icon name="arrows/arrow-right" size="sm" />
-              </span>
+              <Icon name="arrows/arrow-right" size="sm" className="mt-xxs text-icon-secondary" />
             </Link>
           ))}
-        </div>
-      </section>
+        </nav>
+      </header>
 
-      <section className="flex flex-col gap-lg" aria-labelledby="new">
-        <div className="flex flex-wrap items-baseline justify-between gap-md">
-          <h2 id="new" className="type-heading-md-semibold">
-            Recently updated
-          </h2>
-          <Link to="/guidance/03-changelog" className="type-body-sm-semibold text-text-brand">
-            Full changelog
-          </Link>
-        </div>
-        <ul className="grid gap-md md:grid-cols-2">
-          {latest.items.slice(0, 6).map((it, i) => (
-            <li key={i} className="type-body-sm-regular flex gap-md rounded-surface border border-border-subtle p-lg text-text-secondary">
-              <Icon name={it.kind === 'fixed' ? 'alerts/check-circle' : it.kind === 'tokens' ? 'editor/palette' : 'general/plus'} size="sm" className="mt-xxs shrink-0 text-icon-brand" />
-              <span>{it.text}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="flex flex-col gap-lg" aria-labelledby="foundations">
+      <section className="docs-home-section flex flex-col gap-xl" aria-labelledby="foundations">
         <h2 id="foundations" className="type-heading-md-semibold">
           {levelLabel.foundations}
         </h2>
-        <div className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
+        <div className="docs-home-foundations">
           {staticPages
             .filter((p) => p.group === 'foundations')
             .map((p) => (
-              <Link key={p.id} to={`/foundations/${slugOf(p.id, p.name)}`} className="flex flex-col gap-sm rounded-surface border border-border-subtle bg-surface-raised p-lg outline-none transition-colors duration-(--motion-duration-fast) is-hover:border-border-strong is-focus:shadow-focus-default">
-                <span className="flex items-center gap-sm">
-                  <Icon name={foundationBlurb[p.id]?.icon ?? 'general/placeholder'} size="sm" className="text-icon-brand" />
+              <Link key={p.id} to={`/foundations/${slugOf(p.id, p.name)}`} className="docs-home-entry docs-home-link">
+                <Icon name={foundationBlurb[p.id]?.icon ?? 'general/placeholder'} size="sm" className="mt-xxs text-icon-secondary" />
+                <span className="flex min-w-0 flex-col gap-xs">
                   <span className="type-body-md-semibold text-text-primary">{p.name}</span>
+                  <span className="type-body-sm-regular text-text-secondary">{foundationBlurb[p.id]?.text ?? p.name}</span>
                 </span>
-                <span className="type-body-sm-regular text-text-secondary">{copySummary(p.id, foundationBlurb[p.id]?.text ?? p.name)}</span>
+                <Icon name="arrows/arrow-right" size="sm" className="mt-xxs text-icon-secondary" />
               </Link>
             ))}
         </div>
       </section>
 
       {(['parts', 'components', 'sections', 'layouts', 'screens'] as const).filter((lv) => componentDocs.some((d) => d.level === lv)).map((lv) => (
-        <section key={lv} className="flex flex-col gap-lg" aria-labelledby={`lv-${lv}`}>
+        <section key={lv} className="docs-home-section flex flex-col gap-xl" aria-labelledby={`lv-${lv}`}>
           <h2 id={`lv-${lv}`} className="type-heading-md-semibold">
             {levelLabel[lv]}
           </h2>
-          <div className="grid gap-md sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-lg sm:grid-cols-2 xl:grid-cols-3">
             {componentDocs
               .filter((d) => d.level === lv)
               .map((d) => (
@@ -146,6 +122,28 @@ export function Home() {
           </div>
         </section>
       ))}
-    </div>
+      {latest && (
+        <section className="docs-home-section flex flex-col gap-xl" aria-labelledby="release-notes">
+          <div className="flex flex-wrap items-baseline justify-between gap-md">
+            <h2 id="release-notes" className="type-heading-md-semibold">Release notes</h2>
+            <Link to="/guidance/03-changelog" className="docs-home-link type-body-sm-semibold inline-flex items-center gap-sm text-text-secondary">
+              Full changelog <Icon name="arrows/arrow-right" size="sm" />
+            </Link>
+          </div>
+          <div className="docs-home-release">
+            <div className="flex flex-col gap-sm">
+              <p className="type-body-sm-regular text-text-secondary">Latest documented release · <time dateTime={latest.date}>{latest.date}</time></p>
+              <h3 className="type-heading-sm-semibold">Version {latest.version}</h3>
+              <p className="type-body-md-regular text-text-secondary">{latest.summary}</p>
+            </div>
+            {latest.items.length > 0 && (
+              <ul className="docs-home-release-items type-body-sm-regular text-text-secondary">
+                {latest.items.slice(0, 3).map((item, i) => <li key={i}>{item.text}</li>)}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
+    </article>
   );
 }
