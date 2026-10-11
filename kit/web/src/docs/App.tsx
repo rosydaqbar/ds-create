@@ -154,15 +154,15 @@ export function App() {
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-md border-b border-border-subtle bg-surface-base/90 px-lg backdrop-blur md:gap-lg md:px-xl">
+      <header className="docs-topbar sticky top-0 z-30 mx-auto flex h-16 max-w-[1680px] items-center gap-md px-lg md:gap-lg md:px-xl">
         <button ref={menuTrigger} type="button" className="cursor-pointer rounded-control p-xs text-icon-secondary outline-none is-hover:bg-fill-neutral-subtle-hover is-focus:shadow-focus-default lg:hidden" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
           <Icon name={open ? 'general/x' : 'general/menu'} />
         </button>
-        <Link to="/" className="flex min-w-0 items-center gap-md rounded-control outline-none is-focus:shadow-focus-default" aria-label={`${config.name} home`}>
+        <Link to="/" className="docs-brand flex min-w-0 items-center gap-md outline-none is-focus:shadow-focus-default" aria-label={`${config.name} home`}>
           <img src={logo} alt="" className="h-6 md:h-7" />
           <span className="type-code-sm-regular hidden rounded-indicator bg-surface-sunken px-md py-xxs text-text-tertiary sm:inline">v{config.version}</span>
         </Link>
-        <div className="ml-auto flex items-center gap-sm md:gap-md">
+        <div className="docs-top-actions ml-auto flex items-center gap-sm md:gap-md">
           <button
             type="button"
             ref={searchTrigger}
@@ -200,13 +200,13 @@ export function App() {
         {open && <button type="button" aria-label="Close navigation" className="fixed inset-0 top-16 z-20 bg-black/40 lg:hidden" onClick={() => setOpen(false)} />}
         <aside
           aria-label="Site navigation"
-          className={cn('fixed inset-y-16 left-0 z-20 docs-sidebar w-64 shrink-0 overflow-y-auto border-r border-border-subtle bg-surface-base lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)]', open ? 'block motion-enter-slow lg:animate-none' : 'hidden')}
+          className={cn('fixed inset-y-16 left-0 z-20 docs-sidebar w-64 shrink-0 overflow-y-auto bg-surface-base lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)]', open ? 'block motion-enter-slow lg:animate-none' : 'hidden')}
         >
           <Sidebar onNavigate={() => setOpen(false)} onSearch={() => { if (open) searchTrigger.current?.focus(); setOpen(false); setSearching(true); }} />
         </aside>
-        <main ref={main} id="main" tabIndex={-1} className="docs-main min-w-0 flex-1 px-lg py-3xl outline-none md:px-xl md:py-4xl lg:px-6xl">
+        <main ref={main} id="main" tabIndex={-1} className="docs-main min-w-0 flex-1 outline-none">
           {/* 1.6 Motion: content swaps in place with a short fade. */}
-          <div key={loc.pathname} className="motion-fade-in">
+          <div key={loc.pathname}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/guidance/:slug" element={<StaticRoute />} />

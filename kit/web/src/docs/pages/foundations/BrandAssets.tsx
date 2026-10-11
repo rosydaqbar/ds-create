@@ -84,7 +84,7 @@ const MIN = brandCopy.logoMinSize;
 /* ---------- Overview ---------- */
 function LogoSection() {
   return (
-    <section className="flex flex-col gap-lg">
+    <section className="docs-section flex flex-col gap-lg">
       <AnchorHeading>Logo</AnchorHeading>
       <P>
         The lockup is the full logo. Use it where the product signs its name: the app header, the cover and sign-in screens. The mark is the symbol alone, for
@@ -127,7 +127,7 @@ function LogoSection() {
 
 function ClearSpace() {
   return (
-    <section className="flex flex-col gap-lg">
+    <section className="docs-section flex flex-col gap-lg">
       <AnchorHeading>Clear space and minimum size</AnchorHeading>
       <P>{brandCopy.logoClearSpace(MIN)}</P>
       <div className="grid gap-lg lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -166,7 +166,7 @@ function ClearSpace() {
 
 function SocialMarks() {
   return (
-    <section className="flex flex-col gap-lg">
+    <section className="docs-section flex flex-col gap-lg">
       <AnchorHeading>Social marks</AnchorHeading>
       <P>
         These are the sign-in providers the Social button (3.7) supports: {socialProviders.map((p) => socialProviderName[p]).join(', ')}. Each mark keeps its owner’s
@@ -197,7 +197,7 @@ function SocialMarks() {
 
 function Flags() {
   return (
-    <section className="flex flex-col gap-lg">
+    <section className="docs-section flex flex-col gap-lg">
       <AnchorHeading>Flags</AnchorHeading>
       <P>
         Use round flags for the countries and regions the product supports, in badges, tags and country selectors. Each file is named by its ISO 3166 code.
@@ -229,7 +229,7 @@ function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
       <ReadingNarrative id="1.8" fallback={<>
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>About brand assets</AnchorHeading>
         <P>
           The product logo, provider marks and flags are the one place in the system where raw colors and shapes are allowed, because the artwork belongs to its

@@ -226,7 +226,7 @@ const PREVIEW_CSS = [
 /* ---------- shared bits ---------- */
 function Block({ title, intro, children }: { title: string; intro?: ReactNode; children: ReactNode }) {
   return (
-    <section className="flex min-w-0 flex-col gap-lg">
+    <section className="docs-section flex min-w-0 flex-col gap-lg">
       <AnchorHeading>{title}</AnchorHeading>
       {intro && <P>{intro}</P>}
       {children}
@@ -756,9 +756,9 @@ interface Guide {
 }
 function GuideList({ items }: { items: Guide[] }) {
   return (
-    <div className="flex max-w-[64rem] flex-col gap-4xl">
+    <div className="flex flex-col gap-4xl">
       {items.map((g) => (
-        <section key={g.title} className="flex min-w-0 flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0">
+        <section key={g.title} className="docs-section flex min-w-0 flex-col gap-lg">
           <AnchorHeading>{g.title}</AnchorHeading>
           <div className="flex flex-col gap-md">{g.body}</div>
           {g.visual && (

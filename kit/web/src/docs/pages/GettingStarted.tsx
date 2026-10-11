@@ -177,7 +177,7 @@ function Topic({ title, children }: { title: string; children: ReactNode }) {
   return <ReadingTopic id="01" title={title}>{children}</ReadingTopic>;
 }
 function Column({ children }: { children: ReactNode }) {
-  return <div className="flex max-w-[64rem] flex-col gap-4xl">{children}</div>;
+  return <div className="flex flex-col gap-4xl">{children}</div>;
 }
 /** A visual example: a quiet stage that never forces horizontal scroll. */
 function Visual({ children, className = '' }: { children: ReactNode; className?: string }) {

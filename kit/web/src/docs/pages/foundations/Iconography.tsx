@@ -264,7 +264,7 @@ function Colours() {
 function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Icon library</AnchorHeading>
       <ReadingNarrative id="1.7" fallback={<>
         <P>
@@ -276,7 +276,7 @@ function Overview() {
         <Library />
       </section>
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Sizes</AnchorHeading>
         <P>
           Pick from five steps, each set by a size token. Inside controls you don’t need to choose: xs and sm controls use the sm icon, md and lg controls use md,
@@ -285,7 +285,7 @@ function Overview() {
         <Sizes />
       </section>
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Colors</AnchorHeading>
         <P>
           Give icons a color role rather than a raw color, and check them on their intended surface. Use primary for the main meaning and secondary inside buttons and
@@ -294,7 +294,7 @@ function Overview() {
         <Colours />
       </section>
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Core set</AnchorHeading>
         <P>The Parts depend on these icons, so they always stay in the library.</P>
         <div className="grid gap-sm md:grid-cols-2">
@@ -314,7 +314,7 @@ function Overview() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Utility marks</AnchorHeading>
         <P>Check marks, rating stars and status dots work like small icons. Always show them with text, so the meaning never depends on the mark alone.</P>
         <UtilityMarks />

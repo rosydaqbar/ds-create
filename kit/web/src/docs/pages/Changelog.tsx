@@ -30,9 +30,9 @@ export default function Changelog() {
         {
           label: 'Releases',
           render: () => (
-            <div className="flex max-w-[64rem] flex-col gap-4xl">
+            <div className="flex flex-col gap-4xl">
               {releases.map((r) => (
-                <section key={r.version} className="flex flex-col gap-lg">
+                <section key={r.version} className="docs-section flex flex-col gap-lg">
                   <div className="flex flex-wrap items-baseline gap-md">
                     <AnchorHeading id={`v${r.version.replace('.', '-')}`}>{`Version ${r.version}`}</AnchorHeading>
                     <time dateTime={r.date} className="type-body-sm-regular text-text-tertiary">
@@ -72,8 +72,8 @@ export default function Changelog() {
         {
           label: 'Status',
           render: () => (
-            <div className="flex max-w-[64rem] flex-col gap-4xl">
-              <section className="flex flex-col gap-lg">
+            <div className="flex flex-col gap-4xl">
+              <section className="docs-section flex flex-col gap-lg">
                 <AnchorHeading>What the labels mean</AnchorHeading>
                 <div className="grid gap-lg md:grid-cols-2">
                   {(['stable', 'beta'] as const).map((s) => (
@@ -84,7 +84,7 @@ export default function Changelog() {
                   ))}
                 </div>
               </section>
-              <section className="flex flex-col gap-lg">
+              <section className="docs-section flex flex-col gap-lg">
                 <AnchorHeading>Every component</AnchorHeading>
                 <div tabIndex={0} role="region" aria-label="Component status" className="overflow-x-auto rounded-surface border border-border-subtle outline-none focus-visible:shadow-focus-default">
                   <table className="w-full border-collapse text-left">

@@ -244,7 +244,7 @@ function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
       <ReadingNarrative id="1.5" fallback={<>
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>How depth works</AnchorHeading>
         <P>
           {`Elevation shows people what sits on top of what. ${brandCopy.depthDirection({ name: config.name, depth: DEPTH_PHRASE })} Above the page there ${raisedLevels === 1 ? 'is one shadow level' : `are ${countWord(raisedLevels)} shadow levels`}, each with its own job and its own surface color.`}
@@ -261,7 +261,7 @@ function Overview() {
       </section>
       </>} />
 
-      <section className="flex flex-col gap-2xl">
+      <section className="docs-section flex flex-col gap-2xl">
         <AnchorHeading>Levels</AnchorHeading>
         <P>The levels run from lowest to highest. Each one shows the same example in the supported color modes.</P>
         {LEVELS.map((l) => (
@@ -285,7 +285,7 @@ function Overview() {
         ))}
       </section>
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Focus rings</AnchorHeading>
         {HAS_RING ? (
           <>
@@ -361,7 +361,7 @@ function Overview() {
       </section>
 
       {blurs.length > 0 && (
-        <section className="flex flex-col gap-lg">
+        <section className="docs-section flex flex-col gap-lg">
           <AnchorHeading>Backdrop blur</AnchorHeading>
           <P>{brandCopy.backdropBlurUse}</P>
           {siteSchemes.map((m) => (
@@ -417,7 +417,7 @@ ${css('dark')}
 }`;
   return (
     <div className="flex flex-col gap-5xl">
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Effect styles</AnchorHeading>
         <P>
           Effect styles aren’t variables. Each one is a short stack of layers, and each layer takes its color from a color role. The Layers column reads{' '}
@@ -470,12 +470,12 @@ ${css('dark')}
           </table>
         </div>
       </section>
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Color roles behind the effects</AnchorHeading>
         <P>Change one of these roles and every shadow and ring follows. The only value typed into the focus styles by hand is the ring width.</P>
         <TokenTable names={['color/shadow/ambient', 'color/shadow/key', 'color/shadow/edge', 'color/shadow/highlight', 'color/border/focus', 'color/border/danger', 'color/surface/base', 'border/width/focus'].filter((n) => vars.has(n))} />
       </section>
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>In code</AnchorHeading>
         <P>Use the utilities in components. The variables switch with the color mode, so one class works in both Light and Dark.</P>
         <CodeBlock lang="css" code={recipe} label="Elevation CSS recipe" />

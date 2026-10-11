@@ -301,7 +301,7 @@ function HashOrPageLink({ to, children }: { to: string; children: ReactNode }) {
 
 function Overview() {
   return (
-    <div className="flex max-w-[64rem] flex-col gap-4xl">
+    <div className="flex flex-col gap-4xl">
       <Topic title="What the token system is for">
         <P>Four goals decide every token. Each one is a concrete rule with a place in this file where you can check it.</P>
         <div className="grid gap-md sm:grid-cols-2">

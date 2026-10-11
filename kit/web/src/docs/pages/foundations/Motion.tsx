@@ -208,20 +208,20 @@ function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
       <ReadingNarrative id="1.6" fallback={<>
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Principles</AnchorHeading>
         <P>{brandCopy.motionPrinciple({ name: config.name })}</P>
         <Principles />
       </section>
       </>} />
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Durations</AnchorHeading>
         <P>Small feedback is fast, and the farther or larger the movement, the longer it takes. The bars are drawn to scale.</P>
         <DurationBars />
       </section>
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Easings</AnchorHeading>
         <P>An easing sets how a change speeds up and slows down. Things arriving start fast and settle. Things leaving start gently and speed away.</P>
         <div className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
@@ -237,7 +237,7 @@ function Overview() {
         <TryIt />
       </section>
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Pairings</AnchorHeading>
         <P>Choose the duration and easing together, by what the motion is for rather than by feel. Each pairing is a utility or transition built from the tokens, so supported mode values can be applied through the existing CSS.</P>
         <Region label="Motion pairings">
@@ -264,7 +264,7 @@ function Overview() {
         </Region>
       </section>
 
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>See it in real components</AnchorHeading>
         <P>Hover the button, flip the switch and checkbox, focus the tooltip trigger, and open the select and the menu. Each one uses the pairing that fits its purpose.</P>
         <LiveComponents />
@@ -283,7 +283,7 @@ const GROUPS = [
 function Tokens() {
   return (
     <div className="flex flex-col gap-5xl">
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Motion collection</AnchorHeading>
         <P>
           The collection has two modes. <InlineCode>Standard</InlineCode> is the default. <InlineCode>Reduced</InlineCode> takes over when the operating system asks for
@@ -291,7 +291,7 @@ function Tokens() {
         </P>
       </section>
       {GROUPS.map((g) => (
-        <section key={g.title} className="flex flex-col gap-lg">
+        <section key={g.title} className="docs-section flex flex-col gap-lg">
           <AnchorHeading>{g.title}</AnchorHeading>
           <P>{g.sub}</P>
           <Region label={`${g.title} tokens`}>
@@ -332,7 +332,7 @@ function Tokens() {
           </Region>
         </section>
       ))}
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>In code</AnchorHeading>
         <P>Use the recipes for popups and the tokens for transitions. Avoid typing a duration or curve by hand, because Reduced mode only reaches values that come from the tokens.</P>
         <CodeBlock

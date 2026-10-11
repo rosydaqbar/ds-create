@@ -41,7 +41,7 @@ export function Caption({ children }: { children: ReactNode }) {
 }
 export function Section({ title, description, children, id }: { title?: ReactNode; description?: ReactNode; children: ReactNode; id?: string }) {
   return (
-    <section className="flex flex-col gap-lg">
+    <section className="docs-section flex flex-col gap-lg">
       {title && <H2 id={id}>{title}</H2>}
       {description && <P>{description}</P>}
       {children}

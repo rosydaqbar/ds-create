@@ -79,7 +79,7 @@ export function ReadingTopic({ id, title, children }: { id: string; title: strin
     return child;
   });
   const preserved = section || paragraphs?.length ? references(children) : children;
-  return <section className="flex flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0 last:pb-0">
+  return <section className="docs-section flex flex-col gap-lg">
     <AnchorHeading>{item?.title ?? title}</AnchorHeading>
     {item && item.web.split(';').map((old) => old.trim()).filter((old) => old && old !== item.title).map((old) => <span key={old} id={slugify(old)} />)}
     {paragraphs?.map((p, i) => <P key={i}>{p}</P>)}
