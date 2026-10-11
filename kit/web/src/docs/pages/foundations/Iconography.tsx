@@ -1,5 +1,5 @@
 import { copySummary } from '../../copy';
-import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
+import { ReadingDetail, ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -263,61 +263,73 @@ function Colours() {
 function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Icon library</AnchorHeading>
       <ReadingNarrative id="1.7" fallback={<>
-        <P>
-          All icons share one {STYLE.kind} style, drawn with {STYLE.stroke}-pixel rounded strokes. There are {iconNames.length} icons in{' '}
-          {presentCats.length} categories, sorted alphabetically. An icon’s code name, <InlineCode>{'{category}/{name}'}</InlineCode>, matches its Figma name,{' '}
-          <InlineCode>{'Icon/{category}/{name}'}</InlineCode>.
-        </P>
-      </>} />
-        <Library />
-      </section>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Icon library</AnchorHeading>
 
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Sizes</AnchorHeading>
-        <P>
-          Pick from five steps, each set by a size token. Inside controls you don’t need to choose: xs and sm controls use the sm icon, md and lg controls use md,
-          and xl controls use lg. For anything bigger than the largest step, use a Featured icon (2.19).
-        </P>
-        <Sizes />
-      </section>
+          <P>
+            All icons share one {STYLE.kind} style, drawn with {STYLE.stroke}-pixel rounded strokes. There are {iconNames.length} icons in{' '}
+            {presentCats.length} categories, sorted alphabetically. An icon’s code name, <InlineCode>{'{category}/{name}'}</InlineCode>, matches its Figma name,{' '}
+            <InlineCode>{'Icon/{category}/{name}'}</InlineCode>.
+          </P>
 
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Colors</AnchorHeading>
-        <P>
-          Give icons a color role rather than a raw color, and check them on their intended surface. Use primary for the main meaning and secondary inside buttons and
-          inputs. Tertiary supports, and the status roles signal danger, warning, success and info. Roles made for other surfaces are shown on their own surface.
-        </P>
-        <Colours />
-      </section>
+          <ReadingDetail topic="Icon library">
+            <Library />
+          </ReadingDetail>
+        </section>
 
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Core set</AnchorHeading>
-        <P>The Parts depend on these icons, so they always stay in the library.</P>
-        <div className="grid gap-sm md:grid-cols-2">
-          {CORE.map(([names, use]) => (
-            <div key={names[0]} className="flex items-center gap-lg rounded-control border border-border-subtle p-md">
-              <span className="flex shrink-0 gap-sm">
-                {names.map((n) => (
-                  <Icon key={n} name={n} size="md" className="text-icon-primary" />
-                ))}
-              </span>
-              <span className="flex min-w-0 flex-col">
-                <span className="type-code-sm-regular break-words text-text-primary">{names.join(', ')}</span>
-                <span className="type-body-xs-regular text-text-secondary">{use}</span>
-              </span>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Sizes</AnchorHeading>
+          <P>
+            Pick from five steps, each set by a size token. Inside controls you don’t need to choose: xs and sm controls use the sm icon, md and lg controls use md,
+            and xl controls use lg. For anything bigger than the largest step, use a Featured icon (2.19).
+          </P>
+          <ReadingDetail topic="Icon sizes" aliases={["Sizes"]}>
+            <Sizes />
+          </ReadingDetail>
+        </section>
+
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Colors</AnchorHeading>
+          <P>
+            Give icons a color role rather than a raw color, and check them on their intended surface. Use primary for the main meaning and secondary inside buttons and
+            inputs. Tertiary supports, and the status roles signal danger, warning, success and info. Roles made for other surfaces are shown on their own surface.
+          </P>
+          <ReadingDetail topic="Icon colors" aliases={["Colors"]}>
+            <Colours />
+          </ReadingDetail>
+        </section>
+
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Core set</AnchorHeading>
+          <P>The Parts depend on these icons, so they always stay in the library.</P>
+          <ReadingDetail topic="Core set">
+            <div className="grid gap-sm md:grid-cols-2">
+              {CORE.map(([names, use]) => (
+                <div key={names[0]} className="flex items-center gap-lg rounded-control border border-border-subtle p-md">
+                  <span className="flex shrink-0 gap-sm">
+                    {names.map((n) => (
+                      <Icon key={n} name={n} size="md" className="text-icon-primary" />
+                    ))}
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="type-code-sm-regular break-words text-text-primary">{names.join(', ')}</span>
+                    <span className="type-body-xs-regular text-text-secondary">{use}</span>
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </ReadingDetail>
+        </section>
 
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Utility marks</AnchorHeading>
-        <P>Check marks, rating stars and status dots work like small icons. Always show them with text, so the meaning never depends on the mark alone.</P>
-        <UtilityMarks />
-      </section>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Utility marks</AnchorHeading>
+          <P>Check marks, rating stars and status dots work like small icons. Always show them with text, so the meaning never depends on the mark alone.</P>
+          <ReadingDetail topic="Utility marks">
+            <UtilityMarks />
+          </ReadingDetail>
+        </section>
+      </>} />
     </div>
   );
 }

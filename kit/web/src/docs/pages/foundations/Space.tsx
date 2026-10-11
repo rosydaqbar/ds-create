@@ -1,5 +1,5 @@
 import { copySummary } from '../../copy';
-import { FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
+import { ReadingDetail, FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -333,34 +333,44 @@ function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
       <FoundationNarrative id="1.3" fallback={<>
-      <Block title="Grouping and dimensions" intro="Choose gaps according to the relationship between elements. A label should sit closer to its control than to the next field; use a separate size role to set the control’s dimensions.">
-        <P>{brandCopy.density}</P>
-      </Block>
+        <Block title="Grouping and dimensions" intro="Choose gaps according to the relationship between elements. A label should sit closer to its control than to the next field; use a separate size role to set the control’s dimensions.">
+          <P>{brandCopy.density}</P>
+        </Block>
+
+        <Block
+          title="Space scale"
+          intro={`${ON_HALF_UNITS ? `Every step is a whole or half multiple of the ${BASE}px base unit.` : `Every step builds on the ${BASE}px base unit.`} Small steps keep related things close inside a control. Larger steps separate sections of a page.${has('space/optical') ? ' Use space/optical for the small inset around a label next to an icon.' : ''}`}
+        >
+          <ReadingDetail topic="Space" aliases={["Space scale"]}>
+            <SpaceScale />
+            <Caption>In Tailwind, each step is a utility: p-xl, gap-lg, m-md and so on.</Caption>
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Sizes" intro="Size roles set the height of controls and the size of icons, avatars, status dots and tracks. Every specimen below is drawn at its real size.">
+          <ReadingDetail topic="Sizes">
+            <Sizes />
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Widths" intro="Use these fixed widths for panels, dropdowns, dialogs and layouts. Pick xxs–xs for tooltips, menus and popovers, sm–lg for dialogs and side panels, and 2xl–6xl for page layouts. Bars are drawn to scale against the widest.">
+          <ReadingDetail topic="Widths">
+            <Widths />
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Container and reading measure" intro={`Page content stops growing at ${CONTAINER} on large screens. It keeps ${num('size/container/margin-desktop')} side margins on tablet and desktop, and ${num('size/container/margin-mobile')} on mobile. Running text stays within ${num('size/measure/reading')}, about 70 characters per line.`}>
+          <ReadingDetail topic="Containers" aliases={["Container and reading measure"]}>
+            <ContainerSpecimen />
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Grids" intro={GRIDS.length ? 'Each breakpoint has its own grid, shown here with its columns, gutters and margins. The frames are scaled down, but the numbers are real.' : undefined}>
+          <ReadingDetail topic="Grids">
+            <Grids />
+          </ReadingDetail>
+        </Block>
       </>} />
-
-      <Block
-        title="Space scale"
-        intro={`${ON_HALF_UNITS ? `Every step is a whole or half multiple of the ${BASE}px base unit.` : `Every step builds on the ${BASE}px base unit.`} Small steps keep related things close inside a control. Larger steps separate sections of a page.${has('space/optical') ? ' Use space/optical for the small inset around a label next to an icon.' : ''}`}
-      >
-        <SpaceScale />
-        <Caption>In Tailwind, each step is a utility: p-xl, gap-lg, m-md and so on.</Caption>
-      </Block>
-
-      <Block title="Sizes" intro="Size roles set the height of controls and the size of icons, avatars, status dots and tracks. Every specimen below is drawn at its real size.">
-        <Sizes />
-      </Block>
-
-      <Block title="Widths" intro="Use these fixed widths for panels, dropdowns, dialogs and layouts. Pick xxs–xs for tooltips, menus and popovers, sm–lg for dialogs and side panels, and 2xl–6xl for page layouts. Bars are drawn to scale against the widest.">
-        <Widths />
-      </Block>
-
-      <Block title="Container and reading measure" intro={`Page content stops growing at ${CONTAINER} on large screens. It keeps ${num('size/container/margin-desktop')} side margins on tablet and desktop, and ${num('size/container/margin-mobile')} on mobile. Running text stays within ${num('size/measure/reading')}, about 70 characters per line.`}>
-        <ContainerSpecimen />
-      </Block>
-
-      <Block title="Grids" intro={GRIDS.length ? 'Each breakpoint has its own grid, shown here with its columns, gutters and margins. The frames are scaled down, but the numbers are real.' : undefined}>
-        <Grids />
-      </Block>
     </div>
   );
 }

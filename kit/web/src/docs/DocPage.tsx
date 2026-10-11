@@ -223,7 +223,7 @@ export function Topics({ items, children, intro }: { items: Topic[]; children?: 
     <div className="flex flex-col gap-4xl">
       {intro}
       {items.map((g) => (
-        <section key={g.title} className="docs-section flex flex-col gap-lg">
+        <section data-reading-topic={g.title} key={g.title} className="docs-section flex flex-col gap-lg">
           {g.aliases?.map((id) => <span key={id} id={id} aria-hidden="true" className="scroll-mt-36" />)}
           <AnchorHeading>{g.title}</AnchorHeading>
           {g.body.split('\n\n').map((para, i) => (

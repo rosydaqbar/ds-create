@@ -1,5 +1,5 @@
 import { copySummary } from '../../copy';
-import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
+import { ReadingDetail, ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -180,41 +180,47 @@ function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
       <ReadingNarrative id="1.4" fallback={<>
-      <Block
-        title="How shape works"
-        intro={`${brandCopy.cornerCharacter({ name: config.name, character: CHARACTER })} Controls round at ${show('radius/control')}, surfaces at ${show('radius/surface')} and dialogs at ${show('radius/modal')}, while avatars, switches and dots are full pills.`}
-      >
-        <Bullets
-          items={[
-            <>
-              <strong className="font-semibold text-text-primary">Pick the role by what the element is.</strong> A button is a control, a card is a surface, a dialog is a modal. Choose by role rather than by eye.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Change the character in one place.</strong> Components use roles, so editing radius/control reshapes every button, field and select at once.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Lines stay thin.</strong> Most borders use the default width. Save wider lines for focus and selection.
-            </>,
-          ]}
-        />
-      </Block>
+        <Block
+          title="How shape works"
+          intro={`${brandCopy.cornerCharacter({ name: config.name, character: CHARACTER })} Controls round at ${show('radius/control')}, surfaces at ${show('radius/surface')} and dialogs at ${show('radius/modal')}, while avatars, switches and dots are full pills.`}
+        >
+          <Bullets
+            items={[
+              <>
+                <strong className="font-semibold text-text-primary">Pick the role by what the element is.</strong> A button is a control, a card is a surface, a dialog is a modal. Choose by role rather than by eye.
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Change the character in one place.</strong> Components use roles, so editing radius/control reshapes every button, field and select at once.
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Lines stay thin.</strong> Most borders use the default width. Save wider lines for focus and selection.
+              </>,
+            ]}
+          />
+        </Block>
+
+        <Block title="Radius roles" intro="Each tile uses its role directly and lists where you’ll find it.">
+          <ReadingDetail topic="Radius" aliases={["Radius roles"]}>
+            <PreviewCard label="Radius roles" className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
+              {RADIUS.map((r) => (
+                <RadiusTile key={r} name={r} />
+              ))}
+            </PreviewCard>
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Radius in use" intro="Here are the roles on plain shapes: a control, an indicator, a surface holding a control (with the padding between them) and a dialog.">
+          <ReadingDetail topic="Radius in use">
+            <RadiusInUse />
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Border widths" intro="Use the default width almost everywhere. Reach for strong, focus or selected only when a line needs to stand out or a state calls for it.">
+          <ReadingDetail topic="Border widths">
+            <BorderLines />
+          </ReadingDetail>
+        </Block>
       </>} />
-
-      <Block title="Radius roles" intro="Each tile uses its role directly and lists where you’ll find it.">
-        <PreviewCard label="Radius roles" className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
-          {RADIUS.map((r) => (
-            <RadiusTile key={r} name={r} />
-          ))}
-        </PreviewCard>
-      </Block>
-
-      <Block title="Radius in use" intro="Here are the roles on plain shapes: a control, an indicator, a surface holding a control (with the padding between them) and a dialog.">
-        <RadiusInUse />
-      </Block>
-
-      <Block title="Border widths" intro="Use the default width almost everywhere. Reach for strong, focus or selected only when a line needs to stand out or a state calls for it.">
-        <BorderLines />
-      </Block>
     </div>
   );
 }

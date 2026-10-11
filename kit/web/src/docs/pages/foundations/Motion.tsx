@@ -1,5 +1,5 @@
 import { copySummary } from '../../copy';
-import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
+import { ReadingDetail, ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import { useEffect, useState, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -208,67 +208,75 @@ function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
       <ReadingNarrative id="1.6" fallback={<>
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Principles</AnchorHeading>
-        <P>{brandCopy.motionPrinciple({ name: config.name })}</P>
-        <Principles />
-      </section>
-      </>} />
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Principles</AnchorHeading>
+          <P>{brandCopy.motionPrinciple({ name: config.name })}</P>
+          <Principles />
+        </section>
 
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Durations</AnchorHeading>
-        <P>Small feedback is fast, and the farther or larger the movement, the longer it takes. The bars are drawn to scale.</P>
-        <DurationBars />
-      </section>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Durations</AnchorHeading>
+          <P>Small feedback is fast, and the farther or larger the movement, the longer it takes. The bars are drawn to scale.</P>
+          <ReadingDetail topic="Duration" aliases={["Durations"]}>
+            <DurationBars />
+          </ReadingDetail>
+        </section>
 
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Easings</AnchorHeading>
-        <P>An easing sets how a change speeds up and slows down. Things arriving start fast and settle. Things leaving start gently and speed away.</P>
-        <PreviewCard label="Easing curves" className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
-          {easings.map((e) => (
-            <div key={e.name} className="flex flex-col items-center gap-md rounded-surface border border-border-subtle p-xl text-center">
-              <Curve name={e.name} />
-              <span className="type-code-sm-medium text-text-primary">{e.name}</span>
-              <span className="type-code-sm-regular text-text-tertiary">{bezier(e.name).join(', ')}</span>
-              <span className="type-body-sm-regular text-text-secondary">{EASE_USE[short(e.name)]}</span>
-            </div>
-          ))}
-        </PreviewCard>
-        <TryIt />
-      </section>
-
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Pairings</AnchorHeading>
-        <P>Choose the duration and easing together, by what the motion is for rather than by feel. Each pairing is a utility or transition built from the tokens, so supported mode values can be applied through the existing CSS.</P>
-        <Region label="Motion pairings">
-          <table className="w-full text-left">
-            <thead className="bg-surface-sunken">
-              <tr className="type-body-xs-semibold text-text-tertiary">
-                <th className={th}>Purpose</th>
-                <th className={th}>Tokens</th>
-                <th className={th}>In code</th>
-                <th className={th}>Used by</th>
-              </tr>
-            </thead>
-            <tbody>
-              {PAIRINGS.map(([a, b, c, d]) => (
-                <tr key={a} className="border-t border-border-subtle align-top">
-                  <td className="type-body-sm-medium px-lg py-md text-text-primary">{a}</td>
-                  <td className="type-code-sm-regular whitespace-nowrap px-lg py-md text-text-secondary">{b}</td>
-                  <td className="type-code-sm-regular px-lg py-md text-text-brand">{c}</td>
-                  <td className="type-body-sm-regular px-lg py-md text-text-secondary">{d}</td>
-                </tr>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Easings</AnchorHeading>
+          <P>An easing sets how a change speeds up and slows down. Things arriving start fast and settle. Things leaving start gently and speed away.</P>
+          <ReadingDetail topic="Easing" aliases={["Easings"]}>
+            <PreviewCard label="Easing curves" className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
+              {easings.map((e) => (
+                <div key={e.name} className="flex flex-col items-center gap-md rounded-surface border border-border-subtle p-xl text-center">
+                  <Curve name={e.name} />
+                  <span className="type-code-sm-medium text-text-primary">{e.name}</span>
+                  <span className="type-code-sm-regular text-text-tertiary">{bezier(e.name).join(', ')}</span>
+                  <span className="type-body-sm-regular text-text-secondary">{EASE_USE[short(e.name)]}</span>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </Region>
-      </section>
+            </PreviewCard>
+            <TryIt />
+          </ReadingDetail>
+        </section>
 
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>See it in real components</AnchorHeading>
-        <P>Hover the button, flip the switch and checkbox, focus the tooltip trigger, and open the select and the menu. Each one uses the pairing that fits its purpose.</P>
-        <LiveComponents />
-      </section>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Pairings</AnchorHeading>
+          <P>Choose the duration and easing together, by what the motion is for rather than by feel. Each pairing is a utility or transition built from the tokens, so supported mode values can be applied through the existing CSS.</P>
+          <ReadingDetail topic="Pairings">
+            <Region label="Motion pairings">
+              <table className="w-full text-left">
+                <thead className="bg-surface-sunken">
+                  <tr className="type-body-xs-semibold text-text-tertiary">
+                    <th className={th}>Purpose</th>
+                    <th className={th}>Tokens</th>
+                    <th className={th}>In code</th>
+                    <th className={th}>Used by</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {PAIRINGS.map(([a, b, c, d]) => (
+                    <tr key={a} className="border-t border-border-subtle align-top">
+                      <td className="type-body-sm-medium px-lg py-md text-text-primary">{a}</td>
+                      <td className="type-code-sm-regular whitespace-nowrap px-lg py-md text-text-secondary">{b}</td>
+                      <td className="type-code-sm-regular px-lg py-md text-text-brand">{c}</td>
+                      <td className="type-body-sm-regular px-lg py-md text-text-secondary">{d}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Region>
+          </ReadingDetail>
+        </section>
+
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>See it in real components</AnchorHeading>
+          <P>Hover the button, flip the switch and checkbox, focus the tooltip trigger, and open the select and the menu. Each one uses the pairing that fits its purpose.</P>
+          <ReadingDetail topic="See it in real components">
+            <LiveComponents />
+          </ReadingDetail>
+        </section>
+      </>} />
     </div>
   );
 }

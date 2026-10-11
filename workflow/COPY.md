@@ -86,6 +86,7 @@ Navigate with them: paste a node id into Figma's search, or open the web path.
 - Paragraphs of the same surface keep their order.
 - A reading section with `<!-- web: narrative -->` uses its authored topics in place of the template’s explanations on the site; computed specimens, code and token tables remain. The shared reading-topic reader also supports a marked section containing several subtopics. `# Summary` optionally supplies its page description. A Guidelines section marked `<!-- web: replace -->` makes its topic order authoritative on the site. Without these markers the existing template/merge behavior remains.
 - To rename a web topic while preserving its visual and deep link, put the previous title in its source comment (`<!-- web: Previous title -->`). Consolidations may list previous titles separated by `;` inside that value. Retain required visuals explicitly; a copy-only topic has no invented specimen.
+- Keep each topic's explanation, live detail and caption together. Shared web reading pages associate `ReadingDetail` markers or the existing `visuals` map with authored topic titles and previous-title aliases. `web: reference` identifies a reference topic; it does not mean its explanation should be discarded or moved into a separate introduction. Legacy pages without authored narrative still render their original content.
 - Text is plain: no Markdown inside a line. Inline code names (token, component and property names) are written as they appear.
 
 # 3. Sections per page type

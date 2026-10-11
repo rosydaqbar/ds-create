@@ -1,5 +1,5 @@
 import { copySummary } from '../../copy';
-import { FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
+import { ReadingDetail, FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenTextStyle } from '@/tokens/types';
@@ -340,42 +340,48 @@ function HierarchyExample() {
 function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
-      <FoundationNarrative id="1.2" visuals={{'type-model': <LayerModel />}} fallback={<>
-      <Block title="Applying text styles" intro="Use a named style for a complete combination of family, size, weight and line height. Changing only the font size leaves the other settings outside the shared style.">
-        <LayerModel />
-        <Bullets
-          items={[
-            <>
-              <strong className="font-semibold text-text-primary">Apply a text style, not a raw size.</strong> Every piece of text uses one of the styles below, so one change at the source reaches every screen.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Keep the hierarchy simple.</strong> Size, weight and color work together to set the levels. A dense screen rarely needs more than three sizes.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Write for reading.</strong> Body text is {BASE}, stays within the reading measure and has generous line height.
-            </>,
-          ]}
-        />
-      </Block>
-      </>} />
-
-      {FAMILIES.length > 0 && (
-        <Block title="Typefaces" intro={`The product uses ${words(FAMILIES.length)} ${FAMILIES.length === 1 ? 'typeface' : 'typefaces'}. Each card is set in the typeface it describes.`}>
-          <div className="grid gap-xl lg:grid-cols-2">
-            {FAMILIES.map((f) => (
-              <TypefaceCard key={f.token} family={f} />
-            ))}
-          </div>
+      <FoundationNarrative id="1.2" visuals={{ 'type-model': <LayerModel /> }} fallback={<>
+        <Block title="Applying text styles" intro="Use a named style for a complete combination of family, size, weight and line height. Changing only the font size leaves the other settings outside the shared style.">
+          <LayerModel />
+          <Bullets
+            items={[
+              <>
+                <strong className="font-semibold text-text-primary">Apply a text style, not a raw size.</strong> Every piece of text uses one of the styles below, so one change at the source reaches every screen.
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Keep the hierarchy simple.</strong> Size, weight and color work together to set the levels. A dense screen rarely needs more than three sizes.
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Write for reading.</strong> Body text is {BASE}, stays within the reading measure and has generous line height.
+              </>,
+            ]}
+          />
         </Block>
-      )}
 
-      <Block title="Type scale" intro="Styles are grouped by role and run from largest to smallest. Each row shows a sample in every weight that role supports, with its size / line height · letter spacing.">
-        <TypeScale />
-      </Block>
+        {FAMILIES.length > 0 && (
+          <Block title="Typefaces" intro={`The product uses ${words(FAMILIES.length)} ${FAMILIES.length === 1 ? 'typeface' : 'typefaces'}. Each card is set in the typeface it describes.`}>
+            <ReadingDetail topic="Typefaces">
+              <div className="grid gap-xl lg:grid-cols-2">
+                {FAMILIES.map((f) => (
+                  <TypefaceCard key={f.token} family={f} />
+                ))}
+              </div>
+            </ReadingDetail>
+          </Block>
+        )}
 
-      <Block title="Hierarchy in use" intro="A page header and its content, labeled with the style each line uses. Cover the labels and the levels still read clearly.">
-        <HierarchyExample />
-      </Block>
+        <Block title="Type scale" intro="Styles are grouped by role and run from largest to smallest. Each row shows a sample in every weight that role supports, with its size / line height · letter spacing.">
+          <ReadingDetail topic="Type scale">
+            <TypeScale />
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Hierarchy in use" intro="A page header and its content, labeled with the style each line uses. Cover the labels and the levels still read clearly.">
+          <ReadingDetail topic="Hierarchy in use">
+            <HierarchyExample />
+          </ReadingDetail>
+        </Block>
+      </>} />
     </div>
   );
 }

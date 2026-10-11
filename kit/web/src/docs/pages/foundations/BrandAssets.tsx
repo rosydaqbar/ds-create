@@ -81,10 +81,10 @@ function Pending({ children }: { children: ReactNode }) {
 const MIN = brandCopy.logoMinSize;
 
 /* ---------- Overview ---------- */
-function LogoSection() {
+function LogoSection({ embedded = false }: { embedded?: boolean } = {}) {
   return (
-    <section className="docs-section flex flex-col gap-lg">
-      <AnchorHeading>Logo</AnchorHeading>
+    <section className={cn(!embedded && "docs-section", "flex flex-col gap-lg")}>
+      {!embedded && <AnchorHeading>Logo</AnchorHeading>}
       <P>
         The lockup is the full logo. Use it where the product signs its name: the app header, the cover and sign-in screens. The mark is the symbol alone, for
         small spaces such as avatars, favicons and app chrome.
@@ -124,10 +124,10 @@ function LogoSection() {
   );
 }
 
-function ClearSpace() {
+function ClearSpace({ embedded = false }: { embedded?: boolean } = {}) {
   return (
-    <section className="docs-section flex flex-col gap-lg">
-      <AnchorHeading>Clear space and minimum size</AnchorHeading>
+    <section className={cn(!embedded && "docs-section", "flex flex-col gap-lg")}>
+      {!embedded && <AnchorHeading>Clear space and minimum size</AnchorHeading>}
       <P>{brandCopy.logoClearSpace(MIN)}</P>
       <div className="grid gap-lg lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col items-center justify-center gap-md rounded-surface border border-border-subtle bg-surface-sunken p-xl">
@@ -163,10 +163,10 @@ function ClearSpace() {
   );
 }
 
-function SocialMarks() {
+function SocialMarks({ embedded = false }: { embedded?: boolean } = {}) {
   return (
-    <section className="docs-section flex flex-col gap-lg">
-      <AnchorHeading>Social marks</AnchorHeading>
+    <section className={cn(!embedded && "docs-section", "flex flex-col gap-lg")}>
+      {!embedded && <AnchorHeading>Social marks</AnchorHeading>}
       <P>
         These are the sign-in providers the Social button (3.7) supports: {socialProviders.map((p) => socialProviderName[p]).join(', ')}. Each mark keeps its owner’s
         colors and proportions. For a quieter row, use the mono version: a single color that follows the icon color roles. Near-black marks follow the text color so
@@ -194,10 +194,10 @@ function SocialMarks() {
   );
 }
 
-function Flags() {
+function Flags({ embedded = false }: { embedded?: boolean } = {}) {
   return (
-    <section className="docs-section flex flex-col gap-lg">
-      <AnchorHeading>Flags</AnchorHeading>
+    <section className={cn(!embedded && "docs-section", "flex flex-col gap-lg")}>
+      {!embedded && <AnchorHeading>Flags</AnchorHeading>}
       <P>
         Use round flags for the countries and regions the product supports, in badges, tags and country selectors. Each file is named by its ISO 3166 code.
         Always show a flag with the country name.
@@ -229,19 +229,20 @@ function Flags() {
 function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
-      <ReadingNarrative id="1.8" fallback={<>
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>About brand assets</AnchorHeading>
-        <P>
-          The product logo, provider marks and flags are the one place in the system where raw colors and shapes are allowed, because the artwork belongs to its
-          owners. Each asset is a file in <InlineCode>public/brand/</InlineCode>, exported from the Figma file, so replacing a file updates it everywhere.
-        </P>
-      </section>
+      <ReadingNarrative id="1.8" visuals={{ Logo: <LogoSection embedded />, "Clear space and minimum size": <ClearSpace embedded />, "Social mark": <SocialMarks embedded />, Flags: <Flags embedded /> }} fallback={<>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>About brand assets</AnchorHeading>
+          <P>
+            The product logo, provider marks and flags are the one place in the system where raw colors and shapes are allowed, because the artwork belongs to its
+            owners. Each asset is a file in <InlineCode>public/brand/</InlineCode>, exported from the Figma file, so replacing a file updates it everywhere.
+          </P>
+        </section>
+
+        <LogoSection />
+        <ClearSpace />
+        <SocialMarks />
+        <Flags />
       </>} />
-      <LogoSection />
-      <ClearSpace />
-      <SocialMarks />
-      <Flags />
     </div>
   );
 }

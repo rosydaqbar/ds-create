@@ -1,5 +1,5 @@
 import { copySummary } from '../../copy';
-import { FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
+import { ReadingDetail, FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenVariable } from '@/tokens/types';
@@ -598,79 +598,87 @@ function Overview() {
   const hasAlphaWhite = familySteps('alpha-white').length > 0;
   return (
     <div className="flex flex-col gap-6xl">
-      <FoundationNarrative id="1.1" visuals={{'role-model': <RoleModel />}} fallback={<>
-      <Block title="Selecting color roles" intro="Select a role for the element and its context: a text color, for example, needs to be checked against the surface on which the text will appear.">
-        <RoleModel />
-        <Bullets
-          items={[
-            <>
-              <strong className="font-semibold text-text-primary">Pick by purpose, not by hue.</strong> Choose the role that matches the job (text, border, fill, surface) rather than a palette step that happens to look right.
-            </>,
-            <>
-              {MODES.length > 1 ? (
-                <>
-                  <strong className="font-semibold text-text-primary">Every role works in {MODES_TEXT}.</strong> Each role has a value for each mode, so a screen built from roles needs no{' '}
-                  {MODES[1]} overrides.
-                </>
-              ) : (
-                <>
-                  <strong className="font-semibold text-text-primary">Every role has one value, in {MODES[0]}.</strong>
-                  {unsupportedModes.length ? ` ${unsupportedModes.join(' and ')} isn’t supported.` : ''} Adding a mode requires new role mappings and component verification.
-                </>
-              )}
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Color never carries meaning alone.</strong> Always pair a status color with text or an icon, so people who can’t see the difference still get the message.
-            </>,
-          ]}
-        />
-      </Block>
-      </>} />
-
-      <Block title="Base colors" intro="These are the building blocks: white, black and transparent, the brand ramp, and the alpha scales for overlays and shadows. Each swatch lists its contrast on white and on black, and the label on the swatch shows the better of the two.">
-        <div className="flex flex-col gap-xl">
-          <FamilyRow title="Base" family="base" note="Pure white and black for the extremes, plus transparent for layers that should show nothing but still use a token." />
-          <FamilyRow title="Brand" family="brand" badges={[{ label: 'Brand', tone: 'brand' }]} note={brandNote()} />
-          <FamilyRow title="Alpha black" family="alpha-black" note="Black at set opacities, for the scrim behind dialogs and for shadow colors. Shown on a light surface." />
-          {hasAlphaWhite && (
-            <div className="min-w-0">
-              <FamilyRow title="Alpha white" family="alpha-white" dark note="White at set opacities, for hover tints over media and for video controls. Shown on a dark surface." />
-            </div>
-          )}
-        </div>
-      </Block>
-
-      <Block title="Extended palettes" intro={extendedIntro}>
-        <div className="flex flex-col gap-xl">
-          <FamilyRow title="Neutral" family="neutral" badges={[{ label: 'Neutral', tone: 'neutral' }]} note={neutralNote()} />
-          <StatusRows />
-          {SUPPORTING.map((f) => (
-            <FamilyRow key={f} title={cap(f)} family={f} note={supportingNote(f)} />
-          ))}
-        </div>
-      </Block>
-
-      <Block
-        title={`Roles in ${MODES_TEXT}`}
-        intro={
-          MODES.length > 1
-            ? `Both panels below use only color roles. The ${MODES[1]} panel is the ${MODES[0]} panel with the mode switched, and nothing else changed.`
-            : 'The panel below uses only color roles: every color in it comes from a role.'
-        }
-      >
-        <div className={cn('grid min-w-0 gap-xl', MODES.length > 1 ? 'lg:grid-cols-2' : 'max-w-[40rem]')}>
-          {MODES.map((m) => (
-            <ModePanel key={m} mode={m} />
-          ))}
-        </div>
-      </Block>
-
-      {PAIRS.length > 0 && (
-        <Block title="Contrast pairs" intro={`These are the text and icon pairs the product uses, tested in ${IN_EACH}. Text needs 4.5:1 (AA). Large text, icons and borders that identify a control need 3:1.`}>
-          <PairTable />
-          <Caption>Ratios are rounded down, so a pair never looks better than it is. Alpha colors are measured over the surface they sit on. Disabled text is exempt from contrast rules, but people still need to see it.</Caption>
+      <FoundationNarrative id="1.1" visuals={{ 'role-model': <RoleModel /> }} fallback={<>
+        <Block title="Selecting color roles" intro="Select a role for the element and its context: a text color, for example, needs to be checked against the surface on which the text will appear.">
+          <RoleModel />
+          <Bullets
+            items={[
+              <>
+                <strong className="font-semibold text-text-primary">Pick by purpose, not by hue.</strong> Choose the role that matches the job (text, border, fill, surface) rather than a palette step that happens to look right.
+              </>,
+              <>
+                {MODES.length > 1 ? (
+                  <>
+                    <strong className="font-semibold text-text-primary">Every role works in {MODES_TEXT}.</strong> Each role has a value for each mode, so a screen built from roles needs no{' '}
+                    {MODES[1]} overrides.
+                  </>
+                ) : (
+                  <>
+                    <strong className="font-semibold text-text-primary">Every role has one value, in {MODES[0]}.</strong>
+                    {unsupportedModes.length ? ` ${unsupportedModes.join(' and ')} isn’t supported.` : ''} Adding a mode requires new role mappings and component verification.
+                  </>
+                )}
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Color never carries meaning alone.</strong> Always pair a status color with text or an icon, so people who can’t see the difference still get the message.
+              </>,
+            ]}
+          />
         </Block>
-      )}
+
+        <Block title="Base colors" intro="These are the building blocks: white, black and transparent, the brand ramp, and the alpha scales for overlays and shadows. Each swatch lists its contrast on white and on black, and the label on the swatch shows the better of the two.">
+          <ReadingDetail topic="Base colors">
+            <div className="flex flex-col gap-xl">
+              <FamilyRow title="Base" family="base" note="Pure white and black for the extremes, plus transparent for layers that should show nothing but still use a token." />
+              <FamilyRow title="Brand" family="brand" badges={[{ label: 'Brand', tone: 'brand' }]} note={brandNote()} />
+              <FamilyRow title="Alpha black" family="alpha-black" note="Black at set opacities, for the scrim behind dialogs and for shadow colors. Shown on a light surface." />
+              {hasAlphaWhite && (
+                <div className="min-w-0">
+                  <FamilyRow title="Alpha white" family="alpha-white" dark note="White at set opacities, for hover tints over media and for video controls. Shown on a dark surface." />
+                </div>
+              )}
+            </div>
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Extended palettes" intro={extendedIntro}>
+          <ReadingDetail topic="Extended palettes">
+            <div className="flex flex-col gap-xl">
+              <FamilyRow title="Neutral" family="neutral" badges={[{ label: 'Neutral', tone: 'neutral' }]} note={neutralNote()} />
+              <StatusRows />
+              {SUPPORTING.map((f) => (
+                <FamilyRow key={f} title={cap(f)} family={f} note={supportingNote(f)} />
+              ))}
+            </div>
+          </ReadingDetail>
+        </Block>
+
+        <Block
+          title={`Roles in ${MODES_TEXT}`}
+          intro={
+            MODES.length > 1
+              ? `Both panels below use only color roles. The ${MODES[1]} panel is the ${MODES[0]} panel with the mode switched, and nothing else changed.`
+              : 'The panel below uses only color roles: every color in it comes from a role.'
+          }
+        >
+          <ReadingDetail topic={`Roles in ${MODES_TEXT}`}>
+            <div className={cn('grid min-w-0 gap-xl', MODES.length > 1 ? 'lg:grid-cols-2' : 'max-w-[40rem]')}>
+              {MODES.map((m) => (
+                <ModePanel key={m} mode={m} />
+              ))}
+            </div>
+          </ReadingDetail>
+        </Block>
+
+        {PAIRS.length > 0 && (
+          <Block title="Contrast pairs" intro={`These are the text and icon pairs the product uses, tested in ${IN_EACH}. Text needs 4.5:1 (AA). Large text, icons and borders that identify a control need 3:1.`}>
+            <ReadingDetail topic="Contrast pairs">
+              <PairTable />
+              <Caption>Ratios are rounded down, so a pair never looks better than it is. Alpha colors are measured over the surface they sit on. Disabled text is exempt from contrast rules, but people still need to see it.</Caption>
+            </ReadingDetail>
+          </Block>
+        )}
+      </>} />
     </div>
   );
 }

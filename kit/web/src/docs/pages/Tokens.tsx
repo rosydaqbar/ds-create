@@ -1,5 +1,5 @@
 import { copySummary } from '../copy';
-import { ReadingTopic } from '../FoundationCopy';
+import { ReadingDetail, ReadingTopic } from '../FoundationCopy';
 import { Fragment, useDeferredValue, useMemo, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { tokens } from '@/tokens/tokens.gen';
@@ -398,6 +398,7 @@ function Overview() {
 
       <Topic title="Naming">
         <P>Names group tokens by domain and purpose. Check the domain-specific patterns below and use Reference for the exact name.</P>
+        <ReadingDetail topic="The grammar">
         <Visual className="flex flex-col gap-xl">
           <span className="type-code-md-regular text-text-secondary">{'{domain}/{group}/{role}[/{emphasis}][/{state}]'}</span>
           <SegmentAnatomy />
@@ -429,10 +430,12 @@ function Overview() {
             </tbody>
           </table>
         </TableRegion>
+        </ReadingDetail>
         <H3>Roles and children</H3>
         <P>
           States and variants sit under their role as children. The role itself is the resting value, so there’s no <InlineCode>/rest</InlineCode> or <InlineCode>/default</InlineCode> segment.
         </P>
+        <ReadingDetail topic="Roles and children">
         <div className="flex flex-col gap-xs rounded-surface border border-border-subtle p-lg">
           {['color/text/brand', 'hover', 'pressed'].filter((n, i) => byName.has(i === 0 ? n : `color/text/brand/${n}`)).map((n, i, all) => {
             const full = i === 0 ? n : `color/text/brand/${n}`;
@@ -452,16 +455,20 @@ function Overview() {
             );
           })}
         </div>
+        </ReadingDetail>
         <H3>Names describe purpose, not values</H3>
         <P>
           Name a token for its job, not for how it looks or the one place it appears. Sizes are named by step (<InlineCode>xs</InlineCode> to <InlineCode>2xl</InlineCode>), so their values
           can change without a rename.
         </P>
+        <ReadingDetail topic="Names describe purpose, not values">
         <div className="grid gap-xl md:grid-cols-2">
           <DoDont kind="do" caption="color/text/secondary · space/md · radius/control" />
           <DoDont kind="dont" caption="gray-text-2 · space-8px · button-radius-login" />
         </div>
+        </ReadingDetail>
         <H3>From Figma to code</H3>
+        <ReadingDetail topic="Code syntax" aliases={['From Figma to code']}>
         {productHasWeb ? (
           <>
             <P>
@@ -528,9 +535,12 @@ function Overview() {
             </TableRegion>
           </>
         )}
+        </ReadingDetail>
+        <ReadingDetail topic="Descriptions">
         <Caption>
           Every semantic variable describes what it’s for in the UI. You’ll see the same text in Figma’s picker tooltip and in the <TextLink to="?tab=reference">Reference</TextLink> table.
         </Caption>
+        </ReadingDetail>
       </Topic>
 
       <Topic title="Modes">
@@ -550,6 +560,7 @@ function Overview() {
             </>
           )}
         </P>
+        <ReadingDetail topic="Color modes">
         <TableRegion label={`Color roles in ${joinList(supportedModes)}`}>
           <table className="w-full border-collapse text-left">
             <thead className="bg-surface-sunken">
@@ -585,11 +596,13 @@ function Overview() {
             </div>
           ))}
         </div>
+        </ReadingDetail>
         <H3>Motion: Standard and Reduced</H3>
         <P>
           For people who ask their device for less motion, Reduced turns movement into instant changes or short fades. Fades and loops stay, because they don’t move anything across the
           screen.
         </P>
+        <ReadingDetail topic="Motion modes" aliases={['Motion: Standard and Reduced']}>
         <TableRegion label="Motion durations in Standard and Reduced">
           <table className="w-full border-collapse text-left">
             <thead className="bg-surface-sunken">
@@ -614,6 +627,7 @@ function Overview() {
             </tbody>
           </table>
         </TableRegion>
+        </ReadingDetail>
         <Bullets
           items={[
             singleDensity ? (
@@ -662,6 +676,7 @@ function Overview() {
           used directly in components, and they change only when the brand does.{' '}
           {paletteCharacter}
         </P>
+        <ReadingDetail topic="Primitive tables">
         <Visual className="flex flex-col gap-md">
           {families.map((f) => {
             const steps = tokens.variables.filter((t) => t.name.startsWith(`palette/${f}/`));
@@ -677,6 +692,8 @@ function Overview() {
             );
           })}
         </Visual>
+        </ReadingDetail>
+        <ReadingDetail topic="Transparent shades">
         <P>
           {families.includes('alpha-black') && families.includes('alpha-white') && (
             <>
@@ -686,10 +703,13 @@ function Overview() {
           )}
           The number scales are {joinList(scales.map((s) => `scale/${s}`))}.
         </P>
+        </ReadingDetail>
+        <ReadingDetail topic="Changing primitives">
         <Caption>
           For every step with its value and contrast, see <TextLinkTo id="1.1" label="1.1 Color" />. Before changing a primitive, inspect its dependent roles and
           rerun the contrast tests.
         </Caption>
+        </ReadingDetail>
       </Topic>
     </div>
   );

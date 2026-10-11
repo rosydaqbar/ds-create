@@ -112,3 +112,57 @@ test('authored reading copy owns nested explanations, lists and captions while r
  assert.match(renamed,/Choose the text role/);assert.match(renamed,/36px/);assert.doesNotMatch(renamed,/Stale/);
  const legacy=render('missing');assert.match(legacy,/Stale nested claim/);assert.match(legacy,/Stale list/);assert.match(legacy,/Stale caption/);assert.match(legacy,/36px/);
 });
+
+function readingWriter(pages) {
+ const P=({children})=>React.createElement('p',null,children);
+ const H3=({children})=>React.createElement('h3',null,children);
+ const blocks={P,H3,Bullets:({items})=>React.createElement('ul',null,items.map((s,i)=>React.createElement('li',{key:i},s))),Caption:P,slugify:s=>s.toLowerCase().replaceAll(' ','-')};
+ const Topics=({items})=>React.createElement('article',null,items.map(g=>React.createElement('section',{'data-reading-topic':g.title,key:g.title},...(g.aliases??[]).map(id=>React.createElement('span',{id,key:id})),React.createElement('h3',{id:blocks.slugify(g.title)},g.title),React.createElement(P,null,g.body),g.render?.())));
+ const js=ts.transpileModule(fs.readFileSync(new URL('../src/docs/FoundationCopy.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText;
+ const exports={};new Function('exports','require',js)(exports,name=>({'react':React,'react/jsx-runtime':jsxRuntime,'./copy':writer(pages),'./blocks':blocks,'./DocPage':{AnchorHeading:H3,Topics}})[name]);
+ return {...exports,P,H3};
+}
+
+for(const category of ['guidance','foundation','future subject'])test(`${category}: explanation and live detail precede the next topic`,()=>{
+ const items=[{title:'Choosing names',web:'Old grammar',lines:[line('A name identifies purpose.')]},{title:'State mappings',web:'',lines:[line('Only exported conditions have values.')]}];
+ const r=readingWriter({'77':{sections:[{name:'Structure',web:'narrative',lines:[],items}]}});
+ const fallback=React.createElement('div',null,React.createElement(r.ReadingDetail,{topic:'Old grammar'},React.createElement('output',null,'Actual role name')),React.createElement(r.ReadingDetail,{topic:'State mappings'},React.createElement('output',null,'Actual state value')));
+ const html=renderToStaticMarkup(React.createElement(r.ReadingTopic,{id:'77',title:'Structure'},fallback));
+ assert.match(html,/data-reading-topic="Choosing names"[^>]*>[\s\S]*Actual role name[\s\S]*?<\/section>\s*<section[^>]*data-reading-topic="State mappings"/);
+ assert.ok(html.indexOf('Actual role name')<html.indexOf('Only exported conditions'));
+ assert.match(html,/data-reading-topic="State mappings"[^>]*>[\s\S]*Actual state value/);
+});
+
+test('reference topics keep authored prose with specimens, and legacy content remains readable',()=>{
+ const items=[{title:'Radius',web:'reference',lines:[line('These are the exported corner values.')]},{title:'Borders',web:'reference',lines:[line('Boundary width is separate.')]}];
+ const r=readingWriter({'1.4':{sections:[{name:'Overview',web:'narrative',lines:[],items}]}});
+ const fallback=React.createElement('div',null,React.createElement(r.P,null,'Stale explanation.'),React.createElement(r.ReadingDetail,{topic:'Radius'},React.createElement(r.H3,null,'Old heading'),React.createElement('output',null,'8px')),React.createElement(r.ReadingDetail,{topic:'Borders'},React.createElement('output',null,'1px')),React.createElement(r.ReadingDetail,{topic:'Additional reference'},React.createElement('output',null,'16px')));
+ const html=renderToStaticMarkup(React.createElement(r.ReadingNarrative,{id:'1.4',fallback}));
+ assert.ok(html.indexOf('exported corner')<html.indexOf('8px'));
+ assert.ok(html.indexOf('8px')<html.indexOf('Boundary width'));
+ assert.ok(html.indexOf('Boundary width')<html.indexOf('1px'));
+ assert.match(html,/Additional reference/);assert.match(html,/16px/);assert.doesNotMatch(html,/Stale explanation/);
+ const legacy=renderToStaticMarkup(React.createElement(r.ReadingNarrative,{id:'missing',fallback}));
+ assert.match(legacy,/Stale explanation/);assert.match(legacy,/Old heading/);assert.match(legacy,/16px/);
+});
+
+test('a consolidated topic keeps each matched detail and semicolon alias',()=>{
+ const r=readingWriter({'3.9':{sections:[{name:'Overview',web:'narrative',lines:[],items:[{title:'Combined decision',web:'First topic; Second topic',lines:[line('Two related choices are explained together.')]}]}]}});
+ const fallback=React.createElement(React.Fragment,null,React.createElement(r.ReadingDetail,{topic:'First topic'},'Detail one'),React.createElement(r.ReadingDetail,{topic:'Second topic'},'Detail two'));
+ const html=renderToStaticMarkup(React.createElement(r.ReadingNarrative,{id:'3.9',fallback}));
+ assert.equal((html.match(/data-reading-topic=/g)||[]).length,1);
+ assert.match(html,/Detail one/);assert.match(html,/Detail two/);
+ assert.ok(html.indexOf('Detail one')<html.indexOf('Detail two'));
+});
+
+test('an explicit reference topic owns its detail ahead of a renamed introduction alias',()=>{
+ const items=[{title:'Recognizing symbols',web:'Symbol library',lines:[line('Choose recognizable symbols.')]},{title:'Symbol library',web:'reference',lines:[line('Browse the registered symbols.')]}];
+ const r=readingWriter({'1.9':{sections:[{name:'Overview',web:'narrative',lines:[],items}]}});
+ const fallback=React.createElement(r.ReadingDetail,{topic:'Symbol library'},React.createElement(r.P,null,'Registered source data'));
+ for(const [Component,props]of [[r.ReadingNarrative,{id:'1.9',fallback}],[r.ReadingTopic,{id:'1.9',title:'Overview',children:fallback}]]){
+  const html=renderToStaticMarkup(React.createElement(Component,props));
+  assert.equal((html.match(/data-reading-detail=/g)||[]).length,1);
+  if(Component===r.ReadingNarrative)assert.equal((html.match(/id="symbol-library"/g)||[]).length,1);
+  assert.ok(html.indexOf('Browse the registered symbols')<html.indexOf('Registered source data'));
+ }
+});

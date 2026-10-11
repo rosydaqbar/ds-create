@@ -1,5 +1,5 @@
 import { copySummary } from '../../copy';
-import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
+import { ReadingDetail, ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
@@ -243,150 +243,156 @@ function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
       <ReadingNarrative id="1.5" fallback={<>
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>How depth works</AnchorHeading>
-        <P>
-          {`Elevation shows people what sits on top of what. ${brandCopy.depthDirection({ name: config.name, depth: DEPTH_PHRASE })} Above the page there ${raisedLevels === 1 ? 'is one shadow level' : `are ${countWord(raisedLevels)} shadow levels`}, each with its own job and its own surface color.`}
-        </P>
-        <Bullets
-          items={[
-            'The higher something sits, the more temporary it is: a card stays, a menu closes, a dialog waits for an answer.',
-            DARK_SHADOW_STRONGER
-              ? 'Shadows are built from color roles, so they get stronger in Dark mode, where shadows are harder to see.'
-              : 'Shadows are built from color roles, so a palette or mode change reaches every shadow.',
-            ...(DARK_RAISED_LIGHTER ? ['Raised surfaces also get lighter in Dark mode, so depth shows through color as well as shadow.'] : []),
-          ]}
-        />
-      </section>
-      </>} />
-
-      <section className="docs-section flex flex-col gap-2xl">
-        <AnchorHeading>Levels</AnchorHeading>
-        <P>The levels run from lowest to highest. Each one shows the same example in the supported color modes.</P>
-        {LEVELS.map((l) => (
-          <div key={l.name} className="grid gap-xl border-t border-border-subtle pt-2xl lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
-            <div className="flex flex-col gap-md">
-              <span className="type-body-xs-semibold text-text-brand">Level {l.level}</span>
-              <H3>{l.name}</H3>
-              <P className="type-body-sm-regular">{l.purpose}</P>
-              <Meta k="Used by">{l.usedBy}</Meta>
-              <Meta k="Surface">{l.surface}</Meta>
-              <Meta k="Effect style">{l.style ? <TokenBadge name={l.style} /> : 'None'}</Meta>
-            </div>
-            <div className="grid gap-lg sm:grid-cols-2">
-              {siteSchemes.map((m) => (
-                <Themed key={m} mode={m} className="min-h-44">
-                  <div className="flex flex-1 items-center justify-center py-md">{l.specimen()}</div>
-                </Themed>
-              ))}
-            </div>
-          </div>
-        ))}
-      </section>
-
-      <section className="docs-section flex flex-col gap-lg">
-        <AnchorHeading>Focus rings</AnchorHeading>
-        {HAS_RING ? (
-          <>
-            <P>
-              People who move through the page with a keyboard or another non-pointer device need to see where they are, so every interactive component shows a focus
-              ring. It has two parts: a {gapPx}-pixel gap in the surface color, then a {ringPx}-pixel ring in <InlineCode>color/border/focus</InlineCode>. The gap keeps
-              the ring visible on any background, even next to a dark button.
-            </P>
-            <div className="grid gap-xl md:grid-cols-[auto_minmax(0,1fr)] md:items-center">
-              <div className="flex justify-center p-3xl" aria-hidden>
-                <span
-                  className="type-body-md-semibold inline-flex h-(--size-control-xl) items-center rounded-control bg-fill-brand-solid px-2xl text-text-on-solid"
-                  style={{ boxShadow: `0 0 0 ${gapPx * 4}px var(--color-surface-base), 0 0 0 ${(gapPx + ringPx) * 4}px var(--color-border-focus)` }}
-                >
-                  Upload
-                </span>
-              </div>
-              <div className="flex flex-col gap-md">
-                <Caption>Shown at 4× so you can see both parts.</Caption>
-                <span className="flex items-center gap-sm type-body-sm-regular text-text-secondary">
-                  <Swatch name="color/surface/base" /> Gap · {gapPx} px · color/surface/base
-                </span>
-                <span className="flex items-center gap-sm type-body-sm-regular text-text-secondary">
-                  <Swatch name="color/border/focus" /> Ring · {ringPx} px (border/width/focus) · color/border/focus
-                </span>
-              </div>
-            </div>
-          </>
-        ) : (
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>How depth works</AnchorHeading>
           <P>
-            People who move through the page with a keyboard or another non-pointer device need to see where they are, so every interactive component shows a focus
-            ring in <InlineCode>color/border/focus</InlineCode>.
+            {`Elevation shows people what sits on top of what. ${brandCopy.depthDirection({ name: config.name, depth: DEPTH_PHRASE })} Above the page there ${raisedLevels === 1 ? 'is one shadow level' : `are ${countWord(raisedLevels)} shadow levels`}, each with its own job and its own surface color.`}
           </P>
-        )}
-        <H3>Focused controls on different surfaces</H3>
-        <P className="type-body-sm-regular">The ring keeps at least 3:1 contrast with the surface behind it. The ratios below are calculated live from the current color tokens.</P>
-        <div className="grid gap-lg lg:grid-cols-3">
-          {FOCUS_SURFACES.filter((s) => siteSchemes.includes(s.mode)).map((s) => (
-            <div key={s.title} data-theme={s.mode} className={cn('flex flex-col gap-lg rounded-surface p-xl text-text-primary', s.className)}>
-              <div className="flex flex-col gap-xxs">
-                <span className="type-body-sm-semibold text-text-primary">{s.title}</span>
-                {/* On a tinted surface the caption takes the primary text color, so it stays AA whatever the tint. */}
-                <span className={cn('type-body-xs-regular', s.surface === 'color/surface/base' ? 'text-text-secondary' : 'text-text-primary')}>
-                  Ring {contrast(value('color/border/focus', s.mode), value(s.surface, s.mode)).toFixed(1)}:1 against the surface
-                </span>
+          <Bullets
+            items={[
+              'The higher something sits, the more temporary it is: a card stays, a menu closes, a dialog waits for an answer.',
+              DARK_SHADOW_STRONGER
+                ? 'Shadows are built from color roles, so they get stronger in Dark mode, where shadows are harder to see.'
+                : 'Shadows are built from color roles, so a palette or mode change reaches every shadow.',
+              ...(DARK_RAISED_LIGHTER ? ['Raised surfaces also get lighter in Dark mode, so depth shows through color as well as shadow.'] : []),
+            ]}
+          />
+        </section>
+
+        <section className="docs-section flex flex-col gap-2xl">
+          <AnchorHeading>Levels</AnchorHeading>
+          <P>The levels run from lowest to highest. Each one shows the same example in the supported color modes.</P>
+          <ReadingDetail topic="Elevation" aliases={["Levels"]}>
+            {LEVELS.map((l) => (
+              <div key={l.name} className="grid gap-xl border-t border-border-subtle pt-2xl lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
+                <div className="flex flex-col gap-md">
+                  <span className="type-body-xs-semibold text-text-brand">Level {l.level}</span>
+                  <H3>{l.name}</H3>
+                  <P className="type-body-sm-regular">{l.purpose}</P>
+                  <Meta k="Used by">{l.usedBy}</Meta>
+                  <Meta k="Surface">{l.surface}</Meta>
+                  <Meta k="Effect style">{l.style ? <TokenBadge name={l.style} /> : 'None'}</Meta>
+                </div>
+                <div className="grid gap-lg sm:grid-cols-2">
+                  {siteSchemes.map((m) => (
+                    <Themed key={m} mode={m} className="min-h-44">
+                      <div className="flex flex-1 items-center justify-center py-md">{l.specimen()}</div>
+                    </Themed>
+                  ))}
+                </div>
               </div>
-              <FocusSet />
-            </div>
-          ))}
-        </div>
-        {FOCUS_GROUPS.length > 0 && (
-          <>
-            <H3>{controlFocus.length ? 'Three groups of focus styles' : 'Focus styles'}</H3>
-            <div className={cn('grid gap-lg', FOCUS_GROUPS.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2')}>
-              {FOCUS_GROUPS.map((g) => (
-                <div key={g.names[0]} className="flex flex-col gap-md rounded-surface border border-border-subtle p-lg">
-                  <span className="flex flex-wrap gap-xs">
-                    {g.names.map((n) => (
-                      <TokenBadge key={n} name={n} />
-                    ))}
-                  </span>
-                  <span className="type-body-sm-regular text-text-secondary">{g.text}</span>
+            ))}
+          </ReadingDetail>
+        </section>
+
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Focus rings</AnchorHeading>
+          <ReadingDetail topic="Focus" aliases={["Focus rings"]}>
+            {HAS_RING ? (
+              <>
+                <P>
+                  People who move through the page with a keyboard or another non-pointer device need to see where they are, so every interactive component shows a focus
+                  ring. It has two parts: a {gapPx}-pixel gap in the surface color, then a {ringPx}-pixel ring in <InlineCode>color/border/focus</InlineCode>. The gap keeps
+                  the ring visible on any background, even next to a dark button.
+                </P>
+                <div className="grid gap-xl md:grid-cols-[auto_minmax(0,1fr)] md:items-center">
+                  <div className="flex justify-center p-3xl" aria-hidden>
+                    <span
+                      className="type-body-md-semibold inline-flex h-(--size-control-xl) items-center rounded-control bg-fill-brand-solid px-2xl text-text-on-solid"
+                      style={{ boxShadow: `0 0 0 ${gapPx * 4}px var(--color-surface-base), 0 0 0 ${(gapPx + ringPx) * 4}px var(--color-border-focus)` }}
+                    >
+                      Upload
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-md">
+                    <Caption>Shown at 4× so you can see both parts.</Caption>
+                    <span className="flex items-center gap-sm type-body-sm-regular text-text-secondary">
+                      <Swatch name="color/surface/base" /> Gap · {gapPx} px · color/surface/base
+                    </span>
+                    <span className="flex items-center gap-sm type-body-sm-regular text-text-secondary">
+                      <Swatch name="color/border/focus" /> Ring · {ringPx} px (border/width/focus) · color/border/focus
+                    </span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <P>
+                People who move through the page with a keyboard or another non-pointer device need to see where they are, so every interactive component shows a focus
+                ring in <InlineCode>color/border/focus</InlineCode>.
+              </P>
+            )}
+            <H3>Focused controls on different surfaces</H3>
+            <P className="type-body-sm-regular">The ring keeps at least 3:1 contrast with the surface behind it. The ratios below are calculated live from the current color tokens.</P>
+            <div className="grid gap-lg lg:grid-cols-3">
+              {FOCUS_SURFACES.filter((s) => siteSchemes.includes(s.mode)).map((s) => (
+                <div key={s.title} data-theme={s.mode} className={cn('flex flex-col gap-lg rounded-surface p-xl text-text-primary', s.className)}>
+                  <div className="flex flex-col gap-xxs">
+                    <span className="type-body-sm-semibold text-text-primary">{s.title}</span>
+                    {/* On a tinted surface the caption takes the primary text color, so it stays AA whatever the tint. */}
+                    <span className={cn('type-body-xs-regular', s.surface === 'color/surface/base' ? 'text-text-secondary' : 'text-text-primary')}>
+                      Ring {contrast(value('color/border/focus', s.mode), value(s.surface, s.mode)).toFixed(1)}:1 against the surface
+                    </span>
+                  </div>
+                  <FocusSet />
                 </div>
               ))}
             </div>
-          </>
-        )}
-        {controlFocus.length > 0 && (
-          <P className="type-body-sm-regular">
-            Why the combined styles? In Figma, a layer can hold only one effect style, so a control with both a shadow and a ring needs a single style that carries both.
-          </P>
-        )}
-      </section>
-
-      {blurs.length > 0 && (
-        <section className="docs-section flex flex-col gap-lg">
-          <AnchorHeading>Backdrop blur</AnchorHeading>
-          <P>{brandCopy.backdropBlurUse}</P>
-          {siteSchemes.map((m) => (
-            <Themed key={m} mode={m}>
-              <BlurBackdrop>
-                {blurs.map((b) => {
-                  const use = BLUR_USE[step(b.name)];
-                  return (
-                    <div
-                      key={b.name}
-                      className="flex flex-col gap-xxs rounded-surface p-lg text-text-primary"
-                      style={{ backdropFilter: `blur(var(${b.css}))`, WebkitBackdropFilter: `blur(var(${b.css}))`, background: 'color-mix(in srgb, var(--color-surface-overlay) 80%, transparent)' }}
-                    >
-                      <span className="type-code-sm-medium">{b.name}</span>
-                      <span className="type-body-xs-regular">
-                        Blur {b.effects.find((l) => l.type === 'BACKGROUND_BLUR')?.blur}
-                        {use ? ` · ${use}` : ''}
+            {FOCUS_GROUPS.length > 0 && (
+              <>
+                <H3>{controlFocus.length ? 'Three groups of focus styles' : 'Focus styles'}</H3>
+                <div className={cn('grid gap-lg', FOCUS_GROUPS.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2')}>
+                  {FOCUS_GROUPS.map((g) => (
+                    <div key={g.names[0]} className="flex flex-col gap-md rounded-surface border border-border-subtle p-lg">
+                      <span className="flex flex-wrap gap-xs">
+                        {g.names.map((n) => (
+                          <TokenBadge key={n} name={n} />
+                        ))}
                       </span>
+                      <span className="type-body-sm-regular text-text-secondary">{g.text}</span>
                     </div>
-                  );
-                })}
-              </BlurBackdrop>
-            </Themed>
-          ))}
+                  ))}
+                </div>
+              </>
+            )}
+            {controlFocus.length > 0 && (
+              <P className="type-body-sm-regular">
+                Why the combined styles? In Figma, a layer can hold only one effect style, so a control with both a shadow and a ring needs a single style that carries both.
+              </P>
+            )}
+          </ReadingDetail>
         </section>
-      )}
+
+        {blurs.length > 0 && (
+          <section className="docs-section flex flex-col gap-lg">
+            <AnchorHeading>Backdrop blur</AnchorHeading>
+            <P>{brandCopy.backdropBlurUse}</P>
+            <ReadingDetail topic="Backdrop blur">
+              {siteSchemes.map((m) => (
+                <Themed key={m} mode={m}>
+                  <BlurBackdrop>
+                    {blurs.map((b) => {
+                      const use = BLUR_USE[step(b.name)];
+                      return (
+                        <div
+                          key={b.name}
+                          className="flex flex-col gap-xxs rounded-surface p-lg text-text-primary"
+                          style={{ backdropFilter: `blur(var(${b.css}))`, WebkitBackdropFilter: `blur(var(${b.css}))`, background: 'color-mix(in srgb, var(--color-surface-overlay) 80%, transparent)' }}
+                        >
+                          <span className="type-code-sm-medium">{b.name}</span>
+                          <span className="type-body-xs-regular">
+                            Blur {b.effects.find((l) => l.type === 'BACKGROUND_BLUR')?.blur}
+                            {use ? ` · ${use}` : ''}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </BlurBackdrop>
+                </Themed>
+              ))}
+            </ReadingDetail>
+          </section>
+        )}
+      </>} />
     </div>
   );
 }
