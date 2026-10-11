@@ -1,10 +1,12 @@
+import { copySummary } from '../../copy';
+import { ReadingDetail, ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import { useEffect, useState, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
 import { Icon, type IconName } from '@/icons';
 import { Button, Checkbox, IconButton, Menu, Select, Spinner, Switch, Tooltip } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
-import { breakable, Caption, CodeBlock, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
+import { PreviewCard, breakable, Caption, CodeBlock, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { config } from '@/ds.config';
 import type { Topic } from '../../types';
@@ -142,7 +144,7 @@ function Principles() {
 
 function DurationBars() {
   return (
-    <div className="flex flex-col gap-lg">
+    <PreviewCard label="Duration scale" className="flex flex-col gap-lg">
       {durations.map((d) => (
         <div key={d.name} className="grid items-center gap-sm md:grid-cols-[12rem_minmax(0,1fr)_5rem] md:gap-lg">
           <div className="flex flex-col">
@@ -155,14 +157,14 @@ function DurationBars() {
           <span className="type-code-sm-regular text-text-secondary md:text-right">{ms(d.name)} ms</span>
         </div>
       ))}
-    </div>
+    </PreviewCard>
   );
 }
 
 function TryIt() {
   const [on, setOn] = useState(false);
   return (
-    <div className="flex flex-col gap-lg rounded-surface border border-border-subtle p-xl">
+    <PreviewCard label="Motion preview" className="flex flex-col gap-lg">
       <div className="flex flex-wrap items-center justify-between gap-md">
         <span className="type-body-sm-semibold text-text-primary">Every duration with every curve</span>
         <PlayButton on={on} onClick={() => setOn((o) => !o)} />
@@ -181,13 +183,13 @@ function TryIt() {
             )),
           )}
       </div>
-    </div>
+    </PreviewCard>
   );
 }
 
 function LiveComponents() {
   return (
-    <div className="flex flex-wrap items-start gap-2xl rounded-surface border border-border-subtle bg-surface-sunken p-3xl">
+    <PreviewCard label="Component motion" className="flex flex-wrap items-start gap-2xl">
       <Button emphasis="secondary" label="Hover me" />
       <Switch defaultChecked aria-label="Notifications" />
       <Checkbox defaultChecked aria-label="Include shared folders" />
@@ -198,73 +200,83 @@ function LiveComponents() {
         <Select label="Select" options={[{ value: 'a', label: 'Daily' }, { value: 'b', label: 'Weekly' }, { value: 'c', label: 'Monthly' }]} placeholder="Choose" />
       </div>
       <Menu type="button-simple" />
-    </div>
+    </PreviewCard>
   );
 }
 
 function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
-      <section className="flex flex-col gap-lg">
-        <AnchorHeading>Principles</AnchorHeading>
-        <P>{brandCopy.motionPrinciple({ name: config.name })}</P>
-        <Principles />
-      </section>
+      <ReadingNarrative id="1.6" fallback={<>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Principles</AnchorHeading>
+          <P>{brandCopy.motionPrinciple({ name: config.name })}</P>
+          <Principles />
+        </section>
 
-      <section className="flex flex-col gap-lg">
-        <AnchorHeading>Durations</AnchorHeading>
-        <P>Small feedback is fast, and the farther or larger the movement, the longer it takes. The bars are drawn to scale.</P>
-        <DurationBars />
-      </section>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Durations</AnchorHeading>
+          <P>Small feedback is fast, and the farther or larger the movement, the longer it takes. The bars are drawn to scale.</P>
+          <ReadingDetail topic="Duration" aliases={["Durations"]}>
+            <DurationBars />
+          </ReadingDetail>
+        </section>
 
-      <section className="flex flex-col gap-lg">
-        <AnchorHeading>Easings</AnchorHeading>
-        <P>An easing sets how a change speeds up and slows down. Things arriving start fast and settle. Things leaving start gently and speed away.</P>
-        <div className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
-          {easings.map((e) => (
-            <div key={e.name} className="flex flex-col items-center gap-md rounded-surface border border-border-subtle p-xl text-center">
-              <Curve name={e.name} />
-              <span className="type-code-sm-medium text-text-primary">{e.name}</span>
-              <span className="type-code-sm-regular text-text-tertiary">{bezier(e.name).join(', ')}</span>
-              <span className="type-body-sm-regular text-text-secondary">{EASE_USE[short(e.name)]}</span>
-            </div>
-          ))}
-        </div>
-        <TryIt />
-      </section>
-
-      <section className="flex flex-col gap-lg">
-        <AnchorHeading>Pairings</AnchorHeading>
-        <P>Choose the duration and easing together, by what the motion is for rather than by feel. Each pairing is a utility or transition built from the tokens, so Reduced mode applies everywhere without extra code.</P>
-        <Region label="Motion pairings">
-          <table className="w-full text-left">
-            <thead className="bg-surface-sunken">
-              <tr className="type-body-xs-semibold text-text-tertiary">
-                <th className={th}>Purpose</th>
-                <th className={th}>Tokens</th>
-                <th className={th}>In code</th>
-                <th className={th}>Used by</th>
-              </tr>
-            </thead>
-            <tbody>
-              {PAIRINGS.map(([a, b, c, d]) => (
-                <tr key={a} className="border-t border-border-subtle align-top">
-                  <td className="type-body-sm-medium px-lg py-md text-text-primary">{a}</td>
-                  <td className="type-code-sm-regular whitespace-nowrap px-lg py-md text-text-secondary">{b}</td>
-                  <td className="type-code-sm-regular px-lg py-md text-text-brand">{c}</td>
-                  <td className="type-body-sm-regular px-lg py-md text-text-secondary">{d}</td>
-                </tr>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Easings</AnchorHeading>
+          <P>An easing sets how a change speeds up and slows down. Things arriving start fast and settle. Things leaving start gently and speed away.</P>
+          <ReadingDetail topic="Easing" aliases={["Easings"]}>
+            <PreviewCard label="Easing curves" className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
+              {easings.map((e) => (
+                <div key={e.name} className="flex flex-col items-center gap-md rounded-surface border border-border-subtle p-xl text-center">
+                  <Curve name={e.name} />
+                  <span className="type-code-sm-medium text-text-primary">{e.name}</span>
+                  <span className="type-code-sm-regular text-text-tertiary">{bezier(e.name).join(', ')}</span>
+                  <span className="type-body-sm-regular text-text-secondary">{EASE_USE[short(e.name)]}</span>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </Region>
-      </section>
+            </PreviewCard>
+            <TryIt />
+          </ReadingDetail>
+        </section>
 
-      <section className="flex flex-col gap-lg">
-        <AnchorHeading>See it in real components</AnchorHeading>
-        <P>Hover the button, flip the switch and checkbox, focus the tooltip trigger, and open the select and the menu. Each one uses the pairing that fits its purpose.</P>
-        <LiveComponents />
-      </section>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>Pairings</AnchorHeading>
+          <P>Choose the duration and easing together, by what the motion is for rather than by feel. Each pairing is a utility or transition built from the tokens, so supported mode values can be applied through the existing CSS.</P>
+          <ReadingDetail topic="Pairings">
+            <Region label="Motion pairings">
+              <table className="w-full text-left">
+                <thead className="bg-surface-sunken">
+                  <tr className="type-body-xs-semibold text-text-tertiary">
+                    <th className={th}>Purpose</th>
+                    <th className={th}>Tokens</th>
+                    <th className={th}>In code</th>
+                    <th className={th}>Used by</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {PAIRINGS.map(([a, b, c, d]) => (
+                    <tr key={a} className="border-t border-border-subtle align-top">
+                      <td className="type-body-sm-medium px-lg py-md text-text-primary">{a}</td>
+                      <td className="type-code-sm-regular whitespace-nowrap px-lg py-md text-text-secondary">{b}</td>
+                      <td className="type-code-sm-regular px-lg py-md text-text-brand">{c}</td>
+                      <td className="type-body-sm-regular px-lg py-md text-text-secondary">{d}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Region>
+          </ReadingDetail>
+        </section>
+
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>See it in real components</AnchorHeading>
+          <P>Hover the button, flip the switch and checkbox, focus the tooltip trigger, and open the select and the menu. Each one uses the pairing that fits its purpose.</P>
+          <ReadingDetail topic="See it in real components">
+            <LiveComponents />
+          </ReadingDetail>
+        </section>
+      </>} />
     </div>
   );
 }
@@ -279,7 +291,7 @@ const GROUPS = [
 function Tokens() {
   return (
     <div className="flex flex-col gap-5xl">
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>Motion collection</AnchorHeading>
         <P>
           The collection has two modes. <InlineCode>Standard</InlineCode> is the default. <InlineCode>Reduced</InlineCode> takes over when the operating system asks for
@@ -287,7 +299,7 @@ function Tokens() {
         </P>
       </section>
       {GROUPS.map((g) => (
-        <section key={g.title} className="flex flex-col gap-lg">
+        <section key={g.title} className="docs-section flex flex-col gap-lg">
           <AnchorHeading>{g.title}</AnchorHeading>
           <P>{g.sub}</P>
           <Region label={`${g.title} tokens`}>
@@ -328,7 +340,7 @@ function Tokens() {
           </Region>
         </section>
       ))}
-      <section className="flex flex-col gap-lg">
+      <section className="docs-section flex flex-col gap-lg">
         <AnchorHeading>In code</AnchorHeading>
         <P>Use the recipes for popups and the tokens for transitions. Avoid typing a duration or curve by hand, because Reduced mode only reaches values that come from the tokens.</P>
         <CodeBlock
@@ -471,7 +483,7 @@ function ReflowDont() {
         // impeccable-disable-next-line layout-transition -- the Don't demo: it shows the reflow this guideline warns against
         style={{ width: narrow ? '60%' : '100%', transition: `width ${cssVar('motion/duration/slow')} ${cssVar('motion/easing/standard')}` }}
       >
-        Large folders upload in parts so a dropped connection never restarts.
+        This sample paragraph changes its line breaks when the container narrows. Compare the moving text with the stable layout in the adjacent example.
       </p>
     </div>
   );
@@ -525,7 +537,7 @@ function AccessibleLoops() {
         <span className="flex h-20 items-center gap-md">
           <Spinner size="lg" tone="brand" label="Uploading" />
         </span>
-        <Caption>A spinner stops when the task ends.</Caption>
+        <Caption>Remove a progress indicator when its task ends. This specimen runs continuously.</Caption>
       </div>
       <div className="flex flex-col items-center gap-md">
         <span className="flex h-20 items-center gap-md">
@@ -544,7 +556,7 @@ function AccessibleLoops() {
             <Icon name="alerts/check-circle" size="sm" className="text-icon-inverse" /> Folder shared
           </span>
         </span>
-        <Caption>A toast pauses while it’s hovered or focused (motion/delay/toast = {ms('motion/delay/toast')} ms).</Caption>
+        <Caption>This static message illustrates placement only. A timed message needs dismissal and pause behavior implemented separately; motion/delay/toast resolves to {ms('motion/delay/toast')} ms.</Caption>
       </div>
     </div>
   );
@@ -574,7 +586,7 @@ const TOPICS: Topic[] = [
   },
   {
     title: 'Motion accessibility',
-    body: 'No transition flashes more than three times per second, because faster flashing can trigger seizures.\n\nGive anything that loops a way to pause or stop it. Progress indicators are the exception, since they end when the task ends.\n\nMessages that dismiss themselves (motion/delay/toast) pause while hovered or focused. Important messages stay until someone closes them.',
+    body: 'Review flashing, repeated movement and timed messages in the actual interface. Provide pause or stop controls where required; the slide example below demonstrates a pause control.\n\nFor timed messages, implement the needed reading time, dismissal and pause behavior rather than treating a delay token as a complete notification component. The message below is a static specimen.',
     render: () => <AccessibleLoops />,
   },
 ];
@@ -584,12 +596,12 @@ export default function Motion() {
     <DocPage
       eyebrow="Foundations › 1.6 Motion"
       title="Motion"
-      description="Motion explains change: what arrived, what left, what responded. It stays quick and calm, and Reduced mode swaps movement for instant changes and short fades."
+      description={copySummary('1.6', "Motion explains change: what arrived, what left, what responded. It stays quick and calm, and Reduced mode swaps movement for instant changes and short fades.")}
       figmaNode={figmaNodeFor('1.6')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
         { label: 'Tokens', render: () => <Tokens /> },
-        { label: 'Guidelines', render: () => <Topics items={TOPICS} /> },
+        { label: 'Guidelines', render: () => <ReadingGuidelines id="1.6" items={TOPICS} fallback={<Topics items={TOPICS} />} /> },
       ]}
     />
   );

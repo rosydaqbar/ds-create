@@ -67,11 +67,12 @@ async function docbuilder(figma, OPTS) {
   const colById = new Map(cols.map(c => [c.id, c]));
   const FALL = {
     'doc/surface/base': ['color/surface/base'], 'doc/surface/header': ['color/surface/sunken'],
+    'doc/surface/panel': ['color/surface/raised', 'color/surface/base'], 'doc/surface/viewport': ['color/surface/base'],
     'doc/surface/specimen': ['color/surface/raised', 'color/surface/base'], 'doc/surface/stage': ['color/surface/sunken'],
     'doc/status/do': ['color/icon/success', 'color/text/success'], 'doc/status/dont': ['color/icon/danger', 'color/text/danger'],
     'doc/border/subtle': ['color/border/subtle'], 'doc/text/primary': ['color/text/primary'],
     'doc/text/secondary': ['color/text/secondary'], 'doc/text/tertiary': ['color/text/tertiary', 'color/text/secondary'],
-    'doc/text/accent': ['color/text/brand'], 'doc/radius/surface': ['radius/surface'], 'doc/radius/badge': ['radius/indicator', 'radius/full'],
+    'doc/radius/panel': ['radius/modal', 'radius/surface'], 'doc/text/accent': ['color/text/brand'], 'doc/radius/surface': ['radius/surface'], 'doc/radius/badge': ['radius/indicator', 'radius/full'],
     'doc/space/canvas': ['space/11xl'], 'doc/space/frame': ['space/7xl'], 'doc/space/header': ['space/5xl'],
     'doc/space/block': ['space/4xl'], 'doc/space/group': ['space/3xl'], 'doc/space/row': ['space/xl'], 'doc/space/inline': ['space/md'],
     // Not in workflow/DOCFRAMES.md §1: chip/list gaps, table cell padding and stroke width. Brand steps first.
@@ -80,13 +81,14 @@ async function docbuilder(figma, OPTS) {
   };
   // Raw defaults, used only when neither the doc role nor its brand alias exists (workflow/templates/structure.md §5).
   const DEF = {
+    'doc/surface/panel': '#FFFFFF', 'doc/surface/viewport': '#FFFFFF', 'doc/radius/panel': 16,
     'doc/surface/base': '#FFFFFF', 'doc/surface/header': '#F4F4F5', 'doc/surface/specimen': '#FFFFFF', 'doc/surface/stage': '#F4F4F5',
     'doc/status/do': '#15803D', 'doc/status/dont': '#B91C1C', 'doc/border/subtle': '#E4E4E7', 'doc/text/primary': '#18181B',
     'doc/text/secondary': '#3F3F46', 'doc/text/tertiary': '#52525B', 'doc/text/accent': '#1D4ED8',
     'doc/radius/surface': 8, 'doc/radius/badge': 4, 'doc/space/canvas': 160, 'doc/space/frame': 64, 'doc/space/header': 40,
     'doc/space/block': 32, 'doc/space/group': 24, 'doc/space/row': 16, 'doc/space/inline': 8, 'doc/space/tight': 4, 'doc/space/compact': 8,
     'doc/border/width': 1, 'doc/measure/frame': 1440, 'doc/measure/reading': 720, 'doc/measure/row-note': 320, 'doc/measure/table': 1280,
-    'doc/measure/specimen': 160, 'doc/table/name': 320, 'doc/table/header': 40, 'doc/table/separator': 16, 'doc/table/row-min': 56,
+    'doc/measure/specimen': 160, 'doc/measure/preview': 320, 'doc/table/name': 320, 'doc/table/header': 40, 'doc/table/separator': 16, 'doc/table/row-min': 56,
   };
   const vCache = new Map();
   const V = role => {
@@ -239,8 +241,20 @@ async function docbuilder(figma, OPTS) {
     if (o.wrap) { items.layoutWrap = 'WRAP'; bindN(items, 'counterAxisSpacing', o.gap || 'doc/space/group'); }
     return items;
   };
-  // Stage: the surface real instances sit on (workflow/DOCFRAMES.md §1 doc/surface/stage); card: bordered specimen tile.
-  const stage = (name, dir, gap) => { const s = AL(dir || 'HORIZONTAL', name, gap || 'doc/space/row'); fill(s, 'doc/surface/stage'); radius(s, 'doc/radius/surface'); pad(s, 'doc/space/group'); s.counterAxisAlignItems = dir === 'VERTICAL' ? 'MIN' : 'CENTER'; return s; };
+  // Stage: the surface real instances sit on (workflow/DOCFRAMES.md §1 doc/surface/viewport); card: bordered specimen tile.
+  const stage = (name, dir, gap) => { const s = AL(dir || 'HORIZONTAL', name, gap || 'doc/space/row'); fill(s, 'doc/surface/viewport'); radius(s, 'doc/radius/surface'); stroke(s); pad(s, 'doc/space/group'); s.counterAxisAlignItems = dir === 'VERTICAL' ? 'MIN' : 'CENTER'; return s; };
+  // Inset viewport with quiet chrome. Return the content stage: callers retain the old append contract.
+  // Figma has no executable source panel, so it shows Preview only, never a nonfunctional Code tab.
+  const preview = async (parent, name, dir, gap) => {
+    const panel = AL('VERTICAL', 'Preview · ' + (name || 'Example'), 'doc/space/tight');
+    parent.appendChild(panel); fillW(panel); fill(panel, 'doc/surface/panel'); stroke(panel); radius(panel, 'doc/radius/panel'); pad(panel, 'doc/space/tight');
+    const bar = AL('HORIZONTAL', 'Preview toolbar', 'doc/space/inline'); panel.appendChild(bar); fillW(bar); pad(bar, 'doc/space/compact', 'doc/space/inline'); bar.counterAxisAlignItems = 'CENTER';
+    const title = await T(bar, name || 'Example', 'body/sm', 'doc/text/secondary', 'Label'); fillW(title);
+    await T(bar, 'Preview', 'label/sm', 'doc/text/primary', 'View');
+    const s = stage(name || 'Example', dir, gap); panel.appendChild(s); fillW(s);
+    bindN(s, 'minHeight', 'doc/measure/preview');
+    return s;
+  };
   const card = (name, gap) => { const c = AL('VERTICAL', name, gap || 'doc/space/inline'); fill(c, 'doc/surface/specimen'); radius(c, 'doc/radius/surface'); pad(c, 'doc/space/row'); stroke(c); return c; };
   const vstage = (parent, name, dir) => { const s = stage(name || 'Example', dir, 'doc/space/group'); parent.appendChild(s); fillW(s); if (!dir || dir === 'HORIZONTAL') { s.layoutWrap = 'WRAP'; bindN(s, 'counterAxisSpacing', 'doc/space/group'); } return s; };
 
@@ -341,7 +355,7 @@ async function docbuilder(figma, OPTS) {
   return {
     OPTS, G, warn, warnings: W, V, num, paint, fill, fillAlpha, bindN, radius, pad, stroke, topStroke, AL, fillW, T, S, loadFontsIn,
     varName, rgb2hex, vById, tsName, esName, kit, setP, badge, tokenBadge, chip, callout, spec, measure, axis, blockNote, familyHeader, dodont,
-    parseV, pickV, inst, defInst, setInst, topName, mainOf, pid, crumb, titleOf, owned, newFrame, block, finish, growTo, divider, stage, card, vstage,
+    parseV, pickV, inst, defInst, setInst, topName, mainOf, pid, crumb, titleOf, owned, newFrame, block, finish, growTo, divider, stage, preview, card, vstage,
     table, propTable, defsOf, guideFrame, topic, caption, bullets, pairDD, guideTopics, contrast, autoName, mainFrame, finishPage,
     _pure: { parseV, roleFor, pickStyle, rgb2hex, hex2rgb, contrast },
   };
@@ -398,10 +412,10 @@ async function docpages(figma, D) {
   // o: { desc, hero: async stage => …, examples: [[title, caption, async stage => …, width?]], when: [], whenNot: [] }
   const overviewFrame = async (page, o) => {
     const { fr, body } = await newFrame(page, 'Overview', { title: o.title, desc: o.desc });
-    const hi = await block(body, 'Hero', { note: false }); const hero = stage('Hero', 'HORIZONTAL', 'doc/space/group'); hi.appendChild(hero); fillW(hero); hero.primaryAxisAlignItems = 'CENTER'; pad(hero, 'doc/space/header'); await o.hero(hero);
+    const hi = await block(body, 'Hero', { note: false }); const hero = await D.preview(hi, 'Component preview', 'HORIZONTAL', 'doc/space/group'); hero.primaryAxisAlignItems = 'CENTER'; pad(hero, 'doc/space/header'); await o.hero(hero);
     if ((o.examples || []).length) {
       const ex = await block(body, 'Examples in use', { desc: o.exNote || 'Real instances composed the way product screens use them.', dir: 'HORIZONTAL', wrap: true });
-      for (const [name, cap, build, w] of o.examples) { const c = AL('VERTICAL', 'Example · ' + name, 'doc/space/inline'); ex.appendChild(c); const st = stage('Stage', 'VERTICAL', 'doc/space/inline'); c.appendChild(st); st.resize(w || o.exWidth || 388, 120); st.counterAxisSizingMode = 'FIXED'; st.primaryAxisSizingMode = 'AUTO'; await build(st); await T(c, name, 'label/sm', 'doc/text/primary', 'Title'); await T(c, cap, 'body/sm', 'doc/text/secondary', 'Caption', w || o.exWidth || 388); }
+      for (const [name, cap, build, w] of o.examples) { const c = AL('VERTICAL', 'Example · ' + name, 'doc/space/inline'); ex.appendChild(c); const st = await D.preview(c, name, 'VERTICAL', 'doc/space/inline'); st.parent.resize(w || o.exWidth || 388, st.parent.height); st.parent.counterAxisSizingMode = 'FIXED'; fillW(st); bindN(st, 'minHeight', 'doc/measure/specimen'); await build(st); await T(c, name, 'label/sm', 'doc/text/primary', 'Title'); await T(c, cap, 'body/sm', 'doc/text/secondary', 'Caption', w || o.exWidth || 388); }
     }
     const wi = await block(body, 'When to use', { note: false, dir: 'HORIZONTAL' });
     for (const [h, list] of [['When to use', o.when || []], ['When not to use', o.whenNot || []]]) { const c = card(h); wi.appendChild(c); fillW(c); await T(c, h, 'label/md', 'doc/text/primary', 'Title'); for (const it of list) await T(c, '•  ' + it, 'body/md', 'doc/text/secondary', 'Item', 'fill'); }

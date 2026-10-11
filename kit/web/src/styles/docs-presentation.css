@@ -1,0 +1,94 @@
+/* Viewer-only presentation. Product token values and component descendants stay intact. */
+@layer components {
+  .docs-shell {
+    --docs-panel: var(--color-surface-raised);
+    --docs-edge: var(--color-border-subtle);
+    --docs-round: max(1rem, var(--radius-surface));
+  }
+  .docs-main { padding: .75rem 1rem 3rem; }
+  .docs-brand {
+    min-height: 2.75rem;
+    border: 1px solid var(--docs-edge);
+    border-radius: 999px;
+    background: var(--docs-panel);
+    padding: .375rem .75rem;
+  }
+  .docs-reading-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; align-items: start; }
+  .docs-reading-card {
+    --docs-gutter: clamp(1.25rem, 3vw, 2.5rem);
+    min-width: 0;
+    border: 1px solid var(--docs-edge);
+    border-radius: var(--docs-round);
+    background: var(--color-surface-sunken);
+  }
+  .docs-page-header { padding: var(--docs-gutter); border-bottom: 1px solid var(--docs-edge); }
+  .docs-page-header > p { max-width: 46rem; }
+  .docs-tab-dock { position: sticky; top: 4.5rem; z-index: 40; width: fit-content; max-width: calc(100% - 2 * var(--docs-gutter)); margin: 1rem var(--docs-gutter) 0; }
+  .docs-page-tabs {
+    padding: .25rem;
+    border: 1px solid var(--docs-edge);
+    border-radius: 999px;
+    background: var(--docs-panel);
+  }
+  .docs-page-tabs button { border-radius: 999px; min-height: 2.25rem; padding-inline: .875rem; }
+  .docs-page-tabs button:hover { background: var(--color-fill-neutral-subtle-hover); }
+  .docs-page-tabs button[aria-selected=true] { background: color-mix(in oklab, var(--color-text-primary) 10%, var(--docs-panel)); }
+  .docs-page-tabs button:focus-visible { outline: 2px solid var(--color-border-focus, var(--color-text-primary)); outline-offset: -2px; }
+  .docs-panel { padding: var(--docs-gutter); }
+  .docs-panel .docs-section:not(.docs-section .docs-section, .docs-preview *, .docs-stage *) { position: relative; }
+  .docs-panel .docs-section:not(.docs-section .docs-section, .docs-preview *, .docs-stage *):not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: calc(-.5 * var(--spacing-4xl));
+    left: calc(-1 * var(--docs-gutter));
+    right: calc(-1 * var(--docs-gutter));
+    border-top: 1px solid var(--docs-edge);
+  }
+  .docs-page-footer { padding: 1.25rem var(--docs-gutter); border-top: 1px solid var(--docs-edge); }
+  .docs-toc { padding-top: 1.5rem; }
+  .docs-navigation { min-height: 0; }
+  .docs-navigation > nav { min-height: 0; overflow-y: auto; scrollbar-width: thin; }
+  .docs-sidebar { padding: 1.25rem 1rem; }
+  .docs-search, .docs-nav-footer {
+    border: 1px solid var(--docs-edge);
+    background: var(--color-surface-sunken);
+    border-radius: max(.625rem, var(--radius-control));
+    padding: .5rem .625rem;
+  }
+  .docs-nav-group { padding: .375rem .5rem; cursor: pointer; border-radius: .5rem; }
+  .docs-count { border-radius: 1rem; background: var(--color-surface-sunken); padding-inline: .375rem; }
+  .docs-nav-rail { margin-left: 1rem; padding-left: .375rem; border-left: 1px solid var(--docs-edge); }
+  .docs-nav-link { position: relative; min-height: 2rem; padding: .375rem .625rem; margin-block: .125rem; border-radius: .5rem; }
+  .docs-nav-link:hover, .docs-nav-group:hover { background: var(--color-fill-neutral-subtle-hover); }
+  .docs-nav-active { background: color-mix(in oklab, var(--color-text-primary) 8%, var(--color-surface-base)); font-weight: 600; }
+  .docs-nav-active::before { content: ''; position: absolute; left: calc(-.375rem - 1px); top: .5rem; bottom: .5rem; width: 1px; background: var(--color-text-primary); }
+  .docs-nav-link:focus-visible, .docs-nav-group:focus-visible, .docs-search:focus-visible,
+  .docs-tool-button:focus-visible, .docs-preview-tabs button:focus-visible {
+    outline: 2px solid var(--color-border-focus, var(--color-text-primary)); outline-offset: 2px;
+  }
+  .docs-nav-footer { margin-top: 1rem; gap: .5rem; }
+  .docs-preview, .docs-inspector {
+    min-width: 0;
+    border: 1px solid var(--docs-edge);
+    border-radius: calc(var(--docs-round) + .25rem);
+    background: var(--docs-panel);
+  }
+  .docs-preview { width: 100%; max-width: 100%; padding: .25rem; align-self: start; }
+  .docs-preview-toolbar { min-height: 2.5rem; padding: 0 .625rem; }
+  .docs-preview-tabs { gap: .125rem; }
+  .docs-preview-tabs button { cursor: pointer; padding: .375rem .625rem; border-radius: 999px; color: var(--color-text-secondary); }
+  .docs-preview-tabs button[aria-selected=true] { color: var(--color-text-primary); background: color-mix(in oklab, var(--color-text-primary) 10%, var(--docs-panel)); }
+  .docs-stage { background: var(--color-surface-base); border-color: var(--color-border-subtle); border-radius: var(--docs-round, var(--radius-surface)); }
+  .docs-preview .docs-code { border-radius: var(--docs-round); }
+  .docs-code pre { background: var(--color-surface-base); }
+  .docs-code { overflow: hidden; border-radius: var(--docs-round); }
+  .docs-matrix { background: var(--color-surface-raised); border-radius: var(--docs-round); }
+  .docs-preview .docs-matrix { background: transparent; border-radius: 0; }
+  .docs-tool-button { display: inline-flex; align-items: center; gap: .25rem; padding: .375rem; cursor: pointer; border-radius: .5rem; }
+  .docs-tool-button:hover { background: var(--color-fill-neutral-subtle-hover); }
+  .docs-inspector { align-self: start; }
+  .docs-segmented, .docs-segmented button { border-radius: 999px; }
+  @media (min-width: 1180px) { .docs-playground { grid-template-columns: minmax(0, 1fr) 280px; } }
+  @media (min-width: 1280px) { .docs-tab-dock { top: .625rem; } }
+  @media (min-width: 1536px) { .docs-reading-layout { grid-template-columns: minmax(0, 1fr) 180px; } }
+}

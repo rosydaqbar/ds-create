@@ -1,9 +1,11 @@
+import { copySummary } from '../../copy';
+import { ReadingDetail, ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, ChoiceCard, Checkbox, Kbd, Switch, Tag, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
+import { PreviewCard, breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { config } from '@/ds.config';
 import { brandCopy } from '@/brand/copy';
@@ -59,7 +61,7 @@ const BORDER_USE: Record<string, string> = {
 /* ---------- shared bits ---------- */
 function Block({ title, intro, children }: { title: string; intro?: ReactNode; children: ReactNode }) {
   return (
-    <section className="flex min-w-0 flex-col gap-lg">
+    <section className="docs-section flex min-w-0 flex-col gap-lg">
       <AnchorHeading>{title}</AnchorHeading>
       {intro && <P>{intro}</P>}
       {children}
@@ -67,7 +69,7 @@ function Block({ title, intro, children }: { title: string; intro?: ReactNode; c
   );
 }
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl', className)}>{children}</div>;
+  return <PreviewCard className={className}>{children}</PreviewCard>;
 }
 function Code({ children, className }: { children: ReactNode; className?: string }) {
   return <span className={cn('type-code-sm-regular min-w-0 text-text-tertiary', className)}>{children}</span>;
@@ -177,40 +179,48 @@ function BorderLines() {
 function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
-      <Block
-        title="How shape works"
-        intro={`${brandCopy.cornerCharacter({ name: config.name, character: CHARACTER })} Controls round at ${show('radius/control')}, surfaces at ${show('radius/surface')} and dialogs at ${show('radius/modal')}, while avatars, switches and dots are full pills.`}
-      >
-        <Bullets
-          items={[
-            <>
-              <strong className="font-semibold text-text-primary">Pick the role by what the element is.</strong> A button is a control, a card is a surface, a dialog is a modal. Choose by role rather than by eye.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Change the character in one place.</strong> Components use roles, so editing radius/control reshapes every button, field and select at once.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Lines stay thin.</strong> Most borders use the default width. Save wider lines for focus and selection.
-            </>,
-          ]}
-        />
-      </Block>
+      <ReadingNarrative id="1.4" fallback={<>
+        <Block
+          title="How shape works"
+          intro={`${brandCopy.cornerCharacter({ name: config.name, character: CHARACTER })} Controls round at ${show('radius/control')}, surfaces at ${show('radius/surface')} and dialogs at ${show('radius/modal')}, while avatars, switches and dots are full pills.`}
+        >
+          <Bullets
+            items={[
+              <>
+                <strong className="font-semibold text-text-primary">Pick the role by what the element is.</strong> A button is a control, a card is a surface, a dialog is a modal. Choose by role rather than by eye.
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Change the character in one place.</strong> Components use roles, so editing radius/control reshapes every button, field and select at once.
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Lines stay thin.</strong> Most borders use the default width. Save wider lines for focus and selection.
+              </>,
+            ]}
+          />
+        </Block>
 
-      <Block title="Radius roles" intro="Each tile uses its role directly and lists where you’ll find it.">
-        <div className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
-          {RADIUS.map((r) => (
-            <RadiusTile key={r} name={r} />
-          ))}
-        </div>
-      </Block>
+        <Block title="Radius roles" intro="Each tile uses its role directly and lists where you’ll find it.">
+          <ReadingDetail topic="Radius" aliases={["Radius roles"]}>
+            <PreviewCard label="Radius roles" className="grid gap-md sm:grid-cols-2 xl:grid-cols-4">
+              {RADIUS.map((r) => (
+                <RadiusTile key={r} name={r} />
+              ))}
+            </PreviewCard>
+          </ReadingDetail>
+        </Block>
 
-      <Block title="Radius in use" intro="Here are the roles on plain shapes: a control, an indicator, a surface holding a control (with the padding between them) and a dialog.">
-        <RadiusInUse />
-      </Block>
+        <Block title="Radius in use" intro="Here are the roles on plain shapes: a control, an indicator, a surface holding a control (with the padding between them) and a dialog.">
+          <ReadingDetail topic="Radius in use">
+            <RadiusInUse />
+          </ReadingDetail>
+        </Block>
 
-      <Block title="Border widths" intro="Use the default width almost everywhere. Reach for strong, focus or selected only when a line needs to stand out or a state calls for it.">
-        <BorderLines />
-      </Block>
+        <Block title="Border widths" intro="Use the default width almost everywhere. Reach for strong, focus or selected only when a line needs to stand out or a state calls for it.">
+          <ReadingDetail topic="Border widths">
+            <BorderLines />
+          </ReadingDetail>
+        </Block>
+      </>} />
     </div>
   );
 }
@@ -286,9 +296,9 @@ interface Guide {
 }
 function GuideList({ items }: { items: Guide[] }) {
   return (
-    <div className="flex max-w-[64rem] flex-col gap-4xl">
+    <div className="flex flex-col gap-4xl">
       {items.map((g) => (
-        <section key={g.title} className="flex min-w-0 flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0">
+        <section key={g.title} className="docs-section flex min-w-0 flex-col gap-lg">
           <AnchorHeading>{g.title}</AnchorHeading>
           <div className="flex flex-col gap-md">{g.body}</div>
           {g.visual && (
@@ -578,7 +588,7 @@ function GuidelinesTab() {
       caption: `The same three controls before and after one edit. The ${PREVIEW_CONTROL} is a preview, not a value from the Shape collection.`,
     },
   ];
-  return <GuideList items={items} />;
+  return <ReadingGuidelines id="1.4" items={items} fallback={<GuideList items={items} />} />;
 }
 
 export default function Shape() {
@@ -586,7 +596,7 @@ export default function Shape() {
     <DocPage
       eyebrow="Foundations › 1.4 Shape"
       title="Shape"
-      description="Shape covers corner radius and border width. Each kind of element, from controls to dialogs, has its own radius role, so you can reshape a whole family of components in one place."
+      description={copySummary('1.4', "Shape covers corner radius and border width. Each kind of element, from controls to dialogs, has its own radius role, so you can reshape a whole family of components in one place.")}
       figmaNode={figmaNodeFor('1.4')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

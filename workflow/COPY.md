@@ -36,6 +36,12 @@ output/{system-slug}/copy/
 
 # 2. Format
 
+Before drafting, follow `workflow/EDITORIAL.md`: examine the subject, read current evidence, identify reader decisions, then save a plan in `output/{slug}/plans/{id}-{name}.json`. The plan tracks six coverage goals; these are not visible headings. Edit for redundancy after drafting, then run `copy-guard.mjs --slug {slug} --page {id} --editorial`. A saved plan is also checked by the existing page/build guard and Fast packer. Legacy copy without a plan remains supported; new or revised guidelines require one. Prose quality checks apply to every copy file, including legacy files without plans and all text roles.
+
+The section names below are transport slots for Figma frames and web tabs, not an editorial outline. Choose the topics within them for the subject. Default manifests are visual starting points: merge, remove or reorder topics together with the copy while retaining required specifications and visuals. A frame header may have no paragraph when its topics already establish the context.
+
+Write for the task of the page's intended reader. Keep evidence classification, chat history, source-inspection findings and verification caveats in the internal plan/report. State supported design rules and consequential limitations directly. Put export/rebuild and library-maintenance procedures in contributor or implementation guidance when relevant; do not substitute them for design decisions. Review every rendered slot, including text retained inside shared visuals, for the same audience fit.
+
 ```markdown
 ---
 page: 2.1 Button
@@ -82,6 +88,9 @@ Navigate with them: paste a node id into Figma's search, or open the web path.
   - When they differ, write a `figma` line and a `web` line next to each other, in the same order.
 - `role` is empty (a paragraph), `caption`, `item`, `do` or `don't`.
 - Paragraphs of the same surface keep their order.
+- A reading section with `<!-- web: narrative -->` uses its authored topics in place of the template’s explanations on the site; computed specimens, code and token tables remain. The shared reading-topic reader also supports a marked section containing several subtopics. `# Summary` optionally supplies its page description. A Guidelines section marked `<!-- web: replace -->` makes its topic order authoritative on the site. Without these markers the existing template/merge behavior remains.
+- To rename a web topic while preserving its visual and deep link, put the previous title in its source comment (`<!-- web: Previous title -->`). Consolidations may list previous titles separated by `;` inside that value. Retain required visuals explicitly; a copy-only topic has no invented specimen.
+- Keep each topic's explanation, live detail and caption together. Shared web reading pages associate `ReadingDetail` markers or the existing `visuals` map with authored topic titles and previous-title aliases. `web: reference` identifies a reference topic; it does not mean its explanation should be discarded or moved into a separate introduction. Legacy pages without authored narrative still render their original content.
 - Text is plain: no Markdown inside a line. Inline code names (token, component and property names) are written as they appear.
 
 # 3. Sections per page type
@@ -98,7 +107,7 @@ Some text is not copy, and stays out of the file:
 - text inside a component set or main component shown on a frame (`workflow/GOTCHAS.md` G37);
 - a text layer that still reads as its own layer name, such as a `Caption` placeholder.
 
-**Guidance and foundation pages on the site.** These are data-driven pages, not stories. Until a page reads its sentences with `copyOf(id)`, its copy file holds the Figma lines only, and its site text stays in the page file. Moving a page's site text into its copy file is done page by page, and recorded in the build notes.
+**Reading pages on the site.** The kit's guidance and foundation pages read authored summaries, topics and guidelines through the shared copy readers. Numeric references, token tables, code and specimens remain data-driven. When adding another reading page, connect its authored explanations through these readers and verify the rendered output; a saved copy file alone does not prove that the site displays it. Review any captions or prose retained inside reference visuals by the same editorial standard.
 
 # 4. How each surface reads it
 

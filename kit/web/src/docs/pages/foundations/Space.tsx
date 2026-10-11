@@ -1,9 +1,11 @@
+import { copySummary } from '../../copy';
+import { ReadingDetail, FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import { cn } from '@/lib/cn';
 import { Avatar, Badge, Button, Icon, IconButton, Kbd, Menu, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
+import { PreviewCard, breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { brandCopy } from '@/brand/copy';
 
@@ -87,7 +89,7 @@ function NoGrids() {
 /* ---------- shared bits ---------- */
 function Block({ title, intro, children }: { title: string; intro?: ReactNode; children: ReactNode }) {
   return (
-    <section className="flex min-w-0 flex-col gap-lg">
+    <section className="docs-section flex min-w-0 flex-col gap-lg">
       <AnchorHeading>{title}</AnchorHeading>
       {intro && <P>{intro}</P>}
       {children}
@@ -95,7 +97,7 @@ function Block({ title, intro, children }: { title: string; intro?: ReactNode; c
   );
 }
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl', className)}>{children}</div>;
+  return <PreviewCard className={className}>{children}</PreviewCard>;
 }
 function Code({ children, className }: { children: ReactNode; className?: string }) {
   return <span className={cn('type-code-sm-regular min-w-0 text-text-tertiary', className)}>{children}</span>;
@@ -131,7 +133,7 @@ function Spec({ children }: { children: ReactNode }) {
 /* ---------- Overview ---------- */
 function SpaceScale() {
   return (
-    <div className="flex flex-col divide-y divide-border-subtle rounded-surface border border-border-subtle bg-surface-base">
+    <PreviewCard label="Spacing scale" padded={false} className="flex flex-col divide-y divide-border-subtle">
       {SPACE.map((s) => {
         const v = num(s);
         return (
@@ -144,7 +146,7 @@ function SpaceScale() {
           </div>
         );
       })}
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -159,7 +161,7 @@ function Specimen({ label, children }: { label: string; children: ReactNode }) {
 
 function Sizes() {
   return (
-    <div className="flex flex-col gap-xl">
+    <PreviewCard label="Size roles" className="flex flex-col gap-xl">
       <div className="flex flex-col gap-lg border-t border-border-subtle pt-xl">
         <RowNote title="Control height">Buttons, inputs and selects of the same size share a height, so a row of controls lines up. The dashed square on md shows the touch minimum.</RowNote>
         <div className="flex flex-wrap items-end gap-xl">
@@ -228,7 +230,7 @@ function Sizes() {
       </div>
 
       <div className="flex flex-col gap-lg border-t border-border-subtle pt-xl">
-        <RowNote title="Touch minimum">{`Every tap target on a touch screen is at least ${num('size/touch-min')}. A compact control gets there with an invisible hit area, not a bigger icon.`}</RowNote>
+        <RowNote title="Touch minimum">{`Use size/touch-min (${num('size/touch-min')}) when checking touch targets. The dashed box illustrates the intended area; inspect the actual control before assuming an expanded target is implemented.`}</RowNote>
         <div className="flex items-center gap-lg">
           <span className="flex size-(--size-touch-min) items-center justify-center rounded-xs border border-dashed border-border-strong">
             <IconButton size="xs" icon="general/more-horizontal" label="More actions (sample)" />
@@ -236,14 +238,14 @@ function Sizes() {
           <Code>size/touch-min · {num('size/touch-min')}</Code>
         </div>
       </div>
-    </div>
+    </PreviewCard>
   );
 }
 
 function Widths() {
   const max = Math.max(...SIZE_GROUPS.width.map(num));
   return (
-    <div className="flex flex-col gap-sm rounded-surface border border-border-subtle bg-surface-base p-lg">
+    <PreviewCard label="Width roles" className="flex flex-col gap-sm">
       {SIZE_GROUPS.width.map((w) => (
         <div key={w} className="grid grid-cols-[minmax(0,1fr)] gap-xxs md:grid-cols-[9rem_minmax(0,1fr)] md:items-center md:gap-md">
           <span className="type-code-sm-regular text-text-secondary">
@@ -252,7 +254,7 @@ function Widths() {
           <span aria-hidden className="block h-(--size-indicator-lg) rounded-xs bg-fill-brand-subtle ring-1 ring-border-brand-subtle ring-inset" style={{ width: `${(num(w) / max) * 100}%` }} />
         </div>
       ))}
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -284,18 +286,20 @@ function GridFrame({ g, children }: { g: Grid; children?: ReactNode }) {
   const inner = i.frame - 2 * i.margin;
   const style: CSSProperties = { marginInline: `${(i.margin / i.frame) * 100}%`, columnGap: `${(i.gutter / inner) * 100}%`, gridTemplateColumns: `repeat(${i.count}, minmax(0, 1fr))` };
   return (
-    <div className={cn('relative w-full overflow-hidden rounded-control border border-border-subtle bg-surface-base', i.maxW)}>
-      <div aria-hidden className={cn('grid', children ? 'absolute inset-0' : 'h-24')} style={style}>
-        {Array.from({ length: i.count }).map((_, k) => (
-          <span key={k} className="bg-category-pink-subtle ring-1 ring-category-pink-border ring-inset" />
-        ))}
-      </div>
-      {children && (
-        <div aria-hidden className="relative grid content-start gap-y-md py-md" style={style}>
-          {children}
+    <PreviewCard label={`${i.label} grid`}>
+      <div className={cn('relative w-full overflow-hidden rounded-control border border-border-subtle bg-surface-base', i.maxW)}>
+        <div aria-hidden className={cn('grid', children ? 'absolute inset-0' : 'h-24')} style={style}>
+          {Array.from({ length: i.count }).map((_, k) => (
+            <span key={k} className="bg-category-pink-subtle ring-1 ring-category-pink-border ring-inset" />
+          ))}
         </div>
-      )}
-    </div>
+        {children && (
+          <div aria-hidden className="relative grid content-start gap-y-md py-md" style={style}>
+            {children}
+          </div>
+        )}
+      </div>
+    </PreviewCard>
   );
 }
 
@@ -328,45 +332,45 @@ function Grids() {
 function Overview() {
   return (
     <div className="flex flex-col gap-6xl">
-      <Block title="How space works" intro={`This page covers the ${BASE}-point space scale, size roles, widths, the page container and the grid for each breakpoint. ${brandCopy.density}`}>
-        <Bullets
-          items={[
-            <>
-              <strong className="font-semibold text-text-primary">One scale for every gap.</strong> Padding, gaps and margins all come from the space scale, so design and code share one rhythm.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Closer means related.</strong> Put items in a group closer to each other than to the next group.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Sizes are named by their job.</strong> Control heights, icon boxes and widths are named for what they do, so an md button, field and select always line up.
-            </>,
-          ]}
-        />
-      </Block>
+      <FoundationNarrative id="1.3" fallback={<>
+        <Block title="Grouping and dimensions" intro="Choose gaps according to the relationship between elements. A label should sit closer to its control than to the next field; use a separate size role to set the control’s dimensions.">
+          <P>{brandCopy.density}</P>
+        </Block>
 
-      <Block
-        title="Space scale"
-        intro={`${ON_HALF_UNITS ? `Every step is a whole or half multiple of the ${BASE}px base unit.` : `Every step builds on the ${BASE}px base unit.`} Small steps keep related things close inside a control. Larger steps separate sections of a page.${has('space/optical') ? ' Use space/optical for the small inset around a label next to an icon.' : ''}`}
-      >
-        <SpaceScale />
-        <Caption>In Tailwind, each step is a utility: p-xl, gap-lg, m-md and so on.</Caption>
-      </Block>
+        <Block
+          title="Space scale"
+          intro={`${ON_HALF_UNITS ? `Every step is a whole or half multiple of the ${BASE}px base unit.` : `Every step builds on the ${BASE}px base unit.`} Small steps keep related things close inside a control. Larger steps separate sections of a page.${has('space/optical') ? ' Use space/optical for the small inset around a label next to an icon.' : ''}`}
+        >
+          <ReadingDetail topic="Space" aliases={["Space scale"]}>
+            <SpaceScale />
+            <Caption>In Tailwind, each step is a utility: p-xl, gap-lg, m-md and so on.</Caption>
+          </ReadingDetail>
+        </Block>
 
-      <Block title="Sizes" intro="Size roles set the height of controls and the size of icons, avatars, status dots and tracks. Every specimen below is drawn at its real size.">
-        <Sizes />
-      </Block>
+        <Block title="Sizes" intro="Size roles set the height of controls and the size of icons, avatars, status dots and tracks. Every specimen below is drawn at its real size.">
+          <ReadingDetail topic="Sizes">
+            <Sizes />
+          </ReadingDetail>
+        </Block>
 
-      <Block title="Widths" intro="Use these fixed widths for panels, dropdowns, dialogs and layouts. Pick xxs–xs for tooltips, menus and popovers, sm–lg for dialogs and side panels, and 2xl–6xl for page layouts. Bars are drawn to scale against the widest.">
-        <Widths />
-      </Block>
+        <Block title="Widths" intro="Use these fixed widths for panels, dropdowns, dialogs and layouts. Pick xxs–xs for tooltips, menus and popovers, sm–lg for dialogs and side panels, and 2xl–6xl for page layouts. Bars are drawn to scale against the widest.">
+          <ReadingDetail topic="Widths">
+            <Widths />
+          </ReadingDetail>
+        </Block>
 
-      <Block title="Container and reading measure" intro={`Page content stops growing at ${CONTAINER} on large screens. It keeps ${num('size/container/margin-desktop')} side margins on tablet and desktop, and ${num('size/container/margin-mobile')} on mobile. Running text stays within ${num('size/measure/reading')}, about 70 characters per line.`}>
-        <ContainerSpecimen />
-      </Block>
+        <Block title="Container and reading measure" intro={`Page content stops growing at ${CONTAINER} on large screens. It keeps ${num('size/container/margin-desktop')} side margins on tablet and desktop, and ${num('size/container/margin-mobile')} on mobile. Running text stays within ${num('size/measure/reading')}, about 70 characters per line.`}>
+          <ReadingDetail topic="Containers" aliases={["Container and reading measure"]}>
+            <ContainerSpecimen />
+          </ReadingDetail>
+        </Block>
 
-      <Block title="Grids" intro={GRIDS.length ? 'Each breakpoint has its own grid, shown here with its columns, gutters and margins. The frames are scaled down, but the numbers are real.' : undefined}>
-        <Grids />
-      </Block>
+        <Block title="Grids" intro={GRIDS.length ? 'Each breakpoint has its own grid, shown here with its columns, gutters and margins. The frames are scaled down, but the numbers are real.' : undefined}>
+          <ReadingDetail topic="Grids">
+            <Grids />
+          </ReadingDetail>
+        </Block>
+      </>} />
     </div>
   );
 }
@@ -497,9 +501,9 @@ interface Guide {
 }
 function GuideList({ items }: { items: Guide[] }) {
   return (
-    <div className="flex max-w-[64rem] flex-col gap-4xl">
+    <div className="flex flex-col gap-4xl">
       {items.map((g) => (
-        <section key={g.title} className="flex min-w-0 flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0">
+        <section key={g.title} className="docs-section flex min-w-0 flex-col gap-lg">
           <AnchorHeading>{g.title}</AnchorHeading>
           <div className="flex flex-col gap-md">{g.body}</div>
           {g.visual && (
@@ -922,7 +926,7 @@ function GuidelinesTab() {
       ),
     },
   ];
-  return <GuideList items={items} />;
+  return <FoundationGuidelines id="1.3" items={items} fallback={<GuideList items={items} />} />;
 }
 
 export default function Space() {
@@ -930,7 +934,7 @@ export default function Space() {
     <DocPage
       eyebrow="Foundations › 1.3 Space & layout"
       title="Space & layout"
-      description="Space sets the rhythm of every screen. Use one spacing scale for gaps and padding, and the size roles for controls, icons, avatars, widths and the reading measure."
+      description={copySummary('1.3', "Spacing tokens define gaps and padding; size roles define control dimensions, widths and reading measure. Adjust the separation of content independently from the dimensions of its controls.")}
       figmaNode={figmaNodeFor('1.3')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

@@ -126,6 +126,21 @@ async function settle(p) {
   await p.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {}))));
 }
 
+/** References fill their reading column; compact specimens inside may keep their own dimensions. */
+async function checkReferenceWidths(p) {
+  const narrow = await p.$$eval('[data-reading-detail]', (details) => details.flatMap((detail) => {
+    const parent = detail.parentElement;
+    if (!parent) return [];
+    const style = getComputedStyle(parent);
+    const available = parent.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    const width = detail.getBoundingClientRect().width;
+    return available > 0 && Math.abs(width - available) > 2
+      ? [`${detail.dataset.readingDetail}: ${Math.round(width)}px in a ${Math.round(available)}px reference column`]
+      : [];
+  }));
+  narrow.forEach((detail) => fail(p.where, `reference width ${detail}`));
+}
+
 const first = await tab();
 await first.goto(base);
 await settle(first);
@@ -140,7 +155,7 @@ await pool(pages, async (p, route) => {
   p.where = `discover ${route}`;
   await p.goto(base + '#' + route);
   await settle(p);
-  const tabs = await p.$$eval('[role=tablist] [role=tab]', (ts) => ts.map((t) => t.id.split('-tab-')[1]));
+  const tabs = await p.$$eval('[role=tablist] [role=tab]', (ts) => ts.map((t) => t.id.split('-tab-')[1]).filter(Boolean));
   const list = [route, ...tabs.slice(1).map((t) => `${route}?tab=${t}`)];
   // Web and App products: every tab again in App preview (React Native via react-native-web).
   if (await p.$('[role=group][aria-label=Preview]')) list.push(`${route}?platform=app`, ...tabs.slice(1).map((t) => `${route}?platform=app&tab=${t}`));
@@ -157,6 +172,7 @@ await pool(routes, async (p, r) => {
     await p.evaluate((t) => localStorage.setItem('ds-theme', t), theme);
     await p.reload();
     await settle(p);
+    await checkReferenceWidths(p);
     if (!quick) {
       await p.addScriptTag({ content: axe });
       const { v, approved } = await p.evaluate(
@@ -187,6 +203,7 @@ await pool(routes, async (p, r) => {
       p.where = `390px ${r}`;
       await p.setViewportSize({ width: 390, height: 844 });
       await settle(p);
+      await checkReferenceWidths(p);
       const ov = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
       if (ov > 0) fail(p.where, `horizontal overflow ${ov}px`);
       await p.setViewportSize({ width: 1440, height: 900 });

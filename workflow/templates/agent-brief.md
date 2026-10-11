@@ -63,3 +63,7 @@ Keep it concise:
 - each raw value kept as a constant;
 - stand-ins used;
 - changes needed in files you don't own.
+
+## Guideline writing
+
+Before drafting, follow workflow/EDITORIAL.md and save the evidence/decision plan. Frame names and tabs are contracts; topic headings and prose are subject-specific. Preserve token-driven references and actual behavior. Run the existing copy guard with --editorial for revised pages, then the normal parser/build. Do not copy spec instructions into the documentation.

@@ -5,7 +5,7 @@ The structure every generated Figma page follows, whatever it documents: design-
 ```text
 Page
 └─ Frame × n        one per job, as many as the spec lists (one, two, ten…), side by side
-   └─ Block × n     one per topic inside that job, as many as the spec lists
+   └─ Block × n     one per planned topic inside that job; preserve the spec’s coverage
       └─ Items      the things the block shows
 ```
 
@@ -84,7 +84,7 @@ Both kinds: nothing shrinks to fit; when items are wider or taller than a docume
 
 ## 3. Block
 
-One topic inside a frame's job: a block note, then its items. Blocks appear in the order the spec gives. A block with no items is not built.
+One topic inside a frame's job: a block note, then its items. Choose the topic sequence through workflow/EDITORIAL.md; retain the spec’s reference and visual requirements. A block with no items is not built.
 
 ## 4. Items
 

@@ -32,14 +32,17 @@ Every documentation value comes from the `Documentation` collection (`doc/{group
 | Documentation role | Aliases the brand token | Used for |
 | --- | --- | --- |
 | `doc/surface/base` | `color/surface/base` | frame background |
-| `doc/surface/header` | `color/surface/sunken` | header block, table header row |
+| `doc/surface/header` | `color/surface/sunken` | table header row |
 | `doc/surface/specimen` | `color/surface/raised` | swatch cards, specimen tiles |
+| `doc/surface/panel` | `color/surface/raised` (fallback `color/surface/base`) | outer preview shell and property inspector |
+| `doc/surface/viewport` | `color/surface/base` | inset viewport for real component instances |
+| `doc/radius/panel` | `radius/modal` (fallback `radius/surface`) | outer preview and inspector corners |
 | `doc/surface/stage` | `color/surface/sunken` | the area real instances sit on (hero, examples, anatomy, do / don't) |
 | `doc/status/do`, `doc/status/dont` | `color/icon/success`, `color/icon/danger` | do / don't marks and stage edges |
 | `doc/border/subtle` | `color/border/subtle` | card and table outlines, tree connectors |
 | `doc/text/primary`, `doc/text/secondary`, `doc/text/tertiary` | `color/text/primary`, `secondary`, `tertiary` | titles, body, captions |
 | `doc/text/accent` | `color/text/brand` | breadcrumbs, links, badges |
-| `doc/radius/surface` | `radius/surface` | header, cards, swatches |
+| `doc/radius/surface` | `radius/surface` | inset viewports, cards, swatches |
 | `doc/radius/badge` | `radius/indicator` | `Doc/Badge`, `Doc/Token badge` |
 | `doc/space/canvas` … `doc/space/inline` | steps of the brand's `space/*` scale (canvas `space/11xl`, frame `space/7xl`, header `space/5xl`, block `space/4xl`, group `space/3xl`, row `space/xl`, inline `space/md`) | gaps and padding |
 | Text styles | the brand's `type/heading/*`, `type/body/*` and `type/code/*` styles (token names are set in `type/code/*`) | every documentation text |
@@ -53,6 +56,7 @@ doc/measure/reading      reading column of · Guidelines (720)
 doc/measure/row-note     left note column of palette and specimen rows (320)
 doc/measure/table        minimum width of a variable table (1280)
 doc/measure/specimen     swatch and specimen tile size (160)
+doc/measure/preview      minimum full-width preview height (320; grows with content)
 doc/table/name           minimum width of the Name column (320)
 doc/table/header         height of the table header row (40)
 doc/table/separator      space above a subgroup in a table (16)
@@ -96,7 +100,7 @@ Every finished documentation frame begins with a reusable header block.
 - layout: vertical;
 - padding: `doc/space/frame`;
 - background: documentation base surface;
-- contains one rounded inner Content frame.
+- contains one unboxed inner Content frame.
 
 ## Inner header content
 
@@ -107,12 +111,12 @@ Header content
 layout: vertical
 width: Fill
 height: Hug
-padding: doc/space/header
-radius: doc/radius/surface
+padding: 0
+radius: 0
 gap: doc/space/header
 ```
 
-The inner header uses a subtle neutral/system surface resolved from the active design system.
+The title and description sit directly on the documentation base surface. Keep identity and resource links quiet; reserve bordered surfaces for specimens and reference data.
 
 ## Header row
 
@@ -917,3 +921,11 @@ Rules:
 - Documentation frames use these components; they are not redrawn per page.
 - Tables follow §6 exactly: column construction, token badges, tree connectors, alias chips and usage column.
 - Swatches and alias chips are always bound to the variable they show (§5.1).
+
+## Shared preview presentation
+
+Fast-mode previews use an outer panel (`doc/surface/panel`, `doc/radius/panel`) with compact title/view chrome and a bordered inset viewport (`doc/surface/viewport`, `doc/radius/surface`). All colors and radii alias the current system; never copy a reference brand palette or force an unsupported color mode. Specimens remain real instances with their original properties.
+
+The web viewer provides working Preview/Code tabs where source is available, neutral grouped navigation and a separate properties inspector with Reset. Figma shows a static Preview label: do not draw an apparently functional Code tab without a destination. Foundation diagrams and do/don’t illustrations may use a simple bordered stage when a toolbar adds no useful context.
+
+For an existing Doc kit, `dockit(figma, { refreshHeader: true })` opts into the unboxed header treatment while preserving component and property ids. The default idempotent behavior remains unchanged. Refresh renderer caches and regenerate owned documentation frames to apply the new preview composition.

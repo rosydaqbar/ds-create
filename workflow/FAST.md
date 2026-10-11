@@ -29,7 +29,7 @@ Fast mode covers the documentation phase: it starts at the first step that draws
 
 # 2. What the skeleton fixes
 
-The skeleton is the structure of `workflow/templates/structure.md`: page → frame → block → items. It is made of plain frames, text and the Doc kit parts, and it has no style of its own.
+The skeleton is the structure of `workflow/templates/structure.md`: page → frame → block → items. It is made of plain frames, text and the Doc kit parts, and uses the shared presentation grammar in `workflow/DOCFRAMES.md`: unboxed titles, layered inset previews, and compact reference surfaces. Its colors, type and radii still come from the current brand.
 
 | Layer | Fixed by the renderer | From the brand | Filled per page |
 | --- | --- | --- | --- |
@@ -124,7 +124,7 @@ The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes onl
 
 **F1 · Data (after the library phase, before step 11, no Figma calls).** The manifests name real sets, so they are written once steps 6–10 are done and the set snapshots exist.
 1. Run `node kit/tools/fast-pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `output/{slug}/fast/`.
-2. Write the copy file of every in-scope page (`workflow/COPY.md`), with the block and topic titles the manifests use. Read the page's knowledge first (`input/{slug}/knowledge/`, `input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
+2. Plan the information through `workflow/EDITORIAL.md` before drafting, then write the copy file of every in-scope page (`workflow/COPY.md`). Adapt manifest topic titles/order to the plan rather than copying a visible outline; keep copy/manifest titles matched and all required technical visuals covered. Read the page's knowledge first (`input/{slug}/knowledge/`, `input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
 3. Fill each manifest's `todo` visuals with real sets, or remove the visual. Write one manifest per component and layout page (`workflow/templates/fast/component.example.json`, `layout.example.json`).
 4. Run `node kit/tools/fast-pack.mjs --slug {slug} --check` until every page is ready.
 

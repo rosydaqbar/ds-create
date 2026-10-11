@@ -1,11 +1,12 @@
+import { copySummary } from '../../copy';
+import { ReadingNarrative, ReadingGuidelines } from '../../FoundationCopy';
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
-import { tokens } from '@/tokens/tokens.gen';
 import { config } from '@/ds.config';
 import { cn } from '@/lib/cn';
 import { Icon } from '@/icons';
 import { Avatar, Flag, SocialButton, SocialMark, socialProviderName, socialProviders, type SocialProvider } from '@/components';
 import { AnchorHeading, DocPage, Topics } from '../../DocPage';
-import { Caption, CodeBlock, InlineCode, P } from '../../blocks';
+import { PreviewCard, Caption, CodeBlock, InlineCode, P } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import type { Topic } from '../../types';
 import { brandCopy } from '@/brand/copy';
@@ -33,27 +34,13 @@ const countryName = (code: string) => {
   }
 };
 
-const vars = new Map(tokens.variables.map((v) => [v.name, v]));
-const hex = (name: string) => vars.get(name)?.modes.Light?.value ?? '#000000';
-function contrast(a: string, b: string) {
-  const lum = (h: string) => {
-    const x = h.replace('#', '').slice(0, 6);
-    const [r, g, bl] = [0, 2, 4].map((i) => parseInt(x.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
-  };
-  const [p, q] = [lum(a), lum(b)].sort((m, n) => n - m);
-  return (p + 0.05) / (q + 0.05);
-}
-const facebookRatio = contrast(hex('social-button/facebook/fill'), hex('social-button/facebook/fg'));
-
 /* ---------- small pieces ---------- */
 type Mode = 'light' | 'dark';
 function Surface({ mode, children, className, label }: { mode: Mode; children: ReactNode; className?: string; label?: string }) {
   return (
-    <div data-theme={mode} className={cn('flex min-w-0 flex-col gap-lg rounded-surface border border-border-subtle bg-surface-base p-xl text-text-primary', className)}>
-      {label !== '' && <span className="type-body-xs-semibold text-text-tertiary">{label ?? (mode === 'light' ? 'Light surface' : 'Dark surface')}</span>}
+    <PreviewCard scheme={mode} label={label || (mode === 'light' ? 'Light surface' : 'Dark surface')} className={cn('flex flex-col gap-lg text-text-primary', className)}>
       {children}
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -94,10 +81,10 @@ function Pending({ children }: { children: ReactNode }) {
 const MIN = brandCopy.logoMinSize;
 
 /* ---------- Overview ---------- */
-function LogoSection() {
+function LogoSection({ embedded = false }: { embedded?: boolean } = {}) {
   return (
-    <section className="flex flex-col gap-lg">
-      <AnchorHeading>Logo</AnchorHeading>
+    <section className={cn(!embedded && "docs-section", "flex flex-col gap-lg")}>
+      {!embedded && <AnchorHeading>Logo</AnchorHeading>}
       <P>
         The lockup is the full logo. Use it where the product signs its name: the app header, the cover and sign-in screens. The mark is the symbol alone, for
         small spaces such as avatars, favicons and app chrome.
@@ -137,10 +124,10 @@ function LogoSection() {
   );
 }
 
-function ClearSpace() {
+function ClearSpace({ embedded = false }: { embedded?: boolean } = {}) {
   return (
-    <section className="flex flex-col gap-lg">
-      <AnchorHeading>Clear space and minimum size</AnchorHeading>
+    <section className={cn(!embedded && "docs-section", "flex flex-col gap-lg")}>
+      {!embedded && <AnchorHeading>Clear space and minimum size</AnchorHeading>}
       <P>{brandCopy.logoClearSpace(MIN)}</P>
       <div className="grid gap-lg lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="flex flex-col items-center justify-center gap-md rounded-surface border border-border-subtle bg-surface-sunken p-xl">
@@ -176,14 +163,14 @@ function ClearSpace() {
   );
 }
 
-function SocialMarks() {
+function SocialMarks({ embedded = false }: { embedded?: boolean } = {}) {
   return (
-    <section className="flex flex-col gap-lg">
-      <AnchorHeading>Social marks</AnchorHeading>
+    <section className={cn(!embedded && "docs-section", "flex flex-col gap-lg")}>
+      {!embedded && <AnchorHeading>Social marks</AnchorHeading>}
       <P>
         These are the sign-in providers the Social button (3.7) supports: {socialProviders.map((p) => socialProviderName[p]).join(', ')}. Each mark keeps its owner’s
         colors and proportions. For a quieter row, use the mono version: a single color that follows the icon color roles. Near-black marks follow the text color so
-        they stay visible on dark surfaces. Their owners allow either black or white.
+        they stay visible on dark surfaces. Check current owner guidance before adding or changing a treatment.
       </P>
       <div className="grid gap-lg md:grid-cols-2">
         {(['light', 'dark'] as const).map((m) => (
@@ -207,10 +194,10 @@ function SocialMarks() {
   );
 }
 
-function Flags() {
+function Flags({ embedded = false }: { embedded?: boolean } = {}) {
   return (
-    <section className="flex flex-col gap-lg">
-      <AnchorHeading>Flags</AnchorHeading>
+    <section className={cn(!embedded && "docs-section", "flex flex-col gap-lg")}>
+      {!embedded && <AnchorHeading>Flags</AnchorHeading>}
       <P>
         Use round flags for the countries and regions the product supports, in badges, tags and country selectors. Each file is named by its ISO 3166 code.
         Always show a flag with the country name.
@@ -221,17 +208,19 @@ function Flags() {
           country. Until then, the Flag component shows the country code in a neutral circle.
         </Pending>
       ) : (
-        <ul className="grid gap-sm sm:grid-cols-2 lg:grid-cols-4">
-          {flagCodes.map((c) => (
-            <li key={c} className="flex items-center gap-md rounded-control border border-border-subtle p-md">
-              <Flag country={c} size="lg" alt="" />
-              <span className="flex flex-col">
-                <span className="type-body-sm-medium text-text-primary">{countryName(c)}</span>
-                <span className="type-code-sm-regular text-text-tertiary">{c}.svg</span>
-              </span>
-            </li>
-          ))}
-        </ul>
+        <PreviewCard label="Country flags">
+          <ul className="grid gap-sm sm:grid-cols-2 lg:grid-cols-4">
+            {flagCodes.map((c) => (
+              <li key={c} className="flex items-center gap-md rounded-control border border-border-subtle p-md">
+                <Flag country={c} size="lg" alt="" />
+                <span className="flex flex-col">
+                  <span className="type-body-sm-medium text-text-primary">{countryName(c)}</span>
+                  <span className="type-code-sm-regular text-text-tertiary">{c}.svg</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </PreviewCard>
       )}
     </section>
   );
@@ -240,17 +229,20 @@ function Flags() {
 function Overview() {
   return (
     <div className="flex flex-col gap-5xl">
-      <section className="flex flex-col gap-lg">
-        <AnchorHeading>About brand assets</AnchorHeading>
-        <P>
-          The product logo, provider marks and flags are the one place in the system where raw colors and shapes are allowed, because the artwork belongs to its
-          owners. Each asset is a file in <InlineCode>public/brand/</InlineCode>, exported from the Figma file, so replacing a file updates it everywhere.
-        </P>
-      </section>
-      <LogoSection />
-      <ClearSpace />
-      <SocialMarks />
-      <Flags />
+      <ReadingNarrative id="1.8" visuals={{ Logo: <LogoSection embedded />, "Clear space and minimum size": <ClearSpace embedded />, "Social mark": <SocialMarks embedded />, Flags: <Flags embedded /> }} fallback={<>
+        <section className="docs-section flex flex-col gap-lg">
+          <AnchorHeading>About brand assets</AnchorHeading>
+          <P>
+            The product logo, provider marks and flags are the one place in the system where raw colors and shapes are allowed, because the artwork belongs to its
+            owners. Each asset is a file in <InlineCode>public/brand/</InlineCode>, exported from the Figma file, so replacing a file updates it everywhere.
+          </P>
+        </section>
+
+        <LogoSection />
+        <ClearSpace />
+        <SocialMarks />
+        <Flags />
+      </>} />
     </div>
   );
 }
@@ -556,19 +548,15 @@ logo: { light: '${config.logo.light}', dark: '${config.logo.dark}', mark: '${con
   },
   {
     title: 'Partner marks follow their owners’ rules',
-    body: `Third-party marks keep their owners’ colors, proportions and wording, even where the system would choose differently.\n\nThe Facebook button is the documented exception. Facebook’s brand rules set its blue and its white label, which reach ${facebookRatio.toFixed(2)}:1 contrast, just under the 4.5:1 the system uses for text. It stays as a recorded exception because the owner’s rules require it, and the label is large, bold and paired with the mark.\n\nNear-black marks (Apple, X, GitHub) follow the text color instead, which their owners allow, so they never disappear on a dark surface.`,
+    body: 'Use the supplied provider treatments rather than recoloring a partner mark as an ordinary interface icon. Verify current owner guidance before adding or changing provider artwork; the available specimens establish the treatments in this library, not a blanket licensing or contrast exception.',
     render: () => (
       <div className="flex w-full flex-col items-center gap-lg">
-        {/* A specimen of the recorded exception, not a control: inert and described as one image. */}
-        <div role="img" aria-label={`Facebook and Apple sign-in buttons in their owners’ solid colors. Facebook’s white label on its blue is ${facebookRatio.toFixed(2)}:1.`} className="flex flex-wrap justify-center gap-md">
+        <div role="img" aria-label="Supplied provider sign-in treatments" className="flex flex-wrap justify-center gap-md">
           <span inert aria-hidden className="flex flex-wrap justify-center gap-md">
-            <SocialButton provider="facebook" type="solid" size="md" tabIndex={-1} />
-            <SocialButton provider="apple" type="solid" size="md" tabIndex={-1} />
+            {socialProviders.map((provider) => <SocialButton key={provider} provider={provider} type="solid" size="md" tabIndex={-1} />)}
           </span>
         </div>
-        <Caption>
-          Facebook solid: white on its brand blue, {facebookRatio.toFixed(2)}:1, set by Facebook’s brand rules.
-        </Caption>
+        <Caption>These specimens show the providers included in the current build. Authentication must be connected by the consuming application.</Caption>
       </div>
     ),
   },
@@ -614,11 +602,11 @@ export default function BrandAssets() {
     <DocPage
       eyebrow="Foundations › 1.8 Brand assets"
       title="Brand assets"
-      description="The product logo, sign-in provider marks and flags are artwork, not tokens. Each piece belongs to its owner, so it keeps their colors and proportions."
+      description={copySummary('1.8', "The product logo, sign-in provider marks and flags are artwork, not tokens. Each piece belongs to its owner, so it keeps their colors and proportions.")}
       figmaNode={figmaNodeFor('1.8')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },
-        { label: 'Guidelines', render: () => <Topics items={TOPICS} /> },
+        { label: 'Guidelines', render: () => <ReadingGuidelines id="1.8" items={TOPICS} fallback={<Topics items={TOPICS} />} /> },
       ]}
     />
   );

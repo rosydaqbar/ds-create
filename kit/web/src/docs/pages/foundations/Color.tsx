@@ -1,11 +1,12 @@
+import { copySummary } from '../../copy';
+import { ReadingDetail, FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenVariable } from '@/tokens/types';
 import { cn } from '@/lib/cn';
-import { config } from '@/ds.config';
 import { Badge, Button, Checkbox, Divider, HelpText, Icon, Label, Link, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenTable } from '../../blocks';
+import { PreviewCard, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenTable } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { supportedModes, unsupportedModes } from '../../modes';
 import { brandCopy } from '@/brand/copy';
@@ -225,7 +226,7 @@ const PREVIEW_CSS = [
 /* ---------- shared bits ---------- */
 function Block({ title, intro, children }: { title: string; intro?: ReactNode; children: ReactNode }) {
   return (
-    <section className="flex min-w-0 flex-col gap-lg">
+    <section className="docs-section flex min-w-0 flex-col gap-lg">
       <AnchorHeading>{title}</AnchorHeading>
       {intro && <P>{intro}</P>}
       {children}
@@ -233,7 +234,7 @@ function Block({ title, intro, children }: { title: string; intro?: ReactNode; c
   );
 }
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl', className)}>{children}</div>;
+  return <PreviewCard className={className}>{children}</PreviewCard>;
 }
 /** Token names may wrap after a slash, never mid-word. */
 function slashes(text: ReactNode): ReactNode {
@@ -316,7 +317,7 @@ function FamilyRow({ title, family, note, badges = [], dark = false }: { title: 
   const steps = familySteps(family);
   if (!steps.length) return null;
   return (
-    <div className="flex min-w-0 flex-col gap-lg border-t border-border-subtle pt-xl">
+    <div className="flex min-w-0 flex-col gap-lg">
       <div className="flex flex-col gap-xs">
         <div className="flex flex-wrap items-center gap-sm">
           <h3 className="type-heading-xs-semibold text-text-primary">{title}</h3>
@@ -327,13 +328,13 @@ function FamilyRow({ title, family, note, badges = [], dark = false }: { title: 
         </div>
         <p className="type-body-sm-regular max-w-(--size-measure-reading) text-text-secondary">{note}</p>
       </div>
-      <div className="@container min-w-0">
+      <PreviewCard label={`${title} palette`} scheme={dark ? 'dark' : undefined} className="@container min-w-0">
         <div className={cn('grid gap-sm', steps.length > 4 ? 'grid-cols-3 @md:grid-cols-6 @3xl:grid-cols-11' : 'grid-cols-3 @md:grid-cols-6')}>
           {steps.map((s) => (
             <PaletteSwatch key={s.name} v={s} dark={dark} />
           ))}
         </div>
-      </div>
+      </PreviewCard>
     </div>
   );
 }
@@ -372,7 +373,7 @@ function SampleLabel({ children }: { children: ReactNode }) {
 
 function ModePanel({ mode }: { mode: Mode }) {
   return (
-    <div data-theme={mode.toLowerCase()} className="flex min-w-0 flex-col gap-xl rounded-surface border border-border-subtle bg-surface-base p-xl">
+    <PreviewCard label={`${mode} color roles`} scheme={mode.toLowerCase() as 'light' | 'dark'} className="flex flex-col gap-xl">
       <span className="type-body-sm-semibold text-text-primary">{mode}</span>
 
       <div className="flex flex-col gap-sm">
@@ -433,7 +434,7 @@ function ModePanel({ mode }: { mode: Mode }) {
           </div>
         ))}
       </div>
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -536,13 +537,12 @@ const MODEL_ROLE = 'color/text/brand';
 function RoleModel() {
   if (!has(MODEL_ROLE)) return null;
   const aliases = MODES.map((m) => alias(MODEL_ROLE, m));
-  const perMode = aliases[0] !== aliases[1];
   return (
     <Panel>
       <div className="flex flex-col items-stretch gap-md md:flex-row">
         <div className="flex flex-1 flex-col gap-md rounded-control border border-border-subtle bg-surface-base p-lg">
           <span className="type-body-xs-semibold uppercase tracking-wide text-text-tertiary">1 · Primitives</span>
-          <p className="type-body-sm-regular text-text-secondary">The raw palette. It’s hidden from color pickers, and components don’t use it directly.</p>
+          <p className="type-body-sm-regular text-text-secondary">Raw palette values supply the aliases below. Choose semantic roles when composing interface elements.</p>
           {[...new Set(aliases)].map((a) =>
             a ? (
               <span key={a} className="flex items-center gap-sm">
@@ -555,7 +555,7 @@ function RoleModel() {
         <Arrow />
         <div className="flex flex-1 flex-col gap-md rounded-control border border-border-brand-subtle bg-surface-base p-lg">
           <span className="type-body-xs-semibold uppercase tracking-wide text-text-tertiary">2 · Semantic role</span>
-          <p className="type-body-sm-regular text-text-secondary">{perMode ? 'Names what the color is for and points to a different step in each mode.' : 'Names what the color is for and can point to a different step in each mode.'}</p>
+          <p className="type-body-sm-regular text-text-secondary">Names the intended use and references its palette value for each supported mode.</p>
           <span className="flex items-center gap-sm">
             <Dot name={MODEL_ROLE} />
             <Code>{MODEL_ROLE}</Code>
@@ -565,7 +565,7 @@ function RoleModel() {
         <Arrow />
         <div className="flex flex-1 flex-col gap-md rounded-control border border-border-subtle bg-surface-base p-lg">
           <span className="type-body-xs-semibold uppercase tracking-wide text-text-tertiary">3 · Component</span>
-          <p className="type-body-sm-regular text-text-secondary">A Link (2.3) uses the role, so it looks right in every mode with no extra work. Live sample:</p>
+          <p className="type-body-sm-regular text-text-secondary">A Link (2.3) uses this text role. Inspect the rendered link on its actual surface after changing the mapping.</p>
           <Link label="View shared files" href="#" onClick={(e) => e.preventDefault()} />
         </div>
       </div>
@@ -598,77 +598,87 @@ function Overview() {
   const hasAlphaWhite = familySteps('alpha-white').length > 0;
   return (
     <div className="flex flex-col gap-6xl">
-      <Block title="How color works" intro={`${config.name} color comes in two layers. Primitive palettes hold the raw values. Semantic roles say what each color is for, and they change with the mode. Components use only roles, so you can change a palette without touching a single component.`}>
-        <RoleModel />
-        <Bullets
-          items={[
-            <>
-              <strong className="font-semibold text-text-primary">Pick by purpose, not by hue.</strong> Choose the role that matches the job (text, border, fill, surface) rather than a palette step that happens to look right.
-            </>,
-            <>
-              {MODES.length > 1 ? (
-                <>
-                  <strong className="font-semibold text-text-primary">Every role works in {MODES_TEXT}.</strong> Each role has a value for each mode, so a screen built from roles needs no{' '}
-                  {MODES[1]} overrides.
-                </>
-              ) : (
-                <>
-                  <strong className="font-semibold text-text-primary">Every role has one value, in {MODES[0]}.</strong>
-                  {unsupportedModes.length ? ` ${unsupportedModes.join(' and ')} isn’t supported.` : ''} When a mode is added, a screen built from roles follows it with no overrides.
-                </>
-              )}
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Color never carries meaning alone.</strong> Always pair a status color with text or an icon, so people who can’t see the difference still get the message.
-            </>,
-          ]}
-        />
-      </Block>
-
-      <Block title="Base colors" intro="These are the building blocks: white, black and transparent, the brand ramp, and the alpha scales for overlays and shadows. Each swatch lists its contrast on white and on black, and the label on the swatch shows the better of the two.">
-        <div className="flex flex-col gap-xl">
-          <FamilyRow title="Base" family="base" note="Pure white and black for the extremes, plus transparent for layers that should show nothing but still use a token." />
-          <FamilyRow title="Brand" family="brand" badges={[{ label: 'Brand', tone: 'brand' }]} note={brandNote()} />
-          <FamilyRow title="Alpha black" family="alpha-black" note="Black at set opacities, for the scrim behind dialogs and for shadow colors. Shown on a light surface." />
-          {hasAlphaWhite && (
-            <div data-theme="dark" className="rounded-surface bg-surface-base px-lg pb-lg">
-              <FamilyRow title="Alpha white" family="alpha-white" dark note="White at set opacities, for hover tints over media and for video controls. Shown on a dark surface." />
-            </div>
-          )}
-        </div>
-      </Block>
-
-      <Block title="Extended palettes" intro={extendedIntro}>
-        <div className="flex flex-col gap-xl">
-          <FamilyRow title="Neutral" family="neutral" badges={[{ label: 'Neutral', tone: 'neutral' }]} note={neutralNote()} />
-          <StatusRows />
-          {SUPPORTING.map((f) => (
-            <FamilyRow key={f} title={cap(f)} family={f} note={supportingNote(f)} />
-          ))}
-        </div>
-      </Block>
-
-      <Block
-        title={`Roles in ${MODES_TEXT}`}
-        intro={
-          MODES.length > 1
-            ? `Both panels below use only color roles. The ${MODES[1]} panel is the ${MODES[0]} panel with the mode switched, and nothing else changed.`
-            : 'The panel below uses only color roles: every color in it comes from a role.'
-        }
-      >
-        <div className={cn('grid min-w-0 gap-xl', MODES.length > 1 ? 'lg:grid-cols-2' : 'max-w-[40rem]')}>
-          {MODES.map((m) => (
-            <ModePanel key={m} mode={m} />
-          ))}
-        </div>
-      </Block>
-
-      {PAIRS.length > 0 && (
-        <Block title="Contrast pairs" intro={`These are the text and icon pairs the product uses, tested in ${IN_EACH}. Text needs 4.5:1 (AA). Large text, icons and borders that identify a control need 3:1.`}>
-          <PairTable />
-          <Caption>Ratios are rounded down, so a pair never looks better than it is. Alpha colors are measured over the surface they sit on. Disabled text is exempt from contrast rules, but people still need to see it.</Caption>
+      <FoundationNarrative id="1.1" visuals={{ 'role-model': <RoleModel /> }} fallback={<>
+        <Block title="Selecting color roles" intro="Select a role for the element and its context: a text color, for example, needs to be checked against the surface on which the text will appear.">
+          <RoleModel />
+          <Bullets
+            items={[
+              <>
+                <strong className="font-semibold text-text-primary">Pick by purpose, not by hue.</strong> Choose the role that matches the job (text, border, fill, surface) rather than a palette step that happens to look right.
+              </>,
+              <>
+                {MODES.length > 1 ? (
+                  <>
+                    <strong className="font-semibold text-text-primary">Every role works in {MODES_TEXT}.</strong> Each role has a value for each mode, so a screen built from roles needs no{' '}
+                    {MODES[1]} overrides.
+                  </>
+                ) : (
+                  <>
+                    <strong className="font-semibold text-text-primary">Every role has one value, in {MODES[0]}.</strong>
+                    {unsupportedModes.length ? ` ${unsupportedModes.join(' and ')} isn’t supported.` : ''} Adding a mode requires new role mappings and component verification.
+                  </>
+                )}
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Color never carries meaning alone.</strong> Always pair a status color with text or an icon, so people who can’t see the difference still get the message.
+              </>,
+            ]}
+          />
         </Block>
-      )}
+
+        <Block title="Base colors" intro="These are the building blocks: white, black and transparent, the brand ramp, and the alpha scales for overlays and shadows. Each swatch lists its contrast on white and on black, and the label on the swatch shows the better of the two.">
+          <ReadingDetail topic="Base colors">
+            <div className="flex flex-col gap-xl">
+              <FamilyRow title="Base" family="base" note="Pure white and black for the extremes, plus transparent for layers that should show nothing but still use a token." />
+              <FamilyRow title="Brand" family="brand" badges={[{ label: 'Brand', tone: 'brand' }]} note={brandNote()} />
+              <FamilyRow title="Alpha black" family="alpha-black" note="Black at set opacities, for the scrim behind dialogs and for shadow colors. Shown on a light surface." />
+              {hasAlphaWhite && (
+                <div className="min-w-0">
+                  <FamilyRow title="Alpha white" family="alpha-white" dark note="White at set opacities, for hover tints over media and for video controls. Shown on a dark surface." />
+                </div>
+              )}
+            </div>
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Extended palettes" intro={extendedIntro}>
+          <ReadingDetail topic="Extended palettes">
+            <div className="flex flex-col gap-xl">
+              <FamilyRow title="Neutral" family="neutral" badges={[{ label: 'Neutral', tone: 'neutral' }]} note={neutralNote()} />
+              <StatusRows />
+              {SUPPORTING.map((f) => (
+                <FamilyRow key={f} title={cap(f)} family={f} note={supportingNote(f)} />
+              ))}
+            </div>
+          </ReadingDetail>
+        </Block>
+
+        <Block
+          title={`Roles in ${MODES_TEXT}`}
+          intro={
+            MODES.length > 1
+              ? `Both panels below use only color roles. The ${MODES[1]} panel is the ${MODES[0]} panel with the mode switched, and nothing else changed.`
+              : 'The panel below uses only color roles: every color in it comes from a role.'
+          }
+        >
+          <ReadingDetail topic={`Roles in ${MODES_TEXT}`}>
+            <div className={cn('grid min-w-0 gap-xl', MODES.length > 1 ? 'lg:grid-cols-2' : 'max-w-[40rem]')}>
+              {MODES.map((m) => (
+                <ModePanel key={m} mode={m} />
+              ))}
+            </div>
+          </ReadingDetail>
+        </Block>
+
+        {PAIRS.length > 0 && (
+          <Block title="Contrast pairs" intro={`These are the text and icon pairs the product uses, tested in ${IN_EACH}. Text needs 4.5:1 (AA). Large text, icons and borders that identify a control need 3:1.`}>
+            <ReadingDetail topic="Contrast pairs">
+              <PairTable />
+              <Caption>Ratios are rounded down, so a pair never looks better than it is. Alpha colors are measured over the surface they sit on. Disabled text is exempt from contrast rules, but people still need to see it.</Caption>
+            </ReadingDetail>
+          </Block>
+        )}
+      </>} />
     </div>
   );
 }
@@ -754,9 +764,9 @@ interface Guide {
 }
 function GuideList({ items }: { items: Guide[] }) {
   return (
-    <div className="flex max-w-[64rem] flex-col gap-4xl">
+    <div className="flex flex-col gap-4xl">
       {items.map((g) => (
-        <section key={g.title} className="flex min-w-0 flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0">
+        <section key={g.title} className="docs-section flex min-w-0 flex-col gap-lg">
           <AnchorHeading>{g.title}</AnchorHeading>
           <div className="flex flex-col gap-md">{g.body}</div>
           {g.visual && (
@@ -1399,7 +1409,7 @@ function GuidelinesTab() {
       caption: 'Each effect reads its color from one role, so a palette change updates all three.',
     },
   ];
-  return <GuideList items={items} />;
+  return <FoundationGuidelines id="1.1" items={items} fallback={<GuideList items={items} />} />;
 }
 
 export default function Color() {
@@ -1409,7 +1419,7 @@ export default function Color() {
       <DocPage
         eyebrow="Foundations › 1.1 Color"
         title="Color"
-        description={`Color carries the brand and tells people what’s happening. Components use semantic roles instead of raw palette values, so every screen works in ${MODES_TEXT} and the palette can change in one place.`}
+        description={copySummary('1.1', `Raw palette values and semantic roles serve different purposes. Components reference roles for text, borders and surfaces; the exported mappings define their appearance in ${MODES_TEXT}.`)}
         figmaNode={figmaNodeFor('1.1')}
         tabs={[
           { label: 'Overview', render: () => <Overview /> },

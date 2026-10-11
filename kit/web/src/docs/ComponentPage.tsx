@@ -8,7 +8,7 @@ import type { AppVisual, ComponentDoc, Guideline, MatrixSpec } from './types';
 import { levelLabel } from './registry';
 import { figmaNodeFor, pageMeta } from './meta';
 import { AnchorHeading, DocTabs, PageHeader, Topics } from './DocPage';
-import { AppStage, AppTheme, Bullets, Caption, CodeBlock, ExampleBlock, H3, NoAppVersion, P, Playground, productHasApp, productHasWeb, PropsTable, Segmented, Stage, TokenTable, useScrollRegion } from './blocks';
+import { AppStage, AppTheme, Bullets, Caption, CodeBlock, ExampleBlock, H3, NoAppVersion, P, Playground, PreviewCard, PreviewTabs, productHasApp, productHasWeb, PropsTable, Segmented, Stage, TokenTable, useScrollRegion } from './blocks';
 
 export { PageHeader } from './DocPage';
 
@@ -26,7 +26,7 @@ function BoxH2({ children }: { children: ReactNode }) {
 
 function DocSection({ title, description, children }: { title: string; description?: ReactNode; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-lg">
+    <section className="docs-section flex flex-col gap-lg">
       <AnchorHeading>{title}</AnchorHeading>
       {description && <P>{description}</P>}
       {children}
@@ -41,15 +41,17 @@ function Specimen({ m }: { m: MatrixSpec }) {
   // Wide grids scroll inside their own region on small screens.
   const ref = useScrollRegion<HTMLDivElement>(m.title);
   return (
-    <div ref={ref} className="relative min-w-0 max-w-full overflow-x-auto rounded-surface outline-none focus-visible:shadow-focus-default">
-      {m.specimenRole ? (
-        <div role={m.specimenRole} aria-label={`${m.title} specimens`}>
-          {m.render()}
-        </div>
-      ) : (
-        m.render()
-      )}
-    </div>
+    <PreviewCard label={`${m.title} specimens`} padded={false}>
+      <div ref={ref} className="relative min-w-0 max-w-full overflow-x-auto outline-none focus-visible:shadow-focus-default">
+        {m.specimenRole ? (
+          <div role={m.specimenRole} aria-label={`${m.title} specimens`}>
+            {m.render()}
+          </div>
+        ) : (
+          m.render()
+        )}
+      </div>
+    </PreviewCard>
   );
 }
 
@@ -239,7 +241,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
           </div>
         ) : (
           <div className="flex flex-col gap-4xl">
-            <Stage className="min-h-56 bg-surface-sunken">{doc.hero()}</Stage>
+            <PreviewTabs label="Component preview"><Stage className="min-h-72">{doc.hero()}</Stage></PreviewTabs>
             {doc.examples.length > 0 && (
               <DocSection title="Examples in use">
                 <div className="grid grid-cols-[minmax(0,1fr)] gap-3xl xl:grid-cols-2">
@@ -285,9 +287,9 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
               </DocSection>
             ))}
             {doc.privateParts && doc.privateParts.length > 0 && (
-              <div className="flex flex-col gap-3xl rounded-surface border border-border-subtle p-2xl">
+              <section className="docs-section flex flex-col gap-3xl">
                 <div className="flex flex-col gap-xs">
-                  <span className="type-body-xs-semibold uppercase tracking-wide text-text-tertiary">Building blocks</span>
+                  <AnchorHeading>Building blocks</AnchorHeading>
                   <P>The private parts this component is built from, kept in the .Main frame in Figma. They aren’t exported on their own. Change one, and every variant that uses it changes too.</P>
                 </div>
                 {doc.privateParts.map((m) => (
@@ -295,7 +297,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
                     <Specimen m={m} />
                   </DocSection>
                 ))}
-              </div>
+              </section>
             )}
           </div>
         ),
@@ -332,14 +334,14 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
       render: () => (
         <Topics items={platform === 'app' ? doc.guidelines.map((g) => appGuideline(g, app?.visuals?.[g.title])) : doc.guidelines}>
           {productHasApp && app?.notes && app.notes.length > 0 && (
-            <section className="flex flex-col gap-lg">
+            <section className="docs-section flex flex-col gap-lg">
               <AnchorHeading>In apps</AnchorHeading>
               <P>Review the interaction and accessibility notes for iOS and Android. Verify them in the target app before release.</P>
               <Bullets items={app.notes} />
             </section>
           )}
           {doc.accessibility && (
-            <section className="flex flex-col gap-lg">
+            <section className="docs-section flex flex-col gap-lg">
               <AnchorHeading>Accessibility</AnchorHeading>
               <Bullets items={doc.accessibility} />
             </section>
@@ -353,7 +355,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
         const cp = codeOptions.find((c) => c.value === codePlatform) ?? codeOptions[0];
         const ap = cp.value as Exclude<CodePlatform, 'react'>;
         return (
-          <div className="flex max-w-[64rem] flex-col gap-4xl">
+          <div className="flex flex-col gap-4xl">
             {codeOptions.length > 1 && <Segmented label="Code for" options={codeOptions} value={cp.value} onChange={setCodePlatform} />}
             {cp.value === 'react' ? (
               <>
@@ -420,7 +422,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
   ];
 
   return (
-    <article className="flex flex-col gap-4xl">
+    <DocTabs tabs={tabs} label={`${doc.name} documentation`} header={
       <PageHeader
         eyebrow={`${levelLabel[doc.level]} › ${doc.id} ${doc.name}`}
         title={doc.name}
@@ -441,8 +443,7 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
           ) : undefined
         }
       />
-      <DocTabs tabs={tabs} label={`${doc.name} documentation`} />
-      <footer className="flex flex-wrap gap-x-xl gap-y-xs border-t border-border-subtle pt-lg type-body-xs-regular text-text-tertiary">
+      } footer={<footer className="flex flex-wrap gap-x-xl gap-y-xs type-body-xs-regular text-text-tertiary">
         <span>Since v{meta?.since ?? '1.0'}</span>
         <span>
           Spec: <span className="type-code-sm-regular">{doc.spec}</span>
@@ -450,7 +451,6 @@ export function ComponentPage({ doc }: { doc: ComponentDoc }) {
         <span>
           Exports: <span className="type-code-sm-regular">{doc.exports.join(', ')}</span>
         </span>
-      </footer>
-    </article>
+      </footer>} />
   );
 }

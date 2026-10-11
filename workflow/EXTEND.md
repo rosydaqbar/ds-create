@@ -1,5 +1,7 @@
 # Extend
 
+All documentation written through this workflow follows `workflow/EDITORIAL.md` and `kit/web/COPY-GUIDE.md`. The standard applies to every subject, platform and level, including new categories. Verify applicable facts and decisions before prose; preserve implementation references and adapt the organization to the subject.
+
 Extend adds a component to a design system that has already been initiated. It is used for every new component at any level — Part, Component, Section, Layout or Screen — and for components a designer drew themselves and wants in the library. It follows the same steps every time, so an extended component looks and is documented exactly like the ones built at initiation.
 
 Always load `README.md`, `specs/SYSTEM.md`, `workflow/GOTCHAS.md`, `workflow/templates/structure.md`, `input/{system-slug}/sources.md` (and any input file added since, `input/README.md` I5) and the folder file of the target level (`specs/parts/00-parts.md`, `specs/components/00-components.md`, `specs/sections/00-sections.md`, `specs/layouts/00-layouts.md` or `specs/screens/00-screens.md`) before extending.

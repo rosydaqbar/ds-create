@@ -1,3 +1,5 @@
+import { copySummary } from '../../copy';
+import { ReadingDetail, FoundationNarrative, FoundationGuidelines } from '../../FoundationCopy';
 import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenTextStyle } from '@/tokens/types';
@@ -5,7 +7,7 @@ import { cn } from '@/lib/cn';
 import { config } from '@/ds.config';
 import { Badge, Button, Icon, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
+import { PreviewCard, breakable, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { brandCopy } from '@/brand/copy';
 
@@ -136,7 +138,7 @@ const EVEN_LINE_HEIGHTS = tokens.textStyles.length > 0 && tokens.textStyles.ever
 /* ---------- shared bits ---------- */
 function Block({ title, intro, children }: { title: string; intro?: ReactNode; children: ReactNode }) {
   return (
-    <section className="flex min-w-0 flex-col gap-lg">
+    <section className="docs-section flex min-w-0 flex-col gap-lg">
       <AnchorHeading>{title}</AnchorHeading>
       {intro && <P>{intro}</P>}
       {children}
@@ -144,7 +146,7 @@ function Block({ title, intro, children }: { title: string; intro?: ReactNode; c
   );
 }
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl', className)}>{children}</div>;
+  return <PreviewCard className={className}>{children}</PreviewCard>;
 }
 function slashes(text: ReactNode): ReactNode {
   if (typeof text !== 'string') return text;
@@ -235,7 +237,7 @@ function TypefaceCard({ family }: { family: Family }) {
   /* Monospace glyphs run wider, so the mono card sets its sample lines in the code style. */
   const sample = (family.key === 'mono' ? pick('type/code/md/regular') : undefined) ?? BODY;
   return (
-    <div className="flex min-w-0 flex-col gap-lg rounded-surface border border-border-subtle bg-surface-base p-xl md:p-2xl">
+    <PreviewCard label={`${family.label} specimen`} className="flex flex-col gap-lg">
       <div className="flex flex-wrap items-baseline justify-between gap-sm">
         <h3 className="type-heading-sm-semibold text-text-primary">{family.label}</h3>
         <Code>{family.token}</Code>
@@ -251,7 +253,7 @@ function TypefaceCard({ family }: { family: Family }) {
       </div>
       <p className="type-body-sm-regular text-text-secondary">{familyUse(family)}</p>
       <p className="type-body-xs-regular text-text-tertiary">Set by {family.token}. Change its value and every style that uses it follows.</p>
-    </div>
+    </PreviewCard>
   );
 }
 
@@ -264,7 +266,7 @@ function TypeScale() {
             <h3 className="type-heading-xs-semibold text-text-primary">{info(role).title}</h3>
             <p className="type-body-sm-regular max-w-(--size-measure-reading) text-text-secondary">{info(role).use}</p>
           </div>
-          <div className="flex flex-col divide-y divide-border-subtle rounded-surface border border-border-subtle bg-surface-base">
+          <PreviewCard label={`${info(role).title} styles`} padded={false} className="flex flex-col divide-y divide-border-subtle">
             {rows.map(({ size, styles }) => (
               <div key={size} className="grid min-w-0 gap-md p-lg md:grid-cols-[12rem_minmax(0,1fr)] md:items-center md:p-xl">
                 <div className="flex flex-col gap-xxs">
@@ -285,7 +287,7 @@ function TypeScale() {
                 </div>
               </div>
             ))}
-          </div>
+          </PreviewCard>
         </div>
       ))}
     </div>
@@ -336,45 +338,50 @@ function HierarchyExample() {
 }
 
 function Overview() {
-  const jobs: Record<string, string> = { ui: FAMILIES.some((f) => f.key === 'display') ? 'the rest of the interface' : 'the interface', display: 'display and headline text', mono: 'code and data' };
-  const families = FAMILIES.length <= 1 ? `One family, ${UI_FAMILY}, sets every interface role.` : `${list(FAMILIES.map((f) => `${f.label} sets ${jobs[f.key] ?? `${f.key} text`}`))}.`;
-  const intro = `${families} ${brandCopy.typefaceIntro}`;
   return (
     <div className="flex flex-col gap-6xl">
-      <Block title="How typography works" intro={intro}>
-        <LayerModel />
-        <Bullets
-          items={[
-            <>
-              <strong className="font-semibold text-text-primary">Apply a text style, not a raw size.</strong> Every piece of text uses one of the styles below, so one change at the source reaches every screen.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Keep the hierarchy simple.</strong> Size, weight and color work together to set the levels. A dense screen rarely needs more than three sizes.
-            </>,
-            <>
-              <strong className="font-semibold text-text-primary">Write for reading.</strong> Body text is {BASE}, stays within the reading measure and has generous line height.
-            </>,
-          ]}
-        />
-      </Block>
-
-      {FAMILIES.length > 0 && (
-        <Block title="Typefaces" intro={`The product uses ${words(FAMILIES.length)} ${FAMILIES.length === 1 ? 'typeface' : 'typefaces'}. Each card is set in the typeface it describes.`}>
-          <div className="grid gap-xl lg:grid-cols-2">
-            {FAMILIES.map((f) => (
-              <TypefaceCard key={f.token} family={f} />
-            ))}
-          </div>
+      <FoundationNarrative id="1.2" visuals={{ 'type-model': <LayerModel /> }} fallback={<>
+        <Block title="Applying text styles" intro="Use a named style for a complete combination of family, size, weight and line height. Changing only the font size leaves the other settings outside the shared style.">
+          <LayerModel />
+          <Bullets
+            items={[
+              <>
+                <strong className="font-semibold text-text-primary">Apply a text style, not a raw size.</strong> Every piece of text uses one of the styles below, so one change at the source reaches every screen.
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Keep the hierarchy simple.</strong> Size, weight and color work together to set the levels. A dense screen rarely needs more than three sizes.
+              </>,
+              <>
+                <strong className="font-semibold text-text-primary">Write for reading.</strong> Body text is {BASE}, stays within the reading measure and has generous line height.
+              </>,
+            ]}
+          />
         </Block>
-      )}
 
-      <Block title="Type scale" intro="Styles are grouped by role and run from largest to smallest. Each row shows a sample in every weight that role supports, with its size / line height · letter spacing.">
-        <TypeScale />
-      </Block>
+        {FAMILIES.length > 0 && (
+          <Block title="Typefaces" intro={`The product uses ${words(FAMILIES.length)} ${FAMILIES.length === 1 ? 'typeface' : 'typefaces'}. Each card is set in the typeface it describes.`}>
+            <ReadingDetail topic="Typefaces">
+              <div className="grid gap-xl lg:grid-cols-2">
+                {FAMILIES.map((f) => (
+                  <TypefaceCard key={f.token} family={f} />
+                ))}
+              </div>
+            </ReadingDetail>
+          </Block>
+        )}
 
-      <Block title="Hierarchy in use" intro="A page header and its content, labeled with the style each line uses. Cover the labels and the levels still read clearly.">
-        <HierarchyExample />
-      </Block>
+        <Block title="Type scale" intro="Styles are grouped by role and run from largest to smallest. Each row shows a sample in every weight that role supports, with its size / line height · letter spacing.">
+          <ReadingDetail topic="Type scale">
+            <TypeScale />
+          </ReadingDetail>
+        </Block>
+
+        <Block title="Hierarchy in use" intro="A page header and its content, labeled with the style each line uses. Cover the labels and the levels still read clearly.">
+          <ReadingDetail topic="Hierarchy in use">
+            <HierarchyExample />
+          </ReadingDetail>
+        </Block>
+      </>} />
     </div>
   );
 }
@@ -513,9 +520,9 @@ interface Guide {
 }
 function GuideList({ items }: { items: Guide[] }) {
   return (
-    <div className="flex max-w-[64rem] flex-col gap-4xl">
+    <div className="flex flex-col gap-4xl">
       {items.map((g) => (
-        <section key={g.title} className="flex min-w-0 flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0">
+        <section key={g.title} className="docs-section flex min-w-0 flex-col gap-lg">
           <AnchorHeading>{g.title}</AnchorHeading>
           <div className="flex flex-col gap-md">{g.body}</div>
           {g.visual && (
@@ -975,7 +982,7 @@ function GuidelinesTab() {
       caption: 'The same text capped at the reading measure and running full width. On wide screens, the uncapped line grows past 120 characters.',
     },
   ];
-  return <GuideList items={items} />;
+  return <FoundationGuidelines id="1.2" items={items} fallback={<GuideList items={items} />} />;
 }
 
 export default function Typography() {
@@ -983,7 +990,7 @@ export default function Typography() {
     <DocPage
       eyebrow="Foundations › 1.2 Typography"
       title="Typography"
-      description="Text styles set the hierarchy of every screen, from hero headlines to table data. Each Figma text style has a matching utility class: type/body/md/regular → type-body-md-regular."
+      description={copySummary('1.2', "Text styles define complete settings for display, headings, body text and code. Choose the role for the content before choosing its size or weight.")}
       figmaNode={figmaNodeFor('1.2')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

@@ -278,7 +278,7 @@ They run only when the user calls `/ds-create qa` (*QA on call*), and a fast bui
   3. the page file's QA list and the folder file's completion criteria pass;
   4. `kit/tools/figma-audit.js` on the page reports `fail` = 0, saved in `output/{system-slug}/figma/`;
   5. pages with component sets (steps 16–19): the set snapshots from the library step are current; re-export a set when the docs step changed it. Docs agents (step 23) read these files and open Figma only for screenshots;
-  6. its copy file exists with the sections of its page type, `kit/tools/figma-copy.js` in `diff` mode reports 0 differences, and `kit/tools/copy-guard.mjs` finds no citation of `knowledge/` (`workflow/COPY.md` §1, §7);
+  6. its pre-draft editorial plan passes the coverage/evidence review (workflow/EDITORIAL.md), its copy file exists with the transport sections of its page type, `kit/tools/figma-copy.js` in `diff` mode reports 0 differences, and `kit/tools/copy-guard.mjs` finds no citation of `knowledge/` (`workflow/COPY.md` §1, §7);
   7. every knowledge rule that applies to it (`knowledge/system.md` and its own file) is followed, and each entry's *Status* says `applied` (`input/README.md` I7). The ledger lists the knowledge files under `loaded`.
 - **Approved exceptions.** When an audit fail can't be fixed without a change the user ruled out (for example existing values that must stay), ask the user. An approved exception is recorded in the ledger under `auditExceptions` (contrast pairs, unsupported modes, collections that aren't tokens) with the date and reason, documented on the page it belongs to (contrast pairs on 1.1 Color, an unsupported mode on 02 Tokens), and copied into the `ACCEPTED` block of `kit/tools/figma-audit.js` for the run. The audit then reports it as `info`, not `fail`. An exception the user didn't approve is a fail.
 - **Keep and Audit pages take their steps too**, the library step and the docs step. Load the file, compare, run the audit and record the findings. They change nothing, and they are done when the findings are recorded.
@@ -347,7 +347,7 @@ Validation fails immediately if:
 - template frames are missing, renamed or out of order;
 - component matrices are reduced to showcase samples;
 - documented anatomy is flattened;
-- required Guidelines topics or visual examples are missing;
+- required guideline coverage or supported visual examples are missing (topic grouping/headings may adapt through workflow/EDITORIAL.md);
 - approved requirements disappear during a local fix.
 
 Then run:

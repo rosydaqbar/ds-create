@@ -1,11 +1,13 @@
+import { copySummary } from '../copy';
+import { ReadingDetail, ReadingTopic } from '../FoundationCopy';
 import { Fragment, useDeferredValue, useMemo, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { tokens } from '@/tokens/tokens.gen';
 import type { TokenVariable } from '@/tokens/types';
 import { Icon } from '@/icons';
 import { Button, Progress, Select, Switch, TextField } from '@/components';
-import { AnchorHeading, DocPage } from '../DocPage';
-import { appTokenNames, breakable, Bullets, Caption, DoDont, H3, InlineCode, P, productHasWeb, Swatch, TokenTable } from '../blocks';
+import { DocPage } from '../DocPage';
+import { PreviewCard, appTokenNames, breakable, Bullets, Caption, DoDont, H3, InlineCode, P, productHasWeb, Swatch, TokenTable } from '../blocks';
 import { siteHasDark, supportedModes, unsupportedModes } from '../modes';
 import { componentDocs, slugOf, staticPages } from '../registry';
 import { figmaNodeFor } from '../meta';
@@ -120,16 +122,11 @@ function TextLink({ to, children }: { to: string; children: ReactNode }) {
     </Link>
   );
 }
-function Topic({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0 last:pb-0">
-      <AnchorHeading>{title}</AnchorHeading>
-      {children}
-    </section>
-  );
+function Topic({ title, aliases, children }: { title: string; aliases?: string[]; children: ReactNode }) {
+  return <ReadingTopic id="02" title={title} aliases={aliases}>{children}</ReadingTopic>;
 }
 function Visual({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`min-w-0 rounded-surface border border-border-subtle bg-surface-sunken p-xl md:p-3xl ${className}`}>{children}</div>;
+  return <PreviewCard label="Example preview" className={className}>{children}</PreviewCard>;
 }
 function TableRegion({ label, children, className = '' }: { label: string; children: ReactNode; className?: string }) {
   return (
@@ -251,83 +248,11 @@ function ModeCard() {
   );
 }
 
-/* What the token system is for (specs/guidance/02-tokens.md §2.1): four goals, each with what it means and where this system meets it. */
-const goalRole = ['color/fill/brand/solid', 'color/text/brand', 'color/fill/accent/solid'].find((n) => byName.has(n));
-const GOALS: { goal: string; means: string; here: string; see: string; to: string }[] = [
-  {
-    goal: 'Simplicity',
-    means: 'One name per concept, and only as many collections as there are domains.',
-    here: `${tokens.collections.length} collections (${joinList(tokens.collections.map((c) => c.name))}) share one naming grammar: domain, group, role, then emphasis or state.`,
-    see: 'Naming',
-    to: '#naming',
-  },
-  {
-    goal: 'Accessibility',
-    means: 'Every text and surface pair passes contrast in each supported mode before a component uses it.',
-    here: `Pairs are checked in ${joinList(supportedModes)}${unsupportedModes.length ? `; ${joinList(unsupportedModes)} is checked once it has real values` : ''}. Pairs below AA are listed on 1.1 Color with the rule that makes them safe.`,
-    see: '1.1 Color',
-    to: pageTo('1.1'),
-  },
-  {
-    goal: 'Aesthetics',
-    means: 'The brand’s character lives in the primitives and the roles that alias them, never on layers.',
-    here: goalRole
-      ? `${families.length} palette families sit behind the color roles; ${goalRole} → ${primitiveOf(goalRole)} carries the brand into every component that uses it.`
-      : `${families.length} palette families sit behind the color roles.`,
-    see: 'Primitive palette',
-    to: '#primitive-palette',
-  },
-  {
-    goal: 'Scalability',
-    means: 'New modes, brands and components add values without renaming anything.',
-    here: unsupportedModes.length
-      ? `The ${joinList(unsupportedModes)} column is already in the Color collection, waiting for values; new roles go into the groups that exist.`
-      : 'New roles go into the groups that exist, and new modes into the collections that exist.',
-    see: 'Modes',
-    to: '#modes',
-  },
-];
-/* The connecting paragraph: each goal makes the next one possible. */
-const GOALS_LINK = `Because each concept has one name, each role exists once, so each foreground and background pair is checked once, in ${joinList(supportedModes)}. The brand sits in the primitives behind those roles, so restyling never touches a component, and growth only adds values and modes, never renames what exists.`;
-function HashOrPageLink({ to, children }: { to: string; children: ReactNode }) {
-  const cls = 'rounded-xs font-semibold text-text-brand underline decoration-1 underline-offset-2 outline-none is-hover:text-text-brand-hover is-focus:shadow-focus-default';
-  return to.startsWith('#') ? (
-    <a href={to} className={cls}>
-      {children}
-    </a>
-  ) : (
-    <Link to={to} className={cls}>
-      {children}
-    </Link>
-  );
-}
-
 function Overview() {
   return (
-    <div className="flex max-w-[64rem] flex-col gap-4xl">
-      <Topic title="What the token system is for">
-        <P>Four goals decide every token. Each one is a concrete rule with a place in this file where you can check it.</P>
-        <div className="grid gap-md sm:grid-cols-2">
-          {GOALS.map((g) => (
-            <div key={g.goal} className="flex flex-col gap-md rounded-surface border border-border-subtle p-xl">
-              <H3>{g.goal}</H3>
-              <dl className="flex flex-col gap-sm">
-                <div className="flex flex-col gap-xxs">
-                  <dt className="type-body-xs-semibold text-text-tertiary">What it means</dt>
-                  <dd className="type-body-sm-regular text-text-secondary">{g.means}</dd>
-                </div>
-                <div className="flex flex-col gap-xxs">
-                  <dt className="type-body-xs-semibold text-text-tertiary">In this system</dt>
-                  <dd className="type-body-sm-regular text-text-secondary">{g.here}</dd>
-                </div>
-              </dl>
-              <span className="type-body-sm-regular mt-auto">
-                <HashOrPageLink to={g.to}>See {g.see} →</HashOrPageLink>
-              </span>
-            </div>
-          ))}
-        </div>
-        <P>{GOALS_LINK}</P>
+    <div className="flex flex-col gap-4xl">
+      <Topic title="Selecting a token" aliases={['What the token system is for']}>
+        <P>Choose a token by the property and purpose of the element. For supporting text, use a secondary text role rather than selecting a palette swatch by eye. A role keeps that use connected to its source value when the palette changes.</P>
       </Topic>
 
       <Topic title="The collections">
@@ -473,6 +398,7 @@ function Overview() {
 
       <Topic title="Naming">
         <P>Names group tokens by domain and purpose. Check the domain-specific patterns below and use Reference for the exact name.</P>
+        <ReadingDetail topic="The grammar">
         <Visual className="flex flex-col gap-xl">
           <span className="type-code-md-regular text-text-secondary">{'{domain}/{group}/{role}[/{emphasis}][/{state}]'}</span>
           <SegmentAnatomy />
@@ -504,10 +430,12 @@ function Overview() {
             </tbody>
           </table>
         </TableRegion>
+        </ReadingDetail>
         <H3>Roles and children</H3>
         <P>
           States and variants sit under their role as children. The role itself is the resting value, so there’s no <InlineCode>/rest</InlineCode> or <InlineCode>/default</InlineCode> segment.
         </P>
+        <ReadingDetail topic="Roles and children">
         <div className="flex flex-col gap-xs rounded-surface border border-border-subtle p-lg">
           {['color/text/brand', 'hover', 'pressed'].filter((n, i) => byName.has(i === 0 ? n : `color/text/brand/${n}`)).map((n, i, all) => {
             const full = i === 0 ? n : `color/text/brand/${n}`;
@@ -527,16 +455,20 @@ function Overview() {
             );
           })}
         </div>
+        </ReadingDetail>
         <H3>Names describe purpose, not values</H3>
         <P>
           Name a token for its job, not for how it looks or the one place it appears. Sizes are named by step (<InlineCode>xs</InlineCode> to <InlineCode>2xl</InlineCode>), so their values
           can change without a rename.
         </P>
+        <ReadingDetail topic="Names describe purpose, not values">
         <div className="grid gap-xl md:grid-cols-2">
           <DoDont kind="do" caption="color/text/secondary · space/md · radius/control" />
           <DoDont kind="dont" caption="gray-text-2 · space-8px · button-radius-login" />
         </div>
+        </ReadingDetail>
         <H3>From Figma to code</H3>
+        <ReadingDetail topic="Code syntax" aliases={['From Figma to code']}>
         {productHasWeb ? (
           <>
             <P>
@@ -603,9 +535,12 @@ function Overview() {
             </TableRegion>
           </>
         )}
+        </ReadingDetail>
+        <ReadingDetail topic="Descriptions">
         <Caption>
           Every semantic variable describes what it’s for in the UI. You’ll see the same text in Figma’s picker tooltip and in the <TextLink to="?tab=reference">Reference</TextLink> table.
         </Caption>
+        </ReadingDetail>
       </Topic>
 
       <Topic title="Modes">
@@ -625,6 +560,7 @@ function Overview() {
             </>
           )}
         </P>
+        <ReadingDetail topic="Color modes">
         <TableRegion label={`Color roles in ${joinList(supportedModes)}`}>
           <table className="w-full border-collapse text-left">
             <thead className="bg-surface-sunken">
@@ -660,11 +596,13 @@ function Overview() {
             </div>
           ))}
         </div>
+        </ReadingDetail>
         <H3>Motion: Standard and Reduced</H3>
         <P>
           For people who ask their device for less motion, Reduced turns movement into instant changes or short fades. Fades and loops stay, because they don’t move anything across the
           screen.
         </P>
+        <ReadingDetail topic="Motion modes" aliases={['Motion: Standard and Reduced']}>
         <TableRegion label="Motion durations in Standard and Reduced">
           <table className="w-full border-collapse text-left">
             <thead className="bg-surface-sunken">
@@ -689,6 +627,7 @@ function Overview() {
             </tbody>
           </table>
         </TableRegion>
+        </ReadingDetail>
         <Bullets
           items={[
             singleDensity ? (
@@ -737,6 +676,7 @@ function Overview() {
           used directly in components, and they change only when the brand does.{' '}
           {paletteCharacter}
         </P>
+        <ReadingDetail topic="Primitive tables">
         <Visual className="flex flex-col gap-md">
           {families.map((f) => {
             const steps = tokens.variables.filter((t) => t.name.startsWith(`palette/${f}/`));
@@ -752,6 +692,8 @@ function Overview() {
             );
           })}
         </Visual>
+        </ReadingDetail>
+        <ReadingDetail topic="Transparent shades">
         <P>
           {families.includes('alpha-black') && families.includes('alpha-white') && (
             <>
@@ -761,10 +703,13 @@ function Overview() {
           )}
           The number scales are {joinList(scales.map((s) => `scale/${s}`))}.
         </P>
+        </ReadingDetail>
+        <ReadingDetail topic="Changing primitives">
         <Caption>
-          For every step with its value and contrast, see <TextLinkTo id="1.1" label="1.1 Color" />. Change a primitive only when the brand changes, then check the roles that use it and
+          For every step with its value and contrast, see <TextLinkTo id="1.1" label="1.1 Color" />. Before changing a primitive, inspect its dependent roles and
           rerun the contrast tests.
         </Caption>
+        </ReadingDetail>
       </Topic>
     </div>
   );
@@ -866,7 +811,7 @@ export default function Tokens() {
     <DocPage
       eyebrow="Guidance › 02 Tokens"
       title="Tokens"
-      description="Tokens are the named values behind every screen, shared by Figma and code. Here’s how they’re organized, named and switched between modes. Look up any token in the Reference tab."
+      description={copySummary('02', "Tokens are the named values behind every screen, shared by Figma and code. Here’s how they’re organized, named and switched between modes. Look up any token in the Reference tab.")}
       figmaNode={figmaNodeFor('02')}
       tabs={[
         { label: 'Overview', render: () => <Overview /> },

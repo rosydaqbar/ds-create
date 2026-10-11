@@ -216,7 +216,7 @@ function packReading(m, copy, errs) {
       if (visual && texts) visual = Array.isArray(visual) ? visual.map((v, k) => (k === 0 ? { ...v, texts } : v)) : { ...visual, texts };
       items.push({ title: it.title, badge: it.badge, numbered: it.numbered, lines, visual, at });
     }
-    frames.push({ name: f.name, title: f.title, kind: f.kind, width: f.width, header: sec ? paras(sec.lines).join(' ') : undefined, items });
+    frames.push({ name: f.name, title: f.title, kind: f.kind, width: f.width, header: (sec ? paras(sec.lines).join(' ') : '') || (f.name === 'Overview' ? paras(findSection(copy, 'Summary')?.lines || []).join(' ') : undefined), items });
   }
   for (const s of copy?.sections || []) for (const i of s.items) if (!placed.has(`${norm(s.name)}|${norm(i.title)}`)) errs.push(`${m.page}: copy "${s.name} › ${i.title}" has no place in the manifest`);
   return { page: m.page, type: 'reading', frames };

@@ -25,10 +25,10 @@ export function PageHeader({
   figmaNode?: string;
 }) {
   return (
-    <header className="flex flex-col gap-md rounded-surface bg-surface-sunken p-2xl md:p-4xl dark:bg-surface-raised">
-      <span className="type-body-sm-medium text-text-brand">{eyebrow}</span>
+    <header className="docs-page-header flex flex-col gap-md">
+      <span className="type-body-xs-regular text-text-tertiary">{eyebrow}</span>
       <div className="flex flex-wrap items-center gap-md">
-        <h1 className="type-display-sm-semibold text-text-primary">{title}</h1>
+        <h1 className="type-heading-xl-semibold text-text-primary">{title}</h1>
         {status && <StatusPill status={status} />}
       </div>
       <P className="type-body-lg-regular">{description}</P>
@@ -58,7 +58,7 @@ export interface DocTab {
   render: () => ReactNode;
 }
 
-export function DocTabs({ tabs, label }: { tabs: DocTab[]; label: string }) {
+export function DocTabs({ tabs, label, header, footer }: { tabs: DocTab[]; label: string; header?: ReactNode; footer?: ReactNode }) {
   const [params, setParams] = useSearchParams();
   const key = (t: DocTab) => slugify(t.label);
   const current = tabs.find((t) => key(t) === params.get('tab')) ?? tabs[0];
@@ -68,7 +68,10 @@ export function DocTabs({ tabs, label }: { tabs: DocTab[]; label: string }) {
 
   const select = (t: DocTab, focus = false) => {
     setParams(t === tabs[0] ? {} : { tab: key(t) }, { replace: true });
-    if (focus) refs.current[tabs.indexOf(t)]?.focus();
+    if (focus) {
+      const button = refs.current[tabs.indexOf(t)];
+      button?.focus({ preventScroll: true });
+    }
   };
   const onKey = (e: KeyboardEvent) => {
     const i = tabs.indexOf(current);
@@ -77,6 +80,15 @@ export function DocTabs({ tabs, label }: { tabs: DocTab[]; label: string }) {
     e.preventDefault();
     select(tabs[next], true);
   };
+
+  // Reveal a selected pill in the horizontal track without scrolling the document.
+  useEffect(() => {
+    const button = refs.current[tabs.indexOf(current)];
+    const track = button?.parentElement;
+    if (!button || !track) return;
+    const item = button.getBoundingClientRect(), viewport = track.getBoundingClientRect();
+    track.scrollLeft += item.left < viewport.left ? item.left - viewport.left : item.right > viewport.right ? item.right - viewport.right : 0;
+  }, [current]);
 
   // Deep link to a section: ?s=<heading id>
   const section = params.get('s');
@@ -87,51 +99,51 @@ export function DocTabs({ tabs, label }: { tabs: DocTab[]; label: string }) {
   }, [section, current]);
 
   return (
-    <>
-      <div className="relative sticky top-16 z-10 -mt-xl bg-surface-base">
-        <div role="tablist" aria-label={label} onKeyDown={onKey} className="flex gap-xs overflow-x-auto border-b border-border-subtle pt-md [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {tabs.map((t, i) => {
-            const on = t === current;
-            return (
-              <button
-                key={t.label}
-                ref={(el) => {
-                  refs.current[i] = el;
-                }}
-                id={`${idBase}-tab-${key(t)}`}
-                role="tab"
-                type="button"
-                aria-selected={on}
-                aria-controls={`${idBase}-panel`}
-                tabIndex={on ? 0 : -1}
-                onClick={() => select(t)}
-                className={cn(
-                  'type-body-sm-semibold -mb-px shrink-0 cursor-pointer border-b-2 px-lg py-md outline-none transition-colors duration-(--motion-duration-fast) is-focus:shadow-focus-default',
-                  on ? 'border-border-brand text-text-brand' : 'border-transparent text-text-tertiary is-hover:text-text-primary',
-                )}
-              >
-                {t.label}
-              </button>
-            );
-          })}
+    <div className="docs-reading-layout">
+      <article className="docs-reading-card">
+        {header}
+        <div className="docs-tab-dock">
+          <div role="tablist" aria-label={label} onKeyDown={onKey} className="docs-page-tabs flex gap-xs overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {tabs.map((t, i) => {
+              const on = t === current;
+              return (
+                <button
+                  key={t.label}
+                  ref={(el) => {
+                    refs.current[i] = el;
+                  }}
+                  id={`${idBase}-tab-${key(t)}`}
+                  role="tab"
+                  type="button"
+                  aria-selected={on}
+                  aria-controls={`${idBase}-panel`}
+                  tabIndex={on ? 0 : -1}
+                  onClick={() => select(t)}
+                  className={cn(
+                    'type-body-sm-semibold shrink-0 cursor-pointer px-lg py-sm outline-none transition-colors duration-(--motion-duration-fast)',
+                    on ? 'text-text-primary' : 'text-text-secondary',
+                  )}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        {/* Edge fade on small screens: shows the row scrolls. */}
-        <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-surface-base md:hidden" />
-      </div>
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-4xl xl:grid-cols-[minmax(0,1fr)_200px]">
         <div
           key={current.label}
           ref={panelRef}
           id={`${idBase}-panel`}
           role="tabpanel"
           aria-labelledby={`${idBase}-tab-${key(current)}`}
-          className="motion-fade-in min-w-0"
+          className="docs-panel motion-fade-in min-w-0"
         >
           {current.render()}
         </div>
-        <OnThisPage panel={panelRef} deps={current.label} />
-      </div>
-    </>
+        {footer && <div className="docs-page-footer">{footer}</div>}
+      </article>
+      <OnThisPage panel={panelRef} deps={current.label} />
+    </div>
   );
 }
 
@@ -154,10 +166,10 @@ function OnThisPage({ panel, deps }: { panel: React.RefObject<HTMLDivElement | n
     if (panel.current) mo.observe(panel.current, { childList: true, subtree: true });
     return () => mo.disconnect();
   }, [panel, deps]);
-  if (items.length < 3) return <div className="hidden xl:block" />;
+  if (items.length < 3) return <div className="hidden 2xl:block" />;
   return (
-    <nav aria-label="On this page" className="sticky top-36 hidden max-h-[calc(100vh-10rem)] self-start overflow-y-auto xl:flex xl:flex-col xl:gap-xs">
-      <span className="type-body-xs-semibold pb-xs uppercase tracking-wide text-text-tertiary">On this page</span>
+    <nav aria-label="On this page" className="docs-toc sticky top-24 hidden max-h-[calc(100vh-8rem)] self-start overflow-y-auto 2xl:flex 2xl:flex-col 2xl:gap-xs">
+      <span className="type-body-xs-semibold pb-xs text-text-tertiary">On this page</span>
       {items.map((i) => (
         <a
           key={i.id}
@@ -199,26 +211,25 @@ export function DocPage({
   tabs: DocTab[];
 }) {
   return (
-    <article className="flex flex-col gap-4xl">
+    <DocTabs tabs={tabs} label={`${title} documentation`} header={
       <PageHeader eyebrow={eyebrow} title={title} description={description} status={status} figmaNode={figmaNode} meta={meta} />
-      <DocTabs tabs={tabs} label={`${title} documentation`} />
-    </article>
+    } />
   );
 }
 
 /* ---------- guideline topics (same layout as component Guidelines) ---------- */
-export function Topics({ items, children, intro }: { items: Topic[]; children?: ReactNode; intro?: ReactNode }) {
+export function Topics({ items, children, intro, flow = false }: { items: Topic[]; children?: ReactNode; intro?: ReactNode; flow?: boolean }) {
   return (
-    <div className="flex max-w-[64rem] flex-col gap-4xl">
+    <div className="flex flex-col gap-4xl">
       {intro}
       {items.map((g) => (
-        <section key={g.title} className="flex flex-col gap-lg border-b border-border-subtle pb-4xl last:border-b-0">
+        <section data-reading-topic={g.title} key={g.title} className="docs-section flex flex-col gap-lg">
           {g.aliases?.map((id) => <span key={id} id={id} aria-hidden="true" className="scroll-mt-36" />)}
           <AnchorHeading>{g.title}</AnchorHeading>
           {g.body.split('\n\n').map((para, i) => (
             <P key={i}>{para}</P>
           ))}
-          {g.render && <Stage>{g.render()}</Stage>}
+          {g.render && <Stage flow={flow} className={flow ? 'flex flex-col gap-xl' : undefined} label={flow ? g.title : 'Example'}>{g.render()}</Stage>}
           {(g.do || g.dont) && (
             <div className="grid grid-cols-[minmax(0,1fr)] gap-xl md:grid-cols-2">
               {g.do && <DoDont kind="do" caption={g.do.caption}>{g.do.render?.()}</DoDont>}
