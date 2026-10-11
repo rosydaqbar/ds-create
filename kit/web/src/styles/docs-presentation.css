@@ -6,14 +6,13 @@
     --docs-round: max(1rem, var(--radius-surface));
   }
   .docs-main { padding: .75rem 1rem 3rem; }
-  .docs-brand, .docs-top-actions {
+  .docs-brand {
     min-height: 2.75rem;
     border: 1px solid var(--docs-edge);
     border-radius: 999px;
     background: var(--docs-panel);
     padding: .375rem .75rem;
   }
-  .docs-top-actions:empty { display: none; }
   .docs-reading-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; align-items: start; }
   .docs-reading-card {
     --docs-gutter: clamp(1.25rem, 3vw, 2.5rem);

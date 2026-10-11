@@ -162,34 +162,33 @@ export function App() {
           <img src={logo} alt="" className="h-6 md:h-7" />
           <span className="type-code-sm-regular hidden rounded-indicator bg-surface-sunken px-md py-xxs text-text-tertiary sm:inline">v{config.version}</span>
         </Link>
-        <div className={cn('docs-top-actions ml-auto flex items-center gap-sm md:gap-md', siteSchemes.length < 2 && 'lg:hidden')}>
+        {siteSchemes.length > 1 && (
           <button
             type="button"
-            ref={searchTrigger}
-            onClick={() => setSearching(true)}
-            aria-label="Search"
-            aria-keyshortcuts="Meta+K Control+K /"
-            className="type-body-sm-regular inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default bg-surface-base px-sm text-text-placeholder outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default md:w-64 md:px-md lg:hidden"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default bg-surface-base px-sm type-body-sm-medium text-text-secondary is-hover:bg-surface-base-hover is-focus:shadow-focus-default outline-none"
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+            aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
           >
-            <Icon name="general/search" size="sm" className="text-icon-tertiary" />
-            <span className="hidden flex-1 text-left md:inline">Search</span>
-            <span className="hidden md:inline-flex md:gap-xxs">
-              <Kbd size="sm" text={isMac ? '⌘' : 'Ctrl'} />
-              <Kbd size="sm" text="K" />
-            </span>
+            <Icon name={theme === 'dark' ? 'weather/sun' : 'weather/moon'} size="sm" />
+            <span className="hidden md:inline lg:hidden">{theme === 'dark' ? 'Light' : 'Dark'}</span>
           </button>
-          {siteSchemes.length > 1 && (
-            <button
-              type="button"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default px-sm type-body-sm-medium text-text-secondary is-hover:bg-surface-base-hover is-focus:shadow-focus-default outline-none md:px-md"
-              aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-            >
-              <Icon name={theme === 'dark' ? 'weather/sun' : 'weather/moon'} size="sm" />
-              <span className="hidden md:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
-            </button>
-          )}
-        </div>
+        )}
+        <button
+          type="button"
+          ref={searchTrigger}
+          onClick={() => setSearching(true)}
+          aria-label="Search"
+          aria-keyshortcuts="Meta+K Control+K /"
+          className="type-body-sm-regular ml-auto inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default bg-surface-base px-sm text-text-placeholder outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default md:w-64 md:px-md lg:hidden"
+        >
+          <Icon name="general/search" size="sm" className="text-icon-tertiary" />
+          <span className="hidden flex-1 text-left md:inline">Search</span>
+          <span className="hidden md:inline-flex md:gap-xxs">
+            <Kbd size="sm" text={isMac ? '⌘' : 'Ctrl'} />
+            <Kbd size="sm" text="K" />
+          </span>
+        </button>
       </header>
       <div className="mx-auto flex max-w-[1680px]">
         {open && <button type="button" aria-label="Close navigation" className="fixed inset-0 top-16 z-20 bg-black/40 lg:hidden" onClick={() => setOpen(false)} />}
