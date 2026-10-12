@@ -1,6 +1,6 @@
 ---
 name: ds-create
-version: 0.1.3
+version: 0.1.6
 description: Builds a brand-agnostic design system in Figma for any brand, and optionally its documentation site. Five commands, init, build, learn, qa and status, take a brand's context to Figma variables and styles, a component library (Parts, Components, Sections, Layouts) and a documented page for every item, always in the same structure. Use when someone wants to start or continue a design system ("ds-create", "design system for {brand}", "start the DS", "build the Button page", "build the foundations"), teach it a lasting rule ("remember that buttons align left"), check a build ("run QA on the DS"), or see how far it is ("where is the DS build"). Needs the Figma MCP with use_figma and a Figma file with edit access. Not for a single screen, mockup or one-off component in Figma (figma-generate-design, edit-figma-design), Antikode corporate websites on ATOMS (crea-corp-web), or a code-only component library with no Figma file.
 user-invocable: true
 argument-hint: "init · build · learn · qa · status"
@@ -11,6 +11,14 @@ argument-hint: "init · build · learn · qa · status"
 ds-create turns a brand's context into a documented design system in Figma. Every system it builds has the same pages, in the same order, with the same frames and names. Only the brand's values change: colors, typefaces, radius, density and assets. From the same file it can also build a documentation site: React and Tailwind for Web, or React Native previews with React Native, Swift and Kotlin code for App.
 
 This file is the overview. The installed skill folder, the folder this file is in, holds the whole system: the specs, the workflow, the tools and the full skill. Everything below happens in a workspace copy of that folder.
+
+## Example: Novelin
+
+Novelin is a design system built with ds-create. Its documentation site brings together design tokens, foundations, components and usage guidance, with Light and Dark modes.
+
+![Novelin design system documentation in Dark mode, with sidebar navigation, a reading panel and an on-page contents rail](https://novelin-design-system.vercel.app/examples/novelin-design-system.png)
+
+[Explore the live Novelin design system](https://novelin-design-system.vercel.app/).
 
 # 1. Get the workspace first
 

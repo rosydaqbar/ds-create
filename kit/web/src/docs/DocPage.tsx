@@ -6,6 +6,7 @@ import { config } from '@/ds.config';
 import type { Topic } from './types';
 import { DoDont, P, Stage, slugify } from './blocks';
 import { StatusPill, type Status } from './meta';
+import { ThemeToggle } from './ThemeToggle';
 
 /* ---------- page header ---------- */
 export function PageHeader({
@@ -142,13 +143,23 @@ export function DocTabs({ tabs, label, header, footer }: { tabs: DocTab[]; label
         </div>
         {footer && <div className="docs-page-footer">{footer}</div>}
       </article>
-      <OnThisPage panel={panelRef} deps={current.label} />
+      <PageTools panel={panelRef} deps={current.label} />
     </div>
   );
 }
 
+/** Shared page utilities for the landing page and documentation. */
+export function PageTools({ panel, deps }: { panel: React.RefObject<HTMLElement | null>; deps: string }) {
+  return (
+    <aside className="docs-page-tools sticky top-24 hidden max-h-[calc(100vh-8rem)] self-start overflow-y-auto 2xl:flex 2xl:flex-col 2xl:gap-xl">
+      <ThemeToggle />
+      <OnThisPage panel={panel} deps={deps} />
+    </aside>
+  );
+}
+
 /** "On this page": the panel's H2s, on wide screens. */
-function OnThisPage({ panel, deps }: { panel: React.RefObject<HTMLDivElement | null>; deps: string }) {
+function OnThisPage({ panel, deps }: { panel: React.RefObject<HTMLElement | null>; deps: string }) {
   const [items, setItems] = useState<{ id: string; text: string }[]>([]);
   const [, setParams] = useSearchParams();
   useEffect(() => {
@@ -166,9 +177,9 @@ function OnThisPage({ panel, deps }: { panel: React.RefObject<HTMLDivElement | n
     if (panel.current) mo.observe(panel.current, { childList: true, subtree: true });
     return () => mo.disconnect();
   }, [panel, deps]);
-  if (items.length < 3) return <div className="hidden 2xl:block" />;
+  if (items.length < 3) return null;
   return (
-    <nav aria-label="On this page" className="docs-toc sticky top-24 hidden max-h-[calc(100vh-8rem)] self-start overflow-y-auto 2xl:flex 2xl:flex-col 2xl:gap-xs">
+    <nav aria-label="On this page" className="docs-toc flex flex-col gap-xs">
       <span className="type-body-xs-semibold pb-xs text-text-tertiary">On this page</span>
       {items.map((i) => (
         <a

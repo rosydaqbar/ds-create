@@ -65,7 +65,6 @@
     border-top: 1px solid var(--docs-edge);
   }
   .docs-page-footer { padding: 1.25rem var(--docs-gutter); border-top: 1px solid var(--docs-edge); }
-  .docs-toc { padding-top: 1.5rem; }
   .docs-navigation { min-height: 0; }
   .docs-navigation > nav { min-height: 0; overflow-y: auto; scrollbar-width: thin; }
   .docs-sidebar { padding: 1.25rem 1rem; }
@@ -83,7 +82,7 @@
   .docs-nav-active { background: color-mix(in oklab, var(--color-text-primary) 8%, var(--color-surface-base)); font-weight: 600; }
   .docs-nav-active::before { content: ''; position: absolute; left: calc(-.375rem - 1px); top: .5rem; bottom: .5rem; width: 1px; background: var(--color-text-primary); }
   .docs-nav-link:focus-visible, .docs-nav-group:focus-visible, .docs-search:focus-visible,
-  .docs-tool-button:focus-visible, .docs-preview-tabs button:focus-visible {
+  .docs-theme-toggle:focus-visible, .docs-tool-button:focus-visible, .docs-preview-tabs button:focus-visible {
     outline: 2px solid var(--color-border-focus, var(--color-text-primary)); outline-offset: 2px;
   }
   .docs-nav-footer { margin-top: 1rem; gap: .5rem; }
@@ -111,4 +110,10 @@
   @media (min-width: 1180px) { .docs-playground { grid-template-columns: minmax(0, 1fr) 280px; } }
   @media (min-width: 1280px) { .docs-tab-dock { top: .625rem; } }
   @media (min-width: 1536px) { .docs-reading-layout { grid-template-columns: minmax(0, 1fr) 180px; } }
+}
+
+@layer utilities {
+  @media (min-width: 1536px) {
+    .docs-shell:has(.docs-page-tools) .docs-header-theme { display: none; }
+  }
 }

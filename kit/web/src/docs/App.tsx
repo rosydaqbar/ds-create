@@ -10,6 +10,7 @@ import { SearchDialog } from './Search';
 import { pageMeta } from './meta';
 import { Kbd } from '@/components/parts/Kbd';
 import { siteSchemes } from './modes';
+import { ThemeContext, ThemeToggle } from './ThemeToggle';
 
 const lazyPages = new Map<string, ComponentType>(staticPages.map((p) => [slugOf(p.id, p.name), lazy(p.load)]));
 
@@ -143,75 +144,68 @@ export function App() {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
   return (
-    <div className="docs-shell min-h-screen bg-surface-base text-text-primary">
-      <a
-        href="#main"
-        onClick={(e) => {
-          e.preventDefault();
-          main.current?.focus();
-        }}
-        className="type-body-sm-semibold fixed top-sm left-sm z-60 -translate-y-[200%] rounded-control bg-surface-raised px-lg py-sm text-text-primary shadow-overlay outline-none focus:translate-y-0 focus-visible:shadow-focus-default"
-      >
-        Skip to content
-      </a>
-      <header className="docs-topbar sticky top-0 z-30 mx-auto flex h-16 max-w-[1680px] items-center gap-md px-lg md:gap-lg md:px-xl">
-        <button ref={menuTrigger} type="button" className="cursor-pointer rounded-control p-xs text-icon-secondary outline-none is-hover:bg-fill-neutral-subtle-hover is-focus:shadow-focus-default lg:hidden" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-          <Icon name={open ? 'general/x' : 'general/menu'} />
-        </button>
-        <Link to="/" className="docs-brand flex min-w-0 items-center gap-md outline-none is-focus:shadow-focus-default" aria-label={`${config.name} home`}>
-          <img src={logo} alt="" className="h-6 md:h-7" />
-          <span className="type-code-sm-regular hidden rounded-indicator bg-surface-sunken px-md py-xxs text-text-tertiary sm:inline">v{config.version}</span>
-        </Link>
-        {siteSchemes.length > 1 && (
-          <button
-            type="button"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default bg-surface-base px-sm type-body-sm-medium text-text-secondary is-hover:bg-surface-base-hover is-focus:shadow-focus-default outline-none"
-            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-            aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-          >
-            <Icon name={theme === 'dark' ? 'weather/sun' : 'weather/moon'} size="sm" />
-            <span className="hidden md:inline lg:hidden">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+    <ThemeContext.Provider value={{ theme, toggle: () => setTheme(theme === 'dark' ? 'light' : 'dark') }}>
+      <div className="docs-shell min-h-screen bg-surface-base text-text-primary">
+        <a
+          href="#main"
+          onClick={(e) => {
+            e.preventDefault();
+            main.current?.focus();
+          }}
+          className="type-body-sm-semibold fixed top-sm left-sm z-60 -translate-y-[200%] rounded-control bg-surface-raised px-lg py-sm text-text-primary shadow-overlay outline-none focus:translate-y-0 focus-visible:shadow-focus-default"
+        >
+          Skip to content
+        </a>
+        <header className="docs-topbar sticky top-0 z-30 mx-auto flex h-16 max-w-[1680px] items-center gap-md px-lg md:gap-lg md:px-xl">
+          <button ref={menuTrigger} type="button" className="cursor-pointer rounded-control p-xs text-icon-secondary outline-none is-hover:bg-fill-neutral-subtle-hover is-focus:shadow-focus-default lg:hidden" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+            <Icon name={open ? 'general/x' : 'general/menu'} />
           </button>
-        )}
-        <button
-          type="button"
-          ref={searchTrigger}
-          onClick={() => setSearching(true)}
-          aria-label="Search"
-          aria-keyshortcuts="Meta+K Control+K /"
-          className="type-body-sm-regular ml-auto inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default bg-surface-base px-sm text-text-placeholder outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default md:w-64 md:px-md lg:hidden"
-        >
-          <Icon name="general/search" size="sm" className="text-icon-tertiary" />
-          <span className="hidden flex-1 text-left md:inline">Search</span>
-          <span className="hidden md:inline-flex md:gap-xxs">
-            <Kbd size="sm" text={isMac ? '⌘' : 'Ctrl'} />
-            <Kbd size="sm" text="K" />
-          </span>
-        </button>
-      </header>
-      <div className="mx-auto flex max-w-[1680px]">
-        {open && <button type="button" aria-label="Close navigation" className="fixed inset-0 top-16 z-20 bg-black/40 lg:hidden" onClick={() => setOpen(false)} />}
-        <aside
-          aria-label="Site navigation"
-          className={cn('fixed inset-y-16 left-0 z-20 docs-sidebar w-64 shrink-0 overflow-y-auto bg-surface-base lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)]', open ? 'block motion-enter-slow lg:animate-none' : 'hidden')}
-        >
-          <Sidebar onNavigate={() => setOpen(false)} onSearch={() => { if (open) searchTrigger.current?.focus(); setOpen(false); setSearching(true); }} />
-        </aside>
-        <main ref={main} id="main" tabIndex={-1} className="docs-main min-w-0 flex-1 outline-none">
-          {/* Page panels animate independently so sticky tabs remain above the header. */}
-          <div key={loc.pathname}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/guidance/:slug" element={<StaticRoute />} />
-              <Route path="/foundations/:slug" element={<StaticRoute />} />
-              <Route path="/:level/:slug" element={<ComponentRoute />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+          <Link to="/" className="docs-brand flex min-w-0 items-center gap-md outline-none is-focus:shadow-focus-default" aria-label={`${config.name} home`}>
+            <img src={logo} alt="" className="h-6 md:h-7" />
+            <span className="type-code-sm-regular hidden rounded-indicator bg-surface-sunken px-md py-xxs text-text-tertiary sm:inline">v{config.version}</span>
+          </Link>
+          <div className="ml-auto flex items-center gap-sm">
+            <button
+              type="button"
+              ref={searchTrigger}
+              onClick={() => setSearching(true)}
+              aria-label="Search"
+              aria-keyshortcuts="Meta+K Control+K /"
+              className="type-body-sm-regular inline-flex h-(--size-control-sm) cursor-pointer items-center gap-sm rounded-control border border-border-default bg-surface-base px-sm text-text-placeholder outline-none is-hover:bg-surface-base-hover is-focus:shadow-focus-default md:w-64 md:px-md lg:hidden"
+            >
+              <Icon name="general/search" size="sm" className="text-icon-tertiary" />
+              <span className="hidden flex-1 text-left md:inline">Search</span>
+              <span className="hidden md:inline-flex md:gap-xxs">
+                <Kbd size="sm" text={isMac ? '⌘' : 'Ctrl'} />
+                <Kbd size="sm" text="K" />
+              </span>
+            </button>
+            <ThemeToggle className="docs-header-theme" />
           </div>
-        </main>
+        </header>
+        <div className="mx-auto flex max-w-[1680px]">
+          {open && <button type="button" aria-label="Close navigation" className="fixed inset-0 top-16 z-20 bg-black/40 lg:hidden" onClick={() => setOpen(false)} />}
+          <aside
+            aria-label="Site navigation"
+            className={cn('fixed inset-y-16 left-0 z-20 docs-sidebar w-64 shrink-0 overflow-y-auto bg-surface-base lg:sticky lg:top-16 lg:block lg:h-[calc(100vh-4rem)]', open ? 'block motion-enter-slow lg:animate-none' : 'hidden')}
+          >
+            <Sidebar onNavigate={() => setOpen(false)} onSearch={() => { if (open) searchTrigger.current?.focus(); setOpen(false); setSearching(true); }} />
+          </aside>
+          <main ref={main} id="main" tabIndex={-1} className="docs-main min-w-0 flex-1 outline-none">
+            {/* Page panels animate independently so sticky tabs remain above the header. */}
+            <div key={loc.pathname}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/guidance/:slug" element={<StaticRoute />} />
+                <Route path="/foundations/:slug" element={<StaticRoute />} />
+                <Route path="/:level/:slug" element={<ComponentRoute />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </main>
+        </div>
+        <SearchDialog open={searching} onClose={() => setSearching(false)} />
       </div>
-      <SearchDialog open={searching} onClose={() => setSearching(false)} />
-    </div>
+    </ThemeContext.Provider>
   );
 }
