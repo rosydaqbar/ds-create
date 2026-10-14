@@ -7,6 +7,7 @@ import { tokens } from '@/tokens/tokens.gen';
 import { usePresence } from '@/lib/motion';
 import { componentDocs, levelLabel, slugOf, staticPages } from './registry';
 import { pageMeta } from './meta';
+import { config } from '@/ds.config';
 import { appTokenNames, productHasWeb } from './blocks';
 
 /** The code names a token result shows and matches: CSS and Tailwind on a web product; React Native, Swift and Kotlin on an App product. */
@@ -59,10 +60,10 @@ function buildIndex(): Entry[] {
         ...d.exports.map((e) => ({ text: e, weight: 90, label: `export ${e}` })),
         ...(m?.aliases ?? []).map((a) => ({ text: a, weight: 70, label: `also called “${a}”` })),
         { text: d.summary, weight: 30 },
-        ...d.guidelines.map((g) => ({ text: g.title, weight: 40, label: `Guidelines › ${g.title}` })),
+        ...(config.guidelines === false ? [] : d.guidelines).map((g) => ({ text: g.title, weight: 40, label: `Guidelines › ${g.title}` })),
         ...d.examples.map((e) => ({ text: e.title, weight: 35, label: `Example › ${e.title}` })),
         ...d.props.map((p) => ({ text: `${p.name} ${p.figma ?? ''}`, weight: 25, label: `prop ${p.name}` })),
-        ...d.guidelines.map((g) => ({ text: g.body, weight: 10, label: `Guidelines › ${g.title}` })),
+        ...(config.guidelines === false ? [] : d.guidelines).map((g) => ({ text: g.body, weight: 10, label: `Guidelines › ${g.title}` })),
       ],
     });
   }

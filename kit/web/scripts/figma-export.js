@@ -9,7 +9,16 @@
 //   PART = { collections: ['Color'], from: 0, to: 90, styles: false }   one slice of variables
 //   PART = { collections: [], styles: true }                             only text, effect and grid styles
 // Leave PART = null to export everything at once.
+//
+// Faster on any file that has a local base (the previous export, or the token plan init wrote; workflow/WEB.md W2):
+//   MODE = 'hash'   returns hashes only: per collection, its modes, count and 16 bucket hashes; one hash per style list;
+//                   the pages. Save it, then `node scripts/export-diff.mjs --hash hash.json` prints the ROWS to fetch.
+//   MODE = 'rows'   returns compact rows for what differs: ROWS = { Collection: 'all' | [bucket, …], styles: true }.
+//                   `node scripts/export-diff.mjs --hash hash.json --merge rows.json [more.json …]` writes the export.
+// Unchanged collections are never re-sent: a round that changed only component tokens fetches only those.
 const PART = null;
+const MODE = 'full'; // 'full' | 'hash' | 'rows'
+const ROWS = {};
 
 const cols = await figma.variables.getLocalVariableCollectionsAsync();
 const vars = await figma.variables.getLocalVariablesAsync();
@@ -43,7 +52,7 @@ const variables = vars
     };
   })
   .slice(PART && PART.from != null ? PART.from : 0, PART && PART.to != null ? PART.to : undefined);
-const withStyles = !PART || PART.styles;
+const withStyles = !PART || PART.styles || MODE !== 'full';
 
 const textStyles = !withStyles ? [] : (await figma.getLocalTextStylesAsync()).map((s) => ({
   name: s.name,
@@ -71,6 +80,37 @@ const gridStyles = !withStyles ? [] : (await figma.getLocalGridStylesAsync()).ma
   name: s.name,
   grids: s.layoutGrids.map((g) => ({ pattern: g.pattern, count: g.count, gutter: g.gutterSize, margin: g.offset || 0, alignment: g.alignment })),
 }));
+
+// Hashes and rows use the same canonical entry as scripts/export-diff.mjs: change both together.
+const fnv = (s) => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h; };
+const canon = (e, modes) => JSON.stringify([e.name, e.collection, e.type, e.description, modes.map((m) => e.values[m])]);
+const pageList = figma.root.children.map((p) => ({ id: p.id, name: p.name }));
+if (MODE === 'hash') {
+  return {
+    format: 'ds-create/figma-variables-hash@1',
+    collections: cols.map((c) => {
+      const modes = c.modes.map((m) => m.name);
+      const mine = variables.filter((v) => v.collection === c.name);
+      const b = Array.from({ length: 16 }, () => []);
+      for (const e of mine) b[fnv(e.name) % 16].push(canon(e, modes));
+      return { name: c.name, modes, n: mine.length, b: b.map((l) => fnv(l.sort().join('\n')).toString(36)) };
+    }),
+    styles: { text: fnv(JSON.stringify(textStyles)).toString(36), effect: fnv(JSON.stringify(effectStyles)).toString(36), grid: fnv(JSON.stringify(gridStyles)).toString(36) },
+    order: fnv(variables.map((v) => v.name).join('|')).toString(36),
+    pages: pageList,
+  };
+}
+if (MODE === 'rows') {
+  const rows = {};
+  for (const c of cols) {
+    const want = ROWS[c.name];
+    if (!want) continue;
+    const modes = c.modes.map((m) => m.name);
+    rows[c.name] = variables.filter((v) => v.collection === c.name && (want === 'all' || want.includes(fnv(v.name) % 16)))
+      .map((v) => [v.name, v.type, v.description, ...modes.map((m) => (v.values[m] && v.values[m].alias ? '@' + v.values[m].alias : v.values[m]))]);
+  }
+  return { format: 'ds-create/figma-variables-rows@1', rows, textStyles: ROWS.styles ? textStyles : undefined, effectStyles: ROWS.styles ? effectStyles : undefined, gridStyles: ROWS.styles ? gridStyles : undefined };
+}
 
 return {
   format: 'ds-create/figma-variables@1',

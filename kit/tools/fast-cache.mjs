@@ -4,7 +4,14 @@
  * (workflow/FAST.md F3). One file per key, each one `use_figma` call:
  *
  *   node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache [--accepted output/{slug}/figma/audit-accepted.json]
- *                             [--pages reading|components|all] [--audit]
+ *                             [--pages reading|components|all] [--audit] [--no-pack]
+ *   node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache --library
+ *                             the library kit (kit/tools/figma-libkit.js) for steps 6–10, one call
+ *
+ * Calls are PACKED: keys that fit together under the 50,000-character limit go into one call (usually two calls for the
+ * whole docs stack instead of four), each key still checked on its own. --no-pack writes one call per key.
+ * Keep the cache between rounds: step 21 clears it only when the round is the last one (workflow/GOTCHAS.md G8), so a
+ * later round's status call usually answers `need: []` and nothing is re-typed.
  *
  * Keys, in the order to send them: docbuilder, docpages, docfoundations, fastkit. `--pages reading` leaves out
  * docpages, which only Parts to Layouts need (default: all). A build never audits (workflow/INITIATOR.md Part B, QA on
@@ -46,16 +53,18 @@ if (accepted) {
   audit = audit.replace(/const ACCEPTED = \{[\s\S]*?\n\};/, `const ACCEPTED = ${acc};`);
 }
 const want = arg('--pages') || 'all';
-const SOURCES = {
+const LIBRARY = process.argv.includes('--library');
+const SOURCES = LIBRARY ? { libkit: fnFrom(read('kit/tools/figma-libkit.js'), 'libkit') } : {
   docbuilder: fnFrom(builder, 'docbuilder'),
   docpages: fnFrom(builder, 'docpages'),
   docfoundations: fnFrom(builder, 'docfoundations'),
   fastkit: fnFrom(read('kit/tools/figma-fastbuild.js'), 'fastkit'),
   audit: `async function audit(figma, PAGE) {\n${audit}\n}\n`,
 };
-if (want === 'reading') delete SOURCES.docpages;
+if (want === 'reading' && !LIBRARY) delete SOURCES.docpages;
 if (!process.argv.includes('--audit')) delete SOURCES.audit;
 const stamps = {};
+const bodies = [];
 
 // A minifier, when one is installed next to a docs site.
 async function loadRolldown() {
@@ -99,19 +108,37 @@ for (const [key, src] of Object.entries(SOURCES)) {
   code = code.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, (ch) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0'));
   const text = new Function(`${code};return ${local}`)().toString();
   const letters = text.replace(/[^A-Za-z]/g, '');
-  const call = `${code}
+  // Each key runs in its own scope, so packed keys never share names; each checks its letters before it saves.
+  const body = `await (async () => {
+${code}
 const __L = ${local}.toString().replace(/[^A-Za-z]/g, ''); let __h = 0x811c9dc5; for (let i = 0; i < __L.length; i++) { __h ^= __L.charCodeAt(i); __h = Math.imul(__h, 0x01000193) >>> 0; }
-if (__L.length !== ${letters.length} || __h !== ${fnv(letters)}) return { key: '${key}', stored: false, letters: __L.length, want: ${letters.length} };
-figma.root.setSharedPluginData('dscreate', '${key}', ${local}.toString()); figma.root.setSharedPluginData('dscreate', '${key}.v', '${fnv(letters)}'); return { key: '${key}', stored: true, len: ${local}.toString().length };
+if (__L.length !== ${letters.length} || __h !== ${fnv(letters)}) { __out.push({ key: '${key}', stored: false, letters: __L.length, want: ${letters.length} }); return; }
+figma.root.setSharedPluginData('dscreate', '${key}', ${local}.toString()); figma.root.setSharedPluginData('dscreate', '${key}.v', '${fnv(letters)}'); __out.push({ key: '${key}', stored: true, len: ${local}.toString().length });
+})();
 `;
   stamps[key] = String(fnv(letters));
-  if (call.length > 49000) throw new Error(`${key}: the call is ${call.length} characters, over the 50,000 limit`);
-  fs.writeFileSync(path.join(OUT, `cache-${key}.js`), call);
-  console.log(`${key}: ${call.length} characters${rd ? ' (minified)' : ''} → ${path.relative(ROOT, path.join(OUT, `cache-${key}.js`))}`);
+  bodies.push({ key, body });
+}
+// Old files from an earlier run would be sent by mistake: clear them first.
+const STATUS = LIBRARY ? 'cache-status-library.js' : 'cache-status.js';
+for (const f of fs.readdirSync(OUT).filter((x) => /^cache-.*\.js$/.test(x) && !x.startsWith('cache-status') && x.slice(6, -3).split('+').some((k) => k in SOURCES))) fs.rmSync(path.join(OUT, f));
+const LIMIT = 48500;
+const groups = [];
+for (const b of bodies) {
+  const last = groups[groups.length - 1];
+  if (last && !process.argv.includes('--no-pack') && last.reduce((n, x) => n + x.body.length, 200) + b.body.length <= LIMIT) last.push(b);
+  else groups.push([b]);
+}
+for (const g of groups) {
+  const call = `const __out = [];\n${g.map((b) => b.body).join('')}return __out;\n`;
+  if (call.length > 49000) throw new Error(`${g.map((b) => b.key).join('+')}: the call is ${call.length} characters, over the 50,000 limit`);
+  const name = `cache-${g.map((b) => b.key).join('+')}.js`;
+  fs.writeFileSync(path.join(OUT, name), call);
+  console.log(`${g.map((b) => b.key).join(' + ')}: ${call.length} characters${rd ? ' (minified)' : ''} → ${path.relative(ROOT, path.join(OUT, name))}`);
 }
 // The status call: which keys the file still needs. Read-only and a few hundred characters.
-fs.writeFileSync(path.join(OUT, 'cache-status.js'), `const want = ${JSON.stringify(stamps)};
+fs.writeFileSync(path.join(OUT, STATUS), `const want = ${JSON.stringify(stamps)};
 const need = Object.keys(want).filter((k) => figma.root.getSharedPluginData('dscreate', k + '.v') !== want[k] || !figma.root.getSharedPluginData('dscreate', k));
 return { need, current: Object.keys(want).filter((k) => !need.includes(k)) };
 `);
-console.log(`cache-status.js → send it first; then send only the keys it lists in "need", one at a time, in this order: ${Object.keys(SOURCES).join(', ')}. Clear the dscreate keys at step 21.`);
+console.log(`${STATUS} → send it first; then send only the calls that hold a key it lists in "need", one at a time, in the order above. Keep the keys between rounds; clear them at step 21 of the last round (workflow/GOTCHAS.md G8).`);

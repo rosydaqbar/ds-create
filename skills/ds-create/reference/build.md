@@ -15,9 +15,22 @@ If any is missing, stop with one line: "Init isn't done for {slug}. Run `/ds-cre
 
 Re-read the ledger. When an earlier round left a page `building` or `qa`, offer to finish it before new pages.
 
-# 2. The four questions
+# 2. Flags, then the four questions
 
-Ask them in this order, one message each, or all in one message when the user prefers. Show what the inputs or an earlier round already answered.
+**Flags answer questions.** Words after `build` are the user's answers, given up front. Apply each one literally, write it to the answers file as the user's answer (`Decided by: user (command)`), and never ask a question a flag already answers, not even to confirm it:
+
+| Flag | Answers |
+| --- | --- |
+| `fast-mode`, `fast` · `default` | Q1 engine (the user's own choice, so YOLO rules don't apply) |
+| `--review` · `--no-review` | Q1's F2 checkpoint (fast mode); without either, YOLO answers it, otherwise ask |
+| `--no-gl` | no Guidelines frames, in Figma and on the site: ledger `flags.guidelines: false` (§5) |
+| `--upto foundations\|parts\|components\|all` · `--pages 2.1,2.5` | Q2 how far |
+| `--figma-only` · `--site` | Q3 where |
+| `--yolo` · `--step` | Q4 pace |
+
+Ask only the questions no flag answers, in one message. A word that isn't a flag gets one short question.
+
+Ask the remaining questions in this order, one message each, or all in one message when the user prefers. Show what the inputs or an earlier round already answered.
 
 ## Q1 · Engine (always the user's choice)
 
@@ -79,7 +92,7 @@ Show the summary and wait for the user's OK. It lists:
 
 Then:
 - write `input/{slug}/answers/02-build-{YYYY-MM-DD}.md`, or the next number for a later round (`SKILL.md` §3);
-- update the ledger: `answers`, `engine`, and the `sequence` entries for this round (§4);
+- update the ledger: `answers`, `engine`, `flags` (`{ "guidelines": false }` for `--no-gl`), and the `sequence` entries for this round (§4);
 - record each step that won't run as `skip`, with the reason taken from the answers.
 
 # 4. How the answers gate the steps
@@ -98,7 +111,7 @@ Every round runs the library phase before the documentation phase: the sets a pa
 | Q1 = Fast | steps 11–20 follow `workflow/FAST.md`; steps 5–10 always use the standard engine | — |
 | Q3 = Figma and site | 22 site setup · 23 site pages · 24 foundation and guidance site pages · 25 build and package | 26 until the user asks |
 | Q3 = Figma only | — | 22–26 |
-| (always) | 21 closing step: clear the plugin data | — |
+| (always) | 21 closing step: the plugin data is cleared in the last round; a round that leaves pages for later keeps it (`workflow/GOTCHAS.md` G8) | — |
 
 **The sets a round needs.** Before the summary, list every set the round's doc pages show: their Overview compositions, Guidelines examples and visuals, from each page file. Every such set gets its library step in this round, even when its own docs aren't in scope (01 Getting started shows `Button` and `Text field`, so a Foundations round builds those sets and the Parts they contain). Show them in the summary as "added for {page}". Their docs steps are added in the round that documents them.
 
@@ -109,16 +122,16 @@ Steps 5, 6 and 11 run once per system: a later round reuses the page tree, the f
 Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 and its gates.
 
 **Library phase (steps 5–10), standard engine.** For every set, bottom-up:
-1. Build its private parts and sets from the page file, into the page's holding frames (`workflow/INITIATOR.md` Part B §6, *Figma tools*).
+1. Build its private parts and sets from the page file, into the page's holding frames (`workflow/INITIATOR.md` Part B §6, *Figma tools*). Use the library kit (`kit/tools/figma-libkit.js`, cached once with `node kit/tools/fast-cache.mjs --library`): the call then holds only the set's structure, and binding helpers are never re-written per build.
 2. Default mode: run `kit/tools/figma-audit.js` on the page with `LIBRARY = true`; it must report `fail` = 0. Fast mode: skip it; the audit runs on call.
-3. Export its sets with `kit/tools/figma-export-sets.js`.
-4. Mark the library entry `done`, with its evidence.
+3. Default mode: export its sets with `kit/tools/figma-export-sets.js`. Fast mode: the build call returns ids and counts only; one read-only `kit/tools/figma-registry.js` call at the end of the library phase writes every set file at once (`node kit/tools/registry.mjs`).
+4. Mark the library entry `done`, with its evidence (`node kit/tools/ledger.mjs --slug {slug} --done "library:{id}"`).
 
 **Documentation phase (steps 11–20).** For every page:
-1. Write its copy file first (`workflow/COPY.md`).
-2. Draw the page with the engine from Q1, using only sets from the snapshots.
+1. Write its copy file first (`workflow/COPY.md`). Fast mode with agents: brief them from `workflow/templates/fast-brief.md`.
+2. Draw the page with the engine from Q1, using only sets from the snapshots. Fast mode: `kit/tools/fast-pack.mjs --batch` packs the ready pages into a few calls (`workflow/FAST.md` F4).
 3. Default mode: check that the page's own audit reports `fail` = 0. Fast mode: no audit; the manifest has passed `kit/tools/fast-pack.mjs --check` before the call.
-4. Mark the docs entry `done` in the ledger, with its evidence.
+4. Mark the docs entry `done` in the ledger, with its evidence. Fast mode: `node kit/tools/ledger.mjs --slug {slug} --render '<the batch return>'` marks every page of a batch at once.
 
 **A missing set never stops the round.** When a page needs a set that isn't built, add its library entry before the current step, build it, record it under `decisions` and resume (`workflow/INITIATOR.md` Part B §6, *Gates*). Never draw a stand-in.
 
@@ -128,7 +141,7 @@ Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 a
 
 **Fast mode generates only.** A fast round never audits and never stops to fix findings, in the library phase too. Page audits, the copy check and the QA lists run through `qa`, when the user asks.
 
-**Docs site.** With the site in scope (Q3), steps 22–25 follow `workflow/WEB.md`. `npm run build` must pass. `npm run qa` is not run here.
+**Docs site.** With the site in scope (Q3), steps 22–25 follow `workflow/WEB.md`: `scripts/scope.mjs` fits the copied site to the round (W1), `scripts/export-diff.mjs` exports only the tokens that changed (W2). `npm run build` must pass. `npm run qa` is not run here.
 
 # 6. Report
 

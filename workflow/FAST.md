@@ -9,8 +9,12 @@ Fast mode changes how pages are drawn, not what they contain. The specs (`specs/
 | File | What it does |
 | --- | --- |
 | `kit/tools/figma-fastbuild.js` | the renderer: `render(payload)` draws one page of any type, from data |
-| `kit/tools/fast-pack.mjs` | checks a page's manifest and copy file, and prints its payload or its whole page call (`--call`) |
-| `kit/tools/fast-cache.mjs` | writes the calls that cache the doc builder and the renderer in the file, plus a status call that says which are missing. The audit is cached only with `--audit`, for a QA run |
+| `kit/tools/fast-pack.mjs` | checks a page's manifest and copy file, and prints its payload, its page call (`--call`) or batch calls of several pages (`--batch`) |
+| `kit/tools/fast-cache.mjs` | writes the calls that cache the doc builder and the renderer in the file (packed: two calls), plus a status call that says which are missing; `--library` caches the library kit. The audit is cached only with `--audit`, for a QA run |
+| `kit/tools/figma-libkit.js` | the library kit: binding, text, icon, matrix and combine helpers for building sets (steps 6–10), loaded in one line |
+| `kit/tools/figma-registry.js` · `kit/tools/registry.mjs` | one read-only call lists every set (ids, properties, variant counts) and icon of the file; the local tool writes the set files from it |
+| `kit/tools/ledger.mjs` | marks ledger entries from the command line, a batch return at once (`--render`), and refuses out-of-order marks |
+| `workflow/templates/fast-brief.md` | the brief for F1 agents, filled per build instead of written |
 | `kit/tools/icons-lucide.mjs` | writes the calls that create the icon library on 1.7 from Lucide, from the site's icon registry (`specs/foundations/1.7-iconography.md` §1) |
 | `kit/tools/figma-dockit.js` | creates the `Documentation` collection and the Doc kit in a file that has none |
 | `workflow/templates/fast/` | the default manifest of every reading page (`00`–`02`, `1.1`–`1.8`) and example manifests for component and layout pages |
@@ -25,7 +29,7 @@ The build status is in §10.
 | New systems and existing systems alike, once the page tree, tokens and component sets exist (the library phase, steps 4–10) | Creating tokens, styles and component sets: the library phase always uses the standard engine |
 | Rebuilding a page after a review that changed its structure | A page whose manifest needs something the renderer can't draw (§7) |
 
-Fast mode covers the documentation phase: it starts at the first step that draws doc frames (step 11) and ends with the last doc page (step 20). The library phase before it, and everything after it, runs as usual. A page type the renderer doesn't cover (Screens) falls back to the standard engine (§7).
+Fast mode covers the documentation phase: it starts at the first step that draws doc frames (step 11) and ends with the last doc page (step 20). The library phase before it runs with the standard engine, with the fast round's lighter evidence (§5, *Library in a fast round*). A page type the renderer doesn't cover (Screens) falls back to the standard engine (§7).
 
 # 2. What the skeleton fixes
 
@@ -81,7 +85,9 @@ Rules:
 - Every `title` (example, topic, block) is a title in the page's copy file, spelled the same. The renderer takes the text from the copy file by title.
 - An instance recipe names a set, its variant properties and its text or boolean properties, by the names in the file. Nothing else is set on an instance: no fills, sizes or overrides that change a value.
 - A topic without `visual` is text only. A topic with `visual` names an entry of the catalog (§4) and its inputs.
-- Ids come from the build's set snapshots (`output/{system-slug}/figma/sets/`), never typed by hand.
+- Ids come from the build's set files (`output/{system-slug}/figma/sets/`, written by `kit/tools/registry.mjs`), never typed by hand. An instance-swap property may name an icon (`"Icon": "Icon/general/copy"`): fast-pack turns it into the id from `figma/icons.json`.
+- `{system}` in a manifest string is the ledger's `system` (the default 00 Cover manifest titles the cover `{system} design system`).
+- Build flags come from the ledger: with `flags.guidelines: false` (`/ds-create build --no-gl`), `fast-pack --init` copies the reading manifests without their `Guidelines` frame, and packing drops every Guidelines frame, topic, Accessibility and In apps list, and adds `skip: ["gl"]` to component pages. Agents don't write them.
 
 Fields per page type:
 
@@ -122,33 +128,44 @@ Named visuals, each always drawn the same way from its inputs. The renderer impl
 
 The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes only steps 11–20, as follows.
 
+**Library in a fast round (steps 6–10).** The sets are still built from their page files by the standard engine; three things make it lighter:
+- **The library kit.** `node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache --library` writes one call (~6 KB) that caches `kit/tools/figma-libkit.js`; every set call then loads it in one line (`K.tokens`, `K.fill`, `K.text`, `K.iconInst`, `K.matrix`, `K.combine`, …) and holds only the set's own structure. Never re-write binding helpers in a build.
+- **Small returns.** A set call returns its set and part ids and counts, nothing else: no snapshot, no layer dump (a full export of a 360-variant set came back at 140 KB and only filled the context).
+- **One registry at the end.** After the last set, one read-only `kit/tools/figma-registry.js` call (~12 KB back for 30 sets and 170 icons) and `node kit/tools/registry.mjs --slug {slug}` write every set file and the icon map. This is the library gate's export in a fast round; the full layer snapshot (`kit/tools/figma-export-sets.js`) is exported on call, for QA or a site agent that needs layers. Re-run the registry when a later step changes a set.
+
 **F1 · Data (after the library phase, before step 11, no Figma calls).** The manifests name real sets, so they are written once steps 6–10 are done and the set snapshots exist.
 1. Run `node kit/tools/fast-pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `output/{slug}/fast/`.
 2. Plan the information through `workflow/EDITORIAL.md` before drafting, then write the copy file of every in-scope page (`workflow/COPY.md`). Adapt manifest topic titles/order to the plan rather than copying a visible outline; keep copy/manifest titles matched and all required technical visuals covered. Read the page's knowledge first (`input/{slug}/knowledge/`, `input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
 3. Fill each manifest's `todo` visuals with real sets, or remove the visual. Write one manifest per component and layout page (`workflow/templates/fast/component.example.json`, `layout.example.json`).
 4. Run `node kit/tools/fast-pack.mjs --slug {slug} --check` until every page is ready.
 
+Agents write F1 in parallel from `workflow/templates/fast-brief.md` (fill its header, give each agent 4–7 pages). F1 is the largest token cost of a round: an agent that has the brief, the set files and the build notes doesn't need to rediscover the build.
+
 **F2 · Review (optional).** When the user chose a review checkpoint at initiation, stop here. The user reads and edits the copy files and manifests before any page is drawn. Record their changes in `input/{system-slug}/chat/` (`input/README.md` I3).
 
 **F3 · Bootstrap (step 11).**
 - Run `node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
-- Send `cache-status.js` first. It is read-only and answers which keys the file still needs. Send only those calls, one at a time; each answers `stored: true`, or refuses to save when the code arrived changed (`workflow/GOTCHAS.md` G41).
-- Caching costs time: the calls hold about 75 KB of code (minified, about 74 KB over four calls) that is typed out in full, roughly 6–8 minutes for a full set. The status call makes a retry or a resumed session skip what is already current. A new round still sends everything, because step F5 clears the keys (`workflow/GOTCHAS.md` G8).
+- Send `cache-status.js` first. It is read-only and answers which keys the file still needs. Send only the calls that hold a needed key, one at a time; each key answers `stored: true`, or refuses to save when its code arrived changed (`workflow/GOTCHAS.md` G41).
+- Caching costs time: about 75 KB of minified code, typed out in full. The keys are packed into two calls under the 50,000-character limit, so it is two round trips, not four. The status call makes a retry, a resumed session or a later round skip what is already current: the keys stay in the file until the last round's step 21 (`workflow/GOTCHAS.md` G8), so a second round usually sends nothing.
 - When the file has no Doc kit or `Documentation` collection, create them with `kit/tools/figma-dockit.js`: first `{ only: 'collection' }`, then `{ only: 'kit', page, mark, system, footer, meta }`. Every doc variable aliases the brand token `workflow/DOCFRAMES.md` §1 names; the result lists any that fell back to a default.
 
 **Icons (step 6, library).** A new system's icon library comes from `node kit/tools/icons-lucide.mjs --slug {slug}` at its library step, before any Part: send its calls (usually one, about 30 KB). The 1.7 doc page is rendered later, at step 15. The agent doesn't pick, map or draw icons.
 
-**F4 · Pages (steps 12–20).** One page per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --page {id} --call` prints the call: it loads the cached renderer and sends only the page's data (usually 4–9 KB).
+**F4 · Pages (steps 12–20).** Several pages per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --batch` checks every open docs page in ledger order and writes `output/{slug}/fast/calls/batch-{n}.js`: the renderer is loaded once per call and each call holds as many pages as fit in ~45 KB (a full round of 30 pages is 4 calls, not 32). It stops before the first page that isn't ready, so order holds.
+- Send the batches in order, one at a time. Each returns `{ done: [{ id, frames }], failed, next }`; mark it with `node kit/tools/ledger.mjs --slug {slug} --render '<the return>'`.
+- A batch stops at the first page that throws (nothing after it is drawn) and before a page once 70 s have passed. Re-run `--batch`: it starts at the first open page.
+- `--page {id} --call` still prints a single-page call, for a re-draw after a review.
 
-The call returns the page's frame ids and its warnings; it doesn't audit. The page gate is the same as in the standard engine (`workflow/INITIATOR.md` Part B, *Gates*).
+A call doesn't audit. The page gate is the same as in the standard engine (`workflow/INITIATOR.md` Part B, *Gates*); in a batch, each page is still its own step in the ledger.
 
-**F5 · Close.** Re-export any set snapshot a docs step changed, then clear the `dscreate` plugin data (step 21). The copy check against Figma runs on call (`workflow/COPY.md` §7).
+**F5 · Close.** Re-run the registry when a docs step changed a set. Step 21 clears the `dscreate` plugin data only when this is the system's last round (no docs page left for a later round); otherwise the keys stay, versioned, for the next round's status call (`workflow/GOTCHAS.md` G8). The copy check against Figma runs on call (`workflow/COPY.md` §7).
 
 **Ledger.** `engine: "fast"` at the top. For each page, the engine that drew it (`fast` or `standard`) and any `custom` visuals it used.
 
 # 6. Limits
 
-- A call takes at most 50,000 characters. A payload is data only, usually 2–6 KB. Split a page over two calls (`skip`) only when a set has hundreds of variants.
+- A call takes at most 50,000 characters. A payload is data only, usually 2–6 KB; a batch holds pages up to ~45 KB. Split a page over two calls (`skip`) only when a set has hundreds of variants.
+- **No network.** `use_figma` code has no `fetch` or XHR (checked 2026-10-15): every byte reaches the file as typed code, and every byte back comes as a return. Speed comes from typing less (cached code, packed and batched calls, data instead of code) and from small returns.
 - A call that runs past about 120 s may lose its response: verify read-only before resending (`workflow/GOTCHAS.md` G3).
 - A return is at most 20 KB: the renderer returns ids and counts, never node dumps.
 - All rules of `workflow/GOTCHAS.md` §1 apply unchanged.
@@ -188,5 +205,18 @@ Agreed with the maintainer on 2026-10-08:
 | 3 | `kit/tools/figma-dockit.js`: the Doc kit and the `Documentation` collection from code | bootstrap | built; the kit trial passed (16 parts from the file's tokens) |
 | 4 | layout pages through `render()` (`layoutPage`), then a full fast build on a copy of an existing file | `5.x` | renderer built; full trial still to run |
 | 5 | docs-site story skeletons from the manifests | site | planned |
+| 6 | streamlining from the first full fast round (2026-10-15): library kit, registry, packed cache, batch calls, ledger tool, cache kept between rounds, build flags, hash export for the site, site scope script | all phases | built; tools tested on that round's data and a copy of the template, registry and hash export on its Figma file |
+
+# 11. Cost profile
+
+Measured on the first full fast round (tokens, 19 Parts, Figma and site), to point the next streamlining at what costs most:
+
+| Phase | Time | Main cost | Since 2026-10-15 |
+| --- | --- | --- | --- |
+| Library, 30 sets and 170 icons | 46 min | helpers re-written per build; set exports returning 30–140 KB each | library kit; registry, one call |
+| F1 docs data, 6 agents | 15 min (parallel) | the largest token cost; each agent rediscovers the build | brief template; flags dropped from agent work |
+| F3 cache | 8 min | ~75 KB of code typed in four calls, again every round | two packed calls; kept between rounds |
+| F4 pages, 30 | 19 min | 32 calls, each printed then typed | 4 batch calls |
+| Site W2–W3 | 10 min | a ~100 KB export | hash export: ~3 KB when nothing changed |
 
 Each phase is proven when its pages, built from manifests alone on a copy of a finished build, pass the page gate. Trials run on copies only, on scratch pages that are removed afterwards. Update this table and `workflow/ROADMAP.md` when a phase lands.

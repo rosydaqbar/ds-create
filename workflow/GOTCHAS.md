@@ -45,9 +45,9 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 *Why:* steps sorted as text (100, 1000, 200…) produced scrambled palettes and tables.
 *Check:* every step list reads 50 → 950 (or the scale's own order).
 
-**G8. Treat cached plugin data as temporary.** Builder and audit code cached in shared plugin data is written once per session, written again after a cleanup when later edits need it, and cleared when the build ends and after every follow-up edit.
-*Why:* code left in the file ships to everyone who opens it; code cleared too early makes the next edit fail.
-*Check:* after the last write, the `dscreate` plugin data keys are all empty.
+**G8. Treat cached plugin data as temporary, but not per round.** Builder, renderer, library-kit and audit code cached in shared plugin data is written once and versioned (`{key}.v`), so a status call skips what is current. It stays between the rounds of one system: a round that leaves docs pages for a later round keeps the keys and says so in the ledger (step 21, `cacheKept`). It is cleared at step 21 of the system's last round, when the user hands the file off or publishes, and after a follow-up edit that ends the work.
+*Why:* code left in the file ships to everyone who opens it, so it never outlives the work; but re-typing ~80 KB of unchanged code at every round was the slowest fixed cost of a fast build.
+*Check:* after the last round, the `dscreate` plugin data keys are all empty; between rounds, the ledger's step 21 lists the keys kept.
 
 **G9. Resolve nodes by page and name, not by remembered ids.** A duplicated file keeps the ids of the nodes it copied, but nodes created during a build and style ids differ between files. Match styles by name or by content.
 *Why:* ids taken from a test copy pointed at nothing in the real file.

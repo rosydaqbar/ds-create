@@ -59,7 +59,9 @@ export interface DocTab {
   render: () => ReactNode;
 }
 
-export function DocTabs({ tabs, label, header, footer }: { tabs: DocTab[]; label: string; header?: ReactNode; footer?: ReactNode }) {
+export function DocTabs({ tabs: allTabs, label, header, footer }: { tabs: DocTab[]; label: string; header?: ReactNode; footer?: ReactNode }) {
+  // A build without Guidelines frames (`guidelines: false` in ds.config, build --no-gl) has no Guidelines tab either.
+  const tabs = config.guidelines === false ? allTabs.filter((t) => t.label !== 'Guidelines') : allTabs;
   const [params, setParams] = useSearchParams();
   const key = (t: DocTab) => slugify(t.label);
   const current = tabs.find((t) => key(t) === params.get('tab')) ?? tabs[0];

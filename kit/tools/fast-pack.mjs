@@ -9,6 +9,16 @@
  *   node kit/tools/fast-pack.mjs --slug acme --page 1.4        print the payload of one page (checked first)
  *   node kit/tools/fast-pack.mjs --slug acme --page 1.4 --call print the whole page call: load the cached renderer,
  *                                                           render the payload, return frame ids and warnings
+ *   node kit/tools/fast-pack.mjs --slug acme --batch [--pages 1.6,1.7,2.1 | --from 1.6] [--budget 45000]
+ *                                                           write batch calls to output/acme/fast/calls/batch-{n}.js: the
+ *                                                           open docs pages (ledger order), several per call, each checked
+ *                                                           first. Send them one at a time; mark each return with
+ *                                                           kit/tools/ledger.mjs --render (workflow/FAST.md F4)
+ *
+ * Build flags come from the ledger: `flags.guidelines === false` (build --no-gl) drops every Guidelines frame and topic,
+ * so manifests and copy files don't carry them. `{system}` in a manifest string is the ledger's system name.
+ * An instance recipe may name an icon instead of its id: "Icon": "Icon/general/copy" (from output/{slug}/figma/icons.json,
+ * written by kit/tools/registry.mjs).
  *
  * What the check refuses:
  *   - a visual type the renderer doesn't have (the catalog is read from kit/tools/figma-fastbuild.js);
@@ -42,6 +52,17 @@ const FAST = path.join(OUT, 'fast');
 const COPY = path.join(OUT, 'copy');
 const SETS = path.join(OUT, 'figma', 'sets');
 const TEMPL = path.join(ROOT, 'workflow', 'templates', 'fast');
+const LEDGER = (() => {
+  const f = path.join(OUT, 'ds-create-ledger.json');
+  try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; }
+})();
+/** build --no-gl: no Guidelines frame or topic anywhere (FAST.md §3). */
+const NO_GL = LEDGER?.flags?.guidelines === false;
+const SYSTEM = LEDGER?.system || '';
+const ICONS = (() => {
+  const f = path.join(OUT, 'figma', 'icons.json');
+  try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return {}; }
+})();
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
@@ -128,7 +149,20 @@ const resolveSet = (s, errs, where) => {
   if (!id) errs.push(`${where}: no set named "${s}" in output/${slug}/figma/sets/`);
   return id ?? null;
 };
-const recipes = (list, errs, where) => (list || []).map((r) => ({ ...r, set: resolveSet(r.set, errs, where) }));
+/** "Icon/general/copy" → its component id, for instance-swap properties (output/{slug}/figma/icons.json). */
+const resolveProps = (props, errs, where) => {
+  if (!props) return props;
+  const out = {};
+  for (const [k, val] of Object.entries(props)) {
+    if (typeof val === 'string' && val.startsWith('Icon/')) {
+      const id = ICONS[val.slice(5)];
+      if (!id) errs.push(`${where}: no icon "${val}" in output/${slug}/figma/icons.json (run kit/tools/registry.mjs)`);
+      out[k] = id ?? val;
+    } else out[k] = val;
+  }
+  return out;
+};
+const recipes = (list, errs, where) => (list || []).map((r) => ({ ...r, set: resolveSet(r.set, errs, where), props: resolveProps(r.props, errs, where) }));
 
 /** Copy files by page id. */
 const copies = (() => {
@@ -202,7 +236,7 @@ function applyTake(lines, take) {
 function packReading(m, copy, errs) {
   const frames = [];
   const placed = new Set();
-  for (const f of m.frames || []) {
+  for (const f of (m.frames || []).filter((x) => !(NO_GL && x.name === 'Guidelines'))) {
     const sec = findSection(copy, f.name);
     if (!sec) errs.push(`${m.page} · ${f.name}: the copy file has no section "# ${f.name}"`);
     const items = [];
@@ -218,7 +252,7 @@ function packReading(m, copy, errs) {
     }
     frames.push({ name: f.name, title: f.title, kind: f.kind, width: f.width, header: (sec ? paras(sec.lines).join(' ') : '') || (f.name === 'Overview' ? paras(findSection(copy, 'Summary')?.lines || []).join(' ') : undefined), items });
   }
-  for (const s of copy?.sections || []) for (const i of s.items) if (!placed.has(`${norm(s.name)}|${norm(i.title)}`)) errs.push(`${m.page}: copy "${s.name} › ${i.title}" has no place in the manifest`);
+  for (const s of copy?.sections || []) for (const i of s.items) if (!(NO_GL && s.name === 'Guidelines') && !placed.has(`${norm(s.name)}|${norm(i.title)}`)) errs.push(`${m.page}: copy "${s.name} › ${i.title}" has no place in the manifest`);
   return { page: m.page, type: 'reading', frames };
 }
 
@@ -238,8 +272,8 @@ function packComponent(m, copy, errs) {
     if (!ci) errs.push(`${where} › Examples: the copy file has no "## ${e.title}"`);
     return { title: e.title, caption: ci ? (ofRole(ci.lines, 'caption')[0] ?? paras(ci.lines)[0]) : '', items: recipes(e.items, errs, where), dir: e.dir, w: e.w };
   });
-  const gl = sec('Guidelines');
-  const mt = m.topics || {};
+  const gl = NO_GL ? undefined : sec('Guidelines');
+  const mt = NO_GL ? {} : m.topics || {};
   for (const t of Object.keys(mt)) if (!findItem(gl, t)) errs.push(`${where} › Guidelines: the manifest names "${t}", the copy file doesn't have it`);
   const guidelines = (gl?.items || []).map((ci) => {
     const t = Object.entries(mt).find(([k]) => norm(k) === norm(ci.title))?.[1] || {};
@@ -272,11 +306,11 @@ function packComponent(m, copy, errs) {
     use: listOf('When to use'),
     dont: listOf('When not to use'),
     guidelines,
-    accessibility: listOf('Accessibility'),
-    inApps: listOf('In apps'),
+    accessibility: NO_GL ? [] : listOf('Accessibility'),
+    inApps: NO_GL ? [] : listOf('In apps'),
     anat: m.anat,
     rename: m.rename === true,
-    skip: m.skip,
+    skip: NO_GL ? [...new Set([...(m.skip || []), 'gl'])] : m.skip,
     scale: m.scale,
     fixed: m.fixed,
     landmarks: m.landmarks,
@@ -285,7 +319,9 @@ function packComponent(m, copy, errs) {
 
 function pack(file) {
   const errs = [];
-  const m = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const raw = fs.readFileSync(file, 'utf8');
+  if (!SYSTEM && raw.includes('{system}')) errs.push(`${path.basename(file)}: "{system}" needs the system name in the ledger (\`system\`)`);
+  const m = JSON.parse(raw.replace(/\{system\}/g, SYSTEM.replace(/["\\]/g, '')));
   const id = idOf(m.page);
   const copy = copies.get(id);
   if (!copy) errs.push(`${m.page}: no copy file for page ${id} in output/${slug}/copy/`);
@@ -293,13 +329,21 @@ function pack(file) {
   return { id, payload, errs };
 }
 
+// The renderer stack, loaded from plugin data (kit/tools/fast-cache.mjs) in every page or batch call.
+const LOADER = `const AF = Object.getPrototypeOf(async function () {}).constructor; const L = k => figma.root.getSharedPluginData('dscreate', k);
+if (!L('fastkit')) return { error: 'the renderer is not cached: send the kit/tools/fast-cache.mjs calls first' };
+const D = await (new AF('figma', 'OPTS', 'let D = await (' + L('docbuilder') + ')(figma, OPTS); ' + (L('docpages') ? 'D = await (' + L('docpages') + ')(figma, D); ' : '') + 'D = await (' + L('docfoundations') + ')(figma, D); return await (' + L('fastkit') + ')(figma, D);'))(figma, {});
+`;
+
 if (args.includes('--init')) {
   fs.mkdirSync(FAST, { recursive: true });
   let n = 0;
   for (const f of fs.readdirSync(TEMPL).filter((x) => x.endsWith('.json') && !x.includes('example'))) {
     const dst = path.join(FAST, f);
     if (!fs.existsSync(dst)) {
-      fs.copyFileSync(path.join(TEMPL, f), dst);
+      const m = JSON.parse(fs.readFileSync(path.join(TEMPL, f), 'utf8'));
+      if (NO_GL && m.frames) m.frames = m.frames.filter((x) => x.name !== 'Guidelines');
+      fs.writeFileSync(dst, JSON.stringify(m, null, 2) + '\n');
       n++;
     }
   }
@@ -359,14 +403,79 @@ if (want) {
     process.exit(0);
   }
   // The page call: the renderer stack is read from plugin data (kit/tools/fast-cache.mjs), the body is data only.
-  process.stdout.write(`const AF = Object.getPrototypeOf(async function () {}).constructor; const L = k => figma.root.getSharedPluginData('dscreate', k);
-if (!L('fastkit')) return { error: 'the renderer is not cached: send the kit/tools/fast-cache.mjs calls first' };
-const D = await (new AF('figma', 'OPTS', 'let D = await (' + L('docbuilder') + ')(figma, OPTS); D = await (' + L('docpages') + ')(figma, D); D = await (' + L('docfoundations') + ')(figma, D); return await (' + L('fastkit') + ')(figma, D);'))(figma, {});
-const PAYLOAD = ${JSON.stringify(payload)};
+  process.stdout.write(`${LOADER}const PAYLOAD = ${JSON.stringify(payload)};
 const r = await D.render(PAYLOAD);
 return { page: r.page, frames: r.frames, audit: r.audit, checks: r.checks, warnings: (r.warnings || []).slice(0, 12), ms: r.ms };
 `);
   process.exit(0);
+}
+if (args.includes('--batch')) {
+  // Several pages per call (workflow/FAST.md F4): same payloads and checks as --page, fewer round trips. The call renders
+  // its pages in order and stops at the first page that throws (order is kept: nothing after it is drawn), or before a
+  // page once 70 s have passed, so a call never runs into the tool's ~120 s limit (workflow/GOTCHAS.md G3). `next` is
+  // the page to resume from: re-run --batch, which starts at the first open page in the ledger.
+  const BUDGET = Number(arg('--budget') || 45000);
+  const byId = new Map(files.map((f) => [idOf(JSON.parse(fs.readFileSync(f, 'utf8')).page), f]));
+  const natural = (a, b) => a.localeCompare(b, 'en', { numeric: true });
+  let ids;
+  if (arg('--pages')) ids = arg('--pages').split(',').map((x) => x.trim());
+  else if (LEDGER?.sequence) ids = LEDGER.sequence.filter((e) => e.phase === 'docs' && e.status !== 'done' && e.status !== 'skip').map((e) => idOf(e.page)).filter((id) => byId.has(id));
+  else ids = [...byId.keys()].sort(natural);
+  if (arg('--from')) ids = ids.slice(Math.max(0, ids.indexOf(arg('--from'))));
+  const ready = [];
+  for (const id of ids) {
+    const f = byId.get(id);
+    if (!f) {
+      console.error(`fast-pack: no manifest for page ${id}; the batch stops before it`);
+      break;
+    }
+    const { payload, errs } = pack(f);
+    errs.push(...evidenceErrors(slug, id).errs, ...checkPage(slug, id));
+    if (payload) errs.push(...knowledgeErrors(jsonStrings(payload).join('\n'), `payload ${id}`));
+    if (errs.length) {
+      // Order is kept: nothing after a page that isn't ready goes into a batch (workflow/INITIATOR.md Part B, Gates).
+      console.error(`fast-pack: page ${id} is not ready; the batch stops before it:\n  ` + errs.slice(0, 12).join('\n  '));
+      break;
+    }
+    ready.push({ id, payload });
+  }
+  const CALLS = path.join(FAST, 'calls');
+  fs.mkdirSync(CALLS, { recursive: true });
+  for (const f of fs.readdirSync(CALLS).filter((x) => /^batch-\d+\.js$/.test(x))) fs.rmSync(path.join(CALLS, f));
+  const head = LOADER.length + 900;
+  const groups = [];
+  let cur = [];
+  let len = head;
+  for (const r of ready) {
+    const l = JSON.stringify(r.payload).length + 2;
+    if (cur.length && len + l > BUDGET) {
+      groups.push(cur);
+      cur = [];
+      len = head;
+    }
+    cur.push(r);
+    len += l;
+  }
+  if (cur.length) groups.push(cur);
+  groups.forEach((g, k) => {
+    const call = `${LOADER}const PAGES = [
+${g.map((r) => JSON.stringify(r.payload)).join(',\n')}
+];
+const t0 = Date.now(); const done = []; const failed = []; let next = null;
+for (const P of PAGES) {
+  const id = P.page.split(' ')[0];
+  if (done.length + failed.length && Date.now() - t0 > 70000) { next = id; break; }
+  try { const r = await D.render(P); done.push({ id, frames: Object.fromEntries(Object.entries(r.frames || {}).map(([k, v]) => [k.split(' · ').pop(), v])) }); }
+  catch (e) { failed.push({ id, error: String((e && e.message) || e).slice(0, 240) }); next = id; break; }
+}
+return { done, failed, next, warnings: (D.warnings || []).slice(0, 10), ms: Date.now() - t0 };
+`;
+    if (call.length > 49000) throw new Error(`batch ${k + 1}: ${call.length} characters, over the 50,000 limit (lower --budget)`);
+    fs.writeFileSync(path.join(CALLS, `batch-${k + 1}.js`), call);
+    console.log(`batch-${k + 1}.js: ${g.map((r) => r.id).join(', ')} (${call.length} characters)`);
+  });
+  console.log(ready.length ? `fast-pack: ${ready.length} page(s) in ${groups.length} call(s) in output/${slug}/fast/calls/. Send them in order, one at a time; after each, node kit/tools/ledger.mjs --slug ${slug} --render '<its return>'` : 'fast-pack: no page ready to batch');
+  process.exit(ready.length ? 0 : 1);
 }
 console.error('fast-pack: use --init, --check or --page {id}');
 process.exit(2);

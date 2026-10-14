@@ -35,6 +35,6 @@ Renames break instances in product files and props in code, so they wait for a m
 
 | Item | Status |
 | --- | --- |
-| Fast mode (`workflow/FAST.md`) | Built: the renderer, the manifest checks, the cache calls and the Doc kit builder, tried on a copy (1.4, 1.6, 2.1 and the kit). Next: a full fast build on a copy of an existing file, then story skeletons for the docs site (`workflow/FAST.md` §10). |
+| Fast mode (`workflow/FAST.md`) | Built and run end to end on a new system (Figma: tokens, 19 Parts, 30 doc pages). Streamlined from that round (2026-10-15): library kit, set registry, packed cache kept between rounds, batch page calls, ledger tool, build flags, hash export and scope script for the site (`workflow/FAST.md` §10–§11). Next: story skeletons for the docs site from the manifests (the site's W4 is now the largest open cost); a declarative set builder from page specs (the library phase is still hand-written per set); a token generator from brand anchors for init. |
 | `kit/tools/figma-audit.js` checks per page and per file | In use (QA gate). Next: check variant counts against each page spec's matrix, and doc frames bound to `doc/*`. |
 | Binding documentation frames to `doc/*` spacing | Generated files leave many doc-frame paddings raw (the audit reports them as warnings). Fix in the Doc kit build step. |

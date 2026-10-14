@@ -27,4 +27,6 @@ export const config = {
    * (check:brand-copy) fails on any slot still marked `template(…)` or left empty.
    */
   brandCopy: 'template' as 'template' | 'written',
+  /** Whether pages carry a Guidelines tab. False when the Figma build has no Guidelines frames (`/ds-create build --no-gl`). */
+  guidelines: true as boolean,
 };

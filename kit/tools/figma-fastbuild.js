@@ -179,7 +179,9 @@ async function fastkit(figma, D) {
     if (rest.length) await drawLines(items, rest);
     return items;
   };
-  const frameTitle = (page, f) => f.title || (f.name === 'Overview' ? titleOf(page) : titleOf(page) + ' ' + f.name.toLowerCase());
+  // A frame's title: its manifest title; else the page title for Overview or a frame named like the page (00 Cover's 'Cover');
+  // else '{page} tokens' for the standard frames; else the frame's own name (guidance frames such as 'Naming').
+  const frameTitle = (page, f) => f.title || (f.name === 'Overview' || f.name.toLowerCase() === titleOf(page).toLowerCase() ? titleOf(page) : ['Tokens', 'Guidelines', 'Component', 'Anatomy'].includes(f.name) ? titleOf(page) + ' ' + f.name.toLowerCase() : f.name);
   const readingFrame = async (page, f, opts) => {
     opts = opts || {};
     let fr, body, col;

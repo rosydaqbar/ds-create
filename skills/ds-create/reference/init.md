@@ -96,6 +96,7 @@ This is build step 4 of `workflow/INITIATOR.md` Part B §6. Write the ledger fir
 - Create the text styles and the effect styles.
 - Set scopes and code syntax on every variable.
 - Every value comes from the brand inputs and the answers; a value the inputs don't give is an AI decision in YOLO, or a question otherwise.
+- Generate the token calls from one local data file, and write that same data in the export format (`ds-create/figma-variables@1`, `workflow/WEB.md` W2) to `output/{slug}/figma/figma-variables.json`. The docs site's export then checks hashes against it and fetches only what later rounds changed (`scripts/export-diff.mjs`), instead of exporting every variable back out of Figma.
 
 **Existing file.**
 - Read every collection, variable, mode and style, and freeze every value: init never changes a value.

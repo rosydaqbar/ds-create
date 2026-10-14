@@ -140,7 +140,8 @@ async function docbuilder(figma, OPTS) {
     if (stCache.has(key)) return stCache.get(key);
     const nm = pickStyle(key, styles.map(s => s.name)); const s = nm ? styles.find(x => x.name === nm) : null;
     if (!s) warn('no text style for ' + key + ': unstyled text drawn (audit fails doc-text-no-style as warn)');
-    else if (!nm.startsWith('type/' + key + '/')) warn('text style type/' + key + '/… missing: using ' + nm);
+    // A planned role fallback (label → body, code → body) is the documented behavior, not a finding: only other substitutes warn.
+    else if (!nm.startsWith('type/' + key + '/') && !(ROLEFALL[key.split('/')[0]] || []).slice(1).some(r => nm.startsWith('type/' + r + '/'))) warn('text style type/' + key + '/… missing: using ' + nm);
     if (s) await loadFont(s.fontName); stCache.set(key, s); return s;
   };
   const T = async (parent, chars, key, color, name, width) => {
