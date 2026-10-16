@@ -3,9 +3,9 @@
  * Writes the calls that cache the doc builder and the fast-mode renderer in the Figma file's plugin data
  * (workflow/FAST.md F3). One file per key, each one `use_figma` call:
  *
- *   node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache [--accepted output/{slug}/figma/audit-accepted.json]
+ *   node kit/tools/fast-cache.mjs --out workspace/output/{slug}/fast/cache [--accepted workspace/output/{slug}/figma/audit-accepted.json]
  *                             [--pages reading|components|all] [--audit] [--no-pack]
- *   node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache --library
+ *   node kit/tools/fast-cache.mjs --out workspace/output/{slug}/fast/cache --library
  *                             the library kit (kit/tools/figma-libkit.js) for steps 6–10, one call
  *
  * Calls are PACKED: keys that fit together under the 50,000-character limit go into one call (usually two calls for the
@@ -34,7 +34,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const args = process.argv.slice(2);
 const arg = (k) => (args.includes(k) ? args[args.indexOf(k) + 1] : undefined);
-const OUT = path.resolve(arg('--out') || path.join(ROOT, 'output', 'fast-cache'));
+const OUT = path.resolve(arg('--out') || path.join(ROOT, 'workspace', 'output', 'fast-cache'));
 fs.mkdirSync(OUT, { recursive: true });
 
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -69,7 +69,7 @@ const bodies = [];
 // A minifier, when one is installed next to a docs site.
 async function loadRolldown() {
   const cands = [path.join(ROOT, 'kit', 'web', 'node_modules', 'rolldown')];
-  const outDir = path.join(ROOT, 'output');
+  const outDir = path.join(ROOT, 'workspace', 'output');
   if (fs.existsSync(outDir)) for (const d of fs.readdirSync(outDir)) cands.push(path.join(outDir, d, 'web', 'node_modules', 'rolldown'));
   for (const c of cands) {
     if (!fs.existsSync(path.join(c, 'package.json'))) continue;

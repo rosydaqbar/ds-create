@@ -14,7 +14,7 @@
 //                          come at the page's docs step.
 // Run one page per call (the page is switched once). Output stays small: counts plus a few examples.
 // A result with "fail" > 0 fails the page's QA (INITIATOR Part B §8, EXTEND step 11, workflow/DOCFRAMES.md §14).
-// Save each result as output/{system-slug}/figma/audit-{page or file}.json and record it in the ledger.
+// Save each result as workspace/output/{system-slug}/figma/audit-{page or file}.json and record it in the ledger.
 const PAGE = null;
 const LIBRARY = false;
 const MAX_EXAMPLES = 6;

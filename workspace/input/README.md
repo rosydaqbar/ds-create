@@ -2,11 +2,11 @@
 
 Everything the user provides for a design system goes here: product briefs, brand guidelines, the existing design system, references, and what the user says in chat. This folder is the ground truth a build starts from. `workflow/QUESTIONNAIRE.md` is answered from it first, and every later step reads it again.
 
-Nothing in this folder is committed except this file: `.gitignore` ignores `input/*`. Brand content stays here and in `output/`, never in the executor (`README.md` §5).
+Nothing in this folder is committed except this file: `.gitignore` ignores `workspace/input/*`. Brand content stays here and in `workspace/output/`, never in the executor (`README.md` §5).
 
 **For the user.**
-- You don't have to set anything up. Paste your brief or attach files when you run `/ds-create init`, and the agent creates `input/{your-system}/` and saves them there.
-- If you'd rather prepare it yourself, make a folder named after your system (`input/acme/`) and drop in what you have: a PRD or brief in `brief/`, brand guidelines in `brand/`, your current design system in `design-system/`, and anything you like in `references/`. You don't need every folder, and you don't need to rename your files.
+- You don't have to set anything up. Paste your brief or attach files when you run `/ds-create init`, and the agent creates `workspace/input/{your-system}/` and saves them there.
+- If you'd rather prepare it yourself, make a folder named after your system (`workspace/input/acme/`) and drop in what you have: a PRD or brief in `brief/`, brand guidelines in `brand/`, your current design system in `design-system/`, and anything you like in `references/`. You don't need every folder, and you don't need to rename your files.
 - Anything you tell the agent in chat is saved in `chat/` for you.
 - When you teach the agent a lasting rule about your system, for example "buttons align left, it's in our brand guidelines", it is kept in `knowledge/`, applied to what is already built, and followed in every later build. You can also write or edit those files yourself (I7).
 - This folder ships empty: in the repo it holds only this README.
@@ -14,8 +14,8 @@ Nothing in this folder is committed except this file: `.gitignore` ignores `inpu
 # 1. Structure
 
 ```text
-input/
-└─ {system-slug}/              one folder per design system, the same slug as output/{system-slug}/
+workspace/input/
+└─ {system-slug}/              one folder per design system, the same slug as workspace/output/{system-slug}/
    ├─ sources.md               the index: every input, what it decides, when it was read (written by the agent)
    ├─ brief/                   PRD, product brief, goals, users and tasks, scope, roadmap, research
    ├─ brand/                   brand guidelines, logo files, typefaces, color specs, tone of voice, imagery rules
@@ -38,10 +38,10 @@ input/
 # 2. Rules
 
 **I1. Read the inputs before asking.**
-- List the files with `find input -type f`. Git ignores this folder, so `rg`, `fd`, Glob and Grep skip every file in it and show it empty (`workflow/GOTCHAS.md` G55).
-- A file the user drops straight into `input/`, outside any system folder, is an input of the system being built when there is only one; otherwise ask which system it belongs to. It is read where it is and listed in `sources.md` by its path from `input/`.
-- What the user pastes or attaches with a command is an input too. It is saved into `input/{slug}/` first (`chat/` for pasted text, the fitting folder for files), creating the folder when needed, and read with the rest.
-- At initiation (`INITIATOR.md` Part B §6, steps 1–3), read every file in `input/{slug}/` before the first question. Then write `sources.md`.
+- List the files with `find workspace/input -type f`. Git ignores this folder, so `rg`, `fd`, Glob and Grep skip every file in it and show it empty (`workflow/GOTCHAS.md` G55).
+- A file the user drops straight into `workspace/input/`, outside any system folder, is an input of the system being built when there is only one; otherwise ask which system it belongs to. It is read where it is and listed in `sources.md` by its path from `workspace/input/`.
+- What the user pastes or attaches with a command is an input too. It is saved into `workspace/input/{slug}/` first (`chat/` for pasted text, the fitting folder for files), creating the folder when needed, and read with the rest.
+- At initiation (`INITIATOR.md` Part B §6, steps 1–3), read every file in `workspace/input/{slug}/` before the first question. Then write `sources.md`.
 - In every later session, `sources.md` is part of the global set: read it, and open the files it points to at the steps that need them.
 
 **I2. Answer from the inputs first.**
@@ -72,7 +72,7 @@ A conflict is never resolved silently: it is listed in `sources.md` under *Open 
 - The build is not complete while a file in the folder is missing from `sources.md`, or while a conflict is still open (`INITIATOR.md` Part B §9).
 
 **I6. Never leak inputs.**
-- Brand names, product copy, file keys and links from the inputs appear only in the Figma file, in `output/{slug}/` and in this folder.
+- Brand names, product copy, file keys and links from the inputs appear only in the Figma file, in `workspace/output/{slug}/` and in this folder.
 - References are never named in any output.
 - A link the user marks private, such as a working Figma file, is never published on the docs site (`GOTCHAS.md` G28).
 

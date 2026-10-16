@@ -32,7 +32,7 @@ A component gets its app preview only when its Figma page is complete.
 Everything lives in the docs project:
 
 ```text
-output/{system-slug}/web/            the docs site (workflow/WEB.md), product 'app' or 'both'
+workspace/output/{system-slug}/web/            the docs site (workflow/WEB.md), product 'app' or 'both'
 ├─ react-native/                     React Native source for the previews (copy of ds-create/app/react-native)
 │  ├─ tokens/tokens.ts               generated from the Figma export
 │  ├─ theme/                         ThemeProvider, useTheme: color mode, reduced motion, text size; anatomy()
@@ -61,11 +61,11 @@ At initiation, A1–A2 run in step 22 of the build sequence (`workflow/INITIATOR
 
 ## A1 · Copy the preview source
 
-After `workflow/WEB.md` W1, copy `ds-create/app/react-native/` to `output/{system-slug}/web/react-native/`. The docs site finds it there by itself (`@app` alias). Never build inside `ds-create/app/`.
+After `workflow/WEB.md` W1, copy `ds-create/app/react-native/` to `workspace/output/{system-slug}/web/react-native/`. The docs site finds it there by itself (`@app` alias). Never build inside `ds-create/app/`.
 
 ## A2 · Tokens
 
-From `output/{system-slug}/web/`, generate the React Native tokens from the same export the docs use (`workflow/WEB.md` W2, contrast gate included):
+From `workspace/output/{system-slug}/web/`, generate the React Native tokens from the same export the docs use (`workflow/WEB.md` W2, contrast gate included):
 
 ```sh
 node ../../../kit/app/scripts/build-rn-tokens.mjs --in tokens/figma-variables.json --out react-native/tokens
@@ -86,7 +86,7 @@ The mode (YOLO everything, or One by one) is the same as the Figma build.
 
 ## A4 · QA
 
-Run §9, the Impeccable design detector included (`workflow/WEB.md` W7). Write the React Native previews with the Impeccable skill loaded, as in `workflow/WEB.md` W4. Save the results in `output/{system-slug}/reports/`.
+Run §9, the Impeccable design detector included (`workflow/WEB.md` W7). Write the React Native previews with the Impeccable skill loaded, as in `workflow/WEB.md` W4. Save the results in `workspace/output/{system-slug}/reports/`.
 
 # 5. Token names in code
 

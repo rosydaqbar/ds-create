@@ -4,13 +4,13 @@ The questions asked once, at initiation, before anything is built: platforms, sc
 
 **Load it** at initiation (steps 1–3 of `workflow/INITIATOR.md` Part B §6) and whenever the user changes an answer. The build itself follows `workflow/INITIATOR.md`.
 
-**Answer from the inputs first** (`input/README.md`). Before the first question, read every file in `input/{system-slug}/`: briefs, brand files, the existing system, references and earlier chat notes. Pre-fill every question an input answers, and note its source. Ask only what the inputs leave open or where they conflict. When the user has added nothing yet, ask them to put their documents in `input/{system-slug}/` (or paste them in chat, which the agent saves under `chat/`) before going on. Each answer the user gives here is also written to `input/{system-slug}/chat/` (`input/README.md` I3).
+**Answer from the inputs first** (`workspace/input/README.md`). Before the first question, read every file in `workspace/input/{system-slug}/`: briefs, brand files, the existing system, references and earlier chat notes. Pre-fill every question an input answers, and note its source. Ask only what the inputs leave open or where they conflict. When the user has added nothing yet, ask them to put their documents in `workspace/input/{system-slug}/` (or paste them in chat, which the agent saves under `chat/`) before going on. Each answer the user gives here is also written to `workspace/input/{system-slug}/chat/` (`workspace/input/README.md` I3).
 
 The questionnaire decides what gets preserved, audited, generated or rebuilt. Structure and naming are fixed by `specs/SYSTEM.md`; the questionnaire decides **scope** and **values**, never page names, frame names or token grammar.
 
 # 0. Who asks what
 
-The `ds-create` skill asks these questions in two rounds (`skills/ds-create/`). The questions stay as written here; the skill decides when each one is asked, and saves the answers in `input/{slug}/answers/`.
+The `ds-create` skill asks these questions in two rounds (`skills/ds-create/`). The questions stay as written here; the skill decides when each one is asked, and saves the answers in `workspace/input/{slug}/answers/`.
 
 | Section | Asked by | When |
 | --- | --- | --- |
@@ -367,7 +367,7 @@ Suggest the default from §1 Platforms (web platforms → Web, iOS or Android �
 - **Figma and code** (default): everything the product type includes. The documentation site is always on the web, whatever the product type: it is where tokens, foundations and components are browsed.
 - **Figma only for now**: only the Figma file, already adapted to the product type. Code can be added later with `workflow/WEB.md` and `workflow/APP.md`.
 
-The project is created in `output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`kit/web/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
+The project is created in `workspace/output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`kit/web/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
 
 Nothing native is installed, created or built: no Xcode, Android SDK, simulators, emulators or app projects (`workflow/APP.md`, "Nothing is installed or built").
 
@@ -388,8 +388,8 @@ Never remove the template frames, headers, Design notes, the Usage column of var
 # 12. Confirmation summary
 
 Before generation, present:
-- the inputs read (`input/{system-slug}/sources.md`), and for each answer below, whether it came from an input (with its file) or from the user in this conversation;
-- any open conflict between inputs (`input/README.md` I4), with the resolution the user must choose;
+- the inputs read (`workspace/input/{system-slug}/sources.md`), and for each answer below, whether it came from an input (with its file) or from the user in this conversation;
+- any open conflict between inputs (`workspace/input/README.md` I4), with the resolution the user must choose;
 - product and brand summary;
 - platforms and modes;
 - existing-page mapping and actions;
@@ -399,7 +399,7 @@ Before generation, present:
 - component implementation mode: YOLO everything or One by one;
 - naming: fixed contract (new) or Keep / Normalize (existing);
 - output formats;
-- product type (Web, App, or Web and App), what that means for Figma and for code (the docs site, the React library for Web, the App previews and code for App), Figma and code or Figma only, and the system slug for `output/{system-slug}/`;
+- product type (Web, App, or Web and App), what that means for Figma and for code (the docs site, the React library for Web, the App previews and code for App), Figma and code or Figma only, and the system slug for `workspace/output/{system-slug}/`;
 - optional documentation depth;
 - the build sequence (`workflow/INITIATOR.md` Part B §6): every step in scope, in the order it will run, with the pages under each level.
 

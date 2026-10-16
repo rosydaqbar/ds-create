@@ -13,7 +13,7 @@ One skill, five commands. Each command has its own reference file. Load it befor
 | --- | --- | --- |
 | `init` | `reference/init.md` | Readiness check, inputs, the basic questions, the foundations as variables and styles. Settles Web or App. Ends with a report. |
 | `build` | `reference/build.md` | Four gate questions (engine, how far, where, pace), then builds exactly those pages. |
-| `learn` | `reference/learn.md` | Keeps a rule the user teaches about the system in `input/{slug}/knowledge/`, and applies it to what is already built. |
+| `learn` | `reference/learn.md` | Keeps a rule the user teaches about the system in `workspace/input/{slug}/knowledge/`, and applies it to what is already built. |
 | `qa` | `reference/qa.md` | The slow checks, only when the user asks, on the scope they pick. |
 | `status` | `reference/status.md` | Reads the ledger: what is done, what is open, which checks haven't run. |
 
@@ -26,21 +26,21 @@ One skill, five commands. Each command has its own reference file. Load it befor
 # 1. Where things are
 
 - **The repo root** is the folder that holds `workflow/INITIATOR.md`, `specs/SYSTEM.md` and `workflow/`. Work from there.
-- **Specs.** Each command's reference says which spec files to load. Always load the global set first (`workflow/INITIATOR.md` Part B §0): `README.md`, `specs/SYSTEM.md`, `workflow/INITIATOR.md`, `workflow/GOTCHAS.md`, `workflow/templates/structure.md`, and `input/{slug}/sources.md` once it exists.
+- **Specs.** Each command's reference says which spec files to load. Always load the global set first (`workflow/INITIATOR.md` Part B §0): `README.md`, `specs/SYSTEM.md`, `workflow/INITIATOR.md`, `workflow/GOTCHAS.md`, `workflow/templates/structure.md`, and `workspace/input/{slug}/sources.md` once it exists.
 - **The slug.**
-  - The system's slug is its folder name in `input/` and `output/`.
-  - When `input/` holds more than one system folder, ask which one, unless the request names it.
+  - The system's slug is its folder name in `workspace/input/` and `workspace/output/`.
+  - When `workspace/input/` holds more than one system folder, ask which one, unless the request names it.
   - With no folder yet, `init` creates it from the system name (lowercase, kebab case), and saves what came with the command in it (`reference/init.md` §0).
-- **Inputs.** `input/{slug}/` holds the ground truth (`input/README.md`), with any loose file the user dropped straight into `input/` (`reference/init.md` §0). List them with `find input -type f`: git ignores `input/` and `output/`, so `rg`, `fd`, Glob and Grep show them empty (`workflow/GOTCHAS.md` G55). The user's answers go into `input/{slug}/answers/` (§3).
+- **Inputs.** `workspace/input/{slug}/` holds the ground truth (`workspace/input/README.md`), with any loose file the user dropped straight into `workspace/input/` (`reference/init.md` §0). List them with `find workspace/input -type f`: git ignores `workspace/input/` and `workspace/output/`, so `rg`, `fd`, Glob and Grep show them empty (`workflow/GOTCHAS.md` G55). The user's answers go into `workspace/input/{slug}/answers/` (§3).
 - **Design knowledge.** `knowledge/` at the repo root holds the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules (`knowledge/README.md`).
-- **System knowledge.** `input/{slug}/knowledge/` holds the system's standing rules, taught by the user over time: `system.md`, and one file per page (`input/README.md` I7, §4).
-- **Outputs.** `output/{slug}/` holds the ledger (`ds-create-ledger.json`), the copy files (`copy/`), the fast-mode manifests (`fast/`), the Figma exports (`figma/`), the docs site (`kit/web/`) and reports (`reports/`).
+- **System knowledge.** `workspace/input/{slug}/knowledge/` holds the system's standing rules, taught by the user over time: `system.md`, and one file per page (`workspace/input/README.md` I7, §4).
+- **Outputs.** `workspace/output/{slug}/` holds the ledger (`ds-create-ledger.json`), the copy files (`copy/`), the fast-mode manifests (`fast/`), the Figma exports (`figma/`), the docs site (`kit/web/`) and reports (`reports/`).
 
 # 2. Rules for every command
 
-1. **Inputs first.** Save what the user pasted or attached into `input/{slug}/`, creating the folder when needed, then read the whole folder before asking. Ask only what the inputs leave open, and show each answer an input gives with its source (`input/README.md` I1, I2). The user never has to make the folder.
-2. **The system's knowledge before the spec.** Before building, rebuilding or editing a page, read `input/{slug}/knowledge/system.md` and the page's knowledge file. Their rules override the spec, templates and manifests for that system, and never change the repo (`input/README.md` I7). The repo's `knowledge/` explains why the specs are as they are. Read a page's topics before writing its copy, and let that reasoning shape the docs in the system's own words, without ever naming or citing it. For each description: the system's knowledge and inputs first; the repo's `knowledge/` when they say nothing on the topic, as the benchmark; your own reasoning only when neither covers it (`workflow/COPY.md` §1). Use it to apply a rule with its intent or to make a call the spec leaves open, never to override a spec (`knowledge/README.md` §1).
-3. **Save every answer.** Every answer to a skill question is written to `input/{slug}/answers/` in the same turn (§3). Anything else the user says that shapes the system goes to `input/{slug}/chat/` (`input/README.md` I3).
+1. **Inputs first.** Save what the user pasted or attached into `workspace/input/{slug}/`, creating the folder when needed, then read the whole folder before asking. Ask only what the inputs leave open, and show each answer an input gives with its source (`workspace/input/README.md` I1, I2). The user never has to make the folder.
+2. **The system's knowledge before the spec.** Before building, rebuilding or editing a page, read `workspace/input/{slug}/knowledge/system.md` and the page's knowledge file. Their rules override the spec, templates and manifests for that system, and never change the repo (`workspace/input/README.md` I7). The repo's `knowledge/` explains why the specs are as they are. Read a page's topics before writing its copy, and let that reasoning shape the docs in the system's own words, without ever naming or citing it. For each description: the system's knowledge and inputs first; the repo's `knowledge/` when they say nothing on the topic, as the benchmark; your own reasoning only when neither covers it (`workflow/COPY.md` §1). Use it to apply a rule with its intent or to make a call the spec leaves open, never to override a spec (`knowledge/README.md` §1).
+3. **Save every answer.** Every answer to a skill question is written to `workspace/input/{slug}/answers/` in the same turn (§3). Anything else the user says that shapes the system goes to `workspace/input/{slug}/chat/` (`workspace/input/README.md` I3).
 4. **YOLO.** When the user says YOLO, the AI answers the open questions itself. It writes each answer as an AI decision with a one-line reason, and doesn't stop between pages. Three things are never decided by the AI:
    - the build engine (`build` Q1): always the user's choice;
    - what the product is: one sentence from the user or an input;
@@ -50,15 +50,15 @@ One skill, five commands. Each command has its own reference file. Load it befor
 5. **Gates.** `build` runs only after `init` is done. It runs only the steps its answers allow (`reference/build.md` §4). The page gates of `workflow/INITIATOR.md` Part B §6 apply to every page.
 6. **QA on call.** The slow checks run only through `qa` (`workflow/INITIATOR.md` Part B, *QA on call*). The cheap ones run inside `build`: each page's own audit, the copy check at the end of a level, and `npm run build`. In fast mode the build doesn't run these either: page audits and the copy check move to `qa` too, so a fast build only generates (`workflow/INITIATOR.md` Part B §6, *Gates*, *Fast mode*). At the end of `build`, offer `qa` in one line, and never run it unasked.
 7. **Figma.** Load the `figma-use` skill before the first `use_figma` call. Send one writing call at a time, and follow `workflow/GOTCHAS.md` §1.
-8. **The repo stays brand-agnostic.** Brand names, file keys, product copy and knowledge rules live only in `input/`, `output/` and the Figma file (`input/README.md` I6, I7).
+8. **The repo stays brand-agnostic.** Brand names, file keys, product copy and knowledge rules live only in `workspace/input/`, `workspace/output/` and the Figma file (`workspace/input/README.md` I6, I7).
 9. **Examples are references, never sources.**
    - `examples/` may be read to understand a pattern: how a kind of page reads, or how a visual is composed.
    - Nothing is copied from it: no sentences, manifests, page data, values or code.
-   - It never replaces a step. Every page is still written from its spec, the templates and tools, this system's `input/{slug}/` and `output/{slug}/`, and its own Figma file, through the same manifest and copy-file rules.
-   - Other systems' `input/` and `output/` folders are not read at all.
+   - It never replaces a step. Every page is still written from its spec, the templates and tools, this system's `workspace/input/{slug}/` and `workspace/output/{slug}/`, and its own Figma file, through the same manifest and copy-file rules.
+   - Other systems' `workspace/input/` and `workspace/output/` folders are not read at all.
    - `kit/tools/fast-pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`workflow/GOTCHAS.md` G43).
 10. **No repo edits during a build.** The specs, templates and tools are read, never changed, while `init`, `build` or `qa` runs.
-   - Lessons and tool bugs go into the build notes (`output/{slug}/reports/`), and into the repo only after the round, when the maintainer asks.
+   - Lessons and tool bugs go into the build notes (`workspace/output/{slug}/reports/`), and into the repo only after the round, when the maintainer asks.
    - A blocking tool bug is patched once in the file's cached copy (`workflow/FAST.md` §6), or the page falls back to the standard engine. Never loop on it.
 11. **Keep going.** A context summary is not a stopping point. With YOLO or a no-stop pace, resume from the ledger and carry on; stop only at a gate, a blocker, or the end of the round.
 12. **Plan guideline content before prose.** Follow `workflow/EDITORIAL.md`: verify facts, identify reader decisions, adapt topic organization and depth, then revise for redundancy. Preserve outer frames, tokens, APIs and references. New/revised pages save an internal plan checked by the existing copy guard; existing builds remain readable.
@@ -71,7 +71,7 @@ One skill, five commands. Each command has its own reference file. Load it befor
 # 3. The answers folder
 
 ```text
-input/{slug}/answers/
+workspace/input/{slug}/answers/
 ├─ 01-init.md                  init: product, platform, brand, file, new or existing, renames, token naming
 ├─ 02-build-YYYY-MM-DD.md      one file per build round: engine, how far, pages, references, where, pace
 └─ …

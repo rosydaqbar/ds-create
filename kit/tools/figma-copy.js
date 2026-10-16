@@ -14,7 +14,7 @@
 //            builder instead (workflow/GOTCHAS.md G27).
 //
 // The copy for one page and one surface comes from the docs site's parser:
-//   node kit/web/scripts/build-copy.mjs --dir output/{slug}/copy --page 2.1 --surface figma
+//   node kit/web/scripts/build-copy.mjs --dir workspace/output/{slug}/copy --page 2.1 --surface figma
 //
 // Call (cache it like kit/tools/figma-audit.js, or paste it):
 //   const r = await figmaCopy(figma, 'extract', '2.1 Button');

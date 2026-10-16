@@ -2,12 +2,12 @@
 
 Asks four questions, then builds exactly the pages the answers allow, in the fixed order of `workflow/INITIATOR.md` Part B §6. Run it as often as needed: each run is one build round, and a later round adds pages to the same system.
 
-**Load:** the global set (`SKILL.md` §1), `workflow/INITIATOR.md` (all of Part B), and `workflow/QUESTIONNAIRE.md` §4, §6, §7, §8, §10 and §11. Then, per page, the files `workflow/INITIATOR.md` Part B §0 lists for it, and the system's knowledge: `input/{slug}/knowledge/system.md` and the page's own file (`input/README.md` I7), which override the page spec and its fast-mode manifest. The repo's `knowledge/` topics for the page are read before its copy is written: they give the docs their reasoning, which is written in the system's own words and never cited (`workflow/COPY.md` §1). In fast mode, also `workflow/FAST.md`. With the docs site, also `workflow/WEB.md` (and `workflow/APP.md` for App).
+**Load:** the global set (`SKILL.md` §1), `workflow/INITIATOR.md` (all of Part B), and `workflow/QUESTIONNAIRE.md` §4, §6, §7, §8, §10 and §11. Then, per page, the files `workflow/INITIATOR.md` Part B §0 lists for it, and the system's knowledge: `workspace/input/{slug}/knowledge/system.md` and the page's own file (`workspace/input/README.md` I7), which override the page spec and its fast-mode manifest. The repo's `knowledge/` topics for the page are read before its copy is written: they give the docs their reasoning, which is written in the system's own words and never cited (`workflow/COPY.md` §1). In fast mode, also `workflow/FAST.md`. With the docs site, also `workflow/WEB.md` (and `workflow/APP.md` for App).
 
 # 1. Gate check
 
 Before any question, check:
-- `input/{slug}/answers/01-init.md` exists;
+- `workspace/input/{slug}/answers/01-init.md` exists;
 - the ledger marks steps 1–4 `done`;
 - the platform is settled (Web, App, or Web and App).
 
@@ -23,7 +23,7 @@ Re-read the ledger. When an earlier round left a page `building` or `qa`, offer 
 | --- | --- |
 | `fast-mode`, `fast` · `default` | Q1 engine (the user's own choice, so YOLO rules don't apply) |
 | `--review` · `--no-review` | Q1's F2 checkpoint (fast mode); without either, YOLO answers it, otherwise ask |
-| `--no-gl` | no Guidelines frames, in Figma and on the site: ledger `flags.guidelines: false` (§5) |
+| `--no-gl` | no Guidelines frames in Figma (ledger `flags.guidelines: false`, §5), and Q3 = Figma only: the docs site is skipped, even when `--site` is also passed |
 | `--upto foundations\|parts\|components\|all` · `--pages 2.1,2.5` | Q2 how far |
 | `--figma-only` · `--site` | Q3 where |
 | `--yolo` · `--step` | Q4 pace |
@@ -57,7 +57,7 @@ Rules:
   - List every added page in the summary, with why it was added.
   - Foundation documentation pages are not added for a named page; the tokens from init are enough.
 - **References.**
-  - The user may attach designs for a page ("make the button like this"). Save each file to `input/{slug}/references/components/{id}-{kebab name}/` and list it in `sources.md`.
+  - The user may attach designs for a page ("make the button like this"). Save each file to `workspace/input/{slug}/references/components/{id}-{kebab name}/` and list it in `sources.md`.
   - A reference is used as a method: observed, adapted and changed. It is never copied, and never named in any output.
 - **Existing file.** For each page in scope that already exists, also ask its action: Keep, Audit, Improve, Refactor, Rebuild, Replace or Skip (`workflow/QUESTIONNAIRE.md` §4).
 - **Documentation depth** (`workflow/QUESTIONNAIRE.md` §11): ask only when the user brings it up. The default is every extra.
@@ -71,7 +71,7 @@ The kind of site follows from init:
 - App gets React Native previews with React Native, Swift and Kotlin code (`workflow/APP.md`).
 - Web and App gets both.
 
-The site covers the same pages as Q2. Publishing (step 26) happens only when the user asks for it.
+The site covers the same pages as Q2. Publishing (step 26) happens only when the user asks for it. A `--no-gl` round is always Figma only: Q3 isn't asked, and `--site` is ignored (the summary says so in one line).
 
 ## Q4 · Pace
 
@@ -91,7 +91,7 @@ Show the summary and wait for the user's OK. It lists:
 - every AI decision.
 
 Then:
-- write `input/{slug}/answers/02-build-{YYYY-MM-DD}.md`, or the next number for a later round (`SKILL.md` §3);
+- write `workspace/input/{slug}/answers/02-build-{YYYY-MM-DD}.md`, or the next number for a later round (`SKILL.md` §3);
 - update the ledger: `answers`, `engine`, `flags` (`{ "guidelines": false }` for `--no-gl`), and the `sequence` entries for this round (§4);
 - record each step that won't run as `skip`, with the reason taken from the answers.
 
@@ -110,7 +110,7 @@ Every round runs the library phase before the documentation phase: the sets a pa
 | Q2 = named pages | 5, 6 and 11 for those pages; the library steps of those pages and of every set they show or contain; then each page's docs step | every other page |
 | Q1 = Fast | steps 11–20 follow `workflow/FAST.md`; steps 5–10 always use the standard engine | — |
 | Q3 = Figma and site | 22 site setup · 23 site pages · 24 foundation and guidance site pages · 25 build and package | 26 until the user asks |
-| Q3 = Figma only | — | 22–26 |
+| Q3 = Figma only, or `--no-gl` | — | 22–26 |
 | (always) | 21 closing step: the plugin data is cleared in the last round; a round that leaves pages for later keeps it (`workflow/GOTCHAS.md` G8) | — |
 
 **The sets a round needs.** Before the summary, list every set the round's doc pages show: their Overview compositions, Guidelines examples and visuals, from each page file. Every such set gets its library step in this round, even when its own docs aren't in scope (01 Getting started shows `Button` and `Text field`, so a Foundations round builds those sets and the Parts they contain). Show them in the summary as "added for {page}". Their docs steps are added in the round that documents them.
@@ -150,10 +150,10 @@ End every round with:
 ```text
 Built this round   {pages, each with its audit result; fast mode: not audited}
 Engine             {Default | Fast}; pages that fell back to Default: {list or none}
-Docs site          {not in scope | built at output/{slug}/web/ (npm run dev)}
+Docs site          {not in scope | built at workspace/output/{slug}/web/ (npm run dev)}
 Still open         {pages not done, conflicts, spec gaps}
 Decided by the AI  {each with its reason, or none}
 QA                 hasn't run since these changes{; fast mode: no page is audited yet}. Run /ds-create qa?
 ```
 
-Save it to `output/{slug}/reports/build-{YYYY-MM-DD}.md`, and record anything longer than one line in `output/{slug}/reports/build-notes.md`. Add every lesson that applies to any brand to `workflow/GOTCHAS.md` (`workflow/GOTCHAS.md` §0).
+Save it to `workspace/output/{slug}/reports/build-{YYYY-MM-DD}.md`, and record anything longer than one line in `workspace/output/{slug}/reports/build-notes.md`. Add every lesson that applies to any brand to `workflow/GOTCHAS.md` (`workflow/GOTCHAS.md` §0).

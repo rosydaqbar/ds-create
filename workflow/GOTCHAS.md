@@ -7,7 +7,7 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 - **When to load.** `workflow/GOTCHAS.md` is part of the global set (`workflow/INITIATOR.md` §0): load it at the start of every session that writes to Figma or builds the docs site, and again after any context compaction.
 - **Fixed numbering.** Rules are numbered `G1`, `G2`, and so on. A rule's number and meaning never change. A rule can be made stricter, never looser. A rule that no longer applies stays in place, marked `Retired:` with the reason, so its number is never reused.
 - **Adding a lesson.** When something costs a retry, a rollback, an audit failure or a user correction:
-  1. Record it in the build's `output/{slug}/reports/build-notes.md` as it happened.
+  1. Record it in the build's `workspace/output/{slug}/reports/build-notes.md` as it happened.
   2. If it would happen to any brand, add it here as the next number at the end of its section, in the same three-part form.
   3. Before the build is marked complete (`workflow/INITIATOR.md` §9), check that every such lesson is either in this file or noted as brand-specific in the build notes.
 - **Agnostic only.** Rules describe the situation, never the brand: no brand, product or client names, no file keys, no product copy, no screenshots. Use generic words: "a flow page", "the brand fill", "a component set".
@@ -194,7 +194,7 @@ Also turn clip content on: `figma.createComponent()` starts with it off, and the
 *Why:* a variable table in a reading column squeezed its Usage cell to a few characters per line, and the frame grew to over 7,000 px.
 *Check:* no reading frame is taller than its content warrants, and no table cell wraps one word per line.
 
-**G43. Use finished builds as references, never as sources.** `examples/` may be read to understand a pattern. Nothing is copied from it (sentences, manifests, page data, values, code), and it never replaces a step: every page is still written from its spec, the templates and tools, this system's inputs and its own Figma file. Other systems' `input/` and `output/` folders are not read at all.
+**G43. Use finished builds as references, never as sources.** `examples/` may be read to understand a pattern. Nothing is copied from it (sentences, manifests, page data, values, code), and it never replaces a step: every page is still written from its spec, the templates and tools, this system's inputs and its own Figma file. Other systems' `workspace/input/` and `workspace/output/` folders are not read at all.
 *Why:* in fast mode, an agent filled pages from a finished example instead of writing the manifests and copy from the build's own sources, which made the fast-mode rules pointless.
 *Check:* `kit/tools/fast-pack.mjs --check` reports no copy line taken word for word from an example and no line naming one.
 
@@ -256,10 +256,10 @@ Also turn clip content on: `figma.createComponent()` starts with it off, and the
 
 # 6. Inputs and local files
 
-**G55. List `input/` and `output/` with `find`, never with a search tool.**
-- Git ignores `input/*` and `output/*`, so client files are never committed. `rg`, `fd`, `ag` and the agent's Glob and Grep tools skip git-ignored files.
-- List inputs with `find input -type f`, and open each file by its path. Use the same for anything in `output/{slug}/` that has no fixed path.
-- The `.ignore` whitelist for `input/` helps a whole-tree search, but ripgrep still drops the files when it gets several paths at once. Never rely on it.
+**G55. List `workspace/input/` and `workspace/output/` with `find`, never with a search tool.**
+- Git ignores `workspace/input/*` and `workspace/output/*`, so client files are never committed. `rg`, `fd`, `ag` and the agent's Glob and Grep tools skip git-ignored files.
+- List inputs with `find workspace/input -type f`, and open each file by its path. Use the same for anything in `workspace/output/{slug}/` that has no fixed path.
+- The `.ignore` whitelist for `workspace/input/` helps a whole-tree search, but ripgrep still drops the files when it gets several paths at once. Never rely on it.
 
-*Why:* an init listed `input/` with `rg --files`, saw only the README, and asked for a brand identity that was sitting in the folder as a file.
-*Check:* `sources.md` lists every file that `find input -type f` returns for the system, README excepted.
+*Why:* an init listed `workspace/input/` with `rg --files`, saw only the README, and asked for a brand identity that was sitting in the folder as a file.
+*Check:* `sources.md` lists every file that `find workspace/input -type f` returns for the system, README excepted.

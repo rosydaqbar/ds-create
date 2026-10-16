@@ -2,7 +2,7 @@
 
 Read-only. Shows where a system stands, from its ledger and its answers files. It makes no Figma calls and changes nothing.
 
-**Load:** `output/{slug}/ds-create-ledger.json`, the files in `input/{slug}/answers/`, `input/{slug}/sources.md`, and the files in `input/{slug}/knowledge/`.
+**Load:** `workspace/output/{slug}/ds-create-ledger.json`, the files in `workspace/input/{slug}/answers/`, `workspace/input/{slug}/sources.md`, and the files in `workspace/input/{slug}/knowledge/`.
 
 **Report:**
 
@@ -21,4 +21,4 @@ Open         {conflicts in sources.md, spec gaps, approvals waiting}
 Next         {the one command to run next}
 ```
 
-Without a ledger, say so, and suggest `/ds-create init`. When `input/` holds several systems, show one line per system.
+Without a ledger, say so, and suggest `/ds-create init`. When `workspace/input/` holds several systems, show one line per system.

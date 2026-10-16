@@ -22,7 +22,7 @@ Novelin is a design system built with ds-create. Its documentation site brings t
 
 # 1. Get the workspace first
 
-`anti-skill update` replaces the installed skill folder. A build writes `input/{slug}/` and `output/{slug}/` into the folder it runs in, so it never runs inside the installed skill folder.
+`anti-skill update` replaces the installed skill folder. A build writes `workspace/input/{slug}/` and `workspace/output/{slug}/` into the folder it runs in, so it never runs inside the installed skill folder.
 
 1. **Find the workspace.** If the current folder, or one above it, holds `workflow/INITIATOR.md` and `specs/SYSTEM.md`, and is not the installed skill folder, that folder is the workspace. Go to step 3.
 2. **Copy it when there is none.** Ask once where it should live (default `~/ds-create`), then copy the installed skill folder there:
@@ -40,10 +40,10 @@ Novelin is a design system built with ds-create. Its documentation site brings t
    Other agents read `skills/ds-create/SKILL.md` directly.
 4. **Work from the workspace root,** and follow `skills/ds-create/SKILL.md` there. It routes each command to its reference file in `skills/ds-create/reference/`.
 
-**Updating.** Run `anti-skill update ds-create`, then copy the new version over the workspace without touching `input/` and `output/`, so a system's files and builds stay as they are:
+**Updating.** Run `anti-skill update ds-create`, then copy the new version over the workspace without touching `workspace/input/` and `workspace/output/`, so a system's files and builds stay as they are:
 
 ```bash
-rsync -a --exclude input/ --exclude output/ "<installed skill folder>/" ~/ds-create/
+rsync -a --exclude workspace/input/ --exclude workspace/output/ "<installed skill folder>/" ~/ds-create/
 ```
 
 # 2. What it needs
@@ -63,13 +63,13 @@ rsync -a --exclude input/ --exclude output/ "<installed skill folder>/" ~/ds-cre
 
 | Command | What it does |
 | --- | --- |
-| `/ds-create init` | Saves what you paste or attach into `input/{slug}/` (it makes the folder), checks readiness, reads every input, asks only what the inputs leave open, and sets up the foundations as Figma variables and styles. Runs once per system. |
+| `/ds-create init` | Saves what you paste or attach into `workspace/input/{slug}/` (it makes the folder), checks readiness, reads every input, asks only what the inputs leave open, and sets up the foundations as Figma variables and styles. Runs once per system. |
 | `/ds-create build` | Asks four questions: the engine (Default or Fast), how far to go, Figma only or with the docs site, and the pace. Then builds exactly that. Run it again to add more. |
-| `/ds-create learn` | Keeps a lasting rule the user teaches about their system ("buttons align left") in `input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build. |
+| `/ds-create learn` | Keeps a lasting rule the user teaches about their system ("buttons align left") in `workspace/input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build. |
 | `/ds-create qa` | Runs the checks the user asks for: page and file audits, spec checklists, the copy check, and the site's QA. Only on call. |
 | `/ds-create status` | Shows where the build stands, from its ledger, and the next command to run. |
 
-With no command, `status` runs. Every answer is saved in `input/{slug}/answers/`, and anything said in chat that shapes the system goes to `input/{slug}/chat/`, so a later session doesn't ask again.
+With no command, `status` runs. Every answer is saved in `workspace/input/{slug}/answers/`, and anything said in chat that shapes the system goes to `workspace/input/{slug}/chat/`, so a later session doesn't ask again.
 
 # 4. How a build runs
 
@@ -86,11 +86,11 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 - **Library first.** Every set exists before any doc page is drawn, so every example on a page is a real instance and no step waits on a later one. A stand-in component is never drawn.
 - **Two engines.** *Default* builds each page from its spec, with a cheap audit at each page. *Fast* draws every page with a fixed renderer from data, a page's text and a short plan, in far fewer calls. A fast round only generates: its audits and checks run when the user calls `qa`.
 - **Pace.** *YOLO* answers the open questions itself and doesn't stop between pages. *One by one* stops after each page. Three things are always the user's: the engine, what the product is, and the Figma file.
-- **The ledger** (`output/{slug}/ds-create-ledger.json`) keeps every step's status and evidence, so a build can stop and resume in any session.
+- **The ledger** (`workspace/output/{slug}/ds-create-ledger.json`) keeps every step's status and evidence, so a build can stop and resume in any session.
 
 # 5. What goes in and what comes out
 
-**In: `input/{slug}/`**, one folder per system (`input/README.md`). Nobody has to make it: init creates it and saves what the user pastes or attaches.
+**In: `workspace/input/{slug}/`**, one folder per system (`workspace/input/README.md`). Nobody has to make it: init creates it and saves what the user pastes or attaches.
 - `brief/`: product brief, goals, users, scope, research;
 - `brand/`: guidelines, logos, typefaces, colors, tone of voice;
 - `design-system/`: an existing system, its docs, token exports and Figma links;
@@ -99,12 +99,12 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 
 **Out:**
 - **The Figma file:** `00 Cover`, `01 Getting started`, `02 Tokens`, then Foundations (1.x), Parts (2.x), Components (3.x), Sections (4.x), Layouts (5.x) and Screens (6.x). Each page has its fixed frames (`.Main`, Overview, Component, Anatomy, Guidelines).
-- **`output/{slug}/`:** the ledger, every page's copy file (one source of text for Figma and the site), the set snapshots, the reports and the docs site.
+- **`workspace/output/{slug}/`:** the ledger, every page's copy file (one source of text for Figma and the site), the set snapshots, the reports and the docs site.
 
 # 6. Rules every build keeps
 
 - **The inputs are the ground truth.** They are read before any question is asked, and every answer shows where it came from.
-- **The repo stays brand-agnostic.** Brand names, file keys and product copy live only in `input/`, `output/` and the Figma file.
+- **The repo stays brand-agnostic.** Brand names, file keys and product copy live only in `workspace/input/`, `workspace/output/` and the Figma file.
 - **Examples are references, never sources.** `examples/` explains a pattern; nothing is copied from it.
 - **No repo edits during a build.** Lessons go into the build notes, and into the repo after the round, when the maintainer asks.
 - **The specs win.** A system's own knowledge and frozen values come first, then the specs. The repo's `knowledge/` explains the reasoning, and never overrides a spec.
@@ -119,6 +119,6 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 | `knowledge/` | **why** it works: design rationale with examples, never rules |
 | `kit/` | the **code**: Figma tools (`kit/tools/`), the docs-site template (`kit/web/`), the app previews (`kit/app/`) |
 | `examples/` | finished reference builds, to read, never to copy |
-| `input/`, `output/` | each system's files and builds; local only, never committed |
+| `workspace/input/`, `workspace/output/` | each system's files and builds; local only, never committed |
 
 The README holds the full file map and loading rules.

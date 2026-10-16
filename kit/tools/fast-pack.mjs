@@ -4,27 +4,27 @@
  * that kit/tools/figma-fastbuild.js renders. Checks every manifest first: a page that fails the check is never drawn.
  *
  *   node kit/tools/fast-pack.mjs --slug acme --init            copy the default reading-page manifests (workflow/templates/fast/)
- *                                                           into output/acme/fast/ when they are missing
- *   node kit/tools/fast-pack.mjs --slug acme --check           check every manifest in output/acme/fast/
+ *                                                           into workspace/output/acme/fast/ when they are missing
+ *   node kit/tools/fast-pack.mjs --slug acme --check           check every manifest in workspace/output/acme/fast/
  *   node kit/tools/fast-pack.mjs --slug acme --page 1.4        print the payload of one page (checked first)
  *   node kit/tools/fast-pack.mjs --slug acme --page 1.4 --call print the whole page call: load the cached renderer,
  *                                                           render the payload, return frame ids and warnings
  *   node kit/tools/fast-pack.mjs --slug acme --batch [--pages 1.6,1.7,2.1 | --from 1.6] [--budget 45000]
- *                                                           write batch calls to output/acme/fast/calls/batch-{n}.js: the
+ *                                                           write batch calls to workspace/output/acme/fast/calls/batch-{n}.js: the
  *                                                           open docs pages (ledger order), several per call, each checked
  *                                                           first. Send them one at a time; mark each return with
  *                                                           kit/tools/ledger.mjs --render (workflow/FAST.md F4)
  *
  * Build flags come from the ledger: `flags.guidelines === false` (build --no-gl) drops every Guidelines frame and topic,
  * so manifests and copy files don't carry them. `{system}` in a manifest string is the ledger's system name.
- * An instance recipe may name an icon instead of its id: "Icon": "Icon/general/copy" (from output/{slug}/figma/icons.json,
+ * An instance recipe may name an icon instead of its id: "Icon": "Icon/general/copy" (from workspace/output/{slug}/figma/icons.json,
  * written by kit/tools/registry.mjs).
  *
  * What the check refuses:
  *   - a visual type the renderer doesn't have (the catalog is read from kit/tools/figma-fastbuild.js);
  *   - a visual still marked `todo` (fill its inputs or remove it);
  *   - a block or topic title that the copy file doesn't have, and a copy topic the manifest doesn't place;
- *   - a set name that isn't in the build's snapshots (output/{slug}/figma/sets/);
+ *   - a set name that isn't in the build's snapshots (workspace/output/{slug}/figma/sets/);
  *   - an instances visual without items, and do / don't pairs that don't match the copy's do and don't lines;
  *   - a copy line taken word for word from a reference build in examples/, and any copy or manifest line that names
  *     one: examples are references, never sources (workflow/GOTCHAS.md G43);
@@ -47,7 +47,7 @@ if (!slug) {
   console.error('fast-pack: --slug {system} is required');
   process.exit(2);
 }
-const OUT = path.join(ROOT, 'output', slug);
+const OUT = path.join(ROOT, 'workspace', 'output', slug);
 const FAST = path.join(OUT, 'fast');
 const COPY = path.join(OUT, 'copy');
 const SETS = path.join(OUT, 'figma', 'sets');
@@ -146,17 +146,17 @@ const resolveSet = (s, errs, where) => {
   if (!s) return errs.push(`${where}: a recipe has no set`), null;
   if (/^\d+:\d+$/.test(s)) return s;
   const id = setIds.get(s);
-  if (!id) errs.push(`${where}: no set named "${s}" in output/${slug}/figma/sets/`);
+  if (!id) errs.push(`${where}: no set named "${s}" in workspace/output/${slug}/figma/sets/`);
   return id ?? null;
 };
-/** "Icon/general/copy" → its component id, for instance-swap properties (output/{slug}/figma/icons.json). */
+/** "Icon/general/copy" → its component id, for instance-swap properties (workspace/output/{slug}/figma/icons.json). */
 const resolveProps = (props, errs, where) => {
   if (!props) return props;
   const out = {};
   for (const [k, val] of Object.entries(props)) {
     if (typeof val === 'string' && val.startsWith('Icon/')) {
       const id = ICONS[val.slice(5)];
-      if (!id) errs.push(`${where}: no icon "${val}" in output/${slug}/figma/icons.json (run kit/tools/registry.mjs)`);
+      if (!id) errs.push(`${where}: no icon "${val}" in workspace/output/${slug}/figma/icons.json (run kit/tools/registry.mjs)`);
       out[k] = id ?? val;
     } else out[k] = val;
   }
@@ -324,7 +324,7 @@ function pack(file) {
   const m = JSON.parse(raw.replace(/\{system\}/g, SYSTEM.replace(/["\\]/g, '')));
   const id = idOf(m.page);
   const copy = copies.get(id);
-  if (!copy) errs.push(`${m.page}: no copy file for page ${id} in output/${slug}/copy/`);
+  if (!copy) errs.push(`${m.page}: no copy file for page ${id} in workspace/output/${slug}/copy/`);
   const payload = m.type === 'reading' ? packReading(m, copy, errs) : m.type === 'component' || m.type === 'layout' ? packComponent(m, copy, errs) : (errs.push(`${m.page}: type is reading, component or layout`), null);
   return { id, payload, errs };
 }
@@ -347,7 +347,7 @@ if (args.includes('--init')) {
       n++;
     }
   }
-  console.log(`fast-pack: ${n} default manifest(s) copied to output/${slug}/fast/ (existing ones kept)`);
+  console.log(`fast-pack: ${n} default manifest(s) copied to workspace/output/${slug}/fast/ (existing ones kept)`);
   process.exit(0);
 }
 
@@ -384,7 +384,7 @@ const want = arg('--page');
 if (want) {
   const f = files.find((x) => idOf(JSON.parse(fs.readFileSync(x, 'utf8')).page) === want);
   if (!f) {
-    console.error(`fast-pack: no manifest for page ${want} in output/${slug}/fast/`);
+    console.error(`fast-pack: no manifest for page ${want} in workspace/output/${slug}/fast/`);
     process.exit(1);
   }
   const { payload, errs } = pack(f);
@@ -474,7 +474,7 @@ return { done, failed, next, warnings: (D.warnings || []).slice(0, 10), ms: Date
     fs.writeFileSync(path.join(CALLS, `batch-${k + 1}.js`), call);
     console.log(`batch-${k + 1}.js: ${g.map((r) => r.id).join(', ')} (${call.length} characters)`);
   });
-  console.log(ready.length ? `fast-pack: ${ready.length} page(s) in ${groups.length} call(s) in output/${slug}/fast/calls/. Send them in order, one at a time; after each, node kit/tools/ledger.mjs --slug ${slug} --render '<its return>'` : 'fast-pack: no page ready to batch');
+  console.log(ready.length ? `fast-pack: ${ready.length} page(s) in ${groups.length} call(s) in workspace/output/${slug}/fast/calls/. Send them in order, one at a time; after each, node kit/tools/ledger.mjs --slug ${slug} --render '<its return>'` : 'fast-pack: no page ready to batch');
   process.exit(ready.length ? 0 : 1);
 }
 console.error('fast-pack: use --init, --check or --page {id}');

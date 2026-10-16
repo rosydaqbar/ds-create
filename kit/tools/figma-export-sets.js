@@ -21,7 +21,7 @@
 //    them to the file. A 144-variant button (4 layers per variant) needs 5 calls of ~16 s, most of it page load.
 //    MAX_NODES keeps a call well under the 120 s tool window; a tree too big for one return is cut by depth
 //    (`treeDepth` says where).
-// 3. Save each entry of `sets` as output/{system-slug}/figma/sets/{set id, ":" written as "-"}.json, as returned,
+// 3. Save each entry of `sets` as workspace/output/{system-slug}/figma/sets/{set id, ":" written as "-"}.json, as returned,
 //    at the step that audits the page (workflow/INITIATOR.md Part B §6). Docs agents read these files and open Figma only
 //    for screenshots.
 // Excluded pages: copy the ledger's never-open page names into NEVER_OPEN; the script refuses them.

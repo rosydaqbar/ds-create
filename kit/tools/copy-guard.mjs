@@ -4,8 +4,8 @@
  * (workflow/COPY.md §1, knowledge/README.md §1). Readers of a design system's docs should never see where the
  * reasoning came from:
  *
- *   node kit/tools/copy-guard.mjs --slug {slug}                 checks output/{slug}/copy/*.md, the fast-mode manifests
- *                                                           (output/{slug}/fast/*.json) and the site's stories
+ *   node kit/tools/copy-guard.mjs --slug {slug}                 checks workspace/output/{slug}/copy/*.md, the fast-mode manifests
+ *                                                           (workspace/output/{slug}/fast/*.json) and the site's stories
  *   node kit/tools/copy-guard.mjs --slug {slug} --page {id}     one page, before it is drawn: lists the knowledge topics to
  *                                                           read, checks the page's copy file, and checks the ledger
  *                                                           shows those topics under the page's `loaded`
@@ -97,7 +97,7 @@ export function topicsFor(id) {
 export function evidenceErrors(slug, id) {
   const topics = topicsFor(id);
   if (!topics.length) return { errs: [], topics, ledger: true };
-  const lp = path.join(ROOT, 'output', slug, 'ds-create-ledger.json');
+  const lp = path.join(ROOT, 'workspace', 'output', slug, 'ds-create-ledger.json');
   if (!fs.existsSync(lp)) return { errs: [], topics, ledger: false };
   const L = JSON.parse(fs.readFileSync(lp, 'utf8'));
   // A page with sets has a library entry and a docs entry (workflow/INITIATOR.md Part B §0); the copy belongs to the docs entry.
@@ -122,7 +122,7 @@ export const jsonStrings = (v, out = []) => {
 /** Review every copy file. A missing plan never exempts prose from editorial checks. */
 export function checkEditorial(slug, ids = [], required = false) {
   const errors = [], copies = [];
-  const dir = path.join(ROOT, 'output', slug, 'copy');
+  const dir = path.join(ROOT, 'workspace', 'output', slug, 'copy');
   if (!fs.existsSync(dir)) return required ? ['No copy directory for editorial review'] : [];
   const found = new Set();
   for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.md'))) {
@@ -131,7 +131,7 @@ export function checkEditorial(slug, ids = [], required = false) {
     found.add(copy.id);
     errors.push(...parseErrors);
     copies.push(copy);
-    const planFile = path.join(ROOT, 'output', slug, 'plans', file.replace(/\.md$/, '.json'));
+    const planFile = path.join(ROOT, 'workspace', 'output', slug, 'plans', file.replace(/\.md$/, '.json'));
     if (!fs.existsSync(planFile)) {
       if (required) errors.push(`${copy.id}: write the pre-draft editorial plan in plans/${path.basename(planFile)}`);
       continue;
@@ -147,10 +147,10 @@ export function checkEditorial(slug, ids = [], required = false) {
 /** One page's copy file and its fast-mode manifest: everything that can reach its Figma frames or site page. */
 export function checkPage(slug, id) {
   const errs = checkEditorial(slug, [id]);
-  const copy = path.join(ROOT, 'output', slug, 'copy');
+  const copy = path.join(ROOT, 'workspace', 'output', slug, 'copy');
   const f = fs.existsSync(copy) && fs.readdirSync(copy).find((x) => x.startsWith(id + '-') && x.endsWith('.md'));
   if (f) errs.push(...knowledgeErrors(fs.readFileSync(path.join(copy, f), 'utf8'), `copy/${f}`));
-  const fast = path.join(ROOT, 'output', slug, 'fast');
+  const fast = path.join(ROOT, 'workspace', 'output', slug, 'fast');
   if (fs.existsSync(fast)) for (const m of fs.readdirSync(fast).filter((x) => x.endsWith('.json'))) {
     try {
       const j = JSON.parse(fs.readFileSync(path.join(fast, m), 'utf8'));
@@ -163,14 +163,14 @@ export function checkPage(slug, id) {
 /** Every copy file of a build, and the strings of its site stories. */
 export function checkBuild(slug) {
   const errs = checkEditorial(slug);
-  const copy = path.join(ROOT, 'output', slug, 'copy');
+  const copy = path.join(ROOT, 'workspace', 'output', slug, 'copy');
   if (fs.existsSync(copy)) for (const f of fs.readdirSync(copy).filter((x) => x.endsWith('.md'))) errs.push(...knowledgeErrors(fs.readFileSync(path.join(copy, f), 'utf8'), `copy/${f}`));
-  const fast = path.join(ROOT, 'output', slug, 'fast');
+  const fast = path.join(ROOT, 'workspace', 'output', slug, 'fast');
   if (fs.existsSync(fast)) for (const m of fs.readdirSync(fast).filter((x) => x.endsWith('.json'))) {
     try { errs.push(...knowledgeErrors(jsonStrings(JSON.parse(fs.readFileSync(path.join(fast, m), 'utf8'))).join('\n'), `fast/${m}`)); } catch {}
   }
-  const docs = path.join(ROOT, 'output', slug, 'web', 'src', 'docs');
-  const walk = (d) => { if (!fs.existsSync(d)) return; for (const e of fs.readdirSync(d, { withFileTypes: true })) { const f = path.join(d, e.name); if (e.isDirectory()) walk(f); else if (/\.(tsx?|json)$/.test(e.name) && !e.name.endsWith('.gen.json')) { const strs = [...fs.readFileSync(f, 'utf8').matchAll(/(["'`])((?:(?!\1)[^\\\n]|\\.){12,}?)\1/g)].map((m) => m[2]).filter((s) => /\s/.test(s)); errs.push(...knowledgeErrors(strs.join('\n'), path.relative(path.join(ROOT, 'output', slug), f))); } } };
+  const docs = path.join(ROOT, 'workspace', 'output', slug, 'web', 'src', 'docs');
+  const walk = (d) => { if (!fs.existsSync(d)) return; for (const e of fs.readdirSync(d, { withFileTypes: true })) { const f = path.join(d, e.name); if (e.isDirectory()) walk(f); else if (/\.(tsx?|json)$/.test(e.name) && !e.name.endsWith('.gen.json')) { const strs = [...fs.readFileSync(f, 'utf8').matchAll(/(["'`])((?:(?!\1)[^\\\n]|\\.){12,}?)\1/g)].map((m) => m[2]).filter((s) => /\s/.test(s)); errs.push(...knowledgeErrors(strs.join('\n'), path.relative(path.join(ROOT, 'workspace', 'output', slug), f))); } } };
   walk(docs);
   return errs;
 }

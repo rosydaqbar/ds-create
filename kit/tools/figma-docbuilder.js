@@ -28,7 +28,7 @@
 //   'dockit'; gridColumn: id of '.Main/Space grid column' for Layout grids.
 //   Body rules: the body is an ordinary script (backticks and ${ are fine); just don't redeclare D or L.
 //   Page helpers return { page, frames: {name: id}, audit, checks, warnings, foreign, ms }. Save the audit as
-//   output/{slug}/figma/audit-{page}.json and the frame ids in the ledger. Smaller helpers (newFrame, block,
+//   workspace/output/{slug}/figma/audit-{page}.json and the frame ids in the ledger. Smaller helpers (newFrame, block,
 //   table, topic, pairDD, inst…) build custom frames the same way; end with D.finishPage(page).
 //
 // CLEAN UP at the end of the build (one write call):

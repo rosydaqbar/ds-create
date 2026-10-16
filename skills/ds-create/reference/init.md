@@ -4,7 +4,7 @@ Sets up the baseline of a design system: the inputs are read, the basics are set
 
 **Init never** draws a doc page, creates the page tree or the Doc kit, builds a component, or changes a frozen value.
 
-**Load:** the global set (`SKILL.md` §1), `input/README.md`, `workflow/QUESTIONNAIRE.md` §1, §2, §3, §9 and §10, `specs/SYSTEM.md` Part C and `specs/guidance/02-tokens.md`. For an existing file, also `workflow/INITIATOR.md` Part B §2 (*Inspect first*).
+**Load:** the global set (`SKILL.md` §1), `workspace/input/README.md`, `workflow/QUESTIONNAIRE.md` §1, §2, §3, §9 and §10, `specs/SYSTEM.md` Part C and `specs/guidance/02-tokens.md`. For an existing file, also `workflow/INITIATOR.md` Part B §2 (*Inspect first*).
 
 **Order.** Steps 0, 1 and 2 run before anything is asked. The first reply is always the start report (§2), and no question comes before it.
 
@@ -12,11 +12,11 @@ Sets up the baseline of a design system: the inputs are read, the basics are set
 
 The user never has to prepare a folder. Whatever comes with the command, or later in chat, is an input:
 - **The slug.** Take the system name from the request or the pasted text (lowercase, kebab case). Ask for it only when neither gives one.
-- **The folder.** Create `input/{slug}/` when it doesn't exist.
-- **Pasted text** (a brief, a PRD, brand notes, a list of links): save it word for word in `input/{slug}/chat/YYYY-MM-DD.md` (`input/README.md` I3), then read it like any other input. A brief pasted in chat is the system's brief.
+- **The folder.** Create `workspace/input/{slug}/` when it doesn't exist.
+- **Pasted text** (a brief, a PRD, brand notes, a list of links): save it word for word in `workspace/input/{slug}/chat/YYYY-MM-DD.md` (`workspace/input/README.md` I3), then read it like any other input. A brief pasted in chat is the system's brief.
 - **Attached files:** save each one in the folder that fits (`brief/`, `brand/`, `design-system/`, `references/`), under its own name.
 - **A Figma link:** record it in the same chat file. It is the file for the readiness check.
-- **Files dropped straight into `input/`,** outside any system folder: they belong to this system when `input/` holds no other system folder; otherwise ask which system they belong to. Read them where they are, and list them in `sources.md` by their path from `input/`. Never move or rename them.
+- **Files dropped straight into `workspace/input/`,** outside any system folder: they belong to this system when `workspace/input/` holds no other system folder; otherwise ask which system they belong to. Read them where they are, and list them in `sources.md` by their path from `workspace/input/`. Never move or rename them.
 
 # 1. Readiness check
 
@@ -28,11 +28,11 @@ Run every check before asking anything, and report them all together in the star
 | The file is editable | A read-only `use_figma` call on the file returns its pages | Share the file with edit access, or allow a new file |
 | Brand typefaces are installed | `figma.listAvailableFontsAsync()` has every family the brand names, with the styles the type scale needs | Install the font, or choose a stand-in and record it as an answer |
 | Node 20 or later | `node -v`, only when the docs site may be built | Install Node 20 or later |
-| Inputs | `input/{slug}/` holds at least what came with the command (§0) | Nothing to fix: with no input at all, the questions in §3 cover it |
+| Inputs | `workspace/input/{slug}/` holds at least what came with the command (§0) | Nothing to fix: with no input at all, the questions in §3 cover it |
 
 # 2. Read the inputs, then show the start report
 
-List the files with `find input -type f`, never with `rg`, `fd`, Glob or Grep: git ignores `input/`, and those tools skip git-ignored files, so they show an empty folder (`workflow/GOTCHAS.md` G55). Read every file in `input/{slug}/` and every loose file in `input/` that belongs to this system (§0), then write or update `sources.md` (`input/README.md` I1, I5). List any conflict between inputs under *Open conflicts*.
+List the files with `find workspace/input -type f`, never with `rg`, `fd`, Glob or Grep: git ignores `workspace/input/`, and those tools skip git-ignored files, so they show an empty folder (`workflow/GOTCHAS.md` G55). Read every file in `workspace/input/{slug}/` and every loose file in `workspace/input/` that belongs to this system (§0), then write or update `sources.md` (`workspace/input/README.md` I1, I5). List any conflict between inputs under *Open conflicts*.
 
 Then show the start report. It is init's first reply, and the questions in §3 come after it, in the same reply or the next:
 
@@ -43,7 +43,7 @@ Readiness
   Typefaces       {each family: installed | missing | none named yet}
   Node            {version | not needed yet}
 
-Inputs (input/{slug}/)
+Inputs (workspace/input/{slug}/)
   {file}          {what it decides, e.g. "product, users, core features"}
   …
 
@@ -69,7 +69,7 @@ Init owns these questionnaire sections. Ask only the questions the start report 
 
 The user can:
 - answer in chat;
-- upload files into `input/{slug}/` and say so; init then reads them and asks again only what is still open;
+- upload files into `workspace/input/{slug}/` and say so; init then reads them and asks again only what is still open;
 - say YOLO: the AI answers the open questions from the inputs, each as an AI decision with its reason (`SKILL.md` §2.3).
 
 Even with YOLO, init asks for what the product is (one sentence) and for the Figma file when no input gives them.
@@ -83,7 +83,7 @@ Show one short summary and wait for the user's OK. It lists:
 - the AI decisions, each with its reason;
 - for an existing file, the renames init proposes (§5).
 
-Write the answers to `input/{slug}/answers/01-init.md` (`SKILL.md` §3).
+Write the answers to `workspace/input/{slug}/answers/01-init.md` (`SKILL.md` §3).
 
 # 5. Set up the foundations
 
@@ -96,18 +96,18 @@ This is build step 4 of `workflow/INITIATOR.md` Part B §6. Write the ledger fir
 - Create the text styles and the effect styles.
 - Set scopes and code syntax on every variable.
 - Every value comes from the brand inputs and the answers; a value the inputs don't give is an AI decision in YOLO, or a question otherwise.
-- Generate the token calls from one local data file, and write that same data in the export format (`ds-create/figma-variables@1`, `workflow/WEB.md` W2) to `output/{slug}/figma/figma-variables.json`. The docs site's export then checks hashes against it and fetches only what later rounds changed (`scripts/export-diff.mjs`), instead of exporting every variable back out of Figma.
+- Generate the token calls from one local data file, and write that same data in the export format (`ds-create/figma-variables@1`, `workflow/WEB.md` W2) to `workspace/output/{slug}/figma/figma-variables.json`. The docs site's export then checks hashes against it and fetches only what later rounds changed (`scripts/export-diff.mjs`), instead of exporting every variable back out of Figma.
 
 **Existing file.**
 - Read every collection, variable, mode and style, and freeze every value: init never changes a value.
 - Map the file's names to the ds-create grammar, and list each rename it proposes. Apply a rename only when the user approves it. In YOLO, names are kept.
-- Record the frozen state in `output/{slug}/figma/figma-variables.json` (`workflow/WEB.md` W2 explains the export).
+- Record the frozen state in `workspace/output/{slug}/figma/figma-variables.json` (`workflow/WEB.md` W2 explains the export).
 
 **Check.** `kit/tools/figma-audit.js` in file mode reports `fail` = 0 for the variables and styles. Otherwise list the approved exceptions in the ledger (`auditExceptions`). Then mark steps 1–4 `done` in the ledger.
 
 # 6. Report
 
-Show the report below, and save it to `output/{slug}/reports/init.md`:
+Show the report below, and save it to `workspace/output/{slug}/reports/init.md`:
 
 ```text
 Figma file    {link}

@@ -3,10 +3,10 @@
  * Writes the calls that create the icon library on 1.7 Iconography from Lucide (ISC), the same icons and the same
  * version the docs site uses. Nothing is drawn or chosen by hand:
  *
- *   node kit/tools/icons-lucide.mjs --slug {slug} [--registry path/to/icons/index.tsx] [--extra output/{slug}/icons-extra.json]
+ *   node kit/tools/icons-lucide.mjs --slug {slug} [--registry path/to/icons/index.tsx] [--extra workspace/output/{slug}/icons-extra.json]
  *                               [--color color/icon/primary] [--size size/icon/lg]
  *
- * - The icon set is the site's icon registry: `output/{slug}/web/src/icons/index.tsx` when the build has a site,
+ * - The icon set is the site's icon registry: `workspace/output/{slug}/web/src/icons/index.tsx` when the build has a site,
  *   otherwise the template's `kit/web/src/icons/index.tsx`. Each entry `'{category}/{name}': LucideComponent` becomes the
  *   component `Icon/{category}/{name}`.
  * - Extra icons for one system go in the registry of its site, or, for a Figma-only build, in `--extra`:
@@ -17,7 +17,7 @@
  * - The stroke binds to `--color` (default `color/icon/primary`, then `color/text/primary`), and the box to `--size`
  *   (default `size/icon/lg`) when that variable exists. Existing systems pass their own names.
  *
- * Output: `output/{slug}/icons/call-{n}.js` (each one `use_figma` call, under 45,000 characters) and `icons.json`
+ * Output: `workspace/output/{slug}/icons/call-{n}.js` (each one `use_figma` call, under 45,000 characters) and `icons.json`
  * (the names and the Lucide version). The calls are idempotent: icons already on the page are skipped.
  */
 import fs from 'node:fs';
@@ -32,12 +32,12 @@ if (!slug) {
   console.error('usage: node kit/tools/icons-lucide.mjs --slug {slug} [--registry file] [--extra file]');
   process.exit(1);
 }
-const OUT = path.join(ROOT, 'output', slug, 'icons');
+const OUT = path.join(ROOT, 'workspace', 'output', slug, 'icons');
 const COLORS = arg('--color') ? [arg('--color')] : ['color/icon/primary', 'color/text/primary'];
 const SIZE = arg('--size') || 'size/icon/lg';
 
 // 1. The registry: system name → Lucide component name.
-const siteReg = path.join(ROOT, 'output', slug, 'web', 'src', 'icons', 'index.tsx');
+const siteReg = path.join(ROOT, 'workspace', 'output', slug, 'web', 'src', 'icons', 'index.tsx');
 const regFile = path.resolve(arg('--registry') || (fs.existsSync(siteReg) ? siteReg : path.join(ROOT, 'kit', 'web', 'src', 'icons', 'index.tsx')));
 const reg = fs.readFileSync(regFile, 'utf8');
 const block = reg.match(/export const icons = \{([\s\S]*?)\n\}/);
@@ -51,7 +51,7 @@ if (extra) for (const [k, comp] of Object.entries(JSON.parse(fs.readFileSync(pat
 }
 
 // 2. Lucide shapes from the installed lucide-react.
-const cands = [path.join(ROOT, 'output', slug, 'web', 'node_modules', 'lucide-react'), path.join(ROOT, 'kit', 'web', 'node_modules', 'lucide-react')];
+const cands = [path.join(ROOT, 'workspace', 'output', slug, 'web', 'node_modules', 'lucide-react'), path.join(ROOT, 'kit', 'web', 'node_modules', 'lucide-react')];
 const LR = cands.find((c) => fs.existsSync(path.join(c, 'dist', 'esm', 'lucide-react.mjs')));
 if (!LR) throw new Error('lucide-react is not installed: run `npm ci` in kit/web/ (or in the build\'s site) first');
 const version = JSON.parse(fs.readFileSync(path.join(LR, 'package.json'), 'utf8')).version;

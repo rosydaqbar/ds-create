@@ -5,7 +5,7 @@ Every sentence a reader sees in the Figma doc frames and on the docs site comes 
 # 1. Where it lives
 
 ```text
-output/{system-slug}/copy/
+workspace/output/{system-slug}/copy/
 ├─ 00-cover.md
 ├─ 01-getting-started.md
 ├─ 1.1-color.md
@@ -22,7 +22,7 @@ output/{system-slug}/copy/
   - no sentence copied from `knowledge/`, and none of its example numbers: the system's tokens and values only;
   - the spec still decides what the page says. Knowledge only explains why, and fills in reasoning the spec leaves out.
 - **Which reasoning wins, topic by topic.** For each description, take the first source that covers the topic:
-  1. **The system's own knowledge** (`input/{slug}/knowledge/`) and what its inputs say about the topic (a brand guideline that explains a choice). The user's reasoning always comes first.
+  1. **The system's own knowledge** (`workspace/input/{slug}/knowledge/`) and what its inputs say about the topic (a brand guideline that explains a choice). The user's reasoning always comes first.
   2. **The repo's `knowledge/`**, when the system has nothing on the topic. It is then the benchmark for the description: the copy follows its reasoning, in the system's words and values, never cited.
   3. **Your own reasoning**, only when neither has the topic. Write it the same way, as a designer who knows the craft, and note it in the build notes as a judgment.
   `kit/tools/copy-guard.mjs` checks this (§7).
@@ -36,7 +36,7 @@ output/{system-slug}/copy/
 
 # 2. Format
 
-Before drafting, follow `workflow/EDITORIAL.md`: examine the subject, read current evidence, identify reader decisions, then save a plan in `output/{slug}/plans/{id}-{name}.json`. The plan tracks six coverage goals; these are not visible headings. Edit for redundancy after drafting, then run `copy-guard.mjs --slug {slug} --page {id} --editorial`. A saved plan is also checked by the existing page/build guard and Fast packer. Legacy copy without a plan remains supported; new or revised guidelines require one. Prose quality checks apply to every copy file, including legacy files without plans and all text roles.
+Before drafting, follow `workflow/EDITORIAL.md`: examine the subject, read current evidence, identify reader decisions, then save a plan in `workspace/output/{slug}/plans/{id}-{name}.json`. The plan tracks six coverage goals; these are not visible headings. Edit for redundancy after drafting, then run `copy-guard.mjs --slug {slug} --page {id} --editorial`. A saved plan is also checked by the existing page/build guard and Fast packer. Legacy copy without a plan remains supported; new or revised guidelines require one. Prose quality checks apply to every copy file, including legacy files without plans and all text roles.
 
 The section names below are transport slots for Figma frames and web tabs, not an editorial outline. Choose the topics within them for the subject. Default manifests are visual starting points: merge, remove or reorder topics together with the copy while retaining required specifications and visuals. A frame header may have no paragraph when its topics already establish the context.
 
@@ -123,7 +123,7 @@ Some text is not copy, and stays out of the file:
 1. Edit the copy file: change the `both` line, or the `figma` and `web` lines together, so the two surfaces keep the same meaning.
 2. Run `npm run copy` and check the site.
 3. Apply to Figma with `kit/tools/figma-copy.js` (`apply`), then run `diff` to confirm 0 differences.
-4. Record what the review changed in `output/{system-slug}/reports/build-notes.md`. Save the user's review comments to `input/{system-slug}/chat/` (`input/README.md` I3).
+4. Record what the review changed in `workspace/output/{system-slug}/reports/build-notes.md`. Save the user's review comments to `workspace/input/{system-slug}/chat/` (`workspace/input/README.md` I3).
 
 # 6. Adding copy files to a finished build
 

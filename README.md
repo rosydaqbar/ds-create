@@ -10,9 +10,9 @@ ds-create is used through its skill, `skills/ds-create/`: four commands that run
 
 | Command | What it does |
 | --- | --- |
-| `/ds-create init` | checks what the build needs, reads your files in `input/`, asks only what is missing, and sets up the foundations as Figma variables and styles |
+| `/ds-create init` | checks what the build needs, reads your files in `workspace/input/`, asks only what is missing, and sets up the foundations as Figma variables and styles |
 | `/ds-create build` | asks how to draw the pages (Default or Fast mode), how far to go, where (Figma only, or with the docs site) and the pace, then builds exactly that |
-| `/ds-create learn` | keeps a rule you teach about your system (for example "buttons align left") in `input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build |
+| `/ds-create learn` | keeps a rule you teach about your system (for example "buttons align left") in `workspace/input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build |
 | `/ds-create qa` | runs the full checks, only when you ask |
 | `/ds-create status` | shows where the build stands and what to run next |
 
@@ -24,11 +24,11 @@ mkdir -p .claude/skills && ln -s ../../skills/ds-create .claude/skills/ds-create
 
 Then open the repo in Claude Code: the `/ds-create` commands are there.
 
-## Add your context to `input/`
+## Add your context to `workspace/input/`
 
-Before the first build, give the agent what you know about the system. Everything goes into `input/`, one folder per design system (see `input/README.md`):
+Before the first build, give the agent what you know about the system. Everything goes into `workspace/input/`, one folder per design system (see `workspace/input/README.md`):
 
-1. Create `input/{your-system-slug}/`. The slug is your system name in lowercase kebab case: `Acme Design System` → `acme`.
+1. Create `workspace/input/{your-system-slug}/`. The slug is your system name in lowercase kebab case: `Acme Design System` → `acme`.
 2. Drop your files into the folder that fits. Any format the agent can read works: Markdown, text, PDF, images, office documents, exported JSON, or a file of links.
    - `brief/`: PRD, product brief, goals, users and tasks, scope, research
    - `brand/`: brand guidelines, logo files, typefaces, color specs, tone of voice
@@ -38,11 +38,11 @@ Before the first build, give the agent what you know about the system. Everythin
 4. Then run **`/ds-create build`**. It asks four questions: how to draw the pages (Default or Fast mode), how far to go (foundations, Parts, Components, everything, or only the pages you name), where (Figma only, or Figma and the docs site), and the pace. Then it builds exactly that. Run it again later to add more.
 5. Run **`/ds-create qa`** whenever you want the full checks, and **`/ds-create status`** to see where the build stands.
 
-Every answer you give is saved in `input/{your-system-slug}/answers/`, so a later session doesn't ask again.
+Every answer you give is saved in `workspace/input/{your-system-slug}/answers/`, so a later session doesn't ask again.
 
-Context you give in chat is saved too: the agent writes it to `input/{your-system-slug}/chat/`, so it is remembered in later sessions. Leave out a folder you have nothing for. With no input at all, the agent asks every question in `workflow/QUESTIONNAIRE.md`.
+Context you give in chat is saved too: the agent writes it to `workspace/input/{your-system-slug}/chat/`, so it is remembered in later sessions. Leave out a folder you have nothing for. With no input at all, the agent asks every question in `workflow/QUESTIONNAIRE.md`.
 
-`input/` ships empty: only `input/README.md` is committed, and everything you add stays on your machine (`.gitignore`), like `output/`.
+`workspace/input/` ships empty: only `workspace/input/README.md` is committed, and everything you add stays on your machine (`.gitignore`), like `workspace/output/`.
 
 # 1. Structure of a generated file
 
@@ -142,9 +142,10 @@ kit/                 the CODE that builds
   app/               brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
 
 examples/            finished builds made with ds-create, for reference only (never copied into a new build)
-input/               what the user provides for each system: briefs, brand files, the existing system, references, chat notes
-                     (git-ignored except input/README.md)
-output/              everything a build generates: one folder per system (git-ignored except output/README.md)
+workspace/            the WORK: every system's inputs and outputs live here, apart from the repo's own files
+  input/             what the user provides for each system: briefs, brand files, the existing system, references, chat notes
+                     (git-ignored except workspace/input/README.md)
+  output/            everything a build generates: one folder per system (git-ignored except workspace/output/README.md)
 ```
 
 # 3. File map
@@ -281,7 +282,7 @@ Global
 [ ] workflow/INITIATOR.md
 [ ] workflow/GOTCHAS.md
 [ ] workflow/templates/structure.md
-[ ] input/{system-slug}/sources.md (at initiation: every file in input/{system-slug}/)
+[ ] workspace/input/{system-slug}/sources.md (at initiation: every file in workspace/input/{system-slug}/)
 [ ] workflow/QUESTIONNAIRE.md at initiation
 [ ] workflow/DOCFRAMES.md when drawing frames the doc builder has no helper for
 
@@ -307,26 +308,26 @@ Do not begin implementation until every applicable box is checked.
 
 The repo is split in three.
 - The **executor** is everything an agent reads and copies: the root files, `workflow/`, the page specs, `workflow/templates/`, `kit/tools/`, and the `kit/web/` and `kit/app/` templates. It is brand-agnostic.
-- The **input** is everything the user provides for one system: briefs and PRDs, brand files, the existing design system, references, and what the user says in chat. It goes into `input/{system-slug}/` and is the ground truth of the build (`input/README.md`):
+- The **input** is everything the user provides for one system: briefs and PRDs, brand files, the existing design system, references, and what the user says in chat. It goes into `workspace/input/{system-slug}/` and is the ground truth of the build (`workspace/input/README.md`):
 
 ```text
-input/{system-slug}/
+workspace/input/{system-slug}/
 ├─ sources.md       the index the agent writes: every input and what it decides
 ├─ brief/  brand/  design-system/  references/   added by the user
 └─ chat/            the user's chat instructions, saved by the agent, one file per date
 ```
 
-- The **output** is everything a build generates, and it all goes into `output/{system-slug}/`:
+- The **output** is everything a build generates, and it all goes into `workspace/output/{system-slug}/`:
 
 ```text
-output/{system-slug}/
+workspace/output/{system-slug}/
 ├─ ds-create-ledger.json   progress ledger
 ├─ figma/                  the Figma export and figma-audit results
 ├─ kit/web/                    the docs site, for every product type (the React library for Web; kit/web/react-native/ for App previews)
 └─ reports/                QA reports and reviews
 ```
 
-`{system-slug}` is the system name in lowercase kebab case (`Acme Design System` → `acme`). `input/` and `output/` are git-ignored, except their README files, so no brand is ever committed. Never write a build into the executor folders or into `examples/`. Use another location only when the user explicitly asks for one; a finished build becomes a committed reference in `examples/` only when the user asks. The Figma file itself lives in Figma.
+`{system-slug}` is the system name in lowercase kebab case (`Acme Design System` → `acme`). `workspace/input/` and `workspace/output/` are git-ignored, except their README files, so no brand is ever committed. Never write a build into the executor folders or into `examples/`. Use another location only when the user explicitly asks for one; a finished build becomes a committed reference in `examples/` only when the user asks. The Figma file itself lives in Figma.
 
 **Design quality.** Every docs-site build is generated and checked with the [Impeccable](https://www.npmjs.com/package/impeccable) skill and its anti-AI-slop rules. Install it once per machine in this repo:
 
@@ -335,7 +336,7 @@ npx impeccable install --project --providers=claude -y
 .claude/skills/impeccable/scripts/impeccable hooks on
 ```
 
-`.claude/` is git-ignored, so the skill and its hook stay local. The shared `.impeccable/config.json` only turns the hook on and holds no brand exceptions: a build records its own in `output/{system-slug}/web/.impeccable/config.json` (`workflow/WEB.md` W7).
+`.claude/` is git-ignored, so the skill and its hook stay local. The shared `.impeccable/config.json` only turns the hook on and holds no brand exceptions: a build records its own in `workspace/output/{system-slug}/web/.impeccable/config.json` (`workflow/WEB.md` W7).
 
 # 6. Non-negotiable
 

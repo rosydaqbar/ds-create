@@ -30,7 +30,7 @@ if (!slug) {
   console.error('ledger: --slug {system} is required');
   process.exit(2);
 }
-const FILE = path.join(ROOT, 'output', slug, 'ds-create-ledger.json');
+const FILE = path.join(ROOT, 'workspace', 'output', slug, 'ds-create-ledger.json');
 if (!fs.existsSync(FILE)) {
   console.error(`ledger: no ledger at ${path.relative(ROOT, FILE)}`);
   process.exit(1);

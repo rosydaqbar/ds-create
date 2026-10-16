@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {checkEditorial} from './copy-guard.mjs';
 const slug=`editorial-regression-${process.pid}`;
-const root=new URL(`../../output/${slug}/`,import.meta.url);
+const root=new URL(`../../workspace/output/${slug}/`,import.meta.url);
 fs.mkdirSync(new URL('copy/',root),{recursive:true});
 test.after(()=>fs.rmSync(root,{recursive:true,force:true}));
 const file=new URL('copy/77.1-arbitrary-subject.md',root);

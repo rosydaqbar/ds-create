@@ -19,7 +19,7 @@ It runs **after** the Figma pages it implements exist. A component is documented
 # 2. What is produced
 
 ```text
-output/{system-slug}/web/        a copy of ds-create/web, filled for the brand (README §5)
+workspace/output/{system-slug}/web/        a copy of ds-create/web, filled for the brand (README §5)
 ├─ COPY-GUIDE.md                 voice and copy rules for every word on the site
 ├─ tokens/
 │  ├─ figma-variables.json       export of the Figma file (input): variables, styles, page ids
@@ -97,16 +97,16 @@ Run the steps in order. Each step names its exit check. At initiation they are s
 
 ## W1 · Copy the template
 
-Copy `ds-create/web/` to `output/{system-slug}/web/` (README §5), or to another location only when the user explicitly asks for one. Never create the build inside `ds-create/web/` or `ds-create/examples/`: the template stays placeholder-only, and `examples/` holds only builds the user asked to keep as references. Run `npm install`, then `npx playwright install chromium` once for QA. `.npmrc` sets `legacy-peer-deps`, so the React Native web packages install without pulling in `react-native` or any mobile toolchain.
+Copy `ds-create/web/` to `workspace/output/{system-slug}/web/` (README §5), or to another location only when the user explicitly asks for one. Never create the build inside `ds-create/web/` or `ds-create/examples/`: the template stays placeholder-only, and `examples/` holds only builds the user asked to keep as references. Run `npm install`, then `npx playwright install chromium` once for QA. `.npmrc` sets `legacy-peer-deps`, so the React Native web packages install without pulling in `react-native` or any mobile toolchain.
 
-Then fit the copy to the round: `node scripts/scope.mjs --upto {parts|components|sections|layouts}` (add `--no-gl` when the build has no Guidelines). It removes the stories and components above the round's scope, moves the ones the site itself still imports (docs controls such as Select) to `src/docs/controls/` with every import rewritten, and lists the foundation pages whose visuals use them, for W5. Then `npm run index`. Use `npm ci` when a lockfile is present.
+Then fit the copy to the round: `node scripts/scope.mjs --upto {parts|components|sections|layouts}` (add `--no-gl` when the Figma pages have no Guidelines frames; a `build --no-gl` round itself skips the site, so this applies to a later site round on such a system). It removes the stories and components above the round's scope, moves the ones the site itself still imports (docs controls such as Select) to `src/docs/controls/` with every import rewritten, and lists the foundation pages whose visuals use them, for W5. Then `npm run index`. Use `npm ci` when a lockfile is present.
 
 Exit check: `npm run build` passes on the scoped copy.
 
 ## W2 · Export tokens from Figma
 
-1. **With a local base** (the usual case: `output/{system-slug}/figma/figma-variables.json` written by init's token step or a previous round): run `scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back) and save the return as `hash.json`. `node scripts/export-diff.mjs --hash hash.json` compares each collection in 16 buckets, and the style lists, with the base and prints the `ROWS` to fetch; when nothing changed it writes the export at once. Otherwise send the script with `MODE = 'rows'` and those `ROWS` (one collection per call when a return would pass 20 KB), save each return, and run `node scripts/export-diff.mjs --hash hash.json --merge rows.json …`. It writes both export files and checks the result against every hash first: a mismatch writes nothing.
-2. **Without a base**, run `scripts/figma-export.js` (`MODE = 'full'`) and save the returned JSON as `output/{system-slug}/figma/figma-variables.json` (the one export every target shares) and copy it to the project's `tokens/figma-variables.json`. It includes `pages` (page ids and names): the site uses them for every "Open in Figma" button.
+1. **With a local base** (the usual case: `workspace/output/{system-slug}/figma/figma-variables.json` written by init's token step or a previous round): run `scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back) and save the return as `hash.json`. `node scripts/export-diff.mjs --hash hash.json` compares each collection in 16 buckets, and the style lists, with the base and prints the `ROWS` to fetch; when nothing changed it writes the export at once. Otherwise send the script with `MODE = 'rows'` and those `ROWS` (one collection per call when a return would pass 20 KB), save each return, and run `node scripts/export-diff.mjs --hash hash.json --merge rows.json …`. It writes both export files and checks the result against every hash first: a mismatch writes nothing.
+2. **Without a base**, run `scripts/figma-export.js` (`MODE = 'full'`) and save the returned JSON as `workspace/output/{system-slug}/figma/figma-variables.json` (the one export every target shares) and copy it to the project's `tokens/figma-variables.json`. It includes `pages` (page ids and names): the site uses them for every "Open in Figma" button.
 3. Tool output is capped at about 20 KB. When a full export is bigger, set `PART` at the top of the script and export in slices — for example `Color` in two halves, then the other collections, then `styles: true` — saving each result as `tokens/parts/01.json`, `02.json`, …, then run `npm run tokens:merge`. Prefer the hash path: a return that has to be re-typed into a file costs as much as the call itself.
 4. Run `npm run tokens`, then `npm run check:contrast`.
 5. When the owner approved exceptions in the ledger (a mode that isn't supported, contrast pairs below AA), write them to `tokens/accepted.json`: `{ "unsupportedModes": { "Color": ["Dark"] }, "contrast": ["color/text/x on color/fill/y"] }`. The token, React Native token and contrast scripts and QA read it; the export itself is never edited.
@@ -115,7 +115,7 @@ Exit check: the script reports every variable, text style and effect style of th
 
 ## W3 · Brand assets and identity
 
-1. Export from `1.8 Brand assets` the lockup for light and dark surfaces, the mark and any flags as SVG into `public/brand/` (flags in `public/brand/flags/{code}.svg`) with the names in `src/ds.config.ts`. Flags are inlined into the components, so they ship inside the package. When the library step drew an asset from a local SVG, it saved that SVG to `output/{system-slug}/brand/` at the same time: copy those files and confirm them with one read-only call that returns only the length and fnv hash of each `exportAsync({ format: 'SVG_STRING' })`, instead of returning and re-typing the SVGs.
+1. Export from `1.8 Brand assets` the lockup for light and dark surfaces, the mark and any flags as SVG into `public/brand/` (flags in `public/brand/flags/{code}.svg`) with the names in `src/ds.config.ts`. Flags are inlined into the components, so they ship inside the package. When the library step drew an asset from a local SVG, it saved that SVG to `workspace/output/{system-slug}/brand/` at the same time: copy those files and confirm them with one read-only call that returns only the length and fnv hash of each `exportAsync({ format: 'SVG_STRING' })`, instead of returning and re-typing the SVGs.
 2. Fill `ds.config.ts` from `00 Cover`: system name, version, `product` (`'web'`, `'app'` or `'both'`, from `workflow/QUESTIONNAIRE.md` §10), `modes` (`['Light', 'Dark']`, or `['Light']` when Dark isn't supported; the site then hides its Dark toggle and QA checks Light only), `packageName` (the npm name product teams will install, e.g. `@acme/design-system`), description (what the product is and what the system covers, in one or two sentences), and the Figma file link.
 3. When the brand typeface is a web font, add its stylesheet to `fontStylesheets`; the family names already come from `font/family/*`. When the brand typeface can't ship (licensing), name the stand-in in a comment and in the Typography page.
 4. Keep `src/icons/index.tsx` on Lucide. Add the icons the product needs there (they reach Figma through `kit/tools/icons-lucide.mjs`). Only an existing file with its own icon library replaces the imports; keep the names.
@@ -177,7 +177,7 @@ Exit check: the build passes, and (when the product includes Web) the package in
 ## W8 · Publish
 
 1. `dist/` is a static site; it can be opened from any folder or hosted anywhere.
-2. Give the user the location of the project (`output/{system-slug}/web/`), the explorer link when hosting is available, and the web package name (Web products). Save QA results and reviews in `output/{system-slug}/reports/`.
+2. Give the user the location of the project (`workspace/output/{system-slug}/web/`), the explorer link when hosting is available, and the web package name (Web products). Save QA results and reviews in `workspace/output/{system-slug}/reports/`.
 
 # 5. Token contract in code
 

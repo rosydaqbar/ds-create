@@ -1,6 +1,6 @@
 // ds-create fast-mode renderer (workflow/FAST.md). Draws every documentation page from a page payload, always the
-// same way. The payload is data only: kit/tools/fast-pack.mjs builds it from the page manifest (output/{slug}/fast/) and
-// the page's copy file (output/{slug}/copy/). Values are never typed: every number, color and style is read from the
+// same way. The payload is data only: kit/tools/fast-pack.mjs builds it from the page manifest (workspace/output/{slug}/fast/) and
+// the page's copy file (workspace/output/{slug}/copy/). Values are never typed: every number, color and style is read from the
 // file. Brand-agnostic: styling comes from the doc/* variables and the brand's text styles, like the doc builder.
 //
 // NEEDS the doc builder (kit/tools/figma-docbuilder.js: docbuilder, docpages, docfoundations), cached as

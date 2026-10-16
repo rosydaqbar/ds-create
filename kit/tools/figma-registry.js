@@ -1,6 +1,6 @@
 // ds-create set registry: run as a READ-ONLY `use_figma` script, once at the end of the library phase (and again after
 // a docs step changes a set). It lists every published set, private part and standalone component of the file in one
-// compact return, so the build writes its set files (output/{slug}/figma/sets/) with one local command
+// compact return, so the build writes its set files (workspace/output/{slug}/figma/sets/) with one local command
 // (`node kit/tools/registry.mjs --slug {slug}`) instead of one exported snapshot per set.
 //
 // A registry entry holds what the build reads: id, name, page, property definitions (variant options, BOOLEAN:default,

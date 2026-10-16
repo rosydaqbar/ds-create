@@ -61,13 +61,13 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 
-# 7. Everything a build generates (systems, projects, ledgers, reports). See output/README.md.
-output/*
-!output/README.md
+# 7. Everything a build generates (systems, projects, ledgers, reports). See workspace/output/README.md.
+workspace/output/*
+!workspace/output/README.md
 
-# 7b. Everything a user provides for a build (briefs, brand files, existing systems, chat notes). See input/README.md.
-input/*
-!input/README.md
+# 7b. Everything a user provides for a build (briefs, brand files, existing systems, chat notes). See workspace/input/README.md.
+workspace/input/*
+!workspace/input/README.md
 
 # 8. Agent settings
 # Local agent settings and installed skills never go into git. The ds-create skill lives in skills/ds-create/;

@@ -5,12 +5,12 @@ Give this file to every agent that builds docs-site pages (`workflow/INITIATOR.m
 ## The build
 
 - System: `{system name}`, slug `{slug}`, product type `{web | app | both}`, color modes `{Light[, Dark]}`.
-- Docs project: `output/{slug}/web/`. App previews: `output/{slug}/web/react-native/`.
+- Docs project: `workspace/output/{slug}/web/`. App previews: `workspace/output/{slug}/web/react-native/`.
 - Read `workflow/GOTCHAS.md` §4 (Docs site) before writing a page; every rule there applies to page agents too.
-- Inputs: `input/{slug}/sources.md` points to the brief and brand files (product facts, tone of voice). They are read-only, and private links in them are never published (`input/README.md` I6).
-- Ledger: `output/{slug}/ds-create-ledger.json`. Use `sequence[]` (match on `page`) for frame ids and notes, and `reports/build-notes.md` for longer notes.
-- Page specs: the repo's `{level}/{id}-{name}.md`, or `output/{slug}/specs/…` for pages added with `workflow/EXTEND.md`.
-- Figma data: `output/{slug}/figma/sets/{set-id}.json` (`:` written as `-`), one snapshot per published set, written by `kit/tools/figma-export-sets.js` during the Figma build. Read the snapshot, not Figma. Open Figma only for a screenshot or a value the snapshot doesn't hold, and then read-only.
+- Inputs: `workspace/input/{slug}/sources.md` points to the brief and brand files (product facts, tone of voice). They are read-only, and private links in them are never published (`workspace/input/README.md` I6).
+- Ledger: `workspace/output/{slug}/ds-create-ledger.json`. Use `sequence[]` (match on `page`) for frame ids and notes, and `reports/build-notes.md` for longer notes.
+- Page specs: the repo's `{level}/{id}-{name}.md`, or `workspace/output/{slug}/specs/…` for pages added with `workflow/EXTEND.md`.
+- Figma data: `workspace/output/{slug}/figma/sets/{set-id}.json` (`:` written as `-`), one snapshot per published set, written by `kit/tools/figma-export-sets.js` during the Figma build. Read the snapshot, not Figma. Open Figma only for a screenshot or a value the snapshot doesn't hold, and then read-only.
 
 ## Hard rules
 
@@ -49,7 +49,7 @@ Contract: `workflow/WEB.md` §6–§7, `workflow/APP.md` §6–§7.
    - fields: `summary`, `whenToUse`, `anatomy.parts` (target = the `anatomy()` name), `props` (with `figma` filled), `tokens` (bound tokens only), `guidelines` (the Figma Guidelines topics, in order) and `accessibility`;
    - App products: `app.hero`, `app.examples` (each with `code: { reactNative, swift, kotlin }`, copy-ready, tokens only), `app.matrices` (every variant), `app.anatomy`, `app.visuals` (keyed by guideline title) and `app.notes`. The web fields stay empty (`hero: () => null`, `examples: []`, `matrices: []`).
 5. **Copy.** Follow `kit/web/COPY-GUIDE.md`.
-   - Every sentence goes into the page's copy file, `output/{system-slug}/copy/{id}-{kebab name}.md`, as a `web` line, or as a `both` line when Figma says the same (`workflow/COPY.md`). Keep the Figma lines of the same topic next to it, with the same meaning.
+   - Every sentence goes into the page's copy file, `workspace/output/{system-slug}/copy/{id}-{kebab name}.md`, as a `web` line, or as a `both` line when Figma says the same (`workflow/COPY.md`). Keep the Figma lines of the same topic next to it, with the same meaning.
    - Give the reason and its consequence, name the alternative to use, and take the example from the brand's real screens. No inventories, teaser counts or token names in running prose.
    - US English and sentence case. Product copy inside examples may be in the brand's language.
    - Write with the Impeccable skill loaded, and fix every design hook finding.

@@ -49,10 +49,10 @@ Style comes from the brand through the `Documentation` collection, which aliases
 
 # 3. What the agent writes
 
-Two files per page, both in `output/{system-slug}/`. Neither holds a value: values are always read from the file.
+Two files per page, both in `workspace/output/{system-slug}/`. Neither holds a value: values are always read from the file.
 
 **Where the data comes from.**
-- **Sources, only from this build:** the page spec, the default manifest (`workflow/templates/fast/`), this system's inputs and copy files, its set snapshots (`output/{slug}/figma/sets/`) and its Figma file.
+- **Sources, only from this build:** the page spec, the default manifest (`workflow/templates/fast/`), this system's inputs and copy files, its set snapshots (`workspace/output/{slug}/figma/sets/`) and its Figma file.
 - **`examples/` is a reference only.** It may be read to understand how a page or visual works. Nothing is copied from it, and it never replaces writing the manifest and copy file from the sources above: a page filled from a finished example skips the rules this mode exists for.
 - `kit/tools/fast-pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`workflow/GOTCHAS.md` G43).
 
@@ -85,7 +85,7 @@ Rules:
 - Every `title` (example, topic, block) is a title in the page's copy file, spelled the same. The renderer takes the text from the copy file by title.
 - An instance recipe names a set, its variant properties and its text or boolean properties, by the names in the file. Nothing else is set on an instance: no fills, sizes or overrides that change a value.
 - A topic without `visual` is text only. A topic with `visual` names an entry of the catalog (§4) and its inputs.
-- Ids come from the build's set files (`output/{system-slug}/figma/sets/`, written by `kit/tools/registry.mjs`), never typed by hand. An instance-swap property may name an icon (`"Icon": "Icon/general/copy"`): fast-pack turns it into the id from `figma/icons.json`.
+- Ids come from the build's set files (`workspace/output/{system-slug}/figma/sets/`, written by `kit/tools/registry.mjs`), never typed by hand. An instance-swap property may name an icon (`"Icon": "Icon/general/copy"`): fast-pack turns it into the id from `figma/icons.json`.
 - `{system}` in a manifest string is the ledger's `system` (the default 00 Cover manifest titles the cover `{system} design system`).
 - Build flags come from the ledger: with `flags.guidelines: false` (`/ds-create build --no-gl`), `fast-pack --init` copies the reading manifests without their `Guidelines` frame, and packing drops every Guidelines frame, topic, Accessibility and In apps list, and adds `skip: ["gl"]` to component pages. Agents don't write them.
 
@@ -129,29 +129,29 @@ Named visuals, each always drawn the same way from its inputs. The renderer impl
 The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes only steps 11–20, as follows.
 
 **Library in a fast round (steps 6–10).** The sets are still built from their page files by the standard engine; three things make it lighter:
-- **The library kit.** `node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache --library` writes one call (~6 KB) that caches `kit/tools/figma-libkit.js`; every set call then loads it in one line (`K.tokens`, `K.fill`, `K.text`, `K.iconInst`, `K.matrix`, `K.combine`, …) and holds only the set's own structure. Never re-write binding helpers in a build.
+- **The library kit.** `node kit/tools/fast-cache.mjs --out workspace/output/{slug}/fast/cache --library` writes one call (~6 KB) that caches `kit/tools/figma-libkit.js`; every set call then loads it in one line (`K.tokens`, `K.fill`, `K.text`, `K.iconInst`, `K.matrix`, `K.combine`, …) and holds only the set's own structure. Never re-write binding helpers in a build.
 - **Small returns.** A set call returns its set and part ids and counts, nothing else: no snapshot, no layer dump (a full export of a 360-variant set came back at 140 KB and only filled the context).
 - **One registry at the end.** After the last set, one read-only `kit/tools/figma-registry.js` call (~12 KB back for 30 sets and 170 icons) and `node kit/tools/registry.mjs --slug {slug}` write every set file and the icon map. This is the library gate's export in a fast round; the full layer snapshot (`kit/tools/figma-export-sets.js`) is exported on call, for QA or a site agent that needs layers. Re-run the registry when a later step changes a set.
 
 **F1 · Data (after the library phase, before step 11, no Figma calls).** The manifests name real sets, so they are written once steps 6–10 are done and the set snapshots exist.
-1. Run `node kit/tools/fast-pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `output/{slug}/fast/`.
-2. Plan the information through `workflow/EDITORIAL.md` before drafting, then write the copy file of every in-scope page (`workflow/COPY.md`). Adapt manifest topic titles/order to the plan rather than copying a visible outline; keep copy/manifest titles matched and all required technical visuals covered. Read the page's knowledge first (`input/{slug}/knowledge/`, `input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
+1. Run `node kit/tools/fast-pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `workspace/output/{slug}/fast/`.
+2. Plan the information through `workflow/EDITORIAL.md` before drafting, then write the copy file of every in-scope page (`workflow/COPY.md`). Adapt manifest topic titles/order to the plan rather than copying a visible outline; keep copy/manifest titles matched and all required technical visuals covered. Read the page's knowledge first (`workspace/input/{slug}/knowledge/`, `workspace/input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
 3. Fill each manifest's `todo` visuals with real sets, or remove the visual. Write one manifest per component and layout page (`workflow/templates/fast/component.example.json`, `layout.example.json`).
 4. Run `node kit/tools/fast-pack.mjs --slug {slug} --check` until every page is ready.
 
 Agents write F1 in parallel from `workflow/templates/fast-brief.md` (fill its header, give each agent 4–7 pages). F1 is the largest token cost of a round: an agent that has the brief, the set files and the build notes doesn't need to rediscover the build.
 
-**F2 · Review (optional).** When the user chose a review checkpoint at initiation, stop here. The user reads and edits the copy files and manifests before any page is drawn. Record their changes in `input/{system-slug}/chat/` (`input/README.md` I3).
+**F2 · Review (optional).** When the user chose a review checkpoint at initiation, stop here. The user reads and edits the copy files and manifests before any page is drawn. Record their changes in `workspace/input/{system-slug}/chat/` (`workspace/input/README.md` I3).
 
 **F3 · Bootstrap (step 11).**
-- Run `node kit/tools/fast-cache.mjs --out output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
+- Run `node kit/tools/fast-cache.mjs --out workspace/output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
 - Send `cache-status.js` first. It is read-only and answers which keys the file still needs. Send only the calls that hold a needed key, one at a time; each key answers `stored: true`, or refuses to save when its code arrived changed (`workflow/GOTCHAS.md` G41).
 - Caching costs time: about 75 KB of minified code, typed out in full. The keys are packed into two calls under the 50,000-character limit, so it is two round trips, not four. The status call makes a retry, a resumed session or a later round skip what is already current: the keys stay in the file until the last round's step 21 (`workflow/GOTCHAS.md` G8), so a second round usually sends nothing.
 - When the file has no Doc kit or `Documentation` collection, create them with `kit/tools/figma-dockit.js`: first `{ only: 'collection' }`, then `{ only: 'kit', page, mark, system, footer, meta }`. Every doc variable aliases the brand token `workflow/DOCFRAMES.md` §1 names; the result lists any that fell back to a default.
 
 **Icons (step 6, library).** A new system's icon library comes from `node kit/tools/icons-lucide.mjs --slug {slug}` at its library step, before any Part: send its calls (usually one, about 30 KB). The 1.7 doc page is rendered later, at step 15. The agent doesn't pick, map or draw icons.
 
-**F4 · Pages (steps 12–20).** Several pages per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --batch` checks every open docs page in ledger order and writes `output/{slug}/fast/calls/batch-{n}.js`: the renderer is loaded once per call and each call holds as many pages as fit in ~45 KB (a full round of 30 pages is 4 calls, not 32). It stops before the first page that isn't ready, so order holds.
+**F4 · Pages (steps 12–20).** Several pages per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --batch` checks every open docs page in ledger order and writes `workspace/output/{slug}/fast/calls/batch-{n}.js`: the renderer is loaded once per call and each call holds as many pages as fit in ~45 KB (a full round of 30 pages is 4 calls, not 32). It stops before the first page that isn't ready, so order holds.
 - Send the batches in order, one at a time. Each returns `{ done: [{ id, frames }], failed, next }`; mark it with `node kit/tools/ledger.mjs --slug {slug} --render '<the return>'`.
 - A batch stops at the first page that throws (nothing after it is drawn) and before a page once 70 s have passed. Re-run `--batch`: it starts at the first open page.
 - `--page {id} --call` still prints a single-page call, for a re-draw after a review.

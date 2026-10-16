@@ -7,8 +7,8 @@
  *   EOF
  *   node kit/tools/registry.mjs --slug acme --file return.json
  *
- * Writes output/{slug}/figma/sets/{id}.json (":" written as "-") for every set, private part and standalone component,
- * and output/{slug}/figma/icons.json (icon name → component id). A set file that holds a full layer snapshot
+ * Writes workspace/output/{slug}/figma/sets/{id}.json (":" written as "-") for every set, private part and standalone component,
+ * and workspace/output/{slug}/figma/icons.json (icon name → component id). A set file that holds a full layer snapshot
  * (kit/tools/figma-export-sets.js) keeps it: only its id, name, page, props and variant count are refreshed.
  * kit/tools/fast-pack.mjs reads these files to turn set and icon names into ids.
  */
@@ -26,7 +26,7 @@ if (!slug) {
 }
 const raw = arg('--file') ? fs.readFileSync(path.resolve(arg('--file')), 'utf8') : fs.readFileSync(0, 'utf8');
 const r = JSON.parse(raw);
-const FIG = path.join(ROOT, 'output', slug, 'figma');
+const FIG = path.join(ROOT, 'workspace', 'output', slug, 'figma');
 const SETS = path.join(FIG, 'sets');
 fs.mkdirSync(SETS, { recursive: true });
 
@@ -44,4 +44,4 @@ for (const [id, name, page, props, variants, def] of r.sets || []) {
 const iconFile = path.join(FIG, 'icons.json');
 const icons = Object.keys(r.icons || {}).length ? { ...(fs.existsSync(iconFile) ? JSON.parse(fs.readFileSync(iconFile, 'utf8')) : {}), ...r.icons } : null;
 if (icons) fs.writeFileSync(iconFile, JSON.stringify(icons, null, 1) + '\n');
-console.log(`registry: ${n} set file(s) in output/${slug}/figma/sets/${icons ? `, ${Object.keys(icons).length} icon(s) in figma/icons.json` : ''}${r.next !== null && r.next !== undefined ? `; the call stopped at page ${r.next}: send it again with FROM = ${r.next}` : ''}`);
+console.log(`registry: ${n} set file(s) in workspace/output/${slug}/figma/sets/${icons ? `, ${Object.keys(icons).length} icon(s) in figma/icons.json` : ''}${r.next !== null && r.next !== undefined ? `; the call stopped at page ${r.next}: send it again with FROM = ${r.next}` : ''}`);

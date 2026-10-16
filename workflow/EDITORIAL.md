@@ -12,7 +12,7 @@ These editorial standards apply to every documentation subject: guidance, founda
 
 ## Plan format
 
-Path: `output/{slug}/plans/{id}-{name}.json`, matching the copy filename. References below are schematic; replace them with real files and excerpts, never copy example facts.
+Path: `workspace/output/{slug}/plans/{id}-{name}.json`, matching the copy filename. References below are schematic; replace them with real files and excerpts, never copy example facts.
 
 ```json
 {
@@ -21,7 +21,7 @@ Path: `output/{slug}/plans/{id}-{name}.json`, matching the copy filename. Refere
   "kind": "component",
   "distinctions": ["Action emphasis and consequence are separate decisions"],
   "evidence": [
-    {"id": "control", "kind": "verified", "statement": "The implemented treatments", "source": "output/{slug}/web/src/components/parts/Button.tsx", "quote": "exact excerpt from that file"},
+    {"id": "control", "kind": "verified", "statement": "The implemented treatments", "source": "workspace/output/{slug}/web/src/components/parts/Button.tsx", "quote": "exact excerpt from that file"},
     {"id": "recommendation", "kind": "guidance", "statement": "Illustrative decision advice, not a new implementation rule"},
     {"id": "gap", "kind": "missing", "statement": "Which screen-reader combinations have been tested?"}
   ],

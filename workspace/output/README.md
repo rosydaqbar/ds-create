@@ -1,10 +1,10 @@
 # Output
 
-Everything ds-create generates goes here, never into the executor folders (`web/`, `app/`, `templates/`, `tools/`, `workflow/`, the page specs) and never into `examples/`. What the user provides goes into `input/` (`input/README.md`), not here. Nothing in this folder is committed except this file: `.gitignore` ignores `output/*`.
+Everything ds-create generates goes here, never into the executor folders (`web/`, `app/`, `templates/`, `tools/`, `workflow/`, the page specs) and never into `examples/`. What the user provides goes into `workspace/input/` (`workspace/input/README.md`), not here. Nothing in this folder is committed except this file: `.gitignore` ignores `workspace/output/*`.
 
 ```text
-output/
-├─ {system-slug}/                one folder per design system, e.g. output/acme/ (the same slug as input/acme/)
+workspace/output/
+├─ {system-slug}/                one folder per design system, e.g. workspace/output/acme/ (the same slug as workspace/input/acme/)
 │  ├─ ds-create-ledger.json      progress ledger (INITIATOR.md Part B §0)
 │  ├─ copy/                      one copy file per page: every sentence on the Figma frames and the docs site (workflow/COPY.md)
 │  ├─ fast/                      fast mode only: one page manifest per page (workflow/FAST.md)
