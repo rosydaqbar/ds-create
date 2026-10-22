@@ -320,8 +320,10 @@ async function refresh() {
     const next = await response.json();
     $('connection-error').hidden = true;
     const nextSignature = JSON.stringify(next);
+    publisher.update(next);
     if (nextSignature !== signature) { state = next; signature = nextSignature; render(); }
   } catch {
+    publisher.update(null);
     $('connection-error').hidden = false;
     if (!state) $('content').innerHTML = documentFrame('Waiting for your workspace', 'The local server is not responding.', '<div class="empty-state"><p>Retry the connection, or restart DS Create Builder from your agent.</p></div>');
   } finally { fetching = false; }
@@ -338,7 +340,7 @@ try { savedTheme = localStorage.getItem('ds-manager-theme'); } catch { /* use sy
 theme(savedTheme === 'dark' || !savedTheme && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 $('theme').addEventListener('click', () => theme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
 installInteractionMotion();
-setupPublish();
+const publisher = setupPublish();
 setupWeb({ onChange: refresh });
 $('search-icon').innerHTML = icon('search');
 $('nav-search').addEventListener('input', renderNav);

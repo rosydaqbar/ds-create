@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { setupFixture } from './fixtures/manager-setup.mjs';
+import { publishReady } from '../manager/publish.mjs';
 import { getState } from '../manager/state.mjs';
 const exec=promisify(execFile);
 async function until(f,predicate,ms=9000){const start=Date.now();let r;do{r=await f.flow();if(predicate(r))return r;await new Promise(resolve=>setTimeout(resolve,40));}while(Date.now()-start<ms);throw new Error(JSON.stringify(r));}
@@ -28,6 +29,7 @@ test('init-web opens an empty detached Builder, no tokens or completed ledger; s
  const started=JSON.parse((await run('init-web')).stdout),slug=path.basename(started.outputDir);owned.push(started);
  assert.match(slug,/^session-/);assert.equal((await fetch(started.url+'/api/health')).status,200);
  const state=await fetch(started.url+'/api/state').then(r=>r.json());
+ assert.equal(publishReady(state),false);
  assert.equal(state.setup.status,'empty');assert.equal(state.initDone,false);assert.equal(state.summary.variables,0);
  await assert.rejects(readFile(path.join(started.outputDir,'ds-create-ledger.json')),{code:'ENOENT'});
  const listed=JSON.parse((await run('sessions')).stdout);assert.equal(listed.sessions.length,1);assert.match(listed.sessions[0].resumeCommand,new RegExp(slug));
@@ -42,14 +44,14 @@ test('init-web opens an empty detached Builder, no tokens or completed ledger; s
 test('context and binary original filenames persist, question answers resume a real fake subprocess into review',async t=>{
  const f=await fixture(t,{mode:'questions'}),bytes=Buffer.from([0,255,1,2,42]);
  assert.equal((await f.post('/api/setup-submit',f.form('Exact context\nIn Indonesian.',[['Brand guide.pdf',bytes]]))).status,202);
- const q=await until(f,r=>r.status==='questions');assert.equal(q.questions.length,2);
+ const q=await until(f,r=>r.status==='questions');assert.equal(q.questions.length,2);assert.equal(publishReady(await getState(f.output)),false);
  const saved=path.join(f.root,'workspace/input/fixture',q.files[0].path);assert.deepEqual(await readFile(saved),bytes);
  const record=JSON.parse(await readFile(path.join(f.output,'manager/setup.json')));assert.match(await readFile(path.join(f.root,'workspace/input/fixture',record.contextFile),'utf8'),/Exact context\nIn Indonesian\./);
  assert.equal((await f.post('/api/setup-answers',{jobId:'old',answers:[]})).status,409);
  assert.equal((await f.post('/api/setup-answers',{jobId:q.jobId,answers:[{id:'platform',value:'Web'}]})).status,400);
  assert.equal((await f.post('/api/setup-answers',{jobId:q.jobId,answers:[{id:'platform',value:'Web'},{id:'font',value:'Inter'}]})).status,202);
  const ready=await until(f,r=>r.status==='ready');assert.notEqual(ready.jobId,q.jobId);
- const state=await getState(f.output);assert.equal(state.status,'review');assert.equal(state.initDone,false);assert.equal(state.source.review,'pending');assert.equal(state.summary.ready,6);
+ const state=await getState(f.output);assert.equal(publishReady(state),true);assert.equal(state.status,'review');assert.equal(state.initDone,false);assert.equal(state.source.review,'pending');assert.equal(state.summary.ready,6);
  const pub=await fetch(f.url+'/api/publish-flow').then(r=>r.json());assert.equal(pub.figma.canStart,true);assert.equal(pub.build.available,false);
  const ledger=JSON.parse(await readFile(path.join(f.output,'ds-create-ledger.json')));assert.equal(ledger.foundationReview.status,'pending');assert.equal(ledger.sequence[3].status,'todo');
  const prompt=await readFile(path.join(f.output,'received-prompt'),'utf8');assert.match(prompt,/NO Figma read\/write authorization/);
@@ -121,8 +123,8 @@ test('new, modified and removed selected input dependencies invalidate readiness
  const input=path.join(f.root,'workspace/input/fixture'),knowledge=path.join(input,'knowledge');await mkdir(knowledge);
  await writeFile(path.join(knowledge,'new-guideline.md'),'A newly supplied rule.');
  let pub=await fetch(f.url+'/api/publish-flow').then(r=>r.json());assert.equal(pub.figma.canStart,false);
- assert.equal((await getState(f.output)).initDone,false);assert.equal((await f.flow()).status,'outdated');
+ assert.equal((await getState(f.output)).initDone,false);assert.equal((await f.flow()).status,'outdated');assert.equal(publishReady(await getState(f.output)),false);
  await f.post('/api/setup-retry',{});await until(f,r=>r.status==='ready');
  await writeFile(path.join(knowledge,'new-guideline.md'),'Changed rule.');pub=await fetch(f.url+'/api/publish-flow').then(r=>r.json());assert.equal(pub.figma.canStart,false);
- await f.post('/api/setup-retry',{});await until(f,r=>r.status==='ready');await rm(path.join(knowledge,'new-guideline.md'));assert.equal((await f.flow()).status,'outdated');
+ await f.post('/api/setup-retry',{});await until(f,r=>r.status==='ready');await rm(path.join(knowledge,'new-guideline.md'));assert.equal((await f.flow()).status,'outdated');assert.equal(publishReady(await getState(f.output)),false);
 });

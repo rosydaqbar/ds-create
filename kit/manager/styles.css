@@ -493,3 +493,6 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .setup-resume-body p { margin: 0; }
 .setup-resume-project { display: grid; gap: 6px; }
 .setup-resume-project > span, .setup-resume-help { color: var(--color-text-secondary); }
+
+#publish:disabled { cursor: not-allowed; }
+#publish:disabled:hover { background: var(--color-text-primary); }

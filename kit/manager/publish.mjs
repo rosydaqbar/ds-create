@@ -1,4 +1,10 @@
 import { openDialog, closeDialog, revealInteraction } from './ui-motion.mjs';
+export function publishReady(state) {
+  const saved = state?.summary && state.summary.variables + state.summary.textStyles + state.summary.effectStyles > 0;
+  const setupReady = !state?.setup || state.setup.status === 'ready';
+  const localReady = state?.source?.kind === 'local' && !!state.source.hash && ['pending', 'approved', 'synced'].includes(state.source.review) && state.steps?.some(step => step.step === 1 && step.status === 'done');
+  return !!(saved && setupReady && state.status !== 'error' && !state.warnings?.length && (localReady || state.initDone));
+}
 export function setupPublish() {
   const $ = id => document.getElementById(id);
   const dialog = $('publish-dialog');
@@ -63,6 +69,7 @@ export function setupPublish() {
     finally { submitting = false; if (dialog.open && flow) draw(flow); }
   }
   $('publish').addEventListener('click', () => {
+    if ($('publish').disabled) return;
     reviewHash = null; flow = null; showError('');
     $('publish-figma').disabled = true; $('publish-command-section').hidden = true;
     $('publish-status').textContent = 'Checking saved foundations and the local agent…';
@@ -74,10 +81,17 @@ export function setupPublish() {
   $('publish-recheck').addEventListener('click', () => { showError(''); check(); });
   $('publish-close').addEventListener('click', () => closeDialog(dialog));
   dialog.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); closeDialog(dialog); } });
-  dialog.addEventListener('close', () => { clearInterval(timer); request?.abort(); request = null; $('publish').focus({ preventScroll: true }); });
+  dialog.addEventListener('close', () => { clearInterval(timer); request?.abort(); request = null; ($('publish').disabled ? $('setup-open').hidden ? $('main') : $('setup-open') : $('publish')).focus({ preventScroll: true }); });
   $('publish-command').addEventListener('click', e => e.target.select());
   $('publish-copy').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText('ds-create build'); $('publish-copy-feedback').textContent = 'Command copied. Paste it into your agent.'; }
     catch { $('publish-command').focus(); $('publish-command').select(); $('publish-copy-feedback').textContent = 'Copy the selected command manually.'; }
   });
+  return { update(state) {
+    const ready = publishReady(state);
+    const reason = ready ? 'Publish foundations to Figma' : !state ? 'Checking foundation readiness. Reconnect to Builder if this persists.' : ['queued', 'running'].includes(state.setup?.status) ? 'Foundations are being prepared. Wait until the draft is ready.' : 'Prepare foundations or run ds-create init before publishing.';
+    $('publish').disabled = !ready;
+    $('publish').title = reason;
+    $('publish').setAttribute('aria-label', ready ? 'Publish' : `Publish: ${reason}`);
+  } };
 }
