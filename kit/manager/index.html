@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>DS Create Builder</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/chrome.css" />
+    <link rel="stylesheet" href="/docs-presentation.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <div class="docs-shell">
+      <a class="skip-link" href="#main">Skip to content</a>
+      <header class="topbar">
+        <a class="docs-brand" href="#overview" aria-label="DS Create Builder overview"><span class="brand-symbol" aria-hidden="true"></span><strong>DS Create Builder</strong><span class="label-beta">Beta</span></a>
+        <span class="system-name" id="system-name">Your design system</span>
+        <div class="topbar-actions"><button id="setup-open" class="button" hidden aria-haspopup="dialog" aria-controls="setup-dialog">Context</button><a id="figma-link" class="button" hidden target="_blank" rel="noopener noreferrer" aria-label="Open in Figma" title="Open in Figma"><span class="figma-link-label">Open in Figma</span><span aria-hidden="true">↗</span></a><button class="icon-button" id="theme" aria-label="Switch to dark appearance" title="Switch appearance"></button><button id="publish" class="button button-primary" aria-haspopup="dialog" aria-controls="publish-dialog">Publish</button></div>
+      </header>
+      <div class="workspace">
+        <aside class="sidebar docs-sidebar">
+          <details id="navigation" open>
+            <summary>Navigation</summary>
+            <div class="docs-navigation">
+              <label class="search-field"><span id="search-icon" aria-hidden="true"></span><input id="nav-search" type="search" placeholder="Find a foundation" aria-label="Find a foundation" /></label>
+              <nav aria-label="Builder" id="nav"></nav>
+              <p class="nav-hint">Shared rules for interface design.</p>
+            </div>
+          </details>
+          <div class="sidebar-footer"><span class="local-dot" aria-hidden="true"></span> Local workspace <span>Builder</span></div>
+        </aside>
+        <main id="main" tabindex="-1" class="docs-main">
+          <div class="canvas-toolbar">
+            <div class="canvas-context"><strong id="canvas-title">Overview</strong><span id="canvas-subtitle">Foundation setup</span></div>
+            <div class="canvas-tools" role="group" aria-label="Canvas view">
+              <button id="zoom-out" class="icon-button" aria-label="Zoom out" title="Zoom out">−</button>
+              <select id="canvas-zoom" aria-label="Canvas zoom"><option value="0.25">25%</option><option value="0.5">50%</option><option value="0.68" selected>68%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option><option value="4">400%</option></select>
+              <button id="zoom-in" class="icon-button" aria-label="Zoom in" title="Zoom in">+</button>
+              <button id="canvas-fit" class="button" aria-label="Fit canvas content" title="Fit content (1)">Fit</button>
+              <button id="workspace-toggle" class="button" aria-controls="inspector" aria-expanded="false">Workspace</button>
+            </div>
+          </div>
+          <div id="connection-error" class="notice error-notice" hidden role="alert">Connection lost. Showing the last saved view. <button class="text-button" id="retry">Retry connection</button></div>
+          <div id="canvas-viewport" class="canvas-viewport" tabindex="0" role="region" aria-label="Design system canvas" aria-describedby="canvas-help">
+            <div id="canvas-world" class="canvas-world"><div id="content"><article class="docs-reading-card"><header class="docs-page-header"><h1>Opening your workspace</h1><p>Reading the latest init output.</p></header><div class="empty-state"><span class="spinner" aria-hidden="true"></span></div></article></div></div>
+            <div class="canvas-bottom"><span id="preview-notice" hidden>Sample data · Preview only</span><span id="canvas-help">Drag to pan · Ctrl/⌘ + scroll to zoom</span></div>
+          </div>
+          <div id="announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+        </main>
+        <aside id="inspector" class="inspector" aria-label="Tab workspace"></aside>
+      </div>
+    </div>
+    <dialog id="shadow-editor" class="shadow-editor" aria-labelledby="shadow-editor-title" aria-describedby="shadow-editor-path">
+      <div class="shadow-editor-header"><h2 id="shadow-editor-title">Edit shadow</h2><button id="shadow-editor-close" class="icon-button" aria-label="Close shadow editor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <code id="shadow-editor-path"></code><div id="shadow-editor-layers"></div><div class="shadow-editor-footer"><button id="shadow-add-layer" class="button">Add layer</button><button id="shadow-reset-step" class="text-button" hidden>Reset step</button></div>
+    </dialog>
+    <dialog id="setup-dialog" class="publish-dialog setup-dialog" aria-labelledby="setup-title" aria-describedby="setup-description">
+      <div class="publish-header"><h2 id="setup-title">Set up your design system</h2><button id="setup-close" class="icon-button" aria-label="Close setup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <p id="setup-description" class="publish-intro">Describe your product and the design system you need. Add any briefs, brand guidelines, or existing tokens.</p>
+      <p id="setup-simulation" class="notice" hidden>Simulation · no real agent or Figma calls.</p>
+      <form id="setup-initial">
+        <label class="setup-field" for="setup-context"><span>Context / Instruction</span><textarea id="setup-context" rows="6" maxlength="20000" placeholder="What is your product, who uses it, and what should its interface feel like? Include any colors, fonts, or constraints you already have."></textarea></label>
+        <div class="setup-field"><span id="setup-files-label">Context files <span class="setup-optional">Optional</span></span><div id="setup-drop" class="setup-drop"><input id="setup-files" class="sr-only" tabindex="-1" type="file" multiple aria-labelledby="setup-files-label"/><button type="button" id="setup-add-files" class="button">Choose files</button><p>or drop them here</p><small>Briefs, guidelines, images, or token exports.<br/>Up to 10 files · 25 MB each · 50 MB total.</small></div><ul id="setup-file-list" class="setup-files"></ul></div>
+        <p id="setup-agent-note" class="setup-note" hidden>Codex CLI is unavailable. You can save your context now, then install the CLI and sign in before preparing foundations.</p>
+      </form>
+      <div id="setup-saved" hidden><details class="setup-context-details"><summary>Saved context and files</summary><p id="setup-saved-context"></p><ul id="setup-saved-files" class="setup-files"></ul></details><p id="setup-storage" class="setup-note"></p><p id="setup-revision-note" class="setup-note"></p><button id="setup-edit" class="button" type="button">Edit context / add files</button></div>
+      <div id="setup-resume" class="setup-resume"><span>Continue in another agent chat</span><code id="setup-resume-command"></code><button id="setup-copy-resume" class="button" type="button">Copy resume command</button></div>
+      <div id="setup-running" class="setup-running" hidden><span class="spinner" aria-hidden="true"></span><span>Preparing foundations</span></div>
+      <p id="setup-state" class="setup-note" role="status" aria-live="polite" hidden></p>
+      <form id="setup-questions-form" hidden><div id="setup-questions"></div></form>
+      <p id="setup-error" class="setup-error" role="alert" hidden></p>
+      <div class="publish-footer setup-footer"><button id="setup-explore" class="button">Explore Builder</button><button id="setup-edit-cancel" class="button" hidden>Cancel edit</button><button id="setup-stop" class="button" hidden>Stop agent</button><button id="setup-retry" class="button button-primary" hidden>Retry preparation</button><button id="setup-submit" class="button button-primary" type="submit" form="setup-initial">Prepare foundations</button><button id="setup-continue" class="button button-primary" type="submit" form="setup-questions-form" hidden>Continue preparation</button><button id="setup-review" class="button button-primary" hidden>Review foundations</button></div>
+    </dialog>
+    <dialog id="publish-dialog" class="publish-dialog" aria-labelledby="publish-title" aria-describedby="publish-description">
+      <div class="publish-header"><h2 id="publish-title">Publish design system</h2><button id="publish-close" class="icon-button" aria-label="Close publish"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></div>
+      <p id="publish-description" class="publish-intro">Publish foundations to Figma, then build your design system.</p>
+      <p id="publish-simulation" class="notice" hidden>Simulation · no Figma writes or real agent run.</p>
+      <ol class="publish-steps">
+        <li id="publish-figma-step">
+          <div class="publish-step-heading"><span class="publish-step-number" aria-hidden="true">1</span><h3>Publish to Figma</h3><span id="publish-figma-state" class="status">Checking…</span></div>
+          <p>Generate variables and styles from the saved foundation draft.</p>
+          <p id="publish-revision" class="publish-saved"></p>
+          <label id="publish-target-field" class="publish-target" for="publish-figma-url">Figma file URL<input id="publish-figma-url" type="url" required maxlength="1000" placeholder="https://www.figma.com/design/…" autocomplete="off" /></label>
+          <p id="publish-approval-note" class="publish-saved">Publishing approves this saved revision. Unsaved controller previews are excluded.</p>
+          <div class="publish-actions"><button id="publish-figma" class="button button-primary" disabled>Publish to Figma</button><button id="publish-cancel" class="button" hidden>Stop agent</button><a id="publish-open-figma" class="button" hidden target="_blank" rel="noopener noreferrer">Open in Figma</a></div>
+          <p id="publish-status" class="publish-progress" role="status" aria-live="polite">Reading the latest status.</p>
+        </li>
+        <li id="publish-build-step" aria-disabled="true">
+          <div class="publish-step-heading"><span class="publish-step-number" aria-hidden="true">2</span><h3>ds-create build</h3><span id="publish-build-state" class="status">Locked</span></div>
+          <p id="publish-build-description">Available after the current foundations are generated and audited in Figma.</p>
+          <div id="publish-command-section" hidden><p>Paste into your agent to choose the build engine and scope.</p><div class="publish-command"><input id="publish-command" aria-label="Build command" readonly value="ds-create build" /><button id="publish-copy" class="button">Copy command</button></div><p id="publish-copy-feedback" role="status" aria-live="polite"></p></div>
+        </li>
+      </ol>
+      <p id="publish-error" role="alert" hidden></p>
+      <div class="publish-footer"><button id="publish-recheck" class="button">Check again</button></div>
+    </dialog>
+    <dialog id="primitive-picker" class="primitive-picker" aria-labelledby="primitive-picker-title">
+      <div class="primitive-picker-header"><h2 id="primitive-picker-title">Choose primitive</h2><button id="primitive-picker-close" class="icon-button" aria-label="Close primitive picker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></div>
+      <p id="primitive-picker-role"></p>
+      <label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="primitive-picker-search" type="search" aria-label="Search primitives" placeholder="Search all primitives..." /></label>
+      <div id="primitive-picker-options" class="primitive-picker-options" role="listbox" aria-label="Primitive colors"></div>
+      <div id="primitive-picker-count" class="primitive-picker-count" role="status"></div>
+    </dialog>
+  </body>
+</html>

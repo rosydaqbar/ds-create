@@ -23,6 +23,8 @@ The `ds-create` skill asks these questions in two rounds (`skills/ds-create/`). 
 | §11 Documentation depth | `/ds-create build` | only when the user brings it up |
 | §12 Confirmation summary | both | split: the init summary, then each build round's summary |
 
+Init prepares the local foundation draft and opens Builder before Figma generation. Review/approval happens in chat against the saved revision; controller edits are unsaved previews. Figma file/font readiness and final confirmation follow that review (`skills/ds-create/reference/init.md`).
+
 # 1. Product
 
 ## Product status
@@ -88,6 +90,15 @@ For each, select `Available`, `Partial`, `Missing` or `Not needed`:
 - motion;
 - brand guidelines;
 - tone of voice.
+
+## UI font when unspecified
+
+Ask only when neither user/brand inputs nor an existing system specifies the font:
+- Inter
+- Geist
+- Plus Jakarta Sans
+
+These are prepared options, not a replacement for a supplied brand typeface. Record the chosen family with the other brand answers. Verify its required styles in Figma before use; the local Builder font files do not establish Figma availability.
 
 ## Interface character
 

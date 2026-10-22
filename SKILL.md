@@ -1,9 +1,9 @@
 ---
 name: ds-create
 version: 0.1.6
-description: Builds a brand-agnostic design system in Figma for any brand, and optionally its documentation site. Five commands, init, build, learn, qa and status, take a brand's context to Figma variables and styles, a component library (Parts, Components, Sections, Layouts) and a documented page for every item, always in the same structure. Use when someone wants to start or continue a design system ("ds-create", "design system for {brand}", "start the DS", "build the Button page", "build the foundations"), teach it a lasting rule ("remember that buttons align left"), check a build ("run QA on the DS"), or see how far it is ("where is the DS build"). Needs the Figma MCP with use_figma and a Figma file with edit access. Not for a single screen, mockup or one-off component in Figma (figma-generate-design, edit-figma-design), Antikode corporate websites on ATOMS (crea-corp-web), or a code-only component library with no Figma file.
+description: Builds a brand-agnostic design system in Figma for any brand, and optionally its documentation site. Six commands, init-web, init, build, learn, qa and status, take a brand's context to Figma variables and styles, a component library (Parts, Components, Sections, Layouts) and a documented page for every item, always in the same structure. Use when someone wants to start or continue a design system ("ds-create", "design system for {brand}", "start the DS", "build the Button page", "build the foundations"), teach it a lasting rule ("remember that buttons align left"), check a build ("run QA on the DS"), or see how far it is ("where is the DS build"). Needs Node for local Builder review, then the Figma MCP with use_figma and an editable file for approved generation. Not for a single screen, mockup or one-off component in Figma (figma-generate-design, edit-figma-design), Antikode corporate websites on ATOMS (crea-corp-web), or a code-only component library with no Figma file.
 user-invocable: true
-argument-hint: "init · build · learn · qa · status"
+argument-hint: "init-web · init · build · learn · qa · status"
 ---
 
 # ds-create
@@ -53,9 +53,9 @@ rsync -a --exclude workspace/input/ --exclude workspace/output/ "<installed skil
 | The Figma MCP with the `use_figma` tool, signed in | every Figma write goes through it; the `figma-use` skill is loaded before the first call |
 | A Figma file with edit access, or permission to create one | the system is built in it |
 | The brand's typefaces installed | the type styles use them |
-| Node 20 or later | the tools in `kit/tools/` and the docs site |
+| Node 20 or later | the local DS Create Builder on every init, the tools in `kit/tools/` and the docs site |
 
-`/ds-create init` checks each of these before it starts, and says how to fix what's missing.
+`/ds-create init-web` opens Builder before context collection; only Node is needed to open it, and local preparation uses the signed-in Codex CLI. `/ds-create init` checks Node and inputs first, opens the local foundation draft in Builder for review, then checks Figma access and installed fonts before generating the approved revision. Missing Figma access does not block a new system's local preview.
 
 # 3. Commands
 
@@ -63,7 +63,8 @@ rsync -a --exclude workspace/input/ --exclude workspace/output/ "<installed skil
 
 | Command | What it does |
 | --- | --- |
-| `/ds-create init` | Saves what you paste or attach into `workspace/input/{slug}/` (it makes the folder), checks readiness, reads every input, asks only what the inputs leave open, and sets up the foundations as Figma variables and styles. Runs once per system. |
+| `/ds-create init-web` | Opens an empty Builder immediately. Enter context, upload files and answer missing setup questions in the web; the local agent prepares foundations for review, then Publish continues to Figma. |
+| `/ds-create init` | Saves what you paste or attach into `workspace/input/{slug}/` (it makes the folder), checks readiness, reads every input, asks only what the inputs leave open, opens a local foundation draft in DS Create Builder for review, then generates the approved revision as Figma variables and styles. Runs once per system; later calls reuse the baseline and Manager. |
 | `/ds-create build` | Asks four questions: the engine (Default or Fast), how far to go, Figma only or with the docs site, and the pace. Then builds exactly that. Run it again to add more. |
 | `/ds-create learn` | Keeps a lasting rule the user teaches about their system ("buttons align left") in `workspace/input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build. |
 | `/ds-create qa` | Runs the checks the user asks for: page and file audits, spec checklists, the copy check, and the site's QA. Only on call. |
@@ -77,7 +78,7 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 
 | Phase | Steps |
 | --- | --- |
-| **Init** | inputs and inventory → confirmation → tokens: variables, text styles and effect styles |
+| **Init** | inputs → local foundation draft and Builder review → Figma readiness/inventory → confirmation → Figma variables/styles |
 | **Library** | page tree → grid styles, the icon library (Lucide) and brand assets → Parts sets → Components sets → Sections sets → Layouts sets |
 | **Documentation** | Doc kit → Cover → Getting started → Tokens → Foundations → Parts, Components, Sections and Layouts pages → Screens |
 | **Close** | clear the build data from the Figma file |
@@ -98,6 +99,8 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 - `knowledge/`: the system's own lasting rules, written by `learn`.
 
 **Out:**
+- **DS Create Builder:** a local builder dashboard in `workspace/output/{slug}/manager/`, launched on localhost by init. Overview shows the saved local draft, approval state and Figma generation progress. Controller edits are unsaved previews. It is separate from the consumer docs site; see `workflow/MANAGER.md`.
+- **Local foundation draft:** `workspace/output/{slug}/foundations.json`, the saved revision reviewed before Figma generation.
 - **The Figma file:** `00 Cover`, `01 Getting started`, `02 Tokens`, then Foundations (1.x), Parts (2.x), Components (3.x), Sections (4.x), Layouts (5.x) and Screens (6.x). Each page has its fixed frames (`.Main`, Overview, Component, Anatomy, Guidelines).
 - **`workspace/output/{slug}/`:** the ledger, every page's copy file (one source of text for Figma and the site), the set snapshots, the reports and the docs site.
 

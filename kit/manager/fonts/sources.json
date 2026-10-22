@@ -1,0 +1,44 @@
+[
+  {
+    "family": "Inter",
+    "file": "inter.ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf",
+    "upstreamBlobSHA": "047c92f6e2212473dc436020afed689527076d44",
+    "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031"
+  },
+  {
+    "family": "Inter",
+    "file": "inter-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt",
+    "upstreamBlobSHA": "21f6aff961064c2e429f570995e446bcdd555422",
+    "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57"
+  },
+  {
+    "family": "Geist",
+    "file": "geist.ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/geist/Geist%5Bwght%5D.ttf",
+    "upstreamBlobSHA": "f63f0afc6390323715972b6645115485f37cc9f4",
+    "sha256": "73894e0448cae90a92b6c2f8732b7bb9acb7b94c418bff559dad4a18e1de9659"
+  },
+  {
+    "family": "Geist",
+    "file": "geist-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/geist/OFL.txt",
+    "upstreamBlobSHA": "61f6f4b7853081236aec6407f2dd3c7170997f84",
+    "sha256": "1781d2806a07d91c4edf4740b88449fab7d0eadad53f7c351b94cd4d4eb8c00f"
+  },
+  {
+    "family": "Plus Jakarta Sans",
+    "file": "plus-jakarta-sans-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/plusjakartasans/OFL.txt",
+    "upstreamBlobSHA": "ea69b0ca12a02556c436680ea0a159efb7a748fa",
+    "sha256": "995c7199cab65954f545996326755daee7b63cc6b42b06c13da1f9502ab08a99"
+  },
+  {
+    "family": "Plus Jakarta Sans",
+    "file": "plus-jakarta-sans.ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/plusjakartasans/PlusJakartaSans%5Bwght%5D.ttf",
+    "upstreamBlobSHA": "0cb13a998ed525ba226d911b10d6c4c4f923a961",
+    "sha256": "89b3fb38aa0d275d7a731d0d817a4f1622b316b4d7fbdedcf02ee9099ff68bc8"
+  }
+]

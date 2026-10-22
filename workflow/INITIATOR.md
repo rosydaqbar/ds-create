@@ -62,7 +62,7 @@ The full specification is large (several hundred KB). Loading every page file at
 
 ## Progress ledger
 
-Keep a ledger on disk at `workspace/output/{system-slug}/ds-create-ledger.json` (README §5), even for a Figma-only build. Write it after the questionnaire and update it after every step and every page:
+Keep a ledger on disk at `workspace/output/{system-slug}/ds-create-ledger.json` (README §5), even for a Figma-only build. Write initial init entries after inputs/basic choices, expand them after final confirmation, and update after every step and every page:
 
 ```text
 scope            the confirmed summary (`workflow/QUESTIONNAIRE.md` §12): pages, mode, formats, product type, code
@@ -70,7 +70,8 @@ inputs           workspace/input/{system-slug}/sources.md: the date it was last 
 answers[]        the answers files in workspace/input/{system-slug}/answers/, in order (01-init.md, 02-build-YYYY-MM-DD.md, …)
 engine           "standard" or "fast" (the latest build round's Q1); per page, the engine that drew it
 qa[]             each on-call QA run: date, what ran, scope, result, known findings (*QA on call*)
-sequence[]       the build sequence (§6), written once at step 3, in the order it runs. Per entry:
+foundationReview saved local draft approval/hash and successful Figma hash (workflow/MANAGER.md); changes reopen review
+sequence[]       the build sequence (§6), initially steps1–4 after inputs and expanded at step 3, in the order it runs. Per entry:
                  step, phase (init, library, docs, close, site), page or task, status (todo, building, qa, done, skip),
                  loaded (the spec files loaded for it in the current context),
                  audit (fail, warn and the saved result file), date done,
@@ -125,7 +126,7 @@ A local correction does not cancel unrelated approved requirements.
 
 # 2. Inspect first
 
-This is step 2 of the build sequence (§6). It is read-only: nothing in Figma changes before the user confirms the summary.
+This is step 2 of the build sequence (§6). Every init verifies Figma after local Builder review; existing files also require the inventory below. When the existing baseline is only in Figma, a minimal read-only inventory may precede local drafting. Nothing in Figma changes before the saved draft and final choices are approved.
 
 Only after the mandatory specifications are loaded:
 - inventory pages and top-level frames and component sets;
@@ -194,27 +195,30 @@ Before generating variables and components:
 # 6. Build sequence
 
 **Who runs which steps.** The `ds-create` skill (`skills/ds-create/`) is the way in. Its commands run the steps below:
-- `/ds-create init` runs steps 1–4.
+- `/ds-create init-web` opens the empty Builder before context/questions. Its local preparation job follows init through saved-draft review, then the same explicit Figma approval/generation gates (`skills/ds-create/reference/init-web.md`). Launching Builder alone does not complete init.
+- `/ds-create init` runs steps 1–4 and launches the builder's local DS Create Builder (`workflow/MANAGER.md`). Manager opens the local foundation draft before Figma readiness/generation; it is separate from the consumer docs site. User review is required before Figma writes.
 - `/ds-create build` runs steps 5–25 that its four answers allow (`skills/ds-create/reference/build.md` §4), in rounds. Step 26 runs only when the user asks.
 - `/ds-create qa` runs the on-call checks (*QA on call*).
 
 The order, the gates and the ledger are the same whichever command runs a step.
 
+**Init's local handoff.** Read `workflow/MANAGER.md` during init. After inputs/basic choices, write the initial ledger (step1 done,2–4 todo) and `foundations.json`, then launch Builder. Review the saved local draft and record the user's chat approval or explicit Builder Publish-to-Figma click approval of its exact SHA256 before Figma checks/writes. Controller edits remain browser previews; the agent saves requested changes and reopens review. Then verify/inventory Figma (step2), confirm final file/scope/renames (step3), generate the approved data and audit (step4). Record the matching `foundationReview.figmaHash` only after success. Every completed init returns both links. A local draft alone does not complete init or enable build. Legacy export-only systems retain their completed baseline; do not recreate frozen values.
+
 **Library first, then documentation.** The sequence has three phases, so no step ever waits on a later one:
-- **Init (1–4):** inputs, inventory, confirmation, tokens.
+- **Init (1–4):** inputs → local draft/Builder review → Figma readiness/inventory → final confirmation → Figma tokens.
 - **Library (5–10):** the page tree, then every style, asset and component set the round needs, bottom-up: foundation styles and assets → Parts → Components → Sections → Layouts. No doc frame is drawn in this phase.
 - **Documentation (11–20):** the Doc kit, then every page's doc frames, in page-tree order. Every set a page shows already exists, so every example is built from real instances at the page's own step.
 
 Then Figma closes (21) and the docs site follows (22–26).
 
-The build is one numbered sequence. It is the only order, for a new system and for an existing one. Step 3 writes it into the ledger's `sequence` (§0, *Progress ledger*) with every step in scope, steps 1–3 already done, and the run follows it from top to bottom. Every other file that mentions order points here.
+The build is one numbered sequence. It is the only order, for a new system and for an existing one. After local preparation writes the initial init entries, step 3 expands the ledger's `sequence` (§0, *Progress ledger*) with every step in scope, steps 1–3 already done, and the run follows it from top to bottom. Every other file that mentions order points here.
 
 | # | Step | Load at this step | Done when |
 | --- | --- | --- | --- |
 | 1 | **Global set and inputs.** Read every file in `workspace/input/{system-slug}/` (`workspace/input/README.md`) and write its `sources.md` | `README.md`, `specs/SYSTEM.md`, `workflow/INITIATOR.md`, `workflow/GOTCHAS.md`, `workflow/templates/structure.md`; at initiation also `workflow/QUESTIONNAIRE.md` and `workspace/input/README.md` | the global set is in the current context, and `sources.md` lists every input with what it decides |
-| 2 | **Inventory** (existing system only). Read pages, frames, component sets and properties, variables, modes, styles and naming, and map them to the page tree (§2). Also read `workspace/input/{system-slug}/design-system/` and compare it with what the file holds. Read-only. | — | the mapping is ready for the confirmation summary. A family with no page in the tree gets the next free ID of its level and is marked *spec to write*. |
-| 3 | **Confirmation** (`workflow/QUESTIONNAIRE.md` §12), with every answer the inputs give pre-filled and its source shown (`workspace/input/README.md` I2): scope, page actions, implementation mode, naming (fixed, or Keep / Normalize with the rename list), product type, code, system slug | `workflow/QUESTIONNAIRE.md` | the user confirmed; the ledger holds `scope`, `inputs` and the full `sequence`; no input conflict is open |
-| 4 | **Tokens.** New system: Primitives → Color, Typography, Space, Size, Shape, Border and Motion, in the `specs/SYSTEM.md` Part C order, then the text styles and the effect styles (`skills/ds-create/reference/init.md`). Existing system: the renames on the confirmed rename list (Normalize only), then the missing tokens. Grid styles, icons and assets are made at step 6. | `specs/SYSTEM.md` Part C, `specs/guidance/02-tokens.md` | `kit/tools/figma-audit.js` in file mode reports `fail` = 0; collections and counts are in the ledger |
+| 2 | **Verify Figma for every system after local draft approval** (connection, editable file and fonts). Existing systems also inventory pages, frames, component sets and properties, variables, modes, styles and naming, and map them to the page tree (§2). Also read `workspace/input/{system-slug}/design-system/` and compare it with what the file holds. Read-only. | — | Figma readiness passes; for existing systems the mapping is ready for the confirmation summary. A family with no page in the tree gets the next free ID of its level and is marked *spec to write*. |
+| 3 | **Confirmation** (`workflow/QUESTIONNAIRE.md` §12), with every answer the inputs give pre-filled and its source shown (`workspace/input/README.md` I2): scope, page actions, implementation mode, naming (fixed, or Keep / Normalize with the rename list), product type, code, system slug | `workflow/QUESTIONNAIRE.md` | the user confirmed the saved draft and final choices; current local SHA256 matches approval; the ledger holds `scope`, `inputs` and the full `sequence`; no input conflict is open |
+| 4 | **Tokens from the approved local draft.** New system: Primitives → Color, Typography, Space, Size, Shape, Border and Motion, in the `specs/SYSTEM.md` Part C order, then the text styles and the effect styles (`skills/ds-create/reference/init.md`). Existing system: the renames on the confirmed rename list (Normalize only), then the missing tokens. Grid styles, icons and assets are made at step 6. | `specs/SYSTEM.md` Part C, `specs/guidance/02-tokens.md` | `kit/tools/figma-audit.js` in file mode reports `fail` = 0; collections and counts are in the ledger; local drafts have matching approved/current/Figma hashes and a confirmed Figma export (`workflow/MANAGER.md`) |
 | 5 | **Page tree.** Create the in-scope pages in tree order, with separators. Existing system: rename pages and move existing component sets onto their pages. Structure only: no frame is documented and no page is marked done. | `specs/SYSTEM.md` Part A §A1–§A2 | every in-scope page exists with its exact name, in order |
 | 6 | **Foundation styles and assets** (library), one step per page that owns them, in ID order: 1.3 grid styles → 1.7 icon library (`kit/tools/icons-lucide.mjs`) → 1.8 brand asset components (an asset drawn from a local SVG keeps that SVG in `workspace/output/{system-slug}/brand/`, for the site). No doc frame is drawn | `specs/foundations/00-foundations.md`, the page file | every style, variable and asset its page file defines exists, bound to its tokens; for 1.7 and 1.8, the library gate below |
 | 7 | **Parts sets** (library), one step per page, in ID order with the dependencies of `specs/parts/00-parts.md` §3 first | `specs/parts/00-parts.md`, the page file, the files of the Parts it instances | the library gate |

@@ -6,11 +6,14 @@ The repository is **not executable from root files alone**. Root files define th
 
 # Start here: the `ds-create` skill
 
-ds-create is used through its skill, `skills/ds-create/`: four commands that run the whole workflow and keep every answer you give.
+ds-create is used through its skill, `skills/ds-create/`: six commands that run the whole workflow and keep every answer you give.
+
+The **maintainer** develops ds-create. The **builder** uses it to create and maintain a design system and its documentation. **Consumers** use that result: designers in Figma and developers through the web docs. Init gives the builder a local **DS Create Builder**, separate from the consumer docs site, to review a local foundation draft before Figma generation.
 
 | Command | What it does |
 | --- | --- |
-| `/ds-create init` | checks what the build needs, reads your files in `workspace/input/`, asks only what is missing, and sets up the foundations as Figma variables and styles |
+| `/ds-create init-web` | opens Builder immediately: enter context, upload files, answer setup questions and review generated local foundations before Figma |
+| `/ds-create init` | checks readiness, reads your inputs, asks only what is missing, opens a local draft in DS Create Builder for review, then generates the approved foundations as Figma variables and styles |
 | `/ds-create build` | asks how to draw the pages (Default or Fast mode), how far to go, where (Figma only, or with the docs site) and the pace, then builds exactly that |
 | `/ds-create learn` | keeps a rule you teach about your system (for example "buttons align left") in `workspace/input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build |
 | `/ds-create qa` | runs the full checks, only when you ask |
@@ -34,7 +37,7 @@ Before the first build, give the agent what you know about the system. Everythin
    - `brand/`: brand guidelines, logo files, typefaces, color specs, tone of voice
    - `design-system/`: your existing system (docs, token exports, component lists, Figma library and code links)
    - `references/`: systems and products you like, used as inspiration only
-3. Start with **`/ds-create init`**. The agent checks that everything is ready, reads every file before asking anything, writes an index (`sources.md`), asks only what your files leave open, and sets up the foundations as Figma variables and styles. It ends with a report: where the Figma file is and what it now holds.
+3. Start with **`/ds-create init-web`** to open an empty **DS Create Builder** immediately. Add Context / Instruction and Context files in its modal; uploads are saved under `workspace/input/{session}/`. The local signed-in Codex CLI reads them, asks missing questions in the web and prepares the local foundation draft. Review it, then Publish to Figma. Setup can be resumed from saved state; no Figma link is required until Publish. See `skills/ds-create/reference/init-web.md`. For chat-led setup, use **`/ds-create init`**. The agent checks local readiness, reads the inputs, asks only what is missing and prepares `foundations.json`. It launches **DS Create Builder** in the background on localhost so you can review color, typography, spacing, radius and shadows before Figma generation. Send changes to the agent; controller edits are currently browser previews. Use **Publish → Publish to Figma** to approve the saved revision and run the local Codex agent in the background, or approve it in chat. The agent verifies the selected file/fonts and generates that revision in Figma. Publish then unlocks step2, **ds-create build**, with a copyable command for your agent. Init finishes with both links after the token audit passes. Figma is required before build; it is not required to open a new system's local draft. Existing systems preserve frozen values and may need a read-only Figma inventory before drafting. Builder is included for every product type and does not create the consumer docs site.
 4. Then run **`/ds-create build`**. It asks four questions: how to draw the pages (Default or Fast mode), how far to go (foundations, Parts, Components, everything, or only the pages you name), where (Figma only, or Figma and the docs site), and the pace. Then it builds exactly that. Run it again later to add more.
 5. Run **`/ds-create qa`** whenever you want the full checks, and **`/ds-create status`** to see where the build stands.
 
@@ -105,7 +108,7 @@ The root holds the README and one folder per job: what to build, how, why, the c
 ```text
 README.md            this file: structure and file map (always loaded)
 SKILL.md             the overview skill published to the Antikode skill vault: what ds-create is, and how to clone and link this repo
-skills/              ds-create/: the ds-create skill, the way in: /ds-create init · build · learn · qa · status (SKILL.md and one
+skills/              ds-create/: the ds-create skill, the way in: /ds-create init-web · init · build · learn · qa · status (SKILL.md and one
                      reference file per command). Link it into .claude/skills/ once after cloning (Start here); .claude/ is never committed
 
 specs/               WHAT to build: the design system tree
@@ -115,6 +118,7 @@ specs/               WHAT to build: the design system tree
 
 workflow/            HOW to build it: process, gates and lessons
   INITIATOR.md       generation logic: loading, ledger, build sequence, gates (always loaded)
+  MANAGER.md         builder's local init dashboard: lifecycle, progress, output and handoff
   GOTCHAS.md         lessons from real builds as fixed, numbered rules; new agnostic lessons are added after every build (always loaded)
   QUESTIONNAIRE.md   the questions asked at initiation and the confirmation summary (loaded at initiation)
   DOCFRAMES.md       how documentation frames look: styling, tables, matrices, anatomy, Doc kit (loaded when drawing frames)
@@ -140,6 +144,7 @@ kit/                 the CODE that builds
   web/               brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that
                      workflow/WEB.md copies and fills
   app/               brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
+  manager/           builder dashboard template, launched by kit/tools/manager.mjs; reuses web-docs presentation styles
 
 examples/            finished builds made with ds-create, for reference only (never copied into a new build)
 workspace/            the WORK: every system's inputs and outputs live here, apart from the repo's own files
@@ -321,9 +326,11 @@ workspace/input/{system-slug}/
 
 ```text
 workspace/output/{system-slug}/
-├─ ds-create-ledger.json   progress ledger
+├─ foundations.json       local foundation draft reviewed before Figma
+├─ ds-create-ledger.json   progress ledger and saved-revision approval
 ├─ figma/                  the Figma export and figma-audit results
-├─ kit/web/                    the docs site, for every product type (the React library for Web; kit/web/react-native/ for App previews)
+├─ manager/                builder's local DS Create Builder, generated and launched by init
+├─ web/                    consumer docs site, when selected (React library for Web; web/react-native/ for App previews)
 └─ reports/                QA reports and reviews
 ```
 

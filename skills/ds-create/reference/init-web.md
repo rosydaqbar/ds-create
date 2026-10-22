@@ -1,0 +1,37 @@
+# `/ds-create init-web`
+
+Open DS Create Builder BEFORE collecting context or generating foundations. This command finishes when the empty/onboarding Builder is running and opened; the design system's init remains incomplete until its saved draft has been approved, generated and audited in Figma (`reference/init.md`). `init` remains available for chat-led setup. `build` is still separate.
+
+## Launch immediately
+
+Read `workflow/MANAGER.md` for the local lifecycle. For this bootstrap only, defer the global generation specs, questionnaire, brand inputs, Figma readiness and font checks to the local preparation job; do not ask setup questions in chat before opening Builder.
+
+From the selected workspace root, verify Node20+ and run:
+
+```sh
+node kit/tools/manager.mjs init-web
+```
+
+If the user names a system/session, or the current conversation already identifies the session to resume, supply `--slug {slug}`. With no existing sessions, the command creates an isolated `session-{uuid}` folder without asking for a brand name. If sessions already exist, it returns `action: choose-session`, names/statuses and explicit resume commands; offer those choices plus New session, then run the chosen `--slug` or `--new`. `node kit/tools/manager.mjs sessions` lists sessions read-only. Never silently attach to another system or start an extra empty one when the user intends to resume. Keep this opaque folder ID stable: a later name becomes the ledger's display name, not a rename of the running server/input/output folders. Do not attach to another system by guessing from unrelated input folders. Repeating with the same slug reuses its healthy server. Existing initialized systems open normally without first-run onboarding.
+
+The return includes actual URL, pid, instance and outputDir. Check `/api/health`, open that URL, verify the Context modal, and report the URL promptly. Leave the detached server running. Do not report a running Builder without health evidence; on failure inspect manager/server.log. Do not generate placeholder tokens, sample brand data, a successful init ledger, or a Figma file just to launch it.
+
+## Setup happens in Builder
+
+The initial modal has only **Context / Instruction** and **Context files**. Either text or at least one file is needed; files are optional when context is provided. Closing it lets the user explore the empty Builder; Context reopens it. No Figma link is required for local preparation.
+
+Submit saves the verbatim context under `workspace/input/{slug}/chat/` and each original file under `workspace/input/{slug}/uploads/{batch-id}/{filename}`. Unique batch paths avoid overwriting existing inputs. Filenames stay intact. Unsupported/unreadable inputs remain listed and the agent asks for a usable version. In questions, blocked/failed and ready states, **Edit context / add files** opens the same form. Save & prepare again explicitly starts a new input revision. Replacing the same filename uses its newest upload while preserving prior original bytes; older answers stay available unless the newest instructions revise them. Stale tabs conflict rather than overwriting a newer context. Stop an active job before editing. Context includes a copyable `ds-create init-web --slug {slug}` command for another chat. Upload limits are10 files,25MB each,50MB total; context is20,000 characters. This storage stays local; the local agent reads it using its existing configured model/provider. Do not promise offline AI processing.
+
+A fixed local Codex CLI job reads this system's saved inputs and prepares only init's LOCAL stages0–4. It loads `reference/init.md` and its required references, follows the same input precedence, question/YOLO rules, decisions, source manifest and canonical draft schema. It does not restart Builder or proceed into Figma. The request and model output are under manager/setup-jobs/{id}/; manager/setup.json is server/worker-owned state. Do not overwrite it from the agent.
+
+This runner is non-interactive. Missing/conflicting choices return structured `questions` with unique ids, prompt and optional suggested options; Builder shows them as fields (suggestions allow free text). User answers are saved verbatim in chat and a new bounded continuation reads all prior inputs/answers. Record the settled answers in answers/01-init.md and index every file in sources.md. Do not repeatedly ask answered questions or choose a brand font/color without the user's decision or explicit YOLO. A supplied product description is required even in YOLO. Existing frozen values stay frozen. If baseline data is only accessible through Figma, ask for an export/resolution; this preparation worker has no Figma authorization.
+
+A ready local result requires typed values for every declared mode, compatible cycle-free aliases, usable styles, settled platform, saved decisions/sources/report, and ledger step1 done,2–4 todo with foundationReview pending. Write the source-bound `foundation-plan.json` defined in workflow/MANAGER.md, using the trusted request inputHash/inputRevision; record included names or explicit sourced exclusions for each domain and preserve existing naming. New systems follow Part C semantic aliases, descriptions, explicit scopes/code syntax, hidden raw primitives and collection/token/style naming. The checker has no universal token-count threshold. The web checks these artifacts rather than trusting process exit or the word ready. This is a review handoff, never completed init. Partial drafts during questions/errors/running jobs stay hidden and cannot be published.
+
+The runner snapshots every regular file in the selected input tree, including knowledge and newly added files. Only generated sources.md and answers/01-init.md are excluded. It checks additions, edits and removals before/after preparation and publication; changing source inputs after readiness requires preparing again. Read only this selected tree; loose shared inputs must be assigned/copied into this session by the user, not silently read outside the tracked snapshot. Missing CLI/sign-in, failed jobs, changed inputs or cancellation leave the input intact with retry/stop guidance. Reload/reopen resumes from saved server state; in-progress text/files not yet submitted stay only in the current page. Stop does not undo files already written. Closing the modal leaves the job running. A30-minute timeout, bounded logs and parent watchdog apply. No real agent command or arbitrary filesystem target comes from browser input.
+
+## Review, Figma, build
+
+When local preparation is ready, review foundations in the existing Builder. Controller edits remain unsaved previews. To revise the brief or upload a readable replacement, use Edit context / add files and Save & prepare again, then review the new saved draft. For direct agent edits, retain the same input-bound plan and increment the canonical draft revision; changed source inputs require a new preparation. This onboarding is not a general web chat or a token editor.
+
+Publish → Publish to Figma explicitly approves the saved revision/target and starts the existing local Figma continuation. Alternatively provide the file and approval in the user's agent, identifying this session slug. Follow init's Figma readiness, inventory, fonts, generation and audit gates. Init is complete only after both Builder and audited Figma handoffs. Then offer `ds-create build`; never start it automatically.

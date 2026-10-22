@@ -1,24 +1,25 @@
 ---
 name: ds-create
-description: Builds a design system in Figma, and optionally its documentation site, with the ds-create repo. Use when the user wants to start a design system (init), set up its tokens, build its documentation pages, Parts, Components, Sections or Layouts (build), teach it a lasting rule about the system that later builds must follow (learn), check a build (qa), or see how far a build is (status). Triggers on "ds-create", "design system for {brand}", "start the DS", "build the Button page", "run QA on the DS", "where is the DS build", "remember that buttons align left", "from now on the cards …".
+description: Builds a design system in Figma, and optionally its documentation site, with the ds-create repo. Use when the user wants to open the Builder first (init-web), start a design system (init), set up its tokens, build its documentation pages, Parts, Components, Sections or Layouts (build), teach it a lasting rule about the system that later builds must follow (learn), check a build (qa), or see how far a build is (status). Triggers on "ds-create", "design system for {brand}", "start the DS", "build the Button page", "run QA on the DS", "where is the DS build", "remember that buttons align left", "from now on the cards …".
 user-invocable: true
-argument-hint: "init · build · learn · qa · status"
+argument-hint: "init-web · init · build · learn · qa · status"
 ---
 
 # ds-create
 
-One skill, five commands. Each command has its own reference file. Load it before doing anything else for that command.
+One skill, six commands. Each command has its own reference file. Load it before doing anything else for that command.
 
 | Command | Reference | What it does |
 | --- | --- | --- |
-| `init` | `reference/init.md` | Readiness check, inputs, the basic questions, the foundations as variables and styles. Settles Web or App. Ends with a report. |
+| `init-web` | `reference/init-web.md` | Open/resume Builder (explicit session choice when saved sessions exist); collect/revise context/files and missing answers in the web, then prepare local foundations for review. |
+| `init` | `reference/init.md` | Local readiness, inputs/basic choices, a foundation draft reviewed in DS Create Builder, then approved variables/styles in Figma. Settles Web or App. Ends with both links. |
 | `build` | `reference/build.md` | Four gate questions (engine, how far, where, pace), then builds exactly those pages. |
 | `learn` | `reference/learn.md` | Keeps a rule the user teaches about the system in `workspace/input/{slug}/knowledge/`, and applies it to what is already built. |
 | `qa` | `reference/qa.md` | The slow checks, only when the user asks, on the scope they pick. |
 | `status` | `reference/status.md` | Reads the ledger: what is done, what is open, which checks haven't run. |
 
 **Routing.**
-- When the first word is a command, load its reference and follow it.
+- When the first word is a command, load its reference and follow it. `init-web` is the web-first bootstrap; preserve explicit `--slug {slug}` / `--new` intent and its session-discovery response; follow its early-launch loading exception before the global generation set.
 - With no command, run `status` and end with the next command to run.
 - When the request clearly maps to one command ("set up the tokens" → `init`, "build Text field" → `build`, "check the site" → `qa`), use that command.
 - When the user states a lasting rule about the system ("buttons must align left, brand guideline"), at any point and even mid-build, run `learn` for it, then carry on with what was running.
@@ -34,7 +35,8 @@ One skill, five commands. Each command has its own reference file. Load it befor
 - **Inputs.** `workspace/input/{slug}/` holds the ground truth (`workspace/input/README.md`), with any loose file the user dropped straight into `workspace/input/` (`reference/init.md` §0). List them with `find workspace/input -type f`: git ignores `workspace/input/` and `workspace/output/`, so `rg`, `fd`, Glob and Grep show them empty (`workflow/GOTCHAS.md` G55). The user's answers go into `workspace/input/{slug}/answers/` (§3).
 - **Design knowledge.** `knowledge/` at the repo root holds the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules (`knowledge/README.md`).
 - **System knowledge.** `workspace/input/{slug}/knowledge/` holds the system's standing rules, taught by the user over time: `system.md`, and one file per page (`workspace/input/README.md` I7, §4).
-- **Outputs.** `workspace/output/{slug}/` holds the ledger (`ds-create-ledger.json`), the copy files (`copy/`), the fast-mode manifests (`fast/`), the Figma exports (`figma/`), the docs site (`kit/web/`) and reports (`reports/`).
+- **Outputs.** `workspace/output/{slug}/` holds the local foundation draft (`foundations.json`), source-bound web preparation plan (`foundation-plan.json`), ledger (`ds-create-ledger.json`), the local builder's DS Create Builder (`manager/`, from init), the copy files (`copy/`), the fast-mode manifests (`fast/`), the Figma exports (`figma/`), the consumer docs site (`web/`, when selected) and reports (`reports/`).
+- **Audiences.** The maintainer develops ds-create. The builder uses it to create and maintain a design system and its documentation. Consumers use the results: designers in Figma and developers in web docs. DS Create Builder is the builder's local workspace (`workflow/MANAGER.md`), including for Figma-only builds; it is separate from the consumer docs site.
 
 # 2. Rules for every command
 
@@ -47,7 +49,7 @@ One skill, five commands. Each command has its own reference file. Load it befor
    - the Figma file: a link, or permission to create one.
 
    YOLO never skips a check to save time. In particular, a page is drawn only after its `knowledge/` topics are read, recorded under `loaded`, and its copy passes `kit/tools/copy-guard.mjs --page` (`workflow/COPY.md` §1). This is a hard rule in YOLO and in fast mode.
-5. **Gates.** `build` runs only after `init` is done. It runs only the steps its answers allow (`reference/build.md` §4). The page gates of `workflow/INITIATOR.md` Part B §6 apply to every page.
+5. **Gates.** `build` runs only after `init` is done, including approval and successful audited Figma generation of the current local draft. It runs only the steps its answers allow (`reference/build.md` §4). The page gates of `workflow/INITIATOR.md` Part B §6 apply to every page.
 6. **QA on call.** The slow checks run only through `qa` (`workflow/INITIATOR.md` Part B, *QA on call*). The cheap ones run inside `build`: each page's own audit, the copy check at the end of a level, and `npm run build`. In fast mode the build doesn't run these either: page audits and the copy check move to `qa` too, so a fast build only generates (`workflow/INITIATOR.md` Part B §6, *Gates*, *Fast mode*). At the end of `build`, offer `qa` in one line, and never run it unasked.
 7. **Figma.** Load the `figma-use` skill before the first `use_figma` call. Send one writing call at a time, and follow `workflow/GOTCHAS.md` §1.
 8. **The repo stays brand-agnostic.** Brand names, file keys, product copy and knowledge rules live only in `workspace/input/`, `workspace/output/` and the Figma file (`workspace/input/README.md` I6, I7).

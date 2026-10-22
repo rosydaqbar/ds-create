@@ -4,6 +4,8 @@
 // then run `npm run tokens` to regenerate CSS, the Tailwind theme and the DTCG file.
 // Read-only: it never changes the Figma file.
 //
+// Foundation approval verification needs lossless full/PART exports, including scopes/codeSyntax.
+// The compact hash/rows route covers values only and cannot certify metadata equality.
 // Large files: tool output is capped (about 20 KB). Export in parts by setting PART below,
 // save each result as tokens/parts/{n}.json, then run `npm run tokens:merge`.
 //   PART = { collections: ['Color'], from: 0, to: 90, styles: false }   one slice of variables
@@ -48,6 +50,9 @@ const variables = vars
       collection: col.name,
       type: v.resolvedType,
       description: v.description || '',
+      scopes: [...v.scopes],
+      codeSyntax: { ...v.codeSyntax },
+      hiddenFromPublishing: v.hiddenFromPublishing,
       values,
     };
   })
@@ -59,7 +64,11 @@ const textStyles = !withStyles ? [] : (await figma.getLocalTextStylesAsync()).ma
   fontFamily: s.fontName.family,
   fontStyle: s.fontName.style,
   fontSize: s.fontSize,
-  lineHeight: s.lineHeight.unit === 'PIXELS' ? s.lineHeight.value : null,
+  textCase: s.textCase,
+  textDecoration: s.textDecoration,
+  paragraphSpacing: s.paragraphSpacing,
+  paragraphIndent: s.paragraphIndent,
+  lineHeight: s.lineHeight.unit === 'PIXELS' ? s.lineHeight.value : s.lineHeight.unit === 'PERCENT' ? (s.lineHeight.value * s.fontSize) / 100 : null,
   letterSpacing: s.letterSpacing.unit === 'PIXELS' ? s.letterSpacing.value : (s.letterSpacing.value * s.fontSize) / 100,
   bound: Object.fromEntries(Object.entries(s.boundVariables || {}).map(([k, b]) => [k, bound(b)])),
 }));
@@ -68,6 +77,8 @@ const effectStyles = !withStyles ? [] : (await figma.getLocalEffectStylesAsync()
   name: s.name,
   effects: s.effects.map((e) => ({
     type: e.type,
+    visible: e.visible,
+    blendMode: e.blendMode,
     x: e.offset ? e.offset.x : 0,
     y: e.offset ? e.offset.y : 0,
     blur: e.radius || 0,

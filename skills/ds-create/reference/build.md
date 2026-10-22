@@ -9,6 +9,7 @@ Asks four questions, then builds exactly the pages the answers allow, in the fix
 Before any question, check:
 - `workspace/input/{slug}/answers/01-init.md` exists;
 - the ledger marks steps 1–4 `done`;
+- for a local draft/review record, `node kit/tools/manager.mjs status --slug {slug}` reports `initDone: true` and `source.review: synced` (current saved hash approved and generated/audited in Figma); legacy export-only baselines retain their existing gate;
 - the platform is settled (Web, App, or Web and App).
 
 If any is missing, stop with one line: "Init isn't done for {slug}. Run `/ds-create init` first." Then say what is missing.
