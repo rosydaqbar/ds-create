@@ -55,8 +55,8 @@ const fs=require('node:fs/promises'),path=require('node:path');
   await fs.writeFile(path.join(r.outputDir,'foundations.json'),JSON.stringify(draft));
   const domains={};
   for(const [id,prefixes,styles] of [['color',['palette/','color/'],[]],['typography',['font/'],draft.textStyles.map(s=>s.name)],['space',['space/'],[]],['shape',['radius/'],[]],['elevation',[],draft.effectStyles.map(s=>s.name)],['motion',['motion/'],[]]])domains[id]={status:'included',variables:draft.variables.filter(v=>prefixes.some(p=>v.name.startsWith(p))).map(v=>v.name),styles};
-  if(mode!=='no-plan')await fs.writeFile(path.join(r.outputDir,'foundation-plan.json'),JSON.stringify({format:'ds-create/foundation-plan@1',inputHash:r.inputHash,inputRevision:r.inputRevision,product:{name:'Synthetic setup fixture',description:'A synthetic test product',platform:'Web'},systemMode:'new',naming:'normalize',domains,decisions:[{key:'platform',value:'Web',decidedBy:'user',source:r.contextFile}]}));
-  await fs.writeFile(path.join(r.outputDir,'ds-create-ledger.json'),JSON.stringify({system:'Synthetic setup fixture',preview:true,scope:{productType:'Web'},sequence:[1,2,3,4].map(step=>({step,status:step===1?'done':'todo'})),foundationReview:{status:'pending'}}));
+  if(mode!=='no-plan')await fs.writeFile(path.join(r.outputDir,'foundation-plan.json'),JSON.stringify({format:'ds-create/foundation-plan@1',projectName:mode==='wrong-name'?'Different project':r.projectName,inputHash:r.inputHash,inputRevision:r.inputRevision,product:{name:'Synthetic setup fixture',description:'A synthetic test product',platform:'Web'},systemMode:'new',naming:'normalize',domains,decisions:[{key:'platform',value:'Web',decidedBy:'user',source:r.contextFile}]}));
+  await fs.writeFile(path.join(r.outputDir,'ds-create-ledger.json'),JSON.stringify({system:mode==='wrong-name'?'Different project':r.projectName,preview:true,scope:{productType:'Web'},sequence:[1,2,3,4].map(step=>({step,status:step===1?'done':'todo'})),foundationReview:{status:'pending'}}));
  }
  await fs.writeFile(result,JSON.stringify({status:'ready',message:'Simulated local draft.',questions:[]}));
 })();`;
@@ -75,6 +75,6 @@ export async function setupFixture({mode='success',timeoutMs=10000,agentCommand,
  const url='http://127.0.0.1:'+server.address().port,flow=()=>fetch(url+'/api/setup-flow').then(r=>r.json()),initial=await flow();
  const headers={Origin:url,'X-DS-Create-Token':initial.csrfToken};
  const post=(endpoint,body,override={})=>fetch(url+endpoint,{method:'POST',headers:{...headers,...(body instanceof FormData?{}:{'Content-Type':'application/json'}),...override},body:body instanceof FormData?body:JSON.stringify(body)});
- const form=(context='A synthetic product brief.',files=[])=>{const f=new FormData();f.set('context',JSON.stringify(context));for(const [name,bytes]of files)f.append('files',new Blob([bytes]),name);return f;};
+ const form=(context='A synthetic product brief.',files=[],projectName='Synthetic setup fixture')=>{const f=new FormData();f.set('projectName',projectName);f.set('context',JSON.stringify(context));for(const [name,bytes]of files)f.append('files',new Blob([bytes]),name);return f;};
  return {root,output,url,setup,jobs,flow,post,form,initial,setupOptions,async cleanup(){await Promise.allSettled([setup.shutdown(),jobs.shutdown()]);await new Promise(resolve=>server.close(resolve));await rm(root,{recursive:true,force:true});}};
 }

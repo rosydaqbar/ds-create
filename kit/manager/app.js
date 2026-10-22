@@ -321,6 +321,7 @@ async function refresh() {
     $('connection-error').hidden = true;
     const nextSignature = JSON.stringify(next);
     publisher.update(next);
+    if (state?.system !== next.system) draft.name = null;
     if (nextSignature !== signature) { state = next; signature = nextSignature; render(); }
   } catch {
     publisher.update(null);

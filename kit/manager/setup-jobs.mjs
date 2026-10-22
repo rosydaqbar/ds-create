@@ -9,7 +9,7 @@ import { PublishError } from './figma-jobs.mjs';
 import { snapshotInputs, inputFreshness } from './input-snapshot.mjs';
 import { checkPreparation } from './foundation-proof.mjs';
 
-export const uploadLimits = { files: 10, fileBytes: 25 * 1024 * 1024, totalBytes: 50 * 1024 * 1024, context: 20000 };
+export const uploadLimits = { files: 10, fileBytes: 25 * 1024 * 1024, totalBytes: 50 * 1024 * 1024, context: 20000, projectName: 100 };
 export const activeSetup = record => ['queued', 'running'].includes(record?.status);
 export async function saveSetup(file, value) {
   const tmp = `${file}.${randomUUID()}.tmp`;
@@ -62,11 +62,11 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     return r;
   }
   async function status() {
-    const [r, program] = await Promise.all([latest(), executable(agentCommand)]);
+    const [r, program, ledger] = await Promise.all([latest(), executable(agentCommand), readJSON(path.join(outputDir,'ds-create-ledger.json'))]);
     if (!r) return { enabled:false };
     const pointer=await readJSON(path.join(outputDir,'manager/figma-job.json'));
     const publishing=/^[0-9a-f-]{36}$/.test(pointer?.id||'') && activeSetup(await readJSON(path.join(outputDir,'manager/jobs',pointer.id,'status.json')));
-    return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '',
+    return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
       files:r.files || [], inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputPath:`workspace/input/${slug}/`,
       canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
       canStop:activeSetup(r) && !!child && childId === r.jobId };
@@ -87,7 +87,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     }
     const id = randomUUID(), dir = await localDirectory(workspace,`workspace/output/${slug}/manager/setup-jobs/${id}`);
     const snapshot=await snapshotInputs(workspace,slug),inputFiles=snapshot.files.map(f=>f.path);
-    const request = {id,slug,workspace,outputDir,program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
+    const request = {id,slug,projectName:r.projectName || null,workspace,outputDir,program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
     await saveSetup(path.join(dir,'request.json'),request);
     await saveSetup(file,{...r,status:'queued',jobId:id,questions:[],message:'Starting the local agent…'});
     childId=id;
@@ -105,8 +105,11 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     const r=await guard();
     if(!revision && r.submitted) throw new PublishError('Context is already saved. Answer the open questions or retry preparation.');
     const entries=[...form.entries()];
-    if(entries.some(([key])=>!['context','files','inputRevision'].includes(key)) || form.getAll('context').length!==1) throw new PublishError('Submit context and context files only.',400);
+    if(entries.some(([key])=>!['projectName','context','files','inputRevision'].includes(key)) || form.getAll('context').length!==1) throw new PublishError('Submit the project name, context and context files only.',400);
     if(revision && (!r.submitted || form.getAll('inputRevision').length!==1 || Number(form.get('inputRevision'))!==(r.inputRevision||1)))throw new PublishError('Context changed in another tab. Reopen Context before saving a revision.');
+    const projectName=form.get('projectName');
+    if(form.getAll('projectName').length!==1 || typeof projectName!=='string' || !projectName.trim() || projectName.trim().length>uploadLimits.projectName || /[\x00-\x1f\x7f]/.test(projectName))throw new PublishError('Enter a project name of 1–100 characters on one line.',400);
+    const name=projectName.trim();
     let context;
     try { context=JSON.parse(form.get('context')); } catch { throw new PublishError('Context text could not be read. Retry this form.',400); }
     const files=form.getAll('files').filter(f=>typeof f!=='string' && f.name);
@@ -127,11 +130,11 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     }
     const chatDir=await localDirectory(workspace,`workspace/input/${slug}/chat`);
     const contextFile=`chat/${new Date().toISOString().slice(0,10)}-${batch}.md`;
-    await writeFile(path.join(chatDir,path.basename(contextFile)),`# Context from Builder\n\n${context}\n\nMeaning: User-provided context and instructions for local foundation preparation.\nApplies to: this system, init.\n`,{flag:'wx'});
+    await writeFile(path.join(chatDir,path.basename(contextFile)),`# Context from Builder\n\n## Project name\n${name}\n\n## Context / Instruction\n${context}\n\nMeaning: User-provided context and instructions for local foundation preparation.\nApplies to: this system, init.\n`,{flag:'wx'});
     const now=new Date().toISOString(),inputRevision=(r.inputRevision||0)+1;
     const currentFiles=[...(r.files||[]).filter(f=>!names.has(f.name)),...saved];
-    const next={...r,context,files:currentFiles,contextFile,inputRevision,readyInputHash:null,
-      revisions:[...(r.revisions||[]),{revision:inputRevision,contextFile,files:saved,date:now}],submitted:r.submitted||now,status:'saved'};
+    const next={...r,projectName:name,context,files:currentFiles,contextFile,inputRevision,readyInputHash:null,
+      revisions:[...(r.revisions||[]),{revision:inputRevision,projectName:name,contextFile,files:saved,date:now}],submitted:r.submitted||now,status:'saved'};
     if(revision){
       const ledgerFile=path.join(outputDir,'ds-create-ledger.json'),ledger=await readJSON(ledgerFile);
       if(ledger)await saveSetup(ledgerFile,{...ledger,foundationReview:{status:'pending'},sequence:(ledger.sequence||[]).map(e=>[2,3,4].includes(Number(e.step))?{...e,status:'todo'}:e)});

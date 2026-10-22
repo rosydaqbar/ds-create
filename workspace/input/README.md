@@ -5,7 +5,7 @@ Everything the user provides for a design system goes here: product briefs, bran
 Nothing in this folder is committed except this file: `.gitignore` ignores `workspace/input/*`. Brand content stays here and in `workspace/output/`, never in the executor (`README.md` §5).
 
 **For the user.**
-- For web-first setup, run `/ds-create init-web` and enter context/upload files in Builder. Files keep their original names under `{session}/uploads/{batch}/`; context and subsequent web answers are saved in `chat/`. The opaque session folder stays stable when you choose a display name.
+- For web-first setup, run `/ds-create init-web` and enter the project name, context and uploaded files in Builder. Files keep their original names under `{session}/uploads/{batch}/`; context and subsequent web answers are saved in `chat/`. The opaque session folder stays stable when you choose a display name.
 - You don't have to set anything up. Paste your brief or attach files when you run `/ds-create init`, and the agent creates `workspace/input/{your-system}/` and saves them there.
 - If you'd rather prepare it yourself, make a folder named after your system (`workspace/input/acme/`) and drop in what you have: a PRD or brief in `brief/`, brand guidelines in `brand/`, your current design system in `design-system/`, and anything you like in `references/`. You don't need every folder, and you don't need to rename your files.
 - Anything you tell the agent in chat is saved in `chat/` for you.

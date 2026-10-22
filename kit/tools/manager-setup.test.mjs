@@ -65,7 +65,7 @@ test('context and binary original filenames persist, question answers resume a r
  assert.deepEqual(JSON.parse(await readFile(path.join(f.output,'manager/setup.json'))).answerFiles,answered.answerFiles);
 });
 test('fake success, invalid aliases, malformed questions, blocked and process failure never unlock Publish',async t=>{
- for(const mode of ['empty','alias','missing-dark','wrong-float','no-plan','bad-questions','blocked','fail']){
+ for(const mode of ['empty','alias','missing-dark','wrong-float','no-plan','wrong-name','bad-questions','blocked','fail']){
   const f=await fixture(t,{mode});await f.post('/api/setup-submit',f.form());const r=await until(f,settled);assert.notEqual(r.status,'ready',mode);
   assert.equal((await getState(f.output)).initDone,false);
   const p=await fetch(f.url+'/api/publish-flow').then(r=>r.json());assert.equal(p.figma.canStart,false);assert.equal(p.build.available,false);
@@ -114,8 +114,9 @@ test('revisions recover unreadable inputs, preserve originals/answers, and rejec
  let ready=await until(f,r=>r.status==='ready');assert.equal(ready.inputRevision,2);assert.notEqual(ready.files[0].path,original);
  assert.equal(await readFile(path.join(f.root,'workspace/input/fixture',original),'utf8'),'original unreadable bytes');
  assert.equal((await f.post('/api/setup-revise',rev)).status,409);
- const edit=f.form('New direction after review.');edit.set('inputRevision',String(ready.inputRevision));
- assert.equal((await f.post('/api/setup-revise',edit)).status,202);ready=await until(f,r=>r.status==='ready');assert.equal(ready.inputRevision,3);assert.equal(ready.files.length,1);
+ const edit=f.form('New direction after review.',[],'Renamed synthetic project');edit.set('inputRevision',String(ready.inputRevision));
+ assert.equal((await f.post('/api/setup-revise',edit)).status,202);ready=await until(f,r=>r.status==='ready');assert.equal(ready.inputRevision,3);assert.equal(ready.files.length,1);assert.equal(ready.projectName,'Renamed synthetic project');assert.equal((await getState(f.output)).system,'Renamed synthetic project');assert.equal(ready.projectId,'fixture');assert.equal(ready.resumeCommand,'ds-create init-web --slug fixture');
+ const history=JSON.parse(await readFile(path.join(f.output,'manager/setup.json')));assert.equal(history.revisions[0].projectName,'Synthetic setup fixture');
  const prompt=await readFile(path.join(f.output,'received-prompt'),'utf8');assert.match(prompt,/retained archives/);
 });
 test('new, modified and removed selected input dependencies invalidate readiness and publication',async t=>{
@@ -127,4 +128,25 @@ test('new, modified and removed selected input dependencies invalidate readiness
  await f.post('/api/setup-retry',{});await until(f,r=>r.status==='ready');
  await writeFile(path.join(knowledge,'new-guideline.md'),'Changed rule.');pub=await fetch(f.url+'/api/publish-flow').then(r=>r.json());assert.equal(pub.figma.canStart,false);
  await f.post('/api/setup-retry',{});await until(f,r=>r.status==='ready');await rm(path.join(knowledge,'new-guideline.md'));assert.equal((await f.flow()).status,'outdated');assert.equal(publishReady(await getState(f.output)),false);
+});
+
+test('project names are required, persist with Unicode/spaces, and never rename the stable session',async t=>{
+ const f=await fixture(t,{agentCommand:'/nonexistent/codex'});
+ const missing=f.form();missing.delete('projectName');assert.equal((await f.post('/api/setup-submit',missing)).status,400);
+ for(const name of ['', '   ', 'x'.repeat(101), 'Two\nlines'])assert.equal((await f.post('/api/setup-submit',f.form('A product brief.',[],name))).status,400);
+ const duplicate=f.form();duplicate.append('projectName','Other');assert.equal((await f.post('/api/setup-submit',duplicate)).status,400);
+ await assert.rejects(readdir(path.join(f.root,'workspace/input/fixture')),{code:'ENOENT'});
+ const name='Ruang & Rasa — Sistem Desain';
+ assert.equal((await f.post('/api/setup-submit',f.form('Actual context.',[],`  ${name}  `))).status,202);
+ const saved=await f.flow(),record=JSON.parse(await readFile(path.join(f.output,'manager/setup.json')));
+ assert.equal(saved.projectName,name);assert.equal(saved.projectId,'fixture');assert.equal((await getState(f.output)).system,name);
+ assert.equal(saved.resumeCommand,'ds-create init-web --slug fixture');
+ assert.ok((await readFile(path.join(f.root,'workspace/input/fixture',record.contextFile),'utf8')).includes(name));
+ const listed=JSON.parse((await exec(process.execPath,[path.resolve('kit/tools/manager.mjs'),'sessions','--workspace',f.root])).stdout);
+ assert.equal(listed.sessions[0].name,name);assert.equal(listed.sessions[0].slug,'fixture');
+});
+test('a project name mismatch in saved generation evidence blocks Publish after readiness',async t=>{
+ const f=await fixture(t);await f.post('/api/setup-submit',f.form());await until(f,r=>r.status==='ready');
+ const file=path.join(f.output,'foundation-plan.json'),plan=JSON.parse(await readFile(file));plan.projectName='A different project';await writeFile(file,JSON.stringify(plan));
+ const pub=await fetch(f.url+'/api/publish-flow').then(r=>r.json());assert.equal(pub.figma.canStart,false);assert.equal(publishReady(await getState(f.output)),false);
 });

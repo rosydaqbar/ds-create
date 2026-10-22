@@ -200,7 +200,7 @@ export async function getState(outputDir, { preparing = false } = {}) {
   const scope = ledger?.scope || {};
   const figmaUrl = figmaLink(ledger?.figma?.url || ledger?.figmaUrl || scope.figmaUrl || scope.figma);
   return {
-    system: typeof ledger?.system === 'string' ? ledger.system : scope.name || (setup ? 'Your design system' : path.basename(outputDir)),
+    system: setup?.projectName || (typeof ledger?.system === 'string' ? ledger.system : scope.name || (setup ? 'Your design system' : path.basename(outputDir))),
     setup: setup ? { status: fresh.fresh?setup.status:setup.status==='ready'?'outdated':setup.status, message: fresh.fresh?setup.message || '':fresh.message } : null,
     slug: path.basename(outputDir), product: scope.productType || scope.product || scope.platform || 'Not settled yet',
     figmaUrl, preview: ledger?.preview === true, status, initDone, warnings, source,

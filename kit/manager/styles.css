@@ -496,3 +496,5 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 
 #publish:disabled { cursor: not-allowed; }
 #publish:disabled:hover { background: var(--color-text-primary); }
+
+.setup-field-help { color: var(--color-text-secondary); font-size: 14px; line-height: 1.6; }

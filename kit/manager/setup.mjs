@@ -4,7 +4,7 @@ const escape = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;',
 const size = bytes => bytes < 1024 ? `${bytes} B` : bytes < 1024*1024 ? `${Math.ceil(bytes/1024)} KB` : `${(bytes/1024/1024).toFixed(1)} MB`;
 export function setupWeb({ onChange = () => {} } = {}) {
   const dialog=$('setup-dialog');
-  let flow,signature='',pending=[],busy=false,opened=false,questionKey='',returnFocus,editing=false,editRevision;
+  let flow,signature='',pending=[],busy=false,opened=false,questionKey='',returnFocus,editing=false,editRevision,nameHydrated=false;
   const active = () => ['queued','running'].includes(flow?.status);
   function files() {
     $('setup-file-list').innerHTML=pending.map((f,i)=>`<li><span>${escape(f.name)}<small>${size(f.size)}</small></span><button class="icon-button" type="button" data-remove-file="${i}" aria-label="Remove ${escape(f.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></li>`).join('');
@@ -12,6 +12,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
   function paint() {
     $('setup-open').hidden=!flow?.enabled;
     if(!flow?.enabled)return;
+    if(!nameHydrated){if(!$('setup-project-name').value)$('setup-project-name').value=flow.projectName||'';nameHydrated=true;}
     const initial=flow.status==='empty',ready=flow.status==='ready',questions=flow.status==='questions';
     $('setup-open').textContent=questions?'Context · reply':'Context';
     $('setup-title').textContent=initial?'Set up your design system':questions?'A few details to continue':ready?'Foundations ready to review':'Prepare your foundations';
@@ -22,7 +23,8 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-edit-cancel').hidden=!editing;
     $('setup-edit-cancel').disabled=busy;
     $('setup-revision-note').textContent=`Input revision ${flow.inputRevision}. Replacing a filename keeps its original version. Saved answers stay available.`;
-    $('setup-resume-project').textContent=(flow.inputPath||'').split('/').filter(Boolean).at(-1)||'';
+    $('setup-resume-project').textContent=flow.projectName||'Not named yet';
+    $('setup-saved-project').textContent=flow.projectName||'Not named yet';
     $('setup-resume-command').textContent=flow.resumeCommand||'';
     $('setup-resume').hidden=!flow.resumeCommand;
     if(editing){$('setup-title').textContent='Revise your context';$('setup-description').textContent='Update instructions or add a readable replacement file. Saving starts preparation again; review the new draft before publishing.';}
@@ -84,7 +86,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     if(new Set(all.map(f=>f.name)).size!==all.length){error('Choose files with distinct names.');return;}
     error('');pending=all;files();
   }
-  $('setup-edit').addEventListener('click',()=>{editing=true;editRevision=flow.inputRevision;$('setup-context').value=flow.context||'';error('');paint();$('setup-context').focus();});
+  $('setup-edit').addEventListener('click',()=>{editing=true;editRevision=flow.inputRevision;$('setup-project-name').value=flow.projectName||'';$('setup-context').value=flow.context||'';error('');paint();$('setup-project-name').focus();});
   $('setup-edit-cancel').addEventListener('click',()=>{editing=false;pending=[];files();error('');paint();$('setup-edit').focus();});
   $('setup-copy-resume').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(flow.resumeCommand);$('setup-copy-resume').textContent='Copied';setTimeout(()=>{$('setup-copy-resume').textContent='Copy resume command';},1500);}catch{error('Copy failed. Select the resume command above and copy it.');}});
   $('setup-open').addEventListener('click',async()=>{await refresh();if(!dialog.open)open();});
@@ -95,9 +97,10 @@ export function setupWeb({ onChange = () => {} } = {}) {
   $('setup-add-files').addEventListener('click',()=>$('setup-files').click());
   const drop=$('setup-drop');drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('is-dragging');});drop.addEventListener('dragleave',()=>drop.classList.remove('is-dragging'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('is-dragging');addFiles(e.dataTransfer.files);});
   $('setup-initial').addEventListener('submit',e=>{
-    e.preventDefault();const context=$('setup-context').value;
+    e.preventDefault();const context=$('setup-context').value,projectName=$('setup-project-name').value.trim();
+    if(!projectName || projectName.length>100 || /[\x00-\x1f\x7f]/.test(projectName)){error('Enter a project name of 1–100 characters on one line.');$('setup-project-name').focus();return;}
     if(!context.trim() && !pending.length && !(editing&&flow.files?.length)){error('Describe your product or add a context file to get started.');$('setup-context').focus();return;}
-    const form=new FormData();form.set('context',JSON.stringify(context));pending.forEach(f=>form.append('files',f,f.name));if(editing)form.set('inputRevision',String(editRevision));post(editing?'/api/setup-revise':'/api/setup-submit',form,true);
+    const form=new FormData();form.set('projectName',projectName);form.set('context',JSON.stringify(context));pending.forEach(f=>form.append('files',f,f.name));if(editing)form.set('inputRevision',String(editRevision));post(editing?'/api/setup-revise':'/api/setup-submit',form,true);
   });
   $('setup-questions-form').addEventListener('submit',e=>{e.preventDefault();post('/api/setup-answers',{jobId:flow.jobId,answers:flow.questions.map((q,i)=>({id:q.id,value:$(`setup-answer-${i}`).value}))});});
   $('setup-stop').addEventListener('click',()=>post('/api/setup-cancel',{}));$('setup-retry').addEventListener('click',()=>post('/api/setup-retry',{}));

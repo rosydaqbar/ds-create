@@ -34,7 +34,7 @@ async function main() {
       const output=path.join(workspace,'workspace/output',entry.name),setup=await readJSON(path.join(output,'manager/setup.json'));
       const ledger=await readJSON(path.join(output,'ds-create-ledger.json'));
       if(!setup&&!ledger)continue;
-      sessions.push({slug:entry.name,name:ledger?.system||entry.name,status:setup?.status||'initialized',resumeCommand:`ds-create init-web --slug ${entry.name}`});
+      sessions.push({slug:entry.name,name:setup?.projectName||ledger?.system||entry.name,status:setup?.status||'initialized',resumeCommand:`ds-create init-web --slug ${entry.name}`});
     }
     sessions.sort((a,b)=>a.slug.localeCompare(b.slug));
     if(command==='sessions'||sessions.length){console.log(JSON.stringify({action:command==='sessions'?'list':'choose-session',sessions,newCommand:'ds-create init-web --new'},null,2));return;}
