@@ -40,13 +40,14 @@ const timeout = setTimeout(() => { stop('failed', 'The agent reached its time li
 const hash = async () => createHash('sha256').update(await readFile(path.join(request.outputDir, 'foundations.json'))).digest('hex');
 
 try {
-  if((await snapshotInputs(request.workspace,request.slug)).hash!==request.inputHash)throw new Error('Context changed before Figma generation. Prepare it again.');
+  if((await snapshotInputs(request.workspace,request.inputSlug || request.slug)).hash!==request.inputHash)throw new Error('Context changed before Figma generation. Prepare it again.');
   if (await hash() !== request.hash) throw new Error('The saved draft changed before the agent started. Review it and publish again.');
   await save('running', 'The local agent is checking Figma access, fonts, and the approved foundations.');
   await writeFile(schemaFile, JSON.stringify({ type: 'object', additionalProperties: false,
     properties: { status: { type: 'string', enum: ['completed', 'blocked', 'failed'] }, message: { type: 'string' } }, required: ['status', 'message'] }));
   const prompt = `Continue ds-create init for ONLY system ${request.slug} in ${request.workspace}.
 Read skills/ds-create/SKILL.md, reference/init.md relative to that skill, workflow/MANAGER.md and their required references before acting. This is the Builder Publish-to-Figma continuation, not a new brand setup or build.
+Read/write inputs and decisions ONLY in workspace/input/${request.inputSlug || request.slug}/; outputs stay in workspace/output/${request.slug}/. This explicit mapping overrides references that assume matching folder slugs. Never rename or merge these folders.
 Read the trusted user click record at ${requestFile}. The user explicitly approved saved foundations.json revision ${request.revision}, SHA256 ${request.hash}, and target Figma file ${request.figmaUrl} by clicking Publish to Figma. Approval is already recorded in the ledger with this request as its source. Do not ask for the same approval again. Browser controller edits were NOT saved and are excluded.
 Verify the current file hash against ${request.hash} before any Figma write and again before marking complete. Do not alter foundations.json. If a new choice, rename, font substitute, conflicting frozen value, missing input, missing auth/tool/access or other permission is needed, return blocked with a concise next action; do not invent an answer or silently broaden scope.
 Use the configured Figma MCP authoring tools. Load figma-use before use_figma and the required skills/references before other Figma authoring calls. Do not replace variables/styles with an HTML screenshot import. No browser automation workaround and no OS font installation. Verify the target is editable, inventory it read-only and preserve frozen values. A missing authoring tool is blocked, never success.
@@ -70,7 +71,7 @@ Finish with structured status completed|blocked|failed and a concise user-facing
   const code = await new Promise((resolve, reject) => { agent.once('error', reject); agent.once('close', resolve); });
   await logging;
   if (!stopping) {
-    if((await snapshotInputs(request.workspace,request.slug)).hash!==request.inputHash)await save('blocked','Context changed during publication. Inspect partial Figma output and prepare the current input.');
+    if((await snapshotInputs(request.workspace,request.inputSlug || request.slug)).hash!==request.inputHash)await save('blocked','Context changed during publication. Inspect partial Figma output and prepare the current input.');
     else if (await hash() !== request.hash) await save('blocked', 'The saved draft changed during generation. Inspect any partial Figma changes and review the new revision.');
     else {
       const result = await readJSON(resultFile);

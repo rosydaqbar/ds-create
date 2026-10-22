@@ -3,6 +3,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { validateFoundations } from './foundation-validation.mjs';
 import { compareFoundations } from './foundation-compare.mjs';
+import { selectedInputSlug } from './input-identity.mjs';
 import { inputFreshness, snapshotInputs } from './input-snapshot.mjs';
 import { checkWebDraft } from './foundation-proof.mjs';
 
@@ -91,8 +92,8 @@ async function loadSource(outputDir, ledger, warnings = []) {
       const request = await readJSON(path.join(outputDir, 'manager/jobs', builderRequest[1], 'request.json'));
       const fileKey = value => { const url = figmaLink(value); return url ? new URL(url).pathname.match(/^\/(?:design|file)\/([A-Za-z0-9_-]+)(?:\/|$)/)?.[1] : null; };
       const target = ledger?.figma?.url || ledger?.figmaUrl || ledger?.scope?.figmaUrl || ledger?.scope?.figma;
-      let currentInputHash;try{currentInputHash=(await snapshotInputs(path.resolve(outputDir,'../../..'),path.basename(outputDir))).hash;}catch{/* unreadable inputs invalidate approval */}
-      approved = request?.hash === hash && request.inputHash===currentInputHash && typeof currentInputHash==='string' && !!fileKey(target) && fileKey(request.figmaUrl) === fileKey(target);
+      let currentInputHash;try{currentInputHash=(await snapshotInputs(path.resolve(outputDir,'../../..'),selectedInputSlug(setup,path.basename(outputDir)))).hash;}catch{/* unreadable inputs invalidate approval */}
+      approved = request?.hash === hash && (request.inputSlug || path.basename(outputDir))===selectedInputSlug(setup,path.basename(outputDir)) && request.inputHash===currentInputHash && typeof currentInputHash==='string' && !!fileKey(target) && fileKey(request.figmaUrl) === fileKey(target);
     }
     const tokenStep = Array.isArray(ledger?.sequence) ? ledger.sequence.find(e => Number(e?.step) === 4) : null;
     const audit = tokenStep?.audit || ledger?.tokens?.audit;
@@ -202,7 +203,7 @@ export async function getState(outputDir, { preparing = false } = {}) {
   return {
     system: setup?.projectName || (typeof ledger?.system === 'string' ? ledger.system : scope.name || (setup ? 'Your design system' : path.basename(outputDir))),
     setup: setup ? { status: fresh.fresh?setup.status:setup.status==='ready'?'outdated':setup.status, message: fresh.fresh?setup.message || '':fresh.message } : null,
-    slug: path.basename(outputDir), product: scope.productType || scope.product || scope.platform || 'Not settled yet',
+    slug: path.basename(outputDir), inputSlug:selectedInputSlug(setup,path.basename(outputDir)), product: scope.productType || scope.product || scope.platform || 'Not settled yet',
     figmaUrl, preview: ledger?.preview === true, status, initDone, warnings, source,
     updated: Math.max(...modified) ? new Date(Math.max(...modified)).toISOString() : null,
     steps: [1, 2, 3, 4].map(n => {

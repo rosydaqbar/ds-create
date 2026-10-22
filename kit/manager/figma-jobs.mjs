@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { compareFoundations } from './foundation-compare.mjs';
 import { inputFreshness, snapshotInputs } from './input-snapshot.mjs';
+import { selectedInputSlug } from './input-identity.mjs';
 import { checkWebDraft } from './foundation-proof.mjs';
 import { getState, getPublishStatus, readJSON, figmaLink } from './state.mjs';
 
@@ -90,22 +91,22 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', 
       const gate = await status();
       if (gate.figma.reason) throw new PublishError(gate.figma.reason, 412);
       if (state.foundations.some(f => f.variables.some(v => Object.values(v.resolved).some(r => r.error)))) throw new PublishError('Resolve missing or circular token aliases with your agent before publishing.', 412);
-      const slug = path.basename(outputDir);
-      const answersFile = path.join(workspace, 'workspace/input', slug, 'answers/01-init.md');
+      const slug = path.basename(outputDir), setup=await readJSON(path.join(outputDir,'manager/setup.json')), inputSlug=selectedInputSlug(setup,slug);
+      const answersFile = path.join(workspace, 'workspace/input', inputSlug, 'answers/01-init.md');
       try { await access(answersFile); } catch { throw new PublishError('Init answers are missing. Continue ds-create init with your agent first.', 412); }
       if (!['Web', 'App', 'Web and App'].includes(state.product)) throw new PublishError('Settle Web, App, or Web and App through ds-create init first.', 412);
       const program = await executable(agentCommand);
       const id = randomUUID(), dir = path.join(jobsDir, id);
       await mkdir(dir, { recursive: true });
-      const request = { id, slug, hash: input.hash, revision: state.source.revision, figmaUrl: target.url, approvedAt: new Date().toISOString(),
-        workspace, outputDir, program, agentPrefixArgs, timeoutMs, simulation, inputHash:(await snapshotInputs(workspace,slug)).hash };
+      const request = { id, slug, inputSlug, hash: input.hash, revision: state.source.revision, figmaUrl: target.url, approvedAt: new Date().toISOString(),
+        workspace, outputDir, program, agentPrefixArgs, timeoutMs, simulation, inputHash:(await snapshotInputs(workspace,inputSlug)).hash };
       const requestFile = path.join(dir, 'request.json');
       await save(requestFile, request);
       const ledgerFile = path.join(outputDir, 'ds-create-ledger.json');
       const ledger = await readJSON(ledgerFile);
       if (!ledger || !Array.isArray(ledger.sequence)) throw new PublishError('The init ledger is unavailable. Ask the agent to restore it.', 412);
       if ((await getState(outputDir)).source.hash !== input.hash) throw new PublishError('The saved draft changed before publishing. Review it again.');
-      if((await snapshotInputs(workspace,slug)).hash!==request.inputHash)throw new PublishError('Context changed before publishing. Prepare it again.');
+      if((await snapshotInputs(workspace,inputSlug)).hash!==request.inputHash)throw new PublishError('Context changed before publishing. Prepare it again.');
       ledger.foundationReview = { status: 'approved', hash: input.hash, approvedBy: 'user', approvedAt: request.approvedAt, approvalSource: path.relative(workspace, requestFile) };
       ledger.figma = { ...ledger.figma, url: target.url };
       // An older generation is not evidence for the newly approved request/target.

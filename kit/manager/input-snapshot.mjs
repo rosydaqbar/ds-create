@@ -1,11 +1,12 @@
 import { readdir, lstat, readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { selectedInputSlug } from './input-identity.mjs';
 const sha = data => createHash('sha256').update(data).digest('hex');
 // Derived indexes and the generated decision transcription are not source inputs.
 const generated = new Set(['sources.md', 'answers/01-init.md']);
 export async function snapshotInputs(workspace, slug) {
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Invalid system identity.');
+  selectedInputSlug({inputSlug:slug});
   const root = path.join(workspace, 'workspace/input', slug), files = [];
   const base = await realpath(workspace);
   // Reject symlinked ancestors as well as symlinked source files.
@@ -31,7 +32,7 @@ export async function inputFreshness(outputDir, setup) {
   if(!setup || setup.status!=='ready')return {fresh:!setup,message:setup?.message || 'Finish local preparation first.'};
   if(!setup.readyInputHash)return {fresh:false,message:'This draft predates input revision checks. Open Context and prepare it again.'};
   try{
-    const current=await snapshotInputs(path.resolve(outputDir,'../../..'),path.basename(outputDir));
+    const current=await snapshotInputs(path.resolve(outputDir,'../../..'),selectedInputSlug(setup,path.basename(outputDir)));
     return {fresh:current.hash===setup.readyInputHash,hash:current.hash,message:current.hash===setup.readyInputHash?'':'Context files changed. Open Context and prepare the current inputs before publishing.'};
   }catch(e){return {fresh:false,message:e.message};}
 }

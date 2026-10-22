@@ -43,7 +43,7 @@ const fs=require('node:fs/promises'),path=require('node:path');
  if(mode==='questions'&&!r.answerFile){await fs.writeFile(result,JSON.stringify({status:'questions',message:'Choose the product platform and UI font.',questions:[{id:'platform',prompt:'Which platforms should this system support?',options:['Web','App','Web and App']},{id:'font',prompt:'Which UI font should we use?',options:['Inter','Geist','Plus Jakarta Sans']}]}));return;}
  if(mode==='bad-questions'){await fs.writeFile(result,JSON.stringify({status:'questions',message:'Question',questions:[{id:'same',prompt:'One',options:[]},{id:'same',prompt:'Two',options:[]}]}));return;}
  if(mode!=='empty'){
-  const input=path.join(r.workspace,'workspace/input',r.slug);
+  const input=path.join(r.workspace,'workspace/input',r.inputSlug || r.slug);
   await fs.mkdir(path.join(input,'answers'),{recursive:true});await fs.mkdir(path.join(r.outputDir,'reports'),{recursive:true});
   await fs.writeFile(path.join(input,'answers/01-init.md'),'Synthetic answers; Web; Inter, chosen by user.');
   await fs.writeFile(path.join(input,'sources.md'),'Synthetic input manifest '+r.inputFiles.join(', '));

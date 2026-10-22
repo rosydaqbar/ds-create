@@ -1,4 +1,4 @@
-import { access, mkdir, readFile, writeFile, rename, realpath, lstat } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile, rename, realpath, lstat, cp, rm, readdir } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -8,6 +8,7 @@ import { readJSON } from './state.mjs';
 import { PublishError } from './figma-jobs.mjs';
 import { snapshotInputs, inputFreshness } from './input-snapshot.mjs';
 import { checkPreparation } from './foundation-proof.mjs';
+import { projectInputSlug, selectedInputSlug } from './input-identity.mjs';
 
 export const uploadLimits = { files: 10, fileBytes: 25 * 1024 * 1024, totalBytes: 50 * 1024 * 1024, context: 20000, projectName: 100 };
 export const activeSetup = record => ['queued', 'running'].includes(record?.status);
@@ -67,7 +68,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     const pointer=await readJSON(path.join(outputDir,'manager/figma-job.json'));
     const publishing=/^[0-9a-f-]{36}$/.test(pointer?.id||'') && activeSetup(await readJSON(path.join(outputDir,'manager/jobs',pointer.id,'status.json')));
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
-      files:r.files || [], inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputPath:`workspace/input/${slug}/`,
+      files:r.files || [], inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
       canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
       canStop:activeSetup(r) && !!child && childId === r.jobId };
   }
@@ -86,8 +87,8 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
       await saveSetup(file,blocked); return {saved:true,status:'blocked'};
     }
     const id = randomUUID(), dir = await localDirectory(workspace,`workspace/output/${slug}/manager/setup-jobs/${id}`);
-    const snapshot=await snapshotInputs(workspace,slug),inputFiles=snapshot.files.map(f=>f.path);
-    const request = {id,slug,projectName:r.projectName || null,workspace,outputDir,program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
+    const inputSlug=selectedInputSlug(r,slug),snapshot=await snapshotInputs(workspace,inputSlug),inputFiles=snapshot.files.map(f=>f.path);
+    const request = {id,slug,inputSlug,projectName:r.projectName || null,workspace,outputDir,program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
     await saveSetup(path.join(dir,'request.json'),request);
     await saveSetup(file,{...r,status:'queued',jobId:id,questions:[],message:'Starting the local agent…'});
     childId=id;
@@ -101,6 +102,31 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     return {saved:true,jobId:id,status:'queued'};
   }
   async function locked(fn) { if(busy) throw new PublishError('Setup is already being saved.');busy=true;try{return await fn();}finally{busy=false;} }
+  async function reserveInputs(r,name) {
+    if(r.inputSlug || r.submitted)return {inputSlug:selectedInputSlug(r,slug),created:false};
+    let inputSlug;
+    try{inputSlug=projectInputSlug(name);}catch(e){throw new PublishError(e.message,400);}
+    const base=await localDirectory(workspace,'workspace/input'),target=path.join(base,inputSlug);
+    // Validate the old selected tree before copying any manually supplied inputs.
+    let before;
+    try{before=await snapshotInputs(workspace,slug);}catch(e){throw new PublishError(e.message,412);}
+    let created=false;
+    try{await mkdir(target);created=true;}
+    catch(e){
+      if(e.code!=='EEXIST')throw e;
+      const stat=await lstat(target);
+      if(stat.isSymbolicLink() || !stat.isDirectory())throw new PublishError('Input storage must stay inside this workspace.',412);
+      if(inputSlug!==slug)throw new PublishError(`Input folder ${inputSlug} already exists. Choose another project name to keep projects separate.`);
+    }
+    try{
+      if(inputSlug!==slug){
+        const old=path.join(base,slug),entries=await readdir(old).catch(e=>{if(e.code==='ENOENT')return [];throw e;});
+        for(const entry of entries)await cp(path.join(old,entry),path.join(target,entry),{recursive:true,force:false,errorOnExist:true});
+        if((await snapshotInputs(workspace,inputSlug)).hash!==before.hash || (await snapshotInputs(workspace,slug)).hash!==before.hash)throw new PublishError('Inputs changed while assigning the project folder. Save the files and retry.');
+      }
+      return {inputSlug,created,target};
+    }catch(e){if(created)await rm(target,{recursive:true,force:true});throw e;}
+  }
   async function submit(form,revision=false) { return locked(async()=>{
     const r=await guard();
     if(!revision && r.submitted) throw new PublishError('Context is already saved. Answer the open questions or retry preparation.');
@@ -121,32 +147,36 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
       names.add(f.name);bytes+=f.size;
       if(f.size>uploadLimits.fileBytes || bytes>uploadLimits.totalBytes) throw new PublishError('Use files up to 25 MB each and 50 MB total.',413);
     }
-    const batch=randomUUID();
-    const uploadDir=await localDirectory(workspace,`workspace/input/${slug}/uploads/${batch}`);
-    const saved=[];
-    for(const f of files) {
-      await writeFile(path.join(uploadDir,f.name),Buffer.from(await f.arrayBuffer()),{flag:'wx'});
-      saved.push({name:f.name,size:f.size,path:`uploads/${batch}/${f.name}`});
-    }
-    const chatDir=await localDirectory(workspace,`workspace/input/${slug}/chat`);
-    const contextFile=`chat/${new Date().toISOString().slice(0,10)}-${batch}.md`;
-    await writeFile(path.join(chatDir,path.basename(contextFile)),`# Context from Builder\n\n## Project name\n${name}\n\n## Context / Instruction\n${context}\n\nMeaning: User-provided context and instructions for local foundation preparation.\nApplies to: this system, init.\n`,{flag:'wx'});
-    const now=new Date().toISOString(),inputRevision=(r.inputRevision||0)+1;
-    const currentFiles=[...(r.files||[]).filter(f=>!names.has(f.name)),...saved];
-    const next={...r,projectName:name,context,files:currentFiles,contextFile,inputRevision,readyInputHash:null,
-      revisions:[...(r.revisions||[]),{revision:inputRevision,projectName:name,contextFile,files:saved,date:now}],submitted:r.submitted||now,status:'saved'};
-    if(revision){
-      const ledgerFile=path.join(outputDir,'ds-create-ledger.json'),ledger=await readJSON(ledgerFile);
-      if(ledger)await saveSetup(ledgerFile,{...ledger,foundationReview:{status:'pending'},sequence:(ledger.sequence||[]).map(e=>[2,3,4].includes(Number(e.step))?{...e,status:'todo'}:e)});
-    }
-    await saveSetup(file,next);return launch(next);
+    const reserved=await reserveInputs(r,name),inputSlug=reserved.inputSlug;
+    let committed=false;
+    try{
+      const batch=randomUUID();
+      const uploadDir=await localDirectory(workspace,`workspace/input/${inputSlug}/uploads/${batch}`);
+      const saved=[];
+      for(const f of files) {
+        await writeFile(path.join(uploadDir,f.name),Buffer.from(await f.arrayBuffer()),{flag:'wx'});
+        saved.push({name:f.name,size:f.size,path:`uploads/${batch}/${f.name}`});
+      }
+      const chatDir=await localDirectory(workspace,`workspace/input/${inputSlug}/chat`);
+      const contextFile=`chat/${new Date().toISOString().slice(0,10)}-${batch}.md`;
+      await writeFile(path.join(chatDir,path.basename(contextFile)),`# Context from Builder\n\n## Project name\n${name}\n\n## Context / Instruction\n${context}\n\nMeaning: User-provided context and instructions for local foundation preparation.\nApplies to: this system, init.\n`,{flag:'wx'});
+      const now=new Date().toISOString(),inputRevision=(r.inputRevision||0)+1;
+      const currentFiles=[...(r.files||[]).filter(f=>!names.has(f.name)),...saved];
+      const next={...r,inputSlug,projectName:name,context,files:currentFiles,contextFile,inputRevision,readyInputHash:null,
+        revisions:[...(r.revisions||[]),{revision:inputRevision,projectName:name,contextFile,files:saved,date:now}],submitted:r.submitted||now,status:'saved'};
+      if(revision){
+        const ledgerFile=path.join(outputDir,'ds-create-ledger.json'),ledger=await readJSON(ledgerFile);
+        if(ledger)await saveSetup(ledgerFile,{...ledger,foundationReview:{status:'pending'},sequence:(ledger.sequence||[]).map(e=>[2,3,4].includes(Number(e.step))?{...e,status:'todo'}:e)});
+      }
+      await saveSetup(file,next);committed=true;return launch(next);
+    }finally{if(!committed && reserved.created)await rm(reserved.target,{recursive:true,force:true});}
   }); }
   async function answer(input) { return locked(async()=>{
     const r=await guard();
     if(!input || Object.keys(input).some(k=>!['jobId','answers'].includes(k)) || input.jobId!==r.jobId || r.status!=='questions') throw new PublishError('These questions changed. Reopen Context and answer the current questions.');
     const qs=setupQuestions(r.questions), a=input.answers;
     if(!qs || !Array.isArray(a) || a.length!==qs.length || new Set(a.map(x=>x?.id)).size!==qs.length || a.some(x=>!x || Object.keys(x).some(k=>!['id','value'].includes(k)) || !qs.some(q=>q.id===x.id) || typeof x.value!=='string' || !x.value.trim() || x.value.length>10000)) throw new PublishError('Answer every question before continuing.',400);
-    const chatDir=await localDirectory(workspace,`workspace/input/${slug}/chat`), name=`${new Date().toISOString().slice(0,10)}-${randomUUID()}.md`;
+    const chatDir=await localDirectory(workspace,`workspace/input/${selectedInputSlug(r,slug)}/chat`), name=`${new Date().toISOString().slice(0,10)}-${randomUUID()}.md`;
     await writeFile(path.join(chatDir,name),'# Answers from Builder\n\n'+qs.map(q=>`## ${q.prompt}\n${a.find(x=>x.id===q.id).value}\n\nDecided by: user\nApplies to: init.\n`).join('\n'),{flag:'wx'});
     const next={...r,inputRevision:(r.inputRevision||1)+1,readyInputHash:null,answerFiles:[...(r.answerFiles || []),`chat/${name}`]};
     await saveSetup(file,next);return launch(next,{previousJobId:r.jobId,answerFile:`chat/${name}`});

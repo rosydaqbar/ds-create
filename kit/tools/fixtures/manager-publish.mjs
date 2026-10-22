@@ -12,6 +12,8 @@ const fs = require('node:fs/promises'), path = require('node:path');
   let prompt=''; for await (const c of process.stdin) prompt+=c;
   const result=process.argv[process.argv.indexOf('--output-last-message')+1];
   const r=JSON.parse(await fs.readFile(path.join(path.dirname(result),'request.json'),'utf8'));
+  const answers=await fs.readFile(path.join(r.workspace,'workspace/input',r.inputSlug || r.slug,'answers/01-init.md'),'utf8');
+  await fs.writeFile(path.join(r.outputDir,'received-answers'),answers);
   const mode=await fs.readFile(path.join(r.outputDir,'fake-mode'),'utf8').catch(()=> 'success');
   await fs.writeFile(path.join(r.outputDir,'received-prompt'),prompt);
   if(mode==='hang') { setInterval(()=>{},1000); return; }

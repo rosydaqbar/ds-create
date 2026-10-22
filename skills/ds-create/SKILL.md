@@ -29,7 +29,7 @@ One skill, six commands. Each command has its own reference file. Load it before
 - **The repo root** is the folder that holds `workflow/INITIATOR.md`, `specs/SYSTEM.md` and `workflow/`. Work from there.
 - **Specs.** Each command's reference says which spec files to load. Always load the global set first (`workflow/INITIATOR.md` Part B §0): `README.md`, `specs/SYSTEM.md`, `workflow/INITIATOR.md`, `workflow/GOTCHAS.md`, `workflow/templates/structure.md`, and `workspace/input/{slug}/sources.md` once it exists.
 - **The slug.**
-  - The system's slug is its folder name in `workspace/input/` and `workspace/output/`.
+  - Chat-led systems use the same slug in `workspace/input/` and `workspace/output/`. Web-first sessions keep a stable output/session ID; read `workspace/output/{session}/manager/setup.json.inputSlug` for their selected input folder. That mapping overrides `{slug}` in input paths throughout every command, including answers/knowledge/build; output paths and resume commands keep the session ID. Older sessions without inputSlug keep matching folders.
   - When `workspace/input/` holds more than one system folder, ask which one, unless the request names it.
   - With no folder yet, `init` creates it from the system name (lowercase, kebab case), and saves what came with the command in it (`reference/init.md` §0).
 - **Inputs.** `workspace/input/{slug}/` holds the ground truth (`workspace/input/README.md`), with any loose file the user dropped straight into `workspace/input/` (`reference/init.md` §0). List them with `find workspace/input -type f`: git ignores `workspace/input/` and `workspace/output/`, so `rg`, `fd`, Glob and Grep show them empty (`workflow/GOTCHAS.md` G55). The user's answers go into `workspace/input/{slug}/answers/` (§3).
