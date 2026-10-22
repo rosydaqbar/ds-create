@@ -66,7 +66,7 @@
         <p id="setup-agent-note" class="setup-note" hidden>Codex CLI is unavailable. You can save your context now, then install the CLI and sign in before preparing foundations.</p>
       </form>
       <div id="setup-saved" hidden><details class="setup-context-details"><summary>Saved context and files</summary><p id="setup-saved-context"></p><ul id="setup-saved-files" class="setup-files"></ul></details><p id="setup-storage" class="setup-note"></p><p id="setup-revision-note" class="setup-note"></p><button id="setup-edit" class="button" type="button">Edit context / add files</button></div>
-      <div id="setup-resume" class="setup-resume"><span>Continue in another agent chat</span><code id="setup-resume-command"></code><button id="setup-copy-resume" class="button" type="button">Copy resume command</button></div>
+      <details id="setup-resume" class="setup-resume setup-context-details"><summary>Continue in another agent chat?</summary><div class="setup-resume-body"><p class="setup-resume-project"><span>Project name</span><code id="setup-resume-project"></code></p><p class="setup-resume-help">Paste this command into a new agent chat to reopen the project named above.</p><code id="setup-resume-command"></code><button id="setup-copy-resume" class="button" type="button">Copy resume command</button></div></details>
       <div id="setup-running" class="setup-running" hidden><span class="spinner" aria-hidden="true"></span><span>Preparing foundations</span></div>
       <p id="setup-state" class="setup-note" role="status" aria-live="polite" hidden></p>
       <form id="setup-questions-form" hidden><div id="setup-questions"></div></form>

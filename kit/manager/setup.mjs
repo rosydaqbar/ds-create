@@ -22,6 +22,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-edit-cancel').hidden=!editing;
     $('setup-edit-cancel').disabled=busy;
     $('setup-revision-note').textContent=`Input revision ${flow.inputRevision}. Replacing a filename keeps its original version. Saved answers stay available.`;
+    $('setup-resume-project').textContent=(flow.inputPath||'').split('/').filter(Boolean).at(-1)||'';
     $('setup-resume-command').textContent=flow.resumeCommand||'';
     $('setup-resume').hidden=!flow.resumeCommand;
     if(editing){$('setup-title').textContent='Revise your context';$('setup-description').textContent='Update instructions or add a readable replacement file. Saving starts preparation again; review the new draft before publishing.';}

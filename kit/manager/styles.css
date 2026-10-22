@@ -484,6 +484,12 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
   .button, .icon-button, .nav-link, .token-binding, .mode-switch > button, .setup-drop, .status, .nav-dot { transition-duration: 80ms; }
 }
 
-.setup-resume { display: grid; gap: 10px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-border-subtle); font-size: 14px; }
+.setup-resume { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-border-subtle); font-size: 14px; }
 .setup-resume code { overflow-wrap: anywhere; line-height: 1.6; }
 .setup-resume .button { justify-self: start; }
+
+.setup-resume > summary { font-weight: 500; }
+.setup-resume-body { display: grid; gap: 12px; padding-top: 12px; }
+.setup-resume-body p { margin: 0; }
+.setup-resume-project { display: grid; gap: 6px; }
+.setup-resume-project > span, .setup-resume-help { color: var(--color-text-secondary); }
