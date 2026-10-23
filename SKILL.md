@@ -31,13 +31,7 @@ Novelin is a design system built with ds-create. Its documentation site brings t
    cp -R "<installed skill folder>" ~/ds-create
    ```
 
-3. **Link the full skill** so Claude Code finds the commands in the workspace (once per workspace):
-
-   ```bash
-   mkdir -p .claude/skills && ln -s ../../skills/ds-create .claude/skills/ds-create
-   ```
-
-   Other agents read `skills/ds-create/SKILL.md` directly.
+3. **Load the full skill** from `skills/ds-create/SKILL.md` in the workspace, or register that folder through the client's own skill-discovery mechanism. Do not require a particular agent's settings folder or command syntax.
 4. **Work from the workspace root,** and follow `skills/ds-create/SKILL.md` there. It routes each command to its reference file in `skills/ds-create/reference/`.
 
 **Updating.** Run `anti-skill update ds-create`, then copy the new version over the workspace without touching `workspace/input/` and `workspace/output/`, so a system's files and builds stay as they are:
@@ -53,9 +47,10 @@ rsync -a --exclude workspace/input/ --exclude workspace/output/ "<installed skil
 | The Figma MCP with the `use_figma` tool, signed in | every Figma write goes through it; the `figma-use` skill is loaded before the first call |
 | A Figma file with edit access, or permission to create one | the system is built in it |
 | The brand's typefaces installed | the type styles use them |
+| A compatible local MCP client with authorized workspace access | takes Builder preparation/publication requests; client authentication, model and permissions stay client-owned |
 | Node 20 or later | the local DS Create Builder on every init, the tools in `kit/tools/` and the docs site |
 
-`/ds-create init-web` opens Builder before context collection; only Node is needed to open it, and local preparation uses the signed-in Codex CLI. `/ds-create init` checks Node and inputs first, opens the local foundation draft in Builder for review, then checks Figma access and installed fonts before generating the approved revision. Missing Figma access does not block a new system's local preview.
+`/ds-create init-web` opens Builder before context collection; only Node is needed to open it. Preparation, questions and publication use the same DS Create MCP server through any compatible local client, without selecting an agent/provider/IDE. Context exposes its stdio connection details before foundations exist; registration uses the client’s own settings format. Run npm ci --prefix kit/mcp once to install server dependencies. `/ds-create init` checks Node and inputs first, opens the local foundation draft in Builder for review, then checks Figma access and installed fonts before generating the approved revision. Missing Figma access does not block a new system's local preview.
 
 # 3. Commands
 

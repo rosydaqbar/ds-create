@@ -10,6 +10,7 @@ import { verifiedFigma } from './figma-jobs.mjs';
 
 const requestFile = process.argv[2];
 const request = JSON.parse(await readFile(requestFile, 'utf8'));
+if(request.simulation!==true)throw new Error('AI subprocess workers are disabled in production. Use DS Create MCP.');
 const dir = path.dirname(requestFile), parent = process.ppid;
 const statusFile = path.join(dir, 'status.json');
 const resultFile = path.join(dir, 'result.json');

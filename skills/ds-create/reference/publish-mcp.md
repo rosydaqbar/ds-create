@@ -1,18 +1,18 @@
 # Publish with DS Create MCP
 
-Publish is a local MCP workflow usable by any compatible client. It does not launch Codex, inject prompts into terminals or require native background subagents. The host agent uses its own configured Figma authoring tools. Local foundation preparation currently retains its separate Codex CLI runner; this change makes Publish portable, not every Builder operation.
+Publish is a local MCP workflow usable by any compatible client. It does not launch Codex, inject prompts into terminals or require native background subagents. The host agent uses its own configured Figma authoring tools. The same server also handles local preparation and questions; read `reference/agent-mcp.md` for that workflow. No agent/provider/IDE allowlist or selection is required.
 
 ## Connect once
 
-In the workspace run `npm ci --prefix kit/mcp` (Node20+). Configure a stdio MCP server with command `node`, args `["/absolute/workspace/kit/tools/publish-mcp.mjs", "--workspace", "/absolute/workspace"]`. Use the actual workspace path, preserving spaces as JSON strings, never shell interpolation. Builder's Publish dialog provides the resolved configuration and a copy button. Do not alter global client settings or tool approvals without user authorization.
+In the workspace run `npm ci --prefix kit/mcp` (Node20+). Configure a stdio MCP server with command `node`, args `["/absolute/workspace/kit/tools/ds-create-mcp.mjs", "--workspace", "/absolute/workspace"]`. Use the actual workspace path, preserving spaces as JSON strings, never shell interpolation. Builder's Context and Publish dialogs provide the resolved connection details and a copy button. Do not alter global client settings or tool approvals without user authorization.
 
-Claude Code and Cursor can use the JSON below in their project MCP configuration (`.mcp.json` and `.cursor/mcp.json` respectively); merge the named server without replacing other entries:
+Register these connection details in the client's own settings format; MCP does not standardize a settings filename or JSON wrapper:
 
 ```json
-{"mcpServers":{"ds-create-publish":{"command":"node","args":["/absolute/workspace/kit/tools/publish-mcp.mjs","--workspace","/absolute/workspace"]}}}
+{"transport":"stdio","command":"node","args":["/absolute/workspace/kit/tools/ds-create-mcp.mjs","--workspace","/absolute/workspace"]}
 ```
 
-For Codex, register that same stdio command using its MCP configuration/CLI; no Codex command is used by the server. Client-specific registration/authentication stays in the client. Runtime Figma permissions, sign-in and font availability still apply.
+Client-specific registration, authentication and permission policy stay in that client. The legacy publish-mcp entry is an alias for the same full server, not an agent-specific adapter.
 
 ## Run a saved request
 

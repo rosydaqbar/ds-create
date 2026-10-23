@@ -184,7 +184,7 @@ export async function getState(outputDir, { preparing = false } = {}) {
       if (status === 'ready' && !hasData) { status = 'error'; message = 'Marked ready, but no exported values or styles are available.'; }
     }
     if(mapping?.status==='excluded'){status='skipped';message=mapping.reason;}
-    if (settingUp && !f.later) { status = ['queued','running'].includes(setup.status) ? 'generating' : 'pending'; message = setup.message || 'Add context to prepare this foundation.'; }
+    if (settingUp && !f.later) { status = ['queued','running'].includes(setup.status)&&!(setup.runner==='mcp'&&setup.status==='queued') ? 'generating' : 'pending'; message = setup.message || 'Add context to prepare this foundation.'; }
     const library=!settingUp && f.id==='iconography' && (plan?.systemMode||ledger?.scope?.systemMode)==='new'?iconLibrary:null;
     if(f.id==='iconography'){
       status=library?'ready':'pending';
@@ -200,7 +200,7 @@ export async function getState(outputDir, { preparing = false } = {}) {
   const failed = items.some(f => f.status === 'error') || warnings.length > 0 || tokenStep?.status === 'error' || Number(audit?.fail) > 0;
   const running = items.some(f => f.status === 'generating');
   let status = failed ? 'error' : initDone && !running ? 'ready' : skippedRequired ? 'incomplete' : local && exported && source.review === 'pending' ? 'review' : local && exported && !working ? 'approved' : sequence.length ? 'generating' : 'pending';
-  if (settingUp) status = ['queued','running'].includes(setup.status) ? 'generating' : ['failed','blocked','interrupted','cancelled'].includes(setup.status) ? 'incomplete' : 'pending';
+  if (settingUp) status = ['queued','running'].includes(setup.status)&&!(setup.runner==='mcp'&&setup.status==='queued') ? 'generating' : ['failed','blocked','interrupted','cancelled'].includes(setup.status) ? 'incomplete' : 'pending';
   if (initSteps.some(e => e.status === 'error')) status = 'error';
   const files = ['ds-create-ledger.json', 'foundations.json', 'figma/figma-variables.json', 'manager/progress.json'];
   const modified = await Promise.all(files.map(async f => { try { return (await stat(path.join(outputDir, f))).mtimeMs; } catch { return 0; } }));

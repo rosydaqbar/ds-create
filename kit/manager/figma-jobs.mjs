@@ -12,6 +12,8 @@ import { getState, getPublishStatus, readJSON, figmaLink } from './state.mjs';
 
 import { queueMcpJob, cancelMcpJob, activeMcpJob, latestPublish } from './publish-queue.mjs';
 
+import {mcpConfiguration} from './mcp-config.mjs';
+
 export class PublishError extends Error {
   constructor(message, status = 409) { super(message); this.status = status; }
 }
@@ -39,13 +41,14 @@ async function save(file, value) {
   await rename(tmp, file);
 }
 async function executable(program) {
+  if(typeof program!=='string'||!program)return null;
   const candidates = program.includes(path.sep) ? [program] : (process.env.PATH || '').split(path.delimiter).filter(Boolean).map(p => path.join(p, program));
   for (const candidate of candidates) { try { await access(candidate, constants.X_OK); return await realpath(candidate); } catch { /* next */ } }
   return null;
 }
 const safeId = id => typeof id === 'string' && /^[0-9a-f-]{36}$/.test(id);
 const running = job => ['queued', 'running'].includes(job?.status);
-export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false, runner = simulation ? 'cli' : 'mcp', setupGate = async () => null }) {
+export function createFigmaJobs({ outputDir, workspace, agentCommand, agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false, runner = simulation ? 'cli' : 'mcp', setupGate = async () => null }) {
   if(runner !== 'mcp' && !simulation) throw new Error('Detached Figma runners are restricted to isolated simulation fixtures.');
   const jobsDir = path.join(outputDir, 'manager/jobs');
   const pointer = path.join(outputDir, 'manager/figma-job.json');
@@ -76,7 +79,7 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', 
     else if (!program) reason = 'Codex CLI is unavailable. Install it and sign in on this machine, then restart Builder.';
     let publicJob = job ? { id: job.id, status: job.status, message: job.message, started: job.started, finished: job.finished } : null;
     if (publicJob && job.hash !== state.source.hash && !running(job)) publicJob = { ...publicJob, status: 'outdated', message: 'The saved draft changed. Publish the current revision before building.' };
-    return { simulation, integration: runner === 'mcp' ? { transport:'stdio', command:process.execPath, args:[path.join(workspace,'kit/tools/publish-mcp.mjs'),'--workspace',workspace], installCommand:'npm ci --prefix kit/mcp', agentInstruction:`Use DS Create MCP to publish the approved foundations for session ${path.basename(outputDir)}.` } : null, agent: { name: runner === 'mcp' ? 'DS Create MCP' : 'Simulation runner', available: !!program },
+    return { simulation, integration: runner === 'mcp' ? mcpConfiguration(workspace,path.basename(outputDir)) : null, agent: { name: runner === 'mcp' ? 'DS Create MCP' : 'Simulation runner', available: !!program },
       figma: { complete, canStart: !complete && !reason && !running(job) && !busy, reason, revision: state.source.revision || null, hash: state.source.hash || null, url: state.figmaUrl },
       build: { available: complete && !running(job), status: complete ? build.status : 'locked', command: 'ds-create build' }, job: publicJob };
   }

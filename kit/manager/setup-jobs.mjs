@@ -1,4 +1,4 @@
-import { access, mkdir, readFile, writeFile, rename, realpath, lstat, cp, rm, readdir } from 'node:fs/promises';
+import { access, mkdir, writeFile, realpath, lstat, cp, rm, readdir } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -7,56 +7,28 @@ import { fileURLToPath } from 'node:url';
 import { readJSON } from './state.mjs';
 import { PublishError } from './figma-jobs.mjs';
 import { snapshotInputs, inputFreshness } from './input-snapshot.mjs';
-import { checkPreparation } from './foundation-proof.mjs';
 import { projectInputSlug, selectedInputSlug } from './input-identity.mjs';
 import { createSetupProgress } from './setup-progress.mjs';
 
-export const uploadLimits = { files: 10, fileBytes: 25 * 1024 * 1024, totalBytes: 50 * 1024 * 1024, context: 20000, projectName: 100 };
-export const activeSetup = record => ['queued', 'running'].includes(record?.status);
-export async function saveSetup(file, value) {
-  const tmp = `${file}.${randomUUID()}.tmp`;
-  await writeFile(tmp, JSON.stringify(value, null, 2) + '\n'); await rename(tmp, file);
-}
+import {uploadLimits,activeSetup,saveSetup,localDirectory,setupQuestions} from './setup-data.mjs';
+export {uploadLimits,activeSetup,saveSetup,localDirectory,setupQuestions,draftReady,inputDigest} from './setup-data.mjs';
+import {initPrepareDelivery,latestMcpPreparation,cancelMcpPreparation} from './setup-queue.mjs';
+import {mcpConfiguration} from './mcp-config.mjs';
 async function executable(program) {
+  if(typeof program!=='string'||!program)return null;
   for (const candidate of program.includes(path.sep) ? [program] : (process.env.PATH || '').split(path.delimiter).filter(Boolean).map(p => path.join(p, program))) {
     try { await access(candidate, constants.X_OK); return await realpath(candidate); } catch { /* next */ }
   }
   return null;
 }
-// Every writable ancestor must be a real directory inside this workspace, never a symlink.
-export async function localDirectory(workspace, relative) {
-  let dir = await realpath(workspace);
-  for (const part of relative.split('/')) {
-    if (!part || part === '.' || part === '..') throw new PublishError('Invalid workspace directory.', 400);
-    dir = path.join(dir, part);
-    try { await mkdir(dir); } catch (e) { if (e.code !== 'EEXIST') throw e; }
-    const s = await lstat(dir);
-    if (s.isSymbolicLink() || !s.isDirectory()) throw new PublishError('Input storage must stay inside this workspace.', 412);
-  }
-  return dir;
-}
-export function setupQuestions(value) {
-  if (!Array.isArray(value) || !value.length || value.length > 12) return null;
-  const ids = new Set();
-  for (const q of value) {
-    if (!q || typeof q.id !== 'string' || !/^[a-z0-9_-]{1,64}$/.test(q.id) || ids.has(q.id) || typeof q.prompt !== 'string' || !q.prompt.trim() || q.prompt.length > 2000 ||
-      !Array.isArray(q.options) || q.options.length > 8 || q.options.some(o => typeof o !== 'string' || !o.trim() || o.length > 300)) return null;
-    ids.add(q.id);
-  }
-  return value.map(({id,prompt,options}) => ({id,prompt,options}));
-}
-export async function draftReady(outputDir, workspace) {
-  const setup=await readJSON(path.join(outputDir,'manager/setup.json'));
-  return (await checkPreparation(outputDir,workspace,setup)).valid;
-}
-export async function inputDigest(workspace, slug) { return (await snapshotInputs(workspace,slug)).hash; }
-export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false }) {
+export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false, runner = simulation ? 'cli' : 'mcp' }) {
+  if(runner!=='mcp'&&!simulation)throw new Error('Preparation subprocesses are restricted to isolated simulation fixtures.');
   const file = path.join(outputDir, 'manager/setup.json'), slug = path.basename(outputDir);
   const readProgress = createSetupProgress();
   let busy = false, child, childId;
   async function latest() {
-    let r = await readJSON(file);
-    if (activeSetup(r) && r.jobId !== childId) {
+    let r = await latestMcpPreparation(outputDir);
+    if (activeSetup(r) && r.runner!=='mcp' && r.jobId !== childId) {
       let alive = false;
       if (r.pid) { try { process.kill(r.pid, 0); alive = true; } catch { /* stopped */ } }
       if (!alive) { r = {...r,status:'interrupted',message:'Preparation stopped. Your context and files are saved; retry to continue.'}; await saveSetup(file,r); }
@@ -65,7 +37,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     return r;
   }
   async function status() {
-    const [r, program, ledger] = await Promise.all([latest(), executable(agentCommand), readJSON(path.join(outputDir,'ds-create-ledger.json'))]);
+    const [r, program, ledger] = await Promise.all([latest(), runner==='mcp'?true:executable(agentCommand), readJSON(path.join(outputDir,'ds-create-ledger.json'))]);
     if (!r) return { enabled:false };
     const pointer=await readJSON(path.join(outputDir,'manager/figma-job.json'));
     const publishing=/^[0-9a-f-]{36}$/.test(pointer?.id||'') && activeSetup(await readJSON(path.join(outputDir,'manager/jobs',pointer.id,'status.json')));
@@ -73,7 +45,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
       files:r.files || [], inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
       canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
-      progress, updatedAt:r.updated || null, canStop:activeSetup(r) && !!child && childId === r.jobId };
+      integration:runner==='mcp'?mcpConfiguration(workspace,slug,'prepare'):null, runner:r.runner||runner, progress, updatedAt:r.updated || null, canStop:activeSetup(r) && (r.runner==='mcp'||!!child && childId === r.jobId) };
   }
   async function guard() {
     const r = await latest();
@@ -84,16 +56,18 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     return r;
   }
   async function launch(r, extra = {}) {
-    const program = await executable(agentCommand);
+    const program = runner==='mcp'?true:await executable(agentCommand);
     if (!program || r.preview && !simulation) {
-      const blocked = {...r,status:'blocked',questions:[],message:!program ? 'Context saved. Install Codex CLI and sign in on this machine, then retry.' : 'Preview workspace: preparation is disabled. Start ds-create init-web for your own system.'};
+      const blocked = {...r,status:'blocked',questions:[],message:!program ? 'Simulation runner is unavailable. Configure the test executable before retrying.' : 'Preview workspace: preparation is disabled. Start ds-create init-web for your own system.'};
       await saveSetup(file,blocked); return {saved:true,status:'blocked'};
     }
     const id = randomUUID(), dir = await localDirectory(workspace,`workspace/output/${slug}/manager/setup-jobs/${id}`);
     const inputSlug=selectedInputSlug(r,slug),snapshot=await snapshotInputs(workspace,inputSlug),inputFiles=snapshot.files.map(f=>f.path);
-    const request = {id,slug,inputSlug,projectName:r.projectName || null,workspace,outputDir,program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
+    const request = {id,slug,inputSlug,projectName:r.projectName || null,workspace,outputDir,runner,program:runner==='mcp'?null:program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
     await saveSetup(path.join(dir,'request.json'),request);
-    await saveSetup(file,{...r,status:'queued',jobId:id,questions:[],message:'Starting the local agent…'});
+    if(runner==='mcp')await initPrepareDelivery(outputDir,id);
+    await saveSetup(file,{...r,runner,status:'queued',jobId:id,pid:undefined,readyInputHash:null,questions:[],message:runner==='mcp'?'Waiting for an agent to prepare this saved context through DS Create MCP.':'Starting the local agent…'});
+    if(runner==='mcp')return {saved:true,jobId:id,status:'queued'};
     childId=id;
     child=spawn(process.execPath,[fileURLToPath(new URL('./setup-worker.mjs',import.meta.url)),path.join(dir,'request.json')],{cwd:workspace,stdio:'ignore',shell:false});
     const launched=child;
@@ -190,8 +164,10 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
   }); }
   async function cancel() {
     const r=await latest();if(!activeSetup(r))return {stopped:false};
+    if(r.runner==='mcp')return cancelMcpPreparation(outputDir,r.jobId);
     if(!child || r.jobId!==childId)throw new PublishError('Preparation belongs to an earlier Builder process. Wait for it to stop.');
     const proc=child;proc.kill('SIGTERM');await new Promise(resolve=>{proc.once('exit',resolve);setTimeout(resolve,3000).unref();});return {stopped:true};
   }
-  return {status,submit,revise:form=>submit(form,true),answer,retry,cancel,shutdown:cancel};
+  async function shutdown(){const r=await latest();if(r?.runner!=='mcp')return cancel();}
+  return {status,submit,revise:form=>submit(form,true),answer,retry,cancel,shutdown};
 }

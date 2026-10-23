@@ -1,11 +1,3 @@
 #!/usr/bin/env node
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
-import {realpath} from 'node:fs/promises';
-try{
- const args=process.argv.slice(2);
- if(args.length!==0&&(args.length!==2||args[0]!=='--workspace'))throw new Error('Usage: node kit/tools/publish-mcp.mjs [--workspace /absolute/workspace]');
- const workspace=await realpath(args[1]||path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'));
- if(Number(process.versions.node.split('.')[0])<20)throw new Error('DS Create MCP requires Node20+.');
- const {runPublishMcp}=await import('../mcp/server.mjs');await runPublishMcp(workspace);
-}catch(e){console.error(e.code==='ERR_MODULE_NOT_FOUND'?'DS Create MCP dependencies are missing. Run npm ci --prefix kit/mcp in the workspace.':e.message);process.exitCode=1;}
+// Compatibility entry: the same agent-agnostic MCP server handles all Builder tasks.
+import './ds-create-mcp.mjs';

@@ -37,7 +37,7 @@ export function setupPublish() {
     $('publish-mcp-help').hidden=!next.integration||complete;
     if(next.integration){
       const {command,args,agentInstruction}=next.integration;
-      const config=JSON.stringify({mcpServers:{'ds-create-publish':{command,args}}},null,2);
+      const config=JSON.stringify({transport:'stdio',command,args},null,2);
       if($('publish-mcp-config').value!==config)$('publish-mcp-config').value=config;
       if($('publish-agent-instruction').value!==agentInstruction)$('publish-agent-instruction').value=agentInstruction;
       $('publish-mcp-task').hidden=!queued;

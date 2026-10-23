@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, cp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, cp, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,7 +29,7 @@ for(const v of setupDraft.variables){
 }
 setupDraft.textStyles[0].name='type/body/md/regular';
 // Realistic synthetic baseline for the process contract; the small setupDraft above remains useful for unit tests.
-const preparedSetupDraft=structuredClone(setupDraft);
+export const preparedSetupDraft=structuredClone(setupDraft);
 preparedSetupDraft.collections.find(c=>c.name==='Motion').modes=['Standard','Reduced'];
 preparedSetupDraft.variables=preparedSetupDraft.variables.filter(v=>!v.name.startsWith('motion/'));
 for(const [name,value]of Object.entries({'duration/instant':0,'duration/fast':120,'duration/base':200,'duration/slow':300,'duration/loop':900,'easing/standard':'cubic-bezier(0.2, 0, 0, 1)','easing/enter':'cubic-bezier(0, 0, 0.2, 1)','easing/exit':'cubic-bezier(0.4, 0, 1, 1)','easing/linear':'linear','delay/tooltip':400,'delay/toast':5000,'delay/debounce':250})){
@@ -79,8 +79,8 @@ const fs=require('node:fs/promises'),path=require('node:path');
  }
  await fs.writeFile(result,JSON.stringify({status:'ready',message:'Simulated local draft.',questions:[]}));
 })();`;
-export async function setupFixture({mode='success',timeoutMs=10000,agentCommand,port=0}={}) {
- const root=await mkdtemp(path.join(tmpdir(),'ds-setup-test-')),output=path.join(root,'workspace/output/fixture');
+export async function setupFixture({mode='success',timeoutMs=10000,agentCommand,port=0,runner='cli'}={}) {
+ const root=await realpath(await mkdtemp(path.join(tmpdir(),'ds-setup-test-'))),output=path.join(root,'workspace/output/fixture');
  await mkdir(path.join(output,'manager'),{recursive:true});
  await cp(fileURLToPath(new URL('../../manager/',import.meta.url)),path.join(output,'manager'),{recursive:true});
  await cp(fileURLToPath(new URL('../../web/src/styles/docs-presentation.css',import.meta.url)),path.join(output,'manager/docs-presentation.css'));
@@ -88,8 +88,8 @@ export async function setupFixture({mode='success',timeoutMs=10000,agentCommand,
  await writeFile(path.join(output,'manager/setup.json'),JSON.stringify({format:'ds-create/setup@1',status:'empty'}));
  await writeFile(path.join(output,'fake-mode'),mode);
  const program=path.join(root,'fake-agent.cjs');await writeFile(program,setupAgent);
- const setupOptions={agentCommand:agentCommand || process.execPath,agentPrefixArgs:[program],simulation:true,timeoutMs};
- const {server,setup,jobs}=createManagerServer({outputDir:output,workspace:root,setupOptions,jobsOptions:{agentCommand:process.execPath,simulation:true}});
+ const setupOptions={agentCommand:agentCommand || process.execPath,agentPrefixArgs:[program],simulation:true,timeoutMs,runner};
+ const {server,setup,jobs}=createManagerServer({outputDir:output,workspace:root,setupOptions,jobsOptions:{agentCommand:process.execPath,simulation:true,runner}});
  await new Promise(resolve=>server.listen(port,'127.0.0.1',resolve));
  const url='http://127.0.0.1:'+server.address().port,flow=()=>fetch(url+'/api/setup-flow').then(r=>r.json()),initial=await flow();
  const headers={Origin:url,'X-DS-Create-Token':initial.csrfToken};

@@ -19,7 +19,7 @@ One skill, six commands. Each command has its own reference file. Load it before
 | `status` | `reference/status.md` | Reads the ledger: what is done, what is open, which checks haven't run. |
 
 **Routing.**
-- Publish requests use `reference/publish-mcp.md` and DS Create MCP tools, preserving existing saved approval. Legacy `DS_CREATE_AGENT_REQUEST` / `DS_CREATE_AGENT_CANCEL` chat messages are retired; never inject terminal prompts or require native subagents.
+- All Builder–agent work uses the standard DS Create MCP interface in `reference/agent-mcp.md`, independent of agent, provider or IDE. Preparation/questions and publication share one server; `reference/publish-mcp.md` covers the saved-approval publication gates. Legacy `DS_CREATE_AGENT_REQUEST` / `DS_CREATE_AGENT_CANCEL` chat messages are retired; never inject terminal prompts or require native subagents.
 - When the first word is a command, load its reference and follow it. `init-web` is the web-first bootstrap; preserve explicit `--slug {slug}` / `--new` intent and its session-discovery response; follow its early-launch loading exception before the global generation set.
 - With no command, run `status` and end with the next command to run.
 - When the request clearly maps to one command ("set up the tokens" → `init`, "build Text field" → `build`, "check the site" → `qa`), use that command.

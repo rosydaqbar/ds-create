@@ -91,10 +91,10 @@ test('upload endpoint rejects cross-site, nonce, extra fields, empty/duplicate/l
  assert.equal((await f.post('/api/setup-submit',f.form('x',[['safe.txt','body']]))).status,412);assert.deepEqual(await readdir(outside),[]);
  for(const url of ['/uploads/safe.txt','/setup-jobs/request.json','/setup-worker.mjs'])assert.equal((await fetch(f.url+url)).status,404);
 });
-test('missing CLI still saves context and files durably, with retry guidance',async t=>{
+test('missing simulation runner still saves context and files durably, with retry guidance',async t=>{
  const f=await fixture(t,{agentCommand:'/nonexistent/codex'});assert.equal(f.initial.available,false);
  assert.equal((await f.post('/api/setup-submit',f.form('',[['context.md','A product brief']]))).status,202);
- const r=await f.flow();assert.equal(r.status,'blocked');assert.equal(r.canRetry,true);assert.match(r.message,/Install Codex/);
+ const r=await f.flow();assert.equal(r.status,'blocked');assert.equal(r.canRetry,true);assert.match(r.message,/Simulation runner is unavailable/);
  assert.equal(await readFile(path.join(f.root,'workspace/input/synthetic-setup-fixture',r.files[0].path),'utf8'),'A product brief');
 });
 test('single-flight, stop, timeout and changed user inputs are recoverable without claiming ready',async t=>{

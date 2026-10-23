@@ -20,7 +20,8 @@ export function createSetupProgress() {
     const consume = line => {
       let event;try { event = JSON.parse(line.toString('utf8')); } catch { return; }
       const item = event.item || {}, type = item.type;
-      if(event.type==='builder.stage' && event.stage==='validation'){cache.stage='validation';cache.phase='Checking the saved foundation draft';return;}
+      if(event.type==='builder.stage'&&['context','decisions','foundation','validation'].includes(event.stage)){cache.stage=event.stage;cache.phase={context:'Reading product context',decisions:'Resolving design decisions',foundation:'Preparing foundations',validation:'Checking the saved foundation draft'}[event.stage];return;}
+      if(event.type==='builder.update'&&typeof event.message==='string'){const message=clean(event.message);if(message){activity('message',message);if(cache.recent.at(-1)!==message)cache.recent=[...cache.recent.slice(-3),message];}cache.connection=false;return;}
       if (type === 'agent_message' && typeof item.text === 'string' && !/^[\s]*[\[{]/.test(item.text)) {
         const stage=/^DS_CREATE_STAGE: (context|decisions|foundation)\s*$/.exec(item.text.trim());
         if(stage){cache.stage=stage[1];cache.phase={context:'Reading product context',decisions:'Resolving design decisions',foundation:'Preparing foundations'}[stage[1]];return;}
