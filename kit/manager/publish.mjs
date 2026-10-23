@@ -3,7 +3,7 @@ export function publishReady(state) {
   const saved = state?.summary && state.summary.variables + state.summary.textStyles + state.summary.effectStyles > 0;
   const setupReady = !state?.setup || state.setup.status === 'ready';
   const localReady = state?.source?.kind === 'local' && !!state.source.hash && ['pending', 'approved', 'synced'].includes(state.source.review) && state.steps?.some(step => step.step === 1 && step.status === 'done');
-  return !!(saved && setupReady && state.status !== 'error' && !state.warnings?.length && (localReady || state.initDone));
+  return !!(saved && setupReady && !state.warnings?.length && (localReady || state.status !== 'error' && state.initDone));
 }
 export function setupPublish() {
   const $ = id => document.getElementById(id);
@@ -61,7 +61,7 @@ export function setupPublish() {
     if (submitting || !flow) return;
     submitting = true; showError(''); draw(flow);
     try {
-      const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-DS-Create-Token': flow.csrfToken }, body: JSON.stringify(body), signal: AbortSignal.timeout(8000) });
+      const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-DS-Create-Token': flow.csrfToken }, body: JSON.stringify(body), signal: AbortSignal.timeout(30000) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'The local agent could not start. Try again.');
       await check();

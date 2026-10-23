@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, cp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, cp, writeFile, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,7 +35,7 @@ const fs = require('node:fs/promises'), path = require('node:path');
   await fs.writeFile(result,JSON.stringify({status:'completed',message:'Simulated foundation output.'}));
 })();`;
 export async function publishFixture({ mode = 'success', timeoutMs = 10000 } = {}) {
-  const root = await mkdtemp(path.join(tmpdir(), 'ds-publish-test-'));
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), 'ds-publish-test-')));
   const output = path.join(root, 'workspace/output/fixture');
   await mkdir(path.join(output, 'manager'), { recursive: true });
   await mkdir(path.join(root, 'workspace/input/fixture/answers'), { recursive: true });
