@@ -124,7 +124,7 @@ function overview() {
   const names = { ready: 'Init complete', review: 'Review foundations', approved: 'Ready for Figma', generating: 'Initializing', pending: 'Waiting for init', incomplete: 'Setup incomplete', error: 'Needs attention' };
   const statusText = 'Shared rules for color, type, spacing, and interaction keep interface decisions consistent.';
   const skipped = state.steps.filter(s => s.status === 'skip');
-  return documentFrame(displayName(), statusText, `<section class="section" aria-labelledby="init-heading"><div class="section-heading"><h2 id="init-heading">Foundation setup</h2><small>${state.steps.filter(s => s.status === 'done').length} of 4 steps complete${skipped.length ? ` · ${skipped.length} skipped` : ''}</small></div>
+  return documentFrame(displayName(), statusText, `<section class="section" aria-labelledby="init-heading"><div class="section-heading"><h2 id="init-heading">Foundation setup</h2><button id="preparation-history-link" class="text-button" data-show-preparation hidden>Preparation activity</button><small>${state.steps.filter(s => s.status === 'done').length} of 4 steps complete${skipped.length ? ` · ${skipped.length} skipped` : ''}</small></div>
       <ol class="init-steps">${state.steps.map(s => `<li class="step ${escape(s.status)}"><div class="step-title">${s.status === 'done' ? icon('check') : ['building', 'qa'].includes(s.status) ? '<span class="spinner" aria-hidden="true"></span>' : ''}${escape(s.name)}</div><small>${escape({ done: 'Complete', skip: 'Skipped', building: 'In progress', qa: 'Checking', error: 'Needs attention' }[s.status] || 'Waiting')}</small></li>`).join('')}</ol>
       ${skipped.length ? `<p class="setup-note">${skipped.some(s => s.step === 2) ? 'Figma verification is required. This step was skipped; initialization remains incomplete until Figma is verified.' : 'A required step was skipped. Complete it before marking initialization complete.'}</p>` : ''}
     </section>
@@ -301,6 +301,7 @@ function render() {
   applySpecimens(f);
   controls.syncInspector();
   controls.syncDialog();
+  setup.visibility();
   canvas.refresh(route());
   if (changingInspector && priorRoute) { revealInteraction($('content').querySelector('.docs-reading-card')); revealInteraction($('inspector')); }
   if ($('primitive-picker').open) renderPrimitiveOptions();
@@ -342,7 +343,7 @@ theme(savedTheme === 'dark' || !savedTheme && matchMedia('(prefers-color-scheme:
 $('theme').addEventListener('click', () => theme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
 installInteractionMotion();
 const publisher = setupPublish();
-setupWeb({ onChange: refresh });
+const setup = setupWeb({ onChange: refresh });
 $('search-icon').innerHTML = icon('search');
 $('nav-search').addEventListener('input', renderNav);
 $('retry').addEventListener('click', refresh);
@@ -472,7 +473,7 @@ $('zoom-out').addEventListener('click', () => canvas.zoom(canvas.get().scale / 1
 $('canvas-fit').addEventListener('click', () => canvas.fit());
 $('canvas-zoom').addEventListener('change', e => canvas.zoom(Number(e.target.value)));
 $('workspace-toggle').addEventListener('click', () => { const open = $('inspector').classList.toggle('is-open'); $('workspace-toggle').setAttribute('aria-expanded', String(open)); if (open) revealInteraction($('inspector'), 'step'); if (open && inspectorNeedsReset) { $('inspector').scrollTop = 0; inspectorNeedsReset = false; } });
-window.addEventListener('hashchange', () => { if ($('primitive-picker').open) closeDialog($('primitive-picker'), { immediate: true }); controls.close(); query = ''; render(); $('main').focus({ preventScroll: true }); if (matchMedia('(max-width: 767px)').matches) $('navigation').open = false; });
+window.addEventListener('hashchange', () => { if ($('primitive-picker').open) closeDialog($('primitive-picker'), { immediate: true }); controls.close(); query = ''; render(); if (!$('preparation-view').contains(document.activeElement)) $('main').focus({ preventScroll: true }); if (matchMedia('(max-width: 767px)').matches) $('navigation').open = false; });
 const narrow = matchMedia('(max-width: 767px)');
 $('navigation').open = !narrow.matches;
 narrow.addEventListener('change', e => { $('navigation').open = !e.matches; });

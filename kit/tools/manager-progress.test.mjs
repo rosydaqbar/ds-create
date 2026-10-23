@@ -4,6 +4,7 @@ import { mkdtemp, mkdir, writeFile, appendFile, readFile, readdir, rm, utimes } 
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { createSetupProgress } from '../manager/setup-progress.mjs';
+import { preparationTasks } from '../manager/preparation.mjs';
 import { setupFixture } from './fixtures/manager-setup.mjs';
 
 const event = text => JSON.stringify({type:'item.completed',item:{type:'agent_message',text}})+'\n';
@@ -53,4 +54,18 @@ test('setup-flow exposes real fake-process progress before completion, preservin
   let done;
   for(let i=0;i<160;i++){done=await f.flow();if(done.status==='ready')break;await new Promise(resolve=>setTimeout(resolve,25));}
   assert.equal(done.status,'ready');assert.equal(done.canStop,false);
+});
+
+test('stage markers and safe action chips never treat prose or tool names as verified completion',async t=>{
+  const f=await fixture(t);
+  await writeFile(f.events,event('DS_CREATE_STAGE: decisions')+event('All done, validation passed, READY!'));
+  const p=await f.read(f.dir);assert.equal(p.stage,'decisions');assert.equal(p.activity.length,1);
+  assert.ok(preparationTasks({status:'running',progress:p}).every(t=>t.status!=='complete'));
+  await appendFile(f.events,event('DS_CREATE_STAGE: ready')+JSON.stringify({type:'item.completed',item:{type:'reasoning',text:'PRIVATE REASONING'}})+'\n');
+  assert.equal((await f.read(f.dir)).stage,'decisions');assert.doesNotMatch(JSON.stringify(await f.read(f.dir)),/PRIVATE REASONING/);
+  await appendFile(f.events,JSON.stringify({type:'builder.stage',stage:'validation'})+'\n');
+  assert.equal((await f.read(f.dir)).stage,'validation');
+  for(const status of ['running','questions','failed','blocked','cancelled','interrupted','outdated'])assert.ok(preparationTasks({status,progress:p}).every(t=>t.status!=='complete'));
+  assert.equal(preparationTasks({status:'questions',progress:p})[1].status,'input');
+  assert.ok(preparationTasks({status:'ready',progress:p}).every(t=>t.status==='complete'));
 });

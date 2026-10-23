@@ -14,18 +14,24 @@ export function createSetupProgress() {
     const [request, events, stderr] = await Promise.all(['request.json', 'events.jsonl', 'stderr.log'].map(f => fileStat(path.join(dir, f))));
     if (!request) return null;
     if (!cache || cache.dir !== dir || events && (events.ino !== cache.ino || events.size < cache.offset)) {
-      cache = {dir,ino:events?.ino,offset:0,pending:Buffer.alloc(0),discard:false,recent:[],phase:'Starting the local agent',connection:false};
+      cache = {dir,ino:events?.ino,offset:0,pending:Buffer.alloc(0),discard:false,recent:[],phase:'Starting the local agent',connection:false,stage:'context',activity:[]};
     }
+    const activity = (kind,text) => {if(cache.activity.at(-1)?.text!==text)cache.activity=[...cache.activity.slice(-11),{kind,text}];};
     const consume = line => {
       let event;try { event = JSON.parse(line.toString('utf8')); } catch { return; }
       const item = event.item || {}, type = item.type;
+      if(event.type==='builder.stage' && event.stage==='validation'){cache.stage='validation';cache.phase='Checking the saved foundation draft';return;}
       if (type === 'agent_message' && typeof item.text === 'string' && !/^[\s]*[\[{]/.test(item.text)) {
+        const stage=/^DS_CREATE_STAGE: (context|decisions|foundation)\s*$/.exec(item.text.trim());
+        if(stage){cache.stage=stage[1];cache.phase={context:'Reading product context',decisions:'Resolving design decisions',foundation:'Preparing foundations'}[stage[1]];return;}
         const message = clean(item.text);
+        if(message)activity('message',message);
         if (message && cache.recent.at(-1) !== message) cache.recent = [...cache.recent.slice(-3), message];
         cache.phase = 'Preparing foundations';cache.connection = false;
       } else if (type === 'command_execution') {
         const command = item.command || '';
         cache.phase = /foundation-(?:validation|proof)|checkPreparation|validatePlan/.test(command) ? 'Checking foundation output' : /writeFile|write_text|apply_patch/.test(command) ? 'Working on the local draft' : 'Reading project files';
+        if(event.type==='item.completed')activity('tool',/foundation-(?:validation|proof)|checkPreparation|validatePlan/.test(command)?'Check foundation output':/writeFile|write_text|apply_patch/.test(command)?'Update the local draft':'Inspect workspace files');
         cache.connection = false;
       } else if ((type === 'error' || event.type === 'error') && /reconnect|retrying|connection|timed out|timeout|rate limit/i.test(item.message || event.message || '')) {
         cache.phase = 'Waiting for the agent connection';cache.connection = true;
@@ -60,7 +66,7 @@ export function createSetupProgress() {
       } finally { await file.close(); }
     }
     return {startedAt:iso(request.mtimeMs),lastActivityAt:iso(events?.mtimeMs || request.mtimeMs),phase:cache.phase,
-      message:cache.recent.at(-1) || 'Waiting for the local agent to report its progress.',recent:[...cache.recent],connectionIssue};
+      stage:cache.stage,activity:[...cache.activity],message:cache.recent.at(-1) || 'Waiting for the local agent to report its progress.',recent:[...cache.recent],connectionIssue};
   }
   return dir => {
     const result = reading.then(() => read(dir)).catch(() => null);

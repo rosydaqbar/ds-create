@@ -73,7 +73,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
       files:r.files || [], inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
       canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
-      progress, canStop:activeSetup(r) && !!child && childId === r.jobId };
+      progress, updatedAt:r.updated || null, canStop:activeSetup(r) && !!child && childId === r.jobId };
   }
   async function guard() {
     const r = await latest();

@@ -37,6 +37,7 @@ const fs=require('node:fs/promises'),path=require('node:path');
  const mode=await fs.readFile(path.join(r.outputDir,'fake-mode'),'utf8').catch(()=>'success');
  await fs.writeFile(path.join(r.outputDir,'received-prompt'),prompt);
  if(mode.startsWith('progress')){
+  console.log(JSON.stringify({type:'item.completed',item:{type:'agent_message',text:'DS_CREATE_STAGE: foundation'}}));
   console.log(JSON.stringify({type:'item.completed',item:{type:'agent_message',text:'Reading your saved brand brief and context.'}}));
   console.log(JSON.stringify({type:'item.completed',item:{type:'command_execution',command:'cat private/source.txt',status:'completed',exit_code:0,aggregated_output:'PRIVATE RAW OUTPUT'}}));
   console.log(JSON.stringify({type:'item.completed',item:{type:'agent_message',text:'The supplied palette and typography choices are recorded. Preparing the local draft.'}}));

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { zoomAt, fitCamera, initialCamera, MIN_ZOOM, MAX_ZOOM } from '../manager/canvas.mjs';
+import { zoomAt, fitCamera, initialCamera, MIN_ZOOM, MAX_ZOOM, createCanvas } from '../manager/canvas.mjs';
 
 const near = (a, b) => assert.ok(Math.abs(a - b) < 0.00001, `${a} != ${b}`);
 test('zoom preserves the world coordinate beneath its pointer anchor', () => {
@@ -35,4 +35,20 @@ test('initial view fits a fixed-width artboard on mobile without reflowing its c
   const desktop = initialCamera({ width: 912, height: 726 });
   assert.equal(desktop.scale, 0.68);
   assert.equal(desktop.y, 48);
+});
+
+test('hidden processing viewport cannot initialize or corrupt a route camera',()=>{
+  const previous=globalThis.ResizeObserver;let resize;
+  globalThis.ResizeObserver=class {constructor(fn){resize=fn;}observe(){}};
+  try {
+    const viewport={clientWidth:0,clientHeight:0,addEventListener(){},dataset:{}},world={offsetWidth:1120,offsetHeight:1800,style:{}};
+    const c=createCanvas(viewport,world,()=>{});
+    c.refresh('overview');assert.equal(world.style.transform,undefined);
+    viewport.clientWidth=912;viewport.clientHeight=726;resize();c.refresh('overview');
+    assert.deepEqual(c.get(),initialCamera({width:912,height:726}));
+    c.pan(-20,-100);const before=c.get();
+    viewport.clientWidth=0;viewport.clientHeight=0;resize();c.refresh('overview');assert.deepEqual(c.get(),before);
+    viewport.clientWidth=912;viewport.clientHeight=726;resize();c.refresh('overview');assert.deepEqual(c.get(),before);
+    c.refresh('color');c.refresh('overview');assert.deepEqual(c.get(),before);
+  } finally {globalThis.ResizeObserver=previous;}
 });

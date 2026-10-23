@@ -101,10 +101,12 @@ export function createCanvas(viewport, world, onChange) {
   let previousSize = size();
   new ResizeObserver(() => {
     const next = size();
+    if (!next.width || !next.height) return;
     if (key && previousSize.width && previousSize.height) pan((next.width - previousSize.width) / 2, (next.height - previousSize.height) / 2);
     previousSize = next;
   }).observe(viewport);
   return { zoom, fit, pan, get: () => ({ ...camera }), refresh(nextKey) {
+    if (!viewport.clientWidth || !viewport.clientHeight) return;
     if (key !== nextKey) { key = nextKey; apply(cameras.get(key) || initialCamera(size(), world.offsetWidth)); }
     else apply(camera);
   } };
