@@ -28,6 +28,18 @@ for(const v of setupDraft.variables){
  v.codeSyntax={WEB:`var(--${v.name.replaceAll('/','-')})`};
 }
 setupDraft.textStyles[0].name='type/body/md/regular';
+// Realistic synthetic baseline for the process contract; the small setupDraft above remains useful for unit tests.
+const preparedSetupDraft=structuredClone(setupDraft);
+preparedSetupDraft.collections.find(c=>c.name==='Motion').modes=['Standard','Reduced'];
+preparedSetupDraft.variables=preparedSetupDraft.variables.filter(v=>!v.name.startsWith('motion/'));
+for(const [name,value]of Object.entries({'duration/instant':0,'duration/fast':120,'duration/base':200,'duration/slow':300,'duration/loop':900,'easing/standard':'cubic-bezier(0.2, 0, 0, 1)','easing/enter':'cubic-bezier(0, 0, 0.2, 1)','easing/exit':'cubic-bezier(0.4, 0, 1, 1)','easing/linear':'linear','delay/tooltip':400,'delay/toast':5000,'delay/debounce':250})){
+ const type=typeof value==='number'?'FLOAT':'STRING', reduced=['duration/base','duration/slow'].includes(name)?0:name==='duration/loop'?1800:value, refs={};
+ for(const [mode,val]of Object.entries({Standard:value,Reduced:reduced})){
+  const primitive='scale/motion/'+name.replaceAll('/','-')+'-'+mode.toLowerCase();refs[mode]={alias:primitive};
+  preparedSetupDraft.variables.push({name:primitive,collection:'Primitives',type,values:{Value:val},hiddenFromPublishing:true,scopes:[],codeSyntax:{WEB:'var(--'+primitive.replaceAll('/','-')+')'}});
+ }
+ const token='motion/'+name;preparedSetupDraft.variables.push({name:token,collection:'Motion',type,values:refs,description:'Synthetic UI motion purpose for '+name,scopes:[],codeSyntax:{WEB:'var(--'+token.replaceAll('/','-')+')'}});
+}
 export const setupAgent = `
 const fs=require('node:fs/promises'),path=require('node:path');
 (async()=>{
@@ -55,14 +67,14 @@ const fs=require('node:fs/promises'),path=require('node:path');
   await fs.writeFile(path.join(input,'answers/01-init.md'),'Synthetic answers; Web; Inter, chosen by user.');
   await fs.writeFile(path.join(input,'sources.md'),'Synthetic input manifest '+r.inputFiles.join(', '));
   await fs.writeFile(path.join(r.outputDir,'reports/init.md'),'Simulation: awaiting review. Figma not generated.');
-  const draft=${JSON.stringify(setupDraft)};
+  const draft=${JSON.stringify(preparedSetupDraft)};
   if(mode==='alias')draft.variables[1].values.Light.alias='missing/primitive';
   if(mode==='missing-dark'){draft.collections.find(c=>c.name==='Color').modes.push('Dark');}
   if(mode==='wrong-float'){draft.variables.find(v=>v.name==='scale/space/xs').values.Value='not-a-number';}
   await fs.writeFile(path.join(r.outputDir,'foundations.json'),JSON.stringify(draft));
   const domains={};
   for(const [id,prefixes,styles] of [['color',['palette/','color/'],[]],['typography',['font/'],draft.textStyles.map(s=>s.name)],['space',['space/'],[]],['shape',['radius/'],[]],['elevation',[],draft.effectStyles.map(s=>s.name)],['motion',['motion/'],[]]])domains[id]={status:'included',variables:draft.variables.filter(v=>prefixes.some(p=>v.name.startsWith(p))).map(v=>v.name),styles};
-  if(mode!=='no-plan')await fs.writeFile(path.join(r.outputDir,'foundation-plan.json'),JSON.stringify({format:'ds-create/foundation-plan@1',projectName:mode==='wrong-name'?'Different project':r.projectName,inputHash:r.inputHash,inputRevision:r.inputRevision,product:{name:'Synthetic setup fixture',description:'A synthetic test product',platform:'Web'},systemMode:'new',naming:'normalize',domains,decisions:[{key:'platform',value:'Web',decidedBy:'user',source:r.contextFile}]}));
+  if(mode!=='no-plan')await fs.writeFile(path.join(r.outputDir,'foundation-plan.json'),JSON.stringify({format:'ds-create/foundation-plan@1',...(mode==='no-motion-policy'?{}:{motionPolicy:'basic-ui'}),projectName:mode==='wrong-name'?'Different project':r.projectName,inputHash:r.inputHash,inputRevision:r.inputRevision,product:{name:'Synthetic setup fixture',description:'A synthetic test product',platform:'Web'},systemMode:'new',naming:'normalize',domains,decisions:[{key:'platform',value:'Web',decidedBy:'user',source:r.contextFile}]}));
   await fs.writeFile(path.join(r.outputDir,'ds-create-ledger.json'),JSON.stringify({system:mode==='wrong-name'?'Different project':r.projectName,preview:true,scope:{productType:'Web'},sequence:[1,2,3,4].map(step=>({step,status:step===1?'done':'todo'})),foundationReview:{status:'pending'}}));
  }
  await fs.writeFile(result,JSON.stringify({status:'ready',message:'Simulated local draft.',questions:[]}));

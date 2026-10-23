@@ -1,3 +1,4 @@
+import { iconLibrary, libraryIcons } from './icons/catalog.mjs';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -14,7 +15,7 @@ export const foundations = [
   { id: 'shape', name: 'Shape', page: '1.4', description: 'Corner radii and borders define the edges of controls and surfaces.', prefixes: ['radius/', 'border/'] },
   { id: 'elevation', name: 'Elevation', page: '1.5', description: 'Shadows distinguish raised surfaces, while focus treatments identify the active control.', prefixes: [], styles: 'effectStyles' },
   { id: 'motion', name: 'Motion', page: '1.6', description: 'Duration and easing guide how elements enter, leave, and respond to interaction.', prefixes: ['motion/'] },
-  { id: 'iconography', name: 'Iconography', page: '1.7', description: 'A consistent icon style helps people recognize actions and information.', prefixes: [], later: true },
+  { id: 'iconography', name: 'Iconography', page: '1.7', description: 'A consistent icon style helps people recognize actions and information.', prefixes: [] },
   { id: 'brand-assets', name: 'Brand assets', page: '1.8', description: 'Logos and brand assets keep the visual identity consistent across touchpoints.', prefixes: [], later: true },
 ];
 
@@ -184,10 +185,15 @@ export async function getState(outputDir, { preparing = false } = {}) {
     }
     if(mapping?.status==='excluded'){status='skipped';message=mapping.reason;}
     if (settingUp && !f.later) { status = ['queued','running'].includes(setup.status) ? 'generating' : 'pending'; message = setup.message || 'Add context to prepare this foundation.'; }
+    const library=!settingUp && f.id==='iconography' && (plan?.systemMode||ledger?.scope?.systemMode)==='new'?iconLibrary:null;
+    if(f.id==='iconography'){
+      status=library?'ready':'pending';
+      message=library?'Lucide library reference. Figma icon components are created during the library build.':'Settle whether this is a new system. Existing icon libraries are preserved.';
+    }
     const rawModes = [...new Set(rows.flatMap(v => Object.keys(v.values)))];
     const modes = rawModes.length > 1 ? rawModes.filter(m => m !== 'Value') : rawModes;
     if (!modes.length && f.id === 'elevation' && styles.length) modes.push(...(collections.find(c => c.name === 'Color')?.modes || []));
-    return { ...f, status, message, count: rows.length + styles.length, modes,
+    return { ...f, status, message, count: library?libraryIcons.length:rows.length + styles.length, modes, ...(library?{library}:{}),
       variables: rows.map(v => ({ ...v, resolved: Object.fromEntries(Object.keys(v.values).map(mode => [mode, resolveValue(v, mode, byName)])) })), styles };
   });
   const audit = tokenStep?.audit || ledger?.tokens?.audit;

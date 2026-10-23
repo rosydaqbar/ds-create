@@ -75,3 +75,15 @@ test('new drafts require canonical naming, primitive links/visibility and explic
   d=>d.effectStyles[0].effects=[null],
  ]){const changed=structuredClone(data);mutate(changed);assert.equal(validatePlan(plan,changed,snapshot,1).valid,false);}
 });
+
+test('basic UI motion policy cannot be satisfied by an illustrative-motion exclusion or incomplete baseline',()=>{
+ const data=draft();data.collections.find(c=>c.name==='Motion').modes=['Standard','Reduced'];
+ data.variables=data.variables.filter(v=>!v.name.startsWith('motion/'));
+ for(const [name,value]of Object.entries({'duration/instant':0,'duration/fast':120,'duration/base':200,'duration/slow':300,'duration/loop':900,'easing/standard':'cubic-bezier(0.2, 0, 0, 1)','easing/enter':'cubic-bezier(0, 0, 0.2, 1)','easing/exit':'cubic-bezier(0.4, 0, 1, 1)','easing/linear':'linear','delay/tooltip':400,'delay/toast':5000,'delay/debounce':250}))data.variables.push({name:'motion/'+name,collection:'Motion',type:typeof value==='number'?'FLOAT':'STRING',values:{Standard:value,Reduced:['duration/base','duration/slow'].includes(name)?0:name==='duration/loop'?1800:value}});
+ const snapshot={hash:'fixture',files:[{path:'brief.md'}]},plan={format:'ds-create/foundation-plan@1',inputHash:'fixture',inputRevision:1,motionPolicy:'basic-ui',product:{name:'Fixture',description:'Test product',platform:'App'},systemMode:'existing',naming:'keep',decisions:[{key:'motion',value:'Basic UI motion',decidedBy:'user',source:'brief.md'}],domains:Object.fromEntries(['color','typography','space','shape','elevation'].map(id=>[id,{status:'excluded',reason:'Test scope',source:'brief.md'}]))};
+ plan.domains.motion={status:'included',variables:data.variables.filter(v=>v.name.startsWith('motion/')).map(v=>v.name),styles:[]};
+ assert.deepEqual(validatePlan(plan,data,snapshot,1).errors,[]);
+ const excluded=structuredClone(plan);excluded.domains.motion={status:'excluded',reason:'No animated illustration',source:'brief.md'};assert.equal(validatePlan(excluded,data,snapshot,1).valid,false);
+ const missing=structuredClone(data);missing.variables=missing.variables.filter(v=>v.name!=='motion/delay/tooltip');assert.equal(validatePlan(plan,missing,snapshot,1).valid,false);
+ const noReduced=structuredClone(data);noReduced.collections.find(c=>c.name==='Motion').modes=['Standard'];for(const v of noReduced.variables.filter(v=>v.collection==='Motion'))delete v.values.Reduced;assert.equal(validatePlan(plan,noReduced,snapshot,1).valid,false);
+});

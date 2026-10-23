@@ -568,3 +568,15 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 @media (prefers-reduced-motion: reduce) { .preparation-dots i { animation: none; opacity: 1; } }
 #preparation-simulation { margin-top: 16px; }
 #preparation-reply { margin-top: 20px; min-height: 40px; }
+
+.icon-library-preview + .icon-library-preview { margin-top: 24px; }
+.icon-library-preview .docs-stage { display: block; padding: 0; }
+.icon-library-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.icon-library-cell { margin: 0; min-width: 0; display: grid; justify-items: center; align-content: center; gap: 20px; padding: 32px 12px; border-bottom: 1px solid var(--color-border-subtle); }
+.icon-library-cell > svg { width: 24px; height: 24px; stroke-width: 2; }
+.icon-library-cell figcaption { display: grid; text-align: center; gap: 6px; min-width: 0; font-size: 14px; }
+.icon-library-cell figcaption > span { text-transform: capitalize; }
+.icon-library-cell code { font-size: 14px; overflow-wrap: anywhere; color: inherit; }
+.icon-size-reference { display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; }
+[data-library-icon-size] { display: block; }
+[data-library-icon-size] svg { width: 100%; height: 100%; stroke-width: 2; }

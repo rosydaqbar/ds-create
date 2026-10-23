@@ -85,6 +85,13 @@ export function validatePlan(plan,data,snapshot,revision) {
     if(domain==='typography'&&!scope.styles.length||domain==='elevation'&&!scope.styles.length)fail(`${domain}: usable styles are required when included.`);
   }
   if(!domains.some(d=>plan?.domains?.[d]?.status==='included')||!(data?.variables?.length||data?.textStyles?.length||data?.effectStyles?.length))fail('Include at least one usable foundation in the approved scope.');
+  if(plan?.motionPolicy==='basic-ui'){
+    const scope=plan.domains?.motion,collection=data.collections.find(c=>c.name==='Motion');
+    const required=['duration/instant','duration/fast','duration/base','duration/slow','duration/loop','easing/standard','easing/enter','easing/exit','easing/linear','delay/tooltip','delay/toast','delay/debounce'].map(n=>'motion/'+n);
+    if(scope?.status!=='included'||required.some(n=>!scope.variables?.includes(n)))fail('Basic UI motion requires duration, easing and delay tokens; illustrative-motion exclusions do not remove the UI baseline.');
+    if(!collection||!['Standard','Reduced'].every(m=>collection.modes.includes(m)))fail('Basic UI motion requires Standard and Reduced modes.');
+    for(const name of required){const v=data.variables.find(v=>v.name===name);if(!v||v.collection!=='Motion'||v.type!==(name.startsWith('motion/easing/')?'STRING':'FLOAT'))fail(name+': missing or incompatible basic motion token.');}
+  }
   if(plan?.systemMode==='new'){
     const grammar=new Map(Object.entries({Primitives:/^(palette|scale)\/[a-z0-9-]+\/[a-z0-9/-]+$/,Color:/^color\/[a-z0-9-]+\/[a-z0-9/-]+$/,Typography:/^font\/(family|weight|size|line-height|letter-spacing)\/[a-z0-9-]+$/,Space:/^space\/[a-z0-9-]+$/,Size:/^size\/[a-z0-9/-]+$/,Shape:/^(radius\/[a-z0-9-]+|border\/width\/[a-z0-9-]+)$/,Motion:/^motion\/(duration|easing|delay)\/[a-z0-9-]+$/}));
     for(const c of data?.collections||[])if(!grammar.has(c.name))fail(`${c.name}: use the foundation collection contract for a new system.`);

@@ -5,6 +5,7 @@ import { spacingScale } from './spacing.mjs';
 import { createFoundationControls } from './controls.js';
 import { createMotionPreview } from './motion.mjs';
 import { setupPublish } from './publish.mjs';
+import { iconographyContent } from './iconography.mjs';
 import { setupWeb } from './setup.mjs';
 
 const $ = id => document.getElementById(id);
@@ -150,6 +151,13 @@ function variableTable(rows, mode) {
 }
 
 function foundation(f) {
+  if (f.id === 'iconography' && f.library) {
+    const colors=state.foundations.find(f=>f.id==='color'),space=state.foundations.find(f=>f.id==='space');
+    const colorValue=name=>{const v=colors.variables.find(v=>v.name===name);return v?valueText(resultFor(v,modeFor(colors))):'';};
+    const ink=colorValue('color/icon/primary')||colorValue('color/text/primary'),base=ink?colorValue('color/surface/base'):'';
+    const sizes=space.variables.filter(v=>v.name.startsWith('size/icon/')).map(v=>({name:v.name,value:resultFor(v,modeFor(space)).value})).filter(v=>Number.isFinite(v.value)&&v.value>0&&v.value<=48).sort((a,b)=>a.value-b.value);
+    return documentFrame(f.name,f.description,iconographyContent({query,escape,previewCard,sizes,ink,base}),badge('ready','Library reference'));
+  }
   if (f.id === 'color') return colorDocument(f);
   if (f.id === 'space') return spacingDocument(f);
   if (f.id === 'motion' && f.status === 'ready') return documentFrame(f.name, f.description, motion.content(f, query), badge(f.status));
@@ -224,6 +232,7 @@ function colorWorkspace(f) {
 }
 
 function foundationWorkspace(f) {
+  if(f.id==='iconography' && f.library)return `<section class="inspector-section"><h3>Library</h3><dl>${property('Base',f.library.name)}${property('Version',f.library.version)}${property('License',f.library.license)}${property('Construction','24px grid · 2px stroke')}</dl><p class="workspace-help">Local library reference. Figma icon components are created during the library build.</p></section><section class="inspector-section"><h3>Find an icon</h3><label class="search-field">${icon('search')}<input id="token-search" type="search" aria-label="Filter icons" placeholder="Search icons..." value="${escape(query)}" /></label></section>`;
   const filter = `<section class="inspector-section"><h3>Inspect</h3><label class="search-field">${icon('search')}<input id="token-search" type="search" aria-label="Filter foundation values" placeholder="Find a value..." value="${escape(query)}" /></label>${modeControls(f)}</section>`;
   if (f.status !== 'ready') return `<section class="inspector-section">${badge(f.status)}<p class="workspace-help">${escape(f.message)}</p></section>`;
   if (f.id === 'typography') {
@@ -247,6 +256,8 @@ function inspector(f) {
 
 function applySpecimens(f) {
   document.querySelectorAll('[data-color]').forEach(el => { if (CSS.supports('color', el.dataset.color)) el.style.backgroundColor = el.dataset.color; });
+  document.querySelectorAll('[data-icon-ink]').forEach(el=>{if(CSS.supports('color',el.dataset.iconInk))el.style.color=el.dataset.iconInk;});
+  document.querySelectorAll('[data-library-icon-size]').forEach(el=>{const n=Number(el.dataset.libraryIconSize);if(Number.isFinite(n)&&n>0&&n<=48){el.style.width=`${n}px`;el.style.height=`${n}px`;}});
   const typography = state.foundations.find(f => f.id === 'typography');
   document.querySelectorAll('[data-font]').forEach(el => { const family = fontStack(previewTypeface(typography)); if (CSS.supports('font-family', family)) el.style.fontFamily = family; });
   document.querySelectorAll('[data-type-size]').forEach(el => { const size = Number(el.dataset.typeSize) * Number(draft.settings.get('type-scale') || 100) / 100; if (Number.isFinite(size) && size > 0) el.style.fontSize = `${Math.min(size, 96)}px`; });

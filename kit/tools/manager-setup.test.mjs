@@ -56,7 +56,7 @@ test('context and binary original filenames persist, question answers resume a r
  assert.equal((await f.post('/api/setup-answers',{jobId:q.jobId,answers:[{id:'platform',value:'Web'},{id:'font',value:'Inter'}]})).status,202);
  const ready=await until(f,r=>r.status==='ready');assert.notEqual(ready.jobId,q.jobId);
  assert.equal(ready.inputSlug,'synthetic-setup-fixture');assert.equal(ready.inputPath,'workspace/input/synthetic-setup-fixture/');
- const state=await getState(f.output);assert.equal(publishReady(state),true);assert.equal(state.status,'review');assert.equal(state.initDone,false);assert.equal(state.source.review,'pending');assert.equal(state.summary.ready,6);
+ const state=await getState(f.output);assert.equal(publishReady(state),true);assert.equal(state.status,'review');assert.equal(state.initDone,false);assert.equal(state.source.review,'pending');assert.equal(state.summary.ready,7);
  const pub=await fetch(f.url+'/api/publish-flow').then(r=>r.json());assert.equal(pub.figma.canStart,true);assert.equal(pub.build.available,false);
  const ledger=JSON.parse(await readFile(path.join(f.output,'ds-create-ledger.json')));assert.equal(ledger.foundationReview.status,'pending');assert.equal(ledger.sequence[3].status,'todo');
  const prompt=await readFile(path.join(f.output,'received-prompt'),'utf8');assert.match(prompt,/NO Figma read\/write authorization/);
@@ -221,4 +221,9 @@ test('a project name mismatch in saved generation evidence blocks Publish after 
  const f=await fixture(t);await f.post('/api/setup-submit',f.form());await until(f,r=>r.status==='ready');
  const file=path.join(f.output,'foundation-plan.json'),plan=JSON.parse(await readFile(file));plan.projectName='A different project';await writeFile(file,JSON.stringify(plan));
  const pub=await fetch(f.url+'/api/publish-flow').then(r=>r.json());assert.equal(pub.figma.canStart,false);assert.equal(publishReady(await getState(f.output)),false);
+});
+
+test('a new-system agent result cannot silently omit the basic UI motion policy',async t=>{
+ const f=await setupFixture({mode:'no-motion-policy'});t.after(()=>f.cleanup());await f.post('/api/setup-submit',f.form());
+ const r=await until(f,settled);assert.equal(r.status,'failed');assert.match(r.message,/basic UI motion/);
 });
