@@ -84,7 +84,14 @@
           <p id="publish-revision" class="publish-saved"></p>
           <label id="publish-target-field" class="publish-target" for="publish-figma-url">Figma file URL<input id="publish-figma-url" type="url" required maxlength="1000" placeholder="https://www.figma.com/design/…" autocomplete="off" /></label>
           <p id="publish-approval-note" class="publish-saved">Publishing approves this saved revision. Unsaved controller previews are excluded.</p>
-          <div class="publish-actions"><button id="publish-figma" class="button button-primary" disabled>Publish to Figma</button><button id="publish-cancel" class="button" hidden>Stop agent</button><a id="publish-open-figma" class="button" hidden target="_blank" rel="noopener noreferrer">Open in Figma</a></div>
+          <div class="publish-actions"><button id="publish-figma" class="button button-primary" disabled>Publish to Figma</button><button id="publish-cancel" class="button" hidden>Cancel publish</button><a id="publish-open-figma" class="button" hidden target="_blank" rel="noopener noreferrer">Open in Figma</a></div>
+          <div id="publish-mcp-help" class="publish-target" hidden>
+            <details><summary>Connect your agent</summary><p class="publish-saved">Add DS Create MCP to your agent once. It works with MCP clients such as Claude Code and Cursor. In this workspace, install its dependencies first: <code>npm ci --prefix kit/mcp</code>.</p>
+              <div class="setup-field"><label for="publish-mcp-config">MCP configuration</label><textarea id="publish-mcp-config" readonly rows="7" spellcheck="false"></textarea></div>
+              <button id="publish-mcp-copy" class="button">Copy MCP config</button><p id="publish-mcp-feedback" role="status" aria-live="polite"></p>
+            </details>
+            <div id="publish-mcp-task" hidden><p class="publish-saved">Ask your connected agent to take this request. MCP does not wake an idle chat.</p><div class="publish-command"><input id="publish-agent-instruction" aria-label="Publish instruction for your agent" readonly /><button id="publish-agent-copy" class="button">Copy instruction</button></div><p id="publish-agent-feedback" role="status" aria-live="polite"></p></div>
+          </div>
           <p id="publish-status" class="publish-progress" role="status" aria-live="polite">Reading the latest status.</p>
         </li>
         <li id="publish-build-step" aria-disabled="true">

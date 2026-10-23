@@ -10,7 +10,7 @@ import { selectedInputSlug } from './input-identity.mjs';
 import { checkWebDraft } from './foundation-proof.mjs';
 import { getState, getPublishStatus, readJSON, figmaLink } from './state.mjs';
 
-import { chatBinding, target as validateChatTarget, queueChatJob, cancelChatJob, activeChatJob } from './agent-bridge.mjs';
+import { queueMcpJob, cancelMcpJob, activeMcpJob, latestPublish } from './publish-queue.mjs';
 
 export class PublishError extends Error {
   constructor(message, status = 409) { super(message); this.status = status; }
@@ -45,8 +45,8 @@ async function executable(program) {
 }
 const safeId = id => typeof id === 'string' && /^[0-9a-f-]{36}$/.test(id);
 const running = job => ['queued', 'running'].includes(job?.status);
-export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false, runner = simulation ? 'cli' : 'chat', setupGate = async () => null }) {
-  if(runner !== 'chat' && !simulation) throw new Error('Detached Figma runners are restricted to isolated simulation fixtures.');
+export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false, runner = simulation ? 'cli' : 'mcp', setupGate = async () => null }) {
+  if(runner !== 'mcp' && !simulation) throw new Error('Detached Figma runners are restricted to isolated simulation fixtures.');
   const jobsDir = path.join(outputDir, 'manager/jobs');
   const pointer = path.join(outputDir, 'manager/figma-job.json');
   let busy = false;
@@ -57,6 +57,7 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', 
     if (!safeId(p?.id)) return null;
     const file = path.join(jobsDir, p.id, 'status.json');
     let job = await readJSON(file);
+    if(job?.runner==='mcp')return latestPublish(outputDir);
     if (running(job) && job.pid && job.id !== childId) {
       try { process.kill(job.pid, 0); }
       catch { job = { ...job, status: 'interrupted', message: 'The local agent stopped. Check any partial Figma changes before trying again.' }; await save(file, job); }
@@ -64,7 +65,7 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', 
     return job;
   }
   async function status() {
-    const [state, job, program, build] = await Promise.all([getState(outputDir), latest(), runner === 'chat' ? chatBinding(outputDir) : executable(agentCommand), getPublishStatus(outputDir)]);
+    const [state, job, program, build] = await Promise.all([getState(outputDir), latest(), runner === 'mcp' ? true : executable(agentCommand), getPublishStatus(outputDir)]);
     const complete = currentFigma(state) && (!job || job.hash !== state.source.hash || await verifiedFigma(state, outputDir, job.hash, job.figmaUrl));
     const setup=await readJSON(path.join(outputDir,'manager/setup.json')),fresh=await inputFreshness(outputDir,setup);
     const proof=await checkWebDraft(outputDir,workspace,setup);
@@ -72,10 +73,10 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', 
     if (reason) { /* local preparation must finish before approval/publication */ }
     else if (state.preview && !simulation) reason = 'Sample data cannot be published. Run ds-create init for your own system first.';
     else if (state.source.kind !== 'local' || !state.source.hash || state.source.review === 'invalid') reason = 'Ask your agent to prepare a valid local foundation draft with ds-create init.';
-    else if (!program) reason = runner === 'chat' ? 'Link the active agent chat with manager-agent.mjs link before publishing. Reopen ds-create init-web in that chat.' : 'Codex CLI is unavailable. Install it and sign in on this machine, then restart Builder.';
+    else if (!program) reason = 'Codex CLI is unavailable. Install it and sign in on this machine, then restart Builder.';
     let publicJob = job ? { id: job.id, status: job.status, message: job.message, started: job.started, finished: job.finished } : null;
     if (publicJob && job.hash !== state.source.hash && !running(job)) publicJob = { ...publicJob, status: 'outdated', message: 'The saved draft changed. Publish the current revision before building.' };
-    return { simulation, agent: { name: runner === 'chat' ? 'Active chat · visible background agent' : 'Simulation runner', available: !!program },
+    return { simulation, integration: runner === 'mcp' ? { transport:'stdio', command:process.execPath, args:[path.join(workspace,'kit/tools/publish-mcp.mjs'),'--workspace',workspace], installCommand:'npm ci --prefix kit/mcp', agentInstruction:`Use DS Create MCP to publish the approved foundations for session ${path.basename(outputDir)}.` } : null, agent: { name: runner === 'mcp' ? 'DS Create MCP' : 'Simulation runner', available: !!program },
       figma: { complete, canStart: !complete && !reason && !running(job) && !busy, reason, revision: state.source.revision || null, hash: state.source.hash || null, url: state.figmaUrl },
       build: { available: complete && !running(job), status: complete ? build.status : 'locked', command: 'ds-create build' }, job: publicJob };
   }
@@ -94,15 +95,14 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', 
       const gate = await status();
       if (gate.figma.reason) throw new PublishError(gate.figma.reason, 412);
       if (state.foundations.some(f => f.variables.some(v => Object.values(v.resolved).some(r => r.error)))) throw new PublishError('Resolve missing or circular token aliases with your agent before publishing.', 412);
-      if(runner === 'chat' && job?.hash === input.hash && targetFile(job.figmaUrl)?.key === target.key && ['blocked','failed','cancelled','interrupted'].includes(job.status)) {
-        try {return await queueChatJob({outputDir,workspace,id:job.id});}catch(e){throw new PublishError(e.message,412);}
+      if(runner === 'mcp' && job?.hash === input.hash && targetFile(job.figmaUrl)?.key === target.key && ['blocked','failed','cancelled','interrupted'].includes(job.status)) {
+        try {return await queueMcpJob({outputDir,workspace,id:job.id});}catch(e){throw new PublishError(e.message,412);}
       }
       const slug = path.basename(outputDir), setup=await readJSON(path.join(outputDir,'manager/setup.json')), inputSlug=selectedInputSlug(setup,slug);
       const answersFile = path.join(workspace, 'workspace/input', inputSlug, 'answers/01-init.md');
       try { await access(answersFile); } catch { throw new PublishError('Init answers are missing. Continue ds-create init with your agent first.', 412); }
       if (!['Web', 'App', 'Web and App'].includes(state.product)) throw new PublishError('Settle Web, App, or Web and App through ds-create init first.', 412);
-      const program = runner === 'chat' ? null : await executable(agentCommand);
-      if(runner === 'chat') await validateChatTarget(await chatBinding(outputDir),workspace);
+      const program = runner === 'mcp' ? null : await executable(agentCommand);
       const id = randomUUID(), dir = path.join(jobsDir, id);
       await mkdir(dir, { recursive: true });
       const request = { id, slug, inputSlug, hash: input.hash, revision: state.source.revision, figmaUrl: target.url, approvedAt: new Date().toISOString(),
@@ -119,10 +119,10 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', 
       // An older generation is not evidence for the newly approved request/target.
       ledger.sequence = ledger.sequence.map(e => [2, 3, 4].includes(Number(e?.step)) ? { ...e, status: 'todo' } : e);
       await save(ledgerFile, ledger);
-      await save(path.join(dir, 'status.json'), { id, hash: request.hash, figmaUrl: request.figmaUrl, status: runner === 'chat' ? 'prepared' : 'queued', started: request.approvedAt, message: runner === 'chat' ? 'Approved request saved; preparing chat handoff.' : 'Starting the local agent…' });
+      await save(path.join(dir, 'status.json'), { id, hash: request.hash, figmaUrl: request.figmaUrl, status: runner === 'mcp' ? 'prepared' : 'queued', started: request.approvedAt, message: runner === 'mcp' ? 'Approved request saved; preparing MCP publication.' : 'Starting the local agent…' });
       await save(pointer, { id });
-      if(runner === 'chat') {
-        try { return await queueChatJob({outputDir,workspace,id}); }
+      if(runner === 'mcp') {
+        try { return await queueMcpJob({outputDir,workspace,id}); }
         catch(e) { await save(path.join(dir,'status.json'),{id,hash:request.hash,figmaUrl:request.figmaUrl,status:'blocked',message:e.message});throw new PublishError(e.message,503); }
       }
       childId = id;
@@ -139,13 +139,13 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand = 'codex', 
   async function cancel() {
     const job = await latest();
     if (!running(job)) return { stopped: false };
-    if (activeChatJob(job)) return cancelChatJob({outputDir,workspace,id:job.id});
+    if (activeMcpJob(job)) return cancelMcpJob({outputDir,workspace,id:job.id});
     if (job.id !== childId || !child) throw new PublishError('This job belongs to an earlier Builder process. Wait for it to stop before retrying.');
     const proc = child;
     proc.kill('SIGTERM');
     await new Promise(resolve => { proc.once('exit', resolve); setTimeout(resolve, 3000).unref(); });
     return { stopped: true };
   }
-  async function shutdown() { const job=await latest(); if(!activeChatJob(job))return cancel(); }
+  async function shutdown() { const job=await latest(); if(!activeMcpJob(job))return cancel(); }
   return { status, start, cancel, shutdown };
 }

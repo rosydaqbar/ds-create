@@ -14,26 +14,34 @@ export function setupPublish() {
     flow = next;
     if (!reviewHash && next.figma.hash) reviewHash = next.figma.hash;
     const stale = !!reviewHash && reviewHash !== next.figma.hash;
-    const running = ['queued', 'running'].includes(next.job?.status);
+    const queued=next.job?.status==='queued',running = ['queued', 'running'].includes(next.job?.status);
     const complete = next.figma.complete && !running && !stale;
     $('publish-simulation').hidden = !next.simulation;
     $('publish-revision').textContent = next.figma.revision ? `Saved foundation draft · Revision ${next.figma.revision}` : 'Saved Figma baseline';
     const target = $('publish-figma-url');
     if (!target.value && next.figma.url) target.value = next.figma.url;
     target.disabled = running || complete || submitting;
-    const moveFocus = complete && document.activeElement === $('publish-figma');
+    const moveFocus = complete && (document.activeElement === $('publish-figma') || $('publish-mcp-help').contains(document.activeElement));
     $('publish-target-field').hidden = complete;
     $('publish-approval-note').hidden = complete;
     $('publish-figma').hidden = complete;
     $('publish-figma').disabled = !next.figma.canStart || stale || submitting;
-    $('publish-figma').textContent = running ? 'Publishing…' : next.job && !complete ? 'Try again' : 'Publish to Figma';
+    $('publish-figma').textContent = queued ? 'Queued' : running ? 'Publishing…' : next.job && !complete ? 'Try again' : 'Publish to Figma';
     $('publish-cancel').hidden = !running;
     $('publish-cancel').disabled = submitting;
-    $('publish-figma-state').textContent = complete ? 'Complete' : running ? 'In progress' : next.figma.reason ? 'Unavailable' : ['failed', 'blocked', 'cancelled', 'interrupted'].includes(next.job?.status) ? 'Needs attention' : 'Ready';
+    $('publish-figma-state').textContent = complete ? 'Complete' : queued ? 'Waiting for agent' : running ? 'In progress' : next.figma.reason ? 'Unavailable' : ['failed', 'blocked', 'cancelled', 'interrupted'].includes(next.job?.status) ? 'Needs attention' : 'Ready';
     $('publish-figma-state').dataset.status = complete ? 'ready' : running ? 'generating' : 'pending';
-    $('publish-status').textContent = stale ? 'The saved draft changed. Close Publish and review the new revision before continuing.' : complete ? 'Foundations are available in Figma. Continue to step 2.' : next.figma.reason || next.job?.message || `${next.agent.name} will verify the file and fonts, generate foundations, and run the token audit.`;
+    $('publish-status').textContent = stale ? 'The saved draft changed. Close Publish and review the new revision before continuing.' : complete ? 'Foundations are available in Figma. Continue to step 2.' : next.figma.reason || next.job?.message || `${next.agent.name} queues your approved draft. Your connected agent verifies Figma access and fonts, generates foundations, then saves the export and audit.`;
     $('publish-open-figma').hidden = !complete || !next.figma.url;
     if (next.figma.url) $('publish-open-figma').href = next.figma.url;
+    $('publish-mcp-help').hidden=!next.integration||complete;
+    if(next.integration){
+      const {command,args,agentInstruction}=next.integration;
+      const config=JSON.stringify({mcpServers:{'ds-create-publish':{command,args}}},null,2);
+      if($('publish-mcp-config').value!==config)$('publish-mcp-config').value=config;
+      if($('publish-agent-instruction').value!==agentInstruction)$('publish-agent-instruction').value=agentInstruction;
+      $('publish-mcp-task').hidden=!queued;
+    }
     const available = next.build.available && !stale;
     $('publish-build-step').setAttribute('aria-disabled', String(!available));
     $('publish-build-state').textContent = !available ? 'Locked' : ({ building: 'In progress', failed: 'Needs attention', incomplete: 'Continue build' }[next.build.status] || 'Ready');
@@ -72,7 +80,7 @@ export function setupPublish() {
     if ($('publish').disabled) return;
     reviewHash = null; flow = null; showError('');
     $('publish-figma').disabled = true; $('publish-command-section').hidden = true;
-    $('publish-status').textContent = 'Checking saved foundations and the local agent…';
+    $('publish-status').textContent = 'Checking saved foundations and publishing status…';
     openDialog(dialog); dialog.scrollTop = 0; check();
     timer = setInterval(() => { if (!submitting) check(); }, 2000);
   });
@@ -82,6 +90,12 @@ export function setupPublish() {
   $('publish-close').addEventListener('click', () => closeDialog(dialog));
   dialog.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); closeDialog(dialog); } });
   dialog.addEventListener('close', () => { clearInterval(timer); request?.abort(); request = null; ($('publish').disabled ? $('setup-open').hidden ? $('main') : $('setup-open') : $('publish')).focus({ preventScroll: true }); });
+  for(const [button,field,feedback] of [['publish-mcp-copy','publish-mcp-config','publish-mcp-feedback'],['publish-agent-copy','publish-agent-instruction','publish-agent-feedback']]){
+    $(button).addEventListener('click',async()=>{
+      try{await navigator.clipboard.writeText($(field).value);$(feedback).textContent='Copied.';}
+      catch{$(field).focus();$(field).select();$(feedback).textContent='Copy the selected text manually.';}
+    });
+  }
   $('publish-command').addEventListener('click', e => e.target.select());
   $('publish-copy').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText('ds-create build'); $('publish-copy-feedback').textContent = 'Command copied. Paste it into your agent.'; }

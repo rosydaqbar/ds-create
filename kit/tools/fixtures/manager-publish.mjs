@@ -34,7 +34,7 @@ const fs = require('node:fs/promises'), path = require('node:path');
   }
   await fs.writeFile(result,JSON.stringify({status:'completed',message:'Simulated foundation output.'}));
 })();`;
-export async function publishFixture({ mode = 'success', timeoutMs = 10000 } = {}) {
+export async function publishFixture({ mode = 'success', timeoutMs = 10000, runner = 'cli' } = {}) {
   const root = await realpath(await mkdtemp(path.join(tmpdir(), 'ds-publish-test-')));
   const output = path.join(root, 'workspace/output/fixture');
   await mkdir(path.join(output, 'manager'), { recursive: true });
@@ -49,7 +49,7 @@ export async function publishFixture({ mode = 'success', timeoutMs = 10000 } = {
   await writeFile(path.join(output, 'ds-create-ledger.json'), JSON.stringify({system:'Synthetic publish fixture',preview:true,scope:{productType:'Web'},sequence:[1,2,3,4].map(step=>({step,status:step===1?'done':'todo'})),foundationReview:{status:'pending'}}));
   const program=path.join(root,'fake-agent.cjs'); await writeFile(program,fakeAgent);
   await writeFile(path.join(output,'fake-mode'),mode);
-  const jobsOptions={agentCommand:process.execPath,agentPrefixArgs:[program],simulation:true,timeoutMs};
+  const jobsOptions={agentCommand:process.execPath,agentPrefixArgs:[program],simulation:true,timeoutMs,runner};
   const { server, jobs }=createManagerServer({outputDir:output,workspace:root,jobsOptions});
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const url=`http://127.0.0.1:${server.address().port}`;
