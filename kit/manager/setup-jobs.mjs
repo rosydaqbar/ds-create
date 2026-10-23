@@ -9,6 +9,7 @@ import { PublishError } from './figma-jobs.mjs';
 import { snapshotInputs, inputFreshness } from './input-snapshot.mjs';
 import { checkPreparation } from './foundation-proof.mjs';
 import { projectInputSlug, selectedInputSlug } from './input-identity.mjs';
+import { createSetupProgress } from './setup-progress.mjs';
 
 export const uploadLimits = { files: 10, fileBytes: 25 * 1024 * 1024, totalBytes: 50 * 1024 * 1024, context: 20000, projectName: 100 };
 export const activeSetup = record => ['queued', 'running'].includes(record?.status);
@@ -51,6 +52,7 @@ export async function draftReady(outputDir, workspace) {
 export async function inputDigest(workspace, slug) { return (await snapshotInputs(workspace,slug)).hash; }
 export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false }) {
   const file = path.join(outputDir, 'manager/setup.json'), slug = path.basename(outputDir);
+  const readProgress = createSetupProgress();
   let busy = false, child, childId;
   async function latest() {
     let r = await readJSON(file);
@@ -67,10 +69,11 @@ export function createSetupJobs({ outputDir, workspace, agentCommand = 'codex', 
     if (!r) return { enabled:false };
     const pointer=await readJSON(path.join(outputDir,'manager/figma-job.json'));
     const publishing=/^[0-9a-f-]{36}$/.test(pointer?.id||'') && activeSetup(await readJSON(path.join(outputDir,'manager/jobs',pointer.id,'status.json')));
+    const progress=/^[0-9a-f-]{36}$/.test(r.jobId || '') ? await readProgress(path.join(outputDir,'manager/setup-jobs',r.jobId)) : null;
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
       files:r.files || [], inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
       canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
-      canStop:activeSetup(r) && !!child && childId === r.jobId };
+      progress, canStop:activeSetup(r) && !!child && childId === r.jobId };
   }
   async function guard() {
     const r = await latest();

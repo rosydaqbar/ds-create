@@ -36,8 +36,14 @@ const fs=require('node:fs/promises'),path=require('node:path');
  const r=JSON.parse(await fs.readFile(path.join(path.dirname(result),'request.json'),'utf8'));
  const mode=await fs.readFile(path.join(r.outputDir,'fake-mode'),'utf8').catch(()=>'success');
  await fs.writeFile(path.join(r.outputDir,'received-prompt'),prompt);
+ if(mode.startsWith('progress')){
+  console.log(JSON.stringify({type:'item.completed',item:{type:'agent_message',text:'Reading your saved brand brief and context.'}}));
+  console.log(JSON.stringify({type:'item.completed',item:{type:'command_execution',command:'cat private/source.txt',status:'completed',exit_code:0,aggregated_output:'PRIVATE RAW OUTPUT'}}));
+  console.log(JSON.stringify({type:'item.completed',item:{type:'agent_message',text:'The supplied palette and typography choices are recorded. Preparing the local draft.'}}));
+  if(mode==='progress-hang'){setInterval(()=>{},1000);return;}
+ }
  if(mode==='hang'){setInterval(()=>{},1000);return;}
- await new Promise(resolve=>setTimeout(resolve,mode==='slow'?2000:80));
+ await new Promise(resolve=>setTimeout(resolve,['slow','progress'].includes(mode)?2000:80));
  if(mode==='fail')process.exit(2);
  if(mode==='blocked'){await fs.writeFile(result,JSON.stringify({status:'blocked',message:'Sign in to your local Codex CLI, then retry.',questions:[]}));return;}
  if(mode==='questions'&&!r.answerFile){await fs.writeFile(result,JSON.stringify({status:'questions',message:'Choose the product platform and UI font.',questions:[{id:'platform',prompt:'Which platforms should this system support?',options:['Web','App','Web and App']},{id:'font',prompt:'Which UI font should we use?',options:['Inter','Geist','Plus Jakarta Sans']}]}));return;}

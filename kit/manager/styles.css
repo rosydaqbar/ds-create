@@ -420,6 +420,11 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .setup-context-details summary { cursor: pointer; padding: 8px 0; }
 .setup-context-details p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 12px 0; }
 .setup-running { display: flex; align-items: center; gap: 10px; margin-top: 24px; font-weight: 600; }
+.setup-progress { margin-bottom: 24px; font-size: 14px; line-height: 1.6; }
+.setup-progress .setup-note { margin-top: 12px; }
+.setup-progress details { margin-top: 16px; }
+.setup-progress ol { margin: 8px 0 0; padding-inline-start: 20px; }
+.setup-progress li { padding-inline-start: 4px; margin: 0 0 12px; overflow-wrap: anywhere; }
 .setup-footer { flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .setup-footer > :first-child { margin-right: auto; }
 .setup-error { margin-top: 16px; padding: 12px; border: 1px solid var(--color-border-default); border-radius: 8px; }

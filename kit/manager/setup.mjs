@@ -6,6 +6,23 @@ export function setupWeb({ onChange = () => {} } = {}) {
   const dialog=$('setup-dialog');
   let flow,signature='',pending=[],busy=false,opened=false,questionKey='',returnFocus,editing=false,editRevision,nameHydrated=false;
   const active = () => ['queued','running'].includes(flow?.status);
+  let historySignature='';
+  const duration = seconds => seconds < 60 ? `${seconds}s` : `${Math.floor(seconds/60)}m ${seconds%60}s`;
+  function progress() {
+    const p=flow?.progress,shown=active()&&!!p;
+    $('setup-progress').hidden=!shown;
+    $('setup-activity').textContent=p?.phase || 'Preparing foundations';
+    const message=active()&&p?.message?p.message:flow?.message || (flow?.status==='empty'?'':'Context saved.');
+    if($('setup-state').textContent!==message)$('setup-state').textContent=message;
+    if(!shown)return;
+    const elapsed=Math.max(0,Math.floor((Date.now()-Date.parse(p.startedAt))/1000)),age=Math.max(0,Math.floor((Date.now()-Date.parse(p.lastActivityAt))/1000));
+    $('setup-timing').textContent=`${duration(elapsed)} elapsed · Last activity ${age<2?'just now':duration(age)+' ago'}`;
+    const note=p.connectionIssue?'The agent reported a connection issue. Waiting for another update.':age>=90?'No new activity has been reported recently. The agent may still be working.':'';
+    $('setup-progress-note').textContent=note;$('setup-progress-note').hidden=!note;
+    const recent=p.recent || [],key=JSON.stringify(recent);
+    $('setup-history').hidden=!recent.length;
+    if(key!==historySignature){historySignature=key;$('setup-updates').innerHTML=recent.map(message=>`<li>${escape(message)}</li>`).join('');}
+  }
   function files() {
     $('setup-file-list').innerHTML=pending.map((f,i)=>`<li><span>${escape(f.name)}<small>${size(f.size)}</small></span><button class="icon-button" type="button" data-remove-file="${i}" aria-label="Remove ${escape(f.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></li>`).join('');
   }
@@ -31,7 +48,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-saved').hidden=initial;
     $('setup-simulation').hidden=!flow.simulation;
     $('setup-running').hidden=!active();
-    $('setup-state').textContent=flow.message || (initial?'':'Context saved.');
+    progress();
     $('setup-state').hidden=initial;
     $('setup-storage').textContent=`Saved locally in ${flow.inputPath}`;
     $('setup-saved-context').textContent=flow.context || 'Context provided in files.';
@@ -65,6 +82,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
       const r=await fetch('/api/setup-flow',{cache:'no-store',signal:AbortSignal.timeout(4500)});if(!r.ok)throw new Error();
       const next=await r.json(),s=JSON.stringify(next),previous=flow?.status;flow=next;
       if(s!==signature){signature=s;paint();onChange();if(dialog.open && previous!==next.status){if(previous)revealInteraction(next.status==='questions'?$('setup-questions-form'):$('setup-state'),'step');if(next.status==='questions')$('setup-answer-0')?.focus();else if(next.status==='ready')$('setup-review').focus();}}
+      else progress();
     }catch{if(dialog.open)error('Connection lost. Your entries remain here. Reopen Context when Builder reconnects.');}
   }
   function open(){returnFocus=document.activeElement;openDialog(dialog);dialog.scrollTop=0;}
