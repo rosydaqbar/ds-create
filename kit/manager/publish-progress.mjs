@@ -8,26 +8,48 @@ export function publishTasks(job,complete=false){
  const done=new Set(job?.progress?.completed||[]),current=job?.progress?.stage;
  return stages.map(([id,title,description])=>({id,title,description,state:complete?'complete':id===current&&['failed','blocked','cancelled','interrupted'].includes(job?.status)?'attention':id!=='verification'&&done.has(id)?'complete':id===current&&job?.status==='running'?'running':'pending'}));
 }
+// DOM adaptation of BeautifulUI LoadingState, TaskRows and ToolChips.
+// Original MIT components: https://github.com/slev12397/beautiful-ui
+// See BEAUTIFUL_UI_LICENSE.txt. Demo timers are replaced with real job events.
+const check='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+const chevron='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+const element=(tag,className,text)=>{const e=document.createElement(tag);if(className)e.className=className;if(text)e.textContent=text;return e;};
 export function renderPublishProgress(root,flow){
- const job=flow.job,complete=flow.figma.complete&&!['running','queued'].includes(job?.status);
- root.hidden=!job&&!complete;if(root.hidden)return;
- const list=root.querySelector('ol'),signature=JSON.stringify([job?.id,job?.status,job?.progress,complete]);
+ const job=flow.job,complete=flow.figma.complete&&!['running','queued'].includes(job?.status),live=job?.status==='running';
+ root.hidden=!job&&!complete&&!flow.figma.reason;if(root.hidden)return;
+ const tasks=publishTasks(job,complete),list=root.querySelector('.agentic-task-rows ol'),signature=JSON.stringify([job?.id,job?.status,job?.progress,complete]);
  if(root.dataset.signature!==signature){
+  const opened=new Set([...list.querySelectorAll('details[open]')].map(e=>e.dataset.stage));
   root.dataset.signature=signature;list.replaceChildren();
-  for(const [index,task]of publishTasks(job,complete).entries()){
-   const item=document.createElement('li');item.dataset.taskStatus=task.state;
-   const mark=document.createElement('span');mark.className='preparation-task-mark';mark.setAttribute('aria-hidden','true');
-   if(task.state==='running'){const spinner=document.createElement('span');spinner.className='spinner';mark.append(spinner);}
-   else if(task.state==='complete'){mark.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg>';}
-   else mark.textContent=String(index+1);
-   const body=document.createElement('div'),title=document.createElement('strong'),description=document.createElement('p');title.textContent=task.title;description.textContent=task.description;body.append(title,description);
-   const state=document.createElement('span');state.className='preparation-task-state';state.textContent=({complete:'Complete',running:'In progress',pending:'Waiting',attention:job?.status==='cancelled'?'Stopped':'Needs attention'})[task.state];item.append(mark,body,state);list.append(item);
+  for(const [index,task]of tasks.entries()){
+   const item=element('li');item.dataset.taskStatus=task.state;
+   const details=element('details','agentic-task');details.dataset.stage=task.id;details.open=opened.has(task.id);
+   const summary=element('summary'),mark=element('span','agentic-task-mark');mark.setAttribute('aria-hidden','true');
+   if(task.state==='complete')mark.innerHTML=check;
+   else if(task.state==='attention')mark.textContent='!';
+   else {mark.textContent=String(index+1);if(task.state==='running')mark.classList.add('is-running');}
+   const title=element('span','agentic-task-label',task.title),state=element('span','agentic-task-state',({complete:'Complete',running:'Running',pending:'Waiting',attention:job?.status==='cancelled'?'Stopped':'Blocked'})[task.state]),arrow=element('span','agentic-chevron');arrow.innerHTML=chevron;
+   summary.append(mark,title,state,arrow);details.append(summary,element('p','agentic-task-detail',task.description));item.append(details);list.append(item);
   }
-  const activity=root.querySelector('[data-publish-activity]'),events=job?.progress?.activity||[];activity.replaceChildren();
-  root.querySelector('details').hidden=!events.length;
-  for(const event of events.slice(-6)){const item=document.createElement('li'),message=document.createElement('span'),time=document.createElement('time');message.textContent=event.message;time.dateTime=event.time;time.textContent=new Date(event.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});item.append(message,time);activity.append(item);}
+  const events=job?.progress?.activity||[],activity=root.querySelector('[data-publish-activity]');
+  const openedTools=new Set([...activity.querySelectorAll('details[open]')].map(e=>e.dataset.event));activity.replaceChildren();
+  root.querySelector('[data-publish-activity-details]').hidden=!events.length;
+  root.querySelector('[data-publish-activity-count]').textContent=`${events.length} ${events.length===1?'update':'updates'}`;
+  for(const event of events.slice(-6)){
+   const item=element('li'),details=element('details','agentic-tool-row');details.dataset.event=event.time;details.open=openedTools.has(event.time);
+   const summary=element('summary'),arrow=element('span','agentic-chevron');arrow.innerHTML=chevron;
+   summary.append(arrow,element('span','agentic-tool-label',({access:'Check',variables:'Write',styles:'Style',verification:'Verify'})[event.stage]||'Update'),element('span','agentic-tool-chip',stages.find(s=>s[0]===event.stage)?.[1]||'Foundations'));
+   details.append(summary,element('p','agentic-tool-detail',event.message));item.append(details);activity.append(item);
+  }
  }
+ root.querySelector('[data-publish-steps]').hidden=!job;
+ root.querySelector('[data-publish-step-count]').textContent=`${tasks.filter(t=>t.state==='complete').length} of 4 steps complete`;
  const now=Date.parse(job?.finished)||Date.now(),started=Date.parse(job?.started),elapsed=Number.isFinite(started)?Math.max(0,Math.floor((now-started)/1000)):0;
- root.querySelector('[data-publish-elapsed]').textContent=job?.status==='queued'?'Queued · waiting for background worker':`${elapsed<60?`${elapsed}s`:`${Math.floor(elapsed/60)}m ${elapsed%60}s`} elapsed`;
- root.querySelector('[data-publish-worker]').textContent=flow.listener?.connected?'Background listener connected':job?.status==='queued'?'Background listener disconnected. Your approved draft is saved.':'';
+ const age=Math.max(0,(Date.now()-(Date.parse(job?.updated)||started))/1000),quiet=live&&age>=90;
+ root.dataset.running=String(live&&!quiet);
+ const loader=root.querySelector('[data-publish-loader]');loader.hidden=!live||quiet;
+ if(!loader.childElementCount)for(let i=0;i<9;i++){const cell=element('i');cell.style.animationDelay=`${(i%3+Math.abs(Math.floor(i/3)-1))*90}ms`;loader.append(cell);}
+ root.querySelector('[data-publish-phase]').textContent=complete?'Published to Figma':quiet?'Waiting for an update':job?.status==='queued'?'Queued for publish':live?({access:'Checking Figma',variables:'Publishing variables',styles:'Publishing styles',verification:'Verifying the result'})[job.progress?.stage]||'Starting publish':job?.status==='cancelled'?'Publish stopped':'Publish needs attention';
+ const timer=root.querySelector('[data-publish-elapsed]');timer.hidden=!Number.isFinite(started);timer.textContent=elapsed<60?`${elapsed}s`:`${Math.floor(elapsed/60)}m ${elapsed%60}s`;
+ root.dataset.quiet=String(quiet);
 }

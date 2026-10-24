@@ -73,33 +73,25 @@
       <p id="setup-error" class="setup-error" role="alert" hidden></p>
       <div class="publish-footer setup-footer"><button id="setup-explore" class="button">Explore Builder</button><button id="setup-edit-cancel" class="button" hidden>Cancel edit</button><button id="setup-stop" class="button" hidden>Cancel preparation</button><button id="setup-retry" class="button button-primary" hidden>Retry preparation</button><button id="setup-submit" class="button button-primary" type="submit" form="setup-initial">Prepare foundations</button><button id="setup-review" class="button button-primary" hidden>Review foundations</button></div>
     </dialog>
-    <dialog id="publish-dialog" class="publish-dialog" aria-labelledby="publish-title" aria-describedby="publish-description">
-      <div class="publish-header"><h2 id="publish-title">Publish design system</h2><button id="publish-close" class="icon-button" aria-label="Close publish"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></div>
-      <p id="publish-description" class="publish-intro">Publish foundations to Figma, then build your design system.</p>
-      <p id="publish-simulation" class="notice" hidden>Simulation · no Figma writes or real agent run.</p>
-      <ol class="publish-steps">
-        <li id="publish-figma-step">
-          <div class="publish-step-heading"><span class="publish-step-number" aria-hidden="true">1</span><h3>Publish to Figma</h3><span id="publish-figma-state" class="status">Checking…</span></div>
-          <p>Generate variables and styles from the saved foundation draft.</p>
-          <p id="publish-revision" class="publish-saved"></p>
-          <label id="publish-target-field" class="publish-target" for="publish-figma-url">Figma file URL<input id="publish-figma-url" type="url" required maxlength="1000" placeholder="https://www.figma.com/design/…" autocomplete="off" /></label>
-          <p id="publish-approval-note" class="publish-saved">Publishing approves this saved revision. Unsaved controller previews are excluded.</p>
-          <div class="publish-actions"><button id="publish-figma" class="button button-primary" disabled>Publish to Figma</button><button id="publish-cancel" class="button" hidden>Cancel publish</button><a id="publish-open-figma" class="button" hidden target="_blank" rel="noopener noreferrer">Open in Figma</a></div>
-          <section id="publish-task-progress" class="publish-task-progress" aria-label="Publication progress" hidden>
-            <div class="preparation-tasks"><ol aria-label="Figma publication tasks"></ol></div>
-            <p class="publish-saved" data-publish-elapsed></p><p class="publish-saved" data-publish-worker></p>
-            <details class="publish-activity"><summary>Activity</summary><ol data-publish-activity></ol></details>
-          </section>
-          <p id="publish-status" class="publish-progress" role="status" aria-live="polite">Reading the latest status.</p>
-        </li>
-        <li id="publish-build-step" aria-disabled="true">
-          <div class="publish-step-heading"><span class="publish-step-number" aria-hidden="true">2</span><h3>ds-create build</h3><span id="publish-build-state" class="status">Locked</span></div>
-          <p id="publish-build-description">Available after the current foundations are generated and audited in Figma.</p>
-          <div id="publish-command-section" hidden><p>Paste into your agent to choose the build engine and scope.</p><div class="publish-command"><input id="publish-command" aria-label="Build command" readonly value="ds-create build" /><button id="publish-copy" class="button">Copy command</button></div><p id="publish-copy-feedback" role="status" aria-live="polite"></p></div>
-        </li>
-      </ol>
+    <dialog id="publish-dialog" class="publish-dialog agentic-publish" aria-labelledby="publish-title" aria-describedby="publish-description">
+      <div class="publish-header"><h2 id="publish-title">Publish to Figma</h2><button id="publish-close" class="icon-button" aria-label="Close publish"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <p id="publish-description" class="publish-intro">Publish the saved foundations to your Figma file.</p>
+      <p id="publish-simulation" class="notice" hidden>Simulation · no Figma writes.</p>
+      <div class="agentic-context"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5"/></svg><span id="publish-revision"></span><span id="publish-figma-state" class="status">Checking…</span></div>
+      <div id="publish-approval" class="agentic-approval">
+        <label id="publish-target-field" class="publish-target" for="publish-figma-url">Figma file<input id="publish-figma-url" type="url" required maxlength="1000" placeholder="Paste a Figma file link" autocomplete="off"/></label>
+        <p id="publish-approval-note" class="publish-saved">This publishes the saved revision. Preview edits are excluded.</p>
+      </div>
+      <section id="publish-task-progress" class="agentic-run" aria-label="Publication progress" hidden>
+        <div class="agentic-loading"><span data-publish-loader class="agentic-pixels" aria-hidden="true"></span><strong data-publish-phase></strong><span data-publish-elapsed></span></div>
+        <p id="publish-status" class="agentic-message" role="status" aria-live="polite"></p>
+        <details class="agentic-trace" data-publish-steps><summary><span data-publish-step-count>Publication steps</span></summary><div class="agentic-task-rows"><ol aria-label="Figma publication tasks"></ol></div></details>
+        <details class="agentic-tools" data-publish-activity-details hidden><summary><span data-publish-activity-count>Activity</span></summary><ol data-publish-activity></ol></details>
+      </section>
+      <div class="publish-actions"><button id="publish-figma" class="button button-primary" disabled>Publish to Figma</button><button id="publish-cancel" class="button" hidden>Stop</button><button id="publish-edit-target" class="button" hidden>Change file</button><a id="publish-open-figma" class="button button-primary" hidden target="_blank" rel="noopener noreferrer">Open in Figma</a></div>
+      <section id="publish-build-step" class="agentic-next" aria-disabled="true" hidden><span id="publish-build-state" hidden></span><p id="publish-build-description"></p><div id="publish-command-section" hidden><div class="publish-command"><input id="publish-command" aria-label="Build command" readonly value="ds-create build"/><button id="publish-copy" class="button">Copy</button></div><p id="publish-copy-feedback" role="status" aria-live="polite"></p></div></section>
       <p id="publish-error" role="alert" hidden></p>
-      <div class="publish-footer"><button id="publish-recheck" class="button">Check again</button></div>
+      <button id="publish-recheck" class="button" hidden>Check connection</button>
     </dialog>
     <dialog id="primitive-picker" class="primitive-picker" aria-labelledby="primitive-picker-title">
       <div class="primitive-picker-header"><h2 id="primitive-picker-title">Choose primitive</h2><button id="primitive-picker-close" class="icon-button" aria-label="Close primitive picker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></div>
