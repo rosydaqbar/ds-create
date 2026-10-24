@@ -6,6 +6,10 @@ The user opens Builder through the skill and clicks its controls. Setup and publ
 
 After opening the selected Builder, automatically ensure `kit/mcp/node_modules` exists (`npm ci --prefix kit/mcp` if absent). Start/reuse ONE native background agent in this same workspace, scoped to this session, with the instructions below. Use the host's available native background-agent facility; no agent/IDE allowlist or fixed executable. Do not launch an AI CLI from Node, inject a prompt into another terminal, change permission policies or attach another system. Native delegation must retain the existing authorized Figma tools; a fresh unauthenticated external runner is not equivalent.
 
+The worker must be visible in the launching agent's own native interface as a background task/subagent, named for the selected project. Use the native capability actually available in that host, not an editor CLI, another agent executable or an external launcher. Do not open a different terminal/chat to simulate the host's native subagent. The protocol is shared; the host supplies its own delegation and task display. A hidden internal worker, a shell watcher and a saved report are not substitutes for a task the user can inspect.
+
+Before saying automatic processing is ready, verify the native task exists and is inspectable in that interface, then tell the user its name and the actual native place to view its activity. Keep job receipt, public tool activity, blockers and outcomes in that task's visible execution stream while it waits for subsequent Publish events. Do not invent UI navigation or a task link from a private worker ID. Reuse a proven visible worker rather than spawning another for every heartbeat or click.
+
 The native worker runs:
 
 ```text
@@ -14,7 +18,7 @@ node kit/tools/manager-listen.mjs --workspace /absolute/workspace --slug saved-s
 
 Use structured process arguments, or proper shell quoting for paths. Keep stdin open using the host's persistent terminal/process tool. Read its JSON `listening` receipt, send `{"action":"heartbeat"}` to the same stdin and require `event:ack, action:heartbeat, ready:true`, then verify `manager/listener.json.agentSeenAt`; reuse an existing proven worker rather than starting a duplicate. A Node listener's PID is transport liveness, not proof an agent is watching. Verify the native worker started, acknowledged its heartbeat and keeps checking in before reporting automatic processing ready. An alive listener process alone stays unready and cannot claim jobs. Record the native worker handle in the session's working record so later turns can reuse it. Do not require the end user to operate this terminal.
 
-If this host cannot keep a native agent waiting for process output, report that capability as unavailable during bootstrap. Do not claim automatic publishing works from a saved queue alone. This is a host integration limitation, not a request that the user configure MCP.
+If this host cannot create/display a native background task, retain it waiting for process output, or expose the existing authorized tools to it, report that specific capability as unavailable during bootstrap. A failed native API call is not successful startup. Do not claim automatic publishing works from a saved queue alone or fall back to a named CLI/IDE launcher. This is a host integration limitation, not a request that the user configure MCP.
 
 ## Native worker instructions
 
@@ -41,3 +45,5 @@ After a successful finish acknowledgement, return to waiting on the SAME process
 ## Evidence
 
 Process tests must start a real idle listener, trigger an isolated browser/API Publish event, observe receipt without a user prompt, report stages and acknowledge cancellation/blockers. UI tests cover task rows and activity, including reduced motion and mobile layout. This establishes dispatch/state behavior, not actual model decision quality or real Figma generation. Report observed native-worker availability separately from the listener PID.
+
+Startup evidence includes the native task's user-visible name/location, an actual host observation of that task, and its listener/heartbeat receipts. A worker handle or heartbeat alone does not prove native-interface visibility. If visibility is unverified, keep that requirement unverified and say so; do not present background readiness as complete.
