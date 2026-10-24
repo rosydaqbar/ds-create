@@ -46,7 +46,7 @@ export async function latestPublish(outputDir){
  if(!idOK(p?.id))return null;
  const f=await jobFiles(outputDir,p.id);let job=await readJSON(f.statusFile);
  if(job?.runner==='mcp'&&job.status==='running'){
-  const d=await readJSON(f.deliveryFile);let dead=false;
+  const d=await readJSON(f.deliveryFile);job={...job,cancelRequested:!!d?.cancelRequested,cancelRequestedAt:d?.cancelRequestedAt||null};let dead=false;
   if(Number.isInteger(d?.pid)&&d.pid>0)try{process.kill(d.pid,0);}catch(e){dead=e.code==='ESRCH';}
   if(dead)job=await locked(f.dir,async()=>{
    const current=await readJSON(f.statusFile),latest=await readJSON(f.deliveryFile);
@@ -109,8 +109,9 @@ export async function mcpPublishAction({outputDir,workspace,id,attempt,owner,lea
 export async function cancelMcpJob({outputDir,id}){
  const f=await jobFiles(outputDir,id);return locked(f.dir,async()=>{
   const d=await readJSON(f.deliveryFile),job=await readJSON(f.statusFile);if(!activeMcpJob(job))return {stopped:false};
-  await atomic(f.deliveryFile,{...d,cancelRequested:true});
+  const now=new Date().toISOString(),cancelRequestedAt=d?.cancelRequestedAt||now;
+  await atomic(f.deliveryFile,{...d,cancelRequested:true,cancelRequestedAt});
   if(!d.owner){await atomic(f.statusFile,{...job,status:'cancelled',message:'Queued request cancelled before the background worker received it.',finished:new Date().toISOString()});return {stopped:true};}
-  await atomic(f.statusFile,{...job,message:'Cancellation requested. The background worker must stop safely and acknowledge it; existing Figma changes are preserved.'});return {stopped:false,requested:true};
+  await atomic(f.statusFile,{...job,cancelRequested:true,cancelRequestedAt,updated:now,message:'Cancellation requested. The background worker must stop safely and acknowledge it; existing Figma changes are preserved.'});return {stopped:false,requested:true};
  });
 }

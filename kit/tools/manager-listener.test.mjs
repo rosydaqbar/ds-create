@@ -5,15 +5,16 @@ import {createInterface} from 'node:readline';
 import {fileURLToPath} from 'node:url';
 import {once} from 'node:events';
 import {publishFixture} from './fixtures/manager-publish.mjs';
-import {publishTasks} from '../manager/publish-progress.mjs';
+import {createAgentLease} from '../manager/agent-lease.mjs';
+import {publicationLiveness,publishTasks} from '../manager/publish-progress.mjs';
 const entry=fileURLToPath(new URL('./manager-listen.mjs',import.meta.url));
-async function start(t){
- const f=await publishFixture({runner:'mcp'}),child=spawn(process.execPath,[entry,'--workspace',f.root,'--slug','fixture'],{stdio:['pipe','pipe','pipe']});
+async function start(t,{heartbeat=true,leaseMs,cancelAckMs}={}){
+ const f=await publishFixture({runner:'mcp'}),child=spawn(process.execPath,['--input-type=module','-e',`import {runListener} from ${JSON.stringify(new URL('./manager-listen.mjs',import.meta.url).href)};await runListener(${JSON.stringify({workspace:f.root,session:'fixture',leaseMs,cancelAckMs})});`],{stdio:['pipe','pipe','pipe']});
  let errors='';child.stderr.on('data',b=>errors+=b);const lines=[],pending=[];
  createInterface({input:child.stdout}).on('line',line=>{const data=JSON.parse(line);lines.push(data);for(const p of [...pending])if(p.match(data)){pending.splice(pending.indexOf(p),1);clearTimeout(p.timer);p.resolve(data);}});
- const next=match=>{const old=lines.find(match);if(old)return Promise.resolve(old);return new Promise((resolve,reject)=>{const p={match,resolve,timer:setTimeout(()=>reject(new Error('No worker event: '+errors)),5000)};pending.push(p);});};
+ const next=(match,after=0)=>{const old=lines.slice(after).find(match);if(old)return Promise.resolve(old);return new Promise((resolve,reject)=>{const p={match,resolve,timer:setTimeout(()=>reject(new Error('No worker event: '+errors)),5000)};pending.push(p);});};
  t.after(async()=>{child.stdin.end();if(child.exitCode===null)await Promise.race([once(child,'exit'),new Promise(r=>setTimeout(r,2000))]);if(child.exitCode===null){child.kill('SIGTERM');await once(child,'exit');}await f.cleanup();});
- await next(e=>e.event==='listening');return {...f,child,lines,next,send:value=>child.stdin.write(JSON.stringify(value)+'\n')};
+ await next(e=>e.event==='listening');if(heartbeat){child.stdin.write(JSON.stringify({action:'heartbeat'})+'\n');await next(e=>e.event==='ack'&&e.action==='heartbeat');}return {...f,child,lines,next,send:value=>child.stdin.write(JSON.stringify(value)+'\n')};
 }
 async function queue(f){const r=await f.post('/api/publish-figma',{hash:f.initial.figma.hash,figmaUrl:'https://www.figma.com/design/Fixture/Test'});assert.equal(r.status,202);return r.json();}
 test('prestarted background listener automatically receives a Publish click, reports stages and safely blocks',async t=>{
@@ -41,4 +42,30 @@ test('task display never treats prose, an earlier phase or elapsed time as compl
  assert.deepEqual(publishTasks({status:'running',progress:{stage:'verification',completed:['access','variables','styles']}}).map(t=>t.state),['complete','complete','complete','running']);
  assert.deepEqual(publishTasks({status:'running',progress:{stage:'verification',completed:['access','variables','styles','verification']}}).map(t=>t.state),['complete','complete','complete','running']);
  assert.deepEqual(publishTasks({status:'failed',progress:{stage:'verification',completed:['access','variables','styles']}}).map(t=>t.state),['complete','complete','complete','attention']);
+});
+test('an alive Node listener cannot claim queued work before an actual agent heartbeat',async t=>{
+ const f=await start(t,{heartbeat:false});await queue(f);await new Promise(r=>setTimeout(r,600));
+ const before=await f.flow();assert.equal(before.job.status,'queued');assert.equal(before.listener.transportConnected,true);assert.equal(before.listener.connected,false);assert.equal(f.lines.some(e=>e.event==='job'),false);
+ f.send({action:'heartbeat'});await f.next(e=>e.event==='ack'&&e.action==='heartbeat');const job=await f.next(e=>e.event==='job');assert.equal((await f.flow()).listener.connected,true);
+ const original=(await f.flow()).job,index=f.lines.length;f.send({action:'heartbeat'});await f.next(e=>e.event==='ack'&&e.action==='heartbeat',index);const after=(await f.flow()).job;
+ assert.equal(after.updated,original.updated);assert.deepEqual(after.progress,original.progress,'connection heartbeats never simulate progress');
+ f.send({action:'finish',job_id:job.job_id,outcome:'blocked',message:'Fixture finished.'});await f.next(e=>e.event==='ack'&&e.action==='finish');
+});
+test('missing native heartbeat fences a live-process owned job as blocked, never cancelled or successful',async t=>{
+ const f=await start(t,{leaseMs:1400});await queue(f);await f.next(e=>e.event==='job');await f.next(e=>e.event==='worker-expired');if(f.child.exitCode===null)await once(f.child,'exit');
+ const flow=await f.flow();assert.equal(flow.job.status,'blocked');assert.match(flow.job.message,/stopped checking in/);assert.equal(flow.listener.connected,false);assert.equal(flow.build.available,false);
+});
+test('cancellation has a bounded acknowledgement deadline even while its transport remains alive',async t=>{
+ const f=await start(t,{leaseMs:10000,cancelAckMs:100});await queue(f);await f.next(e=>e.event==='job');await f.post('/api/publish-cancel',{});
+ assert.equal((await f.flow()).job.cancelRequested,true);assert.ok((await f.flow()).job.cancelRequestedAt);
+ await f.next(e=>e.event==='cancel-requested');await f.next(e=>e.event==='worker-expired');if(f.child.exitCode===null)await once(f.child,'exit');
+ const flow=await f.flow();assert.equal(flow.job.status,'blocked');assert.match(flow.job.message,/did not acknowledge cancellation/);assert.equal(flow.build.available,false);
+});
+test('agent lease expires irreversibly; UI exposes stopping and quiet progress without inventing activity',()=>{
+ let now=0;const lease=createAgentLease({now:()=>now,durationMs:1000});assert.equal(lease.inspect().ready,false);lease.heartbeat();assert.equal(lease.inspect().ready,true);now=999;assert.equal(lease.inspect().expired,false);now=1000;assert.equal(lease.inspect().ready,false);assert.throws(()=>lease.heartbeat(),/expired/);
+ const at='2026-10-24T10:00:00Z',job={status:'running',started:at,updated:at,progress:{stage:'access',activity:[{time:at,message:'Reading fonts'}]}};
+ assert.equal(publicationLiveness({job},Date.parse(at)+1000).animate,true);
+ assert.equal(publicationLiveness({job},Date.parse(at)+91000).animate,false);
+ assert.match(publicationLiveness({job},Date.parse(at)+91000).notice,/No progress/);
+ const stopping=publicationLiveness({job:{...job,cancelRequested:true,cancelRequestedAt:at}},Date.parse(at)+61000);assert.equal(stopping.animate,false);assert.match(stopping.notice,/has not acknowledged cancellation/);
 });

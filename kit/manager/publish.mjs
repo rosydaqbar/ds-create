@@ -27,7 +27,8 @@ export function setupPublish() {
     $('publish-figma').disabled = !next.figma.canStart || stale || submitting;
     $('publish-figma').textContent = complete ? 'Published' : queued ? 'Queued' : running ? 'Publishing…' : next.job ? 'Try again' : 'Publish to Figma';
     $('publish-cancel').hidden = !running;
-    $('publish-cancel').disabled = submitting;
+    $('publish-cancel').disabled = submitting || !!next.job?.cancelRequested;
+    $('publish-cancel').textContent = next.job?.cancelRequested ? 'Stopping…' : 'Stop';
     $('publish-status').textContent = stale ? 'The saved draft changed. Close Publish and review the new revision before continuing.' : complete ? 'Foundations are available in Figma. Continue to step 2.' : next.figma.reason || next.job?.message || 'Publish this saved revision to the selected Figma file. Your background worker checks fonts, writes foundations, and verifies the result.';
     $('publish-open-figma').hidden = !complete || !next.figma.url;
     if (next.figma.url) $('publish-open-figma').href = next.figma.url;

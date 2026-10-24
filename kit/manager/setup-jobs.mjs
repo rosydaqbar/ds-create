@@ -44,7 +44,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
     const progress=/^[0-9a-f-]{36}$/.test(r.jobId || '') ? await readProgress(path.join(outputDir,'manager/setup-jobs',r.jobId)) : null;
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
       files:r.files || [], inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
-      canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
+      cancelRequested:!!r.cancelRequested,cancelRequestedAt:r.cancelRequestedAt||null, canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
       integration:runner==='mcp'?mcpConfiguration(workspace,slug,'prepare'):null, runner:r.runner||runner, progress, updatedAt:r.updated || null, canStop:activeSetup(r) && (r.runner==='mcp'||!!child && childId === r.jobId) };
   }
   async function guard() {
@@ -66,7 +66,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
     const request = {id,slug,inputSlug,projectName:r.projectName || null,workspace,outputDir,runner,program:runner==='mcp'?null:program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
     await saveSetup(path.join(dir,'request.json'),request);
     if(runner==='mcp')await initPrepareDelivery(outputDir,id);
-    await saveSetup(file,{...r,runner,status:'queued',jobId:id,pid:undefined,readyInputHash:null,questions:[],message:runner==='mcp'?'Your saved context is queued for the background worker.':'Starting the local agent…'});
+    await saveSetup(file,{...r,runner,status:'queued',cancelRequested:false,cancelRequestedAt:null,jobId:id,pid:undefined,readyInputHash:null,questions:[],message:runner==='mcp'?'Your saved context is queued for the background worker.':'Starting the local agent…'});
     if(runner==='mcp')return {saved:true,jobId:id,status:'queued'};
     childId=id;
     child=spawn(process.execPath,[fileURLToPath(new URL('./setup-worker.mjs',import.meta.url)),path.join(dir,'request.json')],{cwd:workspace,stdio:'ignore',shell:false});

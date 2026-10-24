@@ -88,8 +88,9 @@ export async function mcpPrepareAction({outputDir,workspace,id,owner,lease,attem
 export async function cancelMcpPreparation(output,id){
  const f=await files(output,id);return locked(f.dir,async()=>{
   const s=await readJSON(stateFile(output)),d=await readJSON(f.deliveryFile);if(s?.jobId!==id||s.runner!=='mcp'||!activeSetup(s))return {stopped:false};
-  await saveSetup(f.deliveryFile,{...d,cancelRequested:true});
+  const now=new Date().toISOString(),cancelRequestedAt=d?.cancelRequestedAt||now;
+  await saveSetup(f.deliveryFile,{...d,cancelRequested:true,cancelRequestedAt});
   if(!d.owner){await saveSetup(stateFile(output),{...s,status:'cancelled',readyInputHash:null,questions:[],updated:new Date().toISOString(),message:'Queued preparation cancelled before the background worker received it. Your context is saved.'});return {stopped:true};}
-  await saveSetup(stateFile(output),{...s,message:'Cancellation requested. Waiting for the background worker to stop safely and acknowledge it.',updated:new Date().toISOString()});return {stopped:false,requested:true};
+  await saveSetup(stateFile(output),{...s,cancelRequested:true,cancelRequestedAt,updated:now,message:'Cancellation requested. Waiting for the background worker to stop safely and acknowledge it.',updated:new Date().toISOString()});return {stopped:false,requested:true};
  });
 }

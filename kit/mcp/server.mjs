@@ -14,7 +14,7 @@ import {figmaPrompt} from '../manager/figma-prompt.mjs';
 const session=z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).describe('Stable Builder session id, not the project display name or input folder.');
 const uuid=z.string().uuid();
 const result=data=>({content:[{type:'text',text:JSON.stringify(data)}],structuredContent:data});
-const publicJob=job=>job?Object.fromEntries(['id','runner','status','hash','figmaUrl','message','started','updated','finished','progress'].filter(k=>job[k]!==undefined).map(k=>[k,job[k]])):null;
+const publicJob=job=>job?Object.fromEntries(['id','runner','status','hash','figmaUrl','message','started','updated','finished','progress','cancelRequested','cancelRequestedAt'].filter(k=>job[k]!==undefined).map(k=>[k,job[k]])):null;
 
 export function createDsCreateMcp(workspace){
  const server=new McpServer({name:'ds-create',version:'0.2.0'}, {instructions:'Operate only the selected local workspace. Preparation claims saved context and stops at a validated local draft awaiting review; it has no Figma authorization. Publish claims an already approved Builder request; it does not write Figma itself. Use your configured Figma tools to carry out its exact instructions, report progress before writes and finish with real export/audit evidence. A queued job cannot wake an idle chat. Never change approvals or fabricate completed output.'});
