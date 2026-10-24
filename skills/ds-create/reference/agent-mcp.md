@@ -4,7 +4,7 @@ DS Create Builder communicates with an agent through standard MCP tools. It does
 
 ## Automatic worker bootstrap
 
-Read `reference/background-worker.md` and attach the launching agent's native background worker before reporting init-web ready. The portable listener owns its private MCP client connection; it uses this server through the official SDK. There is no host MCP-settings registration or user connection step. Assume the agent already has its Figma connection. Do not introduce DS Create OAuth or new Figma-client registration.
+The parent executing init-web directly spawns one subagent through its own native delegation/background tool (`reference/background-worker.md`), gives it the selected session and existing Figma tools, and leaves it waiting for Builder events. Resume reuses that same native subagent. The portable listener owns its private MCP client connection through the official SDK; MCP delivers jobs but does not spawn the agent. No secondary task-display API, agent/IDE CLI, host MCP-settings registration or user connection step is required. Report the actual native subagent name/handle and startup acknowledgement. Assume the agent already has its Figma connection; do not introduce DS Create OAuth or new Figma-client registration.
 
 The protocol below is internal to that listener and is also usable by existing integrations. Authentication, model choice and native background-agent APIs remain host-owned. No specific agent/IDE binary is launched by Builder.
 
