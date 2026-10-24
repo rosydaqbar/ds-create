@@ -7,6 +7,7 @@ import { getState, getPublishStatus } from './state.mjs';
 import { createFigmaJobs, PublishError } from './figma-jobs.mjs';
 import { createSetupJobs, uploadLimits } from './setup-jobs.mjs';
 import { preparedFonts } from './fonts/catalog.mjs';
+import { workerConnectionStatus } from './listener-status.mjs';
 
 export function createManagerServer({ outputDir, workspace = path.resolve(outputDir, '../../..'), jobsOptions = {}, setupOptions = {} }) {
   const managerDir = path.join(outputDir, 'manager');
@@ -16,7 +17,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
   const routes = new Map([
     ['/', ['index.html', 'text/html; charset=utf-8']],
     ...['app.js', 'controls.js'].map(file => [`/${file}`, [file, 'text/javascript; charset=utf-8']]),
-    ...['canvas.mjs', 'spacing.mjs', 'motion.mjs', 'foundation-controls.mjs', 'publish.mjs', 'publish-progress.mjs', 'setup.mjs', 'preparation.mjs', 'iconography.mjs', 'icons/catalog.mjs', 'ui-motion.mjs', 'fonts/catalog.mjs'].map(file => [`/${file}`, [file, 'text/javascript; charset=utf-8']]),
+    ...['canvas.mjs', 'spacing.mjs', 'motion.mjs', 'foundation-controls.mjs', 'publish.mjs', 'publish-progress.mjs', 'setup.mjs', 'preparation.mjs', 'worker-connection.mjs', 'iconography.mjs', 'icons/catalog.mjs', 'ui-motion.mjs', 'fonts/catalog.mjs'].map(file => [`/${file}`, [file, 'text/javascript; charset=utf-8']]),
     ...['styles.css', 'docs-presentation.css', 'chrome.css'].map(file => [`/${file}`, [file, 'text/css; charset=utf-8']]),
     ['/icons/LUCIDE-LICENSE.txt', ['icons/LUCIDE-LICENSE.txt', 'text/plain; charset=utf-8']],
     ...preparedFonts.map(font => [`/fonts/${font.file}`, [`fonts/${font.file}`, 'font/ttf']]),
@@ -55,6 +56,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
         } finally { transitioning=false; }
       }
       if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }).end(); return; }
+      if (route === '/api/worker') { json(200, await workerConnectionStatus(outputDir, workspace)); return; }
       if (['/api/state', '/api/health', '/api/publish-status', '/api/publish-flow', '/api/setup-flow'].includes(route)) {
         const body = route === '/api/setup-flow' ? { ...await setup.status(), csrfToken } : route === '/api/publish-flow' ? { ...await jobs.status(), csrfToken } : route === '/api/publish-status' ? await getPublishStatus(outputDir) : route === '/api/state' ? await getState(outputDir) : { service: 'ds-create-manager', instance, pid: process.pid, outputDir };
         json(200, body); return;

@@ -100,3 +100,20 @@ test('source-derived preflight executes read-only and requires every exact font 
  assert.deepEqual(evaluatePreflight(draft,actual).missing,[{family:'Fixture Font',style:'Medium'}],'similar family is not an approved substitution');
  assert.throws(()=>evaluatePreflight(draft,{...actual,fonts:actual.fonts.slice(1)}),/every approved font/);
 });
+test('web worker check offers the scoped spawn prompt only without an actual native check-in',async t=>{
+ const f=await start(t,{heartbeat:false}),{readFile}=await import('node:fs/promises'),path=await import('node:path');
+ const ledgerFile=path.join(f.output,'ds-create-ledger.json'),before=await readFile(ledgerFile,'utf8');
+ const disconnected=await fetch(f.url+'/api/worker').then(r=>r.json());assert.equal(disconnected.connected,false);assert.ok(disconnected.recoveryPrompt.includes(JSON.stringify(f.root)));assert.match(disconnected.recoveryPrompt,/session "fixture"/);assert.match(disconnected.recoveryPrompt,/native background\/subagent tool/);
+ assert.equal(disconnected.lastSeenAt,null,'live Node PID alone is not an agent check-in');
+ f.send({action:'heartbeat'});await f.next(e=>e.event==='ack'&&e.action==='heartbeat');
+ const connected=await fetch(f.url+'/api/worker').then(r=>r.json());assert.equal(connected.connected,true);assert.equal(connected.recoveryPrompt,null);assert.ok(connected.lastSeenAt);assert.equal(await readFile(ledgerFile,'utf8'),before,'read-only checks cannot approve or queue anything');assert.equal((await f.flow()).job,null);
+});
+test('stale or future check-in never hides the web recovery prompt, and a new native check-in clears it',async t=>{
+ const f=await start(t),{readFile,writeFile}=await import('node:fs/promises'),path=await import('node:path');const file=path.join(f.output,'manager/listener.json'),identity=JSON.parse(await readFile(file,'utf8'));
+ for(const offset of [-200000,200000]){
+  await writeFile(file,JSON.stringify({...identity,agentSeenAt:new Date(Date.now()+offset).toISOString()}));
+  const stale=await fetch(f.url+'/api/worker').then(r=>r.json());assert.equal(stale.connected,false);assert.ok(stale.recoveryPrompt);
+ }
+ const after=f.lines.length;f.send({action:'heartbeat'});await f.next(e=>e.event==='ack'&&e.action==='heartbeat',after);
+ const current=await fetch(f.url+'/api/worker').then(r=>r.json());assert.equal(current.connected,true);assert.equal(current.recoveryPrompt,null);
+});

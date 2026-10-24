@@ -7,6 +7,7 @@ import { createMotionPreview } from './motion.mjs';
 import { setupPublish } from './publish.mjs';
 import { iconographyContent } from './iconography.mjs';
 import { setupWeb } from './setup.mjs';
+import { setupWorkerConnection } from './worker-connection.mjs';
 
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -354,6 +355,7 @@ theme(savedTheme === 'dark' || !savedTheme && matchMedia('(prefers-color-scheme:
 $('theme').addEventListener('click', () => theme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
 installInteractionMotion();
 const publisher = setupPublish();
+setupWorkerConnection();
 const setup = setupWeb({ onChange: refresh });
 $('search-icon').innerHTML = icon('search');
 $('nav-search').addEventListener('input', renderNav);
