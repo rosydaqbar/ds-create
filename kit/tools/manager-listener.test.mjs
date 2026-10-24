@@ -7,6 +7,7 @@ import {once} from 'node:events';
 import {publishFixture} from './fixtures/manager-publish.mjs';
 import {createAgentLease} from '../manager/agent-lease.mjs';
 import {publicationLiveness,publishTasks} from '../manager/publish-progress.mjs';
+import {preflightOperation,evaluatePreflight,requiredFonts} from '../manager/publish-preflight.mjs';
 const entry=fileURLToPath(new URL('./manager-listen.mjs',import.meta.url));
 async function start(t,{heartbeat=true,leaseMs,cancelAckMs}={}){
  const f=await publishFixture({runner:'mcp'}),child=spawn(process.execPath,['--input-type=module','-e',`import {runListener} from ${JSON.stringify(new URL('./manager-listen.mjs',import.meta.url).href)};await runListener(${JSON.stringify({workspace:f.root,session:'fixture',leaseMs,cancelAckMs})});`],{stdio:['pipe','pipe','pipe']});
@@ -19,9 +20,10 @@ async function start(t,{heartbeat=true,leaseMs,cancelAckMs}={}){
 async function queue(f){const r=await f.post('/api/publish-figma',{hash:f.initial.figma.hash,figmaUrl:'https://www.figma.com/design/Fixture/Test'});assert.equal(r.status,202);return r.json();}
 test('prestarted background listener automatically receives a Publish click, reports stages and safely blocks',async t=>{
  const f=await start(t);assert.equal((await f.flow()).listener.connected,true);assert.equal(f.lines.some(e=>e.event==='job'),false);
- const q=await queue(f),job=await f.next(e=>e.event==='job');assert.equal(job.kind,'publish');assert.equal(job.job_id,q.job.id);assert.equal(job.lease,undefined);assert.match(job.instructions,/already has its Figma connection/);
+ const q=await queue(f),job=await f.next(e=>e.event==='job');assert.equal(job.kind,'publish');assert.equal(job.job_id,q.job.id);assert.equal(job.lease,undefined);assert.equal(job.operation.kind,'figma-preflight');assert.equal(job.operation.readOnly,true);
+ f.send({action:'preflight',job_id:job.job_id,result:{fonts:[],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});const checked=await f.next(e=>e.event==='ack'&&e.action==='preflight');assert.equal(checked.result.passed,true);assert.equal(checked.result.next_operation.kind,'generate-foundations');
  f.send({action:'progress',job_id:job.job_id,stage:'variables',completed_stages:['access'],message:'Fonts verified. Creating the approved variable modes.'});await f.next(e=>e.event==='ack'&&e.action==='progress');
- const flow=await f.flow();assert.deepEqual(publishTasks(flow.job).map(t=>t.state),['complete','running','pending','pending']);assert.equal(flow.job.progress.activity.length,1);assert.equal(flow.build.available,false);
+ const flow=await f.flow();assert.deepEqual(publishTasks(flow.job).map(t=>t.state),['complete','running','pending','pending']);assert.equal(flow.job.progress.activity.length,2);assert.equal(flow.build.available,false);
  f.send({action:'finish',job_id:job.job_id,outcome:'blocked',message:'Synthetic permission blocker.'});await f.next(e=>e.event==='ack'&&e.action==='finish');assert.equal((await f.flow()).job.status,'blocked');
 });
 test('one listener per session; cancelling a claimed job reaches its owner and never unlocks build',async t=>{
@@ -68,4 +70,33 @@ test('agent lease expires irreversibly; UI exposes stopping and quiet progress w
  assert.equal(publicationLiveness({job},Date.parse(at)+91000).animate,false);
  assert.match(publicationLiveness({job},Date.parse(at)+91000).notice,/No progress/);
  const stopping=publicationLiveness({job:{...job,cancelRequested:true,cancelRequestedAt:at}},Date.parse(at)+61000);assert.equal(stopping.animate,false);assert.match(stopping.notice,/has not acknowledged cancellation/);
+});
+
+test('native preflight result controls execution: generation refused before check and missing font ends job immediately',async t=>{
+ const f=await start(t);const {readFile,writeFile}=await import('node:fs/promises');const path=await import('node:path');
+ const file=path.join(f.output,'foundations.json'),draft=JSON.parse(await readFile(file,'utf8'));
+ draft.textStyles=[{name:'type/body',fontFamily:'Fixture Font',fontStyle:'Regular',fontSize:16,lineHeight:24}];
+ await writeFile(file,JSON.stringify(draft));f.initial=await f.flow();
+ await queue(f);const job=await f.next(e=>e.event==='job');
+ f.send({action:'progress',job_id:job.job_id,stage:'variables',message:'Cannot start writing yet.'});await f.next(e=>e.event==='error'&&e.message.includes('preflight'));
+ assert.equal((await f.flow()).job.progress.activity.length,0);
+ f.send({action:'preflight',job_id:job.job_id,result:{fonts:[{family:'Other Font',style:'Regular',available:true}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});await f.next(e=>e.event==='error'&&e.message.includes('approved font set'));
+ assert.equal((await f.flow()).job.status,'running');
+ f.send({action:'preflight',job_id:job.job_id,result:{fonts:[{family:'Fixture Font',style:'Regular',available:false}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});
+ const blocked=await f.next(e=>e.event==='ack'&&e.action==='preflight');assert.equal(blocked.result.status,'blocked');assert.equal(blocked.result.next_operation,undefined);
+ const flow=await f.flow();assert.equal(flow.job.status,'blocked');assert.match(flow.job.message,/Fixture Font \/ Regular/);assert.equal(flow.build.available,false);
+ const receipt=JSON.parse(await readFile(path.join(f.output,'manager/jobs',job.job_id,'mcp-delivery.json'),'utf8'));assert.equal(receipt.preflight.passed,false);assert.equal(receipt.preflight.sourceHash,job.source_hash);
+ const index=f.lines.length;await queue(f);const retry=await f.next(e=>e.event==='job',index);assert.equal(retry.job_id,job.job_id,'same saved approval, new attempt');
+ f.send({action:'finish',job_id:retry.job_id,outcome:'blocked',message:'Fixture cleanup.'});await f.next(e=>e.event==='ack'&&e.action==='finish',index);
+});
+test('source-derived preflight executes read-only and requires every exact font result',async()=>{
+ assert.deepEqual(requiredFonts({textStyles:[{fontFamily:'Fixture Font'}]}),[{family:'Fixture Font',style:'Regular'}],'existing canonical default remains supported');
+ const draft={textStyles:[{fontFamily:'Fixture Font',fontStyle:'Regular'},{fontFamily:'Fixture Font',fontStyle:'Medium'},{fontFamily:'Fixture Font',fontStyle:'Regular'}]};
+ const operation=preflightOperation({figmaUrl:'https://www.figma.com/design/Selected/File',hash:'approved'},draft);
+ const mock={listAvailableFontsAsync:async()=>[{fontName:{family:'Fixture Font',style:'Regular'}},{fontName:{family:'Fixture Font Pro',style:'Medium'}}],variables:{getLocalVariableCollectionsAsync:async()=>[{variableIds:['a','b']}]},getLocalTextStylesAsync:async()=>[],getLocalEffectStylesAsync:async()=>[]};
+ const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
+ const actual=await new AsyncFunction('figma',operation.code)(mock);
+ assert.equal(operation.fileKey,'Selected');assert.deepEqual(actual.inventory,{collections:1,variables:2,textStyles:0,effectStyles:0});
+ assert.deepEqual(evaluatePreflight(draft,actual).missing,[{family:'Fixture Font',style:'Medium'}],'similar family is not an approved substitution');
+ assert.throws(()=>evaluatePreflight(draft,{...actual,fonts:actual.fonts.slice(1)}),/every approved font/);
 });

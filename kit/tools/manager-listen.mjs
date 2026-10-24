@@ -48,18 +48,19 @@ input.on('close',()=>{if(!closing)void cleanup();});
 input.on('line',line=>{commands=commands.then(async()=>{
  let command;
  try{
-  command=JSON.parse(line);if(!command||!['heartbeat','progress','finish','stop'].includes(command.action))throw new Error('Use heartbeat, progress, finish or stop.');
+  command=JSON.parse(line);if(!command||!['heartbeat','progress','preflight','finish','stop'].includes(command.action))throw new Error('Use heartbeat, progress, preflight, finish or stop.');
   if(command.action==='stop'){await cleanup();return;}
   if(command.action==='heartbeat'){if(Object.keys(command).some(k=>k!=='action'))throw new Error('Heartbeat takes no fields.');agentLease.heartbeat();await saveAgentSeen();emit({event:'ack',action:'heartbeat',ready:true});return;}
   if(agentLease.inspect().expired)throw new Error('Agent lease expired; stop this connection.');
   if(!current||command.job_id!==current.job_id)throw new Error('This command does not match the active job.');
   const {action,job_id,...fields}=command;
-  const allowed=action==='progress'?['message','stage','completed_stages']:['outcome','message','questions'];
+  if(action==='preflight'&&current.kind!=='publish')throw new Error('Preflight belongs only to publication.');
+  const allowed=action==='progress'?['message','stage','completed_stages']:action==='preflight'?['result']:['outcome','message','questions'];
   if(Object.keys(fields).some(key=>!allowed.includes(key)))throw new Error('Unexpected worker action fields.');
   agentLease.heartbeat();await saveAgentSeen();
   const result=await call(`ds_create_${current.kind}_${action}`,{job_id,attempt:current.attempt,lease:current.lease,...fields});
   emit({event:'ack',action,job_id,result});
-  if(action==='finish')current=null;
+  if(action==='finish'||action==='preflight'&&result.status==='blocked')current=null;
  }catch(error){emit({event:'error',job_id:command?.job_id,message:error.message});}
  });});
 try{
@@ -87,10 +88,10 @@ try{
   }
   if(!current&&agentLease.inspect().ready){
    for(const kind of ['publish','prepare']){
-    const result=await call(`ds_create_${kind}`,{wait_seconds:0});
+    const result=await call(`ds_create_${kind}`,{wait_seconds:0,...(kind==='publish'?{execution:'stepped'}:{})});
     if(result.status==='running'){
      current={...result,kind};cancelNotified=false;cancelSince=null;const {lease,attempt,...publicJob}=current;
-     publicJob.instructions+='\nListener transport: the ds_create tools mentioned above are invoked internally for you. Send progress and finish JSON lines to this same persistent process stdin, with action, job_id and typed fields. Do not claim again or register tools in the host. Acknowledge cancellation through finish cancelled; after a finish ack, keep waiting for the next job.';
+     publicJob.instructions+='\nListener transport: the ds_create tools mentioned above are invoked internally for you. Send progress, preflight and finish JSON lines to this same persistent process stdin, with action, job_id and typed fields. For preflight send {action:"preflight",job_id,result:THE_ACTUAL_RETURNED_OBJECT}. On preflight ack status blocked, this job has ended: return to waiting without another finish. On passed:true, immediately execute result.next_operation.instructions on this same job; do not wait for another click or claim. Do not register tools in the host. Acknowledge cancellation through finish cancelled; after a finish ack, keep waiting for the next job.';
      emit({event:'job',...publicJob});break;
     }
    }

@@ -95,6 +95,8 @@ Ask the user to review the saved draft in Builder and either approve it in chat 
 # 5. Generate the approved foundations in Figma
 
 Only after saved-draft approval (chat or the explicit Builder Publish action):
+
+The built-in listener first receives the bounded read-only preflight operation in `reference/background-worker.md`. For that operation, load the applicable Figma tool skill; defer the global generation/spec/input reread until its result returns the generation continuation. Submit the actual result immediately: missing font faces end the attempt automatically rather than leaving an agent to resume a long init prompt. The steps below apply to the returned generation continuation.
 1. Check Figma MCP `whoami`, obtain the user's file link or permission to create one, verify edit access with a read-only call and list available fonts. Missing access/fonts pauses this stage; Builder remains available. Load the required Figma skills before tool calls. Do not silently replace an approved font.
 2. Complete step 2: verify Figma for every system; inventory existing content (`workflow/INITIATOR.md` §2). Compare frozen values and proposed renames with the draft. If inventory, a font substitution or another input changes the draft, save a new revision and return to review. Never write before its approval.
 3. Complete step 3: summarize file, approved draft revision, scope/modes and approved renames. Reuse the user's recorded foundation approval when nothing changed; ask only about newly introduced choices. Save the Figma link and confirmation in answers/ledger. Check the current source hash still matches the approval immediately before writing.

@@ -4,12 +4,13 @@ import {z} from 'zod';
 import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
-import {getState} from '../manager/state.mjs';
+import {getState,readJSON} from '../manager/state.mjs';
 import {sessionOutput,latestPublish,claimMcpJob,mcpPublishAction,cancelMcpJob,clean} from '../manager/publish-queue.mjs';
 import {createSetupJobs} from '../manager/setup-jobs.mjs';
 import {latestMcpPreparation,claimMcpPreparation,mcpPrepareAction,cancelMcpPreparation} from '../manager/setup-queue.mjs';
 import {setupPrompt} from '../manager/setup-prompt.mjs';
 import {figmaPrompt} from '../manager/figma-prompt.mjs';
+import {preflightOperation} from '../manager/publish-preflight.mjs';
 
 const session=z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).describe('Stable Builder session id, not the project display name or input folder.');
 const uuid=z.string().uuid();
@@ -28,17 +29,19 @@ export function createDsCreateMcp(workspace){
   const outputDir=await sessionOutput(workspace,args.session),[state,job]=await Promise.all([getState(outputDir),latestPublish(outputDir)]);
   return {session:args.session,source:state.source,initDone:state.initDone,job:publicJob(job),nextAction:'Queue an approved revision and Figma target in Builder, then call ds_create_publish.'};
  },true);
- tool('ds_create_publish','Claim one user-approved publication queued in Builder. Returns a lease and exact Figma continuation instructions, not completed publication. Use the host agent\'s configured Figma tools; no AI subprocess is launched. Optional bounded wait supports an active agent waiting for the user in Builder.',{session,wait_seconds:z.number().int().min(0).max(20).default(0)},async(args,extra)=>{
+ tool('ds_create_publish','Claim one user-approved publication queued in Builder. Stepped execution returns a concrete read-only Figma preflight first; submit its result to receive the continuation. Uses the host agent\'s configured Figma tools, with no AI subprocess.',{session,wait_seconds:z.number().int().min(0).max(20).default(0),execution:z.enum(['legacy','stepped']).default('legacy')},async(args,extra)=>{
   const outputDir=await sessionOutput(workspace,args.session),deadline=Date.now()+args.wait_seconds*1000;
   for(;;){
    if(closing||extra.signal.aborted)throw new Error('Publication wait cancelled.');
    const job=await latestPublish(outputDir);
    if(job?.runner==='mcp'&&['queued','running'].includes(job.status)){
     const key=outputDir+'/'+job.id,previous=owned.get(key),lease=previous?.lease||randomUUID();
-    const claimed=await claimMcpJob({outputDir,workspace,id:job.id,owner,lease});
+    const claimed=await claimMcpJob({outputDir,workspace,id:job.id,owner,lease,execution:args.execution});
     const record={kind:'publish',outputDir,workspace,id:job.id,attempt:claimed.attempt,owner,lease};owned.set(key,record);
     if(closing||extra.signal.aborted){await mcpPublishAction({...record,action:'finish',outcome:'blocked',message:'Background worker disconnected during handoff. Inspect partial output before retrying.'});owned.delete(key);throw new Error('MCP connection closed during handoff.');}
     const r=claimed.request;
+    if(args.execution==='stepped')return {status:'running',session:args.session,job_id:job.id,attempt:claimed.attempt,lease,revision:r.revision,source_hash:r.hash,figma_url:r.figmaUrl,reused:claimed.reused,
+     operation:preflightOperation(r,await readJSON(path.join(outputDir,'foundations.json'))),instructions:'Execute the returned read-only operation first using the already-connected Figma tool. Send its actual result through ds_create_publish_preflight. Do not write Figma or load the full generation workflow until its result returns the continuation. Existing approval is retained.'};
     return {status:'running',session:args.session,job_id:job.id,attempt:claimed.attempt,lease,revision:r.revision,source_hash:r.hash,figma_url:r.figmaUrl,reused:claimed.reused,
      instructions:figmaPrompt(r,path.join(outputDir,'manager/jobs',job.id,'request.json'))+'\nMCP protocol: use ds_create_publish_progress with this session/job_id/attempt/lease before each Figma write and at meaningful stages. A cancellation result means stop and finish cancelled. Finish through ds_create_publish_finish with the same lease; completion requires the real confirmed export and source-bound audit. Keep this MCP connection open until finishing. Do not use the retired manager-agent CLI or depend on native subagents.'};
    }
@@ -48,6 +51,13 @@ export function createDsCreateMcp(workspace){
  });
  const credentials={session,job_id:uuid,attempt:uuid,lease:uuid};
  const actionArgs=async args=>({outputDir:await sessionOutput(workspace,args.session),workspace,id:args.job_id,attempt:args.attempt,lease:args.lease,owner});
+ const fontResult=z.object({family:z.string().min(1).max(300),style:z.string().min(1).max(300),available:z.boolean()}).strict();
+ tool('ds_create_publish_preflight','Submit the actual read-only Figma operation result. Missing approved fonts end this attempt immediately as blocked. A passing result returns generation instructions; it does not prove edit access or complete publication.',{...credentials,result:z.object({fonts:z.array(fontResult).max(1000),inventory:z.object({collections:z.number().int().nonnegative(),variables:z.number().int().nonnegative(),textStyles:z.number().int().nonnegative(),effectStyles:z.number().int().nonnegative()}).strict()}).strict()},async args=>{
+  const a=await actionArgs(args),r=await mcpPublishAction({...a,action:'preflight',preflight:args.result});
+  if(r.status==='blocked')owned.delete(a.outputDir+'/'+a.id);
+  if(r.passed){const requestFile=path.join(a.outputDir,'manager/jobs',a.id,'request.json'),request=await readJSON(requestFile);return {...r,next_operation:{kind:'generate-foundations',instructions:figmaPrompt(request,requestFile)}};}
+  return r;
+ });
  tool('ds_create_publish_progress','Validate source/input/approval and lease, then report public progress before Figma writes. Explicit stage and completed_stages drive task rows; completed publication still requires export/audit verification. cancelRequested:true means stop safely.',{...credentials,message:z.string().trim().min(1).max(2000),stage:z.enum(['access','variables','styles','verification']).optional(),completed_stages:z.array(z.enum(['access','variables','styles','verification'])).max(4).optional()},async args=>mcpPublishAction({...await actionArgs(args),action:'progress',message:args.message,stage:args.stage,completed_stages:args.completed_stages}));
  tool('ds_create_publish_finish','Finish the owned attempt as completed, blocked, failed or cancelled. Completed independently requires real matching confirmed Figma output, current approval and a passing full file audit; a message alone cannot unlock build.',{...credentials,outcome:z.enum(['completed','blocked','failed','cancelled']),message:z.string().trim().min(1).max(2000)},async args=>{
   const a=await actionArgs(args),finished=await mcpPublishAction({...a,action:'finish',outcome:args.outcome,message:args.message});owned.delete(a.outputDir+'/'+a.id);return finished;

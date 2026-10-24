@@ -22,7 +22,7 @@ Keep the MCP connection open until finishing. Disconnect/dead process blocks its
 
 ## Publication
 
-After review, the user approves the saved hash and target through Publish. Use the publication tools in `reference/publish-mcp.md`: status, claim, progress, finish, cancel. The same connection/server protocol applies; no special agent/runtime adapter is introduced. Publication uses the host's configured Figma authoring tools and independently checks confirmed export/audit before unlocking build.
+After review, the user approves the saved hash and target through Publish. Use the publication tools in `reference/publish-mcp.md`: status, claim, progress, finish, cancel. The same connection/server protocol applies; no special agent/runtime adapter is introduced. Publication starts with a source-derived read-only preflight operation through the host's existing Figma tool. Its actual returned font/inventory result drives the runner: missing fonts finish blocked immediately; a passing result returns the generation continuation on the same job. Generation still verifies edit access and frozen values. Confirmed export/audit are independently checked before unlocking build.
 
 ## Native worker lifetime and verification
 

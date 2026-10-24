@@ -5,6 +5,7 @@ import {snapshotInputs} from './input-snapshot.mjs';
 import {checkWebDraft} from './foundation-proof.mjs';
 import {getState,readJSON} from './state.mjs';
 import {compareFoundations} from './foundation-compare.mjs';
+import {evaluatePreflight} from './publish-preflight.mjs';
 const idOK=id=>typeof id==='string'&&/^[0-9a-f-]{36}$/.test(id);
 const digest=s=>createHash('sha256').update(s).digest('hex');
 export const publishStages=['access','variables','styles','verification'];
@@ -68,7 +69,7 @@ export async function queueMcpJob({outputDir,workspace,id}){
   return {job:{id,status:'queued'},attempt,reused:false};
  });
 }
-export async function claimMcpJob({outputDir,workspace,id,owner,lease}){
+export async function claimMcpJob({outputDir,workspace,id,owner,lease,execution='legacy'}){
  const f=await validatePublishRequest(outputDir,workspace,id);
  if(!idOK(owner)||!idOK(lease))throw new Error('Invalid MCP connection lease.');
  return locked(f.dir,async()=>{
@@ -76,17 +77,27 @@ export async function claimMcpJob({outputDir,workspace,id,owner,lease}){
   if(!activeMcpJob(job)||!d||d.cancelRequested)throw new Error('This publication is not available.');
   if(d.owner){if(d.owner===owner&&d.leaseHash===digest(lease))return {request:f.request,attempt:d.attempt,reused:true};throw new Error('Another MCP client owns this publication.');}
   if(job.status!=='queued')throw new Error('This publication is not queued.');
-  await atomic(f.deliveryFile,{...d,owner,pid:process.pid,leaseHash:digest(lease),claimedAt:new Date().toISOString()});
+  await atomic(f.deliveryFile,{...d,owner,pid:process.pid,leaseHash:digest(lease),execution,claimedAt:new Date().toISOString()});
   await atomic(f.statusFile,{...job,status:'running',updated:new Date().toISOString(),progress:{completed:[],activity:[]},message:'The background worker received your approved foundations.'});
   return {request:f.request,attempt:d.attempt,reused:false};
  });
 }
-export async function mcpPublishAction({outputDir,workspace,id,attempt,owner,lease,action,message,outcome,stage,completed_stages}){
+export async function mcpPublishAction({outputDir,workspace,id,attempt,owner,lease,action,message,outcome,stage,completed_stages,preflight}){
  const f=action==='finish'&&outcome!=='completed'?await jobFiles(outputDir,id):await validatePublishRequest(outputDir,workspace,id);
  if(!idOK(attempt)||!idOK(owner)||!idOK(lease))throw new Error('Invalid MCP connection lease.');
  return locked(f.dir,async()=>{
   const d=await readJSON(f.deliveryFile),job=await readJSON(f.statusFile);
   if(!activeMcpJob(job)||d?.attempt!==attempt||d.owner!==owner||d.leaseHash!==digest(lease))throw new Error('This MCP client does not own the active attempt.');
+  if(action==='preflight'){
+   if(d.cancelRequested)return {cancelRequested:true};
+   const checked=evaluatePreflight(await readJSON(path.join(outputDir,'foundations.json')),preflight),now=new Date().toISOString();
+   await atomic(f.deliveryFile,{...d,preflight:{...checked,sourceHash:f.request.hash,observedAt:now}});
+   const detail=checked.passed?'Required font faces are available. Continue with edit-access and frozen-value checks before generation.':clean('Figma is missing the approved font faces: '+checked.missing.map(f=>f.family+' / '+f.style).join('; ')+'. Make these exact faces available in Figma, or revise the saved font choice and review it again. No foundation writes were started by this preflight.');
+   const progress={stage:'access',completed:[],activity:[...(job.progress?.activity||[]),{message:detail,stage:'access',time:now}].slice(-12)};
+   await atomic(f.statusFile,{...job,progress,status:checked.passed?'running':'blocked',message:detail,updated:now,...(!checked.passed?{finished:now}:{})});
+   return {status:checked.passed?'running':'blocked',passed:checked.passed};
+  }
+  if(d.execution==='stepped'&&!d.preflight?.passed&&(action==='finish'&&outcome==='completed'||action==='progress'&&(stage&&stage!=='access'||completed_stages?.length)))throw new Error('Execute and submit the read-only Figma preflight before generation.');
   if(action==='progress'){
    if(d.cancelRequested)return {cancelRequested:true};
    if(stage&&!publishStages.includes(stage)||completed_stages?.some(s=>!publishStages.includes(s)))throw new Error('Invalid publication stage.');
