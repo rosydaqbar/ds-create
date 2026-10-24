@@ -83,7 +83,9 @@ test('native inventory validates exact faces but unlisted fonts allow foundation
  f.send({action:'preflight',job_id:job.job_id,result:{fonts:[{family:'Other Font',style:'Regular',available:true}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});await f.next(e=>e.event==='error'&&e.message.includes('approved font set'));
  assert.equal((await f.flow()).job.status,'running');
  f.send({action:'preflight',job_id:job.job_id,result:{fonts:[{family:'Fixture Font',style:'Regular',available:false}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});
- const checked=await f.next(e=>e.event==='ack'&&e.action==='preflight');assert.equal(checked.result.status,'running');assert.equal(checked.result.passed,true);assert.equal(checked.result.next_operation.kind,'generate-foundations');assert.deepEqual(checked.result.missing,[{family:'Fixture Font',style:'Regular'}]);
+ const checked=await f.next(e=>e.event==='ack'&&e.action==='preflight');assert.equal(checked.result.status,'running');assert.equal(checked.result.passed,true);assert.equal(checked.result.next_operation.kind,'generate-foundations');assert.equal(checked.result.next_operation.engine,'fast');assert.deepEqual(checked.result.missing,[{family:'Fixture Font',style:'Regular'}]);
+ const plan=JSON.parse(await readFile(checked.result.next_operation.plan_file,'utf8'));assert.equal(plan.sourceHash,job.source_hash);assert.equal(plan.calls.length,checked.result.next_operation.call_count);
+ const {createHash}=await import('node:crypto');for(const call of plan.calls){const code=await readFile(call.file,'utf8');assert.equal(createHash('sha256').update(code).digest('hex'),call.sha256);assert.ok(code.length<=45000);}
  const flow=await f.flow();assert.equal(flow.job.status,'running');assert.match(flow.job.message,/Fixture Font \/ Regular/);assert.equal(flow.build.available,false);
  const receipt=JSON.parse(await readFile(path.join(f.output,'manager/jobs',job.job_id,'mcp-delivery.json'),'utf8'));assert.equal(receipt.preflight.passed,true);assert.equal(receipt.preflight.fonts[0].available,false,'do not fabricate availability');assert.equal(receipt.preflight.sourceHash,job.source_hash);
  const after=f.lines.length;f.send({action:'progress',job_id:job.job_id,stage:'variables',message:'Writing approved variables while retaining the selected font names.'});await f.next(e=>e.event==='ack'&&e.action==='progress',after);
@@ -103,6 +105,15 @@ test('source-derived preflight executes read-only and requires every exact font 
  assert.deepEqual(evaluatePreflight(draft,actual).missing,[{family:'Fixture Font',style:'Medium'}],'similar family is not an approved substitution');
  assert.equal(evaluatePreflight(draft,actual).passed,true,'font-list absence is advisory, not a global gate');
  assert.throws(()=>evaluatePreflight(draft,{...actual,fonts:actual.fonts.slice(1)}),/every approved font/);
+});
+test('unsupported FAST metadata returns one standard continuation without discarding the approved field',async t=>{
+ const f=await start(t),{readFile,writeFile}=await import('node:fs/promises'),path=await import('node:path');
+ const file=path.join(f.output,'foundations.json'),draft=JSON.parse(await readFile(file,'utf8'));
+ draft.textStyles=[{name:'type/body',fontFamily:'Fixture Font',fontStyle:'Regular',fontSize:16,lineHeight:24,customFeature:'preserve'}];
+ await writeFile(file,JSON.stringify(draft));f.initial=await f.flow();await queue(f);const job=await f.next(e=>e.event==='job');
+ f.send({action:'preflight',job_id:job.job_id,result:{fonts:[{family:'Fixture Font',style:'Regular',available:false}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});
+ const ack=await f.next(e=>e.event==='ack'&&e.action==='preflight');assert.equal(ack.result.next_operation.engine,'standard');assert.match(ack.result.next_operation.fast_fallback,/customFeature/);assert.deepEqual(JSON.parse(await readFile(file,'utf8')),draft);
+ f.send({action:'finish',job_id:job.job_id,outcome:'blocked',message:'Fixture cleanup.'});await f.next(e=>e.event==='ack'&&e.action==='finish');
 });
 test('web worker check offers the scoped spawn prompt only without an actual native check-in',async t=>{
  const f=await start(t,{heartbeat:false}),{readFile}=await import('node:fs/promises'),path=await import('node:path');

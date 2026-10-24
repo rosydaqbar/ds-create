@@ -11,6 +11,7 @@ import {latestMcpPreparation,claimMcpPreparation,mcpPrepareAction,cancelMcpPrepa
 import {setupPrompt} from '../manager/setup-prompt.mjs';
 import {figmaPrompt} from '../manager/figma-prompt.mjs';
 import {preflightOperation} from '../manager/publish-preflight.mjs';
+import {writeFoundationFastPlan} from '../manager/foundation-fast.mjs';
 
 const session=z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).describe('Stable Builder session id, not the project display name or input folder.');
 const uuid=z.string().uuid();
@@ -55,7 +56,11 @@ export function createDsCreateMcp(workspace){
  tool('ds_create_publish_preflight','Submit the actual read-only Figma inventory. Unlisted fonts are advisory and do not block generation. Returns instructions to publish the approved foundations; it does not prove edit access or complete publication.',{...credentials,result:z.object({fonts:z.array(fontResult).max(1000),inventory:z.object({collections:z.number().int().nonnegative(),variables:z.number().int().nonnegative(),textStyles:z.number().int().nonnegative(),effectStyles:z.number().int().nonnegative()}).strict()}).strict()},async args=>{
   const a=await actionArgs(args),r=await mcpPublishAction({...a,action:'preflight',preflight:args.result});
   if(r.status==='blocked')owned.delete(a.outputDir+'/'+a.id);
-  if(r.passed){const requestFile=path.join(a.outputDir,'manager/jobs',a.id,'request.json'),request=await readJSON(requestFile);return {...r,next_operation:{kind:'generate-foundations',instructions:figmaPrompt(request,requestFile)}};}
+  if(r.passed){
+   const requestFile=path.join(a.outputDir,'manager/jobs',a.id,'request.json'),request=await readJSON(requestFile);
+   try{const plan=await writeFoundationFastPlan(request,requestFile);return {...r,next_operation:{kind:'generate-foundations',engine:'fast',plan_file:plan.file,call_count:plan.calls.length,instructions:figmaPrompt(request,requestFile,plan)}};}
+   catch(error){if(error.code!=='MANAGER_FAST_UNSUPPORTED')throw error;return {...r,next_operation:{kind:'generate-foundations',engine:'standard',fast_fallback:clean(error.message),instructions:'FAST escape hatch: '+clean(error.message)+'. Preserve this metadata through the standard continuation; do not drop it or change the source.\n'+figmaPrompt(request,requestFile)}};}
+  }
   return r;
  });
  tool('ds_create_publish_progress','Validate source/input/approval and lease, then report public progress before Figma writes. Explicit stage and completed_stages drive task rows; completed publication still requires export/audit verification. cancelRequested:true means stop safely.',{...credentials,message:z.string().trim().min(1).max(2000),stage:z.enum(['access','variables','styles','verification']).optional(),completed_stages:z.array(z.enum(['access','variables','styles','verification'])).max(4).optional()},async args=>mcpPublishAction({...await actionArgs(args),action:'progress',message:args.message,stage:args.stage,completed_stages:args.completed_stages}));
