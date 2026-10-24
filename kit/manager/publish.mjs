@@ -1,5 +1,5 @@
 import { renderPublishProgress } from './publish-progress.mjs';
-import { openDialog, closeDialog, revealInteraction } from './ui-motion.mjs';
+import { revealInteraction } from './ui-motion.mjs';
 export function publishReady(state) {
   const saved = state?.summary && state.summary.variables + state.summary.textStyles + state.summary.effectStyles > 0;
   const setupReady = !state?.setup || state.setup.status === 'ready';
@@ -9,7 +9,7 @@ export function publishReady(state) {
 export function setupPublish() {
   const $ = id => document.getElementById(id);
   const dialog = $('publish-dialog');
-  let flow, request, timer, reviewHash, submitting = false, editingTarget = false;
+  let flow, request, timer, reviewHash, submitting = false;
   function draw(next) {
     const previous = flow;
     flow = next;
@@ -17,29 +17,21 @@ export function setupPublish() {
     const stale = !!reviewHash && reviewHash !== next.figma.hash;
     const queued=next.job?.status==='queued',running = ['queued', 'running'].includes(next.job?.status);
     const complete = next.figma.complete && !running && !stale;
-    $('publish-description').hidden = !!next.job || complete;
     $('publish-simulation').hidden = !next.simulation;
     $('publish-revision').textContent = next.figma.revision ? `Foundations · Revision ${next.figma.revision}` : 'Foundations';
     const target = $('publish-figma-url');
     if (!target.value && next.figma.url) target.value = next.figma.url;
     target.disabled = running || complete || submitting;
     const moveFocus = complete && (document.activeElement === $('publish-figma') || $('publish-task-progress').contains(document.activeElement));
-    $('publish-approval').hidden = complete || running || !!next.job && !editingTarget;
-    $('publish-edit-target').hidden = complete || running || !next.job;
-    $('publish-edit-target').textContent = editingTarget ? 'Keep file' : 'Change file';
-    $('publish-approval-note').hidden = complete || running;
-    $('publish-figma').hidden = complete || running;
+    $('publish-approval-note').textContent = complete ? 'This revision is available in Figma.' : 'Publishes the saved revision. Preview edits are excluded.';
     $('publish-figma').disabled = !next.figma.canStart || stale || submitting;
-    $('publish-figma').textContent = queued ? 'Queued' : running ? 'Publishing…' : next.job && !complete ? 'Try again' : 'Publish to Figma';
+    $('publish-figma').textContent = complete ? 'Published' : queued ? 'Queued' : running ? 'Publishing…' : next.job ? 'Try again' : 'Publish to Figma';
     $('publish-cancel').hidden = !running;
     $('publish-cancel').disabled = submitting;
-    $('publish-figma-state').hidden = !!next.job;
-    $('publish-figma-state').textContent = complete ? 'Complete' : queued ? 'Queued' : running ? 'In progress' : next.figma.reason ? 'Unavailable' : ['failed', 'blocked', 'cancelled', 'interrupted'].includes(next.job?.status) ? 'Needs attention' : 'Ready';
-    $('publish-figma-state').dataset.status = complete ? 'ready' : running ? 'generating' : 'pending';
     $('publish-status').textContent = stale ? 'The saved draft changed. Close Publish and review the new revision before continuing.' : complete ? 'Foundations are available in Figma. Continue to step 2.' : next.figma.reason || next.job?.message || 'Publish this saved revision to the selected Figma file. Your background worker checks fonts, writes foundations, and verifies the result.';
     $('publish-open-figma').hidden = !complete || !next.figma.url;
     if (next.figma.url) $('publish-open-figma').href = next.figma.url;
-    renderPublishProgress($('publish-task-progress'),{...next,figma:{...next.figma,complete}});
+    renderPublishProgress($('publish-task-progress'),{...next,notice:stale?'The saved draft changed. Review the current revision before publishing.':next.figma.reason,figma:{...next.figma,complete}});
     const available = next.build.available && !stale;
     $('publish-build-step').hidden = !available;
     $('publish-build-step').setAttribute('aria-disabled', String(!available));
@@ -77,18 +69,19 @@ export function setupPublish() {
   }
   $('publish').addEventListener('click', () => {
     if ($('publish').disabled) return;
-    reviewHash = null; flow = null; editingTarget = false; showError('');
+    if(dialog.open){$('publish-close').focus({preventScroll:true});return;}
+    reviewHash = null; flow = null; showError('');
     $('publish-figma').disabled = true; $('publish-command-section').hidden = true;
     $('publish-status').textContent = 'Checking saved foundations and publishing status…';
-    openDialog(dialog); dialog.scrollTop = 0; check();
+    if(!dialog.open)dialog.show(); revealInteraction(dialog); check();
     timer = setInterval(() => { if (!submitting) check(); }, 2000);
   });
   $('publish-figma').addEventListener('click', () => { if ($('publish-figma-url').reportValidity() && flow?.figma.canStart && reviewHash === flow.figma.hash) post('/api/publish-figma', { hash: reviewHash, figmaUrl: $('publish-figma-url').value.trim() }); });
-  $('publish-edit-target').addEventListener('click', () => { editingTarget = !editingTarget; draw(flow); if(editingTarget)$('publish-figma-url').focus(); });
+  $('publish-figma-url').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('publish-figma').click();}});
   $('publish-cancel').addEventListener('click', () => post('/api/publish-cancel', {}));
   $('publish-recheck').addEventListener('click', () => { showError(''); check(); });
-  $('publish-close').addEventListener('click', () => closeDialog(dialog));
-  dialog.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); closeDialog(dialog); } });
+  $('publish-close').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); dialog.close(); } });
   dialog.addEventListener('close', () => { clearInterval(timer); request?.abort(); request = null; ($('publish').disabled ? $('setup-open').hidden ? $('main') : $('setup-open') : $('publish')).focus({ preventScroll: true }); });
   $('publish-command').addEventListener('click', e => e.target.select());
   $('publish-copy').addEventListener('click', async () => {
