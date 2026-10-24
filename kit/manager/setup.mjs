@@ -13,8 +13,6 @@ export function setupWeb({ onChange = () => {} } = {}) {
   function paint() {
     $('setup-open').hidden=!flow?.enabled;
     preparation.sync(flow,busy);
-    $('setup-mcp-help').hidden=!flow?.integration;
-    if(flow?.integration){const {command,args,agentInstruction}=flow.integration;const config=JSON.stringify({transport:'stdio',command,args},null,2);if($('setup-mcp-config').value!==config)$('setup-mcp-config').value=config;if($('setup-agent-instruction').value!==agentInstruction)$('setup-agent-instruction').value=agentInstruction;}
     if(!flow?.enabled)return;
     if(!nameHydrated){if(!$('setup-project-name').value)$('setup-project-name').value=flow.projectName||'';nameHydrated=true;}
     const initial=flow.status==='empty',ready=flow.status==='ready',questions=flow.status==='questions';
@@ -85,7 +83,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     error('');pending=all;files();
   }
   function editContext(){if(!flow?.canEdit)return;if(!dialog.open)open();editing=true;editRevision=flow.inputRevision;$('setup-project-name').value=flow.projectName||'';$('setup-context').value=flow.context||'';error('');paint();$('setup-project-name').focus();}
-  for(const [button,field,feedback] of [['setup-mcp-copy','setup-mcp-config','setup-mcp-feedback'],['setup-agent-copy','setup-agent-instruction','setup-agent-feedback']])$(button).addEventListener('click',async()=>{try{await navigator.clipboard.writeText($(field).value);$(feedback).textContent='Copied.';}catch{$(field).focus();$(field).select();$(feedback).textContent='Copy the selected text manually.';}});
+
   $('setup-edit').addEventListener('click',editContext);
   $('setup-edit-cancel').addEventListener('click',()=>{editing=false;pending=[];files();error('');paint();$('setup-edit').focus();});
   $('setup-copy-resume').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(flow.resumeCommand);$('setup-copy-resume').textContent='Copied';setTimeout(()=>{$('setup-copy-resume').textContent='Copy resume command';},1500);}catch{error('Copy failed. Select the resume command above and copy it.');}});

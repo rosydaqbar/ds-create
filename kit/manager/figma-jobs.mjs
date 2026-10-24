@@ -13,6 +13,7 @@ import { getState, getPublishStatus, readJSON, figmaLink } from './state.mjs';
 import { queueMcpJob, cancelMcpJob, activeMcpJob, latestPublish } from './publish-queue.mjs';
 
 import {mcpConfiguration} from './mcp-config.mjs';
+import {listenerStatus} from './listener-status.mjs';
 
 export class PublishError extends Error {
   constructor(message, status = 409) { super(message); this.status = status; }
@@ -77,9 +78,9 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand, agentPrefi
     else if (state.preview && !simulation) reason = 'Sample data cannot be published. Run ds-create init for your own system first.';
     else if (state.source.kind !== 'local' || !state.source.hash || state.source.review === 'invalid') reason = 'Ask your agent to prepare a valid local foundation draft with ds-create init.';
     else if (!program) reason = 'Codex CLI is unavailable. Install it and sign in on this machine, then restart Builder.';
-    let publicJob = job ? { id: job.id, status: job.status, message: job.message, started: job.started, finished: job.finished } : null;
+    let publicJob = job ? { id: job.id, status: job.status, message: job.message, started: job.started, finished: job.finished, updated:job.updated, progress:job.progress } : null;
     if (publicJob && job.hash !== state.source.hash && !running(job)) publicJob = { ...publicJob, status: 'outdated', message: 'The saved draft changed. Publish the current revision before building.' };
-    return { simulation, integration: runner === 'mcp' ? mcpConfiguration(workspace,path.basename(outputDir)) : null, agent: { name: runner === 'mcp' ? 'DS Create MCP' : 'Simulation runner', available: !!program },
+    return { simulation, listener:await listenerStatus(outputDir), integration: runner === 'mcp' ? mcpConfiguration(workspace,path.basename(outputDir)) : null, agent: { name: runner === 'mcp' ? 'Background worker' : 'Simulation runner', available: !!program },
       figma: { complete, canStart: !complete && !reason && !running(job) && !busy, reason, revision: state.source.revision || null, hash: state.source.hash || null, url: state.figmaUrl },
       build: { available: complete && !running(job), status: complete ? build.status : 'locked', command: 'ds-create build' }, job: publicJob };
   }

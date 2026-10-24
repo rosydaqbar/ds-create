@@ -7,6 +7,7 @@ import {getState,readJSON} from './state.mjs';
 import {compareFoundations} from './foundation-compare.mjs';
 const idOK=id=>typeof id==='string'&&/^[0-9a-f-]{36}$/.test(id);
 const digest=s=>createHash('sha256').update(s).digest('hex');
+export const publishStages=['access','variables','styles','verification'];
 export const activeMcpJob=job=>job?.runner==='mcp'&&['queued','running'].includes(job.status);
 export const clean=s=>String(s||'').replace(/\b(?:sk-[\w-]{12,}|Bearer\s+[\w.=-]{12,})/gi,'[redacted]').slice(0,2000);
 const atomic=async(file,data)=>{const tmp=file+'.'+randomUUID()+'.tmp';await writeFile(tmp,JSON.stringify(data,null,2)+'\n');await rename(tmp,file);};
@@ -50,7 +51,7 @@ export async function latestPublish(outputDir){
   if(dead)job=await locked(f.dir,async()=>{
    const current=await readJSON(f.statusFile),latest=await readJSON(f.deliveryFile);
    if(current?.runner==='mcp'&&current.status==='running'&&latest?.attempt===d.attempt&&latest.owner===d.owner){
-    const blocked={...current,status:'blocked',message:'MCP server stopped before publication finished. Inspect any in-flight or partial Figma output before retrying.',finished:new Date().toISOString()};await atomic(f.statusFile,blocked);return blocked;
+    const blocked={...current,status:'blocked',message:'Background connection stopped before publication finished. Inspect any in-flight or partial Figma output before retrying.',finished:new Date().toISOString()};await atomic(f.statusFile,blocked);return blocked;
    }return current;
   });
  }return job;
@@ -63,7 +64,7 @@ export async function queueMcpJob({outputDir,workspace,id}){
   if(['queued','running'].includes(old?.status))throw new Error('Stop the earlier publication attempt before switching to MCP.');
   const attempt=randomUUID(),now=new Date().toISOString();
   await atomic(f.deliveryFile,{attempt,created:now});
-  await atomic(f.statusFile,{id,hash:f.request.hash,figmaUrl:f.request.figmaUrl,runner:'mcp',status:'queued',started:now,message:'Waiting for an agent to take this approved request through DS Create MCP. Open your agent and ask it to publish this Builder session.'});
+  await atomic(f.statusFile,{id,hash:f.request.hash,figmaUrl:f.request.figmaUrl,runner:'mcp',status:'queued',started:now,progress:{completed:[],activity:[]},message:'Your approved foundations are queued for the background worker.'});
   return {job:{id,status:'queued'},attempt,reused:false};
  });
 }
@@ -76,11 +77,11 @@ export async function claimMcpJob({outputDir,workspace,id,owner,lease}){
   if(d.owner){if(d.owner===owner&&d.leaseHash===digest(lease))return {request:f.request,attempt:d.attempt,reused:true};throw new Error('Another MCP client owns this publication.');}
   if(job.status!=='queued')throw new Error('This publication is not queued.');
   await atomic(f.deliveryFile,{...d,owner,pid:process.pid,leaseHash:digest(lease),claimedAt:new Date().toISOString()});
-  await atomic(f.statusFile,{...job,status:'running',updated:new Date().toISOString(),message:'An MCP agent claimed the approved request. Checking Figma access and fonts.'});
+  await atomic(f.statusFile,{...job,status:'running',updated:new Date().toISOString(),progress:{completed:[],activity:[]},message:'The background worker received your approved foundations.'});
   return {request:f.request,attempt:d.attempt,reused:false};
  });
 }
-export async function mcpPublishAction({outputDir,workspace,id,attempt,owner,lease,action,message,outcome}){
+export async function mcpPublishAction({outputDir,workspace,id,attempt,owner,lease,action,message,outcome,stage,completed_stages}){
  const f=action==='finish'&&outcome!=='completed'?await jobFiles(outputDir,id):await validatePublishRequest(outputDir,workspace,id);
  if(!idOK(attempt)||!idOK(owner)||!idOK(lease))throw new Error('Invalid MCP connection lease.');
  return locked(f.dir,async()=>{
@@ -88,7 +89,10 @@ export async function mcpPublishAction({outputDir,workspace,id,attempt,owner,lea
   if(!activeMcpJob(job)||d?.attempt!==attempt||d.owner!==owner||d.leaseHash!==digest(lease))throw new Error('This MCP client does not own the active attempt.');
   if(action==='progress'){
    if(d.cancelRequested)return {cancelRequested:true};
-   await atomic(f.statusFile,{...job,message:clean(message),updated:new Date().toISOString()});return {updated:true,cancelRequested:false};
+   if(stage&&!publishStages.includes(stage)||completed_stages?.some(s=>!publishStages.includes(s)))throw new Error('Invalid publication stage.');
+   const now=new Date().toISOString(),previous=job.progress||{},completed=[...new Set([...(previous.completed||[]),...(completed_stages||[])])];
+   const progress={stage:stage||previous.stage||null,completed,activity:[...(previous.activity||[]),{message:clean(message),stage:stage||previous.stage||null,time:now}].slice(-12)};
+   await atomic(f.statusFile,{...job,progress,message:clean(message),updated:now});return {updated:true,cancelRequested:false};
   }
   if(action!=='finish'||!['completed','blocked','failed','cancelled'].includes(outcome))throw new Error('Invalid publication outcome.');
   if(d.cancelRequested&&!['cancelled','blocked'].includes(outcome))throw new Error('Acknowledge cancellation before finishing.');
@@ -106,7 +110,7 @@ export async function cancelMcpJob({outputDir,id}){
  const f=await jobFiles(outputDir,id);return locked(f.dir,async()=>{
   const d=await readJSON(f.deliveryFile),job=await readJSON(f.statusFile);if(!activeMcpJob(job))return {stopped:false};
   await atomic(f.deliveryFile,{...d,cancelRequested:true});
-  if(!d.owner){await atomic(f.statusFile,{...job,status:'cancelled',message:'Queued request cancelled before any MCP agent claimed it.',finished:new Date().toISOString()});return {stopped:true};}
-  await atomic(f.statusFile,{...job,message:'Cancellation requested. The MCP agent must stop safely and acknowledge it; existing Figma changes are preserved.'});return {stopped:false,requested:true};
+  if(!d.owner){await atomic(f.statusFile,{...job,status:'cancelled',message:'Queued request cancelled before the background worker received it.',finished:new Date().toISOString()});return {stopped:true};}
+  await atomic(f.statusFile,{...job,message:'Cancellation requested. The background worker must stop safely and acknowledge it; existing Figma changes are preserved.'});return {stopped:false,requested:true};
  });
 }

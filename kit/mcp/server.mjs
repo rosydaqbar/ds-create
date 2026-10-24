@@ -14,7 +14,7 @@ import {figmaPrompt} from '../manager/figma-prompt.mjs';
 const session=z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).describe('Stable Builder session id, not the project display name or input folder.');
 const uuid=z.string().uuid();
 const result=data=>({content:[{type:'text',text:JSON.stringify(data)}],structuredContent:data});
-const publicJob=job=>job?Object.fromEntries(['id','runner','status','hash','figmaUrl','message','started','updated','finished'].filter(k=>job[k]!==undefined).map(k=>[k,job[k]])):null;
+const publicJob=job=>job?Object.fromEntries(['id','runner','status','hash','figmaUrl','message','started','updated','finished','progress'].filter(k=>job[k]!==undefined).map(k=>[k,job[k]])):null;
 
 export function createDsCreateMcp(workspace){
  const server=new McpServer({name:'ds-create',version:'0.2.0'}, {instructions:'Operate only the selected local workspace. Preparation claims saved context and stops at a validated local draft awaiting review; it has no Figma authorization. Publish claims an already approved Builder request; it does not write Figma itself. Use your configured Figma tools to carry out its exact instructions, report progress before writes and finish with real export/audit evidence. A queued job cannot wake an idle chat. Never change approvals or fabricate completed output.'});
@@ -37,7 +37,7 @@ export function createDsCreateMcp(workspace){
     const key=outputDir+'/'+job.id,previous=owned.get(key),lease=previous?.lease||randomUUID();
     const claimed=await claimMcpJob({outputDir,workspace,id:job.id,owner,lease});
     const record={kind:'publish',outputDir,workspace,id:job.id,attempt:claimed.attempt,owner,lease};owned.set(key,record);
-    if(closing||extra.signal.aborted){await mcpPublishAction({...record,action:'finish',outcome:'blocked',message:'MCP client disconnected during handoff. Inspect partial output before retrying.'});owned.delete(key);throw new Error('MCP connection closed during handoff.');}
+    if(closing||extra.signal.aborted){await mcpPublishAction({...record,action:'finish',outcome:'blocked',message:'Background worker disconnected during handoff. Inspect partial output before retrying.'});owned.delete(key);throw new Error('MCP connection closed during handoff.');}
     const r=claimed.request;
     return {status:'running',session:args.session,job_id:job.id,attempt:claimed.attempt,lease,revision:r.revision,source_hash:r.hash,figma_url:r.figmaUrl,reused:claimed.reused,
      instructions:figmaPrompt(r,path.join(outputDir,'manager/jobs',job.id,'request.json'))+'\nMCP protocol: use ds_create_publish_progress with this session/job_id/attempt/lease before each Figma write and at meaningful stages. A cancellation result means stop and finish cancelled. Finish through ds_create_publish_finish with the same lease; completion requires the real confirmed export and source-bound audit. Keep this MCP connection open until finishing. Do not use the retired manager-agent CLI or depend on native subagents.'};
@@ -48,7 +48,7 @@ export function createDsCreateMcp(workspace){
  });
  const credentials={session,job_id:uuid,attempt:uuid,lease:uuid};
  const actionArgs=async args=>({outputDir:await sessionOutput(workspace,args.session),workspace,id:args.job_id,attempt:args.attempt,lease:args.lease,owner});
- tool('ds_create_publish_progress','Validate current source/input/approval and the owned lease, then save public progress. Call before Figma writes. cancelRequested:true means stop and acknowledge cancellation.',{...credentials,message:z.string().trim().min(1).max(2000)},async args=>mcpPublishAction({...await actionArgs(args),action:'progress',message:args.message}));
+ tool('ds_create_publish_progress','Validate source/input/approval and lease, then report public progress before Figma writes. Explicit stage and completed_stages drive task rows; completed publication still requires export/audit verification. cancelRequested:true means stop safely.',{...credentials,message:z.string().trim().min(1).max(2000),stage:z.enum(['access','variables','styles','verification']).optional(),completed_stages:z.array(z.enum(['access','variables','styles','verification'])).max(4).optional()},async args=>mcpPublishAction({...await actionArgs(args),action:'progress',message:args.message,stage:args.stage,completed_stages:args.completed_stages}));
  tool('ds_create_publish_finish','Finish the owned attempt as completed, blocked, failed or cancelled. Completed independently requires real matching confirmed Figma output, current approval and a passing full file audit; a message alone cannot unlock build.',{...credentials,outcome:z.enum(['completed','blocked','failed','cancelled']),message:z.string().trim().min(1).max(2000)},async args=>{
   const a=await actionArgs(args),finished=await mcpPublishAction({...a,action:'finish',outcome:args.outcome,message:args.message});owned.delete(a.outputDir+'/'+a.id);return finished;
  });
@@ -68,7 +68,7 @@ export function createDsCreateMcp(workspace){
     const key=outputDir+'/'+current.jobId,previous=owned.get(key),lease=previous?.lease||randomUUID();
     const claimed=await claimMcpPreparation({outputDir,workspace,id:current.jobId,owner,lease});
     const record={kind:'prepare',outputDir,workspace,id:current.jobId,attempt:claimed.attempt,owner,lease};owned.set(key,record);
-    if(closing||extra.signal.aborted){await mcpPrepareAction({...record,action:'finish',outcome:'blocked',message:'MCP connection closed during preparation handoff. Context is saved.'});owned.delete(key);throw new Error('MCP connection closed during handoff.');}
+    if(closing||extra.signal.aborted){await mcpPrepareAction({...record,action:'finish',outcome:'blocked',message:'Background connection closed during preparation handoff. Context is saved.'});owned.delete(key);throw new Error('MCP connection closed during handoff.');}
     return {status:'running',session:args.session,job_id:current.jobId,attempt:claimed.attempt,lease,reused:claimed.reused,
       input_hash:claimed.request.inputHash,input_revision:claimed.request.inputRevision,input_slug:claimed.request.inputSlug,
       instructions:setupPrompt(claimed.request,path.join(outputDir,'manager/setup-jobs',current.jobId,'request.json'))+'\nMCP continuation: report public stages/updates through ds_create_prepare_progress using this session/job_id/attempt/lease. Before source reads/output writes, revalidate through progress and obey cancellation. Do not rely on any vendor log format or private reasoning messages. Return questions/ready/blocked/failed/cancelled through ds_create_prepare_finish; its checks decide readiness. Keep this MCP connection open until finishing. All questions are answered in Builder; never overwrite manager-owned setup state. No Figma tools are authorized.'};
@@ -89,7 +89,7 @@ export function createDsCreateMcp(workspace){
   if(closingPromise)return closingPromise;closing=true;
   closingPromise=(async()=>{
    await Promise.allSettled([...inflight]);
-   await Promise.allSettled([...owned.values()].map(record=>(record.kind==='prepare'?mcpPrepareAction:mcpPublishAction)({...record,action:'finish',outcome:'blocked',message:record.kind==='prepare'?'MCP client disconnected before preparation finished. Context is saved; retry to continue.':'MCP client disconnected before publication finished. Inspect any partial Figma output, then retry the approved request.'})));
+   await Promise.allSettled([...owned.values()].map(record=>(record.kind==='prepare'?mcpPrepareAction:mcpPublishAction)({...record,action:'finish',outcome:'blocked',message:record.kind==='prepare'?'Background worker disconnected before preparation finished. Context is saved; retry to continue.':'Background worker disconnected before publication finished. Inspect any partial Figma output, then retry the approved request.'})));
    owned.clear();
   })();return closingPromise;
  }

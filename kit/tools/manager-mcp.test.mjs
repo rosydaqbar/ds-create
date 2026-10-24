@@ -81,7 +81,7 @@ test('a pending MCP tool receives a new browser request without typing into anot
 test('an abruptly terminated MCP process cannot leave an owned job Running forever',async t=>{
  const f=await fixture(t),a=await client(t,f);await queue(f);await a.good('ds_create_publish',{session:'fixture'});
  assert.ok(a.transport.pid>0);process.kill(a.transport.pid,'SIGKILL');
- const done=await awaitJob(f,'blocked');assert.match(done.job.message,/MCP server stopped/);assert.equal(done.build.available,false);
+ const done=await awaitJob(f,'blocked');assert.match(done.job.message,/Background connection stopped/);assert.equal(done.build.available,false);
 });
 
 test('a legacy CLI approval migrates to MCP without reapproval or executing its saved program',async t=>{
@@ -104,7 +104,7 @@ test('source changes during a claimed request stop progress but allow a truthful
 test('production defaults queue MCP without any agent executable or chat binding',async t=>{
  const f=await fixture(t),file=path.join(f.output,'ds-create-ledger.json'),l=await json(file);delete l.preview;await writeFile(file,JSON.stringify(l));
  const jobs=createFigmaJobs({outputDir:f.output,workspace:f.root,agentCommand:'/nonexistent/codex'});
- const before=await jobs.status();assert.equal(before.figma.canStart,true);assert.equal(before.agent.name,'DS Create MCP');
+ const before=await jobs.status();assert.equal(before.figma.canStart,true);assert.equal(before.agent.name,'Background worker');
  const r=await jobs.start({hash:f.initial.figma.hash,figmaUrl:target});assert.equal(r.job.status,'queued');
  assert.equal((await json(path.join(f.output,'manager/jobs',r.job.id,'request.json'))).program,null);
  const {access}=await import('node:fs/promises');await assert.rejects(access(path.join(f.output,'received-prompt')));

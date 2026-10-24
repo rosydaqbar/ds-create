@@ -2,11 +2,11 @@
 
 DS Create Builder communicates with an agent through standard MCP tools. It does not choose an agent, provider, model, IDE, binary or native-subagent framework. Any local compatible MCP client can use the same tools. Client authentication, model choice, permissions, skill loading and tool registration belong to that client. The MCP server itself does not run an LLM. Preparation needs authorized read/write access to the selected local workspace; publication additionally needs configured Figma authoring tools. These are capabilities, not a list of supported agent products. If a capability is missing, report a precise blocker rather than choosing a different agent or installing one.
 
-## Connect
+## Automatic worker bootstrap
 
-Run `npm ci --prefix kit/mcp` once in the workspace (Node20+). Register a stdio server using command `node` and arguments `["/absolute/workspace/kit/tools/ds-create-mcp.mjs", "--workspace", "/absolute/workspace"]`. Context exposes resolved connection details before the user provides any project name or foundation. Publish exposes the same details. Do not assume a universal settings filename or `mcpServers` wrapper; use the client's own registration format. Never overwrite unrelated settings or auto-approve host tools.
+Read `reference/background-worker.md` and attach the launching agent's native background worker before reporting init-web ready. The portable listener owns its private MCP client connection; it uses this server through the official SDK. There is no host MCP-settings registration or user connection step. Assume the agent already has its Figma connection. Do not introduce DS Create OAuth or new Figma-client registration.
 
-The older publish-mcp entry is an alias for the same full server. After an update, reconnect the client to load the new tool list. Configured Figma authoring tools are needed only for publication. Local preparation has no Figma authorization.
+The protocol below is internal to that listener and is also usable by existing integrations. Authentication, model choice and native background-agent APIs remain host-owned. No specific agent/IDE binary is launched by Builder.
 
 ## Local preparation
 
@@ -24,8 +24,8 @@ Keep the MCP connection open until finishing. Disconnect/dead process blocks its
 
 After review, the user approves the saved hash and target through Publish. Use the publication tools in `reference/publish-mcp.md`: status, claim, progress, finish, cancel. The same connection/server protocol applies; no special agent/runtime adapter is introduced. Publication uses the host's configured Figma authoring tools and independently checks confirmed export/audit before unlocking build.
 
-## Idle clients and verification
+## Native worker lifetime and verification
 
-MCP tools are client-invoked. They do not wake an idle chat or create a new agent process. Builder provides a copyable instruction and connection details; an active bounded wait can receive a new queued request. Never start endless polling without the user's request, or claim a queued/unconnected job has begun.
+A native background agent stays active awaiting listener output; the small Node listener handles waiting without an LLM loop. Clicking Publish or saving context then delivers a scoped event over the already-open connection. This is not a claim that an arbitrary closed chat can wake itself. Closing the native worker's stdin/disconnecting releases its unfinished attempt as blocked. Listener liveness proves transport only; actual progress comes from the agent. The host must support that persistent native worker; bootstrap handles it, not the end user.
 
-Wire tests use the official SDK with independent generic clients and synthetic local artifacts. They test transport/state/ownership/readiness, not the quality of generated design decisions or every possible client's UI/version. Report actual host registration, real AI generation and Figma writes as unverified until observed. Historical/simulation CLI logs remain readable, but subprocess execution is disabled for production requests.
+Use SDK/process and actual browser tests for delivery, ownership, cancellation, public stages and verification gates. Do not claim real Figma writes or every possible host's background APIs were tested from synthetic fixtures.

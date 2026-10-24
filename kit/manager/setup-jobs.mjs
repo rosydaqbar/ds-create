@@ -66,7 +66,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
     const request = {id,slug,inputSlug,projectName:r.projectName || null,workspace,outputDir,runner,program:runner==='mcp'?null:program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
     await saveSetup(path.join(dir,'request.json'),request);
     if(runner==='mcp')await initPrepareDelivery(outputDir,id);
-    await saveSetup(file,{...r,runner,status:'queued',jobId:id,pid:undefined,readyInputHash:null,questions:[],message:runner==='mcp'?'Waiting for an agent to prepare this saved context through DS Create MCP.':'Starting the local agent…'});
+    await saveSetup(file,{...r,runner,status:'queued',jobId:id,pid:undefined,readyInputHash:null,questions:[],message:runner==='mcp'?'Your saved context is queued for the background worker.':'Starting the local agent…'});
     if(runner==='mcp')return {saved:true,jobId:id,status:'queued'};
     childId=id;
     child=spawn(process.execPath,[fileURLToPath(new URL('./setup-worker.mjs',import.meta.url)),path.join(dir,'request.json')],{cwd:workspace,stdio:'ignore',shell:false});
