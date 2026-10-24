@@ -72,7 +72,7 @@ test('agent lease expires irreversibly; UI exposes stopping and quiet progress w
  const stopping=publicationLiveness({job:{...job,cancelRequested:true,cancelRequestedAt:at}},Date.parse(at)+61000);assert.equal(stopping.animate,false);assert.match(stopping.notice,/has not acknowledged cancellation/);
 });
 
-test('native preflight result controls execution: generation refused before check and missing font ends job immediately',async t=>{
+test('native inventory validates exact faces but unlisted fonts allow foundation writes without unlocking build',async t=>{
  const f=await start(t);const {readFile,writeFile}=await import('node:fs/promises');const path=await import('node:path');
  const file=path.join(f.output,'foundations.json'),draft=JSON.parse(await readFile(file,'utf8'));
  draft.textStyles=[{name:'type/body',fontFamily:'Fixture Font',fontStyle:'Regular',fontSize:16,lineHeight:24}];
@@ -83,9 +83,12 @@ test('native preflight result controls execution: generation refused before chec
  f.send({action:'preflight',job_id:job.job_id,result:{fonts:[{family:'Other Font',style:'Regular',available:true}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});await f.next(e=>e.event==='error'&&e.message.includes('approved font set'));
  assert.equal((await f.flow()).job.status,'running');
  f.send({action:'preflight',job_id:job.job_id,result:{fonts:[{family:'Fixture Font',style:'Regular',available:false}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});
- const blocked=await f.next(e=>e.event==='ack'&&e.action==='preflight');assert.equal(blocked.result.status,'blocked');assert.equal(blocked.result.next_operation,undefined);
- const flow=await f.flow();assert.equal(flow.job.status,'blocked');assert.match(flow.job.message,/Fixture Font \/ Regular/);assert.equal(flow.build.available,false);
- const receipt=JSON.parse(await readFile(path.join(f.output,'manager/jobs',job.job_id,'mcp-delivery.json'),'utf8'));assert.equal(receipt.preflight.passed,false);assert.equal(receipt.preflight.sourceHash,job.source_hash);
+ const checked=await f.next(e=>e.event==='ack'&&e.action==='preflight');assert.equal(checked.result.status,'running');assert.equal(checked.result.passed,true);assert.equal(checked.result.next_operation.kind,'generate-foundations');assert.deepEqual(checked.result.missing,[{family:'Fixture Font',style:'Regular'}]);
+ const flow=await f.flow();assert.equal(flow.job.status,'running');assert.match(flow.job.message,/Fixture Font \/ Regular/);assert.equal(flow.build.available,false);
+ const receipt=JSON.parse(await readFile(path.join(f.output,'manager/jobs',job.job_id,'mcp-delivery.json'),'utf8'));assert.equal(receipt.preflight.passed,true);assert.equal(receipt.preflight.fonts[0].available,false,'do not fabricate availability');assert.equal(receipt.preflight.sourceHash,job.source_hash);
+ const after=f.lines.length;f.send({action:'progress',job_id:job.job_id,stage:'variables',message:'Writing approved variables while retaining the selected font names.'});await f.next(e=>e.event==='ack'&&e.action==='progress',after);
+ assert.equal((await f.flow()).job.progress.stage,'variables');
+ f.send({action:'finish',job_id:job.job_id,outcome:'completed',message:'No real export or audit exists.'});const rejected=await f.next(e=>e.event==='ack'&&e.action==='finish',after);assert.equal(rejected.result.status,'failed');assert.equal((await f.flow()).build.available,false,'advisory font check cannot certify missing writes');
  const index=f.lines.length;await queue(f);const retry=await f.next(e=>e.event==='job',index);assert.equal(retry.job_id,job.job_id,'same saved approval, new attempt');
  f.send({action:'finish',job_id:retry.job_id,outcome:'blocked',message:'Fixture cleanup.'});await f.next(e=>e.event==='ack'&&e.action==='finish',index);
 });
@@ -98,6 +101,7 @@ test('source-derived preflight executes read-only and requires every exact font 
  const actual=await new AsyncFunction('figma',operation.code)(mock);
  assert.equal(operation.fileKey,'Selected');assert.deepEqual(actual.inventory,{collections:1,variables:2,textStyles:0,effectStyles:0});
  assert.deepEqual(evaluatePreflight(draft,actual).missing,[{family:'Fixture Font',style:'Medium'}],'similar family is not an approved substitution');
+ assert.equal(evaluatePreflight(draft,actual).passed,true,'font-list absence is advisory, not a global gate');
  assert.throws(()=>evaluatePreflight(draft,{...actual,fonts:actual.fonts.slice(1)}),/every approved font/);
 });
 test('web worker check offers the scoped spawn prompt only without an actual native check-in',async t=>{
