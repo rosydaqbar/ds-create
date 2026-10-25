@@ -58,13 +58,13 @@ export function renderPublishProgress(root,flow,force=false){
   const focusedTool=root.contains(document.activeElement)?document.activeElement.closest('[data-agent-tool]')?.dataset.agentTool:null;
   const feed=root.querySelector('[data-publish-messages]');feed.replaceChildren();
   const reply=element('article','agent-assistant');
-  reply.append(element('h3','agent-answer-title',model.title),element('p','agent-answer',model.message));feed.append(reply);
+  reply.append(element('h3',null,model.title),element('p','publish-saved',model.message));feed.append(reply);
   const tools=root.querySelector('[data-publish-tools]');tools.replaceChildren();
   for(const tool of model.tasks.filter(t=>t.state!=='pending')){
-   const button=element('button','agent-tool-chip');button.type='button';button.dataset.agentTool=tool.id;button.dataset.state=tool.state;
+   const button=element('button','button agent-tool-chip');button.type='button';button.dataset.agentTool=tool.id;button.dataset.state=tool.state;
    const status=tool.id==='access'&&tool.state==='complete'?'Checked':tool.id==='verification'&&tool.state==='complete'?'Verified':marks[tool.state];
    button.setAttribute('aria-label',`${tool.title}: ${status}`);button.setAttribute('aria-expanded',String(view.selected===tool.id));button.setAttribute('aria-controls','publish-tool-result');
-   button.append(icon(tool.state),element('span','agent-tool-name',({access:'Figma file',variables:'Variables',styles:'Styles',verification:'Verification'})[tool.id]),element('span','agent-tool-status',status));tools.append(button);
+   button.append(icon(tool.state),element('span',null,({access:'Figma file',variables:'Variables',styles:'Styles',verification:'Verification'})[tool.id]),element('span','agent-tool-status',status));tools.append(button);
   }
   if(focusedTool)root.querySelector(`[data-agent-tool="${focusedTool}"]`)?.focus({preventScroll:true});
   const link=root.querySelector('[data-publish-output]');link.hidden=!flow.figma?.url;
@@ -77,7 +77,6 @@ export function renderPublishProgress(root,flow,force=false){
  }
  const live=publicationLiveness(flow),tail=root.querySelector('.agent-thread-loading');tail.hidden=!model.active;root.dataset.running=String(live.animate);
  const loader=root.querySelector('[data-publish-loader]');loader.hidden=!live.animate;
- if(!loader.childElementCount)for(let i=0;i<9;i++){const cell=element('i');cell.style.animationDelay=`${(i%3+Math.abs(Math.floor(i/3)-1))*90}ms`;loader.append(cell);}
  root.querySelector('[data-publish-phase]').textContent=live.phase;
  const start=Date.parse(job?.started),end=Date.parse(job?.finished)||Date.now(),elapsed=Number.isFinite(start)?Math.max(0,Math.floor((end-start)/1000)):0;
  root.querySelector('[data-publish-elapsed]').textContent=elapsed<60?`${elapsed}s`:`${Math.floor(elapsed/60)}m ${elapsed%60}s`;
