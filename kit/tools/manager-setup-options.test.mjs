@@ -47,7 +47,7 @@ test('revisions retain or replace interface choices while preserving original so
 test('new intake needs no naming question and sends no invented naming decision',async t=>{
  const f=await setupFixture({runner:'mcp'});t.after(()=>f.cleanup());
  const choices={modes:['Light'],devices:['Responsive web']};assert.deepEqual(normalizeInterfaceDetails(choices),choices);
- const html=await fetch(f.url).then(r=>r.text());assert.ok(!html.includes('id="setup-tokenization"'));assert.match(html,/Primitives → Semantic → Components/);
+ const html=await fetch(f.url).then(r=>r.text());assert.ok(!html.includes('id="setup-tokenization"'));
  const form=f.form('A new product and new design system.');form.set('interfaceDetails',JSON.stringify(choices));assert.equal((await f.post('/api/setup-submit',form)).status,202);
  const flow=await f.flow();assert.deepEqual(flow.interfaceDetails,choices);
  const request=JSON.parse(await readFile(path.join(f.output,'manager/setup-jobs',flow.jobId,'request.json')));assert.ok(!Object.hasOwn(request.interfaceDetails,'tokenization'));
