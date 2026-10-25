@@ -420,7 +420,7 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .setup-dialog { --publish-padding: var(--space-3xl); --docs-gutter: var(--space-3xl); --docs-edge: var(--color-border-subtle); --docs-round: var(--radius-surface); width: min(var(--size-measure-reading), calc(100vw - var(--space-4xl))); border-radius: var(--radius-modal); }
 .setup-dialog #setup-stepper { margin-top: var(--space-xl); }
 .setup-dialog .publish-intro { margin: var(--space-lg) 0 var(--space-3xl); }
-.setup-fields { display: grid; gap: var(--space-3xl); }
+.setup-settings { --docs-gutter: var(--space-2xl); }
 .setup-field { display: grid; gap: var(--space-sm); min-width: 0; }
 .setup-optional { margin-left: var(--space-md); color: var(--color-text-tertiary); font-weight: var(--font-weight-regular); }
 .setup-drop { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-md); padding: var(--space-2xl) var(--space-xl); border: var(--border-width-default) dashed var(--color-border-default); border-radius: var(--radius-control); }

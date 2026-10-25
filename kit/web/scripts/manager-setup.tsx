@@ -1,20 +1,24 @@
 /** Maintainer-only static render. Builder uses the real web components without a React runtime. */
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { ReactNode } from 'react';
+import { Icon } from '../src/icons';
 import { Button } from '../src/components/parts/Button';
 import { IconButton } from '../src/components/parts/IconButton';
 import { Label } from '../src/components/parts/Label';
 import { HelpText } from '../src/components/parts/HelpText';
 import { TextField, TextareaField } from '../src/components/components/TextField';
-import { ChoiceCard } from '../src/components/components/ChoiceField';
+import { ChoiceCard, ChoiceField } from '../src/components/components/ChoiceField';
 import { StepNavigation } from '../src/components/components/StepNavigation';
 import { interfaceModes, interfaceDevices } from '../../manager/setup-options.mjs';
 
-function Choices({ id, label, choices }: { id: string; label: string; choices: string[] }) {
-  return <div className="setup-field">
-    <Label as="span" id={`${id}-label`} label={label} />
-    <div id={id} className={id === 'setup-devices' ? 'grid grid-cols-1 gap-md sm:grid-cols-2' : 'grid grid-cols-2 gap-md'} role="group" aria-labelledby={`${id}-label`}>
-      {choices.map(value => <ChoiceCard key={value} size="sm" breakpoint="mobile" type="checkbox" text={value} value={value} name={id} subtext={null} supportingText={null} />)}
-    </div>
+function SettingRow({ label, id, htmlFor, required, optional, children }: {
+  label: string; id?: string; htmlFor?: string; required?: boolean; optional?: boolean; children: ReactNode;
+}) {
+  return <div className="docs-home-section grid grid-cols-1 items-start gap-lg sm:grid-cols-3 sm:gap-3xl">
+    <Label as={htmlFor ? 'label' : 'span'} id={id} htmlFor={htmlFor} showRequired={required}
+      className={htmlFor ? 'sm:pt-md' : id === 'setup-modes-label' ? 'sm:pt-lg' : undefined}
+      label={<>{label}{optional && <span className="setup-optional">Optional</span>}</>} />
+    <div className="min-w-0 sm:col-span-2">{children}</div>
   </div>;
 }
 
@@ -26,22 +30,37 @@ export const markup = renderToStaticMarkup(
     <p id="setup-simulation" className="notice" hidden>Simulation · no real agent or Figma calls.</p>
     <p id="setup-step-label" className="sr-only" role="status" tabIndex={-1}>Step 1 of 2 · General</p>
     <form id="setup-initial">
-      <section id="setup-general" className="setup-fields" aria-label="General">
-        <TextField id="setup-project-name" name="projectName" label="Project name" required maxLength={100} autoComplete="off" placeholder="e.g. Acme Design System" hint="Names your design system and its input folder on first save." />
-        <TextareaField id="setup-context" label="Context / Instruction" rows={4} maxLength={20000} placeholder="What is your product, who uses it, and what should its interface feel like? Include any colors, fonts, or constraints you already have." />
-        <div className="setup-field">
-          <Label as="span" id="setup-files-label" label={<>Context files <span className="setup-optional">Optional</span></>} />
+      <section id="setup-general" className="docs-reading-card setup-settings" aria-label="General">
+        <SettingRow label="Project name" htmlFor="setup-project-name" required>
+          <TextField id="setup-project-name" name="projectName" required maxLength={100} autoComplete="off" placeholder="e.g. Acme Design System" hint="Names your design system and its input folder on first save." />
+        </SettingRow>
+        <SettingRow label="Context / Instruction" htmlFor="setup-context">
+          <TextareaField id="setup-context" rows={4} maxLength={20000} placeholder="What is your product, who uses it, and what should its interface feel like? Include any colors, fonts, or constraints you already have." />
+        </SettingRow>
+        <SettingRow label="Context files" id="setup-files-label" optional>
           <div id="setup-drop" className="setup-drop">
             <input id="setup-files" className="sr-only" tabIndex={-1} type="file" multiple aria-labelledby="setup-files-label" aria-describedby="setup-files-help" />
             <Button id="setup-add-files" emphasis="secondary" label="Choose files" /><p>or drop them here</p>
             <HelpText id="setup-files-help" hint={<>Briefs, guidelines, images, or token exports.<br />Up to 10 files · 25 MB each · 50 MB total.</>} />
           </div><ul id="setup-file-list" className="setup-files" />
-        </div>
+        </SettingRow>
       </section>
-      <section id="setup-interface" className="setup-fields" aria-label="Interface details" hidden>
-        <Choices id="setup-modes" label="Appearance modes" choices={interfaceModes} />
-        <Choices id="setup-devices" label="Devices / platforms" choices={interfaceDevices} />
-        <div className="docs-reading-card setup-field p-xl"><Label as="span" label="Tokenization" /><HelpText hint={<><strong>Web docs:</strong> Tailwind only for now.</>} /><HelpText hint={<><strong>App docs:</strong> Token references will be available for React Native, Swift, and Kotlin.</>} /></div>
+      <section id="setup-interface" className="docs-reading-card setup-settings" aria-label="Interface details" hidden>
+        <SettingRow label="Appearance modes" id="setup-modes-label">
+          <div id="setup-modes" className="grid grid-cols-2 gap-md" role="group" aria-labelledby="setup-modes-label">
+            {interfaceModes.map(value => <ChoiceCard key={value} size="sm" breakpoint="mobile" type="checkbox" name="setup-modes" value={value}
+              text={<span className="flex items-center gap-md"><Icon name={value === 'Light' ? 'weather/sun' : 'weather/moon'} size="sm" />{value}</span>}
+              subtext={null} supportingText={null} />)}
+          </div>
+        </SettingRow>
+        <SettingRow label="Devices / platforms" id="setup-devices-label">
+          <div id="setup-devices" className="grid grid-cols-1 gap-xl min-[400px]:grid-cols-2" role="group" aria-labelledby="setup-devices-label">
+            {interfaceDevices.map(value => <ChoiceField key={value} size="sm" type="checkbox" text={value} value={value} name="setup-devices" />)}
+          </div>
+        </SettingRow>
+        <SettingRow label="Tokenization">
+          <div className="grid gap-md"><HelpText hint={<><strong>Web docs:</strong> Tailwind only for now.</>} /><HelpText hint={<><strong>App docs:</strong> Token references will be available for React Native, Swift, and Kotlin.</>} /></div>
+        </SettingRow>
       </section>
       <p id="setup-agent-note" className="setup-note" hidden>Your background worker prepares foundations from this saved context.</p>
     </form>

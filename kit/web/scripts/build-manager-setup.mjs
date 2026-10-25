@@ -20,7 +20,10 @@ try {
       rolldownOptions: { output: { entryFileNames: 'render.mjs' } } },
   });
   const { markup } = await import(pathToFileURL(path.join(temp, 'render.mjs')));
-  const classes = [...new Set([...markup.matchAll(/class="([^"]+)"/g)].flatMap(m => m[1].split(/\s+/)))];
+  // React SSR escapes attributes; Tailwind needs the DOM-decoded class names.
+  const entities = { '&amp;': '&', '&quot;': '"', '&#x27;': "'", '&#39;': "'", '&lt;': '<', '&gt;': '>' };
+  const classes = [...new Set([...markup.matchAll(/class="([^"]+)"/g)].flatMap(m =>
+    m[1].replace(/&(?:amp|quot|#x27|#39|lt|gt);/g, entity => entities[entity]).split(/\s+/)))];
   const tokens = JSON.parse(await readFile(path.join(web, 'tokens/figma-variables.json'), 'utf8'));
   const byName = new Map(tokens.variables.map(v => [v.name, v]));
   const cssName = name => '--' + name.replaceAll('/', '-').replaceAll('.', '_');
