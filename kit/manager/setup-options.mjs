@@ -1,6 +1,12 @@
 // Choices already defined by workflow/QUESTIONNAIRE.md §§1, 2, 9.
 export const interfaceModes = ['Light', 'Dark'];
 export const interfaceDevices = ['Responsive web', 'Desktop web', 'Mobile web', 'iOS', 'Android', 'Tablet', 'Desktop app', 'Other'];
+export function tokenizationPreview(devices = []) {
+  const web = devices.some(value => ['Responsive web', 'Desktop web', 'Mobile web'].includes(value));
+  const app = devices.some(value => ['iOS', 'Android', 'Desktop app'].includes(value));
+  return { product: web && app ? 'both' : web ? 'web' : app ? 'app' : null,
+    web, app, needsContext: devices.some(value => ['Tablet', 'Other'].includes(value)) };
+}
 // auto is accepted only for compatibility with previously saved intake values; never offered by the UI.
 export const tokenizationRules = {auto:'Follow ds-create init',keep:'Keep existing naming',normalize:'Normalize naming'};
 export function normalizeInterfaceDetails(value) {

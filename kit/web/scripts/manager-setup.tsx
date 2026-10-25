@@ -6,6 +6,8 @@ import { Button } from '../src/components/parts/Button';
 import { IconButton } from '../src/components/parts/IconButton';
 import { Label } from '../src/components/parts/Label';
 import { HelpText } from '../src/components/parts/HelpText';
+import { Badge } from '../src/components/parts/Badge';
+import { Divider } from '../src/components/parts/Divider';
 import { TextField, TextareaField } from '../src/components/components/TextField';
 import { ChoiceCard, ChoiceField } from '../src/components/components/ChoiceField';
 import { StepNavigation } from '../src/components/components/StepNavigation';
@@ -58,8 +60,27 @@ export const markup = renderToStaticMarkup(
             {interfaceDevices.map(value => <ChoiceField key={value} size="sm" type="checkbox" text={value} value={value} name="setup-devices" />)}
           </div>
         </SettingRow>
-        <SettingRow label="Tokenization">
-          <div className="grid gap-md"><HelpText hint={<><strong>Web docs:</strong> Tailwind only for now.</>} /><HelpText hint={<><strong>App docs:</strong> Token references will be available for React Native, Swift, and Kotlin.</>} /></div>
+        <SettingRow label="Tokenization" id="setup-tokenization-label">
+          <div className="grid gap-xl" role="group" aria-labelledby="setup-tokenization-label">
+            <div id="setup-tokenization-empty" className="flex items-start gap-md">
+              <Icon name="development/code" size="md" className="text-icon-tertiary" />
+              <HelpText hint="Choose a device or platform to see token formats." />
+            </div>
+            <div id="setup-tokenization-web" className="grid gap-md" hidden>
+              <div className="flex items-center gap-md type-body-sm-medium text-text-secondary"><Icon name="media/monitor" size="sm" />Web docs</div>
+              <div className="flex flex-wrap gap-md"><Badge size="md" type="outline" label="Tailwind" /></div>
+            </div>
+            <Divider id="setup-tokenization-divider" decorative hidden />
+            <div id="setup-tokenization-app" className="grid gap-md" hidden>
+              <div className="flex items-center gap-md type-body-sm-medium text-text-secondary"><Icon name="media/smartphone" size="sm" />App docs</div>
+              <div className="flex flex-wrap gap-md">{['React Native', 'Swift', 'Kotlin'].map(format => <Badge key={format} size="md" type="outline" label={format} />)}</div>
+            </div>
+            <div id="setup-tokenization-context" className="flex items-start gap-md" hidden>
+              <Icon name="alerts/info-circle" size="md" className="text-icon-tertiary" />
+              <HelpText hint="Token formats for these platforms follow your project context." />
+            </div>
+            <span id="setup-tokenization-status" className="sr-only" role="status" aria-live="polite" aria-atomic="true" />
+          </div>
         </SettingRow>
       </section>
       <p id="setup-agent-note" className="setup-note" hidden>Your background worker prepares foundations from this saved context.</p>

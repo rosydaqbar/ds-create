@@ -1,14 +1,26 @@
-import { normalizeInterfaceDetails, interfaceDetailsText } from './setup-options.mjs';
+import { normalizeInterfaceDetails, interfaceDetailsText, tokenizationPreview } from './setup-options.mjs';
 import { preparationView } from './preparation.mjs';
 import { openDialog, closeDialog } from './ui-motion.mjs';
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 const size = bytes => bytes < 1024 ? `${bytes} B` : bytes < 1024*1024 ? `${Math.ceil(bytes/1024)} KB` : `${(bytes/1024/1024).toFixed(1)} MB`;
+export function renderTokenizationPreview(root, devices) {
+  const state=tokenizationPreview(devices),node=id=>root.querySelector(`#setup-tokenization-${id}`);
+  node('web').hidden=!state.web;node('app').hidden=!state.app;
+  node('divider').hidden=!(state.web&&state.app);
+  node('empty').hidden=state.web||state.app||state.needsContext;
+  node('context').hidden=!state.needsContext;
+  const formats=[...(state.web?['Tailwind']:[]),...(state.app?['React Native','Swift','Kotlin']:[])];
+  const summary=formats.length?`Token formats: ${formats.join(', ')}.${state.needsContext?' Additional formats follow the project context.':''}`:state.needsContext?'Token formats follow the project context.':'Choose a device or platform to see token formats.';
+  if(node('status').textContent!==summary)node('status').textContent=summary;
+}
 export function setupWeb({ onChange = () => {} } = {}) {
   const dialog=$('setup-dialog');
   let flow,signature='',pending=[],busy=false,opened=false,returnFocus,editing=false,editRevision,nameHydrated=false,networkFailed=false,step=1,detailsHydrated=false;
   function hydrateDetails(details){for(const [id,key] of [['setup-modes','modes'],['setup-devices','devices']])for(const input of $(id).querySelectorAll('input[type="checkbox"]'))input.checked=!!details?.[key]?.includes(input.value);}
   function readDetails(){return normalizeInterfaceDetails({modes:[...$('setup-modes').querySelectorAll('input:checked')].map(input=>input.value),devices:[...$('setup-devices').querySelectorAll('input:checked')].map(input=>input.value)});}
+  function updateTokenization(){renderTokenizationPreview(dialog,[...$('setup-devices').querySelectorAll('input:checked')].map(input=>input.value));}
+  $('setup-devices').addEventListener('change',updateTokenization);
   const preparation=preparationView({post,edit:editContext,openContext:open});
   function files() {
     $('setup-file-list').innerHTML=pending.map(f=>`<li><span>${escape(f.name)}<small>${size(f.size)}</small></span></li>`).join('');
@@ -20,6 +32,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     if(!flow?.enabled)return;
     if(!nameHydrated){if(!$('setup-project-name').value)$('setup-project-name').value=flow.projectName||'';nameHydrated=true;}
     if(!detailsHydrated){hydrateDetails(flow.interfaceDetails);detailsHydrated=true;}
+    updateTokenization();
     const initial=flow.status==='empty',ready=flow.status==='ready',questions=flow.status==='questions';
     $('setup-open').textContent=questions?'Answer questions':'Context';
     $('setup-title').textContent=initial?'Set up your design system':'Project context';
@@ -129,7 +142,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
   $('setup-initial').addEventListener('submit',e=>{
     e.preventDefault();if(step===1){advance();return;}
     if(!validateGeneral()){step=1;paint();return;}
-    let interfaceDetails;try{interfaceDetails=readDetails();}catch(e){error(e.message);$(e.message.startsWith('Choose Light')?'setup-modes':'setup-devices').querySelector('button')?.focus();return;}
+    let interfaceDetails;try{interfaceDetails=readDetails();}catch(e){error(e.message);$(e.message.startsWith('Choose Light')?'setup-modes':'setup-devices').querySelector('input[type="checkbox"]')?.focus();return;}
     const context=$('setup-context').value,projectName=$('setup-project-name').value.trim();
     const form=new FormData();form.set('projectName',projectName);form.set('context',JSON.stringify(context));form.set('interfaceDetails',JSON.stringify(interfaceDetails));pending.forEach(f=>form.append('files',f,f.name));if(editing)form.set('inputRevision',String(editRevision));post(editing?'/api/setup-revise':'/api/setup-submit',form,true);
   });
