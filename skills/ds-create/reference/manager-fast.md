@@ -4,7 +4,7 @@ All Builder web jobs require `--fast-mode`; the server records `fastMode:true` o
 
 ## Prepare locally
 
-Read init-web and init's local preparation requirements once, plus the actual selected inputs, knowledge and foundation specs. Reuse fully read, unchanged references within this job; user changes reopen the relevant inputs. Write the canonical draft/plan and source decisions once, then submit the normal ready/questions result. Do not restart the workflow to report progress. Preparation still needs design decisions; FAST does not fabricate defaults, skip source reading or bypass the saved-artifact checks.
+Read init-web and init's local preparation requirements once, plus the actual selected inputs, shared root files listed as ../{filename} in the trusted snapshot, knowledge and foundation specs. Read every listed root file in place before asking questions; never request its upload again or scan another system directory. Reuse fully read, unchanged references within this job; user changes reopen the relevant inputs. Write the canonical draft/plan and source decisions once, then submit the normal ready/questions result. Do not restart the workflow to report progress. Preparation still needs design decisions; FAST does not fabricate defaults, skip source reading or bypass the saved-artifact checks.
 
 ## Publish the approved draft
 

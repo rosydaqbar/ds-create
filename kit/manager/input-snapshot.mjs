@@ -5,15 +5,36 @@ import { selectedInputSlug } from './input-identity.mjs';
 const sha = data => createHash('sha256').update(data).digest('hex');
 // Derived indexes and the generated decision transcription are not source inputs.
 const generated = new Set(['sources.md', 'answers/01-init.md']);
+const rootBookkeeping = new Set(['README.md', '.DS_Store']);
+async function inputDirectory(workspace) {
+  const base=await realpath(workspace);
+  for(const rel of ['workspace','workspace/input']){
+    try{const info=await lstat(path.join(base,rel));if(!info.isDirectory()||info.isSymbolicLink())throw new Error('Input storage must use real workspace directories.');}
+    catch(e){if(e.code==='ENOENT')return null;throw e;}
+  }
+  return path.join(base,'workspace/input');
+}
+// Metadata only for the Builder list; file bytes are read once per source snapshot.
+export async function listRootInputs(workspace) {
+  const input=await inputDirectory(workspace);if(!input)return [];
+  const files=[];
+  for(const entry of await readdir(input,{withFileTypes:true})){
+    if(rootBookkeeping.has(entry.name)||entry.isDirectory()||entry.isSymbolicLink())continue;
+    const info=await lstat(path.join(input,entry.name));
+    if(info.isSymbolicLink())throw new Error(`Root input ${entry.name} is a symlink. Provide a regular file.`);
+    if(!info.isFile())throw new Error(`Root input ${entry.name} is not a regular file.`);
+    files.push({name:entry.name,path:`../${entry.name}`,size:info.size});
+  }
+  return files.sort((a,b)=>a.path.localeCompare(b.path,'en'));
+}
 export async function snapshotInputs(workspace, slug) {
   selectedInputSlug({inputSlug:slug});
-  const root = path.join(workspace, 'workspace/input', slug), files = [];
-  const base = await realpath(workspace);
-  // Reject symlinked ancestors as well as symlinked source files.
-  for (const rel of ['workspace', 'workspace/input', `workspace/input/${slug}`]) {
-    try { const stat = await lstat(path.join(base,rel)); if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error('Input storage must use real workspace directories.'); }
-    catch(e){if(e.code==='ENOENT')return {hash:sha('[]'),files:[]};throw e;}
-  }
+  const input=await inputDirectory(workspace),files=[];
+  if(!input)return {hash:sha('[]'),files};
+  const root=path.join(input,slug);
+  let selectedExists=true;
+  try{const info=await lstat(root);if(!info.isDirectory()||info.isSymbolicLink())throw new Error('Input storage must use real workspace directories.');}
+  catch(e){if(e.code==='ENOENT')selectedExists=false;else throw e;}
   async function walk(dir, prefix='') {
     for (const entry of (await readdir(dir,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name,'en'))) {
       const name=prefix+entry.name, full=path.join(dir,entry.name);
@@ -24,7 +45,13 @@ export async function snapshotInputs(workspace, slug) {
       else throw new Error(`Input ${name} is not a regular file.`);
     }
   }
-  try{await walk(root);}catch(e){if(e.code==='ENOENT')throw new Error('Inputs changed while reading. Retry after files are saved.');throw e;}
+  try{
+    if(selectedExists)await walk(root);
+    for(const entry of await listRootInputs(workspace)){
+      const bytes=await readFile(path.join(input,entry.name));
+      files.push({path:entry.path,size:bytes.length,hash:sha(bytes)});
+    }
+  }catch(e){if(e.code==='ENOENT')throw new Error('Inputs changed while reading. Retry after files are saved.');throw e;}
   files.sort((a,b)=>a.path.localeCompare(b.path,'en'));
   return {hash:sha(JSON.stringify(files)),files};
 }

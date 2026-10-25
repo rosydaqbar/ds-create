@@ -7,7 +7,7 @@ import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { readJSON } from './state.mjs';
 import { PublishError } from './figma-jobs.mjs';
-import { snapshotInputs, inputFreshness } from './input-snapshot.mjs';
+import { snapshotInputs, inputFreshness, listRootInputs } from './input-snapshot.mjs';
 import { projectInputSlug, selectedInputSlug } from './input-identity.mjs';
 import { createSetupProgress } from './setup-progress.mjs';
 
@@ -27,7 +27,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
   const file = path.join(outputDir, 'manager/setup.json'), slug = path.basename(outputDir);
   const readProgress = createSetupProgress();
   let busy = false, child, childId;
-  async function latest() {
+  async function latest(checkQuestions = !busy) {
     let r = await latestMcpPreparation(outputDir);
     if (activeSetup(r) && r.runner!=='mcp' && r.jobId !== childId) {
       let alive = false;
@@ -35,21 +35,25 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
       if (!alive) { r = {...r,status:'interrupted',message:'Preparation stopped. Your context and files are saved; retry to continue.'}; await saveSetup(file,r); }
     }
     if(r?.status==='ready'){const freshness=await inputFreshness(outputDir,r);if(!freshness.fresh){r={...r,status:'outdated',message:freshness.message};await saveSetup(file,r);}}
+    if(checkQuestions&&r?.status==='questions'&&/^[0-9a-f-]{36}$/.test(r.jobId||'')){
+      const request=await readJSON(path.join(outputDir,'manager/setup-jobs',r.jobId,'request.json'));
+      if(request?.inputHash){const freshness=await inputFreshness(outputDir,{...r,status:'ready',readyInputHash:request.inputHash});if(!freshness.fresh){r={...r,status:'outdated',questions:[],message:'Context files changed. Prepare foundations again so the current inputs are read before asking questions.'};await saveSetup(file,r);}}
+    }
     return r;
   }
   async function status() {
-    const [r, program, ledger] = await Promise.all([latest(), runner==='mcp'?true:executable(agentCommand), readJSON(path.join(outputDir,'ds-create-ledger.json'))]);
+    const [r, program, ledger, rootInputs] = await Promise.all([latest(), runner==='mcp'?true:executable(agentCommand), readJSON(path.join(outputDir,'ds-create-ledger.json')), listRootInputs(workspace).then(files=>({files,error:null})).catch(e=>({files:[],error:e.message}))]);
     if (!r) return { enabled:false };
     const pointer=await readJSON(path.join(outputDir,'manager/figma-job.json'));
     const publishing=/^[0-9a-f-]{36}$/.test(pointer?.id||'') && activeSetup(await readJSON(path.join(outputDir,'manager/jobs',pointer.id,'status.json')));
     const progress=/^[0-9a-f-]{36}$/.test(r.jobId || '') ? await readProgress(path.join(outputDir,'manager/setup-jobs',r.jobId)) : null;
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
-      files:r.files || [], interfaceDetails:r.interfaceDetails||null, fastMode:true, inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
+      files:r.files || [], rootFiles:rootInputs.files, rootFilesError:rootInputs.error, interfaceDetails:r.interfaceDetails||null, fastMode:true, inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
       cancelRequested:!!r.cancelRequested,cancelRequestedAt:r.cancelRequestedAt||null, canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
       integration:runner==='mcp'?mcpConfiguration(workspace,slug,'prepare'):null, runner:r.runner||runner, progress, updatedAt:r.updated || null, canStop:activeSetup(r) && (r.runner==='mcp'||!!child && childId === r.jobId) };
   }
   async function guard() {
-    const r = await latest();
+    const r = await latest(true);
     if (!r) throw new PublishError('This workspace does not use web setup.',404);
     if (activeSetup(r)) throw new PublishError('Preparation is already running.');
     const p = await readJSON(path.join(outputDir,'manager/figma-job.json'));
@@ -114,6 +118,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
     const projectName=form.get('projectName');
     if(form.getAll('projectName').length!==1 || typeof projectName!=='string' || !projectName.trim() || projectName.trim().length>uploadLimits.projectName || /[\x00-\x1f\x7f]/.test(projectName))throw new PublishError('Enter a project name of 1–100 characters on one line.',400);
     const name=projectName.trim();
+    if(!r.inputSlug&&!r.submitted){try{projectInputSlug(name);}catch(e){throw new PublishError(e.message,400);}}
     let context;
     try { context=JSON.parse(form.get('context')); } catch { throw new PublishError('Context text could not be read. Retry this form.',400); }
     let interfaceDetails=r.interfaceDetails||null;
@@ -122,7 +127,8 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
       catch(e){throw new PublishError(e.message||'Interface details could not be read.',400);}
     }
     const files=form.getAll('files').filter(f=>typeof f!=='string' && f.name);
-    if(typeof context!=='string' || context.length>uploadLimits.context || !context.trim() && !files.length && !(revision&&r.files?.length)) throw new PublishError('Add context or at least one context file (context limit: 20,000 characters).',400);
+    let rootFiles;try{rootFiles=await listRootInputs(workspace);}catch(e){throw new PublishError(e.message,412);}
+    if(typeof context!=='string' || context.length>uploadLimits.context || !context.trim() && !files.length && !rootFiles.length && !(revision&&r.files?.length)) throw new PublishError('Add context or at least one context file (context limit: 20,000 characters).',400);
     if(form.getAll('files').some(f=>typeof f==='string') || files.length>uploadLimits.files) throw new PublishError('Choose up to 10 files.',400);
     const names=new Set();let bytes=0;
     for(const f of files) {

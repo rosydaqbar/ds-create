@@ -24,14 +24,18 @@ export function setupWeb({ onChange = () => {} } = {}) {
   function updateTokenization(){renderTokenizationPreview(dialog,readDevices());}
   $('setup-devices').addEventListener('change',updateTokenization);
   const preparation=preparationView({post,edit:editContext,openContext:open});
+  let fileListKey='';
+  function rootFileRows(){return (flow?.rootFiles||[]).map(f=>`<li><span>${escape(f.name)}<small>Workspace input · workspace/input/${escape(f.name)}</small></span><span>${size(f.size)}</span></li>`).join('');}
   function files() {
-    $('setup-file-list').innerHTML=pending.map(f=>`<li><span>${escape(f.name)}<small>${size(f.size)}</small></span></li>`).join('');
-    [...$('setup-file-list').children].forEach((row,i)=>{const button=$('setup-remove-file').content.firstElementChild.cloneNode(true);button.dataset.removeFile=i;button.setAttribute('aria-label',`Remove ${pending[i].name}`);row.append(button);});
+    const key=JSON.stringify([flow?.rootFiles,flow?.rootFilesError,pending.map(f=>[f.name,f.size,f.lastModified])]);if(key===fileListKey)return;fileListKey=key;
+    $('setup-file-list').innerHTML=rootFileRows()+(flow?.rootFilesError?`<li role="alert"><span>Workspace inputs<small>${escape(flow.rootFilesError)}</small></span><span>Unavailable</span></li>`:'')+pending.map((f,i)=>`<li data-pending-file="${i}"><span>${escape(f.name)}<small>${size(f.size)}</small></span></li>`).join('');
+    for(const row of $('setup-file-list').querySelectorAll('[data-pending-file]')){const i=Number(row.dataset.pendingFile),button=$('setup-remove-file').content.firstElementChild.cloneNode(true);button.dataset.removeFile=i;button.setAttribute('aria-label',`Remove ${pending[i].name}`);row.append(button);}
   }
   function paint() {
     $('setup-open').hidden=!flow?.enabled;
     preparation.sync(flow,busy);
     if(!flow?.enabled)return;
+    files();
     if(!nameHydrated){if(!$('setup-project-name').value)$('setup-project-name').value=flow.projectName||'';nameHydrated=true;}
     if(!detailsHydrated){hydrateDetails(flow.interfaceDetails);detailsHydrated=true;}
     updateTokenization();
@@ -72,7 +76,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-storage').textContent=`Saved locally in ${flow.inputPath}`;
     $('setup-saved-interface').textContent=interfaceDetailsText(flow.interfaceDetails);$('setup-saved-interface').hidden=!flow.interfaceDetails;
     $('setup-saved-context').textContent=flow.context || 'Context provided in files.';
-    $('setup-saved-files').innerHTML=(flow.files || []).map(f=>`<li><span>${escape(f.name)}</span><span>${size(f.size)}</span></li>`).join('');
+    $('setup-saved-files').innerHTML=rootFileRows()+(flow.files || []).map(f=>`<li><span>${escape(f.name)}</span><span>${size(f.size)}</span></li>`).join('');
     $('setup-submit').hidden=!(initial||editing)||step!==2;
     $('setup-submit').disabled=busy;
     $('setup-submit').textContent=busy?'Saving context…':editing?'Save & prepare again':flow.available?'Prepare foundations':'Save context';
@@ -131,9 +135,10 @@ export function setupWeb({ onChange = () => {} } = {}) {
   $('setup-add-files').addEventListener('click',()=>$('setup-files').click());
   const drop=$('setup-drop');drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('is-dragging');});drop.addEventListener('dragleave',()=>drop.classList.remove('is-dragging'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('is-dragging');addFiles(e.dataTransfer.files);});
   function validateGeneral(){
+    if(flow?.rootFilesError){error(flow.rootFilesError);return false;}
     const projectName=$('setup-project-name').value.trim(),context=$('setup-context').value;
     if(!$('setup-project-name').reportValidity()||!projectName||projectName.length>100||/[\x00-\x1f\x7f]/.test(projectName)){error('Enter a project name of 1–100 characters on one line.');$('setup-project-name').focus();return false;}
-    if(!context.trim()&&!pending.length&&!(editing&&flow.files?.length)){error('Describe your product or add a context file to get started.');$('setup-context').focus();return false;}
+    if(!context.trim()&&!pending.length&&!flow?.rootFiles?.length&&!(editing&&flow.files?.length)){error('Describe your product or add a context file to get started.');$('setup-context').focus();return false;}
     return true;
   }
   function advance(){if(busy||!validateGeneral())return;error('');step=2;paint();dialog.scrollTop=0;$('setup-step-label').focus({preventScroll:true});}

@@ -16,7 +16,7 @@ The user never has to prepare a folder. Whatever comes with the command, or late
 - **Pasted text** (a brief, a PRD, brand notes, a list of links): save it word for word in `workspace/input/{slug}/chat/YYYY-MM-DD.md` (`workspace/input/README.md` I3), then read it like any other input. A brief pasted in chat is the system's brief.
 - **Attached files:** save each one in the folder that fits (`brief/`, `brand/`, `design-system/`, `references/`), under its own name.
 - **A Figma link:** record it in the same chat file. It is the file for the readiness check.
-- **Files dropped straight into `workspace/input/`,** outside any system folder: they belong to this system when `workspace/input/` holds no other system folder; otherwise ask which system they belong to. Read them where they are, and list them in `sources.md` by their path from `workspace/input/`. Never move or rename them.
+- **Files dropped straight into `workspace/input/`,** outside any system folder: these are shared workspace context and must be read alongside the selected system, in place. Exclude the repository README.md and OS .DS_Store; never traverse another system folder. In web jobs, root files have server-listed `../{filename}` snapshot keys relative to the selected folder; retain that exact key in decisions/sources and show its resolved workspace path. Never move, copy or rename the originals.
 
 # 1. Readiness check
 

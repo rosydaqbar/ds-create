@@ -41,7 +41,7 @@ workspace/input/
 
 **I1. Read the inputs before asking.**
 - List the files with `find workspace/input -type f`. Git ignores this folder, so `rg`, `fd`, Glob and Grep skip every file in it and show it empty (`workflow/GOTCHAS.md` G55).
-- A file the user drops straight into `workspace/input/`, outside any system folder, is an input of the system being built when there is only one; otherwise ask which system it belongs to. It is read where it is and listed in `sources.md` by its path from `workspace/input/`.
+- Regular files directly in `workspace/input/` are shared workspace context for the selected system. Read them in place alongside its own folder; never move, rename or silently omit them. Exclude this repository README and OS `.DS_Store`. Web snapshots identify these files as `../{filename}` relative to the selected folder; record that exact source key and the resolved workspace path in `sources.md`. Other system directories are never shared or traversed; put project-specific inputs inside their system folder.
 - What the user pastes or attaches with a command is an input too. It is saved into `workspace/input/{slug}/` first (`chat/` for pasted text, the fitting folder for files), creating the folder when needed, and read with the rest.
 - At initiation (`INITIATOR.md` Part B §6, steps 1–3), read every file in `workspace/input/{slug}/` before the first question. Then write `sources.md`.
 - In every later session, `sources.md` is part of the global set: read it, and open the files it points to at the steps that need them.
