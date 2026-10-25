@@ -1,3 +1,4 @@
+import {normalizeInterfaceDetails,interfaceDetailsText} from './setup-options.mjs';
 import { access, mkdir, writeFile, realpath, lstat, cp, rm, readdir } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import path from 'node:path';
@@ -43,7 +44,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
     const publishing=/^[0-9a-f-]{36}$/.test(pointer?.id||'') && activeSetup(await readJSON(path.join(outputDir,'manager/jobs',pointer.id,'status.json')));
     const progress=/^[0-9a-f-]{36}$/.test(r.jobId || '') ? await readProgress(path.join(outputDir,'manager/setup-jobs',r.jobId)) : null;
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
-      files:r.files || [], inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
+      files:r.files || [], interfaceDetails:r.interfaceDetails||null, fastMode:true, inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:!!program, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
       cancelRequested:!!r.cancelRequested,cancelRequestedAt:r.cancelRequestedAt||null, canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
       integration:runner==='mcp'?mcpConfiguration(workspace,slug,'prepare'):null, runner:r.runner||runner, progress, updatedAt:r.updated || null, canStop:activeSetup(r) && (r.runner==='mcp'||!!child && childId === r.jobId) };
   }
@@ -63,7 +64,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
     }
     const id = randomUUID(), dir = await localDirectory(workspace,`workspace/output/${slug}/manager/setup-jobs/${id}`);
     const inputSlug=selectedInputSlug(r,slug),snapshot=await snapshotInputs(workspace,inputSlug),inputFiles=snapshot.files.map(f=>f.path);
-    const request = {id,slug,inputSlug,projectName:r.projectName || null,workspace,outputDir,runner,program:runner==='mcp'?null:program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
+    const request = {id,slug,inputSlug,fastMode:true,interfaceDetails:r.interfaceDetails||null,projectName:r.projectName || null,workspace,outputDir,runner,program:runner==='mcp'?null:program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
     await saveSetup(path.join(dir,'request.json'),request);
     if(runner==='mcp')await initPrepareDelivery(outputDir,id);
     await saveSetup(file,{...r,runner,status:'queued',cancelRequested:false,cancelRequestedAt:null,jobId:id,pid:undefined,readyInputHash:null,questions:[],message:runner==='mcp'?'Your saved context is queued for the background worker.':'Starting the local agent…'});
@@ -108,13 +109,18 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
     const r=await guard();
     if(!revision && r.submitted) throw new PublishError('Context is already saved. Answer the open questions or retry preparation.');
     const entries=[...form.entries()];
-    if(entries.some(([key])=>!['projectName','context','files','inputRevision'].includes(key)) || form.getAll('context').length!==1) throw new PublishError('Submit the project name, context and context files only.',400);
+    if(entries.some(([key])=>!['projectName','context','files','inputRevision','interfaceDetails'].includes(key)) || form.getAll('context').length!==1) throw new PublishError('Submit the project name, context and context files only.',400);
     if(revision && (!r.submitted || form.getAll('inputRevision').length!==1 || Number(form.get('inputRevision'))!==(r.inputRevision||1)))throw new PublishError('Context changed in another tab. Reopen Context before saving a revision.');
     const projectName=form.get('projectName');
     if(form.getAll('projectName').length!==1 || typeof projectName!=='string' || !projectName.trim() || projectName.trim().length>uploadLimits.projectName || /[\x00-\x1f\x7f]/.test(projectName))throw new PublishError('Enter a project name of 1–100 characters on one line.',400);
     const name=projectName.trim();
     let context;
     try { context=JSON.parse(form.get('context')); } catch { throw new PublishError('Context text could not be read. Retry this form.',400); }
+    let interfaceDetails=r.interfaceDetails||null;
+    if(form.has('interfaceDetails')){
+      try{if(form.getAll('interfaceDetails').length!==1||typeof form.get('interfaceDetails')!=='string')throw new Error('Submit interface details once.');interfaceDetails=normalizeInterfaceDetails(JSON.parse(form.get('interfaceDetails')));if(!interfaceDetails)throw new Error('Choose your interface details.');}
+      catch(e){throw new PublishError(e.message||'Interface details could not be read.',400);}
+    }
     const files=form.getAll('files').filter(f=>typeof f!=='string' && f.name);
     if(typeof context!=='string' || context.length>uploadLimits.context || !context.trim() && !files.length && !(revision&&r.files?.length)) throw new PublishError('Add context or at least one context file (context limit: 20,000 characters).',400);
     if(form.getAll('files').some(f=>typeof f==='string') || files.length>uploadLimits.files) throw new PublishError('Choose up to 10 files.',400);
@@ -136,11 +142,11 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
       }
       const chatDir=await localDirectory(workspace,`workspace/input/${inputSlug}/chat`);
       const contextFile=`chat/${new Date().toISOString().slice(0,10)}-${batch}.md`;
-      await writeFile(path.join(chatDir,path.basename(contextFile)),`# Context from Builder\n\n## Project name\n${name}\n\n## Context / Instruction\n${context}\n\nMeaning: User-provided context and instructions for local foundation preparation.\nApplies to: this system, init.\n`,{flag:'wx'});
+      await writeFile(path.join(chatDir,path.basename(contextFile)),`# Context from Builder\n\n## Project name\n${name}\n\n## Context / Instruction\n${context}\n\n${interfaceDetails?'## Interface details (user selections)\n'+interfaceDetailsText(interfaceDetails)+'\n\n':''}Meaning: User-provided context and instructions for local foundation preparation.\nApplies to: this system, init.\n`,{flag:'wx'});
       const now=new Date().toISOString(),inputRevision=(r.inputRevision||0)+1;
       const currentFiles=[...(r.files||[]).filter(f=>!names.has(f.name)),...saved];
-      const next={...r,inputSlug,projectName:name,context,files:currentFiles,contextFile,inputRevision,readyInputHash:null,
-        revisions:[...(r.revisions||[]),{revision:inputRevision,projectName:name,contextFile,files:saved,date:now}],submitted:r.submitted||now,status:'saved'};
+      const next={...r,inputSlug,projectName:name,context,interfaceDetails,fastMode:true,files:currentFiles,contextFile,inputRevision,readyInputHash:null,
+        revisions:[...(r.revisions||[]),{revision:inputRevision,projectName:name,interfaceDetails,contextFile,files:saved,date:now}],submitted:r.submitted||now,status:'saved'};
       if(revision){
         const ledgerFile=path.join(outputDir,'ds-create-ledger.json'),ledger=await readJSON(ledgerFile);
         if(ledger)await saveSetup(ledgerFile,{...ledger,foundationReview:{status:'pending'},sequence:(ledger.sequence||[]).map(e=>[2,3,4].includes(Number(e.step))?{...e,status:'todo'}:e)});

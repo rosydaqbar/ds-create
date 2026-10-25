@@ -70,7 +70,7 @@ async function main() {
   if (command === 'init-web' && !await readJSON(path.join(dir, 'setup.json')) && !await readJSON(path.join(output, 'ds-create-ledger.json'))) {
     try { await accessDraft(); } catch (e) {
       if (e.code !== 'ENOENT') throw e;
-      await writeFile(path.join(dir, 'setup.json'), JSON.stringify({ format: 'ds-create/setup@1', status: 'empty', created: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx' });
+      await writeFile(path.join(dir, 'setup.json'), JSON.stringify({ format: 'ds-create/setup@1', status: 'empty', fastMode: true, created: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx' });
     }
   }
   async function accessDraft() { await readFile(path.join(output, 'foundations.json')); }

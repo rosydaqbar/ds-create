@@ -1,3 +1,4 @@
+import { interfaceModes, interfaceDevices, normalizeInterfaceDetails, interfaceDetailsText } from './setup-options.mjs';
 import { preparationView } from './preparation.mjs';
 import { openDialog, closeDialog } from './ui-motion.mjs';
 const $ = id => document.getElementById(id);
@@ -5,7 +6,13 @@ const escape = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;',
 const size = bytes => bytes < 1024 ? `${bytes} B` : bytes < 1024*1024 ? `${Math.ceil(bytes/1024)} KB` : `${(bytes/1024/1024).toFixed(1)} MB`;
 export function setupWeb({ onChange = () => {} } = {}) {
   const dialog=$('setup-dialog');
-  let flow,signature='',pending=[],busy=false,opened=false,returnFocus,editing=false,editRevision,nameHydrated=false,networkFailed=false;
+  let flow,signature='',pending=[],busy=false,opened=false,returnFocus,editing=false,editRevision,nameHydrated=false,networkFailed=false,step=1,detailsHydrated=false;
+  for(const [id,choices] of [['setup-modes',interfaceModes],['setup-devices',interfaceDevices]]){
+    $(id).innerHTML=choices.map(value=>`<button type="button" class="button" aria-pressed="false" data-choice="${escape(value)}">${escape(value)}</button>`).join('');
+    $(id).addEventListener('click',e=>{const b=e.target.closest('[data-choice]');if(b)b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));});
+  }
+  function hydrateDetails(details){for(const [id,key] of [['setup-modes','modes'],['setup-devices','devices']])for(const b of $(id).querySelectorAll('[data-choice]'))b.setAttribute('aria-pressed',String(!!details?.[key]?.includes(b.dataset.choice)));$('setup-tokenization').value=details?.tokenization||'auto';}
+  function readDetails(){return normalizeInterfaceDetails({modes:[...$('setup-modes').querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.choice),devices:[...$('setup-devices').querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.choice),tokenization:$('setup-tokenization').value});}
   const preparation=preparationView({post,edit:editContext,openContext:open});
   function files() {
     $('setup-file-list').innerHTML=pending.map((f,i)=>`<li><span>${escape(f.name)}<small>${size(f.size)}</small></span><button class="icon-button" type="button" data-remove-file="${i}" aria-label="Remove ${escape(f.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></li>`).join('');
@@ -15,11 +22,19 @@ export function setupWeb({ onChange = () => {} } = {}) {
     preparation.sync(flow,busy);
     if(!flow?.enabled)return;
     if(!nameHydrated){if(!$('setup-project-name').value)$('setup-project-name').value=flow.projectName||'';nameHydrated=true;}
+    if(!detailsHydrated){hydrateDetails(flow.interfaceDetails);detailsHydrated=true;}
     const initial=flow.status==='empty',ready=flow.status==='ready',questions=flow.status==='questions';
     $('setup-open').textContent=questions?'Answer questions':'Context';
     $('setup-title').textContent=initial?'Set up your design system':'Project context';
     $('setup-description').textContent=initial?'Describe your product and the design system you need. Add any briefs, brand guidelines, or existing tokens.':'Review the saved project context here. Preparation updates and questions are in Overview.';
     $('setup-initial').hidden=!(initial||editing);
+    $('setup-step-label').hidden=!(initial||editing);
+    $('setup-step-label').textContent=`Step ${step} of 2 · ${step===1?'General':'Interface details'}`;
+    $('setup-general').hidden=step!==1;
+    $('setup-interface').hidden=step!==2;
+    $('setup-next').hidden=!(initial||editing)||step!==1;
+    $('setup-back').hidden=!(initial||editing)||step!==2;
+    $('setup-next').disabled=busy;$('setup-back').disabled=busy;
     $('setup-edit').hidden=initial||editing||!flow.canEdit;
     $('setup-edit').disabled=busy;
     $('setup-edit-cancel').hidden=!editing;
@@ -30,14 +45,16 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-resume-command').textContent=flow.resumeCommand||'';
     $('setup-resume').hidden=!flow.resumeCommand;
     if(editing){$('setup-title').textContent='Revise your context';$('setup-description').textContent='Update instructions or add a readable replacement file. Saving starts preparation again; review the new draft before publishing.';}
+    if((initial||editing)&&step===2)$('setup-description').textContent='Choose appearance modes, devices, and the tokenization rule for your foundations.';
     $('setup-saved').hidden=initial;
     $('setup-simulation').hidden=!flow.simulation;
     $('setup-state').textContent=flow.message||'';
     $('setup-state').hidden=initial;
     $('setup-storage').textContent=`Saved locally in ${flow.inputPath}`;
+    $('setup-saved-interface').textContent=interfaceDetailsText(flow.interfaceDetails);$('setup-saved-interface').hidden=!flow.interfaceDetails;
     $('setup-saved-context').textContent=flow.context || 'Context provided in files.';
     $('setup-saved-files').innerHTML=(flow.files || []).map(f=>`<li><span>${escape(f.name)}</span><span>${size(f.size)}</span></li>`).join('');
-    $('setup-submit').hidden=!(initial||editing);
+    $('setup-submit').hidden=!(initial||editing)||step!==2;
     $('setup-submit').disabled=busy;
     $('setup-submit').textContent=busy?'Saving context…':editing?'Save & prepare again':flow.available?'Prepare foundations':'Save context';
     $('setup-retry').hidden=!flow.canRetry||editing;
@@ -70,7 +87,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     try {
       const r=await fetch(route,{method:'POST',headers:{'X-DS-Create-Token':flow.csrfToken,...(upload?{}:{'Content-Type':'application/json'})},body:upload?body:JSON.stringify(body)});
       const result=await r.json();if(!r.ok)throw new Error(result.error || 'Could not save setup. Retry.');
-      if(upload){editing=false;pending=[];files();$('setup-files').value='';}
+      if(upload){editing=false;step=1;pending=[];files();$('setup-files').value='';}
       await refresh();
       if(upload){close();location.hash='overview';}
     }catch(e){error(e.message);}
@@ -82,10 +99,10 @@ export function setupWeb({ onChange = () => {} } = {}) {
     if(new Set(all.map(f=>f.name)).size!==all.length){error('Choose files with distinct names.');return;}
     error('');pending=all;files();
   }
-  function editContext(){if(!flow?.canEdit)return;if(!dialog.open)open();editing=true;editRevision=flow.inputRevision;$('setup-project-name').value=flow.projectName||'';$('setup-context').value=flow.context||'';error('');paint();$('setup-project-name').focus();}
+  function editContext(){if(!flow?.canEdit)return;if(!dialog.open)open();editing=true;step=1;hydrateDetails(flow.interfaceDetails);editRevision=flow.inputRevision;$('setup-project-name').value=flow.projectName||'';$('setup-context').value=flow.context||'';error('');paint();$('setup-project-name').focus();}
 
   $('setup-edit').addEventListener('click',editContext);
-  $('setup-edit-cancel').addEventListener('click',()=>{editing=false;pending=[];files();error('');paint();$('setup-edit').focus();});
+  $('setup-edit-cancel').addEventListener('click',()=>{editing=false;step=1;pending=[];files();error('');paint();$('setup-edit').focus();});
   $('setup-copy-resume').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(flow.resumeCommand);$('setup-copy-resume').textContent='Copied';setTimeout(()=>{$('setup-copy-resume').textContent='Copy resume command';},1500);}catch{error('Copy failed. Select the resume command above and copy it.');}});
   $('setup-open').addEventListener('click',async()=>{await refresh();if(flow?.status==='questions'){location.hash='overview';preparation.reply();}else if(!dialog.open)open();});
   $('setup-close').addEventListener('click',close);$('setup-explore').addEventListener('click',()=>{close();location.hash='overview';});$('setup-review').addEventListener('click',()=>{close();location.hash='overview';});
@@ -94,11 +111,21 @@ export function setupWeb({ onChange = () => {} } = {}) {
   $('setup-file-list').addEventListener('click',e=>{const b=e.target.closest('[data-remove-file]');if(b){pending.splice(Number(b.dataset.removeFile),1);files();$('setup-add-files').focus();}});
   $('setup-add-files').addEventListener('click',()=>$('setup-files').click());
   const drop=$('setup-drop');drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('is-dragging');});drop.addEventListener('dragleave',()=>drop.classList.remove('is-dragging'));drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('is-dragging');addFiles(e.dataTransfer.files);});
+  function validateGeneral(){
+    const projectName=$('setup-project-name').value.trim(),context=$('setup-context').value;
+    if(!$('setup-project-name').reportValidity()||!projectName||projectName.length>100||/[\x00-\x1f\x7f]/.test(projectName)){error('Enter a project name of 1–100 characters on one line.');$('setup-project-name').focus();return false;}
+    if(!context.trim()&&!pending.length&&!(editing&&flow.files?.length)){error('Describe your product or add a context file to get started.');$('setup-context').focus();return false;}
+    return true;
+  }
+  function advance(){if(busy||!validateGeneral())return;error('');step=2;paint();dialog.scrollTop=0;$('setup-step-label').focus({preventScroll:true});}
+  $('setup-next').addEventListener('click',advance);
+  $('setup-back').addEventListener('click',()=>{if(busy)return;error('');step=1;paint();dialog.scrollTop=0;$('setup-project-name').focus({preventScroll:true});});
   $('setup-initial').addEventListener('submit',e=>{
-    e.preventDefault();const context=$('setup-context').value,projectName=$('setup-project-name').value.trim();
-    if(!projectName || projectName.length>100 || /[\x00-\x1f\x7f]/.test(projectName)){error('Enter a project name of 1–100 characters on one line.');$('setup-project-name').focus();return;}
-    if(!context.trim() && !pending.length && !(editing&&flow.files?.length)){error('Describe your product or add a context file to get started.');$('setup-context').focus();return;}
-    const form=new FormData();form.set('projectName',projectName);form.set('context',JSON.stringify(context));pending.forEach(f=>form.append('files',f,f.name));if(editing)form.set('inputRevision',String(editRevision));post(editing?'/api/setup-revise':'/api/setup-submit',form,true);
+    e.preventDefault();if(step===1){advance();return;}
+    if(!validateGeneral()){step=1;paint();return;}
+    let interfaceDetails;try{interfaceDetails=readDetails();}catch(e){error(e.message);$(e.message.startsWith('Choose Light')?'setup-modes':'setup-devices').querySelector('button')?.focus();return;}
+    const context=$('setup-context').value,projectName=$('setup-project-name').value.trim();
+    const form=new FormData();form.set('projectName',projectName);form.set('context',JSON.stringify(context));form.set('interfaceDetails',JSON.stringify(interfaceDetails));pending.forEach(f=>form.append('files',f,f.name));if(editing)form.set('inputRevision',String(editRevision));post(editing?'/api/setup-revise':'/api/setup-submit',form,true);
   });
   $('setup-stop').addEventListener('click',()=>post('/api/setup-cancel',{}));$('setup-retry').addEventListener('click',()=>post('/api/setup-retry',{}));
   document.addEventListener('click',e=>{if(e.target.closest('[data-open-setup]')){if(!dialog.open)open();}});

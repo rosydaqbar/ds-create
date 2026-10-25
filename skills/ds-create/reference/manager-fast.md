@@ -1,6 +1,6 @@
 # Manager FAST jobs
 
-Manager uses FAST's fixed-code/data-payload approach for its foundation workflow. This is separate from the documentation-page renderer in workflow/FAST.md: it creates no documentation pages, components or build round, and never changes the model or provider.
+All Builder web jobs require `--fast-mode`; the server records `fastMode:true` on preparation requests and does not offer a Default engine switch. Manager uses FAST's fixed-code/data-payload approach for its foundation workflow. This is separate from the documentation-page renderer in workflow/FAST.md: it creates no documentation pages, components or build round, and never changes the model or provider.
 
 ## Prepare locally
 
