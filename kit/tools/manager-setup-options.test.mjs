@@ -54,3 +54,19 @@ test('new intake needs no naming question and sends no invented naming decision'
  const prompt=setupPrompt(request,'fixture-request.json');assert.match(prompt,/do not ask a new system to choose naming rules/);
  const record=JSON.parse(await readFile(path.join(f.output,'manager/setup.json'))),source=await readFile(path.join(f.root,'workspace/input',flow.inputSlug,record.contextFile),'utf8');assert.ok(!source.includes('Keep existing naming'));
 });
+
+test('Web, App and both round-trip through real intake without invented device specifics',async()=>{
+ for(const devices of [['Web'],['App'],['Web','App']]){
+  const f=await setupFixture({runner:'mcp'});
+  try{
+   const html=await fetch(f.url).then(r=>r.text());
+   const visible=[...html.matchAll(/<input\b[^>]*\bname="setup-devices"[^>]*>/g)].map(m=>m[0].match(/value="([^"]+)"/)[1]);
+   assert.deepEqual(visible,['Web','App']);
+   const selections={modes:['Light'],devices},form=f.form('Device specifics come from this project context.');
+   form.set('interfaceDetails',JSON.stringify(selections));assert.equal((await f.post('/api/setup-submit',form)).status,202);
+   const flow=await f.flow();assert.deepEqual(flow.interfaceDetails,selections);
+   const request=JSON.parse(await readFile(path.join(f.output,'manager/setup-jobs',flow.jobId,'request.json')));
+   assert.deepEqual(request.interfaceDetails,selections);assert.equal(request.fastMode,true);
+  }finally{await f.cleanup();}
+ }
+});

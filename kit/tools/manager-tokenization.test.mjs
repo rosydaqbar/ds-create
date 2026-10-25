@@ -1,18 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { tokenizationPreview } from '../manager/setup-options.mjs';
+import { tokenizationPreview, platformsForDevices, devicesForPlatforms } from '../manager/setup-options.mjs';
 import { renderTokenizationPreview } from '../manager/setup.mjs';
 
 test('tokenization follows each explicit Web/App platform and keeps Tablet/Other context-dependent', () => {
-  for (const device of ['Responsive web', 'Desktop web', 'Mobile web'])
+  for (const device of ['Web', 'Responsive web', 'Desktop web', 'Mobile web'])
     assert.deepEqual(tokenizationPreview([device]), {product:'web', web:true, app:false, needsContext:false});
-  for (const device of ['iOS', 'Android', 'Desktop app'])
+  for (const device of ['App', 'iOS', 'Android', 'Desktop app'])
     assert.deepEqual(tokenizationPreview([device]), {product:'app', web:false, app:true, needsContext:false});
   for (const device of ['Tablet', 'Other'])
     assert.deepEqual(tokenizationPreview([device]), {product:null, web:false, app:false, needsContext:true});
   assert.equal(tokenizationPreview(['Android', 'Mobile web']).product, 'both');
   assert.equal(tokenizationPreview(['Responsive web', 'Responsive web']).product, 'web');
   assert.deepEqual(tokenizationPreview([]), {product:null, web:false, app:false, needsContext:false});
+});
+
+test('simplified targets retain saved device detail until product scope changes', () => {
+  const detailed=['Responsive web','Mobile web','iOS','Tablet'];
+  assert.deepEqual(platformsForDevices(detailed), ['Web','App']);
+  assert.deepEqual(devicesForPlatforms(detailed, ['App','Web']), detailed);
+  assert.deepEqual(devicesForPlatforms(detailed, ['Web']), ['Web']);
+  assert.deepEqual(devicesForPlatforms(detailed, ['App']), ['App']);
+  assert.deepEqual(devicesForPlatforms(detailed, []), []);
+  assert.deepEqual(devicesForPlatforms(['Tablet'], []), ['Tablet']);
+  assert.deepEqual(devicesForPlatforms([], ['App']), ['App']);
 });
 
 test('live view clears stale formats through Web → App → mixed → empty → ambiguous selections', () => {

@@ -9,9 +9,9 @@ import { HelpText } from '../src/components/parts/HelpText';
 import { Badge } from '../src/components/parts/Badge';
 import { Divider } from '../src/components/parts/Divider';
 import { TextField, TextareaField } from '../src/components/components/TextField';
-import { ChoiceCard, ChoiceField } from '../src/components/components/ChoiceField';
+import { ChoiceCard } from '../src/components/components/ChoiceField';
 import { StepNavigation } from '../src/components/components/StepNavigation';
-import { interfaceModes, interfaceDevices } from '../../manager/setup-options.mjs';
+import { interfaceModes, interfacePlatforms } from '../../manager/setup-options.mjs';
 
 function SettingRow({ label, id, htmlFor, required, optional, children }: {
   label: string; id?: string; htmlFor?: string; required?: boolean; optional?: boolean; children: ReactNode;
@@ -55,16 +55,18 @@ export const markup = renderToStaticMarkup(
               subtext={null} supportingText={null} />)}
           </div>
         </SettingRow>
-        <SettingRow label="Devices / platforms" id="setup-devices-label">
-          <div id="setup-devices" className="grid grid-cols-1 gap-xl min-[400px]:grid-cols-2" role="group" aria-labelledby="setup-devices-label">
-            {interfaceDevices.map(value => <ChoiceField key={value} size="sm" type="checkbox" text={value} value={value} name="setup-devices" />)}
-          </div>
+        <SettingRow label="Platforms" id="setup-devices-label">
+          <div className="grid gap-md"><div id="setup-devices" className="grid grid-cols-2 gap-md" role="group" aria-labelledby="setup-devices-label">
+            {interfacePlatforms.map(value => <ChoiceCard key={value} size="sm" breakpoint="mobile" type="checkbox" name="setup-devices" value={value}
+              text={<span className="flex items-center gap-md"><Icon name={value === 'Web' ? 'media/monitor' : 'media/smartphone'} size="sm" />{value}</span>}
+              subtext={null} supportingText={null} />)}
+          </div><HelpText hint="Choose one or both. Add device details in your context." /></div>
         </SettingRow>
         <SettingRow label="Tokenization" id="setup-tokenization-label">
           <div className="grid gap-xl" role="group" aria-labelledby="setup-tokenization-label">
             <div id="setup-tokenization-empty" className="flex items-start gap-md">
               <Icon name="development/code" size="md" className="text-icon-tertiary" />
-              <HelpText hint="Choose a device or platform to see token formats." />
+              <HelpText hint="Choose Web, App, or both to see token formats." />
             </div>
             <div id="setup-tokenization-web" className="grid gap-md" hidden>
               <div className="flex items-center gap-md type-body-sm-medium text-text-secondary"><Icon name="media/monitor" size="sm" />Web docs</div>

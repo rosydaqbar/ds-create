@@ -1,4 +1,4 @@
-import { normalizeInterfaceDetails, interfaceDetailsText, tokenizationPreview } from './setup-options.mjs';
+import { normalizeInterfaceDetails, interfaceDetailsText, tokenizationPreview, platformsForDevices, devicesForPlatforms } from './setup-options.mjs';
 import { preparationView } from './preparation.mjs';
 import { openDialog, closeDialog } from './ui-motion.mjs';
 const $ = id => document.getElementById(id);
@@ -11,15 +11,17 @@ export function renderTokenizationPreview(root, devices) {
   node('empty').hidden=state.web||state.app||state.needsContext;
   node('context').hidden=!state.needsContext;
   const formats=[...(state.web?['Tailwind']:[]),...(state.app?['React Native','Swift','Kotlin']:[])];
-  const summary=formats.length?`Token formats: ${formats.join(', ')}.${state.needsContext?' Additional formats follow the project context.':''}`:state.needsContext?'Token formats follow the project context.':'Choose a device or platform to see token formats.';
+  const summary=formats.length?`Token formats: ${formats.join(', ')}.${state.needsContext?' Additional formats follow the project context.':''}`:state.needsContext?'Token formats follow the project context.':'Choose Web, App, or both to see token formats.';
   if(node('status').textContent!==summary)node('status').textContent=summary;
 }
 export function setupWeb({ onChange = () => {} } = {}) {
   const dialog=$('setup-dialog');
   let flow,signature='',pending=[],busy=false,opened=false,returnFocus,editing=false,editRevision,nameHydrated=false,networkFailed=false,step=1,detailsHydrated=false;
-  function hydrateDetails(details){for(const [id,key] of [['setup-modes','modes'],['setup-devices','devices']])for(const input of $(id).querySelectorAll('input[type="checkbox"]'))input.checked=!!details?.[key]?.includes(input.value);}
-  function readDetails(){return normalizeInterfaceDetails({modes:[...$('setup-modes').querySelectorAll('input:checked')].map(input=>input.value),devices:[...$('setup-devices').querySelectorAll('input:checked')].map(input=>input.value)});}
-  function updateTokenization(){renderTokenizationPreview(dialog,[...$('setup-devices').querySelectorAll('input:checked')].map(input=>input.value));}
+  let savedDevices=[];
+  function hydrateDetails(details){savedDevices=[...(details?.devices||[])];const platforms=platformsForDevices(savedDevices);for(const input of $('setup-modes').querySelectorAll('input[type="checkbox"]'))input.checked=!!details?.modes?.includes(input.value);for(const input of $('setup-devices').querySelectorAll('input[type="checkbox"]'))input.checked=platforms.includes(input.value);}
+  function readDevices(){return devicesForPlatforms(savedDevices,[...$('setup-devices').querySelectorAll('input:checked')].map(input=>input.value));}
+  function readDetails(){return normalizeInterfaceDetails({modes:[...$('setup-modes').querySelectorAll('input:checked')].map(input=>input.value),devices:readDevices()});}
+  function updateTokenization(){renderTokenizationPreview(dialog,readDevices());}
   $('setup-devices').addEventListener('change',updateTokenization);
   const preparation=preparationView({post,edit:editContext,openContext:open});
   function files() {
