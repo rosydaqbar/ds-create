@@ -1,6 +1,7 @@
 // Choices already defined by workflow/QUESTIONNAIRE.md §§1, 2, 9.
 export const interfaceModes = ['Light', 'Dark'];
 export const interfaceDevices = ['Responsive web', 'Desktop web', 'Mobile web', 'iOS', 'Android', 'Tablet', 'Desktop app', 'Other'];
+// auto is accepted only for compatibility with previously saved intake values; never offered by the UI.
 export const tokenizationRules = {auto:'Follow ds-create init',keep:'Keep existing naming',normalize:'Normalize naming'};
 export function normalizeInterfaceDetails(value) {
   if(value==null)return null; // Saved sessions and older API clients remain readable.
