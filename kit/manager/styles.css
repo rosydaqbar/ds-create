@@ -132,7 +132,7 @@ input::placeholder { color: var(--color-text-secondary); opacity: 1; }
 .status[data-status="generating"] { color: var(--manager-warning); }
 .spinner { display: inline-block; width: 13px; height: 13px; border: 1.5px solid var(--color-border-default); border-top-color: currentColor; border-radius: 50%; animation: spin 1s linear infinite; flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.init-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.init-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 16px; }
 .step { border-top: 2px solid var(--color-border-subtle); padding-top: 12px; }
 .step.done { border-top-color: var(--manager-success); }
 .step.skip { border-top-style: dashed; border-top-color: var(--color-border-default); }
