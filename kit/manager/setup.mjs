@@ -27,10 +27,10 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-initial').hidden=!(initial||editing);
     $('setup-stepper').hidden=!(initial||editing);
     for(const number of [1,2]){
-      const item=$(`setup-step-${number}`),button=item.querySelector('button');
-      item.classList.toggle('done',number<step);item.classList.toggle('building',number===step);
+      const item=$(`setup-stepper-item-${number}`),button=item.querySelector('button');
+      item.dataset.state=number<step?'complete':number===step?'current':'upcoming';
       if(number===step)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');
-      button.disabled=busy;$(`setup-step-state-${number}`).textContent=number<step?'Complete':number===step?'Current step':'Not started';
+      button.disabled=busy;
     }
     $('setup-step-label').hidden=!(initial||editing);
     $('setup-step-label').textContent=`Step ${step} of 2 · ${step===1?'General':'Interface details'}`;
@@ -125,7 +125,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
   $('setup-next').addEventListener('click',advance);
   function back(){if(busy)return;error('');step=1;paint();dialog.scrollTop=0;$('setup-project-name').focus({preventScroll:true});}
   $('setup-back').addEventListener('click',back);
-  $('setup-stepper').addEventListener('click',e=>{const button=e.target.closest('[data-setup-goto]');if(button)(button.dataset.setupGoto==='1'?back:advance)();});
+  $('setup-stepper').addEventListener('click',e=>{const button=e.target.closest('[data-step-index]');if(button)(button.dataset.stepIndex==='0'?back:advance)();});
   $('setup-initial').addEventListener('submit',e=>{
     e.preventDefault();if(step===1){advance();return;}
     if(!validateGeneral()){step=1;paint();return;}

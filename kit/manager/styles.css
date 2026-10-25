@@ -417,7 +417,9 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 @media (prefers-reduced-motion: reduce) { .spinner { animation: none; border-style: dotted; } }
 
 /* Composition only. Controls are statically rendered from the real web-docs components. */
-.setup-dialog { --publish-padding: var(--space-3xl); width: min(var(--size-measure-reading), calc(100vw - var(--space-4xl))); border-radius: var(--radius-modal); }
+.setup-dialog { --publish-padding: var(--space-3xl); --docs-gutter: var(--space-3xl); --docs-edge: var(--color-border-subtle); --docs-round: var(--radius-surface); width: min(var(--size-measure-reading), calc(100vw - var(--space-4xl))); border-radius: var(--radius-modal); }
+.setup-dialog #setup-stepper { margin-top: var(--space-xl); }
+.setup-dialog .publish-intro { margin: var(--space-lg) 0 var(--space-3xl); }
 .setup-fields { display: grid; gap: var(--space-3xl); }
 .setup-field { display: grid; gap: var(--space-sm); min-width: 0; }
 .setup-optional { margin-left: var(--space-md); color: var(--color-text-tertiary); font-weight: var(--font-weight-regular); }
@@ -425,8 +427,6 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .setup-drop.is-dragging { background: var(--color-fill-brand-subtle); border-color: var(--color-border-brand); }
 .setup-drop p { margin: 0; color: var(--color-text-secondary); }
 .setup-drop [data-anatomy="help-text"] { width: 100%; justify-content: center; text-align: center; }
-.setup-dialog .step small { padding-inline: var(--button-padding-x-md); font-size: inherit; }
-.setup-dialog .step.building { border-color: var(--color-border-brand); }
 .setup-files { list-style: none; margin: 0; padding: 0; }
 .setup-files li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--color-border-subtle); overflow-wrap: anywhere; }
 .setup-files li > span:first-child { min-width: 0; }
@@ -442,12 +442,11 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .setup-progress details { margin-top: 16px; }
 .setup-progress ol { margin: 8px 0 0; padding-inline-start: 20px; }
 .setup-progress li { padding-inline-start: 4px; margin: 0 0 12px; overflow-wrap: anywhere; }
-.setup-footer { flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.setup-footer { flex-wrap: wrap; align-items: center; gap: var(--space-md); justify-content: flex-end; margin-top: var(--space-xl); padding-top: var(--space-xl); }
 .setup-footer > :first-child { margin-right: auto; }
 .setup-error { margin-top: 16px; padding: 12px; border: 1px solid var(--color-border-default); border-radius: 8px; }
 @media (max-width: 767px) {
   .topbar:has(#setup-open:not([hidden])) .docs-brand strong { max-width: 96px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .setup-dialog .publish-intro { margin-top: 0; }
 }
 @media (max-width: 400px) { .setup-footer > button { flex: 1 1 auto; justify-content: center; } }
 
@@ -505,7 +504,7 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
   .button, .icon-button, .nav-link, .token-binding, .mode-switch > button, .setup-drop, .status, .nav-dot { transition-duration: 80ms; }
 }
 
-.setup-resume { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-border-subtle); font-size: 14px; }
+.setup-resume { margin-top: var(--space-xl); font-size: 14px; color: var(--color-text-secondary); }
 .setup-resume code { overflow-wrap: anywhere; line-height: 1.6; }
 .setup-resume .button { justify-self: start; }
 

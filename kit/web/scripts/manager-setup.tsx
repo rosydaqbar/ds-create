@@ -5,25 +5,23 @@ import { IconButton } from '../src/components/parts/IconButton';
 import { Label } from '../src/components/parts/Label';
 import { HelpText } from '../src/components/parts/HelpText';
 import { TextField, TextareaField } from '../src/components/components/TextField';
-import { ChoiceField } from '../src/components/components/ChoiceField';
+import { ChoiceCard } from '../src/components/components/ChoiceField';
+import { StepNavigation } from '../src/components/components/StepNavigation';
 import { interfaceModes, interfaceDevices } from '../../manager/setup-options.mjs';
 
 function Choices({ id, label, choices }: { id: string; label: string; choices: string[] }) {
   return <div className="setup-field">
     <Label as="span" id={`${id}-label`} label={label} />
-    <div id={id} className="grid grid-cols-2 gap-xl" role="group" aria-labelledby={`${id}-label`}>
-      {choices.map(value => <ChoiceField key={value} size="sm" type="checkbox" text={value} value={value} name={id} />)}
+    <div id={id} className={id === 'setup-devices' ? 'grid grid-cols-1 gap-md sm:grid-cols-2' : 'grid grid-cols-2 gap-md'} role="group" aria-labelledby={`${id}-label`}>
+      {choices.map(value => <ChoiceCard key={value} size="sm" breakpoint="mobile" type="checkbox" text={value} value={value} name={id} subtext={null} supportingText={null} />)}
     </div>
   </div>;
 }
 
 export const markup = renderToStaticMarkup(
   <dialog id="setup-dialog" className="publish-dialog setup-dialog" aria-labelledby="setup-title" aria-describedby="setup-description">
-    <div className="publish-header"><h2 id="setup-title" className="type-heading-md-semibold">Set up your design system</h2><IconButton id="setup-close" label="Close setup" /></div>
-    <nav id="setup-stepper" aria-label="Setup steps"><ol className="init-steps">
-      <li id="setup-step-1" className="step building"><Button emphasis="tertiary" fullWidth data-setup-goto="1" aria-current="step" label={<span className="whitespace-normal text-start">1. General</span>} /><small id="setup-step-state-1">Current step</small></li>
-      <li id="setup-step-2" className="step"><Button emphasis="tertiary" fullWidth data-setup-goto="2" label={<span className="whitespace-normal text-start">2. Interface details</span>} /><small id="setup-step-state-2">Not started</small></li>
-    </ol></nav>
+    <div className="publish-header docs-page-header"><h2 id="setup-title" className="type-heading-md-semibold">Set up your design system</h2><IconButton id="setup-close" label="Close setup" /></div>
+    <StepNavigation id="setup-stepper" steps={['General', 'Interface details']} />
     <p id="setup-description" className="publish-intro">Describe your product and the design system you need. Add any briefs, brand guidelines, or existing tokens.</p>
     <p id="setup-simulation" className="notice" hidden>Simulation · no real agent or Figma calls.</p>
     <p id="setup-step-label" className="sr-only" role="status" tabIndex={-1}>Step 1 of 2 · General</p>
@@ -43,7 +41,7 @@ export const markup = renderToStaticMarkup(
       <section id="setup-interface" className="setup-fields" aria-label="Interface details" hidden>
         <Choices id="setup-modes" label="Appearance modes" choices={interfaceModes} />
         <Choices id="setup-devices" label="Devices / platforms" choices={interfaceDevices} />
-        <div className="setup-field"><Label as="span" label="Tokenization" /><HelpText hint={<><strong>Web docs:</strong> Tailwind only for now.</>} /><HelpText hint={<><strong>App docs:</strong> Token references will be available for React Native, Swift, and Kotlin.</>} /></div>
+        <div className="docs-reading-card setup-field p-xl"><Label as="span" label="Tokenization" /><HelpText hint={<><strong>Web docs:</strong> Tailwind only for now.</>} /><HelpText hint={<><strong>App docs:</strong> Token references will be available for React Native, Swift, and Kotlin.</>} /></div>
       </section>
       <p id="setup-agent-note" className="setup-note" hidden>Your background worker prepares foundations from this saved context.</p>
     </form>
@@ -53,7 +51,7 @@ export const markup = renderToStaticMarkup(
     <p id="setup-error" className="setup-error" role="alert" hidden />
     <template id="setup-remove-file"><IconButton data-remove-file="" label="Remove file" /></template>
     <div className="publish-footer setup-footer">
-      <Button id="setup-explore" emphasis="tertiary" label="Explore Builder" />
+      <Button id="setup-explore" size="sm" emphasis="tertiary" label="Explore Builder" />
       <Button id="setup-edit-cancel" emphasis="secondary" hidden label="Cancel edit" />
       <Button id="setup-stop" emphasis="secondary" hidden label="Cancel preparation" />
       <Button id="setup-retry" hidden label="Retry preparation" />
