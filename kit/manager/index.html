@@ -80,7 +80,7 @@
         <section id="setup-interface" aria-label="Interface details" hidden>
           <div class="setup-field"><span id="setup-modes-label">Appearance modes</span><div id="setup-modes" class="preparation-options" role="group" aria-labelledby="setup-modes-label"></div></div>
           <div class="setup-field"><span id="setup-devices-label">Devices / platforms</span><div id="setup-devices" class="preparation-options" role="group" aria-labelledby="setup-devices-label"></div></div>
-          <label class="setup-field workspace-field" for="setup-tokenization"><span>Tokenization rule</span><select id="setup-tokenization"><option value="keep">Keep existing naming</option><option value="normalize">Normalize</option></select><small>For existing systems: keep the current naming or normalize it to ds-create. New systems use the fixed standard architecture.</small></label>
+          <div class="setup-field"><span>Tokenization rule</span><p>Primitives → Semantic → Components</p><p>Semantic tokens reference primitives. Component tokens are added only when no semantic role covers the value.</p><p>{domain}/{group}/{role}[/{emphasis}][/{state}]</p></div>
         </section>
         <p id="setup-agent-note" class="setup-note" hidden>Your background worker prepares foundations from this saved context.</p>
       </form>

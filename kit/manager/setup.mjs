@@ -11,8 +11,8 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $(id).innerHTML=choices.map(value=>`<button type="button" class="button" aria-pressed="false" data-choice="${escape(value)}">${escape(value)}</button>`).join('');
     $(id).addEventListener('click',e=>{const b=e.target.closest('[data-choice]');if(b)b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));});
   }
-  function hydrateDetails(details){for(const [id,key] of [['setup-modes','modes'],['setup-devices','devices']])for(const b of $(id).querySelectorAll('[data-choice]'))b.setAttribute('aria-pressed',String(!!details?.[key]?.includes(b.dataset.choice)));$('setup-tokenization').value=details?.tokenization==='normalize'?'normalize':'keep';}
-  function readDetails(){return normalizeInterfaceDetails({modes:[...$('setup-modes').querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.choice),devices:[...$('setup-devices').querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.choice),tokenization:$('setup-tokenization').value});}
+  function hydrateDetails(details){for(const [id,key] of [['setup-modes','modes'],['setup-devices','devices']])for(const b of $(id).querySelectorAll('[data-choice]'))b.setAttribute('aria-pressed',String(!!details?.[key]?.includes(b.dataset.choice)));}
+  function readDetails(){return normalizeInterfaceDetails({modes:[...$('setup-modes').querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.choice),devices:[...$('setup-devices').querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.choice)});}
   const preparation=preparationView({post,edit:editContext,openContext:open});
   function files() {
     $('setup-file-list').innerHTML=pending.map((f,i)=>`<li><span>${escape(f.name)}<small>${size(f.size)}</small></span><button class="icon-button" type="button" data-remove-file="${i}" aria-label="Remove ${escape(f.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></li>`).join('');
@@ -52,7 +52,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-resume-command').textContent=flow.resumeCommand||'';
     $('setup-resume').hidden=!flow.resumeCommand;
     if(editing){$('setup-title').textContent='Revise your context';$('setup-description').textContent='Update instructions or add a readable replacement file. Saving starts preparation again; review the new draft before publishing.';}
-    if((initial||editing)&&step===2)$('setup-description').textContent='Choose appearance modes, devices, and the tokenization rule for your foundations.';
+    if((initial||editing)&&step===2)$('setup-description').textContent='Choose appearance modes and devices. Token rules follow the ds-create init contract.';
     $('setup-saved').hidden=initial;
     $('setup-simulation').hidden=!flow.simulation;
     $('setup-state').textContent=flow.message||'';

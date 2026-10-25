@@ -10,10 +10,11 @@ export function normalizeInterfaceDetails(value) {
     const values=value[key];
     if(!Array.isArray(values)||!values.length||values.length>allowed.length||new Set(values).size!==values.length||values.some(v=>!allowed.includes(v)))throw new Error(key==='modes'?'Choose Light, Dark, or both.':'Choose at least one supported device or platform.');
   }
-  if(!Object.hasOwn(tokenizationRules,value.tokenization))throw new Error('Choose a tokenization rule from ds-create init.');
-  return {modes:interfaceModes.filter(v=>value.modes.includes(v)),devices:interfaceDevices.filter(v=>value.devices.includes(v)),tokenization:value.tokenization};
+  const hasNaming=Object.hasOwn(value,'tokenization');
+  if(hasNaming&&!Object.hasOwn(tokenizationRules,value.tokenization))throw new Error('Invalid existing-system naming choice.');
+  return {modes:interfaceModes.filter(v=>value.modes.includes(v)),devices:interfaceDevices.filter(v=>value.devices.includes(v)),...(hasNaming?{tokenization:value.tokenization}:{})};
 }
 export function interfaceDetailsText(value) {
   if(!value)return '';
-  return `Modes: ${value.modes.join(', ')}\nDevices / platforms: ${value.devices.join(', ')}\nTokenization rule: ${tokenizationRules[value.tokenization]}`;
+  return `Modes: ${value.modes.join(', ')}\nDevices / platforms: ${value.devices.join(', ')}${value.tokenization?'\nExisting-system naming: '+tokenizationRules[value.tokenization]:''}`;
 }

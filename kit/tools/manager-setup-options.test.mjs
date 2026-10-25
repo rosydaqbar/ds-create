@@ -43,3 +43,14 @@ test('revisions retain or replace interface choices while preserving original so
  const history=JSON.parse(await readFile(path.join(f.output,'manager/setup.json')));assert.deepEqual(history.revisions[0].interfaceDetails.modes,['Light']);
  assert.deepEqual(await readFile(path.join(f.root,'workspace/input',flow.inputSlug,saved.contextFile)),oldSource);
 });
+
+test('new intake needs no naming question and sends no invented naming decision',async t=>{
+ const f=await setupFixture({runner:'mcp'});t.after(()=>f.cleanup());
+ const choices={modes:['Light'],devices:['Responsive web']};assert.deepEqual(normalizeInterfaceDetails(choices),choices);
+ const html=await fetch(f.url).then(r=>r.text());assert.ok(!html.includes('id="setup-tokenization"'));assert.match(html,/Primitives → Semantic → Components/);
+ const form=f.form('A new product and new design system.');form.set('interfaceDetails',JSON.stringify(choices));assert.equal((await f.post('/api/setup-submit',form)).status,202);
+ const flow=await f.flow();assert.deepEqual(flow.interfaceDetails,choices);
+ const request=JSON.parse(await readFile(path.join(f.output,'manager/setup-jobs',flow.jobId,'request.json')));assert.ok(!Object.hasOwn(request.interfaceDetails,'tokenization'));
+ const prompt=setupPrompt(request,'fixture-request.json');assert.match(prompt,/do not ask a new system to choose naming rules/);
+ const record=JSON.parse(await readFile(path.join(f.output,'manager/setup.json'))),source=await readFile(path.join(f.root,'workspace/input',flow.inputSlug,record.contextFile),'utf8');assert.ok(!source.includes('Keep existing naming'));
+});
