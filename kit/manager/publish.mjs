@@ -25,7 +25,7 @@ export function setupPublish() {
     const moveFocus = complete && (document.activeElement === $('publish-figma') || $('publish-task-progress').contains(document.activeElement));
     $('publish-approval-note').textContent = complete ? 'This revision is available in Figma.' : 'Publishes the saved revision. Preview edits are excluded.';
     $('publish-figma').disabled = !next.figma.canStart || stale || submitting;
-    $('publish-figma').textContent = complete ? 'Published' : queued ? 'Queued' : running ? 'Publishing…' : next.job ? 'Try again' : 'Publish to Figma';
+    $('publish-figma').textContent = complete ? 'Published' : queued ? 'Queued' : running ? 'Publishing…' : next.job ? 'Retry publish' : 'Publish to Figma';
     $('publish-cancel').hidden = !running;
     $('publish-cancel').disabled = submitting || !!next.job?.cancelRequested;
     $('publish-cancel').textContent = next.job?.cancelRequested ? 'Stopping…' : 'Stop';

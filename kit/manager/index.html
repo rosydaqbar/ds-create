@@ -80,9 +80,18 @@
     </dialog>
     <dialog id="publish-dialog" class="publish-dialog agentic-publish agent-thread-panel" aria-modal="false" aria-labelledby="publish-title" aria-describedby="publish-description">
       <div class="publish-header"><div><h2 id="publish-title">Publish to Figma</h2><p id="publish-revision" class="publish-saved"></p></div><button id="publish-close" class="icon-button" aria-label="Close publish"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
-      <p id="publish-description" class="sr-only">Your publication conversation with DS Create.</p>
+      <p id="publish-description" class="sr-only">Publish tool activity and Figma output.</p>
       <p id="publish-simulation" class="notice" hidden>Simulation · no Figma writes.</p>
-      <section id="publish-task-progress" class="agent-thread" aria-label="Publication conversation"><div data-publish-messages role="log" aria-relevant="additions"></div><div class="agent-thread-loading"><span data-publish-loader class="agentic-pixels" aria-hidden="true"></span><span data-publish-phase role="status"></span><span data-publish-elapsed></span></div></section>
+      <section id="publish-task-progress" class="agent-thread" aria-label="Publish progress">
+        <div data-publish-messages aria-live="polite" aria-atomic="true"></div>
+        <div data-publish-tools class="agent-tool-chips" role="group" aria-label="Publish tools"></div>
+        <section id="publish-tool-result" data-publish-detail class="agent-tool-result" hidden aria-label="Tool result">
+          <div class="agent-detail-heading"><h3 data-publish-detail-title></h3><button class="icon-button" type="button" data-agent-close aria-label="Close tool result"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+          <p data-publish-detail-message></p>
+        </section>
+        <a data-publish-output class="agent-output-link" target="_blank" rel="noopener noreferrer" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7M21 3 11 13"/><path d="M10 3H3v18h18v-7"/></svg><span data-publish-output-name>Open Figma output</span></a>
+        <div class="agent-thread-loading"><span data-publish-loader class="agentic-pixels" aria-hidden="true"></span><span data-publish-phase role="status"></span><span data-publish-elapsed></span></div>
+      </section>
       <footer class="agent-composer">
         <label id="publish-target-field" class="publish-target" for="publish-figma-url">Figma file<input id="publish-figma-url" type="url" required maxlength="1000" placeholder="Paste a Figma file link" autocomplete="off"/></label>
         <p id="publish-approval-note" class="publish-saved">Publishes the saved revision. Preview edits are excluded.</p>
