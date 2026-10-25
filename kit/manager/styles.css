@@ -416,26 +416,23 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 }
 @media (prefers-reduced-motion: reduce) { .spinner { animation: none; border-style: dotted; } }
 
-/* First-run setup uses the same dialog and controls as Publish. */
-.setup-dialog { width: min(640px, calc(100vw - 32px)); }
-.setup-dialog h2 { font-size: 20px; line-height: 1.35; }
-.setup-field { display: grid; gap: 10px; margin: 24px 0 0; font-size: 14px; }
-.setup-field > span { font-weight: 600; }
-.setup-optional { margin-left: 8px; color: var(--color-text-secondary); font-weight: 400; }
-.setup-field textarea, .setup-field input { display: block; width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--color-border-default); border-radius: 8px; background: var(--color-surface-sunken); color: var(--color-text-primary); font: inherit; caret-color: var(--color-text-primary); }
-.setup-field textarea { resize: vertical; min-height: 96px; max-height: 45dvh; }
-.setup-field textarea::placeholder, .setup-field input::placeholder { color: var(--color-text-secondary); opacity: 1; }
-.setup-drop { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; padding: 24px 16px; border: 1px dashed var(--color-border-default); border-radius: 8px; }
-.setup-drop.is-dragging { background: var(--color-surface-sunken); border-color: var(--color-text-primary); }
+/* Composition only. Controls are statically rendered from the real web-docs components. */
+.setup-dialog { --publish-padding: var(--space-3xl); width: min(var(--size-measure-reading), calc(100vw - var(--space-4xl))); border-radius: var(--radius-modal); }
+.setup-fields { display: grid; gap: var(--space-3xl); }
+.setup-field { display: grid; gap: var(--space-sm); min-width: 0; }
+.setup-optional { margin-left: var(--space-md); color: var(--color-text-tertiary); font-weight: var(--font-weight-regular); }
+.setup-drop { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-md); padding: var(--space-2xl) var(--space-xl); border: var(--border-width-default) dashed var(--color-border-default); border-radius: var(--radius-control); }
+.setup-drop.is-dragging { background: var(--color-fill-brand-subtle); border-color: var(--color-border-brand); }
 .setup-drop p { margin: 0; color: var(--color-text-secondary); }
-.setup-drop small { width: 100%; text-align: center; font-size: 14px; line-height: 1.6; color: var(--color-text-secondary); margin-top: 4px; }
-.setup-dialog .button { min-height: 40px; font-size: 14px; }
+.setup-drop [data-anatomy="help-text"] { width: 100%; justify-content: center; text-align: center; }
+.setup-dialog .step small { padding-inline: var(--button-padding-x-md); font-size: inherit; }
+.setup-dialog .step.building { border-color: var(--color-border-brand); }
 .setup-files { list-style: none; margin: 0; padding: 0; }
 .setup-files li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--color-border-subtle); overflow-wrap: anywhere; }
 .setup-files li > span:first-child { min-width: 0; }
 .setup-files small { display: block; font-size: 14px; color: var(--color-text-secondary); }
 .setup-files li > span:last-child { flex-shrink: 0; color: var(--color-text-secondary); }
-.setup-files .icon-button { flex-shrink: 0; }
+.setup-files button { flex-shrink: 0; }
 .setup-note { margin-top: 16px; color: var(--color-text-secondary); overflow-wrap: anywhere; }
 .setup-context-details summary { cursor: pointer; padding: 8px 0; }
 .setup-context-details p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 12px 0; }
@@ -448,12 +445,11 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .setup-footer { flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .setup-footer > :first-child { margin-right: auto; }
 .setup-error { margin-top: 16px; padding: 12px; border: 1px solid var(--color-border-default); border-radius: 8px; }
-.setup-dialog :focus-visible { outline: 2px solid var(--color-text-primary); outline-offset: 3px; }
 @media (max-width: 767px) {
   .topbar:has(#setup-open:not([hidden])) .docs-brand strong { max-width: 96px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .setup-dialog .publish-intro { margin-top: 0; }
 }
-@media (max-width: 400px) { .setup-footer > .button { flex: 1 1 100%; justify-content: center; } }
+@media (max-width: 400px) { .setup-footer > button { flex: 1 1 auto; justify-content: center; } }
 
 /* Native dialog motion from transitions-dev; chrome-only values never write DS tokens. */
 :root {

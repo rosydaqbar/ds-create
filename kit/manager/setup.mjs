@@ -1,4 +1,4 @@
-import { interfaceModes, interfaceDevices, normalizeInterfaceDetails, interfaceDetailsText } from './setup-options.mjs';
+import { normalizeInterfaceDetails, interfaceDetailsText } from './setup-options.mjs';
 import { preparationView } from './preparation.mjs';
 import { openDialog, closeDialog } from './ui-motion.mjs';
 const $ = id => document.getElementById(id);
@@ -7,15 +7,12 @@ const size = bytes => bytes < 1024 ? `${bytes} B` : bytes < 1024*1024 ? `${Math.
 export function setupWeb({ onChange = () => {} } = {}) {
   const dialog=$('setup-dialog');
   let flow,signature='',pending=[],busy=false,opened=false,returnFocus,editing=false,editRevision,nameHydrated=false,networkFailed=false,step=1,detailsHydrated=false;
-  for(const [id,choices] of [['setup-modes',interfaceModes],['setup-devices',interfaceDevices]]){
-    $(id).innerHTML=choices.map(value=>`<button type="button" class="button" aria-pressed="false" data-choice="${escape(value)}">${escape(value)}</button>`).join('');
-    $(id).addEventListener('click',e=>{const b=e.target.closest('[data-choice]');if(b)b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));});
-  }
-  function hydrateDetails(details){for(const [id,key] of [['setup-modes','modes'],['setup-devices','devices']])for(const b of $(id).querySelectorAll('[data-choice]'))b.setAttribute('aria-pressed',String(!!details?.[key]?.includes(b.dataset.choice)));}
-  function readDetails(){return normalizeInterfaceDetails({modes:[...$('setup-modes').querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.choice),devices:[...$('setup-devices').querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.choice)});}
+  function hydrateDetails(details){for(const [id,key] of [['setup-modes','modes'],['setup-devices','devices']])for(const input of $(id).querySelectorAll('input[type="checkbox"]'))input.checked=!!details?.[key]?.includes(input.value);}
+  function readDetails(){return normalizeInterfaceDetails({modes:[...$('setup-modes').querySelectorAll('input:checked')].map(input=>input.value),devices:[...$('setup-devices').querySelectorAll('input:checked')].map(input=>input.value)});}
   const preparation=preparationView({post,edit:editContext,openContext:open});
   function files() {
-    $('setup-file-list').innerHTML=pending.map((f,i)=>`<li><span>${escape(f.name)}<small>${size(f.size)}</small></span><button class="icon-button" type="button" data-remove-file="${i}" aria-label="Remove ${escape(f.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></li>`).join('');
+    $('setup-file-list').innerHTML=pending.map(f=>`<li><span>${escape(f.name)}<small>${size(f.size)}</small></span></li>`).join('');
+    [...$('setup-file-list').children].forEach((row,i)=>{const button=$('setup-remove-file').content.firstElementChild.cloneNode(true);button.dataset.removeFile=i;button.setAttribute('aria-label',`Remove ${pending[i].name}`);row.append(button);});
   }
   function paint() {
     $('setup-open').hidden=!flow?.enabled;
@@ -52,7 +49,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-resume-command').textContent=flow.resumeCommand||'';
     $('setup-resume').hidden=!flow.resumeCommand;
     if(editing){$('setup-title').textContent='Revise your context';$('setup-description').textContent='Update instructions or add a readable replacement file. Saving starts preparation again; review the new draft before publishing.';}
-    if((initial||editing)&&step===2)$('setup-description').textContent='Choose appearance modes and devices. Token rules follow the ds-create init contract.';
+    if((initial||editing)&&step===2)$('setup-description').textContent='Choose the appearance modes and devices your design system needs to support.';
     $('setup-saved').hidden=initial;
     $('setup-simulation').hidden=!flow.simulation;
     $('setup-state').textContent=flow.message||'';
