@@ -5,8 +5,9 @@ import path from 'node:path';
 import {snapshotInputs} from './input-snapshot.mjs';
 import {localDirectory,saveSetup} from './setup-data.mjs';
 import {tokenizationPreview} from './setup-options.mjs';
+import {Worker} from 'node:worker_threads';
 
-export const EXTRACTOR_VERSION='ds-create/source-pack@1';
+export const EXTRACTOR_VERSION='ds-create/source-pack@2';
 export const digest=value=>createHash('sha256').update(value).digest('hex');
 const decode=text=>text.replace(/&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos|nbsp|ndash|mdash|hellip|copy|reg);/gi,(_,entity)=>{
  const n=entity[0]==='#'?parseInt(entity.slice(entity[1]?.toLowerCase()==='x'?2:1),entity[1]?.toLowerCase()==='x'?16:10):null;
@@ -32,12 +33,12 @@ export function extractSource(bytes,extension){
   // Offsets refer to UTF-16 positions in the original file, never to the transformed text.
   const hidden=[...source.matchAll(/<(script|style|svg)\b[^>]*>[\s\S]*?<\/\1\s*>|<!--[\s\S]*?-->/gi)].map(m=>[m.index,m.index+m[0].length]);
   let h=0;const blocks=[];
-  for(const m of source.matchAll(/[^<>]+(?=<|$)/g)){
-   while(hidden[h]&&hidden[h][1]<=m.index)h++;
-   if(hidden[h]&&m.index>=hidden[h][0]&&m.index<hidden[h][1])continue;
-   // Only text nodes; attribute fragments are not visible text.
-   if(m.index&&source[m.index-1]!=='>')continue;
-   const text=decode(m[0]).trim();if(text)blocks.push({offset:m.index,text});
+  // Start at a node boundary, never at every character of an attribute/base64 payload.
+  for(const m of source.matchAll(/(?:^|>)([^<>]+)(?=<|$)/g)){
+   const offset=m.index+(m[0].startsWith('>')?1:0);
+   while(hidden[h]&&hidden[h][1]<=offset)h++;
+   if(hidden[h]&&offset>=hidden[h][0]&&offset<hidden[h][1])continue;
+   const text=decode(m[1]).trim();if(text)blocks.push({offset,text});
   }
   const warnings=[];
   if(source.includes('�'))warnings.push('Unrecognized text encoding: inspect original source.');
@@ -53,6 +54,15 @@ export function extractSource(bytes,extension){
  }
  if(textTypes.has(extension)&&!source.includes('\u0000')&&!source.includes('�'))return {kind:'text',blocks:[{offset:0,text:source}],requiresInspection:false};
  return {kind:imageTypes.has(extension)?'document-or-image':'unsupported',requiresInspection:true,note:'Use existing native file/image tools to inspect this source. If unreadable, return questions. No silent exclusion.'};
+}
+// CPU work is bounded off the MCP event loop so malformed documents cannot strand a lease/lock.
+export function extractSourceBounded(bytes,extension,{timeoutMs=10000}={}){
+ return new Promise((resolve,reject)=>{
+  const worker=new Worker(new URL('./source-worker.mjs',import.meta.url),{workerData:{bytes,extension},execArgv:[]});let settled=false;
+  const finish=(error,result)=>{if(settled)return;settled=true;clearTimeout(timer);void worker.terminate();error?reject(error):resolve(result);};
+  const timer=setTimeout(()=>finish(new Error('Source extraction exceeded its time limit. Inspect the original source or provide a readable export.')),timeoutMs);
+  worker.once('message',result=>finish(null,result));worker.once('error',error=>finish(error));worker.once('exit',code=>{if(!settled)finish(new Error('Source extraction stopped before returning evidence (exit '+code+').'));});
+ });
 }
 export function lockedFacts(request){
  const choices=request.interfaceDetails,platform=tokenizationPreview(choices?.devices||[]);
@@ -77,7 +87,7 @@ export async function prepareSourcePack(request,jobDir){
   let extraction;
   try{const stored=JSON.parse(await readFile(path.join(cache,key+'.json'),'utf8'));if(stored.key===key&&digest(JSON.stringify(stored.extraction))===stored.contentHash)extraction=stored.extraction;}catch(e){if(!['ENOENT',undefined].includes(e.code))throw e;}
   if(extraction)hits++;
-  else{misses++;extraction=extractSource(await sourceBytes(request,entry.path),extension);await saveSetup(path.join(cache,key+'.json'),{key,extraction,contentHash:digest(JSON.stringify(extraction))});}
+  else{misses++;try{extraction=await extractSourceBounded(await sourceBytes(request,entry.path),extension);}catch(error){throw new Error(entry.path+': '+error.message);}await saveSetup(path.join(cache,key+'.json'),{key,extraction,contentHash:digest(JSON.stringify(extraction))});}
   const uploaded=entry.path.startsWith('uploads/'),active=!uploaded||request.activeFiles?.some(f=>f.path===entry.path);
   sources.push({...entry,active,archive:uploaded&&!active,extraction});
  }

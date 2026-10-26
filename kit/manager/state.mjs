@@ -7,6 +7,7 @@ import { compareFoundations } from './foundation-compare.mjs';
 import { selectedInputSlug } from './input-identity.mjs';
 import { inputFreshness, snapshotInputs } from './input-snapshot.mjs';
 import { checkWebDraft } from './foundation-proof.mjs';
+import { observedSetup } from './setup-observation.mjs';
 
 export const foundations = [
   { id: 'color', name: 'Color', page: '1.1', description: 'Color roles establish contrast, content hierarchy, and feedback across interface states.', prefixes: ['palette/', 'color/'] },
@@ -46,7 +47,7 @@ export function publishStatus(ledger) {
 
 export async function getPublishStatus(outputDir) {
   const ledger = await readJSON(path.join(outputDir, 'ds-create-ledger.json'));
-  const setup = await readJSON(path.join(outputDir, 'manager/setup.json'));
+  const setup = await observedSetup(outputDir);
   if (!(await inputFreshness(outputDir,setup)).fresh) return { status: 'incomplete', eligible: false };
   const result = publishStatus(ledger);
   if (result.eligible) {
@@ -80,7 +81,7 @@ async function loadSource(outputDir, ledger, warnings = []) {
     const valid = data?.format === 'ds-create/foundations@1' && Number.isInteger(data.revision) && data.revision > 0 && validPayload(data) && validateFoundations(data).valid &&
       data.variables.length + (data.textStyles?.length || 0) + (data.effectStyles?.length || 0) > 0;
     if (!valid) warnings.push('Local foundation draft is invalid. Ask the agent to save foundations.json again.');
-    const setup=await readJSON(path.join(outputDir,'manager/setup.json'));
+    const setup=await observedSetup(outputDir);
     const fresh=await inputFreshness(outputDir,setup);
     const proof=valid&&setup?await checkWebDraft(outputDir,path.resolve(outputDir,'../../..'),setup):{valid:true};
     if(!fresh.fresh)warnings.push(fresh.message);
@@ -146,7 +147,7 @@ export async function getState(outputDir, { preparing = false } = {}) {
     readJSON(path.join(outputDir, 'manager/progress.json'), warnings),
   ]);
   const { data: savedData, info: source } = await loadSource(outputDir, ledger, warnings);
-  const setup = await readJSON(path.join(outputDir, 'manager/setup.json'));
+  const setup = await observedSetup(outputDir);
   const fresh=await inputFreshness(outputDir,setup);
   const settingUp = !!setup && (setup.status !== 'ready'||!fresh.fresh) && !preparing;
   const plan=await readJSON(path.join(outputDir,'foundation-plan.json'));

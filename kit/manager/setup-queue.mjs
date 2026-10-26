@@ -10,6 +10,7 @@ import {clean} from './publish-queue.mjs';
 import {prepareSourcePack} from './source-pack.mjs';
 import {compilePreparation} from './preparation-compiler.mjs';
 import {validateCoverage,COMPILER_HASH} from './foundation-compiler.mjs';
+import {observedSetup} from './setup-observation.mjs';
 const idOK=v=>typeof v==='string'&&/^[0-9a-f-]{36}$/.test(v);
 const digest=v=>createHash('sha256').update(v).digest('hex');
 const stateFile=output=>path.join(output,'manager/setup.json');
@@ -38,14 +39,7 @@ export async function validatePrepareRequest(output,workspace,id){
 }
 export async function initPrepareDelivery(output,id){const f=await files(output,id);await saveSetup(f.deliveryFile,{attempt:randomUUID(),created:new Date().toISOString()});}
 export async function latestMcpPreparation(output){
- let s=await readJSON(stateFile(output));
- if(s?.runner!=='mcp'||!activeSetup(s))return s;
- const f=await files(output,s.jobId),d=await readJSON(f.deliveryFile);let dead=false;
- if(Number.isInteger(d?.pid)&&d.pid>0)try{process.kill(d.pid,0);}catch(e){dead=e.code==='ESRCH';}
- if(dead)s=await locked(f.dir,async()=>{
-  const current=await readJSON(stateFile(output)),latest=await readJSON(f.deliveryFile);
-  if(current.jobId===s.jobId&&activeSetup(current)&&latest?.attempt===d.attempt&&latest.owner===d.owner){const next={...current,status:'blocked',readyInputHash:null,questions:[],updated:new Date().toISOString(),message:'Background connection stopped before preparation finished. Context is saved; retry to continue.'};await saveSetup(stateFile(output),next);return next;}return current;
- });return s;
+ return observedSetup(output);
 }
 export async function claimMcpPreparation({outputDir,workspace,id,owner,lease}){
  const f=await validatePrepareRequest(outputDir,workspace,id);

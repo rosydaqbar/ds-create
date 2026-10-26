@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {snapshotInputs} from '../manager/input-snapshot.mjs';
-import {extractSource,prepareSourcePack,lockedFacts} from '../manager/source-pack.mjs';
+import {extractSource,extractSourceBounded,prepareSourcePack,lockedFacts} from '../manager/source-pack.mjs';
 import {paletteRamp,compileDomain,assembleFoundations,contrastReport,validateCoverage} from '../manager/foundation-compiler.mjs';
 import {compilePreparation} from '../manager/preparation-compiler.mjs';
 import {generateDefaults} from './prepare-foundation-defaults.mjs';
@@ -43,6 +43,16 @@ test('root extraction cache is content/type/version bound and every unsupported 
  await writeFile(path.join(root,'brand.html'),'<h1>Changed source</h1>');await assert.rejects(prepareSourcePack(f.request,f.dir),/Context changed/);
  const changed=await snapshotInputs(f.workspace,'product');f.request.inputHash=changed.hash;f.request.inputSnapshot=changed.files;
  r=await prepareSourcePack(f.request,f.dir);assert.equal(r.metrics.cacheHits,2);assert.equal(r.metrics.extracted,1);
+});
+test('large embedded HTML assets finish within a bounded parser thread, keep node offsets and never leak encoded bytes',async()=>{
+ const data='A'.repeat(700000),source='<meta name="theme-color" content="#123456"><h1>Foundation brief</h1><img src="data:image/png;base64,'+data+'" alt="Product logo"><p>Use the supplied UI typeface.</p>';
+ const pack=await extractSourceBounded(Buffer.from(source),'.html',{timeoutMs:3000});
+ assert.deepEqual(pack.blocks.map(b=>b.text),['Foundation brief','Use the supplied UI typeface.']);
+ assert.equal(source.slice(pack.blocks[1].offset).startsWith('Use the supplied'),true);
+ assert.equal(pack.assets[0].src,'[embedded asset]');assert.equal(pack.assets[0].label,'Product logo');assert.equal(pack.metadata[0].content,'#123456');
+ assert.ok(JSON.stringify(pack).length<3000);assert.doesNotMatch(JSON.stringify(pack),/A{30}/);
+ await assert.rejects(extractSourceBounded(Buffer.from(source),'.html',{timeoutMs:0}),/time limit/);
+ const again=await extractSourceBounded(Buffer.from('<p>Parser still available</p>'),'.html');assert.equal(again.blocks[0].text,'Parser still available');
 });
 test('compiler preserves pinned anchors, generates canonical metadata/bindings and keeps Web free of App touch roles',async t=>{
  const f=await fixture(t),d=decisions(f.request,f.pack),parts=Object.fromEntries(Object.entries(recipes).map(([id,r])=>[id,compileDomain(id,r,{platform:'Web',modes:['Light','Dark']})]));

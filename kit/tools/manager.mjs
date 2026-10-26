@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { colors, values, effects } from '../web/scripts/chrome-fallbacks.mjs';
 import { foundations, getState, readJSON } from '../manager/state.mjs';
+import { observedSetup } from '../manager/setup-observation.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -31,7 +32,7 @@ async function main() {
     const sessions=[];
     for(const entry of await readdir(path.join(workspace,'workspace/output'),{withFileTypes:true}).catch(e=>{if(e.code==='ENOENT')return [];throw e;})){
       if(!entry.isDirectory()||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.name))continue;
-      const output=path.join(workspace,'workspace/output',entry.name),setup=await readJSON(path.join(output,'manager/setup.json'));
+      const output=path.join(workspace,'workspace/output',entry.name),setup=await observedSetup(output);
       const ledger=await readJSON(path.join(output,'ds-create-ledger.json'));
       if(!setup&&!ledger)continue;
       sessions.push({slug:entry.name,name:setup?.projectName||ledger?.system||entry.name,status:setup?.status||'initialized',resumeCommand:`ds-create init-web --slug ${entry.name}`});
