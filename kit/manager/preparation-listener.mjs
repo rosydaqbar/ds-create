@@ -20,9 +20,9 @@ export async function createPreparationListener({workspace:root,session,onPrompt
   if(await readFile(file,'utf8')!==prior)throw new Error('Listener identity changed.');
   await unlink(file);lock=await open(file,'wx',0o600);
  }
- let pending=null,current=null,closed=false,timer,chain=Promise.resolve(),receiverReady=false,lastError=null;
+ let pending=null,current=null,closed=false,timer,chain=Promise.resolve(),receiverReady=false,lastError=null,binding=randomUUID(),lastHealthCheck=0;
  const identity={pid:process.pid,instance,session,mode:'main-agent',capabilities:['prepare'],started:new Date().toISOString(),agentSeenAt:null};
- const save=async()=>{const tmp=file+'.'+instance+'.tmp';await writeFile(tmp,JSON.stringify({...identity,receiverReady,lastError})+'\n',{mode:0o600});await rename(tmp,file);};
+ const save=async()=>{const tmp=file+'.'+instance+'.tmp';await writeFile(tmp,JSON.stringify({...identity,receiverReady,lastError,binding})+'\n',{mode:0o600});await rename(tmp,file);};
  await lock.writeFile(JSON.stringify(identity)+'\n');await lock.close();
  const serial=fn=>{const next=chain.then(fn);chain=next.catch(()=>{});return next;};
  async function deliver(packet){
@@ -45,6 +45,10 @@ export async function createPreparationListener({workspace:root,session,onPrompt
  }
  async function tick(){
   if(closed)return;
+  if(onPrompt?.health&&Date.now()-lastHealthCheck>5000){
+   lastHealthCheck=Date.now();const healthy=await onPrompt.health();
+   if(healthy===false&&receiverReady){receiverReady=false;lastError='The event transport stopped. Reconnect the main-instance event handler.';await save();}
+  }
   if(current){
    const s=await latestMcpPreparation(output);
    if(s?.jobId!==current.id||s.status!=='running'){current=null;return;}
@@ -57,10 +61,10 @@ export async function createPreparationListener({workspace:root,session,onPrompt
   const event=await discover();if(!event)return;
   const receiptFile=path.join(dir,'setup-jobs',event.job_id,'prompt-delivery.json'),receipt=await readJSON(receiptFile);
   // One notification per saved attempt, including across restarts. Reading/recovery never auto-retries work.
-  if(receipt?.event_id===event.event_id)return;
-  await writeFile(receiptFile,JSON.stringify({event_id:event.event_id,status:'pending'})+'\n',{flag:'wx',mode:0o600});
+  if(receipt?.event_id===event.event_id&&(receipt.status==='accepted'||receipt.instance===instance&&receipt.binding===binding))return;
+  await writeFile(receiptFile,JSON.stringify({event_id:event.event_id,instance,binding,status:'pending'})+'\n',{mode:0o600});
   const accepted=await deliver(event);
-  await writeFile(receiptFile,JSON.stringify({event_id:event.event_id,status:accepted?'accepted':'undelivered',updated:new Date().toISOString()})+'\n',{mode:0o600});
+  await writeFile(receiptFile,JSON.stringify({event_id:event.event_id,instance,binding,status:accepted?'accepted':'undelivered',updated:new Date().toISOString()})+'\n',{mode:0o600});
  }
  async function act(command){return serial(async()=>{
   if(closed)throw new Error('Listener stopped.');
@@ -95,5 +99,12 @@ export async function createPreparationListener({workspace:root,session,onPrompt
  async function loop(){try{await serial(tick);}catch(error){lastError=error.message;await save();}finally{if(!closed)timer=setTimeout(loop,intervalMs);}}
  try{await deliver({event:'listener-ready',event_id:instance,session,capabilities:['prepare']});}catch(error){await close();throw error;}
  timer=setTimeout(loop,0);
- return {act,close,instance};
+ async function connect(receiver){return serial(async()=>{
+  if(closed)throw new Error('Listener stopped.');
+  if(typeof receiver!=='function')throw new Error('Connect an actual event receiver.');
+  onPrompt=receiver;binding=randomUUID();receiverReady=false;lastHealthCheck=Date.now();
+  await deliver({event:'listener-ready',event_id:instance,session,capabilities:['prepare']});
+  return {connected:receiverReady,instance,activeJob:current?.id||null};
+ });}
+ return {act,close,connect,instance};
 }

@@ -120,3 +120,14 @@ test('shutdown blocks unfinished work and a host acknowledgement must echo the a
  await f.listener.act({action:'claim',event_id:event.event_id,consumer_id:randomUUID()});
  await f.listener.close();assert.equal((await f.flow()).status,'blocked');
 });
+
+test('connecting a receiver recovers an undelivered event without restarting or re-claiming the saved request',async t=>{
+ const f=await fixture(t,{onPrompt:undefined});await f.queue();await sleep(60);
+ const before=await f.listener.act({action:'status'}),{event}=await f.listener.act({action:'next'}),events=[];
+ const receiver=async e=>{events.push(e);return {accepted:true,event_id:e.event_id};};
+ assert.equal((await f.listener.connect(receiver)).connected,true);
+ await until(()=>events.some(e=>e.event==='prepare-request'));
+ assert.equal((await f.listener.act({action:'status'})).instance,before.instance);
+ assert.equal((await f.flow()).status,'queued');assert.equal((await f.listener.act({action:'next'})).event.job_id,event.job_id);
+ await f.listener.connect(receiver);await sleep(70);assert.equal(events.filter(e=>e.event==='prepare-request').length,1);
+});
