@@ -10,6 +10,8 @@ import {clean} from './publish-queue.mjs';
 import {prepareSourcePack} from './source-pack.mjs';
 import {compilePreparation} from './preparation-compiler.mjs';
 import {validateCoverage,COMPILER_HASH} from './foundation-compiler.mjs';
+import {foundationPackFiles,verifyFoundationPack} from './foundation-pack.mjs';
+import {templateHash,seedFoundationInputs} from './foundation-templates.mjs';
 import {observedSetup} from './setup-observation.mjs';
 const idOK=v=>typeof v==='string'&&/^[0-9a-f-]{36}$/.test(v);
 const digest=v=>createHash('sha256').update(v).digest('hex');
@@ -53,7 +55,7 @@ export async function claimMcpPreparation({outputDir,workspace,id,owner,lease}){
   await saveSetup(stateFile(outputDir),{...s,status:'running',message:'Your agent received the saved context.',updated:new Date().toISOString()});
   await event(f.dir,{type:'builder.stage',stage:'context'});
   if(f.request.preparationVersion===2){
-   try{await prepareSourcePack(f.request,f.dir);}
+   try{const {pack}=await prepareSourcePack(f.request,f.dir);await seedFoundationInputs(f.request,pack,f.dir);}
    catch(error){await saveSetup(stateFile(outputDir),{...s,status:'blocked',message:'Source extraction stopped: '+clean(error.message),updated:new Date().toISOString()});throw error;}
   }
   return {request:f.request,attempt:d.attempt,reused:false};
@@ -96,6 +98,7 @@ export async function mcpPrepareAction({outputDir,workspace,id,owner,lease,attem
     if(receipt?.inputHash!==f.request.inputHash||receipt.inputRevision!==f.request.inputRevision||receipt.compiler!==COMPILER_HASH)throw new Error('Compile the decision pack through ds_create_prepare_compile before reporting ready.');
     if(digest(await readFile(path.join(outputDir,'foundations.json')))!==receipt.draftHash||digest(JSON.stringify(await readJSON(path.join(f.dir,'decisions.json'))))!==receipt.decisionHash)throw new Error('Compiled draft or decisions changed. Compile the current decisions again.');
     const expected=[...['foundations.json','foundation-plan.json','ds-create-ledger.json','reports/init.md'].map(n=>`workspace/output/${f.request.slug}/${n}`),...['sources.md','answers/01-init.md'].map(n=>`workspace/input/${f.request.inputSlug}/${n}`)];
+    if(receipt.foundationPack){if(receipt.foundationPack.templateHash!==templateHash||JSON.stringify([...receipt.foundationPack.files].sort())!==JSON.stringify([...foundationPackFiles].sort()))throw new Error('Foundation templates changed; compile the current bindings again.');expected.push(...foundationPackFiles.map(n=>`workspace/output/${f.request.slug}/${n}`));await verifyFoundationPack(outputDir,await readJSON(path.join(outputDir,'foundations.json')));}
     if(Object.keys(receipt.artifactHashes||{}).length!==expected.length)throw new Error('The compilation artifact receipt is incomplete. Compile again.');
     for(const name of expected)if(digest(await readFile(path.join(workspace,name)))!==receipt.artifactHashes[name])throw new Error('Compiled review artifacts changed. Compile the current decisions again.');
    }

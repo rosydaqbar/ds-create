@@ -4,7 +4,7 @@ Open DS Create Builder BEFORE collecting context or generating foundations. This
 
 ## Launch immediately
 
-Read `workflow/MANAGER.md` for the local lifecycle. For this bootstrap only, defer the global generation specs, questionnaire, brand inputs, Figma readiness and font checks to the local preparation job; do not ask setup questions in chat before opening Builder.
+For bootstrap read this launch contract and `background-worker.md` only. Defer the full `workflow/MANAGER.md`, global generation specs, questionnaire, brand inputs, Figma readiness and font checks to their actual stages; do not ask setup questions in chat before opening Builder.
 
 From the selected workspace root, verify Node20+ and run:
 

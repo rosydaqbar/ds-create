@@ -75,23 +75,29 @@ function colorRecipe(b,r,modes){
  if(Object.keys(overrides).some(name=>!rows.some(r=>r.name===name)))throw new Error('Unknown color override; use explicit extra definitions for new roles.');
 }
 function typographyRecipe(b,r){
- strict(r,['families','display','code','rows','weights','extra'],'typography recipe');
+ strict(r,['families','faces','display','code','rows','weights','extra'],'typography recipe');
  if(!named(r.families?.ui))throw new Error('Select a source-backed UI font.');
+ if(r.faces!==undefined){strict(r.faces,Object.keys(r.families),'family face');for(const face of Object.values(r.faces))strict(face,['regular','medium','semibold','bold'],'font face');}
  for(const [role,family]of Object.entries(r.families))b.scalar('font/family/'+role,'Typography',family,'Typeface for '+role+' content.','font-family',['FONT_FAMILY']);
  const weightValues={regular:400,medium:500,semibold:600,bold:700},weightNames={regular:'Regular',medium:'Medium',semibold:'Semi Bold',bold:'Bold',...(r.weights||{})};
  const rows=r.rows||defaults.typography.filter(row=>(row.role!=='display'||r.display===true)&&(row.role!=='code'||r.code===true));
  for(const row of rows){
   strict(row,['role','size','fontSize','lineHeight','letterSpacing','weights','family'],'type scale row');
-  const key=row.role+'-'+row.size,familyRole=row.family||(row.role==='display'&&r.families.display?'display':row.role==='code'?'mono':'ui'),family=r.families[familyRole];
+  const key=row.role+'-'+row.size,familyRole=row.family||((row.role==='display'||row.role==='heading'&&r.faces?.display)&&r.families.display?'display':row.role==='code'?'mono':'ui'),family=r.families[familyRole];
   if(!named(family))throw new Error('Missing family for '+row.role);
   b.scalar('font/size/'+key,'Typography',row.fontSize,'Text size for '+row.role+' '+row.size+'.','font-size',['FONT_SIZE']);
   b.scalar('font/line-height/'+key,'Typography',row.lineHeight,'Line height for '+row.role+' '+row.size+'.','line-height',['LINE_HEIGHT']);
   const tracking='font/letter-spacing/'+key;
   b.scalar(tracking,'Typography',row.letterSpacing||0,'Tracking percentage for '+row.role+' '+row.size+'.','letter-spacing',['LETTER_SPACING']);
-  for(const weight of row.weights){
+  const faces=r.faces?.[familyRole];
+  if(faces&&(!Object.keys(faces).length||Object.entries(faces).some(([weight,style])=>!weightValues[weight]||!named(style))))throw new Error('Record exact supported faces for '+familyRole);
+  const available=faces?Object.keys(faces):Object.keys(weightNames);
+  const weights=r.rows?row.weights:[...new Set(row.weights.map(weight=>faces&&!faces[weight]?available.reduce((a,b)=>Math.abs(weightValues[b]-weightValues[weight])<Math.abs(weightValues[a]-weightValues[weight])?b:a):weight))];
+  for(const weight of weights){
+   if(faces&&!faces[weight])throw new Error('The supplied type row requests an undeclared face: '+familyRole+'/'+weight);
    if(!weightValues[weight])throw new Error('Unsupported numeric weight: provide explicit typography definitions.');
    if(!b.data.variables.some(v=>v.name==='font/weight/'+weight))b.scalar('font/weight/'+weight,'Typography',weightValues[weight],'Weight for '+weight+' interface text.','font-weight',['FONT_WEIGHT']);
-   b.data.textStyles.push({name:'type/'+row.role+'/'+row.size+'/'+weight,fontFamily:family,fontStyle:weightNames[weight],fontSize:row.fontSize,lineHeight:{unit:'PIXELS',value:row.lineHeight},letterSpacing:{unit:'PERCENT',value:row.letterSpacing||0},bound:{fontFamily:'font/family/'+familyRole,fontSize:'font/size/'+key,lineHeight:'font/line-height/'+key,letterSpacing:tracking,fontWeight:'font/weight/'+weight}});
+   b.data.textStyles.push({name:'type/'+row.role+'/'+row.size+'/'+weight,fontFamily:family,fontStyle:faces?.[weight]??weightNames[weight],fontSize:row.fontSize,lineHeight:{unit:'PIXELS',value:row.lineHeight},letterSpacing:{unit:'PERCENT',value:row.letterSpacing||0},bound:{fontFamily:'font/family/'+familyRole,fontSize:'font/size/'+key,lineHeight:'font/line-height/'+key,letterSpacing:tracking,fontWeight:'font/weight/'+weight}});
   }
  }
  b.scalar('font/size/input-min','Typography',16,'Minimum mobile input value text size to prevent focus zoom.','font-size',['FONT_SIZE']);
@@ -106,10 +112,10 @@ function spaceRecipe(b,r,platform){
 }
 function elevationRecipe(b,r,{focusWidth=2,hasDanger=true}={}){
  strict(r,['treatment','styles','extra'],'elevation recipe');if(r.styles){b.data.effectStyles.push(...r.styles);return;}
- if(!['layered','flat'].includes(r.treatment))throw new Error('Choose layered/flat depth or provide explicit effect styles.');
+ if(!['layered','flat','none'].includes(r.treatment))throw new Error('Choose layered/flat depth or provide explicit effect styles.');
  const shadow=(y,blur,spread,color)=>({type:'DROP_SHADOW',offset:{x:0,y},radius:blur,spread,color:alias('color/'+color)});
- const control=r.treatment==='flat'?[]:[shadow(1,2,0,'shadow/ambient')];
- for(const [name,effects]of Object.entries({control,raised:r.treatment==='flat'?[]:[...control,shadow(1,3,0,'shadow/key')],overlay:r.treatment==='flat'?[shadow(4,8,0,'shadow/ambient')]:[shadow(12,16,-4,'shadow/key'),shadow(4,6,-2,'shadow/ambient')],modal:r.treatment==='flat'?[shadow(8,24,0,'shadow/ambient')]:[shadow(20,24,-4,'shadow/key'),shadow(8,8,-4,'shadow/ambient')]}))if(effects.length)b.data.effectStyles.push({name:'elevation/'+name,effects});
+ const control=r.treatment!=='layered'?[]:[shadow(1,2,0,'shadow/ambient')];
+ for(const [name,effects]of Object.entries(r.treatment==='none'?{}:{control,raised:r.treatment==='flat'?[]:[...control,shadow(1,3,0,'shadow/key')],overlay:r.treatment==='flat'?[shadow(4,8,0,'shadow/ambient')]:[shadow(12,16,-4,'shadow/key'),shadow(4,6,-2,'shadow/ambient')],modal:r.treatment==='flat'?[shadow(8,24,0,'shadow/ambient')]:[shadow(20,24,-4,'shadow/key'),shadow(8,8,-4,'shadow/ambient')]}))if(effects.length)b.data.effectStyles.push({name:'elevation/'+name,effects});
  for(const tone of ['default',...(hasDanger?['danger']:[])]){
   const effects=[shadow(0,0,2,'surface/base'),shadow(0,0,2+focusWidth,tone==='default'?'border/focus':'border/danger')];
   b.data.effectStyles.push({name:'focus/'+tone,effects},{name:'focus/'+tone+'/control',effects:[...effects,...control]});
@@ -121,8 +127,9 @@ export function compileDomain(domain,recipe,{platform,modes,dependencies}){
  if(domain==='typography')typographyRecipe(b,recipe);
  if(domain==='space')spaceRecipe(b,recipe,platform);
  if(domain==='shape'){
-  strict(recipe,['values','extra'],'shape recipe');
-  for(const [name,row]of Object.entries(defaults.shape))b.scalar(name,'Shape',recipe.values?.[name]??row.value,row.description,name.startsWith('radius/')?'radius':'border-width',name.startsWith('radius/')?['CORNER_RADIUS']:['STROKE_FLOAT']);
+  strict(recipe,['preset','values','extra'],'shape recipe');
+  if(recipe.preset&&!['square','soft'].includes(recipe.preset))throw new Error('Use square or soft radius preset.');
+  for(const [name,row]of Object.entries(defaults.shape))b.scalar(name,'Shape',recipe.values?.[name]??(recipe.preset==='square'&&name.startsWith('radius/')&&name!=='radius/full'?0:row.value),row.description,name.startsWith('radius/')?'radius':'border-width',name.startsWith('radius/')?['CORNER_RADIUS']:['STROKE_FLOAT']);
   if(Object.keys(recipe.values||{}).some(n=>!defaults.shape[n]))throw new Error('Unknown shape role; use extra definitions.');
  }
  if(domain==='motion'){

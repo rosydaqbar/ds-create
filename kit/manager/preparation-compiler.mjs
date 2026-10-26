@@ -1,19 +1,21 @@
 import {readFile,writeFile,rename,lstat} from 'node:fs/promises';
 import path from 'node:path';
 import {sourceBytes,digest} from './source-pack.mjs';
-import {compileDomain,domainNames,COMPILER_HASH,validateDecisionPack,assembleFoundations,contrastReport} from './foundation-compiler.mjs';
+import {domainNames,COMPILER_HASH,validateDecisionPack,assembleFoundations,contrastReport} from './foundation-compiler.mjs';
 import {localDirectory,saveSetup} from './setup-data.mjs';
 import {snapshotInputs} from './input-snapshot.mjs';
 import {readJSON} from './state.mjs';
 import {validateFoundations} from './foundation-validation.mjs';
 import {normalizeFrozen} from './frozen-import.mjs';
+import {resolveTemplateDecisions,templateFor,templateHash} from './foundation-templates.mjs';
+import {createFoundationPack} from './foundation-pack.mjs';
 
 async function regular(file){try{const s=await lstat(file);if(!s.isFile()||s.isSymbolicLink())throw new Error('Preparation artifacts must be regular files.');}catch(e){if(e.code!=='ENOENT')throw e;}}
 export async function compilePreparation(request,jobDir,{assertCurrent=async()=>{}}={}){
  const started=Date.now();
  await assertCurrent();
  const decisionFile=path.join(jobDir,'decisions.json');await regular(decisionFile);
- const decision=JSON.parse(await readFile(decisionFile,'utf8')),pack=JSON.parse(await readFile(path.join(jobDir,'source-pack.json'),'utf8'));
+ const rawDecision=JSON.parse(await readFile(decisionFile,'utf8')),decision=resolveTemplateDecisions(rawDecision),pack=JSON.parse(await readFile(path.join(jobDir,'source-pack.json'),'utf8'));
  if(pack.inputHash!==request.inputHash)throw new Error('Source pack belongs to another revision.');
  const locked=validateDecisionPack(decision,request,pack);
  let frozen=null;
@@ -31,11 +33,11 @@ export async function compilePreparation(request,jobDir,{assertCurrent=async()=>
    const variables=[...(parts.shape?.variables||[]),...(frozen?.variables||[])],v=variables.find(v=>v.name==='border/width/focus'),ref=v?.values.Value?.alias,primitive=variables.find(v=>v.name===ref);
    dependencies={focusWidth:primitive?.values.Value??v?.values.Value??2,hasDanger:[...(parts.color?.variables||[]),...(frozen?.variables||[])].some(v=>v.name==='color/border/danger')};
   }
-  const key=digest(JSON.stringify({compiler:COMPILER_HASH,domain,recipe:scope.recipe,platform,modes:domain==='color'?modes:null,dependencies}));
+  const key=digest(JSON.stringify({compiler:COMPILER_HASH,templates:templateHash,domain,recipe:scope.recipe,platform,modes:domain==='color'?modes:null,dependencies}));
   const file=path.join(cache,key+'.json');await regular(file);
   const stored=await readJSON(file);let part=stored?.key===key&&digest(JSON.stringify(stored.data))===stored.hash?stored.data:null;
   if(part)reused.push(domain);
-  else{part=compileDomain(domain,scope.recipe,{platform,modes,dependencies});await saveSetup(file,{key,hash:digest(JSON.stringify(part)),data:part});compiled.push(domain);}
+  else{part=templateFor(domain).compile(scope.recipe,{platform,modes,dependencies});await saveSetup(file,{key,hash:digest(JSON.stringify(part)),data:part});compiled.push(domain);}
   parts[domain]=part;
  }
  const draftFile=path.join(request.outputDir,'foundations.json');await regular(draftFile);
@@ -55,6 +57,9 @@ export async function compilePreparation(request,jobDir,{assertCurrent=async()=>
  const answers='# Init decisions\n\n'+plan.decisions.map((d,i)=>`## ${i+1} · ${d.key}\nAnswer: ${d.value}\nDecided by: ${d.decidedBy} (${d.source})${d.reason?' — '+d.reason:''}\nGates: local foundation preparation; Figma pending.\n`).join('\n');
  const report=`# Local foundation preparation\n\n${request.projectName} · revision ${revision}\nInput hash: ${request.inputHash}\nCompiler: ${COMPILER_HASH}\n\nAwaiting Builder review. Figma readiness, publication and audit remain pending; init is incomplete.\n\n## Design decisions\n\n`+plan.decisions.map(d=>`- ${d.key}: ${d.value} (${d.source})${d.reason?' — '+d.reason:''}`).join('\n')+'\n\n## Scope\n\n'+domainNames.map(id=>`- ${id}: ${plan.domains[id].status}${plan.domains[id].reason?' — '+plan.domains[id].reason:''}`).join('\n')+`\n\nContrast: ${contrast.length} tested pairs; ${failures.length} failures. Transparent pairs require explicit backing-surface resolution. Preview controller edits are not saved by this operation.\n`;
  const artifacts=[['foundation-plan.json',JSON.stringify(plan,null,2)+'\n'],['ds-create-ledger.json',JSON.stringify(ledger,null,2)+'\n'],['reports/init.md',report],['foundations.json',JSON.stringify(draft,null,2)+'\n']].map(([name,body])=>[path.join(request.outputDir,name),body]);
+ const foundationPack=createFoundationPack({draft,plan,decision:rawDecision,request});
+ await localDirectory(request.workspace,`workspace/output/${request.slug}/foundations`);
+ artifacts.push(...foundationPack.files.map(([name,body])=>[path.join(request.outputDir,name),body]));
  artifacts.unshift([path.join(request.workspace,input,'sources.md'),sources],[path.join(request.workspace,input,'answers/01-init.md'),answers]);
  // Stage the whole set before changing canonical files. Individual renames are atomic;
  // the owned setup remains running until the normal proof checks accept the complete set.
@@ -63,7 +68,7 @@ export async function compilePreparation(request,jobDir,{assertCurrent=async()=>
  await assertCurrent();
  if((await snapshotInputs(request.workspace,request.inputSlug||request.slug)).hash!==request.inputHash)throw new Error('Inputs changed before committing artifacts.');
  for(const [i,[target]]of artifacts.entries())await rename(path.join(staging,i+'.tmp'),target);
- const receipt={format:'ds-create/preparation-compile@1',inputHash:request.inputHash,inputRevision:request.inputRevision,compiler:COMPILER_HASH,decisionHash:digest(JSON.stringify(decision)),draftHash:digest(JSON.stringify(draft,null,2)+'\n'),artifactHashes:Object.fromEntries(artifacts.map(([target,body])=>[path.relative(request.workspace,target).split(path.sep).join('/'),digest(body)])),revision,compiled,reused,counts:{variables:draft.variables.length,textStyles:draft.textStyles.length,effectStyles:draft.effectStyles.length},contrastPairs:contrast.length,contrastWarnings:failures.length,elapsedMs:Date.now()-started,created:now};
+ const receipt={format:'ds-create/preparation-compile@1',inputHash:request.inputHash,inputRevision:request.inputRevision,compiler:COMPILER_HASH,decisionHash:digest(JSON.stringify(rawDecision)),foundationPack:{format:foundationPack.manifest.format,templateHash,files:foundationPack.files.map(([name])=>name)},draftHash:digest(JSON.stringify(draft,null,2)+'\n'),artifactHashes:Object.fromEntries(artifacts.map(([target,body])=>[path.relative(request.workspace,target).split(path.sep).join('/'),digest(body)])),revision,compiled,reused,counts:{variables:draft.variables.length,textStyles:draft.textStyles.length,effectStyles:draft.effectStyles.length},contrastPairs:contrast.length,contrastWarnings:failures.length,elapsedMs:Date.now()-started,created:now};
  await saveSetup(path.join(jobDir,'compile-receipt.json'),receipt);
  return receipt;
 }

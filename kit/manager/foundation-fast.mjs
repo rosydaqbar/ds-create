@@ -2,6 +2,7 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {validateFoundations} from './foundation-validation.mjs';
+import {verifyFoundationPack} from './foundation-pack.mjs';
 const unsupported=message=>Object.assign(new Error(message),{code:'MANAGER_FAST_UNSUPPORTED'});
 
 // Fixed renderer + approved data, following FAST's batching pattern. No agent codegen.
@@ -186,7 +187,8 @@ export function compileFoundationCalls(draft,{maxChars=45000}={}){
 export async function writeFoundationFastPlan(request,requestFile){
  const bytes=await readFile(path.join(request.outputDir,'foundations.json'));
  if(createHash('sha256').update(bytes).digest('hex')!==request.hash)throw new Error('Draft changed before FAST compilation.');
- const calls=compileFoundationCalls(JSON.parse(bytes));
+ const draft=JSON.parse(bytes);await verifyFoundationPack(request.outputDir,draft);
+ const calls=compileFoundationCalls(draft);
  const dir=path.join(path.dirname(requestFile),'fast');await mkdir(dir,{recursive:true});
  const entries=[];
  for(const [i,call] of calls.entries()){
