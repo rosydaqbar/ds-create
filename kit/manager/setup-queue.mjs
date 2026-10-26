@@ -1,4 +1,4 @@
-import {realpath,open,unlink,appendFile,stat} from 'node:fs/promises';
+import {realpath,open,unlink,appendFile,stat,readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {readJSON} from './state.mjs';
@@ -7,6 +7,9 @@ import {snapshotInputs} from './input-snapshot.mjs';
 import {selectedInputSlug} from './input-identity.mjs';
 import {checkPreparation} from './foundation-proof.mjs';
 import {clean} from './publish-queue.mjs';
+import {prepareSourcePack} from './source-pack.mjs';
+import {compilePreparation} from './preparation-compiler.mjs';
+import {validateCoverage,COMPILER_HASH} from './foundation-compiler.mjs';
 const idOK=v=>typeof v==='string'&&/^[0-9a-f-]{36}$/.test(v);
 const digest=v=>createHash('sha256').update(v).digest('hex');
 const stateFile=output=>path.join(output,'manager/setup.json');
@@ -54,10 +57,15 @@ export async function claimMcpPreparation({outputDir,workspace,id,owner,lease}){
   if(s.status!=='queued')throw new Error('This preparation is not queued.');
   await saveSetup(f.deliveryFile,{...d,owner,pid:process.pid,leaseHash:digest(lease),claimedAt:new Date().toISOString()});
   await saveSetup(stateFile(outputDir),{...s,status:'running',message:'The background worker received your saved context.',updated:new Date().toISOString()});
-  await event(f.dir,{type:'builder.stage',stage:'context'});return {request:f.request,attempt:d.attempt,reused:false};
+  await event(f.dir,{type:'builder.stage',stage:'context'});
+  if(f.request.preparationVersion===2){
+   try{await prepareSourcePack(f.request,f.dir);}
+   catch(error){await saveSetup(stateFile(outputDir),{...s,status:'blocked',message:'Source extraction stopped: '+clean(error.message),updated:new Date().toISOString()});throw error;}
+  }
+  return {request:f.request,attempt:d.attempt,reused:false};
  });
 }
-export async function mcpPrepareAction({outputDir,workspace,id,owner,lease,attempt,action,message,stage,outcome,questions=[]}){
+export async function mcpPrepareAction({outputDir,workspace,id,owner,lease,attempt,action,message,stage,outcome,questions=[],coverage}){
  const f=action==='finish'&&['blocked','failed','cancelled'].includes(outcome)?await files(outputDir,id):await validatePrepareRequest(outputDir,workspace,id);
  if(!idOK(owner)||!idOK(lease)||!idOK(attempt))throw new Error('Invalid MCP connection lease.');
  return locked(f.dir,async()=>{
@@ -70,11 +78,33 @@ export async function mcpPrepareAction({outputDir,workspace,id,owner,lease,attem
    await event(f.dir,{type:'builder.update',message:clean(message)});
    await saveSetup(stateFile(outputDir),{...s,message:clean(message),updated:new Date().toISOString()});return {updated:true,cancelRequested:false};
   }
+  if(action==='compile'){
+   if(d.cancelRequested)throw new Error('Cancellation requested; stop and acknowledge it.');
+   if(f.request.preparationVersion!==2)throw new Error('This saved request uses the legacy preparation contract.');
+   await event(f.dir,{type:'builder.stage',stage:'foundation'});
+   const receipt=await compilePreparation(f.request,f.dir,{assertCurrent:async()=>{
+    await validatePrepareRequest(outputDir,workspace,id);
+    const latest=await readJSON(f.deliveryFile);if(latest.cancelRequested||latest.attempt!==attempt||latest.owner!==owner||latest.leaseHash!==digest(lease))throw new Error('Preparation was cancelled or its lease changed.');
+   }});
+   await event(f.dir,{type:'builder.update',message:`Compiled ${receipt.counts.variables} variables and ${receipt.counts.textStyles} text styles. Checking the local review handoff.`});
+   return receipt;
+  }
   if(action!=='finish'||!['questions','ready','blocked','failed','cancelled'].includes(outcome))throw new Error('Invalid preparation outcome.');
   if(d.cancelRequested&&!['cancelled','blocked'].includes(outcome))throw new Error('Acknowledge cancellation before finishing preparation.');
   let status=outcome,detail=clean(message),qs=[];
-  if(outcome==='questions'){qs=setupQuestions(questions);if(!qs)throw new Error('Return distinct valid questions or report blocked.');}
+  if(outcome==='questions'){
+   qs=setupQuestions(questions);if(!qs)throw new Error('Return distinct valid questions or report blocked.');
+   if(f.request.preparationVersion===2){validateCoverage(await readJSON(path.join(f.dir,'source-pack.json')),coverage,{allowUnreadable:true});await saveSetup(path.join(f.dir,'coverage.json'),coverage);}
+  }
   if(outcome==='ready'){
+   if(f.request.preparationVersion===2){
+    const receipt=await readJSON(path.join(f.dir,'compile-receipt.json'));
+    if(receipt?.inputHash!==f.request.inputHash||receipt.inputRevision!==f.request.inputRevision||receipt.compiler!==COMPILER_HASH)throw new Error('Compile the decision pack through ds_create_prepare_compile before reporting ready.');
+    if(digest(await readFile(path.join(outputDir,'foundations.json')))!==receipt.draftHash||digest(JSON.stringify(await readJSON(path.join(f.dir,'decisions.json'))))!==receipt.decisionHash)throw new Error('Compiled draft or decisions changed. Compile the current decisions again.');
+    const expected=[...['foundations.json','foundation-plan.json','ds-create-ledger.json','reports/init.md'].map(n=>`workspace/output/${f.request.slug}/${n}`),...['sources.md','answers/01-init.md'].map(n=>`workspace/input/${f.request.inputSlug}/${n}`)];
+    if(Object.keys(receipt.artifactHashes||{}).length!==expected.length)throw new Error('The compilation artifact receipt is incomplete. Compile again.');
+    for(const name of expected)if(digest(await readFile(path.join(workspace,name)))!==receipt.artifactHashes[name])throw new Error('Compiled review artifacts changed. Compile the current decisions again.');
+   }
    await event(f.dir,{type:'builder.stage',stage:'validation'});
    const check=await checkPreparation(outputDir,workspace,{inputSlug:s.inputSlug,inputRevision:s.inputRevision,projectName:s.projectName});
    if(check.valid&&check.plan?.systemMode==='new'&&check.plan.motionPolicy!=='basic-ui'){check.valid=false;check.errors.push('New-system preparation requires the basic UI motion policy.');}

@@ -43,6 +43,10 @@ Publication stages: access, variables, styles, verification. Preparation stages:
 
 Finish preparation with questions|ready|blocked|failed|cancelled and questions where appropriate; finish publication with completed|blocked|failed|cancelled. Completion is independently verified against actual artifacts; a message cannot unlock build. Only report completed after real confirmed Figma output, export equality and passing source-bound audit. A failed/blocked result retains approved inputs and any partial output.
 
+PreparationVersion2 uses only `manager-preparation.md` and the returned trusted request/source pack for its runtime reads. Write decisions.json once and send `{"action":"compile","job_id":"…"}` on the same stdin; Node writes canonical review artifacts. Questions require source coverage; write the structured result to adjacent handoff.json and send `{"action":"finish-file","job_id":"…"}` instead of typing a large JSON line. No extra process or agent is launched for compilation.
+
+Standby accounting is saved on real check-ins/job boundaries/shutdown in manager/listener-metrics.json: native heartbeats, job counts and separate idle/active milliseconds. These are transport counters, not model token usage. The current portable fallback reports native-check-in and zeroInferenceVerified:false. A host-owned pending-tool/event wake is preferred only when the host actually exposes it and can prove delivery/readiness; do not replace native check-ins with a Node timer or claim zero inference from an alive PID. Empty native wait returns may still incur host inference; retain this limitation in performance reports.
+
 After a successful finish acknowledgement, return to waiting on the SAME process for the next click/answer/retry. Do not end the native agent turn as if its listener can execute Figma independently. `event:error` leaves the current job owned for correction; `worker-expired`, `listener-error` or process exit ends the connection and blocks unfinished work. No blind replay of Figma writes. To stop deliberately, send `{"action":"stop"}` or close stdin; do not claim rollback.
 
 ## Evidence

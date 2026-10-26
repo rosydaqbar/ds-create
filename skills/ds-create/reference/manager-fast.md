@@ -4,7 +4,7 @@ All Builder web jobs require `--fast-mode`; the server records `fastMode:true` o
 
 ## Prepare locally
 
-Read init-web and init's local preparation requirements once, plus the actual selected inputs, shared root files listed as ../{filename} in the trusted snapshot, knowledge and foundation specs. Read every listed root file in place before asking questions; never request its upload again or scan another system directory. Reuse fully read, unchanged references within this job; user changes reopen the relevant inputs. Write the canonical draft/plan and source decisions once, then submit the normal ready/questions result. Do not restart the workflow to report progress. Preparation still needs design decisions; FAST does not fabricate defaults, skip source reading or bypass the saved-artifact checks.
+For requests with preparationVersion:2, read **manager-preparation.md**, the trusted request and adjacent extracted source-pack.json. That is the complete local-preparation required set, replacing the global generation reads. AI resolves source-backed choices in one decisions.json; the owned ds_create_prepare_compile operation expands and validates canonical artifacts with versioned defaults. Every source, including trusted ../{filename} root files, needs actual reading/inspection coverage before questions. Native inspection handles flagged binary/unsupported sources. Reuse unchanged extraction and independent compiled domains; current source hashes, leases and cancel checks still apply. Legacy saved requests without version2 retain init-web/init local preparation and their required references. Do not restart discovery for progress or fabricate skipped-source coverage.
 
 ## Publish the approved draft
 

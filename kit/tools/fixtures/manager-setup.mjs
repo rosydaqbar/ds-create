@@ -79,7 +79,7 @@ const fs=require('node:fs/promises'),path=require('node:path');
  }
  await fs.writeFile(result,JSON.stringify({status:'ready',message:'Simulated local draft.',questions:[]}));
 })();`;
-export async function setupFixture({mode='success',timeoutMs=10000,agentCommand,port=0,runner='cli'}={}) {
+export async function setupFixture({mode='success',timeoutMs=10000,agentCommand,port=0,runner='cli',preparationVersion=1}={}) {
  const root=await realpath(await mkdtemp(path.join(tmpdir(),'ds-setup-test-'))),output=path.join(root,'workspace/output/fixture');
  await mkdir(path.join(output,'manager'),{recursive:true});
  await cp(fileURLToPath(new URL('../../manager/',import.meta.url)),path.join(output,'manager'),{recursive:true});
@@ -88,7 +88,7 @@ export async function setupFixture({mode='success',timeoutMs=10000,agentCommand,
  await writeFile(path.join(output,'manager/setup.json'),JSON.stringify({format:'ds-create/setup@1',status:'empty'}));
  await writeFile(path.join(output,'fake-mode'),mode);
  const program=path.join(root,'fake-agent.cjs');await writeFile(program,setupAgent);
- const setupOptions={agentCommand:agentCommand || process.execPath,agentPrefixArgs:[program],simulation:true,timeoutMs,runner};
+ const setupOptions={agentCommand:agentCommand || process.execPath,agentPrefixArgs:[program],simulation:true,timeoutMs,runner,preparationVersion};
  const {server,setup,jobs}=createManagerServer({outputDir:output,workspace:root,setupOptions,jobsOptions:{agentCommand:process.execPath,simulation:true,runner}});
  await new Promise(resolve=>server.listen(port,'127.0.0.1',resolve));
  const url='http://127.0.0.1:'+server.address().port,flow=()=>fetch(url+'/api/setup-flow').then(r=>r.json()),initial=await flow();

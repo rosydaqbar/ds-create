@@ -22,8 +22,9 @@ async function executable(program) {
   }
   return null;
 }
-export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false, runner = simulation ? 'cli' : 'mcp' }) {
+export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefixArgs = [], timeoutMs = 30 * 60 * 1000, simulation = false, runner = simulation ? 'cli' : 'mcp', preparationVersion = 2 }) {
   if(runner!=='mcp'&&!simulation)throw new Error('Preparation subprocesses are restricted to isolated simulation fixtures.');
+  if(preparationVersion!==2&&!simulation)throw new Error('Legacy preparation is restricted to existing saved requests and simulation.');
   const file = path.join(outputDir, 'manager/setup.json'), slug = path.basename(outputDir);
   const readProgress = createSetupProgress();
   let busy = false, child, childId;
@@ -68,7 +69,7 @@ export function createSetupJobs({ outputDir, workspace, agentCommand, agentPrefi
     }
     const id = randomUUID(), dir = await localDirectory(workspace,`workspace/output/${slug}/manager/setup-jobs/${id}`);
     const inputSlug=selectedInputSlug(r,slug),snapshot=await snapshotInputs(workspace,inputSlug),inputFiles=snapshot.files.map(f=>f.path);
-    const request = {id,slug,inputSlug,fastMode:true,interfaceDetails:r.interfaceDetails||null,projectName:r.projectName || null,workspace,outputDir,runner,program:runner==='mcp'?null:program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
+    const request = {id,slug,inputSlug,preparationVersion,fastMode:true,interfaceDetails:r.interfaceDetails||null,projectName:r.projectName || null,workspace,outputDir,runner,program:runner==='mcp'?null:program,agentPrefixArgs,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
     await saveSetup(path.join(dir,'request.json'),request);
     if(runner==='mcp')await initPrepareDelivery(outputDir,id);
     await saveSetup(file,{...r,runner,status:'queued',cancelRequested:false,cancelRequestedAt:null,jobId:id,pid:undefined,readyInputHash:null,questions:[],message:runner==='mcp'?'Your saved context is queued for the background worker.':'Starting the local agent…'});

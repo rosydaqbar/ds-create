@@ -2,7 +2,7 @@
 // Run inside the launching agent's native background worker. No AI CLI or host config.
 import {Client} from '../mcp/node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js';
 import {StdioClientTransport} from '../mcp/node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js';
-import {open,readFile,writeFile,rename,unlink,realpath} from 'node:fs/promises';
+import {open,readFile,writeFile,rename,unlink,realpath,lstat} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {randomUUID} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
@@ -37,34 +37,46 @@ const client=new Client({name:'ds-create-background-worker',version:'1.0.0'});
 const transport=new StdioClientTransport({command:process.execPath,args:[fileURLToPath(new URL('./ds-create-mcp.mjs',import.meta.url)),'--workspace',workspace],stderr:'pipe'});
 transport.stderr?.on('data',()=>{});
 let current=null,closing=false,commands=Promise.resolve(),cleanupPromise,lastViewerCheck=0,lastCancelCheck=0,cancelNotified=false,cancelSince=null;
+const metrics={format:'ds-create/listener-metrics@1',instance,standby:'native-check-in',zeroInferenceVerified:false,heartbeats:0,jobs:{prepare:0,publish:0},idleMs:0,activeMs:0};
+let segmentStarted=Date.now(),segmentActive=false;
+let metricsWrites=Promise.resolve();
+function saveMetrics(nextActive=segmentActive){const now=Date.now();metrics[segmentActive?'activeMs':'idleMs']+=now-segmentStarted;segmentStarted=now;segmentActive=nextActive;const body=JSON.stringify({...metrics,updated:new Date(now).toISOString()})+'\n';metricsWrites=metricsWrites.then(async()=>{const file=path.join(dir,'listener-metrics.json'),tmp=file+'.'+instance+'.tmp';await writeFile(tmp,body);await rename(tmp,file);});return metricsWrites;}
 const input=createInterface({input:process.stdin,crlfDelay:Infinity});
 const call=async(name,fields)=>{const r=await client.callTool({name,arguments:{session,...fields}});if(r.isError)throw new Error(r.content?.[0]?.text||'Worker action failed.');return r.structuredContent;};
 async function cleanup(){
  if(cleanupPromise)return cleanupPromise;closing=true;
- cleanupPromise=(async()=>{input.close();await client.close().catch(()=>{});try{const r=JSON.parse(await readFile(runtimeFile,'utf8'));if(r.instance===instance)await unlink(runtimeFile);}catch(e){if(e.code!=='ENOENT')throw e;}})();return cleanupPromise;
+ cleanupPromise=(async()=>{input.close();await client.close().catch(()=>{});await saveMetrics();try{const r=JSON.parse(await readFile(runtimeFile,'utf8'));if(r.instance===instance)await unlink(runtimeFile);}catch(e){if(e.code!=='ENOENT')throw e;}})();return cleanupPromise;
 }
 for(const signal of ['SIGTERM','SIGINT'])process.once(signal,()=>{void cleanup().then(()=>process.exit(0));});
 input.on('close',()=>{if(!closing)void cleanup();});
 input.on('line',line=>{commands=commands.then(async()=>{
  let command;
  try{
-  command=JSON.parse(line);if(!command||!['heartbeat','progress','preflight','finish','stop'].includes(command.action))throw new Error('Use heartbeat, progress, preflight, finish or stop.');
+  command=JSON.parse(line);if(!command||!['heartbeat','progress','preflight','compile','finish','finish-file','stop'].includes(command.action))throw new Error('Use heartbeat, progress, preflight, compile, finish, finish-file or stop.');
   if(command.action==='stop'){await cleanup();return;}
-  if(command.action==='heartbeat'){if(Object.keys(command).some(k=>k!=='action'))throw new Error('Heartbeat takes no fields.');agentLease.heartbeat();await saveAgentSeen();emit({event:'ack',action:'heartbeat',ready:true});return;}
+  if(command.action==='heartbeat'){if(Object.keys(command).some(k=>k!=='action'))throw new Error('Heartbeat takes no fields.');agentLease.heartbeat();metrics.heartbeats++;await saveAgentSeen();await saveMetrics();emit({event:'ack',action:'heartbeat',ready:true});return;}
   if(agentLease.inspect().expired)throw new Error('Agent lease expired; stop this connection.');
   if(!current||command.job_id!==current.job_id)throw new Error('This command does not match the active job.');
+  if(command.action==='finish-file'){
+   if(current.kind!=='prepare'||Object.keys(command).some(k=>!['action','job_id'].includes(k)))throw new Error('Finish-file belongs only to preparation and takes no path.');
+   const file=path.join(dir,'setup-jobs',current.job_id,'handoff.json');
+   if(await realpath(path.dirname(file))!==path.dirname(file))throw new Error('Handoff directory must be local.');
+   const info=await lstat(file);if(info.isSymbolicLink()||!info.isFile()||info.size>2*1024*1024)throw new Error('Use a regular handoff.json up to 2 MB.');
+   command={...JSON.parse(await readFile(file,'utf8')),action:'finish',job_id:current.job_id};
+  }
   const {action,job_id,...fields}=command;
   if(action==='preflight'&&current.kind!=='publish')throw new Error('Preflight belongs only to publication.');
-  const allowed=action==='progress'?['message','stage','completed_stages']:action==='preflight'?['result']:['outcome','message','questions'];
+  if(action==='compile'&&current.kind!=='prepare')throw new Error('Compile belongs only to preparation.');
+  const allowed=action==='progress'?['message','stage','completed_stages']:action==='preflight'?['result']:action==='compile'?[]:['outcome','message','questions','coverage'];
   if(Object.keys(fields).some(key=>!allowed.includes(key)))throw new Error('Unexpected worker action fields.');
   agentLease.heartbeat();await saveAgentSeen();
   const result=await call(`ds_create_${current.kind}_${action}`,{job_id,attempt:current.attempt,lease:current.lease,...fields});
   emit({event:'ack',action,job_id,result});
-  if(action==='finish'||action==='preflight'&&result.status==='blocked')current=null;
+  if(action==='finish'||action==='preflight'&&result.status==='blocked'){current=null;await saveMetrics(false);}
  }catch(error){emit({event:'error',job_id:command?.job_id,message:error.message});}
  });});
 try{
- await client.connect(transport);emit({event:'listening',session,pid:process.pid,requiresHeartbeat:true,agentLeaseMs:leaseMs});
+ await client.connect(transport);emit({event:'listening',session,pid:process.pid,requiresHeartbeat:true,agentLeaseMs:leaseMs,standby:{mode:metrics.standby,zeroInferenceVerified:false}});
  while(!closing){
   if(agentLease.inspect().expired){
    emit({event:'worker-expired',message:'The native agent stopped checking in.'});
@@ -91,6 +103,7 @@ try{
     const result=await call(`ds_create_${kind}`,{wait_seconds:0,...(kind==='publish'?{execution:'stepped'}:{})});
     if(result.status==='running'){
      current={...result,kind};cancelNotified=false;cancelSince=null;const {lease,attempt,...publicJob}=current;
+     metrics.jobs[kind]++;await saveMetrics(true);
      publicJob.instructions+='\nListener transport: the ds_create tools mentioned above are invoked internally for you. Send progress, preflight and finish JSON lines to this same persistent process stdin, with action, job_id and typed fields. For preflight send {action:"preflight",job_id,result:THE_ACTUAL_RETURNED_OBJECT}. On preflight ack status blocked, this job has ended: return to waiting without another finish. On passed:true, immediately execute result.next_operation.instructions on this same job; do not wait for another click or claim. Do not register tools in the host. Acknowledge cancellation through finish cancelled; after a finish ack, keep waiting for the next job.';
      emit({event:'job',...publicJob});break;
     }

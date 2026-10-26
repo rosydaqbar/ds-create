@@ -22,7 +22,7 @@ async function awaitJob(f,status){for(let i=0;i<100;i++){const r=await f.flow();
 
 test('real SDK stdio lifecycle: portable tools, browser queue, exclusive lease, progress, unchanged approval and safe retry',async t=>{
  const f=await fixture(t),a=await client(t,f),b=await client(t,f);
- const tools=await a.c.listTools();assert.deepEqual(tools.tools.map(x=>x.name).sort(),['ds_create_prepare','ds_create_prepare_cancel','ds_create_prepare_finish','ds_create_prepare_progress','ds_create_prepare_status','ds_create_publish','ds_create_publish_cancel','ds_create_publish_finish','ds_create_publish_preflight','ds_create_publish_progress','ds_create_publish_status']);
+ const tools=await a.c.listTools();assert.deepEqual(tools.tools.map(x=>x.name).sort(),['ds_create_prepare','ds_create_prepare_cancel','ds_create_prepare_compile','ds_create_prepare_finish','ds_create_prepare_progress','ds_create_prepare_status','ds_create_publish','ds_create_publish_cancel','ds_create_publish_finish','ds_create_publish_preflight','ds_create_publish_progress','ds_create_publish_status']);
  assert.equal((await a.good('ds_create_publish',{session:'fixture'})).status,'waiting');
  const queued=await queue(f),ledgerFile=path.join(f.output,'ds-create-ledger.json'),before=await readFile(ledgerFile,'utf8'),request=await readFile(path.join(f.output,'manager/jobs',queued.job.id,'request.json'),'utf8');
  assert.equal((await f.flow()).job.status,'queued');

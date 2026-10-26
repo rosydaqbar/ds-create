@@ -8,8 +8,9 @@ import {StdioClientTransport} from '../mcp/node_modules/@modelcontextprotocol/sd
 import {setupFixture,preparedSetupDraft} from './fixtures/manager-setup.mjs';
 import {createSetupJobs} from '../manager/setup-jobs.mjs';
 import {preparationTasks} from '../manager/preparation.mjs';
+import {decisions} from './fixtures/preparation-decisions.mjs';
 const json=async p=>JSON.parse(await readFile(p,'utf8'));
-async function fixture(t){const f=await setupFixture({runner:'mcp'});t.after(()=>f.cleanup());return f;}
+async function fixture(t,preparationVersion=1){const f=await setupFixture({runner:'mcp',preparationVersion});t.after(()=>f.cleanup());return f;}
 async function client(t,f){
  const c=new Client({name:'generic-mcp-client',version:'1.0.0'}),transport=new StdioClientTransport({command:process.execPath,args:[fileURLToPath(new URL('./ds-create-mcp.mjs',import.meta.url)),'--workspace',f.root]});await c.connect(transport);t.after(()=>c.close());
  return {c,transport,call:(name,args)=>c.callTool({name,arguments:args}),async good(name,args){const r=await this.call(name,args);assert.notEqual(r.isError,true,r.content?.[0]?.text);return r.structuredContent;}};
@@ -81,4 +82,36 @@ test('input changes, traversal, extra vendor fields and malformed questions are 
  const flow=await f.flow();await writeFile(path.join(f.root,'workspace/input',flow.inputSlug,'new-rule.md'),'new input');
  assert.equal((await a.call('ds_create_prepare_progress',{...creds(r),message:'Before writing'})).isError,true);
  assert.equal((await a.good('ds_create_prepare_finish',{...creds(r),outcome:'blocked',message:'Context changed; no further writes.'})).status,'blocked');
+});
+
+test('v2 real wire intake uses extracted evidence and one owned compile before local review, without Figma/build completion',async t=>{
+ const f=await fixture(t,2),a=await client(t,f),b=await client(t,f);
+ const form=f.form('A synthetic Web product using Inter and a monochrome action palette.');form.set('interfaceDetails',JSON.stringify({modes:['Light','Dark'],devices:['Web']}));
+ assert.equal((await f.post('/api/setup-submit',form)).status,202);
+ const r=await a.good('ds_create_prepare',{session:'fixture'}),dir=path.join(f.output,'manager/setup-jobs',r.job_id),req=await json(path.join(dir,'request.json')),pack=await json(path.join(dir,'source-pack.json'));
+ assert.match(r.instructions,/manager-preparation.md/);assert.doesNotMatch(r.instructions,/LOCAL stages0–4/);assert.equal(pack.locked.platform,'Web');
+ const d=decisions(req,pack);await writeFile(path.join(dir,'decisions.json'),JSON.stringify(d));
+ assert.equal((await b.call('ds_create_prepare_compile',creds(r))).isError,true,'another connection cannot compile');
+ assert.equal((await a.call('ds_create_prepare_finish',{...creds(r),outcome:'ready',message:'Ready without compiler'})).isError,true);
+ const receipt=await a.good('ds_create_prepare_compile',creds(r));assert.ok(receipt.counts.variables>0);
+ const original=await readFile(path.join(f.output,'foundations.json'),'utf8');await writeFile(path.join(f.output,'foundations.json'),original+' ');
+ assert.equal((await a.call('ds_create_prepare_finish',{...creds(r),outcome:'ready',message:'Modified after compilation'})).isError,true);
+ await writeFile(path.join(f.output,'foundations.json'),original);
+ const result=await a.good('ds_create_prepare_finish',{...creds(r),outcome:'ready',message:'Local review ready'});assert.equal(result.status,'ready');
+ assert.equal((await f.flow()).status,'ready');const state=await fetch(f.url+'/api/state').then(r=>r.json());assert.equal(state.source.review,'pending');assert.equal(state.initDone,false);
+ assert.equal((await fetch(f.url+'/api/publish-flow').then(r=>r.json())).build.available,false);
+});
+test('v2 questions require complete source receipts; cancel and changed sources fence compilation',async t=>{
+ const f=await fixture(t,2),a=await client(t,f);await submit(f);let r=await a.good('ds_create_prepare',{session:'fixture'});
+ let dir=path.join(f.output,'manager/setup-jobs',r.job_id),req=await json(path.join(dir,'request.json')),pack=await json(path.join(dir,'source-pack.json'));
+ const question={...creds(r),outcome:'questions',message:'The brand font is missing.',questions:[{id:'font',prompt:'Which font?',options:['Inter','Geist','Plus Jakarta Sans']}]};
+ assert.equal((await a.call('ds_create_prepare_finish',question)).isError,true,'listing the snapshot is not source coverage');
+ await a.good('ds_create_prepare_finish',{...question,coverage:decisions(req,pack).coverage});
+ assert.equal((await f.post('/api/setup-answers',{jobId:r.job_id,answers:[{id:'font',value:'Inter'}]})).status,202);
+ r=await a.good('ds_create_prepare',{session:'fixture'});dir=path.join(f.output,'manager/setup-jobs',r.job_id);req=await json(path.join(dir,'request.json'));pack=await json(path.join(dir,'source-pack.json'));await writeFile(path.join(dir,'decisions.json'),JSON.stringify(decisions(req,pack)));
+ await a.good('ds_create_prepare_cancel',{session:'fixture'});assert.equal((await a.call('ds_create_prepare_compile',creds(r))).isError,true);await assert.rejects(access(path.join(f.output,'foundations.json')));
+ await a.good('ds_create_prepare_finish',{...creds(r),outcome:'cancelled',message:'Stopped'});await f.post('/api/setup-retry',{});
+ r=await a.good('ds_create_prepare',{session:'fixture'});await writeFile(path.join(f.root,'workspace/input',req.inputSlug,'new.md'),'Changed input');
+ assert.equal((await a.call('ds_create_prepare_compile',creds(r))).isError,true);
+ await a.good('ds_create_prepare_finish',{...creds(r),outcome:'blocked',message:'Inputs changed.'});
 });

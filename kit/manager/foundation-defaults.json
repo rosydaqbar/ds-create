@@ -1,0 +1,810 @@
+{
+  "format": "ds-create/foundation-defaults@1",
+  "sources": {
+    "specs/SYSTEM.md": "9b687cc2cfb44729d2d799068b3193bcdc14a0d48550036da9ccbb4095590c4d",
+    "specs/foundations/1.1-color.md": "0da8d71d9f451eea3ee0efb85d9340746d1b36f27ea84ba31d088d319a22250c",
+    "specs/foundations/1.2-typography.md": "dcd38c202df4d7cf46bac8621ff7f120f4f7c852c49f75076639a98064634458",
+    "specs/foundations/1.3-space-and-layout.md": "b4ea0c3d1641f0577ef1b5b899935bf5ebda509979b6246b37e5f68d4b4b6a89",
+    "specs/foundations/1.4-shape.md": "754ac8b916a8993f8d14d6f688db44578b2f5becbd286fb6496e4a428bc74809",
+    "specs/foundations/1.5-elevation.md": "4ef91612f9ee52ed0bcc158c8277f22ef139091769ac2737cb7bfea1396f5047",
+    "specs/foundations/1.6-motion.md": "0220096f836605539bf3c59885634bf6dd0cebe38b784e5671d0463abc012b45"
+  },
+  "colors": [
+    {
+      "name": "color/text/primary",
+      "Light": "neutral/900",
+      "Dark": "neutral/50",
+      "description": "Primary text such as page headings, table cell values and body copy."
+    },
+    {
+      "name": "color/text/primary/on-brand",
+      "Light": "base/white",
+      "Dark": "base/white",
+      "description": "Primary text on solid brand surfaces, such as a brand-colored banner heading."
+    },
+    {
+      "name": "color/text/secondary",
+      "Light": "neutral/700",
+      "Dark": "neutral/300",
+      "description": "Secondary text such as labels, section headings and navigation items."
+    },
+    {
+      "name": "color/text/secondary/hover",
+      "Light": "neutral/800",
+      "Dark": "neutral/200",
+      "description": "Secondary text in hover states, such as a navigation item under the pointer."
+    },
+    {
+      "name": "color/text/secondary/on-brand",
+      "Light": "brand/100",
+      "Dark": "brand/100",
+      "description": "Secondary text on solid brand surfaces."
+    },
+    {
+      "name": "color/text/tertiary",
+      "Light": "neutral/600",
+      "Dark": "neutral/400",
+      "description": "Supporting text such as descriptions, timestamps and helper copy."
+    },
+    {
+      "name": "color/text/tertiary/hover",
+      "Light": "neutral/700",
+      "Dark": "neutral/300",
+      "description": "Supporting text in hover states, such as a breadcrumb link."
+    },
+    {
+      "name": "color/text/tertiary/on-brand",
+      "Light": "brand/200",
+      "Dark": "brand/200",
+      "description": "Supporting text on solid brand surfaces."
+    },
+    {
+      "name": "color/text/disabled",
+      "Light": "neutral/400",
+      "Dark": "neutral/600",
+      "description": "Text in disabled controls and unavailable menu items."
+    },
+    {
+      "name": "color/text/placeholder",
+      "Light": "neutral/600",
+      "Dark": "neutral/400",
+      "description": "Placeholder and empty-input hint text; reaches 4.5:1 on every surface it sits on (Guidelines topic 5)."
+    },
+    {
+      "name": "color/text/inverse",
+      "Light": "base/white",
+      "Dark": "neutral/900",
+      "description": "Text on inverse surfaces such as tooltips, and on the neutral solid fill."
+    },
+    {
+      "name": "color/text/on-solid",
+      "Light": "base/white",
+      "Dark": "base/white",
+      "description": "Text on solid brand and status fills: primary buttons, solid badges, danger buttons. Never on the neutral solid fill."
+    },
+    {
+      "name": "color/text/brand",
+      "Light": "brand/700",
+      "Dark": "brand/300",
+      "description": "Brand-colored text such as links and highlighted figures."
+    },
+    {
+      "name": "color/text/brand/hover",
+      "Light": "brand/800",
+      "Dark": "brand/200",
+      "description": "Links and brand text under the pointer."
+    },
+    {
+      "name": "color/text/brand/pressed",
+      "Light": "brand/900",
+      "Dark": "brand/100",
+      "description": "Links and brand text while pressed."
+    },
+    {
+      "name": "color/text/danger",
+      "Light": "red/700",
+      "Dark": "red/300",
+      "description": "Error messages and danger text, such as an invalid-field message."
+    },
+    {
+      "name": "color/text/warning",
+      "Light": "amber/700",
+      "Dark": "amber/300",
+      "description": "Warning messages and caution labels."
+    },
+    {
+      "name": "color/text/success",
+      "Light": "green/700",
+      "Dark": "green/300",
+      "description": "Success messages and positive values."
+    },
+    {
+      "name": "color/text/info",
+      "Light": "blue/700",
+      "Dark": "blue/300",
+      "description": "Informational messages and neutral notices."
+    },
+    {
+      "name": "color/icon/primary",
+      "Light": "neutral/800",
+      "Dark": "neutral/100",
+      "description": "Icons that carry the main meaning of a row or control."
+    },
+    {
+      "name": "color/icon/primary/on-brand",
+      "Light": "base/white",
+      "Dark": "base/white",
+      "description": "Primary icons on solid brand surfaces."
+    },
+    {
+      "name": "color/icon/secondary",
+      "Light": "neutral/600",
+      "Dark": "neutral/400",
+      "description": "Icons in buttons, inputs and menu items."
+    },
+    {
+      "name": "color/icon/secondary/hover",
+      "Light": "neutral/700",
+      "Dark": "neutral/300",
+      "description": "Icons in those controls under the pointer."
+    },
+    {
+      "name": "color/icon/secondary/on-brand",
+      "Light": "brand/200",
+      "Dark": "brand/200",
+      "description": "Secondary icons on solid brand surfaces."
+    },
+    {
+      "name": "color/icon/tertiary",
+      "Light": "neutral/500",
+      "Dark": "neutral/500",
+      "description": "Supporting icons such as a chevron in a list row or a metadata icon."
+    },
+    {
+      "name": "color/icon/tertiary/hover",
+      "Light": "neutral/600",
+      "Dark": "neutral/400",
+      "description": "Supporting icons under the pointer."
+    },
+    {
+      "name": "color/icon/tertiary/on-brand",
+      "Light": "brand/300",
+      "Dark": "brand/300",
+      "description": "Supporting icons on solid brand surfaces."
+    },
+    {
+      "name": "color/icon/disabled",
+      "Light": "neutral/300",
+      "Dark": "neutral/700",
+      "description": "Icons in disabled controls."
+    },
+    {
+      "name": "color/icon/placeholder",
+      "Light": "neutral/400",
+      "Dark": "neutral/600",
+      "description": "Leading icons inside empty inputs, such as a search icon."
+    },
+    {
+      "name": "color/icon/inverse",
+      "Light": "base/white",
+      "Dark": "neutral/900",
+      "description": "Icons on inverse surfaces such as tooltips, and on the neutral solid fill."
+    },
+    {
+      "name": "color/icon/on-solid",
+      "Light": "base/white",
+      "Dark": "base/white",
+      "description": "Icons on solid brand and status fills, such as the icon in a primary button. Never on the neutral solid fill."
+    },
+    {
+      "name": "color/icon/brand",
+      "Light": "brand/600",
+      "Dark": "brand/400",
+      "description": "Brand icons such as a selected navigation icon or an active tab icon."
+    },
+    {
+      "name": "color/icon/brand/hover",
+      "Light": "brand/700",
+      "Dark": "brand/300",
+      "description": "Brand icons under the pointer."
+    },
+    {
+      "name": "color/icon/brand/pressed",
+      "Light": "brand/800",
+      "Dark": "brand/200",
+      "description": "Brand icons while pressed."
+    },
+    {
+      "name": "color/icon/danger",
+      "Light": "red/600",
+      "Dark": "red/500",
+      "description": "Error icons in alerts, fields and featured icons."
+    },
+    {
+      "name": "color/icon/warning",
+      "Light": "amber/600",
+      "Dark": "amber/500",
+      "description": "Warning icons; also the filled part of rating stars."
+    },
+    {
+      "name": "color/icon/success",
+      "Light": "green/600",
+      "Dark": "green/500",
+      "description": "Success icons and positive trend arrows."
+    },
+    {
+      "name": "color/icon/info",
+      "Light": "blue/600",
+      "Dark": "blue/500",
+      "description": "Informational icons."
+    },
+    {
+      "name": "color/border/subtle",
+      "Light": "neutral/200",
+      "Dark": "neutral/800",
+      "description": "Dividers, table rows and the outline of cards and menus."
+    },
+    {
+      "name": "color/border/default",
+      "Light": "neutral/300",
+      "Dark": "neutral/700",
+      "description": "Default border around form controls, checkboxes and secondary buttons."
+    },
+    {
+      "name": "color/border/strong",
+      "Light": "neutral/600",
+      "Dark": "neutral/400",
+      "description": "Borders that must stand out, such as a control boundary on a tinted surface."
+    },
+    {
+      "name": "color/border/brand",
+      "Light": "brand/600",
+      "Dark": "brand/400",
+      "description": "Selected controls and active inputs, such as a selected radio card."
+    },
+    {
+      "name": "color/border/brand/subtle",
+      "Light": "brand/300",
+      "Dark": "brand/800",
+      "description": "Brand-tinted outlines, such as a brand badge border."
+    },
+    {
+      "name": "color/border/danger",
+      "Light": "red/600",
+      "Dark": "red/400",
+      "description": "Border of an invalid field."
+    },
+    {
+      "name": "color/border/danger/subtle",
+      "Light": "red/300",
+      "Dark": "red/800",
+      "description": "Outline of danger badges and error alerts."
+    },
+    {
+      "name": "color/border/warning",
+      "Light": "amber/500",
+      "Dark": "amber/400",
+      "description": "Border of a field with a warning."
+    },
+    {
+      "name": "color/border/warning/subtle",
+      "Light": "amber/300",
+      "Dark": "amber/800",
+      "description": "Outline of warning badges and alerts."
+    },
+    {
+      "name": "color/border/success",
+      "Light": "green/600",
+      "Dark": "green/400",
+      "description": "Border of a validated field."
+    },
+    {
+      "name": "color/border/success/subtle",
+      "Light": "green/300",
+      "Dark": "green/800",
+      "description": "Outline of success badges and alerts."
+    },
+    {
+      "name": "color/border/info",
+      "Light": "blue/600",
+      "Dark": "blue/400",
+      "description": "Border of an informational field or callout."
+    },
+    {
+      "name": "color/border/info/subtle",
+      "Light": "blue/300",
+      "Dark": "blue/800",
+      "description": "Outline of info badges and alerts."
+    },
+    {
+      "name": "color/border/focus",
+      "Light": "brand/500",
+      "Dark": "brand/400",
+      "description": "Focus ring color; used by the `focus/*` effect styles on 1.5."
+    },
+    {
+      "name": "color/border/disabled",
+      "Light": "neutral/200",
+      "Dark": "neutral/800",
+      "description": "Borders of disabled controls."
+    },
+    {
+      "name": "color/surface/base",
+      "Light": "base/white",
+      "Dark": "neutral/950",
+      "description": "Page background and the default background of cards and controls."
+    },
+    {
+      "name": "color/surface/base/hover",
+      "Light": "neutral/50",
+      "Dark": "neutral/900",
+      "description": "Rows, list items and secondary buttons under the pointer."
+    },
+    {
+      "name": "color/surface/base/pressed",
+      "Light": "neutral/100",
+      "Dark": "neutral/800",
+      "description": "Rows, list items and secondary buttons while pressed."
+    },
+    {
+      "name": "color/surface/sunken",
+      "Light": "neutral/50",
+      "Dark": "base/black",
+      "description": "Recessed areas: page sections behind cards, table headers, code blocks."
+    },
+    {
+      "name": "color/surface/sunken/hover",
+      "Light": "neutral/100",
+      "Dark": "neutral/900",
+      "description": "Recessed rows under the pointer."
+    },
+    {
+      "name": "color/surface/raised",
+      "Light": "base/white",
+      "Dark": "neutral/900",
+      "description": "Cards and panels that sit above the page; used with `elevation/raised`."
+    },
+    {
+      "name": "color/surface/raised/hover",
+      "Light": "neutral/50",
+      "Dark": "neutral/800",
+      "description": "Clickable cards under the pointer."
+    },
+    {
+      "name": "color/surface/overlay",
+      "Light": "base/white",
+      "Dark": "neutral/800",
+      "description": "Menus, popovers, dialogs and drawers; used with `elevation/overlay` and `elevation/modal`."
+    },
+    {
+      "name": "color/surface/inverse",
+      "Light": "neutral/900",
+      "Dark": "neutral/50",
+      "description": "Inverse surfaces such as tooltips and dark callouts."
+    },
+    {
+      "name": "color/surface/brand-subtle",
+      "Light": "brand/50",
+      "Dark": "brand/950",
+      "description": "Lightly tinted brand areas, such as a highlighted plan card."
+    },
+    {
+      "name": "color/surface/brand-subtle/hover",
+      "Light": "brand/100",
+      "Dark": "brand/900",
+      "description": "Tinted brand areas under the pointer."
+    },
+    {
+      "name": "color/surface/brand-solid",
+      "Light": "brand/700",
+      "Dark": "brand/700",
+      "description": "Solid brand sections such as a marketing banner; content on it uses the `on-brand` roles."
+    },
+    {
+      "name": "color/fill/{tone}/solid",
+      "Light": "{hue}/600",
+      "Dark": "{hue}/600",
+      "description": "Solid tone fill: primary buttons, solid badges, checked checkboxes, switch on."
+    },
+    {
+      "name": "color/fill/{tone}/solid/hover",
+      "Light": "{hue}/700",
+      "Dark": "{hue}/700",
+      "description": "The solid fill under the pointer."
+    },
+    {
+      "name": "color/fill/{tone}/solid/pressed",
+      "Light": "{hue}/800",
+      "Dark": "{hue}/800",
+      "description": "The solid fill while pressed."
+    },
+    {
+      "name": "color/fill/{tone}/solid/selected",
+      "Light": "{hue}/700",
+      "Dark": "{hue}/700",
+      "description": "A selected solid item, such as the active segment of a segmented control."
+    },
+    {
+      "name": "color/fill/{tone}/solid/disabled",
+      "Light": "neutral/100",
+      "Dark": "neutral/800",
+      "description": "Solid fills of disabled controls."
+    },
+    {
+      "name": "color/fill/{tone}/subtle",
+      "Light": "{hue}/50",
+      "Dark": "{hue}/950",
+      "description": "Tinted tone fill: subtle badges, tinted buttons, alert backgrounds."
+    },
+    {
+      "name": "color/fill/{tone}/subtle/hover",
+      "Light": "{hue}/100",
+      "Dark": "{hue}/900",
+      "description": "The tinted fill under the pointer."
+    },
+    {
+      "name": "color/fill/{tone}/subtle/pressed",
+      "Light": "{hue}/200",
+      "Dark": "{hue}/800",
+      "description": "The tinted fill while pressed."
+    },
+    {
+      "name": "color/fill/{tone}/subtle/selected",
+      "Light": "{hue}/100",
+      "Dark": "{hue}/900",
+      "description": "Selected rows and selected menu items."
+    },
+    {
+      "name": "color/fill/{tone}/subtle/disabled",
+      "Light": "neutral/50",
+      "Dark": "neutral/900",
+      "description": "Tinted fills of disabled controls."
+    },
+    {
+      "name": "color/fill/none",
+      "Light": "base/transparent",
+      "Dark": "base/transparent",
+      "description": "Transparent fill that keeps a layer bound, such as a ghost button at rest."
+    },
+    {
+      "name": "color/fill/neutral/track",
+      "Light": "neutral/200",
+      "Dark": "neutral/800",
+      "description": "Unfilled tracks: progress bars, sliders and the off state of switches."
+    },
+    {
+      "name": "color/overlay/scrim",
+      "Light": "alpha-black/60",
+      "Dark": "alpha-black/80",
+      "description": "Scrim behind dialogs and drawers that dims the page."
+    },
+    {
+      "name": "color/shadow/ambient",
+      "Light": "alpha-black/5",
+      "Dark": "alpha-black/20",
+      "description": "Soft, wide shadow layer that gives every elevation its spread."
+    },
+    {
+      "name": "color/shadow/key",
+      "Light": "alpha-black/10",
+      "Dark": "alpha-black/40",
+      "description": "Tighter, darker shadow layer that gives elevation its direction."
+    },
+    {
+      "name": "color/shadow/edge",
+      "Light": "alpha-black/10",
+      "Dark": "alpha-black/40",
+      "description": "Inner bottom edge of tactile controls (only when the tactile treatment is used)."
+    },
+    {
+      "name": "color/shadow/highlight",
+      "Light": "alpha-white/20",
+      "Dark": "alpha-white/10",
+      "description": "Inner top highlight of tactile controls (only when the tactile treatment is used)."
+    }
+  ],
+  "typography": [
+    {
+      "role": "display",
+      "size": "lg",
+      "fontSize": 60,
+      "lineHeight": 72,
+      "letterSpacing": -2,
+      "weights": [
+        "semibold",
+        "bold"
+      ]
+    },
+    {
+      "role": "display",
+      "size": "md",
+      "fontSize": 48,
+      "lineHeight": 60,
+      "letterSpacing": -2,
+      "weights": [
+        "semibold",
+        "bold"
+      ]
+    },
+    {
+      "role": "display",
+      "size": "sm",
+      "fontSize": 36,
+      "lineHeight": 44,
+      "letterSpacing": -2,
+      "weights": [
+        "semibold",
+        "bold"
+      ]
+    },
+    {
+      "role": "heading",
+      "size": "xl",
+      "fontSize": 30,
+      "lineHeight": 38,
+      "letterSpacing": -1,
+      "weights": [
+        "semibold",
+        "bold"
+      ]
+    },
+    {
+      "role": "heading",
+      "size": "lg",
+      "fontSize": 24,
+      "lineHeight": 32,
+      "letterSpacing": -1,
+      "weights": [
+        "semibold",
+        "bold"
+      ]
+    },
+    {
+      "role": "heading",
+      "size": "md",
+      "fontSize": 20,
+      "lineHeight": 30,
+      "letterSpacing": -1,
+      "weights": [
+        "semibold",
+        "bold"
+      ]
+    },
+    {
+      "role": "heading",
+      "size": "sm",
+      "fontSize": 18,
+      "lineHeight": 28,
+      "letterSpacing": 0,
+      "weights": [
+        "semibold",
+        "bold"
+      ]
+    },
+    {
+      "role": "heading",
+      "size": "xs",
+      "fontSize": 16,
+      "lineHeight": 24,
+      "letterSpacing": 0,
+      "weights": [
+        "semibold",
+        "bold"
+      ]
+    },
+    {
+      "role": "body",
+      "size": "xl",
+      "fontSize": 20,
+      "lineHeight": 30,
+      "letterSpacing": 0,
+      "weights": [
+        "regular",
+        "medium",
+        "semibold"
+      ]
+    },
+    {
+      "role": "body",
+      "size": "lg",
+      "fontSize": 18,
+      "lineHeight": 28,
+      "letterSpacing": 0,
+      "weights": [
+        "regular",
+        "medium",
+        "semibold"
+      ]
+    },
+    {
+      "role": "body",
+      "size": "md",
+      "fontSize": 16,
+      "lineHeight": 24,
+      "letterSpacing": 0,
+      "weights": [
+        "regular",
+        "medium",
+        "semibold"
+      ]
+    },
+    {
+      "role": "body",
+      "size": "sm",
+      "fontSize": 14,
+      "lineHeight": 20,
+      "letterSpacing": 0,
+      "weights": [
+        "regular",
+        "medium",
+        "semibold"
+      ]
+    },
+    {
+      "role": "body",
+      "size": "xs",
+      "fontSize": 12,
+      "lineHeight": 18,
+      "letterSpacing": 0,
+      "weights": [
+        "regular",
+        "medium",
+        "semibold"
+      ]
+    },
+    {
+      "role": "code",
+      "size": "md",
+      "fontSize": 14,
+      "lineHeight": 20,
+      "letterSpacing": 0,
+      "weights": [
+        "regular",
+        "medium"
+      ]
+    },
+    {
+      "role": "code",
+      "size": "sm",
+      "fontSize": 12,
+      "lineHeight": 18,
+      "letterSpacing": 0,
+      "weights": [
+        "regular",
+        "medium"
+      ]
+    }
+  ],
+  "space": {
+    "space/none": 0,
+    "space/xxs": 2,
+    "space/xs": 4,
+    "space/sm": 6,
+    "space/md": 8,
+    "space/lg": 12,
+    "space/xl": 16,
+    "space/2xl": 20,
+    "space/3xl": 24,
+    "space/4xl": 32,
+    "space/5xl": 40,
+    "space/6xl": 48,
+    "space/7xl": 64,
+    "space/8xl": 80,
+    "space/9xl": 96,
+    "space/10xl": 128,
+    "space/11xl": 160,
+    "space/optical": 2
+  },
+  "shape": {
+    "radius/none": {
+      "value": 0,
+      "description": "Square corners on tables, full-bleed media and edges that meet."
+    },
+    "radius/xs": {
+      "value": 4,
+      "description": "Small parts inside controls, such as the checkbox box."
+    },
+    "radius/sm": {
+      "value": 6,
+      "description": "Nested parts such as menu items and tags inside inputs."
+    },
+    "radius/control": {
+      "value": 8,
+      "description": "Buttons, inputs, selects and every control the user operates."
+    },
+    "radius/indicator": {
+      "value": 9999,
+      "description": "Badges, tags and status chips."
+    },
+    "radius/surface": {
+      "value": 12,
+      "description": "Cards, panels, menus and popovers."
+    },
+    "radius/modal": {
+      "value": 16,
+      "description": "Dialogs, drawers and sheets."
+    },
+    "radius/full": {
+      "value": 9999,
+      "description": "Pills, avatars, switches, dots and radio buttons."
+    },
+    "border/width/default": {
+      "value": 1,
+      "description": "Dividers and the outline of controls, cards and menus."
+    },
+    "border/width/strong": {
+      "value": 1,
+      "description": "Lines that must stand out, such as a control boundary on a tinted surface."
+    },
+    "border/width/focus": {
+      "value": 2,
+      "description": "Focus outlines."
+    },
+    "border/width/selected": {
+      "value": 2,
+      "description": "Outlines of selected cards, segments and options."
+    }
+  },
+  "motion": {
+    "motion/duration/instant": {
+      "Standard": 0,
+      "Reduced": 0,
+      "description": "Changes that happen with no animation."
+    },
+    "motion/duration/fast": {
+      "Standard": 120,
+      "Reduced": 120,
+      "description": "Hover, press and color changes; anything leaving. Kept in Reduced because it is used for fades."
+    },
+    "motion/duration/base": {
+      "Standard": 200,
+      "Reduced": 0,
+      "description": "Small movements such as a switch thumb or a menu opening."
+    },
+    "motion/duration/slow": {
+      "Standard": 300,
+      "Reduced": 0,
+      "description": "Large movements such as a dialog or drawer entering."
+    },
+    "motion/duration/loop": {
+      "Standard": 900,
+      "Reduced": 1800,
+      "description": "One rotation of a spinner; slower, not stopped, in Reduced."
+    },
+    "motion/easing/standard": {
+      "Standard": "cubic-bezier(0.2, 0, 0, 1)",
+      "Reduced": "cubic-bezier(0.2, 0, 0, 1)",
+      "description": "Elements changing in place."
+    },
+    "motion/easing/enter": {
+      "Standard": "cubic-bezier(0, 0, 0.2, 1)",
+      "Reduced": "cubic-bezier(0, 0, 0.2, 1)",
+      "description": "Elements arriving on screen."
+    },
+    "motion/easing/exit": {
+      "Standard": "cubic-bezier(0.4, 0, 1, 1)",
+      "Reduced": "cubic-bezier(0.4, 0, 1, 1)",
+      "description": "Elements leaving the screen."
+    },
+    "motion/easing/linear": {
+      "Standard": "cubic-bezier(0, 0, 1, 1)",
+      "Reduced": "cubic-bezier(0, 0, 1, 1)",
+      "description": "Continuous rotation and progress."
+    },
+    "motion/delay/tooltip": {
+      "Standard": 400,
+      "Reduced": 400,
+      "description": "Wait before a tooltip appears on hover."
+    },
+    "motion/delay/toast": {
+      "Standard": 5000,
+      "Reduced": 5000,
+      "description": "Time before a toast dismisses itself."
+    },
+    "motion/delay/debounce": {
+      "Standard": 250,
+      "Reduced": 250,
+      "description": "Wait after typing before a search runs."
+    }
+  }
+}
