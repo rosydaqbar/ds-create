@@ -73,7 +73,7 @@ export function createFigmaJobs({ outputDir, workspace, agentCommand, agentPrefi
     const complete = currentFigma(state) && (!job || job.hash !== state.source.hash || await verifiedFigma(state, outputDir, job.hash, job.figmaUrl));
     const setup=await readJSON(path.join(outputDir,'manager/setup.json')),fresh=await inputFreshness(outputDir,setup);
     const proof=await checkWebDraft(outputDir,workspace,setup);
-    let reason = await setupGate() || (!fresh.fresh?fresh.message:!proof.valid?'Foundation checks failed. Open Context and prepare again.':null);
+    let reason = await setupGate() || (!fresh.fresh?fresh.message:!proof.valid?'Foundation checks failed: '+(proof.errors?.slice(0,2).join(' ')||'Open Context and prepare again.'):null);
     if (reason) { /* local preparation must finish before approval/publication */ }
     else if (state.preview && !simulation) reason = 'Sample data cannot be published. Run ds-create init for your own system first.';
     else if (state.source.kind !== 'local' || !state.source.hash || state.source.review === 'invalid') reason = 'Ask your agent to prepare a valid local foundation draft with ds-create init.';

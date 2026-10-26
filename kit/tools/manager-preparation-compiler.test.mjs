@@ -9,8 +9,9 @@ import {extractSource,extractSourceBounded,prepareSourcePack,lockedFacts} from '
 import {paletteRamp,compileDomain,assembleFoundations,contrastReport,validateCoverage} from '../manager/foundation-compiler.mjs';
 import {compilePreparation} from '../manager/preparation-compiler.mjs';
 import {generateDefaults} from './prepare-foundation-defaults.mjs';
-import {checkPreparation} from '../manager/foundation-proof.mjs';
+import {checkPreparation,checkWebDraft} from '../manager/foundation-proof.mjs';
 import {normalizeFrozen} from '../manager/frozen-import.mjs';
+import {contrastReport as checkContrast} from '../manager/foundation-contrast.mjs';
 
 const json=async f=>JSON.parse(await readFile(f,'utf8'));
 import {recipes,decisions} from './fixtures/preparation-decisions.mjs';
@@ -61,9 +62,24 @@ test('compiler preserves pinned anchors, generates canonical metadata/bindings a
  assert.equal(draft.variables.find(v=>v.name==='font/family/ui').codeSyntax.WEB,'var(--font-family-ui)');
  assert.ok(draft.variables.filter(v=>v.collection==='Primitives').every(v=>v.hiddenFromPublishing));assert.ok(draft.textStyles.every(s=>Object.keys(s.bound).length===5));
  assert.ok(contrastReport(draft).every(r=>r.pass));
+ const standard=draft.variables.find(v=>v.name==='motion/easing/standard');assert.equal(standard.type,'STRING');assert.deepEqual(standard.values,{Standard:{alias:'scale/easing/standard'},Reduced:{alias:'scale/easing/standard'}});
+ assert.equal(draft.variables.find(v=>v.name==='scale/easing/standard').values.Value,'cubic-bezier(0.2, 0, 0, 1)');assert.equal(draft.variables.find(v=>v.name==='motion/duration/base').type,'FLOAT');assert.equal(draft.variables.find(v=>v.name==='motion/delay/tooltip').type,'FLOAT');
  d.product.platform='App';assert.throws(()=>assembleFoundations(d,f.request,f.pack,parts),/already selected/);
  const ramp=paletteRamp({anchors:{50:'#f9f0e0',400:'#80a080',800:'#203030',950:'#081010'}});assert.equal(ramp[400],'#80a080');assert.equal(ramp[800],'#203030');assert.equal(ramp[50],'#f9f0e0');
  assert.throws(()=>paletteRamp({anchors:{500:'#333333'}}),/both ends/);
+});
+test('local contrast catches brand text on pressed subtle fill even when it passes on the base surface',()=>{
+ const variables=[['palette/base/white','#ffffff'],['palette/brand/700','#747474'],['palette/brand/100','#f5f5f5']].map(([name,value])=>({name,collection:'Primitives',type:'COLOR',values:{Value:value}}));
+ for(const [name,ref]of [['color/surface/base','palette/base/white'],['color/text/brand','palette/brand/700'],['color/fill/brand/subtle/pressed','palette/brand/100']])variables.push({name,collection:'Color',type:'COLOR',values:{Light:{alias:ref}}});
+ const result=checkContrast({collections:[{name:'Primitives',modes:['Value']},{name:'Color',modes:['Light']}],variables});
+ assert.equal(result.find(p=>p.background==='color/surface/base').pass,true);const pressed=result.find(p=>p.background==='color/fill/brand/subtle/pressed');assert.equal(pressed.pass,false);assert.ok(pressed.ratio<4.5);
+});
+test('a previously prepared new-system draft is rechecked for subtle-state contrast before Publish',async t=>{
+ const f=await fixture(t);await writeFile(path.join(f.dir,'decisions.json'),JSON.stringify(decisions(f.request,f.pack)));await compilePreparation(f.request,f.dir);
+ const file=path.join(f.request.outputDir,'foundations.json'),draft=await json(file);draft.revision++;
+ draft.variables.find(v=>v.name==='color/fill/brand/subtle/pressed').values.Light={alias:'palette/neutral/500'};
+ await writeFile(file,JSON.stringify(draft));const result=await checkWebDraft(f.request.outputDir,f.workspace,{inputSlug:'product',inputRevision:1,projectName:'Fixture system'});
+ assert.equal(result.valid,false);assert.ok(result.errors.some(e=>e.includes('Contrast: Light color/text/brand on color/fill/brand/subtle/pressed')));
 });
 test('compact inventory is normalized mechanically and unknown metadata cannot be silently discarded',()=>{
  const source={format:'ds-create/token-plan@1',collections:{Primitives:['Value']},variables:[['scale/space/4','Primitives','FLOAT',[],'Spacing primitive',{Value:4}]],textStyles:[{name:'type/body/md/regular',family:'Fixture Sans',style:'Regular',fs:16,lh:24,ls:0,bind:{fontSize:'scale/space/4'}}],effectStyles:[]};

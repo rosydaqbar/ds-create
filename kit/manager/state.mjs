@@ -85,7 +85,7 @@ async function loadSource(outputDir, ledger, warnings = []) {
     const fresh=await inputFreshness(outputDir,setup);
     const proof=valid&&setup?await checkWebDraft(outputDir,path.resolve(outputDir,'../../..'),setup):{valid:true};
     if(!fresh.fresh)warnings.push(fresh.message);
-    if(!proof.valid)warnings.push('Foundation plan no longer matches the current draft or inputs. Prepare again through Context.');
+    if(!proof.valid)warnings.push('Foundation checks failed: '+(proof.errors?.slice(0,2).join(' ')||'Prepare the current draft again through Context.'));
     const approval = ledger?.foundationReview;
     let approved = valid && fresh.fresh && proof.valid && approval?.status === 'approved' && approval.hash === hash && approval.approvedBy === 'user' &&
       typeof approval.approvalSource === 'string' && approval.approvalSource.trim().length > 0 && Number.isFinite(Date.parse(approval.approvedAt));

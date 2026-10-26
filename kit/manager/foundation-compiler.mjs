@@ -2,13 +2,14 @@
 import {readFileSync} from 'node:fs';
 import {rgba,validatePlan} from './foundation-validation.mjs';
 import {digest,lockedFacts} from './source-pack.mjs';
+export {contrastReport} from './foundation-contrast.mjs';
 const defaults=JSON.parse(readFileSync(new URL('./foundation-defaults.json',import.meta.url),'utf8'));
 export const COMPILER_HASH=digest(readFileSync(new URL(import.meta.url))+JSON.stringify(defaults));
 export const domainNames=['color','typography','space','shape','elevation','motion'];
 const named=x=>typeof x==='string'&&x.trim().length>0;
 const strict=(obj,keys,label)=>{if(!obj||typeof obj!=='object'||Array.isArray(obj)||Object.keys(obj).some(k=>!keys.includes(k)))throw new Error('Unsupported '+label+' fields; preserve them through explicit definitions instead of dropping metadata.');};
 const alias=name=>({alias:name});
-const safe=value=>String(value).replaceAll('-','minus-').replaceAll('.','p').replace(/[^a-z0-9-]/gi,'-').toLowerCase();
+const safe=value=>typeof value==='number'?String(value).replace(/^-/,'minus-').replaceAll('.','p'):String(value).toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'');
 const roles={color:['Color'],typography:['Typography'],space:['Space','Size'],shape:['Shape'],motion:['Motion'],elevation:[]};
 const styles={typography:'textStyles',space:'gridStyles',elevation:'effectStyles'};
 
@@ -35,7 +36,10 @@ function builder(platform){
  function semantic(name,col,type,values,description,scopes){collection(col,Object.keys(values));const v={name,collection:col,type,values,description,scopes};metadata(v);data.variables.push(v);}
  function scalar(name,col,value,description,dimension,scopes,modeValues={Value:value}){
   const type=typeof value==='number'?'FLOAT':typeof value==='boolean'?'BOOLEAN':'STRING',values={};
-  for(const [mode,x]of Object.entries(modeValues)){const p='scale/'+dimension+'/'+safe(x);values[mode]=alias(add(p,type,x));}
+  for(const [mode,x]of Object.entries(modeValues)){
+   const key=dimension==='easing'?name.split('/').at(-1)+(x!==value?'-'+safe(mode):''):safe(x);
+   const p='scale/'+dimension+'/'+key;values[mode]=alias(add(p,type,x));
+  }
   semantic(name,col,type,values,description,scopes);return name;
  }
  return {data,add,semantic,scalar,collection};
@@ -164,18 +168,4 @@ export function assembleFoundations(decision,request,pack,parts,frozen=null,revi
  if(locked.modes&&draft.collections.some(c=>c.name==='Color'&&JSON.stringify(c.modes)!==JSON.stringify(locked.modes)))check.errors.push('Color modes differ from Builder selections.');
  if(check.errors.length)throw new Error(check.errors.slice(0,30).join('\n'));
  return {draft,plan};
-}
-export function contrastReport(draft){
- const byName=new Map(draft.variables.map(v=>[v.name,v]));
- function resolve(name,mode,seen=new Set()){if(seen.has(name))throw new Error('Circular color alias');seen.add(name);const v=byName.get(name),x=v?.values?.[mode]??(Object.keys(v?.values||{}).length===1?Object.values(v.values)[0]:undefined);return x?.alias?resolve(x.alias,mode,seen):rgba(x);}
- const luminance=rgb=>rgb.slice(0,3).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4).reduce((n,c,i)=>n+c*[.2126,.7152,.0722][i],0);
- const results=[];
- for(const mode of draft.collections.find(c=>c.name==='Color')?.modes||[])for(const [foreground,background,minimum]of [
-  ...['primary','secondary','tertiary','placeholder'].map(role=>['color/text/'+role,'color/surface/base',4.5]),['color/border/focus','color/surface/base',3],
-  ...draft.variables.filter(v=>/^color\/fill\/[^/]+\/solid(?:\/(hover|pressed|selected))?$/.test(v.name)).map(v=>[v.name.includes('/neutral/')?'color/text/inverse':'color/text/on-solid',v.name,4.5])]){
-  const a=resolve(foreground,mode),b=resolve(background,mode);if(!a||!b)continue;
-  if(a[3]!==1||b[3]!==1){results.push({foreground,background,mode,minimum,pass:false,reason:'Translucent contrast requires a resolved backing surface.'});continue;}
-  const x=luminance(a),y=luminance(b),ratio=(Math.max(x,y)+.05)/(Math.min(x,y)+.05);results.push({foreground,background,mode,minimum,ratio,pass:ratio>=minimum});
- }
- return results;
 }
