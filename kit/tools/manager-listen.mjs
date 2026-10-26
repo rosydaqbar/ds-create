@@ -99,7 +99,7 @@ try{
    try{process.kill(viewer.pid,0);}catch(e){if(e.code!=='ESRCH')throw e;emit({event:'stopped',reason:'Builder process stopped.'});break;}
   }
   if(!current&&agentLease.inspect().ready){
-   for(const kind of ['publish','prepare']){
+   for(const kind of ['publish']){
     const result=await call(`ds_create_${kind}`,{wait_seconds:0,...(kind==='publish'?{execution:'stepped'}:{})});
     if(result.status==='running'){
      current={...result,kind};cancelNotified=false;cancelSince=null;const {lease,attempt,...publicJob}=current;

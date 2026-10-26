@@ -34,7 +34,7 @@ export function preparationView({post,edit,openContext}) {
     const queued=flow.runner==='mcp'&&flow.status==='queued',live=active(),ready=flow.status==='ready',questions=flow.status==='questions';
     const label=queued?'Queued':live?(flow.progress?.connectionIssue?'Connection issue':'Running'):({empty:'Not started',questions:'Needs input',ready:'Ready for review',failed:'Failed',cancelled:'Cancelled',interrupted:'Interrupted',blocked:'Blocked',outdated:'Context changed'}[flow.status]||'Needs attention');
     $('title').textContent=flow.projectName||'Prepare foundations';if($('status').textContent!==label)$('status').textContent=label;$('status').dataset.status=ready?'ready':questions?'review':queued?'pending':live?'generating':flow.status==='empty'?'pending':'error';
-    $('phase').textContent=queued?'Waiting for background worker':ready?'Saved draft is ready':questions?'Waiting for your design choices':live?(flow.progress?.phase||'Starting the local agent'):label;
+    $('phase').textContent=queued?'Waiting for your agent':ready?'Saved draft is ready':questions?'Waiting for your design choices':live?(flow.progress?.phase||'Starting the local agent'):label;
     $('dots').hidden=!live||queued;$('simulation').hidden=!flow.simulation;
     $('reply').hidden=!questions;$('reply').textContent=`Answer ${flow.questions?.length||0} questions`;
     const message=queued?flow.message:live?flow.progress?.message||flow.message:flow.message||'Describe your product and add briefs, guidelines, or existing tokens to begin.';

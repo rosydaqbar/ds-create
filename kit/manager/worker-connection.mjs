@@ -5,9 +5,9 @@ export function setupWorkerConnection(){
  function draw(result){
   const connected=result?.connected===true,disconnected=result?.connected===false&&typeof result.recoveryPrompt==='string'&&!!result.recoveryPrompt;
   root.dataset.state=connected?'connected':disconnected?'disconnected':'unknown';
-  text('worker-connection-label',connected?'Subagent connected':disconnected?'Subagent disconnected':'Subagent connection unavailable');
-  text('worker-connection-detail',connected?'Connected to this Builder session.':'Builder is waiting for a native background subagent.');
-  if(!connected&&!disconnected)text('worker-connection-detail','Could not check the subagent connection. Check again when Builder reconnects.');
+  text('worker-connection-label',connected?'Agent events connected':disconnected?'Agent events disconnected':'Agent connection unavailable');
+  text('worker-connection-detail',connected?(result.mode==='main-agent'?'Preparation events go to your main agent. Node handles idle waiting.':'Connected to this Builder session.'):(result.reason||'Connect this Builder to your main agent.'));
+  if(!connected&&!disconnected)text('worker-connection-detail','Could not check the agent connection. Check again when Builder reconnects.');
   if(!disconnected&&recovery.contains(document.activeElement))recheck.focus({preventScroll:true});
   recovery.hidden=!disconnected;
   if(prompt.value!==(disconnected?result.recoveryPrompt:'')){prompt.value=disconnected?result.recoveryPrompt:'';prompt.scrollTop=0;}

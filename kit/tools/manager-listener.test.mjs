@@ -115,10 +115,10 @@ test('unsupported FAST metadata returns one standard continuation without discar
  const ack=await f.next(e=>e.event==='ack'&&e.action==='preflight');assert.equal(ack.result.next_operation.engine,'standard');assert.match(ack.result.next_operation.fast_fallback,/customFeature/);assert.deepEqual(JSON.parse(await readFile(file,'utf8')),draft);
  f.send({action:'finish',job_id:job.job_id,outcome:'blocked',message:'Fixture cleanup.'});await f.next(e=>e.event==='ack'&&e.action==='finish');
 });
-test('web worker check offers the scoped spawn prompt only without an actual native check-in',async t=>{
+test('web connection recovery targets the main instance without changing publication state',async t=>{
  const f=await start(t,{heartbeat:false}),{readFile}=await import('node:fs/promises'),path=await import('node:path');
  const ledgerFile=path.join(f.output,'ds-create-ledger.json'),before=await readFile(ledgerFile,'utf8');
- const disconnected=await fetch(f.url+'/api/worker').then(r=>r.json());assert.equal(disconnected.connected,false);assert.ok(disconnected.recoveryPrompt.includes(JSON.stringify(f.root)));assert.match(disconnected.recoveryPrompt,/session "fixture"/);assert.match(disconnected.recoveryPrompt,/native background\/subagent tool/);
+ const disconnected=await fetch(f.url+'/api/worker').then(r=>r.json());assert.equal(disconnected.connected,false);assert.ok(disconnected.recoveryPrompt.includes(JSON.stringify(f.root)));assert.match(disconnected.recoveryPrompt,/session "fixture"/);assert.match(disconnected.recoveryPrompt,/MAIN agent instance/);
  assert.equal(disconnected.lastSeenAt,null,'live Node PID alone is not an agent check-in');
  f.send({action:'heartbeat'});await f.next(e=>e.event==='ack'&&e.action==='heartbeat');
  const connected=await fetch(f.url+'/api/worker').then(r=>r.json());assert.equal(connected.connected,true);assert.equal(connected.recoveryPrompt,null);assert.ok(connected.lastSeenAt);assert.equal(await readFile(ledgerFile,'utf8'),before,'read-only checks cannot approve or queue anything');assert.equal((await f.flow()).job,null);

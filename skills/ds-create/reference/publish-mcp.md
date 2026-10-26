@@ -2,9 +2,9 @@
 
 Publish is a local MCP workflow usable by any compatible client. It does not launch Codex, inject prompts into terminals or require native background subagents. The host agent uses its own configured Figma authoring tools. The same server also handles local preparation and questions; read `reference/agent-mcp.md` for that workflow. No agent/provider/IDE allowlist or selection is required.
 
-## Already-running background worker
+## Separate publication execution
 
-`init-web` attaches the native background worker through `reference/background-worker.md`. The listener keeps this MCP connection open internally. Figma is already connected to the launching agent. A Publish click queues its exact saved approval; the listener takes it and delivers instructions to the waiting worker without user MCP setup or another chat message. No separate Figma OAuth/client registration is needed. Never confuse a Node process waiting for events with the native agent that executes Figma tools.
+The Node preparation listener (`reference/background-worker.md`) never claims Publish. A Publish click still saves the exact reviewed approval and queues its MCP continuation. The host's executing agent uses its existing Figma connection and the protocol below. Preparation startup does not start an AI waiter or authorize publication, and no Node PID proves that Figma execution is ready. No separate Figma OAuth/client registration is needed.
 
 The numbered operations below are the listener's internal protocol, not end-user instructions. Integrations can still use the same standard tools. The user sees publication task rows, current public activity, elapsed time and actual blockers.
 

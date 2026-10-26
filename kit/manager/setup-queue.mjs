@@ -50,7 +50,7 @@ export async function claimMcpPreparation({outputDir,workspace,id,owner,lease}){
   if(d.owner){if(d.owner===owner&&d.leaseHash===digest(lease))return {request:f.request,attempt:d.attempt,reused:true};throw new Error('Another MCP connection owns this preparation.');}
   if(s.status!=='queued')throw new Error('This preparation is not queued.');
   await saveSetup(f.deliveryFile,{...d,owner,pid:process.pid,leaseHash:digest(lease),claimedAt:new Date().toISOString()});
-  await saveSetup(stateFile(outputDir),{...s,status:'running',message:'The background worker received your saved context.',updated:new Date().toISOString()});
+  await saveSetup(stateFile(outputDir),{...s,status:'running',message:'Your agent received the saved context.',updated:new Date().toISOString()});
   await event(f.dir,{type:'builder.stage',stage:'context'});
   if(f.request.preparationVersion===2){
    try{await prepareSourcePack(f.request,f.dir);}
@@ -114,7 +114,7 @@ export async function cancelMcpPreparation(output,id){
   const s=await readJSON(stateFile(output)),d=await readJSON(f.deliveryFile);if(s?.jobId!==id||s.runner!=='mcp'||!activeSetup(s))return {stopped:false};
   const now=new Date().toISOString(),cancelRequestedAt=d?.cancelRequestedAt||now;
   await saveSetup(f.deliveryFile,{...d,cancelRequested:true,cancelRequestedAt});
-  if(!d.owner){await saveSetup(stateFile(output),{...s,status:'cancelled',readyInputHash:null,questions:[],updated:new Date().toISOString(),message:'Queued preparation cancelled before the background worker received it. Your context is saved.'});return {stopped:true};}
-  await saveSetup(stateFile(output),{...s,cancelRequested:true,cancelRequestedAt,updated:now,message:'Cancellation requested. Waiting for the background worker to stop safely and acknowledge it.',updated:new Date().toISOString()});return {stopped:false,requested:true};
+  if(!d.owner){await saveSetup(stateFile(output),{...s,status:'cancelled',readyInputHash:null,questions:[],updated:new Date().toISOString(),message:'Queued preparation cancelled before your agent received it. Your context is saved.'});return {stopped:true};}
+  await saveSetup(stateFile(output),{...s,cancelRequested:true,cancelRequestedAt,updated:now,message:'Cancellation requested. Waiting for your agent to stop safely and acknowledge it.',updated:new Date().toISOString()});return {stopped:false,requested:true};
  });
 }

@@ -46,10 +46,10 @@
             </div>
           </div>
           <div id="connection-error" class="notice error-notice" hidden role="alert">Connection lost. Showing the last saved view. <button class="text-button" id="retry">Retry connection</button></div>
-          <section id="worker-connection" class="worker-connection" aria-label="Background subagent connection" data-state="checking">
-            <div class="worker-connection-heading"><span id="worker-connection-label" role="status" aria-live="polite">Checking subagent…</span><button id="worker-recheck" class="text-button" type="button">Check again</button></div>
-            <p id="worker-connection-detail">Checking whether a background subagent is ready for Builder events.</p>
-            <div id="worker-recovery" hidden><label for="worker-spawn-prompt">Paste this prompt into your agent to reconnect the background subagent.</label><textarea id="worker-spawn-prompt" rows="4" readonly spellcheck="false"></textarea><div class="worker-recovery-actions"><button id="worker-copy-prompt" class="button" type="button">Copy prompt</button><span id="worker-copy-feedback" role="status" aria-live="polite"></span></div></div>
+          <section id="worker-connection" class="worker-connection" aria-label="Agent event connection" data-state="checking">
+            <div class="worker-connection-heading"><span id="worker-connection-label" role="status" aria-live="polite">Checking agent events…</span><button id="worker-recheck" class="text-button" type="button">Check again</button></div>
+            <p id="worker-connection-detail">Checking whether Builder events can reach your agent.</p>
+            <div id="worker-recovery" hidden><label for="worker-spawn-prompt">Paste this prompt into your agent to reconnect preparation events.</label><textarea id="worker-spawn-prompt" rows="4" readonly spellcheck="false"></textarea><div class="worker-recovery-actions"><button id="worker-copy-prompt" class="button" type="button">Copy prompt</button><span id="worker-copy-feedback" role="status" aria-live="polite"></span></div></div>
           </section>
           <div id="preparation-view" class="preparation-view" tabindex="-1" hidden></div>
           <div id="canvas-viewport" class="canvas-viewport" tabindex="0" role="region" aria-label="Design system canvas" aria-describedby="canvas-help">
