@@ -6,7 +6,7 @@ import {readJSON} from './state.mjs';
 import {latestMcpPreparation,validatePrepareRequest,claimMcpPreparation,mcpPrepareAction} from './setup-queue.mjs';
 import {setupPrompt} from './setup-prompt.mjs';
 const uuid=x=>typeof x==='string'&&/^[0-9a-f-]{36}$/.test(x);
-export async function createPreparationListener({workspace:root,session,onPrompt,intervalMs=500,activeTimeoutMs=180000,cancelAckMs=60000}){
+export async function createPreparationListener({workspace:root,session,onPrompt,intervalMs=500,activeTimeoutMs=1800000,cancelAckMs=60000}){
  const workspace=await realpath(root);
  if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(session))throw new Error('Invalid session.');
  const output=path.join(workspace,'workspace/output',session),dir=path.join(output,'manager');
@@ -53,7 +53,7 @@ export async function createPreparationListener({workspace:root,session,onPrompt
    const s=await latestMcpPreparation(output);
    if(s?.jobId!==current.id||s.status!=='running'){current=null;return;}
    if(s.cancelRequested&&!current.cancelAt){current.cancelAt=Date.parse(s.cancelRequestedAt)||Date.now();await deliver({event:'prepare-cancel',event_id:randomUUID(),job_id:current.id,session,prompt:'Stop this preparation safely and acknowledge cancellation through the same Node listener. No further source/output work.'});}
-   if(Date.now()-current.lastActionAt>=activeTimeoutMs||current.cancelAt&&Date.now()-current.cancelAt>=cancelAckMs){
+   if(Date.now()-current.lastActionAt>=current.activeTimeoutMs||current.cancelAt&&Date.now()-current.cancelAt>=cancelAckMs){
     await mcpPrepareAction({...current,action:'finish',outcome:'blocked',message:'The main agent stopped responding during preparation. Partial output is unverified; review before retrying.'});current=null;
    }
    return;
@@ -76,7 +76,7 @@ export async function createPreparationListener({workspace:root,session,onPrompt
    if(current){if(current.event_id!==command.event_id||current.consumer_id!==command.consumer_id)throw new Error('Another main-agent consumer owns this attempt.');return {...current.public,reused:true};}
    const event=await discover();if(!event||event.event_id!==command.event_id)throw new Error('This queued event is no longer current.');
    const lease=randomUUID(),claimed=await claimMcpPreparation({outputDir:output,workspace,id:event.job_id,owner,lease});
-   current={outputDir:output,workspace,id:event.job_id,owner,lease,attempt:claimed.attempt,event_id:event.event_id,consumer_id:command.consumer_id,lastActionAt:Date.now()};
+   current={outputDir:output,workspace,id:event.job_id,owner,lease,attempt:claimed.attempt,event_id:event.event_id,consumer_id:command.consumer_id,activeTimeoutMs:Math.min(activeTimeoutMs,Number.isFinite(claimed.request.timeoutMs)&&claimed.request.timeoutMs>0?claimed.request.timeoutMs:activeTimeoutMs),lastActionAt:Date.now()};
    identity.agentSeenAt=new Date().toISOString();await save();
    current.public={status:'running',job_id:event.job_id,event_id:event.event_id,request_file:event.request_file,instructions:setupPrompt(claimed.request,event.request_file)+'\nMain-agent transport: execute in this instance, not a subagent. Use Node listener actions progress, compile and finish with this job_id and consumer_id. These invoke the existing preparation protocol internally; do not claim through another MCP client. After finish, leave Node waiting and end the agent turn. Do not poll while idle.'};
    return current.public;
