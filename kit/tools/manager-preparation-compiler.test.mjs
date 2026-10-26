@@ -62,8 +62,8 @@ test('compiler preserves pinned anchors, generates canonical metadata/bindings a
  assert.equal(draft.variables.find(v=>v.name==='font/family/ui').codeSyntax.WEB,'var(--font-family-ui)');
  assert.ok(draft.variables.filter(v=>v.collection==='Primitives').every(v=>v.hiddenFromPublishing));assert.ok(draft.textStyles.every(s=>Object.keys(s.bound).length===5));
  assert.ok(contrastReport(draft).every(r=>r.pass));
- const standard=draft.variables.find(v=>v.name==='motion/easing/standard');assert.equal(standard.type,'STRING');assert.deepEqual(standard.values,{Standard:{alias:'scale/easing/standard'},Reduced:{alias:'scale/easing/standard'}});
- assert.equal(draft.variables.find(v=>v.name==='scale/easing/standard').values.Value,'cubic-bezier(0.2, 0, 0, 1)');assert.equal(draft.variables.find(v=>v.name==='motion/duration/base').type,'FLOAT');assert.equal(draft.variables.find(v=>v.name==='motion/delay/tooltip').type,'FLOAT');
+ const standard=draft.variables.find(v=>v.name==='motion/easing/standard');assert.equal(standard.type,'EASING');assert.deepEqual(standard.values,{Standard:{alias:'scale/easing/standard'},Reduced:{alias:'scale/easing/standard'}});
+ assert.deepEqual(draft.variables.find(v=>v.name==='scale/easing/standard').values.Value,{type:'CUSTOM_CUBIC_BEZIER',easingFunctionCubicBezier:{x1:0.2,y1:0,x2:0,y2:1}});assert.equal(draft.variables.find(v=>v.name==='motion/duration/base').type,'TIMING');assert.equal(draft.variables.find(v=>v.name==='motion/delay/tooltip').type,'TIMING');
  d.product.platform='App';assert.throws(()=>assembleFoundations(d,f.request,f.pack,parts),/already selected/);
  const ramp=paletteRamp({anchors:{50:'#f9f0e0',400:'#80a080',800:'#203030',950:'#081010'}});assert.equal(ramp[400],'#80a080');assert.equal(ramp[800],'#203030');assert.equal(ramp[50],'#f9f0e0');
  assert.throws(()=>paletteRamp({anchors:{500:'#333333'}}),/both ends/);

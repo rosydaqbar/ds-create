@@ -7,7 +7,7 @@ export interface TokenMode {
 export interface TokenVariable {
   name: string;
   collection: string;
-  type: 'COLOR' | 'FLOAT' | 'STRING' | 'BOOLEAN';
+  type: 'COLOR' | 'FLOAT' | 'STRING' | 'BOOLEAN' | 'TIMING' | 'EASING';
   description: string;
   /** CSS custom property, e.g. `--color-text-primary`. */
   css: string;

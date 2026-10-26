@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createManagerServer } from '../../manager/server.mjs';
+import { nativeEasing } from '../../manager/motion-values.mjs';
 import { colors, values, effects } from '../../web/scripts/chrome-fallbacks.mjs';
 
 // Small synthetic data to exercise the handoff; not a design-system generator.
@@ -33,10 +34,10 @@ export const preparedSetupDraft=structuredClone(setupDraft);
 preparedSetupDraft.collections.find(c=>c.name==='Motion').modes=['Standard','Reduced'];
 preparedSetupDraft.variables=preparedSetupDraft.variables.filter(v=>!v.name.startsWith('motion/'));
 for(const [name,value]of Object.entries({'duration/instant':0,'duration/fast':120,'duration/base':200,'duration/slow':300,'duration/loop':900,'easing/standard':'cubic-bezier(0.2, 0, 0, 1)','easing/enter':'cubic-bezier(0, 0, 0.2, 1)','easing/exit':'cubic-bezier(0.4, 0, 1, 1)','easing/linear':'linear','delay/tooltip':400,'delay/toast':5000,'delay/debounce':250})){
- const type=typeof value==='number'?'FLOAT':'STRING', reduced=['duration/base','duration/slow'].includes(name)?0:name==='duration/loop'?1800:value, refs={};
+ const type=typeof value==='number'?'TIMING':'EASING', reduced=['duration/base','duration/slow'].includes(name)?0:name==='duration/loop'?1800:value, refs={};
  for(const [mode,val]of Object.entries({Standard:value,Reduced:reduced})){
   const primitive='scale/motion/'+name.replaceAll('/','-')+'-'+mode.toLowerCase();refs[mode]={alias:primitive};
-  preparedSetupDraft.variables.push({name:primitive,collection:'Primitives',type,values:{Value:val},hiddenFromPublishing:true,scopes:[],codeSyntax:{WEB:'var(--'+primitive.replaceAll('/','-')+')'}});
+  preparedSetupDraft.variables.push({name:primitive,collection:'Primitives',type,values:{Value:type==='TIMING'?val/1000:nativeEasing(val)},hiddenFromPublishing:true,scopes:[],codeSyntax:{WEB:'var(--'+primitive.replaceAll('/','-')+')'}});
  }
  const token='motion/'+name;preparedSetupDraft.variables.push({name:token,collection:'Motion',type,values:refs,description:'Synthetic UI motion purpose for '+name,scopes:[],codeSyntax:{WEB:'var(--'+token.replaceAll('/','-')+')'}});
 }

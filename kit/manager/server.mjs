@@ -17,7 +17,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
   const routes = new Map([
     ['/', ['index.html', 'text/html; charset=utf-8']],
     ...['app.js', 'controls.js'].map(file => [`/${file}`, [file, 'text/javascript; charset=utf-8']]),
-    ...['canvas.mjs', 'spacing.mjs', 'motion.mjs', 'foundation-controls.mjs', 'publish.mjs', 'publish-progress.mjs', 'setup.mjs', 'setup-options.mjs', 'preparation.mjs', 'worker-connection.mjs', 'iconography.mjs', 'icons/catalog.mjs', 'ui-motion.mjs', 'fonts/catalog.mjs'].map(file => [`/${file}`, [file, 'text/javascript; charset=utf-8']]),
+    ...['canvas.mjs', 'spacing.mjs', 'motion.mjs', 'motion-values.mjs', 'foundation-controls.mjs', 'publish.mjs', 'publish-progress.mjs', 'setup.mjs', 'setup-options.mjs', 'preparation.mjs', 'worker-connection.mjs', 'iconography.mjs', 'icons/catalog.mjs', 'ui-motion.mjs', 'fonts/catalog.mjs'].map(file => [`/${file}`, [file, 'text/javascript; charset=utf-8']]),
     ...['styles.css', 'docs-presentation.css', 'chrome.css'].map(file => [`/${file}`, [file, 'text/css; charset=utf-8']]),
     ['/icons/LUCIDE-LICENSE.txt', ['icons/LUCIDE-LICENSE.txt', 'text/plain; charset=utf-8']],
     ...preparedFonts.map(font => [`/fonts/${font.file}`, [`fonts/${font.file}`, 'font/ttf']]),

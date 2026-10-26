@@ -65,9 +65,23 @@ function unit(name) {
 }
 function literal(v, value) {
   if (v.type === 'COLOR') return value;
+  if (v.type === 'TIMING') return `${value}s`; // Plugin API stores seconds, not UI milliseconds.
+  if (v.type === 'EASING') {
+    const points = bezierPoints(value, v.name);
+    return `cubic-bezier(${points.join(', ')})`;
+  }
   if (typeof value === 'number') return value + unit(v.name);
-  if (v.name.startsWith('motion/easing/')) return `cubic-bezier(${value})`;
+  if (v.name.startsWith('motion/easing/') && !/^(?:cubic-bezier\(|linear$|ease(?:-in|-out|-in-out)?$)/.test(value)) return `cubic-bezier(${value})`;
   return value;
+}
+function bezierPoints(value, name) {
+  if (value?.type === 'CUSTOM_CUBIC_BEZIER') {
+    const {x1, y1, x2, y2} = value.easingFunctionCubicBezier || {};
+    if ([x1, y1, x2, y2].every(Number.isFinite) && x1 >= 0 && x1 <= 1 && x2 >= 0 && x2 <= 1) return [x1, y1, x2, y2];
+  }
+  const points = {LINEAR: [0,0,1,1], EASE_IN: [.42,0,1,1], EASE_OUT: [0,0,.58,1], EASE_IN_AND_OUT: [.42,0,.58,1]}[value?.type];
+  if (points) return points;
+  throw new Error(`${name}: native ${value?.type || 'invalid easing'} has no supported CSS cubic-bezier mapping; preserve the Figma value and provide an explicit code mapping.`);
 }
 // CSS value for a variable in a mode family. Colours resolve to the primitive so a
 // themed subtree (data-theme on any element) never inherits a value frozen at :root.
@@ -328,7 +342,7 @@ writeFileSync(
 
 // ---------- DTCG ----------
 const dtcg = {};
-const dtcgType = (v) => (v.type === 'COLOR' ? 'color' : v.type === 'STRING' ? (v.name.startsWith('motion/easing') ? 'cubicBezier' : 'fontFamily') : /duration|delay/.test(v.name) ? 'duration' : /weight/.test(v.name) ? 'fontWeight' : 'dimension');
+const dtcgType = (v) => (v.type === 'TIMING' ? 'duration' : v.type === 'EASING' ? 'cubicBezier' : v.type === 'COLOR' ? 'color' : v.type === 'STRING' ? (v.name.startsWith('motion/easing') ? 'cubicBezier' : 'fontFamily') : /duration|delay/.test(v.name) ? 'duration' : /weight/.test(v.name) ? 'fontWeight' : 'dimension');
 const ref = (a) => '{' + a.replaceAll('/', '.') + '}';
 for (const v of src.variables) {
   const parts = v.name.split('/');
@@ -338,7 +352,7 @@ for (const v of src.variables) {
     node = node[p];
   }
   const modes = Object.entries(v.values);
-  const toVal = (r) => (r && typeof r === 'object' && r.alias ? ref(r.alias) : typeof r === 'number' ? (unit(v.name) ? `${r}${unit(v.name)}` : r) : r);
+  const toVal = (r) => (r && typeof r === 'object' && r.alias ? ref(r.alias) : v.type === 'TIMING' ? {value:r, unit:'s'} : v.type === 'EASING' ? bezierPoints(r, v.name) : typeof r === 'number' ? (unit(v.name) ? `${r}${unit(v.name)}` : r) : r);
   const leaf = { $type: dtcgType(v), $value: toVal(modes[0][1]) };
   if (v.description) leaf.$description = v.description;
   if (modes.length > 1) leaf.$extensions = { 'ds-create.modes': Object.fromEntries(modes.map(([m, r]) => [m, toVal(r)])), 'ds-create.collection': v.collection };

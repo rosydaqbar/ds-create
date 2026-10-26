@@ -32,3 +32,42 @@ test('playback follows selected duration/easing and reduces spatial movement wit
   assert.equal(motionPlan(-1, 'linear', false, 340), null);
   assert.equal(motionPlan(200, 'broken', false, 340), null);
 });
+
+test('native TIMING seconds and EASING objects keep the same duration and curve in playback', async () => {
+  const { previewTiming, validTiming, validEasing, nativeEasing } = await import('../manager/motion-values.mjs');
+  const native = {type:'CUSTOM_CUBIC_BEZIER',easingFunctionCubicBezier:{x1:.2,y1:0,x2:0,y2:1}};
+  assert.deepEqual(nativeEasing('cubic-bezier(0.2, 0, 0, 1)'), native);
+  assert.equal(previewTiming('TIMING', .2), 200);
+  assert.equal(previewTiming('FLOAT', 200), 200, 'frozen legacy timings remain milliseconds');
+  assert.equal(previewTiming('TIMING', 0), 0);
+  assert.equal(motionPlan(previewTiming('TIMING', .2), native, false, 20).duration, 200);
+  assert.deepEqual(easingCurve(native), easingCurve('0.2, 0, 0, 1'));
+  assert.equal(validTiming(500), true, 'validation has no preview-only 60 second limit');
+  for (const value of [-.2, NaN, Infinity, '0.2']) assert.equal(validTiming(value), false);
+  for (const value of [{type:'CUSTOM_CUBIC_BEZIER'}, {...native,easingFunctionCubicBezier:{x1:2,y1:0,x2:0,y2:1}}, {type:'CUSTOM_SPRING',easingFunctionSpring:{bounce:2}}, {type:'LINEAR',unexpected:true}, '0.2,0,0,1']) assert.equal(validEasing(value), false);
+  const spring = {type:'CUSTOM_SPRING',easingFunctionSpring:{bounce:.4}};
+  assert.equal(validEasing(spring), true);assert.deepEqual(nativeEasing(spring), spring);
+  assert.equal(easingCurve(spring), null, 'unsupported browser spring preview never guesses another curve');
+});
+
+test('Builder preview renders native timing in ms and native curves using existing card markup', async () => {
+  const oldMedia=globalThis.matchMedia,oldDocument=globalThis.document;
+  globalThis.matchMedia=()=>({matches:false,addEventListener(){}});
+  globalThis.document={addEventListener(){}};
+  try {
+    const {createMotionPreview}=await import('../manager/motion.mjs');
+    const f={modes:['Standard','Reduced'],variables:[
+      {name:'motion/duration/base',type:'TIMING',values:{Standard:.2,Reduced:0}},
+      {name:'motion/easing/standard',type:'EASING',values:{Standard:{type:'CUSTOM_CUBIC_BEZIER',easingFunctionCubicBezier:{x1:.2,y1:0,x2:0,y2:1}}}},
+      {name:'motion/delay/tooltip',type:'TIMING',values:{Standard:.4}}
+    ]},draft={settings:new Map()};let mode='Standard';
+    const preview=createMotionPreview({draft,resultFor:(v,m)=>({value:v.values[m]??v.values.Standard}),modeFor:()=>mode,escape:String,previewCard:(head,body)=>head+body,modeControls:()=>'',renderAll(){},renderCanvas(){}});
+    let html=preview.content(f);
+    assert.match(html,/data-motion-ms="200"/);assert.match(html,/200ms/);assert.match(html,/400ms/);
+    assert.doesNotMatch(html,/\[object Object\]|0\.2ms|200000ms/);
+    assert.match(html,/cubic-bezier\(0.2, 0, 0, 1\)/);
+    draft.settings.set('motion-duration:motion/duration/base:Standard',320);
+    assert.match(preview.workspace(f),/value="320"/,'preview overrides are already milliseconds');
+    mode='Reduced';assert.match(preview.content(f),/data-motion-ms="0"/);
+  } finally {globalThis.matchMedia=oldMedia;globalThis.document=oldDocument;}
+});

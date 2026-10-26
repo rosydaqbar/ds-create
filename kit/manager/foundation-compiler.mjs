@@ -1,10 +1,11 @@
 // Deterministic LOCAL foundation expansion. No Figma calls and no brand-specific fixtures.
 import {readFileSync} from 'node:fs';
 import {rgba,validatePlan} from './foundation-validation.mjs';
+import {nativeEasing,validTiming} from './motion-values.mjs';
 import {digest,lockedFacts} from './source-pack.mjs';
 export {contrastReport} from './foundation-contrast.mjs';
 const defaults=JSON.parse(readFileSync(new URL('./foundation-defaults.json',import.meta.url),'utf8'));
-export const COMPILER_HASH=digest(readFileSync(new URL(import.meta.url))+JSON.stringify(defaults));
+export const COMPILER_HASH=digest(readFileSync(new URL(import.meta.url))+readFileSync(new URL('./motion-values.mjs',import.meta.url))+JSON.stringify(defaults));
 export const domainNames=['color','typography','space','shape','elevation','motion'];
 const named=x=>typeof x==='string'&&x.trim().length>0;
 const strict=(obj,keys,label)=>{if(!obj||typeof obj!=='object'||Array.isArray(obj)||Object.keys(obj).some(k=>!keys.includes(k)))throw new Error('Unsupported '+label+' fields; preserve them through explicit definitions instead of dropping metadata.');};
@@ -34,10 +35,10 @@ function builder(platform){
  }
  function metadata(v){if(platform.includes('Web'))v.codeSyntax={WEB:'var(--'+v.name.replaceAll('/','-')+')'};}
  function semantic(name,col,type,values,description,scopes){collection(col,Object.keys(values));const v={name,collection:col,type,values,description,scopes};metadata(v);data.variables.push(v);}
- function scalar(name,col,value,description,dimension,scopes,modeValues={Value:value}){
-  const type=typeof value==='number'?'FLOAT':typeof value==='boolean'?'BOOLEAN':'STRING',values={};
+ function scalar(name,col,value,description,dimension,scopes,modeValues={Value:value},nativeType){
+  const type=nativeType||(typeof value==='number'?'FLOAT':typeof value==='boolean'?'BOOLEAN':'STRING'),values={};
   for(const [mode,x]of Object.entries(modeValues)){
-   const key=dimension==='easing'?name.split('/').at(-1)+(x!==value?'-'+safe(mode):''):safe(x);
+   const key=dimension==='easing'?name.split('/').at(-1)+(JSON.stringify(x)!==JSON.stringify(value)?'-'+safe(mode):''):safe(x);
    const p='scale/'+dimension+'/'+key;values[mode]=alias(add(p,type,x));
   }
   semantic(name,col,type,values,description,scopes);return name;
@@ -126,7 +127,16 @@ export function compileDomain(domain,recipe,{platform,modes,dependencies}){
  }
  if(domain==='motion'){
   strict(recipe,['values','extra'],'motion recipe');
-  for(const [name,row]of Object.entries(defaults.motion)){const values=recipe.values?.[name]||{Standard:row.Standard,Reduced:row.Reduced};b.scalar(name,'Motion',values.Standard,row.description,name.split('/')[1],[],values);}
+  for(const [name,row]of Object.entries(defaults.motion)){
+   const raw=recipe.values?.[name]||{Standard:row.Standard,Reduced:row.Reduced},dimension=name.split('/')[1],type=dimension==='easing'?'EASING':'TIMING';
+   if(!raw||Object.keys(raw).length!==2||!Object.hasOwn(raw,'Standard')||!Object.hasOwn(raw,'Reduced'))throw new Error(name+': provide Standard and Reduced recipe values.');
+   const values=Object.fromEntries(Object.entries(raw).map(([mode,value])=>{
+    if(type==='EASING')return [mode,nativeEasing(value)];
+    if(!validTiming(value))throw new Error(name+': timing recipe needs nonnegative milliseconds.');
+    return [mode,value/1000];
+   }));
+   b.scalar(name,'Motion',values.Standard,row.description,dimension,[],values,type);
+  }
   if(Object.keys(recipe.values||{}).some(n=>!defaults.motion[n]))throw new Error('Unknown motion role; use extra definitions.');
  }
  if(domain==='elevation')elevationRecipe(b,recipe,dependencies);

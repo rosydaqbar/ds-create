@@ -1,19 +1,5 @@
-export function milliseconds(value) {
-  if (typeof value === 'string' && !/^\s*\d+(?:\.\d+)?\s*(?:ms|s)?\s*$/.test(value)) return null;
-  if (!['number', 'string'].includes(typeof value)) return null;
-  const n = typeof value === 'number' ? value : parseFloat(value) * (value.trim().endsWith('s') && !value.trim().endsWith('ms') ? 1000 : 1);
-  return Number.isFinite(n) && n >= 0 && n <= 60000 ? n : null;
-}
-
-export function easingCurve(value) {
-  const keywords = { linear: [0, 0, 1, 1], ease: [.25, .1, .25, 1], 'ease-in': [.42, 0, 1, 1], 'ease-out': [0, 0, .58, 1], 'ease-in-out': [.42, 0, .58, 1] };
-  if (typeof value !== 'string') return null;
-  const text = value.trim();
-  const pieces = text.replace(/^cubic-bezier\((.*)\)$/, '$1').split(',');
-  const points = keywords[text] || (pieces.length === 4 && pieces.every(p => p.trim() && Number.isFinite(Number(p))) ? pieces.map(Number) : null);
-  if (!points || points[0] < 0 || points[0] > 1 || points[2] < 0 || points[2] > 1) return null;
-  return { points, css: `cubic-bezier(${points.join(', ')})` };
-}
+import { milliseconds, easingCurve, previewTiming } from './motion-values.mjs';
+export { milliseconds, easingCurve, previewTiming } from './motion-values.mjs';
 
 export function motionPlan(duration, easing, reduced, distance) {
   const ms = milliseconds(duration), curve = easingCurve(easing);
@@ -34,7 +20,10 @@ export function createMotionPreview({ draft, resultFor, modeFor, escape, preview
   function model(f) {
     current = f;
     const mode = modeFor(f);
-    const rows = prefix => f.variables.filter(v => v.name.startsWith(`motion/${prefix}/`)).map(v => ({ ...v, result: resultFor(v, mode) }));
+    const rows = prefix => f.variables.filter(v => v.name.startsWith(`motion/${prefix}/`)).map(v => {
+      const result = resultFor(v, mode);
+      return { ...v, result: { ...result, value: v.type === 'TIMING' ? previewTiming(v.type, result.value) : result.value } };
+    });
     const durations = rows('duration'), easings = rows('easing'), delays = rows('delay');
     const d = durations.find(v => v.name === draft.settings.get('motion-duration-token')) || durations.find(v => v.name.endsWith('/base')) || durations[0];
     const e = easings.find(v => v.name === draft.settings.get('motion-easing-token')) || easings.find(v => v.name.endsWith('/standard')) || easings[0];
@@ -44,7 +33,7 @@ export function createMotionPreview({ draft, resultFor, modeFor, escape, preview
   }
   const playButton = (group, label = 'Play') => `<button type="button" class="button" data-motion-play="${group}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"/></svg>${label}</button>`;
   const status = group => `<span class="motion-status" data-motion-status="${group}" role="status">Ready</span>`;
-  const track = (group, duration, easing) => `<div class="motion-lane" data-motion-group="${group}" data-motion-ms="${escape(duration)}" data-motion-easing="${escape(easing)}"><span class="motion-dot" aria-hidden="true"></span><span class="motion-endpoint" aria-hidden="true"></span></div>`;
+  const track = (group, duration, easing) => `<div class="motion-lane" data-motion-group="${group}" data-motion-ms="${escape(duration)}" data-motion-easing="${escape(easingCurve(easing)?.css || '')}"><span class="motion-dot" aria-hidden="true"></span><span class="motion-endpoint" aria-hidden="true"></span></div>`;
   function curveSVG(curve) {
     if (!curve) return '<p>Curve unavailable</p>';
     const [a, b, c, d] = curve.points;
@@ -63,7 +52,7 @@ export function createMotionPreview({ draft, resultFor, modeFor, escape, preview
       <section class="section">${intro('Easing curves', 'Compare how each curve accelerates and settles over the selected duration.')}
       <div class="motion-easing-grid">${m.easings.filter(matches).map((v, i) => {
         const curve = v.result.error ? null : easingCurve(v.result.value), group = `easing-${i}`;
-        return previewCard(`<span>${escape(title(v.name))}</span>${curve ? playButton(group) : ''}`, `${curveSVG(curve)}${curve ? track(group, m.duration, curve.css) : ''}<code>${escape(curve?.points.join(', ') || v.result.error || 'Invalid curve')}</code>${status(group)}`, { stageClass: 'motion-easing-stage', caption: `<p class="motion-caption"><code>${escape(v.name)}</code>${v.description ? `<span>${escape(v.description)}</span>` : ''}</p>` });
+        return previewCard(`<span>${escape(title(v.name))}</span>${curve ? playButton(group) : ''}`, `${curveSVG(curve)}${curve ? track(group, m.duration, curve.css) : ''}<code>${escape(curve?.points.join(', ') || v.result.error || (v.type === 'EASING' ? `${v.result.value?.type || 'Native easing'} · Browser preview unavailable` : 'Invalid curve'))}</code>${status(group)}`, { stageClass: 'motion-easing-stage', caption: `<p class="motion-caption"><code>${escape(v.name)}</code>${v.description ? `<span>${escape(v.description)}</span>` : ''}</p>` });
       }).join('') || '<p>No easing tokens match.</p>'}</div></section>
       <section class="section">${intro('Delays', 'Delays control when a response begins or how long a message stays visible. They do not change transition speed.')}<table class="value-table"><thead><tr><th scope="col">Token</th><th scope="col">Delay</th><th scope="col">Source</th></tr></thead><tbody>${m.delays.filter(matches).map(v => `<tr><td><code>${escape(v.name)}</code><p>${escape(v.description || '')}</p></td><td><code>${milliseconds(v.result.value) ?? 'Unavailable'}${milliseconds(v.result.value) === null ? '' : 'ms'}</code></td><td><code>${escape(v.result.alias || v.collection)}</code></td></tr>`).join('')}</tbody></table></section>`;
   }

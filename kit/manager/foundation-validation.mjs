@@ -1,3 +1,4 @@
+import {validTiming,validEasing} from './motion-values.mjs';
 // Shared validation for preparation, review and publication. No Figma side effects.
 const domains = ['color','typography','space','shape','elevation','motion'];
 const named = x => typeof x === 'string' && x.trim().length > 0;
@@ -11,7 +12,7 @@ export function rgba(value) {
   if(value && ['r','g','b'].every(k=>finite(value[k])&&value[k]>=0&&value[k]<=1) && (value.a===undefined||finite(value.a)&&value.a>=0&&value.a<=1))return [value.r,value.g,value.b,value.a??1];
   return null;
 }
-const literal = (type,v) => type==='COLOR'?!!rgba(v):type==='FLOAT'?finite(v):type==='STRING'?typeof v==='string':type==='BOOLEAN'?typeof v==='boolean':false;
+const literal = (type,v) => type==='COLOR'?!!rgba(v):type==='TIMING'?validTiming(v):type==='EASING'?validEasing(v):type==='FLOAT'?finite(v):type==='STRING'?typeof v==='string':type==='BOOLEAN'?typeof v==='boolean':false;
 export function validateFoundations(data) {
   const errors=[], fail=message=>errors.push(message);
   if(!data || !Array.isArray(data.collections) || !Array.isArray(data.variables))return {valid:false,errors:['Collections and variables must be arrays.']};
@@ -27,7 +28,7 @@ export function validateFoundations(data) {
     if(v.codeSyntax!==undefined&&(!v.codeSyntax||typeof v.codeSyntax!=='object'||Array.isArray(v.codeSyntax)||Object.values(v.codeSyntax).some(s=>!named(s))))fail(`${v.name}: invalid code syntax.`);
     if(v.hiddenFromPublishing!==undefined&&typeof v.hiddenFromPublishing!=='boolean')fail(`${v.name}: invalid publishing visibility.`);
     const c=cols.get(v.collection);
-    if(!c || !['COLOR','FLOAT','STRING','BOOLEAN'].includes(v.type)||!v.values||typeof v.values!=='object'||Array.isArray(v.values)){fail(`Invalid variable ${v.name}.`);continue;}
+    if(!c || !['COLOR','FLOAT','STRING','BOOLEAN','TIMING','EASING'].includes(v.type)||!v.values||typeof v.values!=='object'||Array.isArray(v.values)){fail(`Invalid variable ${v.name}.`);continue;}
     if(Object.keys(v.values).length!==c.modes.length||c.modes.some(m=>!Object.hasOwn(v.values,m)))fail(`${v.name}: every declared mode needs a value.`);
     for(const [mode,value] of Object.entries(v.values))if(!c.modes.includes(mode)||!(value&&typeof value==='object'&&named(value.alias))&&!literal(v.type,value))fail(`${v.name}/${mode}: invalid ${v.type} value.`);
   }
@@ -90,7 +91,11 @@ export function validatePlan(plan,data,snapshot,revision) {
     const required=['duration/instant','duration/fast','duration/base','duration/slow','duration/loop','easing/standard','easing/enter','easing/exit','easing/linear','delay/tooltip','delay/toast','delay/debounce'].map(n=>'motion/'+n);
     if(scope?.status!=='included'||required.some(n=>!scope.variables?.includes(n)))fail('Basic UI motion requires duration, easing and delay tokens; illustrative-motion exclusions do not remove the UI baseline.');
     if(!collection||!['Standard','Reduced'].every(m=>collection.modes.includes(m)))fail('Basic UI motion requires Standard and Reduced modes.');
-    for(const name of required){const v=data.variables.find(v=>v.name===name);if(!v||v.collection!=='Motion'||v.type!==(name.startsWith('motion/easing/')?'STRING':'FLOAT'))fail(name+': missing or incompatible basic motion token.');}
+    for(const name of required){
+      const v=data.variables.find(v=>v.name===name),easing=name.startsWith('motion/easing/'),nativeType=easing?'EASING':'TIMING';
+      const allowed=plan.systemMode==='existing'?[nativeType,easing?'STRING':'FLOAT']:[nativeType];
+      if(!v||v.collection!=='Motion'||!allowed.includes(v.type))fail(name+': missing or incompatible basic motion token; new systems require '+(easing?'EASING objects.':'TIMING seconds.'));
+    }
   }
   if(plan?.systemMode==='new'){
     const grammar=new Map(Object.entries({Primitives:/^(palette|scale)\/[a-z0-9-]+\/[a-z0-9/-]+$/,Color:/^color\/[a-z0-9-]+\/[a-z0-9/-]+$/,Typography:/^font\/(family|weight|size|line-height|letter-spacing)\/[a-z0-9-]+$/,Space:/^space\/[a-z0-9-]+$/,Size:/^size\/[a-z0-9/-]+$/,Shape:/^(radius\/[a-z0-9-]+|border\/width\/[a-z0-9-]+)$/,Motion:/^motion\/(duration|easing|delay)\/[a-z0-9-]+$/}));

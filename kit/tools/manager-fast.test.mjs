@@ -65,3 +65,23 @@ test('batches respect transport size, topological ordering and literal data; uns
  d.effectStyles[0].effects[0].unsupported='retain me';assert.throws(()=>compileFoundationCalls(d),/effect metadata/);delete d.effectStyles[0].effects[0].unsupported;
  d.variables[0].unsupported='retain me';assert.throws(()=>compileFoundationCalls(d),/does not support/);
 });
+
+test('native motion survives compiled Figma writes, full export and readback without changing published types',async()=>{
+ const {compileDomain}=await import('../manager/foundation-compiler.mjs');
+ const {compareFoundations}=await import('../manager/foundation-compare.mjs');
+ const {readFile}=await import('node:fs/promises');
+ const data=compileDomain('motion',{}, {platform:'Web',modes:['Light'],dependencies:{}});
+ const f=mockFigma();f.root={name:'Native motion fixture',children:[]};
+ const calls=compileFoundationCalls(data);await execute(f,calls);
+ const byName=new Map(f.variableRecords.map(v=>[v.name,v]));
+ const timing=byName.get('motion/duration/base');assert.equal(timing.resolvedType,'TIMING');
+ const baseRef=Object.values(timing.valuesByMode)[0],base=f.variableRecords.find(v=>v.id===baseRef.id);
+ assert.equal(Object.values(base.valuesByMode)[0],.2);
+ assert.equal(byName.get('motion/easing/standard').resolvedType,'EASING');
+ const exported=await new AsyncFunction('figma',await readFile(new URL('../web/scripts/figma-export.js',import.meta.url),'utf8'))(f);
+ assert.deepEqual(compareFoundations(data,exported).differences,[]);
+ const repeated=await execute(f,calls);assert.ok(repeated.every(r=>!r.createdVariableIds.length));
+ timing.resolvedType='FLOAT';const before=structuredClone(timing.valuesByMode),count=f.variableRecords.length;
+ await assert.rejects(()=>execute(f,calls),/Existing variable conflicts/);
+ assert.equal(f.variableRecords.length,count);assert.deepEqual(timing.valuesByMode,before);
+});

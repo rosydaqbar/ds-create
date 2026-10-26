@@ -244,6 +244,8 @@ Components      component tokens (only when needed)
 Documentation   documentation measures and roles (doc kit only)
 ```
 
+Motion uses native Figma `TIMING` variables for durations/delays (Plugin API seconds; display milliseconds) and `EASING` variables for `MotionEasing` objects. Primitives and aliases share the same resolved type. Preserve frozen legacy FLOAT/STRING definitions; changing an already-published type requires an explicit migration.
+
 Never prefix collections with tier names, product names or feature names. A product concept (for example a signal-strength color set) is a group inside its domain collection, not a new collection.
 
 # 3. Token naming grammar

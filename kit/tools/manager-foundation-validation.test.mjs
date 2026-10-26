@@ -87,3 +87,15 @@ test('basic UI motion policy cannot be satisfied by an illustrative-motion exclu
  const missing=structuredClone(data);missing.variables=missing.variables.filter(v=>v.name!=='motion/delay/tooltip');assert.equal(validatePlan(plan,missing,snapshot,1).valid,false);
  const noReduced=structuredClone(data);noReduced.collections.find(c=>c.name==='Motion').modes=['Standard'];for(const v of noReduced.variables.filter(v=>v.collection==='Motion'))delete v.values.Reduced;assert.equal(validatePlan(plan,noReduced,snapshot,1).valid,false);
 });
+
+test('native motion validates objects/seconds and rejects cross-type aliases or malformed values',async()=>{
+ const {compileDomain}=await import('../manager/foundation-compiler.mjs');
+ const data=compileDomain('motion',{}, {platform:'Web',modes:['Light'],dependencies:{}});
+ assert.deepEqual(validateFoundations(data).errors,[]);
+ for(const mutate of [
+  d=>d.variables.find(v=>v.name==='motion/duration/base').values.Standard={alias:'scale/easing/standard'},
+  d=>d.variables.find(v=>v.name==='scale/duration/0p2').values.Value=-.2,
+  d=>d.variables.find(v=>v.name==='scale/easing/standard').values.Value='cubic-bezier(0.2,0,0,1)',
+  d=>d.variables.find(v=>v.name==='scale/easing/standard').values.Value.easingFunctionCubicBezier.x1=2,
+ ]){const bad=structuredClone(data);mutate(bad);assert.equal(validateFoundations(bad).valid,false);}
+});

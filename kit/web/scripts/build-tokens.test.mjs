@@ -128,3 +128,23 @@ test('a single-mode component color that aliases a Light/Dark role gets its own 
   // An alias straight to a primitive has no Dark value to follow.
   assert.doesNotMatch(dark, /--switch-track-fixed/);
 });
+
+test('native Figma motion serializes seconds and easing objects without losing aliases or Reduced mode', () => {
+  const curve={type:'CUSTOM_CUBIC_BEZIER',easingFunctionCubicBezier:{x1:.2,y1:0,x2:0,y2:1}};
+  const {data,css,dtcg}=generate(null,{variables:[
+    {name:'scale/duration/base',collection:'Primitives',type:'TIMING',values:{Value:.2}},
+    {name:'scale/duration/zero',collection:'Primitives',type:'TIMING',values:{Value:0}},
+    {name:'scale/easing/standard',collection:'Primitives',type:'EASING',values:{Value:curve}},
+    {name:'motion/duration/base',collection:'Motion',type:'TIMING',values:{Standard:{alias:'scale/duration/base'},Reduced:{alias:'scale/duration/zero'}}},
+    {name:'motion/delay/tooltip',collection:'Motion',type:'TIMING',values:{Standard:.4,Reduced:.4}},
+    {name:'motion/easing/standard',collection:'Motion',type:'EASING',values:{Standard:{alias:'scale/easing/standard'},Reduced:{alias:'scale/easing/standard'}}}
+  ]});
+  assert.match(css,/--scale-duration-base: 0\.2s;/);assert.match(css,/--motion-delay-tooltip: 0\.4s;/);
+  assert.match(css,/--scale-easing-standard: cubic-bezier\(0.2, 0, 0, 1\);/);
+  assert.doesNotMatch(css,/\[object Object\]|cubic-bezier\(cubic-bezier/);
+  assert.deepEqual(dtcg.scale.duration.base.$value,{value:.2,unit:'s'});
+  assert.equal(dtcg.scale.easing.standard.$type,'cubicBezier');assert.deepEqual(dtcg.scale.easing.standard.$value,[.2,0,0,1]);
+  const token=data.variables.find(v=>v.name==='motion/duration/base');
+  assert.equal(token.modes.Standard.value,'0.2s');assert.equal(token.modes.Reduced.value,'0s');
+  assert.equal(token.modes.Standard.alias,'scale/duration/base');
+});
