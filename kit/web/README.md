@@ -20,7 +20,7 @@ npm run qa:dev         # the same checks against the running dev server
 
 ## From Figma to code
 
-0. Fit the copy to the round: `node scripts/scope.mjs --upto parts` (or components, sections, layouts; `--no-gl` for a build without Guidelines), then `npm run index`.
+0. Fit the copy to the round: `node scripts/scope.mjs --upto parts` (or components, sections, layouts; `--no-gl` for a build without Guidelines), then `npm run index` and `npm run pin-props` (docs usages name their variant props, so changing a component's defaults never resizes the site's pages).
 1. Run `scripts/figma-export.js` as a `use_figma` script on the Figma file. With a local base export, use `MODE = 'hash'` and `node scripts/export-diff.mjs` (only what changed comes back); without one, save the full result as `tokens/figma-variables.json` (large files: export in parts — see the script header — then `npm run tokens:merge`).
 2. `npm run tokens` writes:
    - `src/styles/tokens.css` — CSS variables named like the Figma variables (`color/text/primary` → `--color-text-primary`), Light on `:root`, Dark on `[data-theme="dark"]`, Reduced motion; the Tailwind theme; one utility per text style (`type-body-md-regular`);

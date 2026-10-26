@@ -133,15 +133,33 @@ The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes onl
 - **Small returns.** A set call returns its set and part ids and counts, nothing else: no snapshot, no layer dump (a full export of a 360-variant set came back at 140 KB and only filled the context).
 - **One registry at the end.** After the last set, one read-only `kit/tools/figma-registry.js` call (~12 KB back for 30 sets and 170 icons) and `node kit/tools/registry.mjs --slug {slug}` write every set file and the icon map. This is the library gate's export in a fast round; the full layer snapshot (`kit/tools/figma-export-sets.js`) is exported on call, for QA or a site agent that needs layers. Re-run the registry when a later step changes a set.
 
-**F1 · Data (after the library phase, before step 11, no Figma calls).** The manifests name real sets, so they are written once steps 6–10 are done and the set snapshots exist.
+**F0 · Base (right after the registry, read-only).** F1 agents take collection names, component tokens and page ids from the build's token base, so it has to describe the file as built. Init's token plan has no Components collection and no page ids: agents reading it wrote "no component tokens" and guessed every `figma:` line.
+1. Send `kit/web/scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back). Save the return as `workspace/output/{slug}/figma/hash.json`.
+2. From the repo root, run `node kit/web/scripts/export-diff.mjs --slug {slug} --hash workspace/output/{slug}/figma/hash.json`. It prints the `ROWS` that differ from the base; for a new system that is usually the Components collection alone.
+3. Send `figma-export.js` with `MODE = 'rows'` and those `ROWS`, save the return, and re-run with `--merge {rows file}`. It checks every hash, then writes `figma/figma-variables.json` with every collection and the page ids.
+
+The site's W2 later fetches only what changed after F0 (usually the `Documentation` collection from F3), so a round with the site fetches the component rows once, not twice. In a Figma-only round, F0 is the only export.
+
+**F1 · Data (after F0, no Figma calls).** The manifests name real sets, so they are written once steps 6–10 are done and the set snapshots exist.
 1. Run `node kit/tools/fast-pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `workspace/output/{slug}/fast/`.
 2. Plan the information through `workflow/EDITORIAL.md` before drafting, then write the copy file of every in-scope page (`workflow/COPY.md`). Adapt manifest topic titles/order to the plan rather than copying a visible outline; keep copy/manifest titles matched and all required technical visuals covered. Read the page's knowledge first (`workspace/input/{slug}/knowledge/`, `workspace/input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
 3. Fill each manifest's `todo` visuals with real sets, or remove the visual. Write one manifest per component and layout page (`workflow/templates/fast/component.example.json`, `layout.example.json`).
 4. Run `node kit/tools/fast-pack.mjs --slug {slug} --check` until every page is ready.
 
-Agents write F1 in parallel from `workflow/templates/fast-brief.md` (fill its header, give each agent 4–7 pages). F1 is the largest token cost of a round: an agent that has the brief, the set files and the build notes doesn't need to rediscover the build.
+Agents write F1 in parallel from `workflow/templates/fast-brief.md` (fill its header, give each agent 4–7 pages). F1 is the largest token cost of a round: an agent that has the brief, the set files and the build notes doesn't need to rediscover the build. Give the earliest pages to the smallest agents (00 and 01 together, 02 on its own), so F4 can start while later agents still write.
 
 **F2 · Review (optional).** When the user chose a review checkpoint at initiation, stop here. The user reads and edits the copy files and manifests before any page is drawn. Record their changes in `workspace/input/{system-slug}/chat/` (`workspace/input/README.md` I3).
+
+**While F1 runs.** F1 is local work done by agents. The main session doesn't wait for all of them; it still sends one write call at a time (`workflow/GOTCHAS.md` G1):
+- **F3 runs during F1.** Nothing in F1 reads the renderer cache or the Doc kit, so step 11 starts as soon as the agents do.
+- **F4 starts with the first ready pages.** When the agent holding the earliest open pages returns, run `--batch` and send what it packed. It packs ready pages in ledger order and stops before the first page that isn't ready, so order holds. Re-run it as each later agent returns. With the F2 review chosen, F4 waits for the user instead; F3 and the site prep don't.
+- **With the site in scope**, two kinds of local work start during F1 as well:
+  - W1 (copy the template, `npm ci`, `scope.mjs`) runs in the background.
+  - Site component agents write the component files (`workflow/WEB.md` W4 steps 1–3) from the set files the registry wrote.
+  - The stories (W4 step 4) and the foundation pages (W5) wait until their pages' copy files pass the F1 checks, because they write lines into those same files.
+  - Every site step is still marked at its own place, after step 21 (`workflow/INITIATOR.md` Part B, *Gates*, *Prepared ahead*).
+
+The first full fast round waited about 25 minutes on this: the cache, the first batch and the site agents each sat behind work they didn't need.
 
 **F3 · Bootstrap (step 11).**
 - Run `node kit/tools/fast-cache.mjs --out workspace/output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
@@ -151,7 +169,7 @@ Agents write F1 in parallel from `workflow/templates/fast-brief.md` (fill its he
 
 **Icons (step 6, library).** A new system's icon library comes from `node kit/tools/icons-lucide.mjs --slug {slug}` at its library step, before any Part: send its calls (usually one, about 30 KB). The 1.7 doc page is rendered later, at step 15. The agent doesn't pick, map or draw icons.
 
-**F4 · Pages (steps 12–20).** Several pages per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --batch` checks every open docs page in ledger order and writes `workspace/output/{slug}/fast/calls/batch-{n}.js`: the renderer is loaded once per call and each call holds as many pages as fit in ~45 KB (a full round of 30 pages is 4 calls, not 32). It stops before the first page that isn't ready, so order holds.
+**F4 · Pages (steps 12–20).** Several pages per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --batch` checks every open docs page in ledger order and writes `workspace/output/{slug}/fast/calls/batch-{n}.js`: the renderer is loaded once per call and each call holds as many pages as fit in ~45 KB (a full round of 30 pages is 4–5 calls, not 32). It stops before the first page that isn't ready, so order holds. A manifest marked `"solo": true` gets a call of its own: the default 02 Tokens manifest is one, because its primitive table takes most of the 70 s budget alone.
 - Send the batches in order, one at a time. Each returns `{ done: [{ id, frames }], failed, next }`; mark it with `node kit/tools/ledger.mjs --slug {slug} --render '<the return>'`.
 - A batch stops at the first page that throws (nothing after it is drawn) and before a page once 70 s have passed. Re-run `--batch`: it starts at the first open page.
 - `--page {id} --call` still prints a single-page call, for a re-draw after a review.
@@ -206,6 +224,7 @@ Agreed with the maintainer on 2026-10-08:
 | 4 | layout pages through `render()` (`layoutPage`), then a full fast build on a copy of an existing file | `5.x` | renderer built; full trial still to run |
 | 5 | docs-site story skeletons from the manifests | site | planned |
 | 6 | streamlining from the first full fast round (2026-10-15): library kit, registry, packed cache, batch calls, ledger tool, cache kept between rounds, build flags, hash export for the site, site scope script | all phases | built; tools tested on that round's data and a copy of the template, registry and hash export on its Figma file |
+| 7 | streamlining from the second full fast round (folded in 2026-10-19): F0 base before F1, F3 and F4 during F1, site prep during F1, solo batch for 02 Tokens, `K.arc` and strokes outside layout in the library kit | all phases | built; `export-diff --slug` and `--batch` tested on that round's data; the overlap is untried |
 
 # 11. Cost profile
 
@@ -214,9 +233,9 @@ Measured on the first full fast round (tokens, 19 Parts, Figma and site), to poi
 | Phase | Time | Main cost | Since 2026-10-15 |
 | --- | --- | --- | --- |
 | Library, 30 sets and 170 icons | 46 min | helpers re-written per build; set exports returning 30–140 KB each | library kit; registry, one call |
-| F1 docs data, 6 agents | 15 min (parallel) | the largest token cost; each agent rediscovers the build | brief template; flags dropped from agent work |
+| F1 docs data, 6 agents | 15 min (parallel) | the largest token cost; each agent rediscovers the build | brief template; flags dropped from agent work; F0 gives agents the real base; F3, F4 and site prep run during F1 |
 | F3 cache | 8 min | ~75 KB of code typed in four calls, again every round | two packed calls; kept between rounds |
-| F4 pages, 30 | 19 min | 32 calls, each printed then typed | 4 batch calls |
-| Site W2–W3 | 10 min | a ~100 KB export | hash export: ~3 KB when nothing changed |
+| F4 pages, 30 | 19 min | 32 calls, each printed then typed | 4 batch calls; 02 Tokens alone, so no batch stops at 70 s |
+| Site W2–W3 | 10 min | a ~100 KB export | hash export: ~3 KB when nothing changed; component rows fetched once, at F0 |
 
 Each phase is proven when its pages, built from manifests alone on a copy of a finished build, pass the page gate. Trials run on copies only, on scratch pages that are removed afterwards. Update this table and `workflow/ROADMAP.md` when a phase lands.

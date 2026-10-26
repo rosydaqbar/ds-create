@@ -93,19 +93,19 @@ Do not add a CSS-in-JS library, a second styling system or a component library u
 
 # 4. Workflow
 
-Run the steps in order. Each step names its exit check. At initiation they are steps 22–26 of the build sequence (`workflow/INITIATOR.md` Part B §6): they start only when every Figma step is done in the ledger, the file audit included, and they follow the same gates.
+Run the steps in order. Each step names its exit check. At initiation they are steps 22–26 of the build sequence (`workflow/INITIATOR.md` Part B §6): they start only when every Figma step is done in the ledger, the file audit included, and they follow the same gates. In a fast round, W1 and the component files of W4 may be prepared during F1 (`workflow/FAST.md` §5, *While F1 runs*); their steps still check and mark them in order.
 
 ## W1 · Copy the template
 
 Copy `ds-create/web/` to `workspace/output/{system-slug}/web/` (README §5), or to another location only when the user explicitly asks for one. Never create the build inside `ds-create/web/` or `ds-create/examples/`: the template stays placeholder-only, and `examples/` holds only builds the user asked to keep as references. Run `npm install`, then `npx playwright install chromium` once for QA. `.npmrc` sets `legacy-peer-deps`, so the React Native web packages install without pulling in `react-native` or any mobile toolchain.
 
-Then fit the copy to the round: `node scripts/scope.mjs --upto {parts|components|sections|layouts}` (add `--no-gl` when the Figma pages have no Guidelines frames; a `build --no-gl` round itself skips the site, so this applies to a later site round on such a system). It removes the stories and components above the round's scope, moves the ones the site itself still imports (docs controls such as Select) to `src/docs/controls/` with every import rewritten, and lists the foundation pages whose visuals use them, for W5. Then `npm run index`. Use `npm ci` when a lockfile is present.
+Then fit the copy to the round: `node scripts/scope.mjs --upto {parts|components|sections|layouts}` (add `--no-gl` when the Figma pages have no Guidelines frames; a `build --no-gl` round itself skips the site, so this applies to a later site round on such a system). It removes the stories and components above the round's scope, moves the ones the site itself still imports (docs controls such as Select) to `src/docs/controls/` with every import rewritten, and lists the foundation pages whose visuals use them, for W5. Then `npm run index`, and `npm run pin-props`: it writes the template's current variant defaults (size, emphasis, tone, type…) into every docs usage that leaves them out, so W4 can change a component's defaults without resizing the site's own pages. Use `npm ci` when a lockfile is present.
 
 Exit check: `npm run build` passes on the scoped copy.
 
 ## W2 · Export tokens from Figma
 
-1. **With a local base** (the usual case: `workspace/output/{system-slug}/figma/figma-variables.json` written by init's token step or a previous round): run `scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back) and save the return as `hash.json`. `node scripts/export-diff.mjs --hash hash.json` compares each collection in 16 buckets, and the style lists, with the base and prints the `ROWS` to fetch; when nothing changed it writes the export at once. Otherwise send the script with `MODE = 'rows'` and those `ROWS` (one collection per call when a return would pass 20 KB), save each return, and run `node scripts/export-diff.mjs --hash hash.json --merge rows.json …`. It writes both export files and checks the result against every hash first: a mismatch writes nothing.
+1. **With a local base** (the usual case: `workspace/output/{system-slug}/figma/figma-variables.json` written by init's token step, a fast round's F0 or a previous round; after F0, usually only the `Documentation` collection differs): run `scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back) and save the return as `hash.json`. `node scripts/export-diff.mjs --hash hash.json` compares each collection in 16 buckets, and the style lists, with the base and prints the `ROWS` to fetch; when nothing changed it writes the export at once. Otherwise send the script with `MODE = 'rows'` and those `ROWS` (one collection per call when a return would pass 20 KB), save each return, and run `node scripts/export-diff.mjs --hash hash.json --merge rows.json …`. It writes both export files and checks the result against every hash first: a mismatch writes nothing.
 2. **Without a base**, run `scripts/figma-export.js` (`MODE = 'full'`) and save the returned JSON as `workspace/output/{system-slug}/figma/figma-variables.json` (the one export every target shares) and copy it to the project's `tokens/figma-variables.json`. It includes `pages` (page ids and names): the site uses them for every "Open in Figma" button.
 3. Tool output is capped at about 20 KB. When a full export is bigger, set `PART` at the top of the script and export in slices — for example `Color` in two halves, then the other collections, then `styles: true` — saving each result as `tokens/parts/01.json`, `02.json`, …, then run `npm run tokens:merge`. Prefer the hash path: a return that has to be re-typed into a file costs as much as the call itself.
 4. Run `npm run tokens`, then `npm run check:contrast`.
@@ -232,6 +232,8 @@ A component only uses components from lower levels, exactly as in Figma (a Selec
 | `Filled` on fields | derived from the value, not a prop |
 
 Every component also accepts its native HTML attributes and `className`.
+
+Defaults are the Figma set's default variant. The site's own pages don't follow them: W1's `npm run pin-props` already named their variant props, and every usage written later names its props too.
 
 ## 6.3 States
 

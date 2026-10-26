@@ -120,8 +120,14 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 *Check:* each set's snapshot lists its text layers by their anatomy names.
 
 **G49. An open arc is an ellipse with `innerRadius` near 1 and a centered stroke, not `innerRadius: 0`.** With `arcData.innerRadius = 0`, Figma strokes the arc as a pie wedge, with two lines to the center. Set `innerRadius: 0.999`, `strokeAlign: 'CENTER'`, `strokeJoin` and `strokeCap: 'ROUND'`. Inset the ellipse by half the stroke on every side, so the arc stays inside the box and lines up with an inside-stroked ring.
-*Why:* the Spinner's active segment first rendered as a wedge in every variant.
+*Why:* the Spinner's active segment first rendered as a wedge in every variant, and again in a later build that drew its arcs by hand.
+*How:* draw rings and arcs with `K.arc()` (`kit/tools/figma-libkit.js`), which sets all of this.
 *Check:* a screenshot of the set shows an arc with round ends and no lines to the center.
+
+**G56. Keep strokes out of auto-layout sizing.** A new auto-layout frame counts its stroke in layout (`strokesIncludedInLayout` true), so a bordered hug-sized variant comes out two stroke widths larger than the same variant without a border.
+*Why:* a md Badge measured 26 instead of 24, and secondary Buttons came out 2 px wider than primary ones.
+*How:* `K.AL()` and `K.stroke()` set it off; set `strokesIncludedInLayout = false` on any bordered frame made another way.
+*Check:* variants that differ only in border have the same width and height.
 
 **G50. A drop-shadow focus ring doesn't render on a fully transparent fill.** Figma draws a shadow from the fill's alpha, so a frame filled with a transparent variable (`color/fill/none`) shows no ring. This happens even with clip content on and `showShadowBehindNode` true. Forcing the paint opacity to 1 makes the fill opaque instead. Give the focus state of a containerless control a real subtle fill, such as its hover fill, and record the change as a gap.
 *Why:* every tertiary Button focus variant first showed no focus ring at all.

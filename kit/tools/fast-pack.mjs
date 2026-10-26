@@ -12,7 +12,8 @@
  *   node kit/tools/fast-pack.mjs --slug acme --batch [--pages 1.6,1.7,2.1 | --from 1.6] [--budget 45000]
  *                                                           write batch calls to workspace/output/acme/fast/calls/batch-{n}.js: the
  *                                                           open docs pages (ledger order), several per call, each checked
- *                                                           first. Send them one at a time; mark each return with
+ *                                                           first; a manifest with "solo": true goes in a call of its
+ *                                                           own. Send them one at a time; mark each return with
  *                                                           kit/tools/ledger.mjs --render (workflow/FAST.md F4)
  *
  * Build flags come from the ledger: `flags.guidelines === false` (build --no-gl) drops every Guidelines frame and topic,
@@ -437,7 +438,7 @@ if (args.includes('--batch')) {
       console.error(`fast-pack: page ${id} is not ready; the batch stops before it:\n  ` + errs.slice(0, 12).join('\n  '));
       break;
     }
-    ready.push({ id, payload });
+    ready.push({ id, payload, solo: JSON.parse(fs.readFileSync(f, 'utf8')).solo === true });
   }
   const CALLS = path.join(FAST, 'calls');
   fs.mkdirSync(CALLS, { recursive: true });
@@ -446,9 +447,11 @@ if (args.includes('--batch')) {
   const groups = [];
   let cur = [];
   let len = head;
+  // A manifest marked `"solo": true` gets a call of its own: its render takes most of the 70 s on its own (02 Tokens
+  // draws every primitive in one table), so pages packed with it would stop and be sent again.
   for (const r of ready) {
     const l = JSON.stringify(r.payload).length + 2;
-    if (cur.length && len + l > BUDGET) {
+    if (cur.length && (len + l > BUDGET || r.solo || cur[0].solo)) {
       groups.push(cur);
       cur = [];
       len = head;

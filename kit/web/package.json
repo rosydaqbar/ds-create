@@ -19,6 +19,7 @@
     "qa": "npm run build && node scripts/qa.mjs",
     "qa:dev": "node scripts/qa.mjs --url http://localhost:5173/",
     "check:contrast": "node scripts/check-contrast.mjs",
+    "pin-props": "node scripts/pin-props.mjs --write",
     "test": "node --test scripts/*.test.mjs"
   },
   "dependencies": {

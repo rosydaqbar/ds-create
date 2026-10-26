@@ -3,14 +3,17 @@
  * The token export without re-sending what didn't change (workflow/WEB.md W2). Run in the site project.
  *
  *   1. Send scripts/figma-export.js with MODE = 'hash' (read-only, ~3 KB back). Save the return as hash.json.
- *   2. node scripts/export-diff.mjs --hash hash.json [--base tokens/figma-variables.json]
+ *   2. node scripts/export-diff.mjs --hash hash.json [--base ../figma/figma-variables.json]
  *        compares each collection's 16 buckets and the style lists with the base (the last export, or the token plan
- *        init wrote) and prints the ROWS to fetch. Nothing to fetch → it writes the export straight away.
+ *        init and the library step wrote; the build's ../figma copy comes before the template's placeholder) and prints the ROWS to fetch. Nothing to fetch → it writes the export straight away.
  *   3. Send figma-export.js with MODE = 'rows' and those ROWS; save the return as rows.json (split ROWS over several
  *      calls when one return would pass 20 KB: one collection per call, say).
  *   4. node scripts/export-diff.mjs --hash hash.json --merge rows.json [rows-2.json …]
  *        writes tokens/figma-variables.json (and ../figma/figma-variables.json when that folder exists), then checks the
  *        result against every hash from step 1. A mismatch writes nothing: re-fetch that collection with ROWS 'all'.
+ *
+ * --slug {slug}, run from the repo root instead of the site project (workflow/FAST.md F0, before the site exists): the
+ * base and the target are workspace/output/{slug}/figma/figma-variables.json, plus the site's tokens/ copy when it exists.
  *
  * The canonical entry (name, collection, type, description, values per mode) is the one figma-export.js hashes.
  */
@@ -32,7 +35,14 @@ if (!arg('--hash')) {
   process.exit(2);
 }
 const H = read(arg('--hash'));
-const basePath = arg('--base') || ['tokens/figma-variables.json', '../figma/figma-variables.json'].find((f) => fs.existsSync(f));
+const SLUG = arg('--slug');
+const OUT = SLUG && path.join('workspace', 'output', SLUG);
+if (OUT && !fs.existsSync(OUT)) {
+  console.error(`export-diff: no ${OUT}/ (run --slug from the repo root)`);
+  process.exit(2);
+}
+// The build's own base first: tokens/figma-variables.json in a fresh site copy is the template's placeholder.
+const basePath = arg('--base') || (OUT ? [path.join(OUT, 'figma', 'figma-variables.json')] : ['../figma/figma-variables.json', 'tokens/figma-variables.json']).find((f) => fs.existsSync(f));
 const base = basePath && fs.existsSync(basePath) ? read(basePath) : { variables: [], textStyles: [], effectStyles: [], gridStyles: [] };
 
 const fnv = (s) => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h; };
@@ -118,7 +128,8 @@ if (problems.length) {
   process.exit(1);
 }
 const orderOk = fnv(variables.map((v) => v.name).join('|')).toString(36) === H.order;
-const targets = ['tokens/figma-variables.json'];
-if (fs.existsSync('../figma')) targets.push('../figma/figma-variables.json');
+const targets = OUT ? [path.join(OUT, 'figma', 'figma-variables.json'), path.join(OUT, 'web', 'tokens', 'figma-variables.json')].filter((t, i) => !i || fs.existsSync(path.dirname(t))) : ['tokens/figma-variables.json'];
+if (!OUT && fs.existsSync('../figma')) targets.push('../figma/figma-variables.json');
+if (OUT) fs.mkdirSync(path.join(OUT, 'figma'), { recursive: true });
 for (const t of targets) fs.writeFileSync(t, JSON.stringify(out, null, 2) + '\n');
-console.log(`export-diff: ${variables.length} variables, ${out.textStyles.length} text styles, ${out.effectStyles.length} effect styles, ${out.gridStyles.length} grid styles, ${out.pages.length} pages → ${targets.join(', ')}; every hash matches Figma${orderOk ? '' : ' (variable order differs from Figma; names and values match)'}. Next: npm run tokens`);
+console.log(`export-diff: ${variables.length} variables, ${out.textStyles.length} text styles, ${out.effectStyles.length} effect styles, ${out.gridStyles.length} grid styles, ${out.pages.length} pages → ${targets.join(', ')}; every hash matches Figma${orderOk ? '' : ' (variable order differs from Figma; names and values match)'}.${OUT ? '' : ' Next: npm run tokens'}`);

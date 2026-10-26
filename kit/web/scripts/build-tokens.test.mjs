@@ -107,3 +107,24 @@ test('site chrome names the file does not define get a site-only default in chro
   // Never in the site data: token tables only show the Figma export.
   assert.equal(data.variables.some((v) => v.css === '--color-text-tertiary'), false);
 });
+
+test('a single-mode component color that aliases a Light/Dark role gets its own Dark declaration', () => {
+  const { css } = generate(null, {
+    collections: [
+      { name: 'Primitives', modes: ['Value'] },
+      { name: 'Color', modes: ['Light', 'Dark'] },
+      { name: 'Components', modes: ['Value'] },
+    ],
+    variables: [
+      { name: 'palette/base/white', collection: 'Primitives', type: 'COLOR', values: { Value: '#ffffff' } },
+      { name: 'palette/base/black', collection: 'Primitives', type: 'COLOR', values: { Value: '#000000' } },
+      { name: 'color/text/primary', collection: 'Color', type: 'COLOR', values: { Light: { alias: 'palette/base/black' }, Dark: { alias: 'palette/base/white' } } },
+      { name: 'switch/thumb/fill', collection: 'Components', type: 'COLOR', values: { Value: { alias: 'color/text/primary' } } },
+      { name: 'switch/track/fixed', collection: 'Components', type: 'COLOR', values: { Value: { alias: 'palette/base/black' } } },
+    ],
+  });
+  const dark = css.split('[data-theme="dark"] {')[1].split('\n}')[0];
+  assert.match(dark, /--switch-thumb-fill: var\(--palette-base-white\);/);
+  // An alias straight to a primitive has no Dark value to follow.
+  assert.doesNotMatch(dark, /--switch-track-fixed/);
+});

@@ -125,11 +125,11 @@ Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 a
 **Library phase (steps 5–10), standard engine.** For every set, bottom-up:
 1. Build its private parts and sets from the page file, into the page's holding frames (`workflow/INITIATOR.md` Part B §6, *Figma tools*). Use the library kit (`kit/tools/figma-libkit.js`, cached once with `node kit/tools/fast-cache.mjs --library`): the call then holds only the set's structure, and binding helpers are never re-written per build.
 2. Default mode: run `kit/tools/figma-audit.js` on the page with `LIBRARY = true`; it must report `fail` = 0. Fast mode: skip it; the audit runs on call.
-3. Default mode: export its sets with `kit/tools/figma-export-sets.js`. Fast mode: the build call returns ids and counts only; one read-only `kit/tools/figma-registry.js` call at the end of the library phase writes every set file at once (`node kit/tools/registry.mjs`).
+3. Default mode: export its sets with `kit/tools/figma-export-sets.js`. Fast mode: the build call returns ids and counts only; one read-only `kit/tools/figma-registry.js` call at the end of the library phase writes every set file at once (`node kit/tools/registry.mjs`), then F0 refreshes the token base with the hash export (`workflow/FAST.md` F0), so the docs-data agents read the file as built.
 4. Mark the library entry `done`, with its evidence (`node kit/tools/ledger.mjs --slug {slug} --done "library:{id}"`).
 
 **Documentation phase (steps 11–20).** For every page:
-1. Write its copy file first (`workflow/COPY.md`). Fast mode with agents: brief them from `workflow/templates/fast-brief.md`.
+1. Write its copy file first (`workflow/COPY.md`). Fast mode with agents: brief them from `workflow/templates/fast-brief.md`, and don't wait for all of them: the cache, the first batches and, with the site, its preparation run meanwhile (`workflow/FAST.md` §5, *While F1 runs*).
 2. Draw the page with the engine from Q1, using only sets from the snapshots. Fast mode: `kit/tools/fast-pack.mjs --batch` packs the ready pages into a few calls (`workflow/FAST.md` F4).
 3. Default mode: check that the page's own audit reports `fail` = 0. Fast mode: no audit; the manifest has passed `kit/tools/fast-pack.mjs --check` before the call.
 4. Mark the docs entry `done` in the ledger, with its evidence. Fast mode: `node kit/tools/ledger.mjs --slug {slug} --render '<the batch return>'` marks every page of a batch at once.

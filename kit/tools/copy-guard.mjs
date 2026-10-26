@@ -170,7 +170,9 @@ export function checkBuild(slug) {
     try { errs.push(...knowledgeErrors(jsonStrings(JSON.parse(fs.readFileSync(path.join(fast, m), 'utf8'))).join('\n'), `fast/${m}`)); } catch {}
   }
   const docs = path.join(ROOT, 'workspace', 'output', slug, 'web', 'src', 'docs');
-  const walk = (d) => { if (!fs.existsSync(d)) return; for (const e of fs.readdirSync(d, { withFileTypes: true })) { const f = path.join(d, e.name); if (e.isDirectory()) walk(f); else if (/\.(tsx?|json)$/.test(e.name) && !e.name.endsWith('.gen.json')) { const strs = [...fs.readFileSync(f, 'utf8').matchAll(/(["'`])((?:(?!\1)[^\\\n]|\\.){12,}?)\1/g)].map((m) => m[2]).filter((s) => /\s/.test(s)); errs.push(...knowledgeErrors(strs.join('\n'), path.relative(path.join(ROOT, 'workspace', 'output', slug), f))); } } };
+  // SVG path data (d="M1 1 L1 15 …") is drawing, not copy: its commands read as principle ids.
+  const svgPath = /^[MLHVCSQTAZ\d\s.,-]+$/i;
+  const walk = (d) => { if (!fs.existsSync(d)) return; for (const e of fs.readdirSync(d, { withFileTypes: true })) { const f = path.join(d, e.name); if (e.isDirectory()) walk(f); else if (/\.(tsx?|json)$/.test(e.name) && !e.name.endsWith('.gen.json')) { const strs = [...fs.readFileSync(f, 'utf8').matchAll(/(["'`])((?:(?!\1)[^\\\n]|\\.){12,}?)\1/g)].map((m) => m[2]).filter((s) => /\s/.test(s) && !svgPath.test(s)); errs.push(...knowledgeErrors(strs.join('\n'), path.relative(path.join(ROOT, 'workspace', 'output', slug), f))); } } };
   walk(docs);
   return errs;
 }

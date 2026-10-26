@@ -88,7 +88,14 @@ function resolvedLiteral(name, modes) {
 }
 
 const isColor = (v) => v.type === 'COLOR';
-const modeful = (v) => Object.keys(v.values).some((m) => DARK.includes(m));
+// A variable is modeful when it has a Dark value, or when its alias chain reaches one (a single-mode
+// component or documentation token that aliases a Light/Dark role needs its own Dark declaration).
+const modeful = (v, guard = 0) => {
+  if (Object.keys(v.values).some((m) => DARK.includes(m))) return true;
+  const r = Object.values(v.values)[0];
+  const next = r && typeof r === 'object' && r.alias ? byName.get(r.alias) : null;
+  return !!next && guard < 10 && modeful(next, guard + 1);
+};
 const primitives = src.variables.filter((v) => v.collection === 'Primitives');
 const others = src.variables.filter((v) => v.collection !== 'Primitives');
 

@@ -13,7 +13,8 @@
 //                                  Primitives hidden from publishing. Returns the count.
 //   K.v(name) / K.paint(name)      a variable / a solid paint bound to it
 //   K.fill, K.stroke, K.pad, K.pad4, K.gap, K.radius, K.size, K.minW   bind node properties to variables
-//   K.AL(dir, name), K.FR(name)    an auto-layout frame / a plain frame, both without fill
+//   K.AL(dir, name), K.FR(name)    an auto-layout frame (strokes outside layout) / a plain frame, both without fill
+//   K.arc(parent, D, w, color, start?, end?, name?)   a ring or ring segment (never a pie wedge), inset by half its width
 //   await K.text(parent, chars, style, color, name)   text with a text style and a color role
 //   await K.effect(node, style)    apply an effect style by name
 //   await K.loadPage(name)         load a page and index its components; K.comp(name), K.icon('general/x')
@@ -32,14 +33,29 @@ async function libkit(figma) {
   const v = (n) => { const x = V.get(n); if (!x) throw new Error('no variable ' + n); return x; };
   const paint = (n) => figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }, 'color', v(n));
   const fill = (node, n) => { node.fills = n ? [paint(n)] : []; return node; };
-  const stroke = (node, n, w, align) => { node.strokes = [paint(n)]; node.strokeAlign = align || 'INSIDE'; node.setBoundVariable('strokeWeight', v(w || 'border/width/default')); return node; };
+  // New auto-layout frames count their stroke in layout, so a bordered hug-sized variant would grow by the stroke width.
+  const stroke = (node, n, w, align) => { node.strokes = [paint(n)]; node.strokeAlign = align || 'INSIDE'; node.setBoundVariable('strokeWeight', v(w || 'border/width/default')); if ('strokesIncludedInLayout' in node) node.strokesIncludedInLayout = false; return node; };
   const pad = (node, x, y) => { if (x) { node.setBoundVariable('paddingLeft', v(x)); node.setBoundVariable('paddingRight', v(x)); } if (y) { node.setBoundVariable('paddingTop', v(y)); node.setBoundVariable('paddingBottom', v(y)); } return node; };
   const pad4 = (node, t, r, b, l) => { for (const [k, n] of [['paddingTop', t], ['paddingRight', r], ['paddingBottom', b], ['paddingLeft', l]]) if (n) node.setBoundVariable(k, v(n)); return node; };
   const gap = (node, n) => { node.setBoundVariable('itemSpacing', v(n)); return node; };
   const radius = (node, n) => { for (const k of ['topLeftRadius', 'topRightRadius', 'bottomLeftRadius', 'bottomRightRadius']) node.setBoundVariable(k, v(n)); return node; };
   const size = (node, w, h) => { if (w) node.setBoundVariable('width', v(w)); if (h) node.setBoundVariable('height', v(h)); return node; };
   const minW = (node, n) => { node.setBoundVariable('minWidth', v(n)); return node; };
-  const AL = (dir, name, props) => { const f = figma.createAutoLayout(dir, Object.assign({ name }, props || {})); f.fills = []; return f; };
+  const AL = (dir, name, props) => { const f = figma.createAutoLayout(dir, Object.assign({ name }, props || {})); f.fills = []; f.strokesIncludedInLayout = false; return f; };
+  // A ring or ring segment (Spinner, Progress) in a D × D box, from `start` to `end` in radians (0 = 3 o'clock, clockwise;
+  // both left out = a full ring). innerRadius 0 would draw a pie wedge whose stroke also runs along both radii, so the
+  // ring is a hairline (innerRadius ≈ 1) with a centred stroke, inset by half the width so its outer edge meets the box.
+  // `w` is a width variable (bound) or a number.
+  const arc = (parent, D, w, color, start, end, name) => {
+    const e = figma.createEllipse(); parent.appendChild(e); e.name = name || 'Arc';
+    if (parent.layoutMode && parent.layoutMode !== 'NONE') e.layoutPositioning = 'ABSOLUTE';
+    let t = w;
+    if (typeof w === 'string') { e.setBoundVariable('strokeWeight', v(w)); t = v(w).resolveForConsumer(e).value; } else e.strokeWeight = w;
+    e.fills = []; e.strokes = [paint(color)]; e.strokeAlign = 'CENTER'; e.strokeCap = 'ROUND';
+    e.arcData = { startingAngle: start || 0, endingAngle: end == null ? 2 * Math.PI : end, innerRadius: 0.9999 };
+    e.resize(D - t, D - t); e.x = t / 2; e.y = t / 2;
+    return e;
+  };
   const FR = (name) => { const f = figma.createFrame(); f.name = name; f.fills = []; return f; };
 
   // Variables from rows. A component token aliases a semantic token (specs/SYSTEM.md Part C §1).
@@ -123,5 +139,5 @@ async function libkit(figma) {
   const props = (set) => Object.fromEntries(Object.entries(set.componentPropertyDefinitions).map(([k, d]) => [k.split('#')[0], d.type === 'VARIANT' ? d.variantOptions : d.type === 'BOOLEAN' ? 'BOOLEAN:' + d.defaultValue : d.type]));
   const pageOf = (n) => { let p = n; while (p && p.type !== 'PAGE') p = p.parent; return p; };
   const entry = (set) => ({ id: set.id, name: set.name, type: set.type, page: (pageOf(set) || {}).name, props: set.type === 'COMPONENT_SET' || !(set.parent && set.parent.type === 'COMPONENT_SET') ? props(set) : {}, variants: set.type === 'COMPONENT_SET' ? set.children.length : 1, default: set.type === 'COMPONENT_SET' ? set.defaultVariant.name : undefined });
-  return { V, TS, ES, v, paint, fill, stroke, pad, pad4, gap, radius, size, minW, AL, FR, tokens, text, effect, loadPage, comp, comps, icon, iconInst, matrix, vname, variant, holder, combine, props, entry };
+  return { V, TS, ES, v, paint, fill, stroke, pad, pad4, gap, radius, size, minW, AL, FR, arc, tokens, text, effect, loadPage, comp, comps, icon, iconInst, matrix, vname, variant, holder, combine, props, entry };
 }
