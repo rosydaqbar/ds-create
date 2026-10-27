@@ -57,7 +57,7 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 *Why:* pasting each page's full copy into the check would have cost tens of kilobytes per call. Fingerprints checked 716 targets on 64 pages in two calls.
 *Check:* a whole-file verification takes one to three calls, and returns only mismatches.
 
-**G41. Check cached code by its letters, not its bytes.** The `use_figma` tool reformats code before it runs, so `toString()` never matches the source byte for byte. A caching call compares a hash of the function's letters only, and refuses to save on a mismatch (`kit/tools/fast-cache.mjs`).
+**G41. Check cached code by its letters, not its bytes.** The `use_figma` tool reformats code before it runs, so `toString()` never matches the source byte for byte. A caching call compares a hash of the function's letters only, and refuses to save on a mismatch (`kit/tools/build/cache.mjs`).
 *Why:* the first byte-hash check failed although the code arrived intact. A check that always fails would have been dropped, letting a real typo through.
 *Check:* every caching call answers `stored: true`.
 
@@ -121,7 +121,7 @@ Lessons from real builds, turned into fixed rules. Every rule here broke a real 
 
 **G49. An open arc is an ellipse with `innerRadius` near 1 and a centered stroke, not `innerRadius: 0`.** With `arcData.innerRadius = 0`, Figma strokes the arc as a pie wedge, with two lines to the center. Set `innerRadius: 0.999`, `strokeAlign: 'CENTER'`, `strokeJoin` and `strokeCap: 'ROUND'`. Inset the ellipse by half the stroke on every side, so the arc stays inside the box and lines up with an inside-stroked ring.
 *Why:* the Spinner's active segment first rendered as a wedge in every variant, and again in a later build that drew its arcs by hand.
-*How:* draw rings and arcs with `K.arc()` (`kit/tools/figma-libkit.js`), which sets all of this.
+*How:* draw rings and arcs with `K.arc()` (`kit/tools/figma/libkit.js`), which sets all of this.
 *Check:* a screenshot of the set shows an arc with round ends and no lines to the center.
 
 **G56. Keep strokes out of auto-layout sizing.** A new auto-layout frame counts its stroke in layout (`strokesIncludedInLayout` true), so a bordered hug-sized variant comes out two stroke widths larger than the same variant without a border.
@@ -190,7 +190,7 @@ Also turn clip content on: `figma.createComponent()` starts with it off, and the
 
 **G36. Write every doc sentence in the page's copy file first.** Figma and the site take their text from it (`workflow/COPY.md`), never from text typed only in a frame or a story. A direct edit in Figma is folded back into the copy file the same day.
 *Why:* frame text that existed only in Figma drifted from the site, and every review had to be done twice.
-*Check:* `kit/tools/figma-copy.js` `diff` reports 0 differences on every page, and the site's text matches the copy file's `both` and `web` lines.
+*Check:* `kit/tools/figma/copy.js` `diff` reports 0 differences on every page, and the site's text matches the copy file's `both` and `web` lines.
 
 **G37. Never let a text tool read or write inside a main component.** Tools that read or set doc-frame text skip component sets and components shown in a frame, and skip text that still reads as its own layer name.
 *Why:* a copy extract walked into a component set displayed on its doc page and picked up the component's own layer text. An apply would have changed the main component.
@@ -202,7 +202,7 @@ Also turn clip content on: `figma.createComponent()` starts with it off, and the
 
 **G43. Use finished builds as references, never as sources.** `examples/` may be read to understand a pattern. Nothing is copied from it (sentences, manifests, page data, values, code), and it never replaces a step: every page is still written from its spec, the templates and tools, this system's inputs and its own Figma file. Other systems' `workspace/input/` and `workspace/output/` folders are not read at all.
 *Why:* in fast mode, an agent filled pages from a finished example instead of writing the manifests and copy from the build's own sources, which made the fast-mode rules pointless.
-*Check:* `kit/tools/fast-pack.mjs --check` reports no copy line taken word for word from an example and no line naming one.
+*Check:* `kit/tools/build/pack.mjs --check` reports no copy line taken word for word from an example and no line naming one.
 
 # 4. Docs site
 

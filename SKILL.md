@@ -28,8 +28,12 @@ Novelin is a design system built with ds-create. Its documentation site brings t
 2. **Copy it when there is none.** Ask once where it should live (default `~/ds-create`), then copy the installed skill folder there:
 
    ```bash
-   cp -R "<installed skill folder>" ~/ds-create
+   rsync -a --include='/workspace/input/README.md' --include='/workspace/output/README.md' \
+     --exclude='/workspace/input/*' --exclude='/workspace/output/*' \
+     "<installed skill folder>/" ~/ds-create/
    ```
+
+   The copy includes the workspace README templates and excludes saved project inputs, outputs, sessions, and caches.
 
 3. **Load the full skill** from `skills/ds-create/SKILL.md` in the workspace, or register that folder through the client's own skill-discovery mechanism. Do not require a particular agent's settings folder or command syntax.
 4. **Work from the workspace root,** and follow `skills/ds-create/SKILL.md` there. It routes each command to its reference file in `skills/ds-create/reference/`.
@@ -47,10 +51,10 @@ rsync -a --exclude workspace/input/ --exclude workspace/output/ "<installed skil
 | The Figma MCP with the `use_figma` tool, signed in | every Figma write goes through it; the `figma-use` skill is loaded before the first call |
 | A Figma file with edit access, or permission to create one | the system is built in it |
 | The brand's typefaces installed | the type styles use them |
-| Main agent with authorized workspace access; a host event hook for automatic wake | Node waits; preparation events are handled in the existing main instance |
+| Main agent with authorized workspace access and a compatible MCP connection | Node waits; preparation events are handled in the existing main instance |
 | Node 20 or later | the local DS Create Builder on every init, the tools in `kit/tools/` and the docs site |
 
-`/ds-create init-web` opens Builder before context collection; only Node is needed to open it. A portable Node preparation listener waits without AI polling and sends events through a supported host hook to the existing main instance. No subagent, agent/IDE CLI or product-specific bridge is launched. Transport and host receiver readiness are checked separately; a host without current-chat wake support is reported honestly. Preparation stops at review; publication uses its separate approved MCP continuation and the agent's existing Figma connection. See skills/ds-create/reference/background-worker.md. `/ds-create init` checks Node and inputs first, opens the local foundation draft in Builder for review, then checks Figma access and installed fonts before generating the approved revision. Missing Figma access does not block a new system's local preview.
+`/ds-create init-web` starts Builder before context collection; only Node is needed. Verify the local health endpoint and give the user the URL to open and fill in themselves. Do not attach a browser debugger, automate the browser, or create a tab group for Builder. Node waits through one pending tool request: `ds_create_prepare_wait` on DS Create MCP, or the Node utility's `wait` action for terminal tool hosts. Its result resumes the same main agent when Prepare foundations is submitted. No subagent, agent/IDE CLI, vendor API or idle model polling. Keep the receiving tool call pending for at most five minutes; on `wait-expired`, end the turn without automatically rearming and let the user continue with Builder’s short prompt; ending the main turn and testing stdout while active does not establish an idle-chat wake. Cancellation or host timeout detaches readiness without claiming/retrying a job. Preparation stops at review; publication keeps its separate approved MCP continuation. See skills/ds-create/reference/background-worker.md. `/ds-create init` checks Node and inputs first, provides the Builder link for local foundation review, then checks Figma access and installed fonts before generating the approved revision. Missing Figma access does not block a new system's local preview.
 
 # 3. Commands
 
@@ -102,7 +106,7 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 # 6. Rules every build keeps
 
 - **The inputs are the ground truth.** They are read before any question is asked, and every answer shows where it came from.
-- **The repo stays brand-agnostic.** Brand names, file keys and product copy live only in `workspace/input/`, `workspace/output/` and the Figma file.
+- **The repo stays brand-agnostic.** Brand names, file keys and product copy live only in `workspace/input/`, `workspace/output/` and the Figma file. Skill distributions contain only the workspace README templates, never saved project data or runtime sessions.
 - **Examples are references, never sources.** `examples/` explains a pattern; nothing is copied from it.
 - **No repo edits during a build.** Lessons go into the build notes, and into the repo after the round, when the maintainer asks.
 - **The specs win.** A system's own knowledge and frozen values come first, then the specs. The repo's `knowledge/` explains the reasoning, and never overrides a spec.

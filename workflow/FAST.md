@@ -8,15 +8,15 @@ Fast mode changes how pages are drawn, not what they contain. The specs (`specs/
 
 | File | What it does |
 | --- | --- |
-| `kit/tools/figma-fastbuild.js` | the renderer: `render(payload)` draws one page of any type, from data |
-| `kit/tools/fast-pack.mjs` | checks a page's manifest and copy file, and prints its payload, its page call (`--call`) or batch calls of several pages (`--batch`) |
-| `kit/tools/fast-cache.mjs` | writes the calls that cache the doc builder and the renderer in the file (packed: two calls), plus a status call that says which are missing; `--library` caches the library kit. The audit is cached only with `--audit`, for a QA run |
-| `kit/tools/figma-libkit.js` | the library kit: binding, text, icon, matrix and combine helpers for building sets (steps 6–10), loaded in one line |
-| `kit/tools/figma-registry.js` · `kit/tools/registry.mjs` | one read-only call lists every set (ids, properties, variant counts) and icon of the file; the local tool writes the set files from it |
-| `kit/tools/ledger.mjs` | marks ledger entries from the command line, a batch return at once (`--render`), and refuses out-of-order marks |
+| `kit/tools/figma/fastbuild.js` | the renderer: `render(payload)` draws one page of any type, from data |
+| `kit/tools/build/pack.mjs` | checks a page's manifest and copy file, and prints its payload, its page call (`--call`) or batch calls of several pages (`--batch`) |
+| `kit/tools/build/cache.mjs` | writes the calls that cache the doc builder and the renderer in the file (packed: two calls), plus a status call that says which are missing; `--library` caches the library kit. The audit is cached only with `--audit`, for a QA run |
+| `kit/tools/figma/libkit.js` | the library kit: binding, text, icon, matrix and combine helpers for building sets (steps 6–10), loaded in one line |
+| `kit/tools/figma/registry.js` · `kit/tools/build/registry.mjs` | one read-only call lists every set (ids, properties, variant counts) and icon of the file; the local tool writes the set files from it |
+| `kit/tools/build/ledger.mjs` | marks ledger entries from the command line, a batch return at once (`--render`), and refuses out-of-order marks |
 | `workflow/templates/fast-brief.md` | the brief for F1 agents, filled per build instead of written |
-| `kit/tools/icons-lucide.mjs` | writes the calls that create the icon library on 1.7 from Lucide, from the site's icon registry (`specs/foundations/1.7-iconography.md` §1) |
-| `kit/tools/figma-dockit.js` | creates the `Documentation` collection and the Doc kit in a file that has none |
+| `kit/tools/figma/icons.mjs` | writes the calls that create the icon library on 1.7 from Lucide, from the site's icon registry (`specs/foundations/1.7-iconography.md` §1) |
+| `kit/tools/figma/dockit.js` | creates the `Documentation` collection and the Doc kit in a file that has none |
 | `workflow/templates/fast/` | the default manifest of every reading page (`00`–`02`, `1.1`–`1.8`) and example manifests for component and layout pages |
 
 The build status is in §10.
@@ -54,7 +54,7 @@ Two files per page, both in `workspace/output/{system-slug}/`. Neither holds a v
 **Where the data comes from.**
 - **Sources, only from this build:** the page spec, the default manifest (`workflow/templates/fast/`), this system's inputs and copy files, its set snapshots (`workspace/output/{slug}/figma/sets/`) and its Figma file.
 - **`examples/` is a reference only.** It may be read to understand how a page or visual works. Nothing is copied from it, and it never replaces writing the manifest and copy file from the sources above: a page filled from a finished example skips the rules this mode exists for.
-- `kit/tools/fast-pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`workflow/GOTCHAS.md` G43).
+- `kit/tools/build/pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`workflow/GOTCHAS.md` G43).
 
 **The copy file**, `copy/{id}-{kebab name}.md`, holds every sentence (`workflow/COPY.md`).
 
@@ -85,7 +85,7 @@ Rules:
 - Every `title` (example, topic, block) is a title in the page's copy file, spelled the same. The renderer takes the text from the copy file by title.
 - An instance recipe names a set, its variant properties and its text or boolean properties, by the names in the file. Nothing else is set on an instance: no fills, sizes or overrides that change a value.
 - A topic without `visual` is text only. A topic with `visual` names an entry of the catalog (§4) and its inputs.
-- Ids come from the build's set files (`workspace/output/{system-slug}/figma/sets/`, written by `kit/tools/registry.mjs`), never typed by hand. An instance-swap property may name an icon (`"Icon": "Icon/general/copy"`): fast-pack turns it into the id from `figma/icons.json`.
+- Ids come from the build's set files (`workspace/output/{system-slug}/figma/sets/`, written by `kit/tools/build/registry.mjs`), never typed by hand. An instance-swap property may name an icon (`"Icon": "Icon/general/copy"`): fast-pack turns it into the id from `figma/icons.json`.
 - `{system}` in a manifest string is the ledger's `system` (the default 00 Cover manifest titles the cover `{system} design system`).
 - Build flags come from the ledger: with `flags.guidelines: false` (`/ds-create build --no-gl`), `fast-pack --init` copies the reading manifests without their `Guidelines` frame, and packing drops every Guidelines frame, topic, Accessibility and In apps list, and adds `skip: ["gl"]` to component pages. Agents don't write them.
 
@@ -99,7 +99,7 @@ Fields per page type:
 | `component` | `2.x`–`4.x` | `sets`, `examples`, `topics` |
 | `layout` | `5.x` | `sets`, `regions` (optional fixed-region pattern), `topics` |
 
-`kit/tools/fast-pack.mjs` checks a manifest against its page type and its copy file (unknown title, unknown visual, missing input) and prints the payload for the page call.
+`kit/tools/build/pack.mjs` checks a manifest against its page type and its copy file (unknown title, unknown visual, missing input) and prints the payload for the page call.
 
 # 4. The visual catalog
 
@@ -129,9 +129,9 @@ Named visuals, each always drawn the same way from its inputs. The renderer impl
 The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes only steps 11–20, as follows.
 
 **Library in a fast round (steps 6–10).** The sets are still built from their page files by the standard engine; three things make it lighter:
-- **The library kit.** `node kit/tools/fast-cache.mjs --out workspace/output/{slug}/fast/cache --library` writes one call (~6 KB) that caches `kit/tools/figma-libkit.js`; every set call then loads it in one line (`K.tokens`, `K.fill`, `K.text`, `K.iconInst`, `K.matrix`, `K.combine`, …) and holds only the set's own structure. Never re-write binding helpers in a build.
+- **The library kit.** `node kit/tools/build/cache.mjs --out workspace/output/{slug}/fast/cache --library` writes one call (~6 KB) that caches `kit/tools/figma/libkit.js`; every set call then loads it in one line (`K.tokens`, `K.fill`, `K.text`, `K.iconInst`, `K.matrix`, `K.combine`, …) and holds only the set's own structure. Never re-write binding helpers in a build.
 - **Small returns.** A set call returns its set and part ids and counts, nothing else: no snapshot, no layer dump (a full export of a 360-variant set came back at 140 KB and only filled the context).
-- **One registry at the end.** After the last set, one read-only `kit/tools/figma-registry.js` call (~12 KB back for 30 sets and 170 icons) and `node kit/tools/registry.mjs --slug {slug}` write every set file and the icon map. This is the library gate's export in a fast round; the full layer snapshot (`kit/tools/figma-export-sets.js`) is exported on call, for QA or a site agent that needs layers. Re-run the registry when a later step changes a set.
+- **One registry at the end.** After the last set, one read-only `kit/tools/figma/registry.js` call (~12 KB back for 30 sets and 170 icons) and `node kit/tools/build/registry.mjs --slug {slug}` write every set file and the icon map. This is the library gate's export in a fast round; the full layer snapshot (`kit/tools/figma/export-sets.js`) is exported on call, for QA or a site agent that needs layers. Re-run the registry when a later step changes a set.
 
 **F0 · Base (right after the registry, read-only).** F1 agents take collection names, component tokens and page ids from the build's token base, so it has to describe the file as built. Init's token plan has no Components collection and no page ids: agents reading it wrote "no component tokens" and guessed every `figma:` line.
 1. Send `kit/web/scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back). Save the return as `workspace/output/{slug}/figma/hash.json`.
@@ -141,10 +141,10 @@ The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes onl
 The site's W2 later fetches only what changed after F0 (usually the `Documentation` collection from F3), so a round with the site fetches the component rows once, not twice. In a Figma-only round, F0 is the only export.
 
 **F1 · Data (after F0, no Figma calls).** The manifests name real sets, so they are written once steps 6–10 are done and the set snapshots exist.
-1. Run `node kit/tools/fast-pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `workspace/output/{slug}/fast/`.
-2. Plan the information through `workflow/EDITORIAL.md` before drafting, then write the copy file of every in-scope page (`workflow/COPY.md`). Adapt manifest topic titles/order to the plan rather than copying a visible outline; keep copy/manifest titles matched and all required technical visuals covered. Read the page's knowledge first (`workspace/input/{slug}/knowledge/`, `workspace/input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
+1. Run `node kit/tools/build/pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `workspace/output/{slug}/fast/`.
+2. Plan the information through `workflow/EDITORIAL.md` before drafting, then write the copy file of every in-scope page (`workflow/COPY.md`). Adapt manifest topic titles/order to the plan rather than copying a visible outline; keep copy/manifest titles matched and all required technical visuals covered. Read the page's knowledge first (`workspace/input/{slug}/knowledge/`, `workspace/input/README.md` I7): its rules override the default manifest and the page spec. Then read the `knowledge/` topics the index lists for the page (`node kit/tools/content/guard.mjs --slug {slug} --page {id}` prints them). Let their reasoning shape the copy, in the system's own words, never cited, and add them to the page's `loaded` in the ledger. **This is a hard rule:** `fast-pack` refuses a page without them (`workflow/COPY.md` §1).
 3. Fill each manifest's `todo` visuals with real sets, or remove the visual. Write one manifest per component and layout page (`workflow/templates/fast/component.example.json`, `layout.example.json`).
-4. Run `node kit/tools/fast-pack.mjs --slug {slug} --check` until every page is ready.
+4. Run `node kit/tools/build/pack.mjs --slug {slug} --check` until every page is ready.
 
 Agents write F1 in parallel from `workflow/templates/fast-brief.md` (fill its header, give each agent 4–7 pages). F1 is the largest token cost of a round: an agent that has the brief, the set files and the build notes doesn't need to rediscover the build. Give the earliest pages to the smallest agents (00 and 01 together, 02 on its own), so F4 can start while later agents still write.
 
@@ -162,15 +162,15 @@ Agents write F1 in parallel from `workflow/templates/fast-brief.md` (fill its he
 The first full fast round waited about 25 minutes on this: the cache, the first batch and the site agents each sat behind work they didn't need.
 
 **F3 · Bootstrap (step 11).**
-- Run `node kit/tools/fast-cache.mjs --out workspace/output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
+- Run `node kit/tools/build/cache.mjs --out workspace/output/{slug}/fast/cache` (add `--accepted` with the build's approved exceptions, and `--pages reading` when the round has no Parts to Layouts pages).
 - Send `cache-status.js` first. It is read-only and answers which keys the file still needs. Send only the calls that hold a needed key, one at a time; each key answers `stored: true`, or refuses to save when its code arrived changed (`workflow/GOTCHAS.md` G41).
 - Caching costs time: about 75 KB of minified code, typed out in full. The keys are packed into two calls under the 50,000-character limit, so it is two round trips, not four. The status call makes a retry, a resumed session or a later round skip what is already current: the keys stay in the file until the last round's step 21 (`workflow/GOTCHAS.md` G8), so a second round usually sends nothing.
-- When the file has no Doc kit or `Documentation` collection, create them with `kit/tools/figma-dockit.js`: first `{ only: 'collection' }`, then `{ only: 'kit', page, mark, system, footer, meta }`. Every doc variable aliases the brand token `workflow/DOCFRAMES.md` §1 names; the result lists any that fell back to a default.
+- When the file has no Doc kit or `Documentation` collection, create them with `kit/tools/figma/dockit.js`: first `{ only: 'collection' }`, then `{ only: 'kit', page, mark, system, footer, meta }`. Every doc variable aliases the brand token `workflow/DOCFRAMES.md` §1 names; the result lists any that fell back to a default.
 
-**Icons (step 6, library).** A new system's icon library comes from `node kit/tools/icons-lucide.mjs --slug {slug}` at its library step, before any Part: send its calls (usually one, about 30 KB). The 1.7 doc page is rendered later, at step 15. The agent doesn't pick, map or draw icons.
+**Icons (step 6, library).** A new system's icon library comes from `node kit/tools/figma/icons.mjs --slug {slug}` at its library step, before any Part: send its calls (usually one, about 30 KB). The 1.7 doc page is rendered later, at step 15. The agent doesn't pick, map or draw icons.
 
-**F4 · Pages (steps 12–20).** Several pages per call, in build-sequence order. `node kit/tools/fast-pack.mjs --slug {slug} --batch` checks every open docs page in ledger order and writes `workspace/output/{slug}/fast/calls/batch-{n}.js`: the renderer is loaded once per call and each call holds as many pages as fit in ~45 KB (a full round of 30 pages is 4–5 calls, not 32). It stops before the first page that isn't ready, so order holds. A manifest marked `"solo": true` gets a call of its own: the default 02 Tokens manifest is one, because its primitive table takes most of the 70 s budget alone.
-- Send the batches in order, one at a time. Each returns `{ done: [{ id, frames }], failed, next }`; mark it with `node kit/tools/ledger.mjs --slug {slug} --render '<the return>'`.
+**F4 · Pages (steps 12–20).** Several pages per call, in build-sequence order. `node kit/tools/build/pack.mjs --slug {slug} --batch` checks every open docs page in ledger order and writes `workspace/output/{slug}/fast/calls/batch-{n}.js`: the renderer is loaded once per call and each call holds as many pages as fit in ~45 KB (a full round of 30 pages is 4–5 calls, not 32). It stops before the first page that isn't ready, so order holds. A manifest marked `"solo": true` gets a call of its own: the default 02 Tokens manifest is one, because its primitive table takes most of the 70 s budget alone.
+- Send the batches in order, one at a time. Each returns `{ done: [{ id, frames }], failed, next }`; mark it with `node kit/tools/build/ledger.mjs --slug {slug} --render '<the return>'`.
 - A batch stops at the first page that throws (nothing after it is drawn) and before a page once 70 s have passed. Re-run `--batch`: it starts at the first open page.
 - `--page {id} --call` still prints a single-page call, for a re-draw after a review.
 
@@ -218,9 +218,9 @@ Agreed with the maintainer on 2026-10-08:
 
 | Phase | Delivers | Covers | Status |
 | --- | --- | --- | --- |
-| 1 | manifest checks (`kit/tools/fast-pack.mjs`), `render()` for component pages, the catalog, `kit/tools/fast-cache.mjs` | `2.x`–`4.x` | built; trial passed (2.1 on a copy: every frame drawn from data, audit 0 fail) |
+| 1 | manifest checks (`kit/tools/build/pack.mjs`), `render()` for component pages, the catalog, `kit/tools/build/cache.mjs` | `2.x`–`4.x` | built; trial passed (2.1 on a copy: every frame drawn from data, audit 0 fail) |
 | 2 | blocks and topics frames for guidance and foundation pages, default manifests | `00`–`02`, `1.1`–`1.8` | built; trial passed on 1.4 and 1.6 (audit 0 fail); the other pages are untried |
-| 3 | `kit/tools/figma-dockit.js`: the Doc kit and the `Documentation` collection from code | bootstrap | built; the kit trial passed (16 parts from the file's tokens) |
+| 3 | `kit/tools/figma/dockit.js`: the Doc kit and the `Documentation` collection from code | bootstrap | built; the kit trial passed (16 parts from the file's tokens) |
 | 4 | layout pages through `render()` (`layoutPage`), then a full fast build on a copy of an existing file | `5.x` | renderer built; full trial still to run |
 | 5 | docs-site story skeletons from the manifests | site | planned |
 | 6 | streamlining from the first full fast round (2026-10-15): library kit, registry, packed cache, batch calls, ledger tool, cache kept between rounds, build flags, hash export for the site, site scope script | all phases | built; tools tested on that round's data and a copy of the template, registry and hash export on its Figma file |

@@ -25,7 +25,7 @@ Next         {the one command to run next}
 
 Without a ledger, say so, and suggest `/ds-create init`. When `workspace/input/` holds several systems, show one line per system.
 
-Read Manager availability with `node kit/tools/manager.mjs status --slug {slug}`; it checks the saved local instance and makes no Figma calls. Never report a saved URL as running without its health check. Suggest `node kit/tools/manager.mjs start --slug {slug}` when it is stopped.
+Read Manager availability with `node kit/manager/cli.mjs status --slug {slug}`; it checks the saved local instance and makes no Figma calls. Never report a saved URL as running without its health check. Suggest `node kit/manager/cli.mjs start --slug {slug}` when it is stopped.
 
 Use the status command's current `source` and `initDone` fields for local drafts; old done steps alone are insufficient after draft changes. Pending review: ask the builder to review the saved revision; approved but not synced: resume init for Figma. Never infer approval from browser controller changes.
 

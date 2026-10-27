@@ -11,7 +11,8 @@ import { Divider } from '../src/components/parts/Divider';
 import { TextField, TextareaField } from '../src/components/components/TextField';
 import { ChoiceCard } from '../src/components/components/ChoiceField';
 import { StepNavigation } from '../src/components/components/StepNavigation';
-import { interfaceModes, interfacePlatforms } from '../../manager/setup-options.mjs';
+import { interfaceModes, interfacePlatforms } from '../../manager/shared/interface.mjs';
+import { builderSettings } from '../../manager/shared/ui-settings.mjs';
 
 function SettingRow({ label, id, htmlFor, required, optional, children }: {
   label: string; id?: string; htmlFor?: string; required?: boolean; optional?: boolean; children: ReactNode;
@@ -103,4 +104,32 @@ export const markup = renderToStaticMarkup(
       <Button id="setup-review" hidden label="Review foundations" />
     </div>
   </dialog>
+);
+
+
+/** Status controls share the same components as Context, rendered for Builder's static client. */
+export const workerMarkup = renderToStaticMarkup(
+  <div id="worker-shell">
+  <section id="worker-connection" className="shrink-0 min-w-0 px-xl py-lg border-b-(length:--border-width-default) border-border-subtle bg-surface-base data-[connection=disconnected]:m-xl data-[connection=disconnected]:p-xl data-[connection=disconnected]:border-(length:--border-width-default) data-[connection=disconnected]:border-border-warning-subtle data-[connection=disconnected]:rounded-control data-[connection=disconnected]:bg-surface-raised data-[state=attention]:m-xl data-[state=attention]:p-xl data-[state=attention]:border-(length:--border-width-default) data-[state=attention]:border-border-warning-subtle data-[state=attention]:rounded-control data-[state=attention]:bg-surface-raised" aria-label="Agent status" tabIndex={-1} data-state="checking">
+    <div className="flex flex-wrap items-center justify-between gap-md">
+      <div className="flex flex-wrap items-center gap-md"><strong className="type-body-sm-semibold">Agent status</strong><span id="worker-connection-label" role="status" aria-live="polite">
+          <Badge id="worker-status-connected" size="sm" tone="success" showDot label="Connected" hidden />
+          <Badge id="worker-status-disconnected" size="sm" tone="warning" showDot label="Not connected" hidden />
+          <Badge id="worker-status-idle" size="sm" tone="neutral" showDot label="Not connected" hidden />
+          <Badge id="worker-status-delivered" size="sm" tone="info" showDot label="Request delivered" hidden />
+          <Badge id="worker-status-unknown" size="sm" tone="neutral" showDot label="Connection unavailable" />
+        </span><Button id="worker-recheck" size="sm" emphasis="tertiary" leadingIcon="general/refresh" label="Check again" /><Badge id="worker-work-summary" size="sm" tone="neutral" label="No changes needed" role="status" hidden /></div>
+      <div className="flex items-center gap-md">
+        <Button id="worker-details-toggle" size="sm" emphasis="tertiary" aria-controls="worker-details" aria-expanded="true" trailingIcon="arrows/chevron-down" label="Hide details" />
+      </div>
+    </div>
+    <div id="worker-details">
+      <p id="worker-connection-detail" className="mt-xs">Checking whether Builder events can reach your agent.</p>
+      <div id="worker-recovery" className="mt-xl" hidden>
+        <TextareaField id="worker-spawn-prompt" label="Continuation prompt" rows={builderSettings.continuationPromptRows} readOnly spellCheck={false} />
+        <div className="mt-md flex flex-wrap items-center gap-md"><Button id="worker-copy-prompt" size="sm" leadingIcon="general/copy" label="Copy continuation prompt" /><span id="worker-copy-feedback" className="text-text-secondary" role="status" aria-live="polite" /></div>
+      </div>
+    </div>
+  </section>
+  </div>
 );

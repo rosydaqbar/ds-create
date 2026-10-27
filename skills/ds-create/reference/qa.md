@@ -22,9 +22,9 @@ In YOLO, use the default.
 
 Run them read-only, batched, and within the 20 KB return limit (`workflow/GOTCHAS.md` G40).
 
-1. **Audit.** `kit/tools/figma-audit.js` on every page in scope (several pages per call), with `LIBRARY = true` for a page whose docs aren't built yet, then once in file mode (tokens: contrast, scopes, code syntax). Save each result in `workspace/output/{slug}/figma/` and in the page's ledger entry (`audit`), and compare it with the last saved one. Approved exceptions follow `workflow/INITIATOR.md` Part B, *Gates*.
+1. **Audit.** `kit/tools/figma/audit.js` on every page in scope (several pages per call), with `LIBRARY = true` for a page whose docs aren't built yet, then once in file mode (tokens: contrast, scopes, code syntax). Save each result in `workspace/output/{slug}/figma/` and in the page's ledger entry (`audit`), and compare it with the last saved one. Approved exceptions follow `workflow/INITIATOR.md` Part B, *Gates*.
 2. **Spec lists.** The QA list of each page file in scope and the completion criteria of its folder file (`workflow/INITIATOR.md` Part B §8).
-3. **Copy.** Run `node kit/web/scripts/build-copy.mjs --dir workspace/output/{slug}/copy --fingerprints {ids}`. Send its rows to `kit/tools/figma-copy.js` in `verify` mode, which returns only the mismatches.
+3. **Copy.** Run `node kit/web/scripts/build-copy.mjs --dir workspace/output/{slug}/copy --fingerprints {ids}`. Send its rows to `kit/tools/figma/copy.js` in `verify` mode, which returns only the mismatches.
 4. **Set snapshots.** For each set in scope, compare the variant count in the file with its snapshot in `workspace/output/{slug}/figma/sets/`. Re-export the stale ones only after the report, if the user agrees.
 
 # 3. Site checks

@@ -2,7 +2,7 @@
 
 How every Figma documentation frame looks: brand styling, frame families, headers, tables, swatches, matrices, anatomy, the reading pattern and the Doc kit. This was `specs/SYSTEM.md` Part B; its section numbers are unchanged, so `workflow/DOCFRAMES.md` §6.4 is the old Part B §6.4.
 
-**Load it** at the build steps that draw frames the doc builder has no helper for: the Doc kit, Cover, guidance pages, foundation palette rows and variable tables, and Screens (`workflow/INITIATOR.md` Part B §6). Load it also to change or review the builder. `kit/tools/figma-docbuilder.js` implements this file for Parts, Components, Sections and Layouts, and each of its rules cites a section here. A change here is made in the builder in the same change. The page tree, the frames each page has and the token contract stay in `specs/SYSTEM.md`.
+**Load it** at the build steps that draw frames the doc builder has no helper for: the Doc kit, Cover, guidance pages, foundation palette rows and variable tables, and Screens (`workflow/INITIATOR.md` Part B §6). Load it also to change or review the builder. `kit/tools/figma/docbuilder.js` implements this file for Parts, Components, Sections and Layouts, and each of its rules cites a section here. A change here is made in the builder in the same change. The page tree, the frames each page has and the token contract stay in `specs/SYSTEM.md`.
 
 # 0. Terminology contract
 
@@ -703,9 +703,9 @@ Global QA:
 
 All component-specific QA belongs to the corresponding file under `specs/parts/`, `specs/components/`, `specs/sections/`, `specs/layouts/` or `specs/screens/` and must be executed from there.
 
-Run `kit/tools/figma-audit.js` (a read-only `use_figma` script) on every built page and once on the file. A page with `fail` > 0 fails QA: raw values inside components, unbound fills, text without a text style, effects without an effect style, wrong variant names, loose nodes or overlapping frames on the canvas, missing template frames, and color pairs below AA. Warnings (raw spacing in documentation frames, variant names outside the vocabulary) are reviewed and either fixed or explained in the page report.
+Run `kit/tools/figma/audit.js` (a read-only `use_figma` script) on every built page and once on the file. A page with `fail` > 0 fails QA: raw values inside components, unbound fills, text without a text style, effects without an effect style, wrong variant names, loose nodes or overlapping frames on the canvas, missing template frames, and color pairs below AA. Warnings (raw spacing in documentation frames, variant names outside the vocabulary) are reviewed and either fixed or explained in the page report.
 
-`finishPage` in `kit/tools/figma-docbuilder.js` runs the cached audit on every page it arranges.
+`finishPage` in `kit/tools/figma/docbuilder.js` runs the cached audit on every page it arranges.
 
 # 15. Visual teaching is part of documentation
 

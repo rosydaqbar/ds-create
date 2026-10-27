@@ -3,7 +3,7 @@
  * on 1.7 Iconography) to an icon library. Components only ever use <Icon name="general/check" />.
  *
  * The library is Lucide (ISC). This registry is also the icon set of the Figma file:
- * kit/tools/icons-lucide.mjs builds Icon/{category}/{name} on 1.7 from it, so add new icons here.
+ * kit/tools/figma/icons.mjs builds Icon/{category}/{name} on 1.7 from it, so add new icons here.
  * Only an existing file with its own icon library changes the imports; keep the names.
  */
 import type { LucideIcon } from 'lucide-react';

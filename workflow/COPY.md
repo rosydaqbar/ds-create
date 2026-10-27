@@ -25,13 +25,13 @@ workspace/output/{system-slug}/copy/
   1. **The system's own knowledge** (`workspace/input/{slug}/knowledge/`) and what its inputs say about the topic (a brand guideline that explains a choice). The user's reasoning always comes first.
   2. **The repo's `knowledge/`**, when the system has nothing on the topic. It is then the benchmark for the description: the copy follows its reasoning, in the system's words and values, never cited.
   3. **Your own reasoning**, only when neither has the topic. Write it the same way, as a designer who knows the craft, and note it in the build notes as a judgment.
-  `kit/tools/copy-guard.mjs` checks this (§7).
+  `kit/tools/content/guard.mjs` checks this (§7).
 - **Hard rule in fast mode and in YOLO.** No page is drawn until:
   1. its knowledge topics are read, and listed under the page's `loaded` in the ledger;
   2. its copy carries their reasoning;
-  3. `node kit/tools/copy-guard.mjs --slug {slug} --page {id}` passes.
+  3. `node kit/tools/content/guard.mjs --slug {slug} --page {id}` passes.
 
-  `kit/tools/fast-pack.mjs` refuses `--check`, `--page` and `--call` for a page that fails any of these.
+  `kit/tools/build/pack.mjs` refuses `--check`, `--page` and `--call` for a page that fails any of these.
 - **The citing ban holds in fast mode too.** The guard reads the copy files, the fast-mode manifests, the packed payload of each page (every string that reaches Figma) and the site's stories. Knowledge names and ids may appear only in internal records: the ledger's `loaded`, the build notes and reports to the user. They never appear in anything a reader of the docs sees. In YOLO with the standard engine, run the same check before the page's first drawing call. A failure is fixed on the spot, never noted for later, and YOLO never skips it to save time.
 
 # 2. Format
@@ -114,21 +114,21 @@ Some text is not copy, and stays out of the file:
 - **Docs site.** `npm run copy` (part of `npm run build`) parses `../copy/*.md` into `src/docs/copy.gen.json`, keeping only the site's lines (`both` and `web`). Each page's story is merged with it by page id: `both` and `web` lines replace the story's summary, when-to-use lists, guideline bodies and do / don't captions (matched by topic title), accessibility items, in-app notes, example captions (by title) and anatomy part descriptions (by part name). The story keeps the visuals and code.
 - **Figma.**
   - The doc builder's page data is filled from the `both` and `figma` lines when the page is drawn.
-  - After a review, `kit/tools/figma-copy.js` applies the edited copy to the existing frames by node id. It changes text only, and returns every place where the number of paragraphs or items no longer matches.
+  - After a review, `kit/tools/figma/copy.js` applies the edited copy to the existing frames by node id. It changes text only, and returns every place where the number of paragraphs or items no longer matches.
   - When the structure changed (a new topic, an extra paragraph), the page is rebuilt with the doc builder instead (`workflow/GOTCHAS.md` G27).
-- **Drift check.** `kit/tools/figma-copy.js` in `diff` mode compares a page's frames with its copy file and lists every difference. Run it after any direct edit in Figma, and fold the edit back into the copy file.
+- **Drift check.** `kit/tools/figma/copy.js` in `diff` mode compares a page's frames with its copy file and lists every difference. Run it after any direct edit in Figma, and fold the edit back into the copy file.
 
 # 5. Review
 
 1. Edit the copy file: change the `both` line, or the `figma` and `web` lines together, so the two surfaces keep the same meaning.
 2. Run `npm run copy` and check the site.
-3. Apply to Figma with `kit/tools/figma-copy.js` (`apply`), then run `diff` to confirm 0 differences.
+3. Apply to Figma with `kit/tools/figma/copy.js` (`apply`), then run `diff` to confirm 0 differences.
 4. Record what the review changed in `workspace/output/{system-slug}/reports/build-notes.md`. Save the user's review comments to `workspace/input/{system-slug}/chat/` (`workspace/input/README.md` I3).
 
 # 6. Adding copy files to a finished build
 
 When a build has no copy files yet:
-1. Run `kit/tools/figma-copy.js` in `extract` mode on every doc page (read-only, a few pages per call, within the 20 KB return limit).
+1. Run `kit/tools/figma/copy.js` in `extract` mode on every doc page (read-only, a few pages per call, within the 20 KB return limit).
 2. Read the site's text for the same pages from the built stories.
 3. Write one copy file per page: put each surface's lines under the same topic, and write a `both` line wherever the two say exactly the same thing.
 4. Check both surfaces: the site's text is unchanged after `npm run copy`, and `diff` reports 0 differences on every page.
@@ -139,6 +139,6 @@ Topics that exist on only one surface, or that say different things, are listed 
 
 - Every in-scope page has a copy file, with the sections of its page type in order.
 - Every item that appears in Figma has a `figma:` source, and every item that appears on the site has a `web:` source.
-- `kit/tools/figma-copy.js` `diff` reports 0 differences on every page.
+- `kit/tools/figma/copy.js` `diff` reports 0 differences on every page.
 - `npm run copy` reports no unknown section, role or surface.
-- `node kit/tools/copy-guard.mjs --slug {slug}` reports nothing: no copy line or site string cites `knowledge/` or copies it word for word (§1). `kit/tools/fast-pack.mjs --check` runs it too.
+- `node kit/tools/content/guard.mjs --slug {slug}` reports nothing: no copy line or site string cites `knowledge/` or copies it word for word (§1). `kit/tools/build/pack.mjs --check` runs it too.

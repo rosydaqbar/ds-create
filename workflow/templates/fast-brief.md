@@ -15,9 +15,9 @@ You write the **docs data** for your pages, three files each, named `{id}-{kebab
 
 ## Read first, for your pages
 - `workflow/COPY.md`, `workflow/EDITORIAL.md`, `workflow/FAST.md` §3–§4, `workflow/GOTCHAS.md` G24, G25, G36, G43.
-- The visual catalog: the `VIS` object of `kit/tools/figma-fastbuild.js` (visual types and inputs), and how `kit/tools/fast-pack.mjs` joins manifest and copy (`packReading`, `packComponent`, the recipe keys it accepts).
+- The visual catalog: the `VIS` object of `kit/tools/figma/fastbuild.js` (visual types and inputs), and how `kit/tools/build/pack.mjs` joins manifest and copy (`packReading`, `packComponent`, the recipe keys it accepts).
 - Each page's spec file and its folder file (`specs/{level}/00-*.md`).
-- The page's knowledge topics: `node kit/tools/copy-guard.mjs --slug {slug} --page {id}` prints them. Write their reasoning in this system's own words and values; never name, cite or copy them.
+- The page's knowledge topics: `node kit/tools/content/guard.mjs --slug {slug} --page {id}` prints them. Write their reasoning in this system's own words and values; never name, cite or copy them.
 - The system: `workspace/input/{slug}/sources.md`, `workspace/input/{slug}/chat/*`, `workspace/input/{slug}/answers/*`, `workspace/input/{slug}/knowledge/*` (its rules override the spec and the default manifest), and the brand voice from the inputs.
 - What was built: `workspace/output/{slug}/figma/sets/*.json` (set names, ids, property names and values), `workspace/output/{slug}/figma/icons.json` (icon names), `workspace/output/{slug}/figma/figma-variables.json` (every collection and variable as built, Components included, and the page ids, refreshed at F0) and `workspace/output/{slug}/reports/build-notes.md` (every deviation from the specs). Document what exists; where the build deviates from the spec, document the build.
 
@@ -32,9 +32,9 @@ You write the **docs data** for your pages, three files each, named `{id}-{kebab
 
 ## Checks (until they pass, per page)
 ```bash
-node kit/tools/copy-guard.mjs --slug {slug} --page {id}
-node kit/tools/copy-guard.mjs --slug {slug} --pages {id} --editorial
-node kit/tools/fast-pack.mjs --slug {slug} --page {id} > /dev/null
+node kit/tools/content/guard.mjs --slug {slug} --page {id}
+node kit/tools/content/guard.mjs --slug {slug} --pages {id} --editorial
+node kit/tools/build/pack.mjs --slug {slug} --page {id} > /dev/null
 ```
 Edit only your pages' files in `workspace/output/{slug}/plans/`, `copy/` and `fast/`. Never edit the ledger, specs, tools or the repo; never touch Figma.
 

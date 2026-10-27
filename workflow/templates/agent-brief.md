@@ -10,7 +10,7 @@ Give this file to every agent that builds docs-site pages (`workflow/INITIATOR.m
 - Inputs: `workspace/input/{slug}/sources.md` points to the brief and brand files (product facts, tone of voice). They are read-only, and private links in them are never published (`workspace/input/README.md` I6).
 - Ledger: `workspace/output/{slug}/ds-create-ledger.json`. Use `sequence[]` (match on `page`) for frame ids and notes, and `reports/build-notes.md` for longer notes.
 - Page specs: the repo's `{level}/{id}-{name}.md`, or `workspace/output/{slug}/specs/…` for pages added with `workflow/EXTEND.md`.
-- Figma data: `workspace/output/{slug}/figma/sets/{set-id}.json` (`:` written as `-`), one snapshot per published set, written by `kit/tools/figma-export-sets.js` during the Figma build. Read the snapshot, not Figma. Open Figma only for a screenshot or a value the snapshot doesn't hold, and then read-only.
+- Figma data: `workspace/output/{slug}/figma/sets/{set-id}.json` (`:` written as `-`), one snapshot per published set, written by `kit/tools/figma/export-sets.js` during the Figma build. Read the snapshot, not Figma. Open Figma only for a screenshot or a value the snapshot doesn't hold, and then read-only.
 
 ## Hard rules
 

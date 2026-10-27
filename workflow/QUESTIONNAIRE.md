@@ -325,7 +325,7 @@ Rules:
 - in **One by one**, do not prebuild unrelated selected pages; Parts and private parts the active page depends on may be built as dependencies;
 - in **YOLO everything**, every selected page still follows its complete Markdown file and QA before the run is considered complete.
 
-**Which engine draws the documentation pages?** Ask only when `kit/tools/figma-fastbuild.js` exists in the repo (`workflow/FAST.md` §10). Otherwise, record `engine: "standard"` without asking.
+**Which engine draws the documentation pages?** Ask only when `kit/tools/figma/fastbuild.js` exists in the repo (`workflow/FAST.md` §10). Otherwise, record `engine: "standard"` without asking.
 
 - **Standard** (default): each page is drawn by its own build step, with the doc builder and `workflow/DOCFRAMES.md`.
 - **Fast mode**: the agent writes a copy file and a manifest per page, and a fixed renderer draws every page the same way (`workflow/FAST.md`). It is faster, and it covers only the page types the renderer supports; the other pages use Standard.

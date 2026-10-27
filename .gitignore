@@ -50,6 +50,9 @@ ds-create-ledger.json
 **/android/app/build/
 .gradle/
 build/
+# Build orchestration is source code, not generated build output.
+!kit/tools/build/
+!kit/tools/build/*.mjs
 local.properties
 *.iml
 captures/

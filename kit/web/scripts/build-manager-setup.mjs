@@ -19,10 +19,10 @@ try {
     build: { ssr: path.join(web, 'scripts/manager-setup.tsx'), outDir: temp, copyPublicDir: false,
       rolldownOptions: { output: { entryFileNames: 'render.mjs' } } },
   });
-  const { markup } = await import(pathToFileURL(path.join(temp, 'render.mjs')));
+  const { markup, workerMarkup } = await import(pathToFileURL(path.join(temp, 'render.mjs')));
   // React SSR escapes attributes; Tailwind needs the DOM-decoded class names.
   const entities = { '&amp;': '&', '&quot;': '"', '&#x27;': "'", '&#39;': "'", '&lt;': '<', '&gt;': '>' };
-  const classes = [...new Set([...markup.matchAll(/class="([^"]+)"/g)].flatMap(m =>
+  const classes = [...new Set([...(markup + workerMarkup).matchAll(/class="([^"]+)"/g)].flatMap(m =>
     m[1].replace(/&(?:amp|quot|#x27|#39|lt|gt);/g, entity => entities[entity]).split(/\s+/)))];
   const tokens = JSON.parse(await readFile(path.join(web, 'tokens/figma-variables.json'), 'utf8'));
   const byName = new Map(tokens.variables.map(v => [v.name, v]));
@@ -59,20 +59,21 @@ try {
   const styles = await readFile(path.join(web, 'src/styles/index.css'), 'utf8');
   const variants = styles.slice(styles.indexOf('@custom-variant dark'), styles.indexOf('@layer base'));
   const source = `@import "tailwindcss/theme.css" layer(theme);\n@theme inline {${theme}}\n${typography}\n${variants}\n` +
-    '#setup-dialog :where(button,input,textarea) {border-style:solid;border-width:0;padding:0;font:inherit;}\n' +
-    [...new Set([...markup.matchAll(/stroke-width="([\d.]+)"/g)].map(m => m[1]))].map(width => `#setup-dialog svg[stroke-width="${width}"] {stroke-width:${width};}`).join('\n') +
-    '#setup-dialog {@tailwind utilities;}';
+    ':is(#setup-dialog,#worker-shell) :where(button,input,textarea) {border-style:solid;border-width:0;padding:0;font:inherit;}\n' +
+    [...new Set([...(markup + workerMarkup).matchAll(/stroke-width="([\d.]+)"/g)].map(m => m[1]))].map(width => `:is(#setup-dialog,#worker-shell) svg[stroke-width="${width}"] {stroke-width:${width};}`).join('\n') +
+    ':is(#setup-dialog,#worker-shell) {@tailwind utilities;}';
   const compiler = await compile(source, { base: web, onDependency() {} });
   const utilities = compiler.build(classes);
   const names = new Map(tokens.variables.map(v => [cssName(v.name), v.name]));
   for (const [, ref] of utilities.matchAll(/var\((--[\w-]+)\)/g)) if (!known.has(ref) && names.has(ref)) metric(names.get(ref));
-  const declarations = `#setup-dialog {${[...metrics].map(([name, value]) => `${cssName(name)}:${value};`).join('')}--elevation-control:${shadow};}\n`;
+  const declarations = ` :is(#setup-dialog,#worker-shell) {${[...metrics].map(([name, value]) => `${cssName(name)}:${value};`).join('')}--elevation-control:${shadow};}\n`;
   const css = optimize(declarations + utilities, { minify: true }).code;
-  const file = path.join(manager, 'index.html');
+  const file = path.join(manager, 'client/index.html');
   let html = await readFile(file, 'utf8');
   html = html.replace(/\s*<!-- BEGIN WEB SETUP STYLES -->[\s\S]*?<!-- END WEB SETUP STYLES -->/, '');
   html = html.replace('</head>', `<!-- BEGIN WEB SETUP STYLES -->\n<style>${css}</style>\n<!-- END WEB SETUP STYLES -->\n</head>`);
   html = html.replace(/<dialog id="setup-dialog"[\s\S]*?<\/dialog>/, markup);
+  html = html.replace(/(?:<div id="worker-shell">)?<section id="worker-connection"[\s\S]*?(?=<div id="preparation-view")/, `${workerMarkup}\n          `);
   await writeFile(file, html);
   console.log(`Setup: actual web components, ${classes.length} utility classes; static output written.`);
 } finally { await rm(temp, { recursive: true, force: true }); }
