@@ -1,0 +1,61 @@
+import * as fs from 'node:fs/promises';
+import {cp, mkdir, mkdtemp, realpath, rm, writeFile} from 'node:fs/promises';
+import {setTimeout as delay} from 'node:timers/promises';
+import {fixtureConsumer} from './consumer.mjs';
+import {figmaPrompt} from '../../kit/manager/server/publish.mjs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createManagerServer} from '../../kit/manager/server/index.mjs';
+import {colors, effects, values} from '../../kit/web/scripts/chrome-fallbacks.mjs';
+
+// Synthetic publication evidence, consumed through the production MCP queue guards.
+export async function publishFixtureOutput(r,dir,signal){
+ const prompt=figmaPrompt(r,path.join(dir,'request.json'));
+  const answers=await fs.readFile(path.join(r.workspace,'workspace/input',r.inputSlug || r.slug,'answers/01-init.md'),'utf8');
+  await fs.writeFile(path.join(r.outputDir,'received-answers'),answers);
+  const mode=await fs.readFile(path.join(r.outputDir,'fake-mode'),'utf8').catch(()=> 'success');
+  await fs.writeFile(path.join(r.outputDir,'received-prompt'),prompt);
+  if(mode==='hang')await delay(2147483647,undefined,{signal});
+  await delay(mode==='slow'?2000:60,undefined,{signal});
+  if(mode==='blocked') { return ({status:'blocked',message:'Connect the Figma authoring MCP in your local agent.'}); }
+  if(mode==='fail')throw new Error('Simulated agent failure.');
+  if(mode!=='empty') {
+    const draft=JSON.parse(await fs.readFile(path.join(r.outputDir,'foundations.json'),'utf8'));
+    if(mode==='different-value')draft.variables[0].values.Value='#ff0000';
+    if(mode==='different-alias')draft.variables[1].values.Light='#ffffff';
+    await fs.mkdir(path.join(r.outputDir,'figma'),{recursive:true});
+    await fs.writeFile(path.join(r.outputDir,'figma/figma-variables.json'),JSON.stringify({...draft,format:'ds-create/figma-variables@1'}));
+    const l=JSON.parse(await fs.readFile(path.join(r.outputDir,'ds-create-ledger.json'),'utf8'));
+    l.sequence=l.sequence.map(e=>({...e,status:'done'})); l.tokens={audit:{fail:0,file:'figma/audit-file.json'}};
+    l.foundationReview.figmaHash=r.hash;
+    await fs.writeFile(path.join(r.outputDir,'ds-create-ledger.json'),JSON.stringify(l));
+    if(mode!=='no-audit') await fs.writeFile(path.join(r.outputDir,'figma/audit-file.json'),JSON.stringify({mode:'file',sourceHash:r.hash,result:{fail:0},simulation:true}));
+  }
+  return ({status:'completed',message:'Simulated foundation output.'});
+}
+export async function publishFixture({ mode = 'success', timeoutMs = 10000, autoRun = true } = {}) {
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), 'ds-publish-test-')));
+  const output = path.join(root, 'workspace/output/fixture');
+  await mkdir(path.join(output, 'manager'), { recursive: true });
+  await mkdir(path.join(root, 'workspace/input/fixture/answers'), { recursive: true });
+  await writeFile(path.join(root, 'workspace/input/fixture/answers/01-init.md'), 'Synthetic test answers; Web.');
+  await cp(fileURLToPath(new URL('../../kit/manager', import.meta.url)), path.join(output, 'manager'), { recursive: true });
+  await cp(fileURLToPath(new URL('../../kit/web/src/styles/docs-presentation.css', import.meta.url)), path.join(output, 'manager/docs-presentation.css'));
+  await writeFile(path.join(output, 'manager/chrome.css'), ':root{'+[...colors,...values,...effects].map(([k,v])=>k+':'+v+';').join('')+'}');
+  await writeFile(path.join(output, 'foundations.json'), JSON.stringify({ format:'ds-create/foundations@1',revision:1,collections:[{name:'Primitives',modes:['Value']},{name:'Color',modes:['Light']}],variables:[
+    {name:'palette/base/white',collection:'Primitives',type:'COLOR',values:{Value:'#ffffff'}},
+    {name:'color/surface/base',collection:'Color',type:'COLOR',values:{Light:{alias:'palette/base/white'}}}],textStyles:[],effectStyles:[] }));
+  await writeFile(path.join(output, 'ds-create-ledger.json'), JSON.stringify({system:'Synthetic publish fixture',preview:true,scope:{productType:'Web'},sequence:[1,2,3,4].map(step=>({step,status:step===1?'done':'todo'})),foundationReview:{status:'pending'}}));
+  await writeFile(path.join(output,'fake-mode'),mode);
+  const jobsOptions={simulation:true,timeoutMs};
+  const { server, jobs }=createManagerServer({outputDir:output,workspace:root,jobsOptions});
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const consumer=autoRun?fixtureConsumer({output,workspace:root,kind:'publish',execute:publishFixtureOutput,timeoutMs}):null;
+  const url=`http://127.0.0.1:${server.address().port}`;
+  const flow=()=>fetch(url+'/api/publish-flow').then(r=>r.json());
+  const initial=await flow();
+  const headers={'Content-Type':'application/json',Origin:url,'X-DS-Create-Token':initial.csrfToken};
+  const post=(endpoint,body,override={})=>fetch(url+endpoint,{method:'POST',headers:{...headers,...override},body:JSON.stringify(body)});
+  return {root,output,url,consumer,jobs,flow,post,initial,jobsOptions,async cleanup(){await consumer?.close();await new Promise(resolve=>server.close(resolve));await rm(root,{recursive:true,force:true});}};
+}

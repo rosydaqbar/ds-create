@@ -31,7 +31,7 @@ Before the first build, give the agent what you know about the system. Everythin
    - `brand/`: brand guidelines, logo files, typefaces, color specs, tone of voice
    - `design-system/`: your existing system (docs, token exports, component lists, Figma library and code links)
    - `references/`: systems and products you like, used as inspiration only
-3. Start with **`/ds-create init-web`** to open an empty **DS Create Builder** immediately. Enter a Project name, then add Context / Instruction and Context files in its modal; the name sets the input folder (`Acme Design System` → `workspace/input/acme-design-system/`). The saved input slug stays stable on later name edits; the output/session ID and resume command stay separate. A portable Node listener waits for preparation events without an idle AI/subagent. An actual host event hook delivers the prompt into the existing main agent instance; host wake readiness is reported separately from Node liveness. Missing design questions stay in Builder. No agent/IDE CLI or product-specific bridge is selected. Publication remains a separate approved MCP continuation using the agent’s existing Figma connection. See `skills/ds-create/reference/background-worker.md`. Review it, then Publish to Figma. Setup can be resumed from saved state; no Figma link is required until Publish. See `skills/ds-create/reference/init-web.md`. For chat-led setup, use **`/ds-create init`**. The agent checks local readiness, reads the inputs, asks only what is missing and prepares `foundations.json`. It launches **DS Create Builder** in the background on localhost so you can review color, typography, spacing, radius and shadows before Figma generation. Send changes to the agent; controller edits are currently browser previews. Use **Publish → Publish to Figma** to approve the saved revision and queue its approved MCP continuation, or approve it in chat. The agent verifies the selected file/fonts and generates that revision in Figma. Publish then unlocks step2, **ds-create build**, with a copyable command for your agent. Init finishes with both links after the token audit passes. Figma is required before build; it is not required to open a new system's local draft. Existing systems preserve frozen values and may need a read-only Figma inventory before drafting. Builder is included for every product type and does not create the consumer docs site.
+3. Start with **`/ds-create init-web`** to open an empty **DS Create Builder** immediately. Enter a Project name, then add Context / Instruction and Context files in its modal; the name sets the input folder (`Acme Design System` → `workspace/input/acme-design-system/`). The saved input slug stays stable on later name edits; the output/session ID and resume command stay separate. Node waits for preparation through one pending MCP tool call, which returns the event to the existing main agent. An ended tool call cannot wake an idle chat. Missing design questions stay in Builder. No agent/IDE CLI or product-specific bridge is selected. Publication remains a separate approved MCP continuation using the agent’s existing Figma connection. See `skills/ds-create/reference/background-worker.md`. Review it, then Publish to Figma. Setup can be resumed from saved state; no Figma link is required until Publish. See `skills/ds-create/reference/init-web.md`. For chat-led setup, use **`/ds-create init`**. The agent checks local readiness, reads the inputs, asks only what is missing and prepares `foundations.json`. It launches **DS Create Builder** in the background on localhost so you can review color, typography, spacing, radius and shadows before Figma generation. Send changes to the agent; controller edits are currently browser previews. Use **Publish → Publish to Figma** to approve the saved revision and queue its approved MCP continuation, or approve it in chat. The agent verifies the selected file/fonts and generates that revision in Figma. Publish then unlocks step2, **ds-create build**, with a copyable command for your agent. Init finishes with both links after the token audit passes. Figma is required before build; it is not required to open a new system's local draft. Existing systems preserve frozen values and may need a read-only Figma inventory before drafting. Builder is included for every product type and does not create the consumer docs site.
 4. Then run **`/ds-create build`**. It asks four questions: how to draw the pages (Default or Fast mode), how far to go (foundations, Parts, Components, everything, or only the pages you name), where (Figma only, or Figma and the docs site), and the pace. Then it builds exactly that. Run it again later to add more.
 5. Run **`/ds-create qa`** whenever you want the full checks, and **`/ds-create status`** to see where the build stands.
 
@@ -39,7 +39,7 @@ Every answer you give is saved in `workspace/input/{your-system-slug}/answers/`,
 
 Context you give in chat is saved too: the agent writes it to `workspace/input/{your-system-slug}/chat/`, so it is remembered in later sessions. Leave out a folder you have nothing for. With no input at all, the agent asks every question in `workflow/QUESTIONNAIRE.md`.
 
-`workspace/input/` ships empty: only `workspace/input/README.md` is committed, and everything you add stays on your machine (`.gitignore`), like `workspace/output/`.
+`workspace/input/` and `workspace/output/` ship with only their README templates. Saved projects, generated sessions and caches are local workspace data; exclude them when copying or distributing the skill, even when they are git-ignored.
 
 # 1. Structure of a generated file
 
@@ -128,17 +128,21 @@ workflow/            HOW to build it: process, gates and lessons
 knowledge/           WHY: the reasoning behind the specs, from the maintainer's experience: rationale and examples, never rules
                      (badges-and-tags.md, buttons.md, color.md, motion.md, radius.md, spacing.md)
 
-kit/                 the CODE that builds
-  tools/             figma-audit.js: read-only audit that every page call runs on its page (QA gate; the file-wide sweep runs on call);
-                     figma-docbuilder.js: the doc-frame builder for Parts, Components, Sections and Layouts; figma-export-sets.js:
-                     read-only JSON snapshot of each component set for the docs site; figma-copy.js: reads, checks and applies the page
-                     copy files on the doc frames; figma-fastbuild.js, fast-pack.mjs, fast-cache.mjs, figma-dockit.js: fast mode
-                     (workflow/FAST.md); icons-lucide.mjs: the icon library on 1.7, from Lucide; copy-guard.mjs: checks the docs
-                     explain with knowledge/ without citing it
-  web/               brand-agnostic web template (React, Tailwind v4, documentation site, package and QA scripts) that
-                     workflow/WEB.md copies and fills
-  app/               brand-agnostic React Native source for the docs' App previews, and its token script; never built into an app
-  manager/           builder dashboard template, launched by kit/tools/manager.mjs; reuses web-docs presentation styles
+kit/                 reusable execution code and templates
+  manager/           local Builder application (see kit/manager/README.md)
+    cli.mjs          Builder lifecycle entry point
+    client/          browser shell, feature modules and licensed assets
+    server/          HTTP/API, source intake, job execution and verification
+    foundations/     foundation compilation, validation, templates and Figma calls
+    shared/          browser/server interface choices and motion values
+  mcp/               MCP entry point for preparation and approved publication
+  tools/             workflow tools (see kit/tools/README.md)
+    figma/           Figma renderers, libraries, exports, audits and copy
+    build/           manifest packing, renderer cache, ledger and registry
+    content/         copy guard and editorial checks
+    maintain/        bundled icon/default-data generation
+  web/               brand-agnostic React/Tailwind documentation template
+  app/               React Native source for App previews and its token script
 
 examples/            finished builds made with ds-create, for reference only (never copied into a new build)
 workspace/            the WORK: every system's inputs and outputs live here, apart from the repo's own files
@@ -146,6 +150,8 @@ workspace/            the WORK: every system's inputs and outputs live here, apa
                      (git-ignored except workspace/input/README.md)
   output/            everything a build generates: one folder per system (git-ignored except workspace/output/README.md)
 ```
+
+Maintainer tests and synthetic fixtures live in `tests/`, outside the distributed runtime tools. Run `node --test tests/*.test.mjs` from the repository root. The MCP entry point is `node kit/mcp/server.mjs --workspace /absolute/workspace`; install its dependencies with `npm ci --prefix kit/mcp`.
 
 # 3. File map
 
@@ -225,7 +231,7 @@ Every page is built with the structure in `workflow/templates/structure.md` (pag
 | --- | --- |
 | Initiation, and whenever the user changes an answer | `workflow/QUESTIONNAIRE.md` |
 | Any step that draws frames the doc builder has no helper for (Doc kit, Cover, guidance pages, Foundations, Screens), or that changes the builder | `workflow/DOCFRAMES.md` |
-| Parts, Components, Sections and Layouts in Figma | `kit/tools/figma-docbuilder.js`, cached once at step 11 (`workflow/INITIATOR.md` Part B §6) |
+| Parts, Components, Sections and Layouts in Figma | `kit/tools/figma/docbuilder.js`, cached once at step 11 (`workflow/INITIATOR.md` Part B §6) |
 | Docs site (`workflow/WEB.md`, `workflow/APP.md`) | `workflow/WEB.md`, plus `workflow/APP.md` for App products; docs agents start from `workflow/templates/agent-brief.md` |
 
 `examples/` holds finished reference builds, not inputs: read one only to understand a pattern, and never copy from it (`workflow/GOTCHAS.md` G43). Never open generated files (`kit/web/src/tokens/tokens.gen.ts`, `kit/web/tokens/tokens.dtcg.json`, `kit/web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
@@ -342,7 +348,7 @@ npx impeccable install --project --providers=claude -y
 # 6. Non-negotiable
 
 - Build in the order of the build sequence in `workflow/INITIATOR.md` Part B §6, for a new system and an existing one. The library comes first: every style, asset and component set is built before any doc page, so every example on a page is a real instance and no step waits on a later one. A step starts only when every step above it is done in the ledger. YOLO removes the pauses, never a step.
-- A page is done only after its own page file was loaded, its QA passed and `kit/tools/figma-audit.js` reported `fail` = 0. No page is built from root files or by a generic script without its page file.
+- A page is done only after its own page file was loaded, its QA passed and `kit/tools/figma/audit.js` reported `fail` = 0. No page is built from root files or by a generic script without its page file.
 - Use the exact page tree, page names and template frames in `specs/SYSTEM.md` Part A.
 - Use the naming in `specs/SYSTEM.md` Part C for tokens, styles, component sets, properties, parts and layers.
 - Never merge required pages into one page.

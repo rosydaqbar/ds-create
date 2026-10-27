@@ -1,17 +1,16 @@
+import {realpath} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
 import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
 import {StdioServerTransport} from '@modelcontextprotocol/sdk/server/stdio.js';
 import {z} from 'zod';
 import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {setTimeout as delay} from 'node:timers/promises';
-import {getState,readJSON} from '../manager/state.mjs';
-import {sessionOutput,latestPublish,claimMcpJob,mcpPublishAction,cancelMcpJob,clean} from '../manager/publish-queue.mjs';
-import {createSetupJobs} from '../manager/setup-jobs.mjs';
-import {latestMcpPreparation,claimMcpPreparation,mcpPrepareAction,cancelMcpPreparation} from '../manager/setup-queue.mjs';
-import {setupPrompt} from '../manager/setup-prompt.mjs';
-import {figmaPrompt} from '../manager/figma-prompt.mjs';
-import {preflightOperation} from '../manager/publish-preflight.mjs';
-import {writeFoundationFastPlan} from '../manager/foundation-fast.mjs';
+import {getState, publicMessage, readJSON} from '../manager/server/state.mjs';
+import {sessionOutput} from '../manager/server/files.mjs';
+import {cancelMcpJob, claimMcpJob, figmaPrompt, latestPublish, mcpPublishAction, preflightOperation} from '../manager/server/publish.mjs';
+import {cancelMcpPreparation, claimMcpPreparation, createSetupJobs, latestMcpPreparation, mcpPrepareAction, setupPrompt, waitForPreparation} from '../manager/server/setup.mjs';
+import {writeFoundationFastPlan} from '../manager/foundations/publish.mjs';
 
 const session=z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).describe('Stable Builder session id, not the project display name or input folder.');
 const uuid=z.string().uuid();
@@ -20,11 +19,11 @@ const publicJob=job=>job?Object.fromEntries(['id','runner','status','hash','figm
 
 export function createDsCreateMcp(workspace){
  const server=new McpServer({name:'ds-create',version:'0.2.0'}, {instructions:'Operate only the selected local workspace. Preparation claims saved context and stops at a validated local draft awaiting review; it has no Figma authorization. Publish claims an already approved Builder request; it does not write Figma itself. Use your configured Figma tools to carry out its exact instructions, report progress before writes and finish with real export/audit evidence. A queued job cannot wake an idle chat. Never change approvals or fabricate completed output.'});
- const owner=randomUUID(),owned=new Map(),inflight=new Set();let closing=false,closingPromise;
+ const owner=randomUUID(),owned=new Map(),inflight=new Set(),shutdown=new AbortController();let closing=false,closingPromise;
  const tool=(name,description,schema,handler,readOnly=false)=>server.registerTool(name,{description,inputSchema:z.object(schema).strict(),annotations:{readOnlyHint:readOnly,destructiveHint:false,openWorldHint:false}},async(args,extra)=>{
   if(closing)return {content:[{type:'text',text:'MCP connection is closing.'}],isError:true};
   const operation=Promise.resolve().then(()=>handler(args,extra));inflight.add(operation);
-  try{return result(await operation);}catch(e){return {content:[{type:'text',text:clean(e.message)}],isError:true};}finally{inflight.delete(operation);}
+  try{return result(await operation);}catch(e){return {content:[{type:'text',text:publicMessage(e.message)}],isError:true};}finally{inflight.delete(operation);}
  });
  tool('ds_create_publish_status','Read the selected Builder source and current publication status. Does not approve, queue, claim or write Figma.',{session},async args=>{
   const outputDir=await sessionOutput(workspace,args.session),[state,job]=await Promise.all([getState(outputDir),latestPublish(outputDir)]);
@@ -59,7 +58,7 @@ export function createDsCreateMcp(workspace){
   if(r.passed){
    const requestFile=path.join(a.outputDir,'manager/jobs',a.id,'request.json'),request=await readJSON(requestFile);
    try{const plan=await writeFoundationFastPlan(request,requestFile);return {...r,next_operation:{kind:'generate-foundations',engine:'fast',plan_file:plan.file,call_count:plan.calls.length,instructions:figmaPrompt(request,requestFile,plan)}};}
-   catch(error){if(error.code!=='MANAGER_FAST_UNSUPPORTED')throw error;return {...r,next_operation:{kind:'generate-foundations',engine:'standard',fast_fallback:clean(error.message),instructions:'FAST escape hatch: '+clean(error.message)+'. Preserve this metadata through the standard continuation; do not drop it or change the source.\n'+figmaPrompt(request,requestFile)}};}
+   catch(error){if(error.code!=='MANAGER_FAST_UNSUPPORTED')throw error;return {...r,next_operation:{kind:'generate-foundations',engine:'standard',fast_fallback:publicMessage(error.message),instructions:'FAST escape hatch: '+publicMessage(error.message)+'. Preserve this metadata through the standard continuation; do not drop it or change the source.\n'+figmaPrompt(request,requestFile)}};}
   }
   return r;
  });
@@ -74,6 +73,11 @@ export function createDsCreateMcp(workspace){
   const outputDir=await sessionOutput(workspace,args.session),flow=await createSetupJobs({outputDir,workspace}).status();
   return {session:args.session,...flow,nextAction:'Save context or answers in Builder, then call ds_create_prepare to take its queued preparation.'};
  },true);
+ tool('ds_create_prepare_wait','Wait up to 5 minutes for Prepare foundations in Builder. Node waits without model requests. A prepare-request event resumes this same agent; claim it with ds_create_prepare. On wait-expired, end the turn without automatically waiting again; Builder offers a continuation prompt. Host cancellation detaches without claiming or retrying work. after_event acknowledges a previously returned event.',{session,after_event:uuid.optional()},async(args,extra)=>{
+ const event=await waitForPreparation({workspace,session:args.session,signal:AbortSignal.any([extra.signal,shutdown.signal]),afterEvent:args.after_event});
+  if(event.event==='wait-expired')return {...event,instructions:'End the turn. Do not rearm or poll. The user can copy the continuation prompt from Builder when ready.'};
+  return {...event,status:'queued',next_tool:'ds_create_prepare',instructions:'This is a queued event, not a claim or generation. Use ds_create_prepare for this same session, then follow its guarded local preparation instructions in this main instance. No subagent, Figma, or build.'};
+ });
  tool('ds_create_prepare','Claim one queued local preparation requested in Builder. Uses this MCP client and its agent, with no selected vendor or external AI process. Returns the exact snapshot/scope and lease; the agent prepares local artifacts and reports through MCP. This does not authorize any Figma call.',{session,wait_seconds:z.number().int().min(0).max(20).default(0)},async(args,extra)=>{
   const outputDir=await sessionOutput(workspace,args.session),deadline=Date.now()+args.wait_seconds*1000;
   for(;;){
@@ -103,7 +107,7 @@ export function createDsCreateMcp(workspace){
   const outputDir=await sessionOutput(workspace,args.session),current=await latestMcpPreparation(outputDir);return current?.jobId?cancelMcpPreparation(outputDir,current.jobId):{stopped:false};
  });
  async function cleanup(){
-  if(closingPromise)return closingPromise;closing=true;
+  if(closingPromise)return closingPromise;closing=true;shutdown.abort();
   closingPromise=(async()=>{
    await Promise.allSettled([...inflight]);
    await Promise.allSettled([...owned.values()].map(record=>(record.kind==='prepare'?mcpPrepareAction:mcpPublishAction)({...record,action:'finish',outcome:'blocked',message:record.kind==='prepare'?'Background worker disconnected before preparation finished. Context is saved; retry to continue.':'Background worker disconnected before publication finished. Inspect any partial Figma output, then retry the approved request.'})));
@@ -121,4 +125,11 @@ export async function runDsCreateMcp(workspace){
  process.once('SIGTERM',stop);process.once('SIGINT',stop);
 }
 
-export const createPublishMcp=createDsCreateMcp,runPublishMcp=runDsCreateMcp;
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+ try{
+  const args=process.argv.slice(2);
+  if(args.length!==0&&(args.length!==2||args[0]!=='--workspace'))throw new Error('Usage: node kit/mcp/server.mjs [--workspace /absolute/workspace]');
+  if(Number(process.versions.node.split('.')[0])<20)throw new Error('DS Create MCP requires Node20+.');
+  await runDsCreateMcp(await realpath(args[1]||fileURLToPath(new URL('../../',import.meta.url))));
+ }catch(error){console.error(error.message);process.exitCode=1;}
+}

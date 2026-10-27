@@ -6,10 +6,10 @@
  *   node scripts/build-copy.mjs --dir path/to/copy  another copy folder
  *   node scripts/build-copy.mjs --page 2.1 --surface figma
  *                                                   prints one page's lines for one surface as JSON,
- *                                                   for kit/tools/figma-copy.js (apply) and the doc builder
+ *                                                   for kit/tools/figma/copy.js (apply) and the doc builder
  *   node scripts/build-copy.mjs --fingerprints [2.1,3.2]
  *                                                   prints compact Figma fingerprints per page (all pages, or the
- *                                                   ids given) for kit/tools/figma-copy.js `verify` (workflow/GOTCHAS.md G40)
+ *                                                   ids given) for kit/tools/figma/copy.js `verify` (workflow/GOTCHAS.md G40)
  *
  * A missing copy folder writes an empty file, so a template without copy still builds.
  * Unknown surfaces or roles fail the run: they would silently drop text.
@@ -81,7 +81,7 @@ export function parseCopy(text, file = 'copy') {
 /** Lines one surface shows: its own and the shared ones, in file order. */
 export const linesFor = (lines, surface) => lines.filter((l) => l.surface === 'both' || l.surface === surface);
 
-/** FNV-1a over UTF-16 code units: the same number as kit/tools/figma-copy.js computes in the plugin. */
+/** FNV-1a over UTF-16 code units: the same number as kit/tools/figma/copy.js computes in the plugin. */
 export const fnv = (s) => {
   let h = 0x811c9dc5;
   for (let i = 0; i < s.length; i++) {

@@ -1,0 +1,101 @@
+import * as fs from 'node:fs/promises';
+import {cp, mkdir, mkdtemp, realpath, rm, writeFile} from 'node:fs/promises';
+import {setTimeout as delay} from 'node:timers/promises';
+import {fixtureConsumer} from './consumer.mjs';
+import {setupPrompt} from '../../kit/manager/server/setup.mjs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createManagerServer} from '../../kit/manager/server/index.mjs';
+import {nativeEasing} from '../../kit/manager/shared/motion.mjs';
+import {colors, effects, values} from '../../kit/web/scripts/chrome-fallbacks.mjs';
+
+// Small synthetic data to exercise the handoff; not a design-system generator.
+export const setupDraft = {format:'ds-create/foundations@1',revision:1,collections:[{name:'Primitives',modes:['Value']},{name:'Color',modes:['Light']},...['Typography','Space','Shape','Motion'].map(name=>({name,modes:['Value']}))],variables:[
+  {name:'palette/base/white',collection:'Primitives',type:'COLOR',values:{Value:'#ffffff'}},
+  {name:'color/surface/base',collection:'Color',type:'COLOR',values:{Light:{alias:'palette/base/white'}}},
+  {name:'font/family/ui',collection:'Typography',type:'STRING',values:{Value:'Inter'}},
+  {name:'space/xs',collection:'Space',type:'FLOAT',values:{Value:4}},
+  {name:'radius/control',collection:'Shape',type:'FLOAT',values:{Value:8}},
+  {name:'motion/duration/base',collection:'Motion',type:'FLOAT',values:{Value:200}},
+  {name:'motion/easing/standard',collection:'Motion',type:'STRING',values:{Value:'cubic-bezier(0.2, 0, 0, 1)'}}
+],textStyles:[{name:'body/md',fontFamily:'Inter',fontStyle:'Regular',fontSize:16,lineHeight:{unit:'PIXELS',value:24}}],effectStyles:[{name:'elevation/sm',effects:[{type:'DROP_SHADOW',color:'#000000',opacity:0.1,offset:{x:0,y:1},radius:3,spread:0}]}]};
+// A deliberately small but structurally real new-system fixture: every semantic is aliased.
+for(const v of [...setupDraft.variables])if(v.collection!=='Primitives' && v.name!=='color/surface/base'){
+ const name='scale/'+v.name;
+ setupDraft.variables.unshift({name,collection:'Primitives',type:v.type,values:{Value:v.values.Value}});
+ v.values={Value:{alias:name}};
+}
+for(const v of setupDraft.variables){
+ if(v.collection!=='Primitives')v.description='Synthetic UI purpose for '+v.name;
+ else v.hiddenFromPublishing=true;
+ v.scopes=v.collection==='Color'?['FRAME_FILL','SHAPE_FILL']:v.collection==='Typography'?['FONT_FAMILY']:v.collection==='Space'?['GAP']:v.collection==='Shape'?['CORNER_RADIUS']:[];
+ v.codeSyntax={WEB:`var(--${v.name.replaceAll('/','-')})`};
+}
+setupDraft.textStyles[0].name='type/body/md/regular';
+// Realistic synthetic baseline for the process contract; the small setupDraft above remains useful for unit tests.
+export const preparedSetupDraft=structuredClone(setupDraft);
+preparedSetupDraft.collections.find(c=>c.name==='Motion').modes=['Standard','Reduced'];
+preparedSetupDraft.variables=preparedSetupDraft.variables.filter(v=>!v.name.startsWith('motion/'));
+for(const [name,value]of Object.entries({'duration/instant':0,'duration/fast':120,'duration/base':200,'duration/slow':300,'duration/loop':900,'easing/standard':'cubic-bezier(0.2, 0, 0, 1)','easing/enter':'cubic-bezier(0, 0, 0.2, 1)','easing/exit':'cubic-bezier(0.4, 0, 1, 1)','easing/linear':'linear','delay/tooltip':400,'delay/toast':5000,'delay/debounce':250})){
+ const type=typeof value==='number'?'TIMING':'EASING', reduced=['duration/base','duration/slow'].includes(name)?0:name==='duration/loop'?1800:value, refs={};
+ for(const [mode,val]of Object.entries({Standard:value,Reduced:reduced})){
+  const primitive='scale/motion/'+name.replaceAll('/','-')+'-'+mode.toLowerCase();refs[mode]={alias:primitive};
+  preparedSetupDraft.variables.push({name:primitive,collection:'Primitives',type,values:{Value:type==='TIMING'?val/1000:nativeEasing(val)},hiddenFromPublishing:true,scopes:[],codeSyntax:{WEB:'var(--'+primitive.replaceAll('/','-')+')'}});
+ }
+ const token='motion/'+name;preparedSetupDraft.variables.push({name:token,collection:'Motion',type,values:refs,description:'Synthetic UI motion purpose for '+name,scopes:[],codeSyntax:{WEB:'var(--'+token.replaceAll('/','-')+')'}});
+}
+export async function prepareFixture(r,dir,signal){
+ const prompt=setupPrompt(r,path.join(dir,'request.json'));
+ const mode=await fs.readFile(path.join(r.outputDir,'fake-mode'),'utf8').catch(()=>'success');
+ await fs.writeFile(path.join(r.outputDir,'received-prompt'),prompt);
+ if(mode.startsWith('progress')){
+  await fs.appendFile(path.join(dir,'events.jsonl'),[
+   {type:'builder.stage',stage:'foundation'},
+   {type:'builder.update',message:'Reading your saved brand brief and context.'},
+   {type:'builder.update',message:'The supplied palette and typography choices are recorded. Preparing the local draft.'}
+  ].map(event=>JSON.stringify(event)+'\n').join(''));
+  if(mode==='progress-hang')await delay(2147483647,undefined,{signal});
+ }
+ if(mode==='hang')await delay(2147483647,undefined,{signal});
+ await delay(['slow','progress'].includes(mode)?2000:80,undefined,{signal});
+ if(mode==='fail')throw new Error('Simulated agent failure.');
+ if(mode==='blocked'){return ({status:'blocked',message:'Fixture agent needs more context.',questions:[]});}
+ if(mode==='questions'&&!r.answerFile){return ({status:'questions',message:'Choose the product platform and UI font.',questions:[{id:'platform',prompt:'Which platforms should this system support?',options:['Web','App','Web and App']},{id:'font',prompt:'Which UI font should we use?',options:['Inter','Geist','Plus Jakarta Sans']}]});}
+ if(mode==='bad-questions'){return ({status:'questions',message:'Question',questions:[{id:'same',prompt:'One',options:[]},{id:'same',prompt:'Two',options:[]}]});}
+ if(mode!=='empty'){
+  const input=path.join(r.workspace,'workspace/input',r.inputSlug || r.slug);
+  await fs.mkdir(path.join(input,'answers'),{recursive:true});await fs.mkdir(path.join(r.outputDir,'reports'),{recursive:true});
+  await fs.writeFile(path.join(input,'answers/01-init.md'),'Synthetic answers; Web; Inter, chosen by user.');
+  await fs.writeFile(path.join(input,'sources.md'),'Synthetic input manifest '+r.inputFiles.join(', '));
+  await fs.writeFile(path.join(r.outputDir,'reports/init.md'),'Simulation: awaiting review. Figma not generated.');
+  const draft=structuredClone(preparedSetupDraft);
+  if(mode==='alias')draft.variables[1].values.Light.alias='missing/primitive';
+  if(mode==='missing-dark'){draft.collections.find(c=>c.name==='Color').modes.push('Dark');}
+  if(mode==='wrong-float'){draft.variables.find(v=>v.name==='scale/space/xs').values.Value='not-a-number';}
+  await fs.writeFile(path.join(r.outputDir,'foundations.json'),JSON.stringify(draft));
+  const domains={};
+  for(const [id,prefixes,styles] of [['color',['palette/','color/'],[]],['typography',['font/'],draft.textStyles.map(s=>s.name)],['space',['space/'],[]],['shape',['radius/'],[]],['elevation',[],draft.effectStyles.map(s=>s.name)],['motion',['motion/'],[]]])domains[id]={status:'included',variables:draft.variables.filter(v=>prefixes.some(p=>v.name.startsWith(p))).map(v=>v.name),styles};
+  if(mode!=='no-plan')await fs.writeFile(path.join(r.outputDir,'foundation-plan.json'),JSON.stringify({format:'ds-create/foundation-plan@1',...(mode==='no-motion-policy'?{}:{motionPolicy:'basic-ui'}),projectName:mode==='wrong-name'?'Different project':r.projectName,inputHash:r.inputHash,inputRevision:r.inputRevision,product:{name:'Synthetic setup fixture',description:'A synthetic test product',platform:'Web'},systemMode:'new',naming:'normalize',domains,decisions:[{key:'platform',value:'Web',decidedBy:'user',source:r.contextFile}]}));
+  await fs.writeFile(path.join(r.outputDir,'ds-create-ledger.json'),JSON.stringify({system:mode==='wrong-name'?'Different project':r.projectName,preview:true,scope:{productType:'Web'},sequence:[1,2,3,4].map(step=>({step,status:step===1?'done':'todo'})),foundationReview:{status:'pending'}}));
+ }
+ return ({status:'ready',message:'Simulated local draft.',questions:[]});
+}
+export async function setupFixture({mode='success',timeoutMs=10000,autoRun=true,port=0,preparationVersion=1}={}) {
+ const root=await realpath(await mkdtemp(path.join(tmpdir(),'ds-setup-test-'))),output=path.join(root,'workspace/output/fixture');
+ await mkdir(path.join(output,'manager'),{recursive:true});
+ await cp(fileURLToPath(new URL('../../kit/manager',import.meta.url)),path.join(output,'manager'),{recursive:true});
+ await cp(fileURLToPath(new URL('../../kit/web/src/styles/docs-presentation.css',import.meta.url)),path.join(output,'manager/docs-presentation.css'));
+ await writeFile(path.join(output,'manager/chrome.css'),':root{'+[...colors,...values,...effects].map(([k,v])=>k+':'+v+';').join('')+'}');
+ await writeFile(path.join(output,'manager/setup.json'),JSON.stringify({format:'ds-create/setup@1',status:'empty'}));
+ await writeFile(path.join(output,'fake-mode'),mode);
+ const setupOptions={simulation:true,timeoutMs,preparationVersion};
+ const {server,setup,jobs}=createManagerServer({outputDir:output,workspace:root,setupOptions,jobsOptions:{simulation:true}});
+ await new Promise(resolve=>server.listen(port,'127.0.0.1',resolve));
+ const consumer=autoRun?fixtureConsumer({output,workspace:root,kind:'prepare',execute:prepareFixture,timeoutMs}):null;
+ const url='http://127.0.0.1:'+server.address().port,flow=()=>fetch(url+'/api/setup-flow').then(r=>r.json()),initial=await flow();
+ const headers={Origin:url,'X-DS-Create-Token':initial.csrfToken};
+ const post=(endpoint,body,override={})=>fetch(url+endpoint,{method:'POST',headers:{...headers,...(body instanceof FormData?{}:{'Content-Type':'application/json'}),...override},body:body instanceof FormData?body:JSON.stringify(body)});
+ const form=(context='A synthetic product brief.',files=[],projectName='Synthetic setup fixture')=>{const f=new FormData();f.set('projectName',projectName);f.set('context',JSON.stringify(context));for(const [name,bytes]of files)f.append('files',new Blob([bytes]),name);return f;};
+ return {root,output,url,server,consumer,setup,jobs,flow,post,form,initial,setupOptions,async cleanup(){await consumer?.close();await new Promise(resolve=>server.close(resolve));await rm(root,{recursive:true,force:true});}};
+}

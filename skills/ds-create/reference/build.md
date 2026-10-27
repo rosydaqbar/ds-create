@@ -9,7 +9,7 @@ Asks four questions, then builds exactly the pages the answers allow, in the fix
 Before any question, check:
 - `workspace/input/{slug}/answers/01-init.md` exists;
 - the ledger marks steps 1–4 `done`;
-- for a local draft/review record, `node kit/tools/manager.mjs status --slug {slug}` reports `initDone: true` and `source.review: synced` (current saved hash approved and generated/audited in Figma); legacy export-only baselines retain their existing gate;
+- for a local draft/review record, `node kit/manager/cli.mjs status --slug {slug}` reports `initDone: true` and `source.review: synced` (current saved hash approved and generated/audited in Figma); legacy export-only baselines retain their existing gate;
 - the platform is settled (Web, App, or Web and App).
 
 If any is missing, stop with one line: "Init isn't done for {slug}. Run `/ds-create init` first." Then say what is missing.
@@ -41,7 +41,7 @@ Ask the remaining questions in this order, one message each, or all in one messa
 
 Rules:
 - Q1 is never answered by the AI, even in YOLO. Wait for the user's choice.
-- Offer Fast mode only when `kit/tools/figma-fastbuild.js` exists. Otherwise say "Fast mode isn't available in this copy of ds-create" and use Default mode.
+- Offer Fast mode only when `kit/tools/figma/fastbuild.js` exists. Otherwise say "Fast mode isn't available in this copy of ds-create" and use Default mode.
 - In fast mode, also ask: **Read all the text and page plans before anything is drawn?** This is the F2 checkpoint of `workflow/FAST.md`.
 
 ## Q2 · How far
@@ -123,16 +123,16 @@ Steps 5, 6 and 11 run once per system: a later round reuses the page tree, the f
 Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 and its gates.
 
 **Library phase (steps 5–10), standard engine.** For every set, bottom-up:
-1. Build its private parts and sets from the page file, into the page's holding frames (`workflow/INITIATOR.md` Part B §6, *Figma tools*). Use the library kit (`kit/tools/figma-libkit.js`, cached once with `node kit/tools/fast-cache.mjs --library`): the call then holds only the set's structure, and binding helpers are never re-written per build.
-2. Default mode: run `kit/tools/figma-audit.js` on the page with `LIBRARY = true`; it must report `fail` = 0. Fast mode: skip it; the audit runs on call.
-3. Default mode: export its sets with `kit/tools/figma-export-sets.js`. Fast mode: the build call returns ids and counts only; one read-only `kit/tools/figma-registry.js` call at the end of the library phase writes every set file at once (`node kit/tools/registry.mjs`), then F0 refreshes the token base with the hash export (`workflow/FAST.md` F0), so the docs-data agents read the file as built.
-4. Mark the library entry `done`, with its evidence (`node kit/tools/ledger.mjs --slug {slug} --done "library:{id}"`).
+1. Build its private parts and sets from the page file, into the page's holding frames (`workflow/INITIATOR.md` Part B §6, *Figma tools*). Use the library kit (`kit/tools/figma/libkit.js`, cached once with `node kit/tools/build/cache.mjs --library`): the call then holds only the set's structure, and binding helpers are never re-written per build.
+2. Default mode: run `kit/tools/figma/audit.js` on the page with `LIBRARY = true`; it must report `fail` = 0. Fast mode: skip it; the audit runs on call.
+3. Default mode: export its sets with `kit/tools/figma/export-sets.js`. Fast mode: the build call returns ids and counts only; one read-only `kit/tools/figma/registry.js` call at the end of the library phase writes every set file at once (`node kit/tools/build/registry.mjs`), then F0 refreshes the token base with the hash export (`workflow/FAST.md` F0), so the docs-data agents read the file as built.
+4. Mark the library entry `done`, with its evidence (`node kit/tools/build/ledger.mjs --slug {slug} --done "library:{id}"`).
 
 **Documentation phase (steps 11–20).** For every page:
 1. Write its copy file first (`workflow/COPY.md`). Fast mode with agents: brief them from `workflow/templates/fast-brief.md`, and don't wait for all of them: the cache, the first batches and, with the site, its preparation run meanwhile (`workflow/FAST.md` §5, *While F1 runs*).
-2. Draw the page with the engine from Q1, using only sets from the snapshots. Fast mode: `kit/tools/fast-pack.mjs --batch` packs the ready pages into a few calls (`workflow/FAST.md` F4).
-3. Default mode: check that the page's own audit reports `fail` = 0. Fast mode: no audit; the manifest has passed `kit/tools/fast-pack.mjs --check` before the call.
-4. Mark the docs entry `done` in the ledger, with its evidence. Fast mode: `node kit/tools/ledger.mjs --slug {slug} --render '<the batch return>'` marks every page of a batch at once.
+2. Draw the page with the engine from Q1, using only sets from the snapshots. Fast mode: `kit/tools/build/pack.mjs --batch` packs the ready pages into a few calls (`workflow/FAST.md` F4).
+3. Default mode: check that the page's own audit reports `fail` = 0. Fast mode: no audit; the manifest has passed `kit/tools/build/pack.mjs --check` before the call.
+4. Mark the docs entry `done` in the ledger, with its evidence. Fast mode: `node kit/tools/build/ledger.mjs --slug {slug} --render '<the batch return>'` marks every page of a batch at once.
 
 **A missing set never stops the round.** When a page needs a set that isn't built, add its library entry before the current step, build it, record it under `decisions` and resume (`workflow/INITIATOR.md` Part B §6, *Gates*). Never draw a stand-in.
 
