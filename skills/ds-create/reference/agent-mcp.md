@@ -6,6 +6,8 @@ DS Create Builder communicates with an agent through standard MCP tools. It does
 
 `init-web` starts Builder, gives the user its URL, and holds `ds_create_prepare_wait({session})` pending through DS Create MCP (`background-worker.md`). Node waits without model requests; the tool result returns the event to the existing main agent, which claims through the same MCP protocol below. A terminal tool can run the same waiter through `manager.mjs wait`; it does not provide another execution protocol. No callback daemon, heartbeat listener, subagent or host-specific bridge is started. A live pending request and an owned Running attempt are distinct from a Node PID.
 
+When the agent's session has no `ds_create_*` tools, it calls the same tools through `node kit/manager/cli.mjs mcp {tool}`. A background terminal host (`kit/mcp/host.mjs`) holds one real MCP client connection, so everything below applies unchanged (`background-worker.md`, *Without DS Create MCP tools*).
+
 ## Local preparation
 
 1. The user saves project name, context/files or answers in Builder. This creates an immutable selected-input snapshot/request and queues local preparation. No executable is selected or launched. Queued means Waiting for agent, not Running.

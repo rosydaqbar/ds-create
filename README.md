@@ -151,7 +151,7 @@ workspace/            the WORK: every system's inputs and outputs live here, apa
   output/            everything a build generates: one folder per system (git-ignored except workspace/output/README.md)
 ```
 
-Maintainer tests and synthetic fixtures live in `tests/`, outside the distributed runtime tools. Run `node --test tests/*.test.mjs` from the repository root. The MCP entry point is `node kit/mcp/server.mjs --workspace /absolute/workspace`; install its dependencies with `npm ci --prefix kit/mcp`.
+Maintainer tests and synthetic fixtures live in `tests/`, outside the distributed runtime tools. Run `node --test tests/*.test.mjs` from the repository root. The MCP entry point is `node kit/mcp/server.mjs --workspace /absolute/workspace`; install its dependencies with `npm ci --prefix kit/mcp`. An agent session without the `ds_create_*` tools calls them through `node kit/manager/cli.mjs mcp {tool} --json '{…}'`, which installs the dependencies and starts a terminal host holding one MCP connection (`kit/mcp/host.mjs`), so no restart is needed.
 
 # 3. File map
 

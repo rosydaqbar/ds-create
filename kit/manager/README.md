@@ -8,7 +8,7 @@ node kit/manager/cli.mjs init-web --new
 
 | Location | Responsibility |
 | --- | --- |
-| `cli.mjs` | Launch, discover, inspect and stop local Builder sessions |
+| `cli.mjs` | Launch, discover, inspect and stop local Builder sessions; `mcp` / `mcp-host` call DS Create MCP tools through the terminal host (`kit/mcp/host.mjs`) |
 | `client/` | Browser entry, page shell and shared presentation styles |
 | `client/features/` | Intake, preparation, publication and foundation previews |
 | `client/assets/` | Bundled fonts, icons, licenses and source metadata |

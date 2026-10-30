@@ -14,7 +14,7 @@ const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
 const command = args[0];
 let slug = arg('--slug');
 const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait [--slug {slug}] [--foundation color --status generating --message "…"]';
+const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait [--slug {slug}] [--foundation color --status generating --message "…"]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -28,6 +28,30 @@ async function activeRuntime(dir) {
 
 async function main() {
   if (Number(process.versions.node.split('.')[0]) < 20) throw new Error('DS Create Builder requires Node 20 or later.');
+  // Same DS Create MCP tools for agents whose session has no ds_create_* tools loaded (kit/mcp/host.mjs).
+  if (command === 'mcp' || command === 'mcp-host') {
+    const host = await import('../mcp/host-client.mjs');
+    const sub = args[1];
+    if (command === 'mcp-host') {
+      if (!['start', 'status', 'stop'].includes(sub)) throw new Error(usage);
+      const record = sub === 'status' ? await host.hostRecord(workspace) : null;
+      console.log(JSON.stringify(sub === 'start' ? await host.startHost(workspace) : sub === 'stop' ? await host.stopHost(workspace) : { running: !!record, url: record?.url || null, pid: record?.pid || null }));
+      return;
+    }
+    if (!sub) throw new Error(usage);
+    const controller = new AbortController(), stop = () => controller.abort();
+    process.once('SIGTERM', stop); process.once('SIGINT', stop);
+    if (sub === 'tools') { console.log(JSON.stringify((await host.callHost(workspace, '/tools', undefined, controller.signal)).tools, null, 2)); return; }
+    const file = arg('--json-file');
+    const input = file ? await readFile(file, 'utf8') : arg('--json') || '{}';
+    let toolArgs;
+    try { toolArgs = JSON.parse(input); } catch { throw new Error('--json / --json-file must hold one JSON object of tool arguments.'); }
+    const r = await host.callHost(workspace, '/call', { name: sub, arguments: toolArgs }, controller.signal);
+    const text = r.content?.map(c => c.text).filter(Boolean).join('\n') || '';
+    if (r.isError) { console.error(text || 'Tool call failed.'); process.exitCode = 1; return; }
+    console.log(r.structuredContent ? JSON.stringify(r.structuredContent, null, 2) : text);
+    return;
+  }
   if(command==='sessions'||command==='init-web'&&!slug&&!args.includes('--new')){
     const sessions=[];
     for(const entry of await readdir(path.join(workspace,'workspace/output'),{withFileTypes:true}).catch(e=>{if(e.code==='ENOENT')return [];throw e;})){

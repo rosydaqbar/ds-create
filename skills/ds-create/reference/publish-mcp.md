@@ -6,6 +6,8 @@ Publish is a local MCP workflow usable by any compatible client. It does not lau
 
 Preparation delivery (`reference/background-worker.md`) never claims Publish. A Publish click still saves the exact reviewed approval and queues its MCP continuation. The host's executing agent uses its existing Figma connection and the protocol below. Preparation startup does not start an AI waiter or authorize publication, and no Node PID proves that Figma execution is ready. No separate Figma OAuth/client registration is needed.
 
+Without `ds_create_*` tools in the session, call each `ds_create_publish*` tool below through `node kit/manager/cli.mjs mcp {tool} --json '{…}'` (`background-worker.md`, *Without DS Create MCP tools*); the Figma writes still go through the host's own Figma tools.
+
 The numbered operations below are the agent integration protocol, not end-user instructions. Integrations can still use the same standard tools. The user sees publication task rows, current public activity, elapsed time and actual blockers.
 
 1. Call `ds_create_publish_status` with the stable output/session id, not inputSlug or display name.
