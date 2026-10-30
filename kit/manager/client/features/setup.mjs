@@ -1,5 +1,5 @@
 import { builderSettings } from '../../shared/ui-settings.mjs';
-import { normalizeInterfaceDetails, interfaceDetailsText, tokenizationPreview, platformsForDevices, devicesForPlatforms } from '../../shared/interface.mjs';
+import { normalizeInterfaceDetails, tokenizationPreview, platformsForDevices, devicesForPlatforms } from '../../shared/interface.mjs';
 import { preparationView } from './preparation.mjs';
 import { openDialog, closeDialog } from '../ui-motion.mjs';
 const $ = id => document.getElementById(id);
@@ -15,7 +15,10 @@ export function renderTokenizationPreview(root, devices) {
   const summary=formats.length?`Token formats: ${formats.join(', ')}.${state.needsContext?' Additional formats follow the project context.':''}`:state.needsContext?'Token formats follow the project context.':'Choose Web, App, or both to see token formats.';
   if(node('status').textContent!==summary)node('status').textContent=summary;
 }
-export function setupWeb({ onChange = () => {} } = {}) {
+// Totals from the system contract: specs/parts holds 19 Parts and specs/sections 2 Sections. Layouts are
+// made per product, so they have no fixed total.
+const catalog = { parts: 19, sections: 2 };
+export function setupWeb({ onChange = () => {}, progress = () => null } = {}) {
   const dialog=$('setup-dialog');
   let flow,signature='',pending=[],busy=false,opened=false,returnFocus,editing=false,editRevision,nameHydrated=false,networkFailed=false,step=1,detailsHydrated=false;
   let savedDevices=[];
@@ -31,6 +34,15 @@ export function setupWeb({ onChange = () => {} } = {}) {
     const key=JSON.stringify([flow?.rootFiles,flow?.rootFilesError,pending.map(f=>[f.name,f.size,f.lastModified])]);if(key===fileListKey)return;fileListKey=key;
     $('setup-file-list').innerHTML=rootFileRows()+(flow?.rootFilesError?`<li role="alert"><span>Workspace inputs<small>${escape(flow.rootFilesError)}</small></span><span>Unavailable</span></li>`:'')+pending.map((f,i)=>`<li data-pending-file="${i}"><span>${escape(f.name)}<small>${size(f.size)}</small></span></li>`).join('');
     for(const row of $('setup-file-list').querySelectorAll('[data-pending-file]')){const i=Number(row.dataset.pendingFile),button=$('setup-remove-file').content.firstElementChild.cloneNode(true);button.dataset.removeFile=i;button.setAttribute('aria-label',`Remove ${pending[i].name}`);row.append(button);}
+  }
+  // Once foundations are ready, the status line becomes a count of what the system has so far. Builder's own
+  // state arrives separately, so this also repaints whenever Builder renders.
+  function paintStats() {
+    const p=progress(),ready=flow?.status==='ready'&&!editing;$('setup-stats').hidden=!ready||!p;
+    if(!ready||!p)return;
+    const done=p.foundations.filter(f=>f.status==='ready').length,prepared=p.parts.filter(x=>x.status==='review'||x.status==='synced').length;
+    const stats={foundations:[done,`of ${p.foundations.length} ready`],parts:[prepared,`of ${catalog.parts} prepared`],sections:[0,`of ${catalog.sections} built`],layouts:[0,'built']};
+    for(const [key,[value,note]] of Object.entries(stats)){const card=dialog.querySelector(`[data-stat="${key}"]`);card.querySelector('[data-stat-value]').textContent=value;card.querySelector('[data-stat-note]').textContent=note;}
   }
   function paint() {
     $('setup-open').hidden=!flow?.enabled;
@@ -63,21 +75,29 @@ export function setupWeb({ onChange = () => {} } = {}) {
     $('setup-edit').disabled=busy;
     $('setup-edit-cancel').hidden=!editing;
     $('setup-edit-cancel').disabled=busy;
-    $('setup-revision-note').textContent=`Input revision ${flow.inputRevision}. Replacing a filename keeps its original version. Saved answers stay available.`;
+    $('setup-revision').querySelector('[data-anatomy="label"]').textContent=`Revision ${flow.inputRevision}`;
     $('setup-resume-project').textContent=flow.projectName||'Not named yet';
     $('setup-saved-project').textContent=flow.projectName||'Not named yet';
     $('setup-resume-command').textContent=flow.resumeCommand||'';
-    $('setup-resume').hidden=!flow.resumeCommand;
+    $('setup-resume').hidden=!flow.resumeCommand||editing;
     if(editing){$('setup-title').textContent='Revise your context';$('setup-description').textContent='Update instructions or add a readable replacement file. Saving starts preparation again; review the new draft before publishing.';}
     if((initial||editing)&&step===2)$('setup-description').textContent='Choose the appearance modes and devices your design system needs to support.';
-    $('setup-saved').hidden=initial;
+    $('setup-saved').hidden=initial||editing;
     $('setup-simulation').hidden=!flow.simulation;
-    $('setup-state').textContent=flow.message||'';
-    $('setup-state').hidden=initial;
-    $('setup-storage').textContent=`Saved locally in ${flow.inputPath}`;
-    $('setup-saved-interface').textContent=interfaceDetailsText(flow.interfaceDetails);$('setup-saved-interface').hidden=!flow.interfaceDetails;
+    $('setup-state-text').textContent=flow.message||'';
+    $('setup-state').dataset.tone=ready?'success':questions||flow.status==='blocked'?'warning':/error|failed/.test(flow.status)?'danger':'info';
+    $('setup-state').hidden=initial||!flow.message||ready;
+    paintStats();
+    $('setup-storage').textContent=flow.inputPath;
+    // Saved modes and platforms show as the same badges the form offers.
+    const platforms=platformsForDevices(flow.interfaceDetails?.devices||[]);
+    for(const badge of dialog.querySelectorAll('[data-saved-mode]'))badge.hidden=!flow.interfaceDetails?.modes?.includes(badge.dataset.savedMode);
+    for(const badge of dialog.querySelectorAll('[data-saved-platform]'))badge.hidden=!platforms.includes(badge.dataset.savedPlatform);
+    for(const row of dialog.querySelectorAll('[data-saved-interface]'))row.hidden=!flow.interfaceDetails;
     $('setup-saved-context').textContent=flow.context || 'Context provided in files.';
-    $('setup-saved-files').innerHTML=rootFileRows()+(flow.files || []).map(f=>`<li><span>${escape(f.name)}</span><span>${size(f.size)}</span></li>`).join('');
+    const savedFiles=[...(flow.rootFiles||[]).map(f=>[f.name,`Workspace input · ${size(f.size)}`]),...(flow.files||[]).map(f=>[f.name,`${(f.name.split('.').pop()||'File').toUpperCase()} · ${size(f.size)}`])];
+    $('setup-saved-files').replaceChildren(...savedFiles.map(([name,meta])=>{const row=$('setup-saved-file').content.firstElementChild.cloneNode(true);row.querySelector('[data-file-name]').textContent=name;row.querySelector('[data-file-meta]').textContent=meta;return row;}));
+    $('setup-saved-files').hidden=!savedFiles.length;$('setup-saved-files-empty').hidden=!!savedFiles.length;
     $('setup-submit').hidden=!(initial||editing)||step!==2;
     $('setup-submit').disabled=busy;
     $('setup-submit').textContent=busy?'Saving context…':editing?'Save & prepare again':flow.available?'Prepare foundations':'Save context';
@@ -127,7 +147,7 @@ export function setupWeb({ onChange = () => {} } = {}) {
 
   $('setup-edit').addEventListener('click',editContext);
   $('setup-edit-cancel').addEventListener('click',()=>{editing=false;step=1;pending=[];files();error('');paint();$('setup-edit').focus();});
-  $('setup-copy-resume').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(flow.resumeCommand);$('setup-copy-resume').textContent='Copied';setTimeout(()=>{$('setup-copy-resume').textContent='Copy resume command';},1500);}catch{error('Copy failed. Select the resume command above and copy it.');}});
+  $('setup-copy-resume').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(flow.resumeCommand);const label=$('setup-copy-resume').querySelector('[data-anatomy="label"]');label.textContent='Copied';setTimeout(()=>{label.textContent='Copy resume command';},1500);}catch{error('Copy failed. Select the resume command above and copy it.');}});
   $('setup-open').addEventListener('click',async()=>{await refresh();if(flow?.status==='questions'){location.hash='overview';preparation.reply();}else if(!dialog.open)open();});
   $('setup-close').addEventListener('click',close);$('setup-explore').addEventListener('click',()=>{close();location.hash='overview';});$('setup-review').addEventListener('click',()=>{close();location.hash='overview';});
   dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
@@ -157,5 +177,5 @@ export function setupWeb({ onChange = () => {} } = {}) {
   $('setup-stop').addEventListener('click',()=>post('/api/setup-cancel',{}));$('setup-retry').addEventListener('click',()=>post('/api/setup-retry',{}));
   document.addEventListener('click',e=>{if(e.target.closest('[data-open-setup]')){if(!dialog.open)open();}});
   async function poll(){await refresh();setTimeout(poll,document.hidden?builderSettings.network.pollHiddenMs:builderSettings.network.pollVisibleMs);}poll();
-  return {refresh,visibility:preparation.visibility};
+  return {refresh,visibility:()=>{preparation.visibility();paintStats();}};
 }

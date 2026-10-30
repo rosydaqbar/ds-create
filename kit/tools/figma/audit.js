@@ -54,7 +54,8 @@ if (!PAGE) {
   for (const v of vars) {
     const col = colById.get(v.variableCollectionId);
     if (col && ACCEPTED.outOfScopeCollections.includes(col.name)) { hit('out-of-scope-collection', 'info', 'Approved: collections that are not tokens', col.name); continue; }
-    if (v.scopes.includes('ALL_SCOPES') && col && col.name !== 'Primitives') hit('variable-all-scopes', 'fail', 'Variables must have explicit scopes (never ALL_SCOPES)', v.name);
+    // Figma fixes TIMING and EASING variables at ALL_SCOPES; their scopes cannot be set.
+    if (v.scopes.includes('ALL_SCOPES') && col && col.name !== 'Primitives' && !['TIMING', 'EASING'].includes(v.resolvedType)) hit('variable-all-scopes', 'fail', 'Variables must have explicit scopes (never ALL_SCOPES)', v.name);
     if (!v.codeSyntax || !v.codeSyntax.WEB) hit('variable-no-web-syntax', 'warn', 'Variables need WEB code syntax var(--name)', v.name);
   }
 

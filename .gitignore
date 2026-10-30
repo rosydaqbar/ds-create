@@ -76,6 +76,7 @@ workspace/input/*
 # Local agent settings and installed skills never go into git. The ds-create skill lives in skills/ds-create/;
 # each user links it into .claude/skills/ on their own machine (README, Start here).
 .claude/
+.agents/
 CLAUDE.local.md
 
 # 9. Local session notes

@@ -8,16 +8,17 @@ import { Label } from '../src/components/parts/Label';
 import { HelpText } from '../src/components/parts/HelpText';
 import { Badge } from '../src/components/parts/Badge';
 import { Divider } from '../src/components/parts/Divider';
+import { FeaturedIcon } from '../src/components/parts/FeaturedIcon';
 import { TextField, TextareaField } from '../src/components/components/TextField';
 import { ChoiceCard } from '../src/components/components/ChoiceField';
 import { StepNavigation } from '../src/components/components/StepNavigation';
 import { interfaceModes, interfacePlatforms } from '../../manager/shared/interface.mjs';
 import { builderSettings } from '../../manager/shared/ui-settings.mjs';
 
-function SettingRow({ label, id, htmlFor, required, optional, children }: {
-  label: string; id?: string; htmlFor?: string; required?: boolean; optional?: boolean; children: ReactNode;
+function SettingRow({ label, id, htmlFor, required, optional, rowId, savedInterface, children }: {
+  label: string; id?: string; htmlFor?: string; required?: boolean; optional?: boolean; rowId?: string; savedInterface?: boolean; children: ReactNode;
 }) {
-  return <div className="docs-home-section grid grid-cols-1 items-start gap-lg sm:grid-cols-3 sm:gap-3xl">
+  return <div id={rowId} data-saved-interface={savedInterface ? '' : undefined} className="docs-home-section grid grid-cols-1 items-start gap-lg sm:grid-cols-3 sm:gap-3xl">
     <Label as={htmlFor ? 'label' : 'span'} id={id} htmlFor={htmlFor} showRequired={required}
       className={htmlFor ? 'sm:pt-md' : id === 'setup-modes-label' ? 'sm:pt-lg' : undefined}
       label={<>{label}{optional && <span className="setup-optional">Optional</span>}</>} />
@@ -88,9 +89,58 @@ export const markup = renderToStaticMarkup(
       </section>
       <p id="setup-agent-note" className="setup-note" hidden>Your background worker prepares foundations from this saved context.</p>
     </form>
-    <p id="setup-state" className="setup-note" role="status" aria-live="polite" hidden />
-    <div id="setup-saved" hidden><details className="setup-context-details"><summary>Saved context and files</summary><p>Project name: <strong id="setup-saved-project" /></p><p id="setup-saved-context" /><p id="setup-saved-interface" hidden /><ul id="setup-saved-files" className="setup-files" /></details><p id="setup-storage" className="setup-note" /><p id="setup-revision-note" className="setup-note" /><Button id="setup-edit" emphasis="secondary" label="Edit context / add files" /></div>
-    <details id="setup-resume" className="setup-resume setup-context-details"><summary>Continue in another agent chat?</summary><div className="setup-resume-body"><p className="setup-resume-project"><span>Project name</span><code id="setup-resume-project" /></p><p className="setup-resume-help">Paste this command into a new agent chat to reopen this project with its saved context.</p><code id="setup-resume-command" /><Button id="setup-copy-resume" emphasis="secondary" label="Copy resume command" /></div></details>
+    <div id="setup-state" className="setup-status" data-tone="info" role="status" aria-live="polite" hidden>
+      <Icon name="alerts/check-circle" size="md" data-tone-icon="success" />
+      <Icon name="alerts/alert-triangle" size="md" data-tone-icon="warning" />
+      <Icon name="alerts/x-circle" size="md" data-tone-icon="danger" />
+      <Icon name="alerts/info-circle" size="md" data-tone-icon="info" />
+      <p id="setup-state-text" className="m-0 type-body-sm-medium" />
+    </div>
+    <div id="setup-stats" className="setup-stats" role="group" aria-label="Design system progress" hidden>
+      {[['foundations', 'Foundations'], ['parts', 'Parts'], ['sections', 'Sections'], ['layouts', 'Layouts']].map(([key, label]) =>
+        <div key={key} className="setup-stat" data-stat={key}><span className="type-body-sm-medium text-text-secondary">{label}</span><strong className="type-heading-md-semibold text-text-primary" data-stat-value>0</strong><span className="type-body-sm-regular text-text-tertiary" data-stat-note /></div>)}
+    </div>
+    <div id="setup-saved" hidden>
+      <section className="docs-reading-card setup-settings setup-saved-card" aria-label="Saved context">
+        <SettingRow label="Project name">
+          <p id="setup-saved-project" className="m-0 type-body-md-regular text-text-primary setup-saved-value" />
+        </SettingRow>
+        <SettingRow label="Context / Instruction">
+          <p id="setup-saved-context" className="m-0 type-body-sm-regular text-text-secondary setup-saved-context" />
+        </SettingRow>
+        <SettingRow label="Appearance modes" savedInterface>
+            <div className="flex flex-wrap gap-md">
+              {interfaceModes.map(value => <Badge key={value} data-saved-mode={value} size="md" type="outline" leadingIcon={value === 'Light' ? 'weather/sun' : 'weather/moon'} label={value} hidden />)}
+            </div>
+        </SettingRow>
+        <SettingRow label="Platforms" savedInterface>
+            <div className="flex flex-wrap gap-md">
+              {interfacePlatforms.map(value => <Badge key={value} data-saved-platform={value} size="md" type="outline" leadingIcon={value === 'Web' ? 'media/monitor' : 'media/smartphone'} label={value} hidden />)}
+            </div>
+        </SettingRow>
+        <SettingRow label="Context files">
+          <ul id="setup-saved-files" className="setup-saved-files" />
+          <HelpText id="setup-saved-files-empty" hint="No files. The context above is the only source." hidden />
+        </SettingRow>
+        <SettingRow label="Saved in">
+          <div className="grid gap-md">
+            <div className="flex flex-wrap items-center gap-md"><code id="setup-storage" className="setup-saved-path" /><Badge id="setup-revision" size="sm" tone="neutral" label="Revision" /></div>
+            <HelpText id="setup-revision-note" hint="Replacing a file with the same name keeps its earlier version. Saved answers stay available." />
+          </div>
+        </SettingRow>
+      </section>
+      <div className="setup-saved-actions"><Button id="setup-edit" emphasis="secondary" leadingIcon="general/edit" label="Edit context / add files" /></div>
+    </div>
+    <template id="setup-saved-file"><li className="setup-saved-file"><FeaturedIcon type="square" size="sm" tone="neutral" icon="files/file-text" /><span className="grid min-w-0"><span data-file-name className="type-body-sm-medium text-text-primary" /><span data-file-meta className="type-body-sm-regular text-text-tertiary" /></span></li></template>
+    <details id="setup-resume" className="setup-resume docs-reading-card">
+      <summary><Icon name="development/terminal" size="md" className="text-icon-tertiary" /><span className="type-body-sm-medium text-text-primary">Continue in another agent chat</span><Icon name="arrows/chevron-down" size="sm" className="setup-resume-chevron text-icon-tertiary" /></summary>
+      <div className="setup-resume-body">
+        <HelpText hint="Paste this command into a new agent chat to reopen this project with its saved context." />
+        <p className="setup-resume-project"><span className="type-body-sm-medium text-text-secondary">Project</span><code id="setup-resume-project" /></p>
+        <code id="setup-resume-command" className="setup-resume-command" />
+        <Button id="setup-copy-resume" size="sm" emphasis="secondary" leadingIcon="general/copy" label="Copy resume command" />
+      </div>
+    </details>
     <p id="setup-error" className="setup-error" role="alert" hidden />
     <template id="setup-remove-file"><IconButton data-remove-file="" label="Remove file" /></template>
     <div className="publish-footer setup-footer">
@@ -101,7 +151,7 @@ export const markup = renderToStaticMarkup(
       <Button id="setup-back" emphasis="secondary" hidden label="Back" />
       <Button id="setup-next" label="Next" />
       <Button id="setup-submit" hidden type="submit" form="setup-initial" label="Prepare foundations" />
-      <Button id="setup-review" hidden label="Review foundations" />
+      <Button id="setup-review" hidden label="Review" />
     </div>
   </dialog>
 );
@@ -111,25 +161,41 @@ export const markup = renderToStaticMarkup(
 export const workerMarkup = renderToStaticMarkup(
   <div id="worker-shell">
   <section id="worker-connection" className="shrink-0 min-w-0 px-xl py-lg border-b-(length:--border-width-default) border-border-subtle bg-surface-base data-[connection=disconnected]:m-xl data-[connection=disconnected]:p-xl data-[connection=disconnected]:border-(length:--border-width-default) data-[connection=disconnected]:border-border-warning-subtle data-[connection=disconnected]:rounded-control data-[connection=disconnected]:bg-surface-raised data-[state=attention]:m-xl data-[state=attention]:p-xl data-[state=attention]:border-(length:--border-width-default) data-[state=attention]:border-border-warning-subtle data-[state=attention]:rounded-control data-[state=attention]:bg-surface-raised" aria-label="Agent status" tabIndex={-1} data-state="checking">
-    <div className="flex flex-wrap items-center justify-between gap-md">
-      <div className="flex flex-wrap items-center gap-md"><strong className="type-body-sm-semibold">Agent status</strong><span id="worker-connection-label" role="status" aria-live="polite">
-          <Badge id="worker-status-connected" size="sm" tone="success" showDot label="Connected" hidden />
-          <Badge id="worker-status-disconnected" size="sm" tone="warning" showDot label="Not connected" hidden />
-          <Badge id="worker-status-idle" size="sm" tone="neutral" showDot label="Not connected" hidden />
-          <Badge id="worker-status-delivered" size="sm" tone="info" showDot label="Request delivered" hidden />
-          <Badge id="worker-status-unknown" size="sm" tone="neutral" showDot label="Connection unavailable" />
-        </span><Button id="worker-recheck" size="sm" emphasis="tertiary" leadingIcon="general/refresh" label="Check again" /><Badge id="worker-work-summary" size="sm" tone="neutral" label="No changes needed" role="status" hidden /></div>
-      <div className="flex items-center gap-md">
-        <Button id="worker-details-toggle" size="sm" emphasis="tertiary" aria-controls="worker-details" aria-expanded="true" trailingIcon="arrows/chevron-down" label="Hide details" />
-      </div>
+    {/* Same anatomy as the Appearance panel: title with status, one sentence, detail rows, full-width action. */}
+    <div className="workspace-panel-header"><h2>Connection</h2><span id="worker-connection-label" role="status" aria-live="polite">
+      <Badge id="worker-status-connected" size="sm" tone="success" showDot label="Connected" hidden />
+      <Badge id="worker-status-disconnected" size="sm" tone="warning" showDot label="Not connected" hidden />
+      <Badge id="worker-status-idle" size="sm" tone="neutral" showDot label="Idle" hidden />
+      <Badge id="worker-status-delivered" size="sm" tone="info" showDot label="Request delivered" hidden />
+      <Badge id="worker-status-unknown" size="sm" tone="neutral" showDot label="Checking…" />
+    </span></div>
+    <p id="worker-connection-detail" className="workspace-disclaimer">Checking whether Builder events can reach your agent.</p>
+    <div id="worker-job" className="worker-job" data-active="false">
+      <Icon name="time/history" size="md" className="text-icon-tertiary" />
+      <strong id="worker-job-title" className="type-body-sm-semibold text-text-primary">No active job</strong>
+      <span id="worker-job-text" className="type-body-sm-regular text-text-tertiary">Prepare and Publish requests from Builder show up here.</span>
     </div>
-    <div id="worker-details">
-      <p id="worker-connection-detail" className="mt-xs">Checking whether Builder events can reach your agent.</p>
-      <div id="worker-recovery" className="mt-xl" hidden>
-        <TextareaField id="worker-spawn-prompt" label="Continuation prompt" rows={builderSettings.continuationPromptRows} readOnly spellCheck={false} />
-        <div className="mt-md flex flex-wrap items-center gap-md"><Button id="worker-copy-prompt" size="sm" leadingIcon="general/copy" label="Copy continuation prompt" /><span id="worker-copy-feedback" className="text-text-secondary" role="status" aria-live="polite" /></div>
-      </div>
-    </div>
+    <section id="worker-recovery" className="inspector-section" hidden><h3>Continue in a new chat</h3>
+      <TextareaField id="worker-spawn-prompt" label="Continuation prompt" rows={builderSettings.continuationPromptRows} readOnly spellCheck={false} />
+      <div className="mt-md flex flex-wrap items-center gap-md"><Button id="worker-copy-prompt" size="sm" leadingIcon="general/copy" label="Copy continuation prompt" /><span id="worker-copy-feedback" className="text-text-secondary" role="status" aria-live="polite" /></div>
+    </section>
+    <section id="change-requests" className="change-requests" aria-labelledby="change-requests-title" hidden>
+      <h3 id="change-requests-title">Change requests</h3>
+      <div id="change-request-list" className="change-request-list" />
+      <div className="change-request-actions"><Button id="change-request-copy" size="sm" leadingIcon="general/copy" label="Copy prompt" /><span id="change-request-copied" className="type-body-sm-regular text-text-secondary" role="status" aria-live="polite" /></div>
+      <p id="change-request-status" className="type-body-sm-regular text-text-danger" role="status" aria-live="polite" />
+    </section>
+    <template id="change-request-card"><article className="change-request">
+      <div className="change-request-head"><Badge size="sm" tone="info" label="Change Request" /><IconButton data-change-remove="" size="sm" emphasis="tertiary" icon="general/x" label="Remove change request" /></div>
+      <p className="change-request-path type-body-xs-medium text-text-tertiary" data-change-path />
+      <strong className="change-request-item type-body-sm-semibold text-text-primary" data-change-item />
+      <p className="change-request-details type-body-sm-regular text-text-secondary" data-change-details />
+      <ul className="change-request-notes" data-change-notes />
+      <div className="change-request-form" data-change-form hidden><textarea className="change-request-input" rows={3} maxLength={2000} aria-label="Note for this change" placeholder="What should change?" /><div className="flex flex-wrap gap-sm"><Button data-change-save="" size="sm" label="Save note" /><Button data-change-cancel="" size="sm" emphasis="tertiary" label="Cancel" /></div></div>
+      <Button data-change-add-note="" size="sm" emphasis="secondary" leadingIcon="general/plus" label="Add Notes" />
+    </article></template>
+    <template id="change-request-note"><li className="change-request-note"><span className="type-body-sm-regular text-text-primary" data-note-text /><IconButton data-note-remove="" size="sm" emphasis="tertiary" icon="general/trash" label="Remove note" /></li></template>
+    <div className="workspace-reset"><Button id="worker-recheck" emphasis="secondary" leadingIcon="general/refresh" className="w-full" label="Check again" /><small>Builder also checks on its own every few seconds.</small></div>
   </section>
   </div>
 );

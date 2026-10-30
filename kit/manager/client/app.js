@@ -4,10 +4,14 @@ import { createCanvas } from './canvas.mjs';
 import { preparedFonts, fontChoices, fontStack } from './assets/fonts/catalog.mjs';
 import { spacingScale } from './features/spacing.mjs';
 import { createFoundationControls } from './features/controls.js';
+import { cssColor, rounded } from './features/foundation-controls.mjs';
 import { createMotionPreview } from './features/motion.mjs';
 import { setupPublish } from './features/publish.mjs';
 import { iconographyContent } from './features/iconography.mjs';
+import { overviewParts, partInspector, partPage, partStatus, setupParts } from './features/parts.mjs';
 import { setupWeb } from './features/setup.mjs';
+import { setupChangeRequests } from './features/change-requests.mjs';
+import { setupBuild } from './features/build.mjs';
 import { setupWorkerConnection } from './features/worker-connection.mjs';
 
 const $ = id => document.getElementById(id);
@@ -46,6 +50,8 @@ let inspectorRoute;
 let inspectorNeedsReset = true;
 const draft = { name: null, product: null, values: new Map(), settings: new Map() };
 let selectedToken = 'color/text/primary';
+// Foundation pages work like Part pages: a card or row selects one item; the page card itself selects the page.
+let selectedItem = null;
 const displayName = () => draft.name ?? state.system;
 const valueKey = (name, mode) => `${name}\u0000${mode}`;
 const route = () => location.hash.slice(1) || 'overview';
@@ -92,19 +98,22 @@ function colorGroups(f) {
   const order = Object.keys(groupNames);
   return [...groups].sort(([a], [b]) => (order.indexOf(a) < 0 ? 99 : order.indexOf(a)) - (order.indexOf(b) < 0 ? 99 : order.indexOf(b)));
 }
-const valueText = result => result?.error || (typeof result?.value === 'object' ? JSON.stringify(result.value) : String(result?.value ?? '—'));
+const valueText = result => { const value = cssColor(result?.value); return result?.error || (typeof value === 'object' ? JSON.stringify(value) : String(value ?? '—')); };
 const footer = () => `<footer class="docs-page-footer"><span>Init workspace</span><span>${state?.updated ? `Output saved ${escape(new Date(state.updated).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }))}` : 'Waiting for the first saved output'}</span></footer>`;
 const documentFrame = (title, description, body, status = '', titleAttributes = '') => `<article class="docs-reading-card"><header class="docs-page-header"><div class="page-title-row"><h1 ${titleAttributes}>${escape(title)}</h1>${status}</div><p>${escape(description)}</p></header>${body}${footer()}</article>`;
-function previewCard(toolbar, content, { className = '', stageClass = '', attributes = '', stageAttributes = '', caption = '', interactive = false } = {}) {
+const isSelectedItem = key => selectedItem === `${route()}|${key}`;
+const selectable = key => `data-select-item="${escape(key)}" tabindex="0" role="button" aria-pressed="${isSelectedItem(key)}"`;
+const selectClass = key => `is-selectable${isSelectedItem(key) ? ' is-selected' : ''}`;
+function previewCard(toolbar, content, { className = '', stageClass = '', attributes = '', stageAttributes = '', caption = '', interactive = false, select = '' } = {}) {
   const inner = interactive ? 'span' : 'div';
-  return `<div class="docs-preview ${className}" ${interactive ? '' : attributes}>${interactive ? `<button type="button" class="specimen-select" ${attributes}>` : ''}<${inner} class="docs-preview-toolbar">${toolbar}</${inner}><${inner} class="docs-stage ${stageClass}" ${stageAttributes}>${content}</${inner}>${caption}${interactive ? '</button>' : ''}</div>`;
+  return `<div class="docs-preview ${className}${select ? ` ${selectClass(select)}` : ''}" ${interactive ? '' : attributes} ${select ? selectable(select) : ''}>${interactive ? `<button type="button" class="specimen-select" ${attributes}>` : ''}<${inner} class="docs-preview-toolbar">${toolbar}</${inner}><${inner} class="docs-stage ${stageClass}" ${stageAttributes}>${content}</${inner}>${caption}${interactive ? '</button>' : ''}</div>`;
 }
 
 function renderNav() {
   if (!state) return;
   const term = $('nav-search').value.trim().toLowerCase();
   const items = state.foundations.filter(f => f.name.toLowerCase().includes(term));
-  $('nav').innerHTML = `<a class="nav-link" href="#overview" ${route() === 'overview' ? 'aria-current="page"' : ''}>${icon('overview')}<span>Overview</span></a><div class="nav-heading">Foundations</div>${items.map(f => `<a class="nav-link" href="#${f.id}" ${route() === f.id ? 'aria-current="page"' : ''}>${icon(f.id)}<span>${escape(f.name)}</span><span class="nav-dot" data-status="${f.status}" aria-label="${escape(labels[f.status])}"></span></a>`).join('')}${items.length ? '' : '<p class="nav-hint">No foundations match.</p>'}`;
+  $('nav').innerHTML = `<a class="nav-link" href="#overview" ${route() === 'overview' ? 'aria-current="page"' : ''}>${icon('overview')}<span>Overview</span></a><div class="nav-heading">Foundations</div>${items.map(f => `<a class="nav-link" href="#${f.id}" ${route() === f.id ? 'aria-current="page"' : ''}>${icon(f.id)}<span>${escape(f.name)}</span><span class="nav-dot" data-status="${f.status}" aria-label="${escape(labels[f.status])}"></span></a>`).join('')}${items.length ? '' : '<p class="nav-hint">No foundations match.</p>'}${(state.parts || []).length ? `<div class="nav-heading">Parts</div>${state.parts.filter(p => p.name.toLowerCase().includes(term)).map(p => `<a class="nav-link" href="#part-${escape(p.id)}" ${route() === 'part-' + p.id ? 'aria-current="page"' : ''}>${icon('overview')}<span>${escape(p.name)}</span><span class="nav-dot" data-status="${escape({ review: 'review', synced: 'ready', outdated: 'error' }[p.status] || 'pending')}" aria-label="${escape(p.status)}"></span></a>`).join('')}` : ''}`;
 }
 
 function preview(f) {
@@ -137,6 +146,7 @@ function overview() {
       return previewCard(`<a href="#${id}">${escape(f.name)}</a>${icon('arrow')}`, preview(f));
     }).join('')}</div></section>
     <section class="section" aria-labelledby="foundations-heading"><div class="section-heading"><h2 id="foundations-heading">Foundation library</h2><small>${state.summary.ready} ready to inspect</small></div><div class="foundation-list">${state.foundations.map(f => `<a class="foundation-row" href="#${f.id}">${icon(f.id)}<div><strong>${escape(f.name)}</strong><small>${escape(f.description)}</small></div><div class="row-meta">${f.count ? `<span class="count">${f.count} ${f.styles.length && !f.variables.length ? 'styles' : 'items'}</span>` : ''}${badge(f.status, f.later && f.status === 'pending' ? 'Not generated yet' : labels[f.status])}</div>${icon('arrow')}</a>`).join('')}</div></section>
+    ${overviewParts(state.parts, { escape, badge, icon })}
     `, badge(state.status, names[state.status]), 'data-system-name');
 }
 
@@ -158,7 +168,7 @@ function foundation(f) {
     const colorValue=name=>{const v=colors.variables.find(v=>v.name===name);return v?valueText(resultFor(v,modeFor(colors))):'';};
     const ink=colorValue('color/icon/primary')||colorValue('color/text/primary'),base=ink?colorValue('color/surface/base'):'';
     const sizes=space.variables.filter(v=>v.name.startsWith('size/icon/')).map(v=>({name:v.name,value:resultFor(v,modeFor(space)).value})).filter(v=>Number.isFinite(v.value)&&v.value>0&&v.value<=48).sort((a,b)=>a.value-b.value);
-    return documentFrame(f.name,f.description,iconographyContent({query,escape,previewCard,sizes,ink,base}),badge('ready','Library reference'));
+    return documentFrame(f.name,f.description,iconographyContent({query,escape,previewCard,sizes,ink,base,selectable,selectClass}),badge('ready','Library reference'));
   }
   if (f.id === 'color') return colorDocument(f);
   if (f.id === 'space') return spacingDocument(f);
@@ -175,12 +185,13 @@ function foundation(f) {
     if (styles.length) body += `<div class="specimen-list">${styles.map(s => {
         if (f.id === 'typography') {
           const type = textStyle(f, s);
-          return previewCard(`<code>${escape(s.name)}</code><span>${escape(typefaceLabel(previewTypeface(f)))} · ${escape(type.fontSize)} / ${escape(type.lineHeight ?? 'Auto')}</span>`, `<p data-font="${escape(type.fontFamily)}" data-type-size="${escape(type.fontSize)}">The shape of things to come.</p>`, { className: 'type-style' });
+          return previewCard(`<code>${escape(s.name)}</code><span>${escape(typefaceLabel(previewTypeface(f)))} · ${escape(type.fontSize)} / ${escape(type.lineHeight ?? 'Auto')}</span>`, `<p data-font="${escape(type.fontFamily)}" data-type-size="${escape(type.fontSize)}">The shape of things to come.</p>`, { className: 'type-style', select: s.name });
         }
-        if (f.id === 'elevation') return previewCard(`<code>${escape(s.name)}</code>`, `<div class="effect-sample" data-effect="${escape(s.name)}"></div><small>${escape(controls.summary(s))}</small>`, { className: 'effect-style' });
+        if (f.id === 'elevation') return previewCard(`<code>${escape(s.name)}</code>`, `<div class="effect-sample" data-effect="${escape(s.name)}"></div><small>${escape(controls.summary(s))}</small>`, { className: 'effect-style', select: s.name });
         return previewCard(`<code>${escape(s.name)}</code>`, `<p>${escape(JSON.stringify(s.grids || []))}</p>`);
       }).join('')}</div>`;
-      if (filtered.length) body += `${styles.length ? '<div class="section-heading"><h2>Variables</h2></div>' : ''}${variableTable(filtered, mode)}`;
+      // Pages show their styles, not a token list; the table only stands in when there is nothing else to show.
+      if (filtered.length && !f.styles.length) body += variableTable(filtered, mode);
     body += '</section>';
   }
   return documentFrame(f.name, f.description, body, badge(f.status));
@@ -192,7 +203,7 @@ function spacingFor(f) {
   return spacingScale(draft.settings.get('space-base-rem') ?? (Number.isFinite(saved) && saved > 0 ? saved / 16 : 0.25));
 }
 function spacingCard(step, base = false, measureScale = 1) {
-  return previewCard(`<span>${base ? 'Base unit' : `×${step.multiple}`}</span><code>${step.px}px</code>`, `<span class="measure spacing-measure" style="width:${step.px}px;transform:scaleX(${measureScale})" aria-hidden="true"></span>`, { className: 'spacing-card', stageClass: 'spacing-stage', attributes: `data-spacing-step="${base ? 'base' : step.multiple}"`, stageAttributes: `role="img" aria-label="${step.px} pixel spacing"` });
+  return previewCard(`<span>${base ? 'Base unit' : `×${step.multiple}`}</span><code>${step.px}px</code>`, `<span class="measure spacing-measure" style="width:${step.px}px;transform:scaleX(${measureScale})" aria-hidden="true"></span>`, { select: base ? 'space:base' : `space:${step.px}`, className: 'spacing-card', stageClass: 'spacing-stage', attributes: `data-spacing-step="${base ? 'base' : step.multiple}"`, stageAttributes: `role="img" aria-label="${step.px} pixel spacing"` });
 }
 function spacingDocument(f) {
   if (f.status !== 'ready') return documentFrame(f.name, f.description, emptyFoundation(f), badge(f.status));
@@ -218,13 +229,14 @@ function colorDocument(f) {
 const property = (name, value) => `<div class="property"><dt>${escape(name)}</dt><dd>${escape(value)}</dd></div>`;
 const field = (id, label, value, type = 'text', attrs = '') => `<label class="workspace-field" for="${id}"><span>${escape(label)}</span><input id="${id}" type="${type}" value="${escape(value)}" ${attrs} /></label>`;
 function modeControls(f) {
-  if (!f.modes.length) return '';
+  // One mode has nothing to switch to, so no control is shown.
+  if (f.modes.length < 2) return '';
   const mode = modeFor(f);
   return `<div class="mode-switch" role="group" aria-label="${escape(f.name)} mode">${f.modes.map(m => `<button type="button" data-mode="${escape(m)}" aria-pressed="${m === mode}">${m === 'Light' ? icon('sun') : m === 'Dark' ? icon('moon') : ''}${escape(m)}</button>`).join('')}</div>`;
 }
 function colorWorkspace(f) {
   const mode = modeFor(f);
-  return `<section class="inspector-section"><h3>Mode</h3>${modeControls(f)}</section><section class="inspector-section"><h3>Semantic tokens</h3><label class="search-field">${icon('search')}<input id="token-search" type="search" aria-label="Filter semantic tokens" placeholder="Find a token..." value="${escape(query)}" /></label><p class="workspace-help">Choose the primitive each role uses.</p></section>${colorGroups(f).map(([key, rows]) => `<details class="token-group" data-group="${escape(key)}" open><summary>${escape(groupNames[key] || key)}<span>${rows.length}</span></summary><div>${rows.map(v => {
+  return `${modeControls(f) ? `<section class="inspector-section"><h3>Mode</h3>${modeControls(f)}</section>` : ''}<section class="inspector-section"><h3>Semantic tokens</h3><label class="search-field">${icon('search')}<input id="token-search" type="search" aria-label="Filter semantic tokens" placeholder="Find a token..." value="${escape(query)}" /></label><p class="workspace-help">Choose the primitive each role uses.</p></section>${colorGroups(f).map(([key, rows]) => `<details class="token-group" data-group="${escape(key)}" open><summary>${escape(groupNames[key] || key)}<span>${rows.length}</span></summary><div>${rows.map(v => {
     const i = f.variables.indexOf(v);
     const result = resultFor(v, mode);
     const value = valueText(result);
@@ -235,22 +247,61 @@ function colorWorkspace(f) {
 
 function foundationWorkspace(f) {
   if(f.id==='iconography' && f.library)return `<section class="inspector-section"><h3>Library</h3><dl>${property('Base',f.library.name)}${property('Version',f.library.version)}${property('License',f.library.license)}${property('Construction','24px grid · 2px stroke')}</dl><p class="workspace-help">Local library reference. Figma icon components are created during the library build.</p></section><section class="inspector-section"><h3>Find an icon</h3><label class="search-field">${icon('search')}<input id="token-search" type="search" aria-label="Filter icons" placeholder="Search icons..." value="${escape(query)}" /></label></section>`;
-  const filter = `<section class="inspector-section"><h3>Inspect</h3><label class="search-field">${icon('search')}<input id="token-search" type="search" aria-label="Filter foundation values" placeholder="Find a value..." value="${escape(query)}" /></label>${modeControls(f)}</section>`;
+  // Pages with several modes still get a mode switch; the old Inspect search only filtered token tables.
   if (f.status !== 'ready') return `<section class="inspector-section">${badge(f.status)}<p class="workspace-help">${escape(f.message)}</p></section>`;
   if (f.id === 'typography') {
     const choices = fontChoices(typeFamilies(f));
     const family = previewTypeface(f);
     const options = (name, families) => families.length ? `<optgroup label="${name}">${families.map(v => `<option value="${escape(v)}" ${family === v ? 'selected' : ''}>${escape(typefaceLabel(v))}</option>`).join('')}</optgroup>` : '';
-    return `<section class="inspector-section"><h3>Typeface</h3><label class="workspace-field" for="type-family"><span>Preview family</span><select id="type-family">${options('System fonts', choices.system)}${options('Prepared fonts', choices.prepared)}</select></label><div class="workspace-font-sample" data-font="${escape(family)}">Aa Bb Cc</div><p id="type-font-status" class="workspace-help" role="status"></p><p class="workspace-help">${choices.system.length ? 'Your system font is selected by default. You can also preview a prepared font.' : 'No font specified. Choose Inter, Geist, or Plus Jakarta Sans.'}</p>${field('type-scale', 'Preview scale', draft.settings.get('type-scale') || 100, 'number', 'min="50" max="200" step="5"')}</section>${filter}`;
+    return `<section class="inspector-section"><h3>Typeface</h3><label class="workspace-field" for="type-family"><span>Preview family</span><select id="type-family">${options('System fonts', choices.system)}${options('Prepared fonts', choices.prepared)}</select></label><div class="workspace-font-sample" data-font="${escape(family)}">Aa Bb Cc</div><p id="type-font-status" class="workspace-help" role="status"></p><p class="workspace-help">${choices.system.length ? 'Your system font is selected by default. You can also preview a prepared font.' : 'No font specified. Choose Inter, Geist, or Plus Jakarta Sans.'}</p>${field('type-scale', 'Preview scale', draft.settings.get('type-scale') || 100, 'number', 'min="50" max="200" step="5"')}</section>`;
   }
   if (f.id === 'shape') return controls.radiusWorkspace(f);
   if (f.id === 'space') return spacingWorkspace(f);
   if (f.id === 'elevation') return controls.shadowWorkspace(f);
-  if (f.id === 'motion') return motion.workspace(f) + filter.replace(modeControls(f), '');
-  return filter;
+  if (f.id === 'motion') return motion.workspace(f);
+  const modes = modeControls(f);
+  return modes ? `<section class="inspector-section"><h3>Mode</h3>${modes}</section>` : '';
 }
 
+// The panel for one selected item: what it is and which tokens it uses, with the page settings one click away.
+function itemPanel(f, key) {
+  const head = (title, note = '') => `<div class="workspace-panel-header"><h2>${escape(title)}</h2><span class="label-beta">Selected</span></div><p class="workspace-disclaimer">${escape(note || `Click the page to go back to the ${f.name} settings.`)}</p>`;
+  const list = rows => `<dl>${rows.filter(([, v]) => v !== undefined && v !== null && v !== '').map(([n, v]) => property(n, v)).join('')}</dl>`;
+  const px = v => `${rounded(Number(v))}px`;
+  if (f.id === 'typography') {
+    const s = f.styles.find(x => x.name === key); if (!s) return '';
+    const t = textStyle(f, s), lh = t.lineHeight?.value ?? t.lineHeight, ls = t.letterSpacing?.value ?? t.letterSpacing;
+    return head(s.name) + `<section class="inspector-section"><h3>Style</h3>${list([['Family', t.fontFamily], ['Weight', t.fontStyle], ['Size', px(t.fontSize)], ['Line height', lh === undefined || lh === null ? 'Auto' : px(lh)], ['Letter spacing', ls === undefined ? '' : px(ls)]])}</section>`
+      + (Object.keys(s.bound || {}).length ? `<section class="inspector-section"><h3>Tokens</h3>${list(Object.entries(s.bound).map(([k, v]) => [k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()), v]))}</section>` : '');
+  }
+  if (f.id === 'elevation') {
+    const s = f.styles.find(x => x.name === key); if (!s) return '';
+    const editor = controls.inlineEditor(s.name);
+    return head(s.name) + `<section class="inspector-section"><h3>Layers</h3>${editor || list(controls.summary(s).split('; ').map((l, i) => [`Layer ${i + 1}`, l]))}</section>`;
+  }
+  if (f.id === 'space' && key.startsWith('space:')) {
+    const spacing = spacingFor(f), step = key === 'space:base' ? spacing.base : spacing.scale.find(x => x.px === Number(key.slice(6))); if (!step) return '';
+    const value = step.px;
+    const tokens = f.variables.filter(v => Number(resultFor(v, modeFor(f)).value) === value).map(v => v.name);
+    return head(step === spacing.base ? 'Base unit' : `×${step.multiple}`) + `<section class="inspector-section"><h3>Step</h3>${list([['Pixels', px(step.px)], ['Rem', `${rounded(step.px / 16)}rem`], ['Multiple', step.multiple ? `×${step.multiple}` : '']])}</section>`
+      + `<section class="inspector-section"><h3>Tokens</h3>${tokens.length ? list(tokens.map(n => [n, px(value)])) : '<p class="workspace-help">No token uses this step yet.</p>'}</section>`;
+  }
+  if (f.id === 'shape') {
+    const v = f.variables.find(x => x.name === key); if (!v) return '';
+    const r = resultFor(v, modeFor(f)), n = Number(r.value);
+    return head(v.name) + `<section class="inspector-section"><h3>Value</h3>${list([['Size', n >= 999 ? 'Full' : px(n)], ['Rem', n >= 999 ? '' : `${rounded(n / 16)}rem`], ['From', r.alias]])}${v.description ? `<p class="workspace-help">${escape(v.description)}</p>` : ''}</section>`;
+  }
+  if (f.id === 'iconography') {
+    const el = document.querySelector(`[data-select-item="${CSS.escape(key)}"]`), glyph = el?.querySelector('svg')?.outerHTML || '';
+    if (key.startsWith('icon:')) return head(key.slice(5)) + `<section class="inspector-section"><h3>Icon</h3><div class="item-icon-preview" aria-hidden="true">${glyph}</div>${list([['Name', key.slice(5)], ['Library', f.library ? `${f.library.name} ${f.library.version}` : 'Lucide'], ['Construction', '24px grid · 2px stroke']])}</section>`;
+    const size = f.variables?.find(x => x.name === key) || null;
+    return head(key) + `<section class="inspector-section"><h3>Size</h3>${list([['Token', key], ['Size', size ? px(resultFor(size, modeFor(f)).value) : el?.querySelector('figcaption span')?.textContent]])}</section>`;
+  }
+  return '';
+}
 function inspector(f) {
+  const item = f && selectedItem?.startsWith(`${f.id}|`) ? selectedItem.slice(f.id.length + 1) : null;
+  if (item && f.status === 'ready' && !['color', 'motion'].includes(f.id)) { const panel = itemPanel(f, item); if (panel) return panel; }
   if (state.setup && state.setup.status !== 'ready') return `<h2>Setup</h2><p class="workspace-help">Add context, answer any open questions, then review your foundations before publishing to Figma.</p><button class="button" data-open-setup>Open context</button>`;
   const identity = `<section class="inspector-section"><h3>Identity</h3>${field('ds-name', 'Name', displayName(), 'text', 'maxlength="80"')}<dl>${property('Input slug', state.inputSlug || state.slug)}</dl><label class="workspace-field" for="ds-product"><span>Product</span><select id="ds-product">${['Web', 'App', 'Web and App'].map(v => `<option ${v === (draft.product || state.product) ? 'selected' : ''}>${v}</option>`).join('')}</select></label></section><section class="inspector-section"><h3>Foundation output</h3><dl>${property('Variables', state.summary.variables)}${property('Collections', state.summary.collections)}${property('Text styles', state.summary.textStyles)}${property('Effect styles', state.summary.effectStyles)}</dl></section>`;
   return `<div class="workspace-panel-header"><h2>${escape(f?.id === 'shape' ? 'Radius' : f?.id === 'elevation' ? 'Shadow' : f?.name || 'System')}</h2><span class="label-beta">Preview</span></div><p class="workspace-disclaimer">Changes stay in this preview.</p>${f?.id === 'color' && f.status === 'ready' ? colorWorkspace(f) : f ? foundationWorkspace(f) : identity}<div class="workspace-reset"><button id="reset-preview" class="button">Reset preview</button><small>Nothing is saved to Figma or your files.</small></div>`;
@@ -296,7 +347,7 @@ function render() {
   if (changingInspector) inspectorNeedsReset = true;
   inspectorRoute = route();
   const openGroups = new Map([...document.querySelectorAll('.token-group, .control-details')].map(el => [el.dataset.group || el.id, el.open]));
-  const f = state.foundations.find(f => f.id === route());
+  const f = state.foundations.find(f => f.id === route()), part = route().startsWith('part-') ? (state.parts || []).find(p => 'part-' + p.id === route()) : null;
   $('system-name').textContent = displayName();
   document.title = `${f?.name || 'Overview'} · ${displayName()} · DS Create Builder`;
   $('canvas-title').textContent = f?.name || 'Overview';
@@ -306,8 +357,10 @@ function render() {
   $('preview-notice').hidden = !state.preview;
   renderNav();
   const warnings = state.warnings.map(w => `<div class="notice error-notice">${escape(w)}</div>`).join('');
-  $('content').innerHTML = warnings + (route() === 'overview' ? overview() : f ? foundation(f) : documentFrame('View not found', 'Choose a foundation from the navigation.', '<div class="empty-state"><a class="button" href="#overview">Go to Overview</a></div>'));
-  $('inspector').innerHTML = inspector(f);
+  if (route().startsWith('part-')) { document.title = `${part?.name || 'Part'} · ${displayName()} · DS Create Builder`; $('canvas-title').textContent = part?.name || 'Part'; $('canvas-subtitle').textContent = part ? `${part.page} · ${part.description}` : ''; }
+  $('content').innerHTML = warnings + (route() === 'overview' ? overview() : route().startsWith('part-') ? partPage(part, { escape, badge, documentFrame, previewCard }) : f ? foundation(f) : documentFrame('View not found', 'Choose a foundation from the navigation.', '<div class="empty-state"><a class="button" href="#overview">Go to Overview</a></div>'));
+  markPage(f);
+  $('inspector').innerHTML = route().startsWith('part-') ? partInspector(part, { escape }) : inspector(f);
   document.querySelectorAll('.token-group, .control-details').forEach(el => { const key = el.dataset.group || el.id; if (openGroups.has(key)) el.open = openGroups.get(key); });
   $('inspector').scrollTop = panelScroll;
   if ($('inspector').getClientRects().length) inspectorNeedsReset = false;
@@ -315,6 +368,8 @@ function render() {
   controls.syncInspector();
   controls.syncDialog();
   setup.visibility();
+  changes.sync();
+  build.sync();
   canvas.refresh(route());
   if (changingInspector && priorRoute) { revealInteraction($('content').querySelector('.docs-reading-card')); revealInteraction($('inspector')); }
   if ($('primitive-picker').open) renderPrimitiveOptions();
@@ -353,11 +408,32 @@ function theme(value) {
 let savedTheme;
 try { savedTheme = localStorage.getItem('ds-manager-theme'); } catch { /* use system preference */ }
 theme(savedTheme === 'dark' || !savedTheme && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+setupParts({ getState: () => state, refresh: async () => { signature = ''; await refresh(); }, render: () => render() });
 $('theme').addEventListener('click', () => theme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
 installInteractionMotion();
 const publisher = setupPublish();
 setupWorkerConnection();
-const setup = setupWeb({ onChange: refresh });
+// Workspace tabs: Appearance holds the page panel, Agent holds the agent connection moved out of the canvas header.
+$('agent-panel').append($('worker-shell'));
+function showTab(tab) {
+  for (const t of document.querySelectorAll('[data-builder-tab]')) { const on = t === tab; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; $(t.dataset.builderTab).hidden = !on; }
+}
+document.querySelector('.builder-tabs').addEventListener('click', e => { const tab = e.target.closest('[data-builder-tab]'); if (tab) showTab(tab); });
+document.querySelector('.builder-tabs').addEventListener('keydown', e => {
+  const tabs = [...document.querySelectorAll('[data-builder-tab]')], i = tabs.indexOf(document.activeElement);
+  const next = e.key === 'ArrowRight' ? tabs[(i + 1) % tabs.length] : e.key === 'ArrowLeft' ? tabs[(i - 1 + tabs.length) % tabs.length] : e.key === 'Home' ? tabs[0] : e.key === 'End' ? tabs.at(-1) : null;
+  if (next) { e.preventDefault(); showTab(next); next.focus(); }
+});
+// The Agent tab carries the connection state as a dot so a lost connection still shows from Appearance.
+// A lost connection needs the continuation prompt, so the Agent tab opens by itself when that happens.
+new MutationObserver(() => {
+  const state = $('worker-connection')?.dataset.connection || 'unknown', was = $('tab-agent-dot').dataset.connection;
+  $('tab-agent-dot').dataset.connection = state;
+  if (state === 'disconnected' && was !== 'disconnected') showTab($('tab-agent'));
+}).observe($('worker-connection'), { attributes: true, attributeFilter: ['data-connection'] });
+const build = setupBuild({ getState: () => state });
+const changes = setupChangeRequests({ getState: () => state, refresh: async () => { signature = ''; await refresh(); }, showAgent: () => showTab($('tab-agent')) });
+const setup = setupWeb({ onChange: refresh, progress: () => state?.foundations ? { foundations: state.foundations, parts: state.parts || [] } : null });
 $('search-icon').innerHTML = icon('search');
 $('nav-search').addEventListener('input', renderNav);
 $('retry').addEventListener('click', refresh);
@@ -451,22 +527,46 @@ $('inspector').addEventListener('click', e => {
   if (mode) { selectedMode = mode.dataset.mode; render(); }
   if (e.target.closest('#reset-preview')) { draft.name = null; draft.product = null; draft.values.clear(); draft.settings.clear(); render(); }
 });
+// Selecting on foundation pages. The canvas captures the pointer for panning, so look up what sits under the cursor.
+function markPage(f) {
+  const pageCard = f && $('content').querySelector('article.docs-reading-card:not(.preparation-card)');
+  if (pageCard) { pageCard.classList.add('selectable-page'); pageCard.classList.toggle('is-selected', !selectedItem?.startsWith(`${f.id}|`)); pageCard.tabIndex = 0; pageCard.setAttribute('aria-label', `${f.name} page`); }
+}
+function selectItem(f, key) {
+  if (f.id === 'motion' && key) draft.settings.set(key.startsWith('motion/easing/') ? 'motion-easing-token' : 'motion-duration-token', key);
+  selectedItem = key ? `${f.id}|${key}` : null;
+  render();
+}
+document.addEventListener('click', e => {
+  const f = state?.foundations.find(x => x.id === route()); if (!f) return;
+  const at = document.elementFromPoint(e.clientX, e.clientY) || e.target;
+  if (!at?.closest?.('#content .selectable-page') || at.closest('button, a, input, select, textarea, label, summary')) return;
+  selectItem(f, at.closest('[data-select-item]')?.dataset.selectItem || null);
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const f = state?.foundations.find(x => x.id === route()), target = e.target;
+  if (!f || !target.matches?.('#content [data-select-item], #content .selectable-page')) return;
+  e.preventDefault(); selectItem(f, target.dataset.selectItem || null);
+  document.querySelector(target.dataset.selectItem ? `[data-select-item="${CSS.escape(target.dataset.selectItem)}"]` : '#content .selectable-page')?.focus({ preventScroll: true });
+});
 $('content').addEventListener('click', e => {
   if (motion.click(e)) return;
   const token = e.target.closest('[data-select-token]');
   if (!token) return;
   selectedToken = token.dataset.selectToken;
+  selectedItem = `color|${selectedToken}`;
   render();
   const row = [...document.querySelectorAll('[data-token-row]')].find(el => el.dataset.tokenRow === selectedToken);
   if (row) { row.closest('details').open = true; row.scrollIntoView({ block: 'nearest' }); row.querySelector('[data-choose-primitive]').focus({ preventScroll: true }); }
 });
-controls = createFoundationControls({ foundation: id => state?.foundations.find(f => f.id === id), draft, resultFor, savedResult, modeFor, valueKey, escape, icon, previewCard, modeControls, updatePreview: () => {
+controls = createFoundationControls({ foundation: id => state?.foundations.find(f => f.id === id), draft, resultFor, savedResult, modeFor, valueKey, escape, icon, previewCard, modeControls, selectable, selectClass, updatePreview: () => {
   const f = state.foundations.find(f => f.id === route());
   if (!f || !['shape', 'elevation'].includes(f.id)) return;
   const warnings = state.warnings.map(w => `<div class="notice error-notice">${escape(w)}</div>`).join('');
-  $('content').innerHTML = warnings + foundation(f); applySpecimens(f); canvas.refresh(route());
+  $('content').innerHTML = warnings + foundation(f); markPage(f); applySpecimens(f); changes.sync(); canvas.refresh(route());
 } });
-motion = createMotionPreview({ draft, resultFor, modeFor, escape, previewCard, modeControls, renderAll: render, renderCanvas: () => {
+motion = createMotionPreview({ draft, resultFor, modeFor, escape, previewCard, modeControls, selectable, selectClass, renderAll: render, renderCanvas: () => {
   motion.stop();
   const f = state.foundations.find(f => f.id === 'motion');
   $('content').innerHTML = state.warnings.map(w => `<div class="notice error-notice">${escape(w)}</div>`).join('') + foundation(f);
@@ -486,7 +586,7 @@ $('zoom-in').addEventListener('click', () => canvas.zoom(canvas.get().scale * 1.
 $('zoom-out').addEventListener('click', () => canvas.zoom(canvas.get().scale / 1.2));
 $('canvas-fit').addEventListener('click', () => canvas.fit());
 $('canvas-zoom').addEventListener('change', e => canvas.zoom(Number(e.target.value)));
-$('workspace-toggle').addEventListener('click', () => { const open = $('inspector').classList.toggle('is-open'); $('workspace-toggle').setAttribute('aria-expanded', String(open)); if (open) revealInteraction($('inspector'), 'step'); if (open && inspectorNeedsReset) { $('inspector').scrollTop = 0; inspectorNeedsReset = false; } });
+$('workspace-toggle').addEventListener('click', () => { const open = $('inspector-shell').classList.toggle('is-open'); $('workspace-toggle').setAttribute('aria-expanded', String(open)); if (open) revealInteraction($('inspector'), 'step'); if (open && inspectorNeedsReset) { $('inspector').scrollTop = 0; inspectorNeedsReset = false; } });
 window.addEventListener('hashchange', () => { if ($('primitive-picker').open) closeDialog($('primitive-picker'), { immediate: true }); controls.close(); query = ''; render(); if (!$('preparation-view').contains(document.activeElement)) $('main').focus({ preventScroll: true }); if (matchMedia('(max-width: 767px)').matches) $('navigation').open = false; });
 const narrow = matchMedia('(max-width: 767px)');
 $('navigation').open = !narrow.matches;

@@ -1,7 +1,7 @@
 import { openDialog, closeDialog } from '../ui-motion.mjs';
-import { rounded, radiusBase, deriveRadii, colorOpacity, shadowSeed, deriveShadows, shadowCSS, isShadow } from './foundation-controls.mjs';
+import { rounded, radiusBase, deriveRadii, colorOpacity, shadowSeed, deriveShadows, shadowCSS, isShadow, shadowEffect, cssColor } from './foundation-controls.mjs';
 
-export function createFoundationControls({ foundation, draft, resultFor, savedResult, modeFor, valueKey, escape, icon, previewCard, modeControls, updatePreview }) {
+export function createFoundationControls({ foundation, draft, resultFor, savedResult, modeFor, valueKey, escape, icon, previewCard, modeControls, updatePreview, selectable = () => '', selectClass = () => '' }) {
   const $ = id => document.getElementById(id);
   const label = name => name.split('/').slice(1).join(' ').replaceAll('-', ' ').replace(/^./, c => c.toUpperCase());
   const unit = (id, text, value, suffix, attrs = '', data = '') => `<span class="unit-input"><input id="${id}" aria-label="${escape(text)}" type="number" value="${rounded(value)}" ${attrs} ${data}/><span>${suffix}</span></span>`;
@@ -22,23 +22,24 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     const borders = f.variables.filter(v => !v.name.startsWith('radius/'));
     return `<section class="section"><div class="section-intro"><h2>Corner radius</h2><p>Use consistent corner shapes for controls, surfaces, and overlays.</p></div><div class="radius-grid">${radii.map(v => {
       const value = resultFor(v, modeFor(f));
-      return previewCard(`<span>${escape(label(v.name))}</span><code>${Number(value.value) >= 999 ? 'Full' : `${rounded(Number(value.value))}px`}</code>`, `<div class="radius-specimen" data-radius="${Number(value.value)}"></div>`, { stageClass: 'radius-stage', caption: `<div class="specimen-caption"><code>${escape(v.name)}</code><small>${escape(value.alias || 'Preview value')}</small></div>` });
-    }).join('')}</div></section>${borders.length ? `<section class="section"><div class="section-heading"><h2>Border widths</h2></div><dl class="border-values">${borders.map(v => `<div><dt><code>${escape(v.name)}</code></dt><dd>${escape(resultFor(v, modeFor(f)).value)}px</dd></div>`).join('')}</dl></section>` : ''}`;
+      return previewCard(`<span>${escape(label(v.name))}</span><code>${Number(value.value) >= 999 ? 'Full' : `${rounded(Number(value.value))}px`}</code>`, `<div class="radius-specimen" data-radius="${Number(value.value)}"></div>`, { select: v.name, stageClass: 'radius-stage', caption: `<div class="specimen-caption"><code>${escape(v.name)}</code><small>${escape(value.alias || 'Preview value')}</small></div>` });
+    }).join('')}</div></section>${borders.length ? `<section class="section"><div class="section-heading"><h2>Border widths</h2></div><dl class="border-values">${borders.map(v => `<div class="${selectClass(v.name)}" ${selectable(v.name)}><dt><code>${escape(v.name)}</code></dt><dd>${escape(resultFor(v, modeFor(f)).value)}px</dd></div>`).join('')}</dl></section>` : ''}`;
   }
   function resolveColor(color) {
     if (!color?.alias) return color;
     const f = foundation('color');
     const token = f?.variables.find(v => v.name === color.alias);
-    return token ? resultFor(token, modeFor(f)).value : null;
+    return token ? cssColor(resultFor(token, modeFor(f)).value) : null;
   }
   const ramp = () => foundation('elevation')?.styles.filter(s => !s.name.startsWith('focus/') && s.effects?.some(isShadow)) || [];
   const sourceSeed = () => shadowSeed(ramp().find(s => /\/(control|sm)$/.test(s.name)) || ramp()[0], resolveColor);
   const seed = () => draft.settings.get('shadow-seed') || sourceSeed();
   const overrideKey = name => `shadow-step:${name}`;
   function effectsFor(style) {
-    if (!ramp().some(s => s.name === style.name)) return style.effects || [];
+    const effects = (style.effects || []).map(shadowEffect);
+    if (!ramp().some(s => s.name === style.name)) return effects;
     if (draft.settings.has(overrideKey(style.name))) return draft.settings.get(overrideKey(style.name));
-    return draft.settings.has('shadow-seed') && sourceSeed() ? deriveShadows(style.effects || [], sourceSeed(), seed(), resolveColor) : style.effects || [];
+    return draft.settings.has('shadow-seed') && sourceSeed() ? deriveShadows(effects, sourceSeed(), seed(), resolveColor) : effects;
   }
   const cssFor = style => shadowCSS(effectsFor(style), resolveColor);
   function summary(style, compact = false) {
@@ -68,7 +69,26 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     dialog.style.left = `${Math.max(12, Math.min(box.right - dialog.offsetWidth, innerWidth - dialog.offsetWidth - 12))}px`;
     dialog.style.top = `${Math.max(12, Math.min(box.bottom + 8, innerHeight - dialog.offsetHeight - 12))}px`;
   }
+  const layersHTML = effects => effects.map((e, i) => `<section class="shadow-layer" data-shadow-layer="${i}" aria-labelledby="shadow-layer-title-${i}"><div class="shadow-layer-header"><h3 id="shadow-layer-title-${i}">Layer ${i + 1}</h3><div><button id="layer-${i}-up" class="icon-button" aria-label="Move layer ${i + 1} up" data-layer-action="up" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button><button id="layer-${i}-down" class="icon-button" aria-label="Move layer ${i + 1} down" data-layer-action="down" ${i === effects.length - 1 ? 'disabled' : ''}>${icon('down')}</button><button class="icon-button" aria-label="Remove layer ${i + 1}" data-layer-action="remove">${icon('trash')}</button></div></div><div class="layer-field"><span>Type</span><div class="mode-switch" role="group" aria-label="Layer ${i + 1} type">${[['DROP_SHADOW', 'Drop'], ['INNER_SHADOW', 'Inner']].map(([type, title]) => `<button id="layer-${i}-${type}" type="button" data-layer-type="${type}" aria-pressed="${e.type === type}">${title}</button>`).join('')}</div></div><div class="layer-field"><span>X / Y</span><div class="layer-pair">${unit(`layer-${i}-x`, `Layer ${i + 1} X`, e.x || 0, 'px', 'min="-512" max="512" step="0.5"', 'data-layer-value="x"')}${unit(`layer-${i}-y`, `Layer ${i + 1} Y`, e.y || 0, 'px', 'min="-512" max="512" step="0.5"', 'data-layer-value="y"')}</div></div><div class="layer-field"><span>Blur / Spread</span><div class="layer-pair">${unit(`layer-${i}-blur`, `Layer ${i + 1} blur`, e.blur || 0, 'px', 'min="0" max="512" step="0.5"', 'data-layer-value="blur"')}${unit(`layer-${i}-spread`, `Layer ${i + 1} spread`, e.spread || 0, 'px', 'min="-512" max="512" step="0.5"', 'data-layer-value="spread"')}</div></div><div class="layer-field layer-color"><span>Color</span>${colorField(`layer-${i}-color`, e.color?.alias || e.color, e.opacity ?? colorOpacity(resolveColor(e.color)), 'data-layer-value="color"')}</div></section>`).join('') || '<p class="workspace-help">No layers. Add a layer to create this shadow.</p>';
+  // Selecting a shadow on the page edits its layers right in the panel; the floating editor stays for the Ramp gear.
+  function inlineEditor(name) {
+    editorName = name;
+    const style = styleForEditor();
+    if (!style) return '';
+    return `<div id="item-shadow-layers" class="item-shadow-layers">${layersHTML(effectsFor(style).filter(isShadow))}</div><div class="shadow-editor-footer"><button id="item-shadow-add" type="button" class="button" data-shadow-add>Add layer</button><button id="item-shadow-reset" type="button" class="text-button" data-shadow-reset ${draft.settings.has(overrideKey(name)) ? '' : 'hidden'}>Reset step</button></div>`;
+  }
+  function renderInline() {
+    const host = $('item-shadow-layers'), style = styleForEditor();
+    if (!host || !style) return false;
+    const active = document.activeElement?.id;
+    host.innerHTML = layersHTML(effectsFor(style).filter(isShadow));
+    if ($('item-shadow-reset')) $('item-shadow-reset').hidden = !draft.settings.has(overrideKey(style.name));
+    syncChips();
+    if (active && $(active)) $(active).focus({ preventScroll: true });
+    return true;
+  }
   function renderEditor() {
+    if (renderInline() && !$('shadow-editor').open) return;
     const style = styleForEditor();
     if (!style) { if ($('shadow-editor').open) closeDialog($('shadow-editor')); return; }
     const active = document.activeElement?.id;
@@ -76,7 +96,7 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     $('shadow-editor-title').textContent = `${label(style.name)} shadow`;
     $('shadow-editor-path').textContent = style.name;
     const effects = effectsFor(style).filter(isShadow);
-    $('shadow-editor-layers').innerHTML = effects.map((e, i) => `<section class="shadow-layer" data-shadow-layer="${i}" aria-labelledby="shadow-layer-title-${i}"><div class="shadow-layer-header"><h3 id="shadow-layer-title-${i}">Layer ${i + 1}</h3><div><button id="layer-${i}-up" class="icon-button" aria-label="Move layer ${i + 1} up" data-layer-action="up" ${i === 0 ? 'disabled' : ''}>${icon('up')}</button><button id="layer-${i}-down" class="icon-button" aria-label="Move layer ${i + 1} down" data-layer-action="down" ${i === effects.length - 1 ? 'disabled' : ''}>${icon('down')}</button><button class="icon-button" aria-label="Remove layer ${i + 1}" data-layer-action="remove">${icon('trash')}</button></div></div><div class="layer-field"><span>Type</span><div class="mode-switch" role="group" aria-label="Layer ${i + 1} type">${[['DROP_SHADOW', 'Drop'], ['INNER_SHADOW', 'Inner']].map(([type, title]) => `<button id="layer-${i}-${type}" type="button" data-layer-type="${type}" aria-pressed="${e.type === type}">${title}</button>`).join('')}</div></div><div class="layer-field"><span>X / Y</span><div class="layer-pair">${unit(`layer-${i}-x`, `Layer ${i + 1} X`, e.x || 0, 'px', 'min="-512" max="512" step="0.5"', 'data-layer-value="x"')}${unit(`layer-${i}-y`, `Layer ${i + 1} Y`, e.y || 0, 'px', 'min="-512" max="512" step="0.5"', 'data-layer-value="y"')}</div></div><div class="layer-field"><span>Blur / Spread</span><div class="layer-pair">${unit(`layer-${i}-blur`, `Layer ${i + 1} blur`, e.blur || 0, 'px', 'min="0" max="512" step="0.5"', 'data-layer-value="blur"')}${unit(`layer-${i}-spread`, `Layer ${i + 1} spread`, e.spread || 0, 'px', 'min="-512" max="512" step="0.5"', 'data-layer-value="spread"')}</div></div><div class="layer-field layer-color"><span>Color</span>${colorField(`layer-${i}-color`, e.color?.alias || e.color, e.opacity ?? colorOpacity(resolveColor(e.color)), 'data-layer-value="color"')}</div></section>`).join('') || '<p class="workspace-help">No layers. Add a layer to create this shadow.</p>';
+    $('shadow-editor-layers').innerHTML = layersHTML(effects);
     $('shadow-reset-step').hidden = !draft.settings.has(overrideKey(style.name));
     syncChips();
     if (active && $(active)) $(active).focus({ preventScroll: true });
@@ -92,6 +112,7 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     });
   }
   function syncInspector() {
+    if ($('item-shadow-layers')) syncChips();
     const f = foundation('shape');
     if (routeIsShape() && $('radius-base-rem')) {
       if (document.activeElement !== $('radius-base-rem')) $('radius-base-rem').value = rounded(baseRem(f));
@@ -141,9 +162,12 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     const trigger = event.target.closest('[data-shadow-edit]');
     if (trigger) { editorName = trigger.dataset.shadowEdit; triggerId = trigger.id; renderEditor(); openDialog($('shadow-editor')); positionEditor(); $('shadow-editor-close').focus(); }
   });
-  function storeLayers(layers) { draft.settings.set(overrideKey(editorName), layers); update(); $('shadow-reset-step').hidden = false; }
-  $('shadow-editor-layers').addEventListener('input', event => {
+  function storeLayers(layers) { draft.settings.set(overrideKey(editorName), layers); update(); for (const reset of [$('shadow-reset-step'), $('item-shadow-reset')]) if (reset) reset.hidden = false; }
+  // Layer controls live in the floating editor or in the panel, so listen at the document.
+  const inLayers = target => target.closest?.('#shadow-editor-layers, #item-shadow-layers');
+  document.addEventListener('input', event => {
     const target = event.target;
+    if (!inLayers(target)) return;
     if (!target.dataset.layerValue || target instanceof HTMLInputElement && (!target.validity.valid || target.value === '')) return;
     const index = Number(target.closest('[data-shadow-layer]').dataset.shadowLayer);
     const layers = structuredClone(effectsFor(styleForEditor()).filter(isShadow));
@@ -151,7 +175,8 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     layers[index][key] = key === 'color' ? target.value.startsWith('color/') ? { alias: target.value } : target.value : Number(target.value);
     storeLayers(layers); syncChips();
   });
-  $('shadow-editor-layers').addEventListener('click', event => {
+  document.addEventListener('click', event => {
+    if (!inLayers(event.target)) return;
     const button = event.target.closest('[data-layer-type], [data-layer-action]');
     if (!button || button.disabled) return;
     const index = Number(button.closest('[data-shadow-layer]').dataset.shadowLayer);
@@ -161,19 +186,25 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     if (button.dataset.layerAction === 'up' && index > 0) [layers[index - 1], layers[index]] = [layers[index], layers[index - 1]];
     if (button.dataset.layerAction === 'down' && index < layers.length - 1) [layers[index + 1], layers[index]] = [layers[index], layers[index + 1]];
     storeLayers(layers); renderEditor();
-    if (button.dataset.layerAction === 'remove') $('shadow-add-layer').focus();
+    if (button.dataset.layerAction === 'remove') ($('item-shadow-add') || $('shadow-add-layer')).focus();
     if (button.dataset.layerAction === 'up') $(`layer-${index - 1}-x`)?.focus();
     if (button.dataset.layerAction === 'down') $(`layer-${index + 1}-x`)?.focus();
   });
-  $('shadow-add-layer').addEventListener('click', () => {
+  function addLayer() {
     const s = seed();
     storeLayers([...structuredClone(effectsFor(styleForEditor()).filter(isShadow)), { type: 'DROP_SHADOW', x: s.x, y: s.y, blur: s.blur, spread: s.spread, color: s.color.startsWith('color/') ? { alias: s.color } : s.color, opacity: s.opacity }]); renderEditor();
+  }
+  function resetStep(focus) { draft.settings.delete(overrideKey(editorName)); update(); renderEditor(); focus.focus(); }
+  $('shadow-add-layer').addEventListener('click', addLayer);
+  $('shadow-reset-step').addEventListener('click', () => resetStep($('shadow-add-layer')));
+  document.addEventListener('click', event => {
+    if (event.target.closest('[data-shadow-add]')) addLayer();
+    else if (event.target.closest('[data-shadow-reset]')) resetStep($('item-shadow-add'));
   });
-  $('shadow-reset-step').addEventListener('click', () => { draft.settings.delete(overrideKey(editorName)); update(); renderEditor(); $('shadow-add-layer').focus(); });
   $('shadow-editor-close').addEventListener('click', () => closeDialog($('shadow-editor')));
   $('shadow-editor').addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); closeDialog($('shadow-editor')); } });
   $('shadow-editor').addEventListener('close', () => { $(triggerId)?.focus({ preventScroll: true }); });
   $('shadow-editor').addEventListener('click', e => { if (e.target !== $('shadow-editor')) return; const box = e.target.getBoundingClientRect(); if (e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom) closeDialog(e.target); });
   window.addEventListener('resize', positionEditor);
-  return { radiusWorkspace, radiusContent, shadowWorkspace, effectsFor, cssFor, summary, syncInspector, syncDialog: () => { if ($('shadow-editor').open) renderEditor(); }, close: () => { if ($('shadow-editor').open) closeDialog($('shadow-editor'), { immediate: true }); } };
+  return { inlineEditor, radiusWorkspace, radiusContent, shadowWorkspace, effectsFor, cssFor, summary, syncInspector, syncDialog: () => { if ($('shadow-editor').open) renderEditor(); }, close: () => { if ($('shadow-editor').open) closeDialog($('shadow-editor'), { immediate: true }); } };
 }

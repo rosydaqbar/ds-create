@@ -91,8 +91,9 @@ function typographyRecipe(b,r){
   if(!named(family))throw new Error('Missing family for '+row.role);
   b.scalar('font/size/'+key,'Typography',row.fontSize,'Text size for '+row.role+' '+row.size+'.','font-size',['FONT_SIZE']);
   b.scalar('font/line-height/'+key,'Typography',row.lineHeight,'Line height for '+row.role+' '+row.size+'.','line-height',['LINE_HEIGHT']);
-  const tracking='font/letter-spacing/'+key;
-  b.scalar(tracking,'Typography',row.letterSpacing||0,'Tracking percentage for '+row.role+' '+row.size+'.','letter-spacing',['LETTER_SPACING']);
+  // Figma binds letter spacing in pixels, so percent tracking is converted per size.
+  const tracking='font/letter-spacing/'+key,trackingPx=Math.round((row.letterSpacing||0)*row.fontSize)/100||0;
+  b.scalar(tracking,'Typography',trackingPx,'Tracking in pixels for '+row.role+' '+row.size+' ('+(row.letterSpacing||0)+'% of '+row.fontSize+'px).','letter-spacing',['LETTER_SPACING']);
   const faces=r.faces?.[familyRole];
   if(faces&&(!Object.keys(faces).length||Object.entries(faces).some(([weight,style])=>!weightValues[weight]||!named(style))))throw new Error('Record exact supported faces for '+familyRole);
   const available=faces?Object.keys(faces):Object.keys(weightNames);
@@ -101,7 +102,7 @@ function typographyRecipe(b,r){
    if(faces&&!faces[weight])throw new Error('The supplied type row requests an undeclared face: '+familyRole+'/'+weight);
    if(!weightValues[weight])throw new Error('Unsupported numeric weight: provide explicit typography definitions.');
    if(!b.data.variables.some(v=>v.name==='font/weight/'+weight))b.scalar('font/weight/'+weight,'Typography',weightValues[weight],'Weight for '+weight+' interface text.','font-weight',['FONT_WEIGHT']);
-   b.data.textStyles.push({name:'type/'+row.role+'/'+row.size+'/'+weight,fontFamily:family,fontStyle:faces?.[weight]??weightNames[weight],fontSize:row.fontSize,lineHeight:{unit:'PIXELS',value:row.lineHeight},letterSpacing:{unit:'PERCENT',value:row.letterSpacing||0},bound:{fontFamily:'font/family/'+familyRole,fontSize:'font/size/'+key,lineHeight:'font/line-height/'+key,letterSpacing:tracking,fontWeight:'font/weight/'+weight}});
+   b.data.textStyles.push({name:'type/'+row.role+'/'+row.size+'/'+weight,fontFamily:family,fontStyle:faces?.[weight]??weightNames[weight],fontSize:row.fontSize,lineHeight:{unit:'PIXELS',value:row.lineHeight},letterSpacing:{unit:'PIXELS',value:trackingPx},bound:{fontFamily:'font/family/'+familyRole,fontSize:'font/size/'+key,lineHeight:'font/line-height/'+key,letterSpacing:tracking,fontWeight:'font/weight/'+weight}});
   }
  }
  b.scalar('font/size/input-min','Typography',16,'Minimum mobile input value text size to prevent focus zoom.','font-size',['FONT_SIZE']);

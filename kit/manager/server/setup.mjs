@@ -10,6 +10,7 @@ import {compilePreparation} from './compile.mjs';
 import {COMPILER_HASH, validateCoverage} from '../foundations/compiler.mjs';
 import {foundationPackFiles, verifyFoundationPack} from '../foundations/pack.mjs';
 import {seedFoundationInputs, templateHash} from '../foundations/templates.mjs';
+import {fontRoles, latestPublish, validatePublishRequest} from './publish.mjs';
 import {setTimeout as delay} from 'node:timers/promises';
 
 export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 1000, simulation = false, runner = 'mcp', preparationVersion = 2 }) {
@@ -155,11 +156,38 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
     if(!input || Object.keys(input).length) throw new PublishError('Retry takes no parameters.',400);
     const r=await guard();if(!r.submitted || ['empty','questions','ready'].includes(r.status)) throw new PublishError('Provide context or answer the open questions first.');return launch(r);
   }); }
+  // A replacement chosen from the Publish font check becomes a new, user-decided input revision.
+  async function fontChoice(input) { return locked(async()=>{
+    const r=await guard();
+    if(r.status!=='ready')throw new PublishError('Font choices apply to prepared foundations. Finish preparation first.');
+    const job=await latestPublish(outputDir);
+    if(job?.status!=='needs-fonts')throw new PublishError('Run the Figma font check from Publish first.');
+    const roles=(await readJSON(path.join(outputDir,'manager/jobs',job.id,'mcp-delivery.json')))?.preflight?.roles;
+    if(!Array.isArray(roles)||!roles.length)throw new PublishError('The font check result is unavailable. Check fonts again.');
+    if(!input||Object.keys(input).some(k=>k!=='choices')||!Array.isArray(input.choices)||input.choices.length!==roles.length)throw new PublishError('Choose an option for every font.',400);
+    const sections=[];let replaced=0;
+    for(const role of roles){
+      const c=input.choices.find(x=>x?.role===role.role);
+      if(!c||Object.keys(c).some(k=>!['role','family'].includes(k))||typeof c.family!=='string')throw new PublishError('Choose an option for every font.',400);
+      if(c.family===role.family){sections.push(`## ${role.label} (font/family/${role.role})\nKeep "${role.family}" (${role.styles.join(', ')}). It must be made available in Figma before publishing.\n`);continue;}
+      const option=role.options.find(o=>o.family===c.family);
+      if(!option)throw new PublishError('Choose one of the listed fonts.',400);
+      replaced++;
+      sections.push(`## ${role.label} (font/family/${role.role})\nReplace "${role.family}" (${role.styles.join(', ')}) with "${option.family}". Faces available in Figma: ${option.styles.join(', ')}.\nUse the closest available face for each weight the system uses. The previous faces were not available to Figma's publishing tool.\n`);
+    }
+    if(!replaced)throw new PublishError('Keeping every font needs no new preparation. Make the fonts available in Figma, then check fonts again.',400);
+    const chatDir=await localDirectory(workspace,`workspace/input/${selectedInputSlug(r,slug)}/chat`), name=`${new Date().toISOString().slice(0,10)}-${randomUUID()}.md`;
+    await writeFile(path.join(chatDir,name),'# Font choices from Builder\n\n'+sections.join('\n')+'\nDecided by: user (Publish font check)\nApplies to: init, typography.\n',{flag:'wx'});
+    const ledgerFile=path.join(outputDir,'ds-create-ledger.json'),ledger=await readJSON(ledgerFile);
+    if(ledger)await writeJSON(ledgerFile,{...ledger,foundationReview:{status:'pending'},sequence:(ledger.sequence||[]).map(e=>[2,3,4].includes(Number(e.step))?{...e,status:'todo'}:e)});
+    const next={...r,inputRevision:(r.inputRevision||1)+1,readyInputHash:null,answerFiles:[...(r.answerFiles || []),`chat/${name}`]};
+    await writeJSON(file,next);return launch(next,{previousJobId:r.jobId,fontChoiceFile:`chat/${name}`});
+  }); }
   async function cancel() {
     const r=await latest();if(!activeSetup(r))return {stopped:false};
     return cancelMcpPreparation(outputDir,r.jobId);
   }
-  return {status,submit,revise:form=>submit(form,true),answer,retry,cancel};
+  return {status,submit,revise:form=>submit(form,true),answer,retry,fontChoice,cancel};
 }
 
 export const uploadLimits = { files: 10, fileBytes: 25 * 1024 * 1024, totalBytes: 50 * 1024 * 1024, context: 20000, projectName: 100 };
@@ -329,34 +357,59 @@ export function createSetupProgress() {
 
 // A pending tool call is the receiver. Node waits; returning the tool result resumes
 // the caller. No callback, agent executable, vendor API or idle model is involved.
+// One receiver serves both Builder events: Prepare foundations and Publish to Figma.
 
 export async function preparationWaitStatus(output){
  const r=await readJSON(path.join(output,'manager/preparation-wait.json'));
  if(!Number.isInteger(r?.pid)||r.pid<=0||r.session!==path.basename(output)||r.mode!=='pending-tool'||!Number.isFinite(r.expiresAt)||r.expiresAt<=Date.now())return null;
  try{process.kill(r.pid,0);}catch(e){if(e.code==='ESRCH')return null;throw e;}
- return {connected:true,transportConnected:true,mode:'pending-tool',capabilities:['prepare'],started:r.started,agentSeenAt:null,reason:null};
+ return {connected:true,transportConnected:true,mode:'pending-tool',capabilities:['prepare','publish'],started:r.started,agentSeenAt:null,reason:null};
 }
 
 export const PREPARATION_WAIT_MS=5*60*1000;
 
+// A queued, unclaimed publication with a valid approval, or null.
+async function pendingPublish(output,workspace){
+ const job=await latestPublish(output);
+ if(job?.runner!=='mcp'||job.status!=='queued')return null;
+ try{const f=await validatePublishRequest(output,workspace,job.id),delivery=await readJSON(f.deliveryFile);return {...f,job,delivery};}
+ catch{return null;}
+}
+
+// A Publish click in Builder queues one ds-create build for the agent; it is delivered once per attempt.
+async function pendingBuild(output){
+ const dir=path.join(output,'manager/build'),requestFile=path.join(dir,'request.json'),request=await readJSON(requestFile);
+ return request?.status==='queued'&&request.attempt?{dir,requestFile,request}:null;
+}
+export async function buildStatus(output){
+ const build=await pendingBuild(output);if(!build)return {status:'none'};
+ const receipt=await readJSON(path.join(build.dir,'prompt-delivery.json'));
+ return {status:receipt?.event_id===build.request.attempt?'delivered':'waiting',attempt:build.request.attempt,created:build.request.created};
+}
+export async function requestBuild(output){
+ const dir=path.join(output,'manager/build'),request={attempt:randomUUID(),status:'queued',created:new Date().toISOString(),command:'ds-create build'};
+ await mkdir(dir,{recursive:true});const tmp=path.join(dir,`request.${request.attempt}.tmp`);await writeFile(tmp,JSON.stringify(request,null,2),{mode:0o600});await rename(tmp,path.join(dir,'request.json'));
+ return request;
+}
 export async function waitForPreparation({workspace,session,signal,afterEvent,timeoutMs=PREPARATION_WAIT_MS}){
  signal?.throwIfAborted();
- if(!Number.isFinite(timeoutMs)||timeoutMs<=0||timeoutMs>PREPARATION_WAIT_MS)throw Error('Preparation wait must be between 1 and 300000 milliseconds.');
+ if(!Number.isFinite(timeoutMs)||timeoutMs<=0||timeoutMs>PREPARATION_WAIT_MS)throw Error('Builder wait must be between 1 and 300000 milliseconds.');
  const output=await sessionOutput(workspace,session),file=path.join(output,'manager/preparation-wait.json'),instance=randomUUID();
  const saveReceipt=async(f,receipt)=>{const dest=path.join(f.dir,'prompt-delivery.json'),tmp=dest+'.'+instance+'.tmp';await writeFile(tmp,JSON.stringify(receipt),{mode:0o600});await rename(tmp,dest);};
  if(afterEvent){
-  const current=await latestMcpPreparation(output);
-  if(!current?.jobId)throw Error('No preparation event is available to acknowledge.');
-  const f=await validatePrepareRequest(output,workspace,current.jobId),delivery=await readJSON(f.deliveryFile);
-  if(delivery?.attempt!==afterEvent)throw Error('The acknowledged event is not the current preparation attempt.');
-  await saveReceipt(f,{event_id:afterEvent,status:'accepted',transport:'pending-tool',updated:new Date().toISOString()});
+  const current=await latestMcpPreparation(output),publish=await pendingPublish(output,workspace);
+  const prepare=current?.jobId?await validatePrepareRequest(output,workspace,current.jobId).catch(()=>null):null;
+  const build=await pendingBuild(output);
+  const target=publish?.delivery?.attempt===afterEvent?publish:build?.request.attempt===afterEvent?build:prepare&&(await readJSON(prepare.deliveryFile))?.attempt===afterEvent?prepare:null;
+  if(!target)throw Error('The acknowledged event is not the current preparation or publication attempt.');
+  await saveReceipt(target,{event_id:afterEvent,status:'accepted',transport:'pending-tool',updated:new Date().toISOString()});
  }
  let lock;
  try{lock=await open(file,'wx',0o600);}catch(e){
   if(e.code!=='EEXIST')throw e;
   const previous=await readFile(file,'utf8');
-  if(!await readJSON(file)&&Date.now()-(await stat(file)).mtimeMs<15000)throw Error('This session already has a pending preparation tool call.');
-  if(await preparationWaitStatus(output))throw Error('This session already has a pending preparation tool call.');
+  if(!await readJSON(file)&&Date.now()-(await stat(file)).mtimeMs<15000)throw Error('This session already has a pending Builder wait.');
+  if(await preparationWaitStatus(output))throw Error('This session already has a pending Builder wait.');
   if(await readFile(file,'utf8')!==previous)throw Error('Preparation receiver changed.');
   await unlink(file);lock=await open(file,'wx',0o600);
  }
@@ -378,8 +431,23 @@ export async function waitForPreparation({workspace,session,signal,afterEvent,ti
      return {event:'prepare-request',event_id:delivery.attempt,job_id:current.jobId,session,workspace,request_file:f.requestFile};
     }
    }
+   const publish=await pendingPublish(output,workspace);
+   if(publish?.delivery?.attempt&&!publish.delivery.owner&&!publish.delivery.cancelRequested){
+    const receipt=await readJSON(path.join(publish.dir,'prompt-delivery.json'));
+    if(!(receipt?.event_id===publish.delivery.attempt&&receipt.status==='accepted')){
+     signal?.throwIfAborted();
+     await saveReceipt(publish,{event_id:publish.delivery.attempt,status:'handed-off',transport:'pending-tool',updated:new Date().toISOString()});
+     return {event:'publish-request',event_id:publish.delivery.attempt,job_id:publish.job.id,session,workspace,request_file:publish.requestFile};
+    }
+   }
+   const build=await pendingBuild(output);
+   if(build&&(await readJSON(path.join(build.dir,'prompt-delivery.json')))?.event_id!==build.request.attempt){
+    signal?.throwIfAborted();
+    await saveReceipt(build,{event_id:build.request.attempt,status:'handed-off',transport:'pending-tool',updated:new Date().toISOString()});
+    return {event:'build-request',event_id:build.request.attempt,session,workspace,request_file:build.requestFile};
+   }
    if(Date.now()-refreshed>=5000){
-    const saved=await readJSON(file);if(saved?.instance!==instance)throw Error('Preparation receiver changed.');
+    const saved=await readJSON(file);if(saved?.instance!==instance)throw Error('Builder receiver changed.');
     const tmp=file+'.'+instance+'.tmp';await writeFile(tmp,JSON.stringify({...identity,deadline,expiresAt:Math.min(deadline,Date.now()+15000)}),{mode:0o600});await rename(tmp,file);refreshed=Date.now();
    }
    await delay(Math.min(250,Math.max(1,deadline-Date.now())),undefined,{signal});
@@ -401,12 +469,18 @@ export async function preparationHandoffStatus(output){
  if(receipt?.transport!=='pending-tool'||receipt.status!=='handed-off'||receipt.event_id!==delivery?.attempt||delivery?.cancelRequested||delivery?.owner||!(age>=0&&age<15000))return null;
  return {connected:false,transportConnected:true,mode:'tool-handoff',capabilities:['prepare'],deliveryState:'delivered',reason:'Prepare request returned to the agent. Waiting for acknowledgement.'};
 }
+export async function publishHandoffStatus(output){
+ const job=await latestPublish(output);
+ if(job?.runner!=='mcp'||job.status!=='queued')return null;
+ const dir=path.join(output,'manager/jobs',job.id),[receipt,delivery]=await Promise.all([readJSON(path.join(dir,'prompt-delivery.json')),readJSON(path.join(dir,'mcp-delivery.json'))]);
+ const age=Date.now()-Date.parse(receipt?.updated);
+ if(receipt?.transport!=='pending-tool'||receipt.status!=='handed-off'||receipt.event_id!==delivery?.attempt||delivery?.cancelRequested||delivery?.owner||!(age>=0&&age<15000))return null;
+ return {connected:false,transportConnected:true,mode:'tool-handoff',capabilities:['publish'],deliveryState:'delivered',reason:'Publish request returned to the agent. Waiting for it to claim the job.'};
+}
 
 export async function listenerStatus(output,capability='prepare'){
- if(capability==='prepare'){
-  const pending=await preparationWaitStatus(output)||await preparationHandoffStatus(output);
-  if(pending)return pending;
- }
+ const pending=await preparationWaitStatus(output)||await (capability==='prepare'?preparationHandoffStatus:publishHandoffStatus)(output);
+ if(pending)return pending;
  const prepare=capability==='prepare',record=await readJSON(path.join(output,'manager',prepare?'setup.json':'figma-job.json'));
  const id=prepare?record?.jobId:record?.id;
  if(/^[0-9a-f-]{36}$/.test(id||'')){
@@ -444,6 +518,6 @@ export function setupPrompt(request,requestFile){
 Read ${requestFile} and skills/ds-create/reference/${request.preparationVersion===2?'manager-preparation.md (the complete local contract), plus the adjacent source-pack.json, foundation-inputs.json and template-catalog.json':'init.md (local stages only), init-web.md and workflow/MANAGER.md'}.
 Inputs: ${input}; outputs: workspace/output/${request.slug}/. read EVERY file in the trusted snapshot before asking missing design questions. Listed ../filename entries are shared files directly in workspace/input/; other parent paths and other systems are outside scope. Inspect flagged originals; never execute or modify supplied sources. Earlier uploads are retained archives when superseded by activeFiles/latest context.
 Project name: ${JSON.stringify(request.projectName)}. Interface choices: ${JSON.stringify(request.interfaceDetails||null)}. Preserve these locked choices and frozen values; do not ask a new system to choose naming rules. Use sources for product/font/color choices; ask unresolved questions in Builder unless explicit YOLO permits an inference. YOLO still requires a real product description. New systems include basic Standard/Reduced UI motion and Lucide utility icons.
-${request.preparationVersion===2?'Fill decisions.json with source coverage and template inputs, then invoke ds_create_prepare_compile. Correct its named errors; do not generate renderer code or hand-write canonical artifacts.':'Save the input-bound foundations.json, foundation-plan.json, answers/sources/report and pending-review ledger required by the local init contract.'}
+${request.fontChoiceFile?`The user replaced fonts in Builder's Publish font check (${input}${request.fontChoiceFile}). Start from the previous decisions (workspace/output/${request.slug}/manager/setup-jobs/${request.previousJobId}/decisions.json) and change only the typography families and faces it names; keep every other decision and source.\n`:''}${request.preparationVersion===2?'Fill decisions.json with source coverage and template inputs, then invoke ds_create_prepare_compile. Correct its named errors; do not generate renderer code or hand-write canonical artifacts.':'Save the input-bound foundations.json, foundation-plan.json, answers/sources/report and pending-review ledger required by the local init contract.'}
 Use the same MCP lease for progress before reads/writes and finish questions/ready/blocked/failed/cancelled. Revalidation errors or cancellation stop work. Ready requires saved proof and means awaiting review. No dependency installs, approval, Figma, build, repo edits or Builder restart. Keep the owning MCP connection open through finish.`;
 }
