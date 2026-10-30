@@ -10,7 +10,47 @@ export function publishReady(state) {
 export function setupPublish() {
   const $ = id => document.getElementById(id);
   const dialog = $('publish-dialog');
-  let flow, request, timer, reviewHash, submitting = false;
+  let flow, request, timer, reviewHash, submitting = false, fontKey = '';
+  const fontChoices = new Map();
+  // The same continuation as the agent status panel, for a request no agent is waiting for.
+  function drawRecovery(next) {
+    const prompt = next.recoveryPrompt || '', panel = $('publish-recovery');
+    if (!prompt && panel.contains(document.activeElement)) $('publish-close').focus({ preventScroll: true });
+    panel.hidden = !prompt;
+    $('publish-recovery-detail').textContent = next.waitExpired ? 'The 5-minute wait ended. Copy the prompt below into your agent to publish this saved request.' : 'No agent is waiting for Builder events. Copy the prompt below into your agent to publish this saved request.';
+    if ($('publish-recovery-prompt').value !== prompt) $('publish-recovery-prompt').value = prompt;
+    if (!prompt) $('publish-recovery-feedback').textContent = '';
+  }
+  const chosen = () => (flow?.job?.fonts || []).map(role => ({ role: role.role, family: fontChoices.get(role.role) || role.family }));
+  function drawFonts(next) {
+    // A saved choice starts a new preparation; the setup gate then explains what happens next.
+    const roles = next.job?.status === 'needs-fonts' && !next.figma.reason ? next.job.fonts || [] : [], panel = $('publish-fonts');
+    panel.hidden = !roles.length;
+    const key = JSON.stringify(roles);
+    if (key !== fontKey) {
+      fontKey = key;
+      for (const role of fontChoices.keys()) if (!roles.some(r => r.role === role)) fontChoices.delete(role);
+      const list = $('publish-font-roles'); list.replaceChildren();
+      for (const role of roles) {
+        const set = document.createElement('fieldset'); set.className = 'publish-font-role';
+        const legend = document.createElement('legend'); legend.textContent = `${role.label} · ${role.family}`; set.append(legend);
+        const option = (family, title, detail, note) => {
+          const label = document.createElement('label'), input = document.createElement('input'), text = document.createElement('span');
+          input.type = 'radio'; input.name = 'publish-font-' + role.role; input.value = family; input.checked = (fontChoices.get(role.role) || role.family) === family;
+          input.addEventListener('change', () => { fontChoices.set(role.role, family); drawFonts(flow); });
+          text.textContent = title;
+          const small = document.createElement('small'); small.textContent = detail; text.append(small);
+          if (note) { const badge = document.createElement('span'); badge.className = 'publish-font-note'; badge.textContent = ' ' + note; text.insertBefore(badge, small); }
+          label.append(input, text); set.append(label);
+        };
+        option(role.family, `Keep ${role.family}`, `Missing in Figma: ${role.styles.join(', ')}. Make it available in Figma, then check fonts again.`);
+        for (const o of role.options) option(o.family, o.family, `In Figma: ${o.styles.slice(0, 6).join(', ')}${o.styles.length > 6 ? '…' : ''}`, o.note === 'closest' ? '· closest match' : '· recommended');
+        if (!role.options.length) { const none = document.createElement('small'); none.textContent = 'No similar font was found in Figma.'; set.append(none); }
+        list.append(set);
+      }
+    }
+    $('publish-fonts-apply').disabled = submitting || !chosen().some((c, i) => c.family !== roles[i]?.family);
+  }
   function draw(next) {
     const previous = flow;
     flow = next;
@@ -26,7 +66,7 @@ export function setupPublish() {
     const moveFocus = complete && (document.activeElement === $('publish-figma') || $('publish-task-progress').contains(document.activeElement));
     $('publish-approval-note').textContent = complete ? 'This revision is available in Figma.' : 'Publishes the saved revision. Preview edits are excluded.';
     $('publish-figma').disabled = !next.figma.canStart || stale || submitting;
-    $('publish-figma').textContent = complete ? 'Published' : queued ? 'Queued' : running ? 'Publishing…' : next.job ? 'Retry publish' : 'Publish to Figma';
+    $('publish-figma').textContent = complete ? 'Published' : queued ? 'Queued' : running ? 'Publishing…' : next.job?.status === 'needs-fonts' ? 'Check fonts again' : next.job ? 'Retry publish' : 'Publish to Figma';
     $('publish-cancel').hidden = !running;
     $('publish-cancel').disabled = submitting || !!next.job?.cancelRequested;
     $('publish-cancel').textContent = next.job?.cancelRequested ? 'Stopping…' : 'Stop';
@@ -34,6 +74,7 @@ export function setupPublish() {
     $('publish-open-figma').hidden = !complete || !next.figma.url;
     if (next.figma.url) $('publish-open-figma').href = next.figma.url;
     renderPublishProgress($('publish-task-progress'),{...next,notice:stale?'The saved draft changed. Review the current revision before publishing.':next.figma.reason,figma:{...next.figma,complete}});
+    drawRecovery(next); drawFonts(next);
     const available = next.build.available && !stale;
     $('publish-build-step').hidden = !available;
     $('publish-build-step').setAttribute('aria-disabled', String(!available));
@@ -81,10 +122,20 @@ export function setupPublish() {
   $('publish-figma').addEventListener('click', () => { if ($('publish-figma-url').reportValidity() && flow?.figma.canStart && reviewHash === flow.figma.hash) post('/api/publish-figma', { hash: reviewHash, figmaUrl: $('publish-figma-url').value.trim() }); });
   $('publish-figma-url').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('publish-figma').click();}});
   $('publish-cancel').addEventListener('click', () => post('/api/publish-cancel', {}));
+  $('publish-fonts-apply').addEventListener('click', async () => {
+    if ($('publish-fonts-apply').disabled) return;
+    await post('/api/publish-fonts', { choices: chosen() });
+    if ($('publish-error').hidden) $('publish-fonts-feedback').textContent = 'Saved. Your agent prepares the new typography; review it, then publish again.';
+  });
+  $('publish-recovery-copy').addEventListener('click', async () => {
+    const prompt = $('publish-recovery-prompt');
+    try { await navigator.clipboard.writeText(prompt.value); $('publish-recovery-feedback').textContent = 'Copied. Paste into your agent to continue.'; }
+    catch { prompt.focus(); prompt.select(); $('publish-recovery-feedback').textContent = 'Copy the selected prompt manually.'; }
+  });
   $('publish-recheck').addEventListener('click', () => { showError(''); check(); });
   $('publish-close').addEventListener('click', () => dialog.close());
   dialog.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); dialog.close(); } });
-  dialog.addEventListener('close', () => { clearInterval(timer); request?.abort(); request = null; ($('publish').disabled ? $('setup-open').hidden ? $('main') : $('setup-open') : $('publish')).focus({ preventScroll: true }); });
+  dialog.addEventListener('close', () => { clearInterval(timer); request?.abort(); request = null; $('publish-open').focus({ preventScroll: true }); });
   $('publish-command').addEventListener('click', e => e.target.select());
   $('publish-copy').addEventListener('click', async () => {
     try { await navigator.clipboard.writeText('ds-create build'); $('publish-copy-feedback').textContent = 'Command copied. Paste it into your agent.'; }
@@ -95,6 +146,6 @@ export function setupPublish() {
     const reason = ready ? 'Publish foundations to Figma' : !state ? 'Checking foundation readiness. Reconnect to Builder if this persists.' : ['queued', 'running'].includes(state.setup?.status) ? 'Foundations are being prepared. Wait until the draft is ready.' : 'Prepare foundations or run ds-create init before publishing.';
     $('publish').disabled = !ready;
     $('publish').title = reason;
-    $('publish').setAttribute('aria-label', ready ? 'Publish' : `Publish: ${reason}`);
+    $('publish').setAttribute('aria-label', ready ? 'Publish to Figma' : `Publish to Figma: ${reason}`);
   } };
 }

@@ -21,22 +21,27 @@ export function opaqueColor(color) {
   if (/^rgba?\(/i.test(color) && color.split(',').length === 4) return color.replace(/,\s*[^,]+\)$/, ')').replace(/^rgba/i, 'rgb');
   return color;
 }
+// Alpha colors arrive as Figma channel objects ({r, g, b, a} in 0–1); everything else is already a CSS string.
+export const cssColor = value => value && typeof value === 'object' && ['r', 'g', 'b'].every(k => Number.isFinite(value[k]))
+  ? `rgba(${['r', 'g', 'b'].map(k => Math.round(value[k] * 255)).join(', ')}, ${Math.round((value.a ?? 1) * 1000) / 1000})` : value;
 export const isShadow = effect => ['DROP_SHADOW', 'INNER_SHADOW'].includes(effect.type);
+// Local drafts store Figma's effect shape (offset.x/y, radius); legacy exports use x/y/blur. Read either.
+export const shadowEffect = e => isShadow(e) ? { ...e, x: e.x ?? e.offset?.x ?? 0, y: e.y ?? e.offset?.y ?? 0, blur: e.blur ?? e.radius ?? 0, spread: e.spread ?? 0 } : e;
 export function shadowSeed(style, resolve) {
-  const e = style?.effects?.find(isShadow);
+  const e = style?.effects?.map(shadowEffect).find(isShadow);
   if (!e) return null;
   if (typeof (e.color?.alias || e.color) !== 'string' || typeof resolve(e.color) !== 'string') return null;
   return { x: e.x || 0, y: e.y || 0, blur: e.blur || 0, spread: e.spread || 0, color: e.color?.alias || e.color, opacity: colorOpacity(resolve(e.color)) };
 }
 export function deriveShadows(effects, original, seed, resolve) {
-  return effects.filter(isShadow).map(e => ({ ...structuredClone(e),
+  return effects.map(shadowEffect).filter(isShadow).map(e => ({ ...structuredClone(e),
     ...Object.fromEntries(['x', 'y', 'blur', 'spread'].map(key => [key, rounded(original[key] ? (e[key] || 0) * seed[key] / original[key] : (e[key] || 0) + seed[key])])),
     color: seed.color === original.color ? structuredClone(e.color) : seed.color.startsWith('color/') ? { alias: seed.color } : seed.color,
     opacity: Math.min(100, Math.max(0, colorOpacity(resolve(e.color)) * seed.opacity / (original.opacity || 100))),
   }));
 }
 export function shadowCSS(effects, resolve) {
-  return effects.filter(isShadow).map(e => {
+  return effects.map(shadowEffect).filter(isShadow).map(e => {
     const dimensions = [e.x ?? 0, e.y ?? 0, e.blur ?? 0, e.spread ?? 0];
     const color = resolve(e.color);
     if (!dimensions.every(Number.isFinite) || dimensions[2] < 0 || typeof color !== 'string' || !color) return '';

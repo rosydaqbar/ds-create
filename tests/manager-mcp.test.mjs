@@ -23,7 +23,7 @@ async function awaitJob(f,status){for(let i=0;i<100;i++){const r=await f.flow();
 
 test('real SDK stdio lifecycle: portable tools, browser queue, exclusive lease, progress, unchanged approval and safe retry',async t=>{
  const f=await fixture(t),a=await client(t,f),b=await client(t,f);
- const tools=await a.c.listTools();assert.deepEqual(tools.tools.map(x=>x.name).sort(),['ds_create_prepare','ds_create_prepare_cancel','ds_create_prepare_compile','ds_create_prepare_finish','ds_create_prepare_progress','ds_create_prepare_status','ds_create_prepare_wait','ds_create_publish','ds_create_publish_cancel','ds_create_publish_finish','ds_create_publish_preflight','ds_create_publish_progress','ds_create_publish_status']);
+ const tools=await a.c.listTools();assert.deepEqual(tools.tools.map(x=>x.name).sort(),['ds_create_prepare','ds_create_prepare_cancel','ds_create_prepare_compile','ds_create_prepare_finish','ds_create_prepare_progress','ds_create_prepare_status','ds_create_prepare_wait','ds_create_publish','ds_create_publish_cancel','ds_create_publish_finish','ds_create_publish_preflight','ds_create_publish_progress','ds_create_publish_status','ds_create_wait']);
  assert.equal((await a.good('ds_create_publish',{session:'fixture'})).status,'waiting');
  const queued=await queue(f),ledgerFile=path.join(f.output,'ds-create-ledger.json'),before=await readFile(ledgerFile,'utf8'),request=await readFile(path.join(f.output,'manager/jobs',queued.job.id,'request.json'),'utf8');
  assert.equal((await f.flow()).job.status,'queued');
@@ -81,6 +81,21 @@ test('a pending MCP tool receives a new browser request without typing into anot
  const r=await pending;assert.equal(r.status,'running');await a.good('ds_create_publish_finish',{...creds(r),outcome:'cancelled',message:'Fixture done.'});
 });
 
+test('one pending Builder wait receives a Publish click; without it Builder offers the continuation prompt',async t=>{
+ const f=await fixture(t),a=await client(t,f);
+ const idle=await queue(f),before=await f.flow();assert.equal(before.job.status,'queued');
+ assert.match(before.recoveryPrompt,/^Publish the approved foundations saved in Builder\.\nds-create init-web --slug fixture\nWorkspace: /);
+ await f.post('/api/publish-cancel',{});
+ const pending=a.good('ds_create_wait',{session:'fixture'});
+ await new Promise(r=>setTimeout(r,300));
+ const waiting=await f.flow();assert.equal(waiting.listener.connected,true);assert.deepEqual(waiting.listener.capabilities,['prepare','publish']);
+ await queue(f);
+ const event=await pending;assert.equal(event.event,'publish-request');assert.equal(event.next_tool,'ds_create_publish');assert.ok(idle.attempt!==event.event_id);
+ const delivered=await f.flow();assert.equal(delivered.listener.deliveryState,'delivered');assert.equal(delivered.recoveryPrompt,null);
+ const r=await a.good('ds_create_publish',{session:'fixture',execution:'stepped'});assert.equal(r.attempt,event.event_id);
+ await a.good('ds_create_publish_finish',{...creds(r),outcome:'cancelled',message:'Fixture done.'});
+});
+
 test('an abruptly terminated MCP process cannot leave an owned job Running forever',async t=>{
  const f=await fixture(t),a=await client(t,f);await queue(f);await a.good('ds_create_publish',{session:'fixture'});
  assert.ok(a.transport.pid>0);process.kill(a.transport.pid,'SIGKILL');
@@ -121,13 +136,23 @@ test('stepped publication returns read-only preflight and requires its real resu
  const f=await fixture(t),file=path.join(f.output,'foundations.json'),draft=await json(file);
  draft.textStyles=[{name:'type/body',fontFamily:'Fixture Font',fontStyle:'Regular',fontSize:16,lineHeight:24}];
  await writeFile(file,JSON.stringify(draft));f.initial=await f.flow();await queue(f);
- const a=await client(t,f),r=await a.good('ds_create_publish',{session:'fixture',execution:'stepped'});
+ const a=await client(t,f);let r=await a.good('ds_create_publish',{session:'fixture',execution:'stepped'});
  assert.equal(r.operation.fileKey,'Fixture');assert.match(r.operation.code,/listAvailableFontsAsync/);
  assert.equal((await a.call('ds_create_publish_progress',{...creds(r),stage:'variables',message:'Too early'})).isError,true);
- const result={fonts:[{family:'Fixture Font',style:'Regular',available:false}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}};
- assert.equal((await a.call('ds_create_publish_preflight',{...creds(r),result:{...result,fonts:[]}})).isError,true);
- const preflight=await a.good('ds_create_publish_preflight',{...creds(r),result});
- assert.equal(preflight.passed,true);assert.equal(preflight.missing.length,1);assert.equal(preflight.next_operation.engine,'fast');
+ const missing={fonts:[{family:'Fixture Font',style:'Regular',available:false}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0},
+  alternatives:[{family:'Fixture Font',similar:[{family:'Fixture Font Display',styles:['Regular','Bold']}],recommended:[{family:'Inter',styles:['Regular','Medium']}]}]};
+ assert.equal((await a.call('ds_create_publish_preflight',{...creds(r),result:{...missing,fonts:[]}})).isError,true);
+ assert.equal((await a.call('ds_create_publish_preflight',{...creds(r),result:{...missing,alternatives:[{family:'Other',similar:[],recommended:[]}]}})).isError,true,'alternatives must describe a missing family');
+ const stopped=await a.good('ds_create_publish_preflight',{...creds(r),result:missing});
+ assert.equal(stopped.status,'needs-fonts');assert.equal(stopped.passed,false);assert.equal(stopped.next_operation,undefined,'no write continuation');
+ assert.equal((await a.call('ds_create_publish_progress',{...creds(r),stage:'variables',message:'Too late'})).isError,true,'the attempt is no longer active');
+ const blocked=await f.flow();assert.equal(blocked.job.status,'needs-fonts');assert.equal(blocked.figma.canStart,true);
+ assert.deepEqual(blocked.job.fonts.map(x=>[x.role,x.family,x.styles,x.options.map(o=>[o.family,o.note])]),[['ui','Fixture Font',['Regular'],[['Fixture Font Display','closest'],['Inter','recommended']]]]);
+ await queue(f);
+ const again=await a.good('ds_create_publish',{session:'fixture',execution:'stepped'});assert.notEqual(again.attempt,r.attempt);
+ const preflight=await a.good('ds_create_publish_preflight',{...creds(again),result:{...missing,fonts:[{family:'Fixture Font',style:'Regular',available:true}],alternatives:[]}});
+ assert.equal(preflight.passed,true);assert.equal(preflight.next_operation.engine,'fast');
+ r=again;
  await a.good('ds_create_publish_progress',{...creds(r),stage:'variables',message:'Preserving the approved font names.'});
  assert.equal((await a.good('ds_create_publish_finish',{...creds(r),outcome:'completed',message:'No export exists.'})).status,'failed');
  assert.equal((await f.flow()).build.available,false);
@@ -137,7 +162,7 @@ test('unsupported FAST metadata returns the standard continuation without changi
  draft.textStyles=[{name:'type/body',fontFamily:'Fixture Font',fontStyle:'Regular',fontSize:16,lineHeight:24,customFeature:'preserve'}];
  await writeFile(file,JSON.stringify(draft));f.initial=await f.flow();await queue(f);
  const a=await client(t,f),r=await a.good('ds_create_publish',{session:'fixture',execution:'stepped'});
- const preflight=await a.good('ds_create_publish_preflight',{...creds(r),result:{fonts:[{family:'Fixture Font',style:'Regular',available:false}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});
+ const preflight=await a.good('ds_create_publish_preflight',{...creds(r),result:{fonts:[{family:'Fixture Font',style:'Regular',available:true}],inventory:{collections:0,variables:0,textStyles:0,effectStyles:0}}});
  assert.equal(preflight.next_operation.engine,'standard');assert.match(preflight.next_operation.fast_fallback,/customFeature/);assert.deepEqual(await json(file),draft);
  await a.good('ds_create_publish_finish',{...creds(r),outcome:'blocked',message:'Fixture finished.'});
 });

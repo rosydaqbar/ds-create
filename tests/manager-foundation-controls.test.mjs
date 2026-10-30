@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {colorOpacity, deriveRadii, deriveShadows, opaqueColor, radiusBase, shadowCSS, shadowSeed} from '../kit/manager/client/features/foundation-controls.mjs';
+import {colorOpacity, cssColor, deriveRadii, deriveShadows, opaqueColor, radiusBase, shadowCSS, shadowSeed} from '../kit/manager/client/features/foundation-controls.mjs';
 
 test('radius base scales actual semantic steps while fixed square and full anchors remain intact', () => {
   const rows = [{ name:'radius/none', value:0 }, { name:'radius/control', value:8 }, { name:'radius/surface', value:12 }, { name:'radius/full', value:9999 }];
@@ -37,4 +37,13 @@ test('shadow CSS preserves layer order, inner shadows, signed spread, empty and 
   assert.equal(shadowCSS([{...effects[0],blur:-1}],c=>c), 'none');
   assert.equal(shadowCSS([{...effects[0],x:NaN}],c=>c), 'none');
   assert.equal(shadowSeed({effects:[]}, c=>c), null);
+});
+
+test('local draft shadows in Figma shape and alpha channel colors still preview', () => {
+  assert.equal(cssColor({r:0,g:0,b:0,a:0.05}), 'rgba(0, 0, 0, 0.05)');
+  assert.equal(cssColor('#0A0B09'), '#0A0B09');
+  const resolve = color => color?.alias === 'color/shadow/ambient' ? cssColor({r:0,g:0,b:0,a:0.05}) : color;
+  const style = {effects:[{type:'DROP_SHADOW',offset:{x:0,y:1},radius:2,spread:0,color:{alias:'color/shadow/ambient'}}]};
+  assert.deepEqual(shadowSeed(style, resolve), {x:0,y:1,blur:2,spread:0,color:'color/shadow/ambient',opacity:5});
+  assert.equal(shadowCSS(style.effects, resolve), '0px 1px 2px 0px rgba(0, 0, 0, 0.05)');
 });

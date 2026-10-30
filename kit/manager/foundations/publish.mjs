@@ -56,7 +56,7 @@ export async function renderFoundationBatch(figma,{phase,definitions}){
     let v=vars.get(d.name);
     const matches=()=>v.resolvedType===d.type&&v.variableCollectionId===c.id&&
      ['description','hiddenFromPublishing'].every(k=>d[k]===undefined||same(v[k],d[k]))&&
-     (d.scopes===undefined||same([...v.scopes].sort(),[...d.scopes].sort()))&&
+     (d.scopes===undefined||['TIMING','EASING'].includes(d.type)&&!d.scopes.length||same([...v.scopes].sort(),[...d.scopes].sort()))&&
      (d.codeSyntax===undefined||same({...v.codeSyntax},d.codeSyntax))&&
      Object.entries(d.values).every(([mode,x])=>same(v.valuesByMode[c.modes.find(m=>m.name===mode)?.modeId],valueFor(d,x)));
     if(v){if(!matches())throw new Error('Existing variable conflicts: '+d.name);reused++;}
@@ -67,7 +67,8 @@ export async function renderFoundationBatch(figma,{phase,definitions}){
      });
      v=figma.variables.createVariable(d.name,c,d.type);createdVariableIds.push(v.id);
      if(d.description!==undefined)v.description=d.description;
-     v.scopes=d.scopes??[];
+     // Figma rejects scopes on TIMING and EASING variables; their definitions carry none.
+     if(!['TIMING','EASING'].includes(d.type))v.scopes=d.scopes??[];
      if(d.hiddenFromPublishing!==undefined)v.hiddenFromPublishing=d.hiddenFromPublishing;
      for(const [platform,syntax] of Object.entries(d.codeSyntax??{}))v.setVariableCodeSyntax(platform,syntax);
      for(const [mode,x] of values)v.setValueForMode(mode,x);

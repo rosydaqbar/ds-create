@@ -11,6 +11,10 @@ test('source-derived preflight executes read-only and requires every exact font 
  const actual=await new AsyncFunction('figma',operation.code)(mock);
  assert.equal(operation.fileKey,'Selected');assert.deepEqual(actual.inventory,{collections:1,variables:2,textStyles:0,effectStyles:0});
  assert.deepEqual(evaluatePreflight(draft,actual).missing,[{family:'Fixture Font',style:'Medium'}],'similar family is not an approved substitution');
- assert.equal(evaluatePreflight(draft,actual).passed,true,'font-list absence is advisory, not a global gate');
+ const checked=evaluatePreflight(draft,actual);
+ assert.equal(checked.passed,false,'a face Figma cannot load stops publication before writes');
+ assert.deepEqual(actual.alternatives,[{family:'Fixture Font',similar:[{family:'Fixture Font Pro',styles:['Medium']}],recommended:[]}]);
+ assert.deepEqual(checked.roles,[{role:'ui',family:'Fixture Font',styles:['Medium'],label:'UI and body text',options:[{family:'Fixture Font Pro',styles:['Medium'],note:'closest'}]}]);
+ assert.equal(evaluatePreflight(draft,{...actual,fonts:actual.fonts.map(f=>({...f,available:true})),alternatives:[]}).passed,true);
  assert.throws(()=>evaluatePreflight(draft,{...actual,fonts:actual.fonts.slice(1)}),/every approved font/);
 });

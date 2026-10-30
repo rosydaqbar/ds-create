@@ -5,14 +5,14 @@ const stages=[
  ['verification','Verify output','Compare the saved Figma output with the approved draft.'],
 ];
 export function publishTasks(job,complete=false){
- const done=new Set(job?.progress?.completed||[]),current=job?.progress?.stage,index=stages.findIndex(s=>s[0]===current),terminal=['blocked','failed','interrupted'].includes(job?.status);
+ const done=new Set(job?.progress?.completed||[]),current=job?.progress?.stage,index=stages.findIndex(s=>s[0]===current),terminal=['blocked','failed','interrupted','needs-fonts'].includes(job?.status);
  return stages.map(([id,title,description],i)=>({id,title,description,state:complete?'complete':['queued','outdated'].includes(job?.status)?'pending':id!=='verification'&&done.has(id)?'complete':job?.status==='cancelled'&&id===current?'cancelled':terminal&&i<=index?'attention':id===current&&job?.status==='running'?'running':job?.status==='running'&&i<index?'unconfirmed':'pending'}));
 }
 export function publicationLiveness(flow,now=Date.now()){
  const job=flow.job,live=job?.status==='running',stopping=live&&job.cancelRequested;
  const updated=Date.parse(job?.progress?.activity?.at(-1)?.time||job?.updated||job?.started),age=now-updated;
  if(stopping){const cancelAge=now-Date.parse(job.cancelRequestedAt||job.updated||job.started);return {animate:false,phase:'Stopping safely',notice:cancelAge>=60000?'The agent has not acknowledged cancellation. In-flight changes have not been confirmed.':null};}
- if(job?.status==='queued')return {animate:false,phase:flow.listener?.connected?'Queued for the agent':'Waiting for an agent',notice:flow.listener?.connected?null:'Your request is saved. Reconnect the background agent to continue.'};
+ if(job?.status==='queued')return {animate:false,phase:flow.listener?.connected?'Queued for the agent':flow.listener?.deliveryState==='delivered'?'Delivered to your agent':'Waiting for an agent',notice:flow.listener?.connected||flow.listener?.deliveryState==='delivered'?null:'Your request is saved. Reconnect the background agent to continue.'};
  if(live&&age>=90000)return {animate:false,phase:'Waiting for an agent update',notice:`No progress has been reported since ${new Date(updated).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}. No new result has been confirmed.`};
  return {animate:live,phase:({access:'Checking the Figma file',variables:'Publishing variables',styles:'Publishing styles',verification:'Verifying the output'})[job?.progress?.stage]||'Starting the agent',notice:null};
 }
@@ -23,7 +23,8 @@ export function publicationPresentation(flow){
  if(complete){tone='success';label='Published';title='Your foundations are in Figma';message='All foundation steps are verified. You can continue with components and documentation.';}
  else if(flow.notice||job?.status==='outdated'){tone='warning';label='Review needed';title='Review the current draft';message=flow.notice||'The draft changed after this attempt. Review it before publishing again.';}
  else if(job?.cancelRequested&&active){tone='warning';label='Stopping';title='Waiting for the agent to stop';message='Existing changes are retained. Cancellation is complete only after the agent acknowledges it.';}
- else if(job?.status==='queued'){label='Queued';title=flow.listener?.connected?'Your request is queued':'Waiting for an agent';message=flow.listener?.connected?'The saved revision is ready for the background agent.':'Reconnect the background agent. Your request and approval are saved.';}
+ else if(job?.status==='queued'){label='Queued';const delivered=flow.listener?.deliveryState==='delivered';title=flow.listener?.connected?'Your request is queued':delivered?'Your agent received the request':'Waiting for an agent';message=flow.listener?.connected?'The saved revision is ready for the background agent.':delivered?'Waiting for your agent to start the font check.':flow.recoveryPrompt?'No agent is waiting. Copy the continuation prompt below into your agent. Your request and approval are saved.':'Reconnect the background agent. Your request and approval are saved.';}
+ else if(job?.status==='needs-fonts'){tone='warning';label='Fonts needed';title='Some fonts aren’t available in Figma';message='The font check ran before any writes, so the file is unchanged. Choose what to do with each font below.';}
  else if(job?.status==='running'){tone=liveness.notice?'warning':'active';label=liveness.notice?'Waiting for update':'Working';title=liveness.phase;message=liveness.notice||stages.find(s=>s[0]===job.progress?.stage)?.[2]||'The agent received your request. Confirmed results will appear here.';}
  else if(['blocked','failed','interrupted'].includes(job?.status)){
   tone=confirmed?'warning':'error';label=confirmed?'Partial result':job.status==='failed'?'Failed':'Needs attention';title=confirmed?'Some foundations are still incomplete':'Publication needs attention';

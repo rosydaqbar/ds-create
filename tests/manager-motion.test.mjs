@@ -63,7 +63,7 @@ test('Builder preview renders native timing in ms and native curves using existi
     ]},draft={settings:new Map()};let mode='Standard';
     const preview=createMotionPreview({draft,resultFor:(v,m)=>({value:v.values[m]??v.values.Standard}),modeFor:()=>mode,escape:String,previewCard:(head,body)=>head+body,modeControls:()=>'',renderAll(){},renderCanvas(){}});
     let html=preview.content(f);
-    assert.match(html,/data-motion-ms="200"/);assert.match(html,/200ms/);assert.match(html,/400ms/);
+    assert.match(html,/data-motion-ms="200"/);assert.match(html,/200ms/);assert.doesNotMatch(html,/value-table/,"token tables stay off the page");
     assert.doesNotMatch(html,/\[object Object\]|0\.2ms|200000ms/);
     assert.match(html,/cubic-bezier\(0.2, 0, 0, 1\)/);
     draft.settings.set('motion-duration:motion/duration/base:Standard',320);

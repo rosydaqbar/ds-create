@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { createChangeRequests } from '../kit/manager/server/changes.mjs';
+
+test('change requests keep one card per canvas item, with notes the agent can read', async t => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'ds-changes-')); t.after(() => rm(dir, { recursive: true, force: true }));
+  const changes = createChangeRequests({ outputDir: dir });
+  const context = { page: 'Button', section: 'Button types', group: 'Danger · destructive actions', item: 'danger secondary button', details: 'Medium · Normal' };
+  const first = await changes.update({ action: 'add', route: 'part-button', key: 'danger|secondary', context });
+  const again = await changes.update({ action: 'add', route: 'part-button', key: 'danger|secondary', context });
+  assert.equal(again.id, first.id, 'the same item reuses its card');
+  await changes.update({ action: 'note', id: first.id, text: 'Use the subtle danger border.' });
+  await changes.update({ action: 'note', id: first.id, text: 'Keep the label red.' });
+  let [request] = await changes.list();
+  assert.deepEqual(request.notes.map(n => n.text), ['Use the subtle danger border.', 'Keep the label red.']);
+  assert.equal(request.context.group, 'Danger · destructive actions');
+  const saved = JSON.parse(await readFile(path.join(dir, 'change-requests.json'), 'utf8'));
+  assert.equal(saved.requests[0].key, 'danger|secondary', 'requests are saved in the workspace for the agent');
+  const text = changes.prompt(await changes.list(), { session: 'session-1', workspace: '/work/ds' });
+  assert.match(text, /^Apply the change requests saved in Builder\.\nds-create init-web --slug session-1\nWorkspace: \/work\/ds/);
+  assert.match(text, /1\. danger secondary button \(Button › Button types › Danger · destructive actions\)/);
+  assert.match(text, /- Use the subtle danger border\.\n   - Keep the label red\./);
+  assert.equal(changes.prompt([], { session: 's', workspace: 'w' }), '', 'no prompt without requests');
+  await changes.update({ action: 'remove-note', id: first.id, noteId: request.notes[0].id });
+  [request] = await changes.list();
+  assert.equal(request.notes.length, 1);
+  await assert.rejects(changes.update({ action: 'note', id: first.id, text: '   ' }), /Write a note/);
+  await assert.rejects(changes.update({ action: 'add', route: 'part-button', key: 'x', context: {} }), /Choose an item/);
+  await changes.update({ action: 'remove', id: first.id });
+  assert.deepEqual(await changes.list(), []);
+});

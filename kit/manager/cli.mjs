@@ -14,7 +14,7 @@ const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
 const command = args[0];
 let slug = arg('--slug');
 const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait [--slug {slug}] [--foundation color --status generating --message "…"]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
+const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|build [--slug {slug}] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -65,7 +65,7 @@ async function main() {
     if(command==='sessions'||sessions.length){console.log(JSON.stringify({action:command==='sessions'?'list':'choose-session',sessions,newCommand:'ds-create init-web --new'},null,2));return;}
   }
   if(command==='init-web'&&!slug)slug=`session-${randomUUID()}`;
-  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
+  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'build'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
   if (command === 'wait') {
     const { waitForPreparation } = await import('./server/setup.mjs');
     const controller = new AbortController(), stop = () => controller.abort();
@@ -87,6 +87,38 @@ async function main() {
     if (writes) await mkdir(dir, { recursive: true });
     if (await realpath(dir) !== path.join(base, slug, 'manager')) throw new Error('Manager output must stay inside the selected system folder.');
   } catch (e) { if (e.code !== 'ENOENT' || writes) throw e; }
+  // The user decides; the agent carries out the matching Builder action through the running Builder.
+  if (['publish', 'retry', 'fonts', 'parts', 'build'].includes(command)) {
+    const runtime = await activeRuntime(dir);
+    if (!runtime) throw new Error('DS Create Builder is not running for this session. Run init-web --slug first.');
+    const get = async route => { const r = await fetch(runtime.url + route, { cache: 'no-store' }); if (!r.ok) throw new Error(`${route}: ${r.status}`); return r.json(); };
+    const post = async (route, body, token) => {
+      const r = await fetch(runtime.url + route, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: runtime.url, 'X-DS-Create-Token': token }, body: JSON.stringify(body) });
+      const result = await r.json().catch(() => ({})); if (!r.ok) throw new Error(result.error || `${route}: ${r.status}`); return result;
+    };
+    if (command === 'publish') {
+      // Queues the reviewed revision exactly like Publish to Figma; run it only after the user approved that revision and file.
+      const flow = await get('/api/publish-flow'), figmaUrl = arg('--figma') || flow.figma.url;
+      if (!figmaUrl) throw new Error('Give the approved Figma file with --figma URL.');
+      if (flow.figma.reason) throw new Error(flow.figma.reason);
+      console.log(JSON.stringify(await post('/api/publish-figma', { hash: flow.figma.hash, figmaUrl }, flow.csrfToken)));
+    } else if (command === 'parts') {
+      const s = await get('/api/state');
+      console.log(JSON.stringify(await post('/api/parts-prepare', { ids: arg('--ids') ? arg('--ids').split(',') : (s.parts || []).map(p => p.id) }, s.csrfToken)));
+    } else if (command === 'build') {
+      const s = await get('/api/state');
+      console.log(JSON.stringify(await post('/api/build-request', {}, s.csrfToken)));
+    } else if (command === 'retry') {
+      const flow = await get('/api/setup-flow');
+      console.log(JSON.stringify(await post('/api/setup-retry', {}, flow.csrfToken)));
+    } else {
+      const flow = await get('/api/publish-flow'), roles = flow.job?.status === 'needs-fonts' ? flow.job.fonts || [] : [];
+      if (!roles.length) throw new Error('No font check is waiting for a choice.');
+      const picked = Object.fromEntries(args.flatMap((a, i) => a === '--choice' ? [args[i + 1].split('=')] : []).map(([role, ...family]) => [role, family.join('=')]));
+      console.log(JSON.stringify(await post('/api/publish-fonts', { choices: roles.map(r => ({ role: r.role, family: picked[r.role] || r.family })) }, flow.csrfToken)));
+    }
+    return;
+  }
   if (command === 'progress') {
     const id = arg('--foundation');
     const status = arg('--status');
@@ -126,7 +158,8 @@ async function main() {
     return;
   }
   if (active) { console.log(JSON.stringify({ ...active, reused: true })); return; }
-  const port = Number(arg('--port') || 0);
+  // Reuse the session's last port so the Builder link stays the same across restarts.
+  const saved = Number((await readJSON(path.join(dir, 'port.json')))?.port) || 0, port = Number(arg('--port') || saved);
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('Port must be an integer from 0 to 65535.');
   await cp(path.join(ROOT, 'kit/manager'), dir, { recursive: true, filter: source => !['cli.mjs', 'README.md'].includes(path.relative(path.join(ROOT, 'kit/manager'), source)) });
   await cp(path.join(ROOT, 'kit/web/src/styles/docs-presentation.css'), path.join(dir, 'docs-presentation.css'));
@@ -135,7 +168,7 @@ async function main() {
   await writeFile(path.join(dir, 'chrome.css'), `/* Generated from kit/web/scripts/chrome-fallbacks.mjs. */\n:root {\n${declarations}\n}\n`);
   try { await unlink(path.join(dir, 'runtime.json')); } catch (e) { if (e.code !== 'ENOENT') throw e; }
   const log = await open(path.join(dir, 'server.log'), 'a');
-  const child = spawn(process.execPath, [path.join(dir, 'server/index.mjs'), String(port)], { detached: true, stdio: ['ignore', log.fd, log.fd] });
+  const child = spawn(process.execPath, [path.join(dir, 'server/index.mjs'), String(port), ...(arg('--port') ? [] : ['prefer'])], { detached: true, stdio: ['ignore', log.fd, log.fd] });
   await log.close();
   let spawnError;
   let exited = false;

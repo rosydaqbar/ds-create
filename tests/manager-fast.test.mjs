@@ -86,3 +86,14 @@ test('native motion survives compiled Figma writes, full export and readback wit
  await assert.rejects(()=>execute(f,calls),/Existing variable conflicts/);
  assert.equal(f.variableRecords.length,count);assert.deepEqual(timing.valuesByMode,before);
 });
+test('TIMING and EASING variables are created without scopes, which Figma rejects for those types',async()=>{
+ const f=mockFigma(),create=f.variables.createVariable.bind(f.variables);
+ f.variables.createVariable=(name,c,type)=>{const v=create(name,c,type);let scopes=[];Object.defineProperty(v,'scopes',{get:()=>scopes,set:x=>{if(['TIMING','EASING'].includes(type))throw new Error('in set_scopes: Cannot set scopes on this variable type');scopes=x;},enumerable:true});return v;};
+ const motion=draft();motion.collections.push({name:'Motion',modes:['Standard','Reduced']});
+ motion.variables.push({name:'scale/duration/0p2',collection:'Primitives',type:'TIMING',values:{Value:0.2},scopes:[],hiddenFromPublishing:true},
+  {name:'motion/duration/base',collection:'Motion',type:'TIMING',values:{Standard:{alias:'scale/duration/0p2'},Reduced:{alias:'scale/duration/0p2'}},description:'Small movements.',scopes:[]},
+  {name:'scale/easing/standard',collection:'Primitives',type:'EASING',values:{Value:{type:'CUSTOM_CUBIC_BEZIER',easingFunctionCubicBezier:{x1:0.2,y1:0,x2:0,y2:1}}},scopes:[],hiddenFromPublishing:true});
+ const calls=compileFoundationCalls(motion);await execute(f,calls);
+ assert.deepEqual(f.variableRecords.filter(v=>['TIMING','EASING'].includes(v.resolvedType)).map(v=>v.name).sort(),['motion/duration/base','scale/duration/0p2','scale/easing/standard']);
+ assert.ok((await execute(f,calls)).every(r=>r.createdVariableIds.length===0),'readback accepts the unscoped motion variables on resume');
+});

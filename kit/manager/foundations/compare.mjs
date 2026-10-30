@@ -42,7 +42,8 @@ export function compareFoundations(expected,actual){
       const right=v.type==='COLOR'&&rgba(other)?rgba(other).map(x=>Math.round(x*255)):other;
       if(!equal(left,right))differences.push(`Value: ${v.name}/${mode}`);
     }
-    for(const [k,value] of Object.entries(metadata(v,['name','collection','type','values'])))if(!equal(k==='scopes'?[...value].sort():value,k==='scopes'&&Array.isArray(a[k])?[...a[k]].sort():a[k]))differences.push(`Variable ${k}: ${v.name}`);
+    // Figma gives TIMING and EASING variables ALL_SCOPES and rejects setting them; unscoped definitions match that default.
+    for(const [k,value] of Object.entries(metadata(v,['name','collection','type','values'])))if(!(k==='scopes'&&['TIMING','EASING'].includes(v.type)&&!value.length&&(!a[k]?.length||equal(a[k],['ALL_SCOPES'])))&&!equal(k==='scopes'?[...value].sort():value,k==='scopes'&&Array.isArray(a[k])?[...a[k]].sort():a[k]))differences.push(`Variable ${k}: ${v.name}`);
   }
   for(const kind of ['textStyles','effectStyles','gridStyles']){
     const byName=new Map((actual?.[kind]||[]).map(s=>[s.name,s]));

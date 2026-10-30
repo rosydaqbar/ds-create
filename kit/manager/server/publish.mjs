@@ -54,8 +54,12 @@ export function createFigmaJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
     else if (state.preview && !simulation) reason = 'Sample data cannot be published. Run ds-create init for your own system first.';
     else if (state.source.kind !== 'local' || !state.source.hash || state.source.review === 'invalid') reason = 'Ask your agent to prepare a valid local foundation draft with ds-create init.';
     let publicJob = job ? { id: job.id, status: job.status, message: job.message, started: job.started, finished: job.finished, updated:job.updated, progress:job.progress, cancelRequested:!!job.cancelRequested, cancelRequestedAt:job.cancelRequestedAt||null } : null;
-    if (publicJob && job.hash !== state.source.hash && !running(job)) publicJob = { ...publicJob, status: 'outdated', message: 'The saved draft changed. Publish the current revision before building.' };
-    return { simulation, listener:await listenerStatus(outputDir,'publish'),
+    if (publicJob?.status === 'needs-fonts') publicJob.fonts = (await readJSON(path.join(jobsDir, job.id, 'mcp-delivery.json')))?.preflight?.roles || [];
+    if (publicJob && job.hash !== state.source.hash && !running(job)) publicJob = { ...publicJob, status: 'outdated', fonts: undefined, message: 'The saved draft changed. Publish the current revision before building.' };
+    const listener=await listenerStatus(outputDir,'publish'),wait=await readJSON(path.join(outputDir,'manager/preparation-wait.json'));
+    // Same continuation as the agent status panel: a queued request nobody is waiting for.
+    const recoveryPrompt=job?.status==='queued'&&!listener.connected&&listener.deliveryState!=='delivered'?publishRecoveryPrompt(path.basename(outputDir),workspace):null;
+    return { simulation, listener, recoveryPrompt, waitExpired:!!recoveryPrompt&&wait?.expired===true,
       figma: { complete, canStart: !complete && !reason && !running(job) && !busy, reason, revision: state.source.revision || null, hash: state.source.hash || null, url: state.figmaUrl },
       build: { available: complete && !running(job), status: complete ? build.status : 'locked', command: 'ds-create build' }, job: publicJob };
   }
@@ -74,7 +78,7 @@ export function createFigmaJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
       const gate = await status();
       if (gate.figma.reason) throw new PublishError(gate.figma.reason, 412);
       if (state.foundations.some(f => f.variables.some(v => Object.values(v.resolved).some(r => r.error)))) throw new PublishError('Resolve missing or circular token aliases with your agent before publishing.', 412);
-      if(job?.hash === input.hash && targetFile(job.figmaUrl)?.key === target.key && ['blocked','failed','cancelled','interrupted'].includes(job.status)) {
+      if(job?.hash === input.hash && targetFile(job.figmaUrl)?.key === target.key && ['blocked','failed','cancelled','interrupted','needs-fonts'].includes(job.status)) {
         try {return await queueMcpJob({outputDir,workspace,id:job.id});}catch(e){throw new PublishError(e.message,412);}
       }
       const slug = path.basename(outputDir), setup=await readJSON(path.join(outputDir,'manager/setup.json')), inputSlug=selectedInputSlug(setup,slug);
@@ -184,10 +188,16 @@ export async function mcpPublishAction({outputDir,workspace,id,attempt,owner,lea
    if(d.cancelRequested)return {cancelRequested:true};
    const checked=evaluatePreflight(await readJSON(path.join(outputDir,'foundations.json')),preflight),now=new Date().toISOString();
    await writeJSON(f.deliveryFile,{...d,preflight:{...checked,sourceHash:f.request.hash,observedAt:now}});
-   const detail=checked.missing.length?publicMessage('Font inventory note: this tool did not list '+checked.missing.map(f=>f.family+' / '+f.style).join('; ')+'. Continue publishing the approved foundations with these exact font names. Report any actual typography write failure separately; do not upload or replace fonts.'):'Foundation inventory read. Continue with edit-access and frozen-value checks before generation.';
+   if(!checked.passed){
+    const detail=publicMessage('Figma can’t load '+checked.missing.map(f=>f.family+' '+f.style).join(', ')+'. Nothing was written. Make the fonts available in Figma, or choose replacements, then check fonts again.');
+    const progress={stage:'access',completed:[],activity:[...(job.progress?.activity||[]),{message:detail,stage:'access',time:now}].slice(-12)};
+    await writeJSON(f.statusFile,{...job,progress,status:'needs-fonts',message:detail,updated:now,finished:now});
+    return {status:'needs-fonts',passed:false,missing:checked.missing,roles:checked.roles};
+   }
+   const detail='Fonts and foundation inventory read. Continue with edit-access and frozen-value checks before generation.';
    const progress={stage:'access',completed:[],activity:[...(job.progress?.activity||[]),{message:detail,stage:'access',time:now}].slice(-12)};
    await writeJSON(f.statusFile,{...job,progress,status:'running',message:detail,updated:now});
-   return {status:'running',passed:true,missing:checked.missing};
+   return {status:'running',passed:true,missing:[]};
   }
   if(d.execution==='stepped'&&!d.preflight?.passed&&(action==='finish'&&outcome==='completed'||action==='progress'&&(stage&&stage!=='access'||completed_stages?.length)))throw new Error('Execute and submit the read-only Figma preflight before generation.');
   if(action==='progress'){
@@ -227,14 +237,35 @@ export function requiredFonts(draft){
   return [JSON.stringify(font),font];
  })).values()];
 }
+// Which semantic font role (font/family/{role}) uses each approved family, and with which faces.
+export function fontRoles(draft){
+ const roles=new Map();
+ for(const s of draft.textStyles||[]){
+  const role=String(s.bound?.fontFamily||'font/family/ui').split('/').at(-1),font=requiredFonts({textStyles:[s]})[0],key=role+'\n'+font.family;
+  if(!roles.has(key))roles.set(key,{role,family:font.family,styles:[]});
+  if(!roles.get(key).styles.includes(font.style))roles.get(key).styles.push(font.style);
+ }
+ return [...roles.values()];
+}
+export const recommendedFonts=['Inter','Geist','Plus Jakarta Sans'];
+const roleLabels={ui:'UI and body text',display:'Display and headings',mono:'Code'};
 export function preflightOperation(request,draft){
  const fonts=requiredFonts(draft);
  return {kind:'figma-preflight',readOnly:true,fileKey:new URL(request.figmaUrl).pathname.split('/')[2],sourceHash:request.hash,
   instructions:'Load the applicable Figma tool skill, then execute this read-only code using your existing connected Figma authoring tool on fileKey. Do not regenerate the draft or load generation specs first. Send its actual returned object through ds_create_publish_preflight on the same MCP connection. A tool error must finish blocked with its actual reason. No Figma writes are authorized by this operation. The preflight acknowledgement supplies the next operation or ends the job.',
   code:`const required = ${JSON.stringify(fonts)};
+const recommended = ${JSON.stringify(recommendedFonts)};
 const [available, collections, textStyles, effectStyles] = await Promise.all([figma.listAvailableFontsAsync(), figma.variables.getLocalVariableCollectionsAsync(), figma.getLocalTextStylesAsync(), figma.getLocalEffectStylesAsync()]);
-return {fonts: required.map(f => ({...f, available: available.some(a => a.fontName.family === f.family && a.fontName.style === f.style)})), inventory: {collections: collections.length, variables: collections.reduce((n,c) => n + c.variableIds.length, 0), textStyles: textStyles.length, effectStyles: effectStyles.length}};`};
+const families = new Map();
+for (const a of available) families.set(a.fontName.family, [...(families.get(a.fontName.family) || []), a.fontName.style]);
+const words = s => s.toLowerCase().split(/\\s+/).filter(Boolean);
+const option = family => ({family, styles: families.get(family).slice(0, 40)});
+const similar = family => { const w = words(family), score = f => words(f).filter(x => w.includes(x)).length; return [...families.keys()].filter(f => f !== family && score(f) >= Math.min(2, w.length)).sort((a, b) => score(b) - score(a) || a.length - b.length).slice(0, 3); };
+const missing = [...new Set(required.filter(f => !(families.get(f.family) || []).includes(f.style)).map(f => f.family))];
+return {fonts: required.map(f => ({...f, available: (families.get(f.family) || []).includes(f.style)})), inventory: {collections: collections.length, variables: collections.reduce((n,c) => n + c.variableIds.length, 0), textStyles: textStyles.length, effectStyles: effectStyles.length},
+  alternatives: missing.map(family => ({family, similar: similar(family).map(option), recommended: recommended.filter(f => f !== family && families.has(f)).map(option)}))};`};
 }
+const fontOption=o=>o&&typeof o.family==='string'&&o.family.trim()&&o.family.length<=200&&Array.isArray(o.styles)&&o.styles.length&&o.styles.length<=40&&o.styles.every(s=>typeof s==='string'&&s&&s.length<=100);
 export function evaluatePreflight(draft,result){
  const expected=requiredFonts(draft),key=f=>JSON.stringify([f.family,f.style]);
  if(!result||!Array.isArray(result.fonts)||result.fonts.length!==expected.length)throw new Error('Return the actual result for every approved font.');
@@ -245,15 +276,25 @@ export function evaluatePreflight(draft,result){
  }
  if(!result.inventory||!['collections','variables','textStyles','effectStyles'].every(k=>Number.isSafeInteger(result.inventory[k])&&result.inventory[k]>=0))throw new Error('Return the actual read-only file inventory.');
  const missing=expected.filter(f=>!seen.get(key(f)));
- // Font discovery describes this tool's runtime, not permission to publish the draft.
- // Preserve absent faces as advisory evidence; actual writes determine what can be saved.
- return {passed:true,missing,fonts:expected.map(f=>({...f,available:seen.get(key(f))})),inventory:result.inventory};
+ const alternatives=result.alternatives===undefined?[]:result.alternatives;
+ if(!Array.isArray(alternatives)||alternatives.length>20||alternatives.some(a=>!missing.some(f=>f.family===a?.family)||!['similar','recommended'].every(k=>Array.isArray(a[k])&&a[k].length<=10&&a[k].every(fontOption))))throw new Error('Return the font alternatives exactly as the preflight code produced them.');
+ // Figma's publishing runtime can only write text styles whose faces it can load.
+ // A missing face stops before any write; the user keeps, uploads or replaces it in Builder.
+ const roles=fontRoles(draft).map(r=>({...r,styles:r.styles.filter(s=>missing.some(f=>f.family===r.family&&f.style===s))})).filter(r=>r.styles.length).map(r=>{
+  const a=alternatives.find(x=>x.family===r.family),options=[];
+  for(const [note,list] of [['closest',a?.similar||[]],['recommended',a?.recommended||[]]])for(const o of list)if(!options.some(x=>x.family===o.family))options.push({family:o.family,styles:o.styles,note});
+  return {...r,label:roleLabels[r.role]||r.role,options};
+ });
+ return {passed:!missing.length,missing,roles,fonts:expected.map(f=>({...f,available:seen.get(key(f))})),inventory:result.inventory};
+}
+export function publishRecoveryPrompt(slug,workspace){
+ return `Publish the approved foundations saved in Builder.\nds-create init-web --slug ${slug}\nWorkspace: ${workspace}`;
 }
 
 export function figmaPrompt(request,requestFile,fastPlan){
  return `Publish approved foundations for session ${request.slug} in ${request.workspace}.
 Read ${requestFile}, skills/ds-create/reference/${fastPlan?'manager-fast.md':'publish-mcp.md and init.md (approved Figma continuation)'} and the applicable Figma tool skill. Inputs: workspace/input/${request.inputSlug||request.slug}/; outputs: workspace/output/${request.slug}/.
-The user already approved revision ${request.revision}, SHA256 ${request.hash}, target ${request.figmaUrl}. Use that existing target and approval. Do not alter foundations.json. Preserve frozen values, names, metadata and exact font identities; inventory absence is advisory, actual write failures must be reported. No new client, file, font substitution/installation, components/docs, build, deployment or Builder restart.
+The user already approved revision ${request.revision}, SHA256 ${request.hash}, target ${request.figmaUrl}. Use that existing target and approval. Do not alter foundations.json. Preserve frozen values, names, metadata and exact font identities; every approved face must load in Figma (the stepped preflight checks this first), and actual write failures must be reported. No new client, file, font substitution/installation, components/docs, build, deployment or Builder restart.
 ${fastPlan?`Verify the compiled plan ${fastPlan.file}, its sourceHash and call hashes. Execute its ${fastPlan.calls.length} calls in order through the existing Figma authoring tool; retain actual results and errors. Do not regenerate the approved data or blindly retry ambiguous writes.`:'Follow the approved publication contract through the existing Figma tools: inventory/access, variables, styles, readback and full-file audit. Preserve partial output; continue independent work when one style fails.'}
 Report progress and cancellation through ds_create_publish_progress with the same lease before every write. Export actual output losslessly to figma/figma-variables.json and save the real mode:file audit to figma/audit-file.json with sourceHash ${request.hash}. Matching approved output and a passing audit are required before marking the ledger synced. Finish completed/blocked/failed/cancelled through ds_create_publish_finish; a successful tool return or planned export alone is not completion. Keep the MCP connection open until finishing.`;
 }

@@ -230,3 +230,23 @@ test('a new-system agent result cannot silently omit the basic UI motion policy'
  const f=await setupFixture({mode:'no-motion-policy'});t.after(()=>f.cleanup());await f.post('/api/setup-submit',f.form());
  const r=await until(f,settled);assert.equal(r.status,'failed');assert.match(r.message,/basic UI motion/);
 });
+test('a replacement chosen in the Publish font check becomes a user-decided input revision; keeping every font does not',async t=>{
+ const f=await fixture(t);await f.post('/api/setup-submit',f.form('Test brief',[],'Acme Design System'));const ready=await until(f,r=>r.status==='ready');
+ const jobs=createFigmaJobs({outputDir:f.output,workspace:f.root,simulation:true}),before=await jobs.status();
+ assert.equal((await f.post('/api/publish-fonts',{choices:[]})).status,409,'no font check has run');
+ const {job}=await jobs.start({hash:before.figma.hash,figmaUrl:'https://www.figma.com/design/Fixture/Test'}),dir=path.join(f.output,'manager/jobs',job.id);
+ const status=JSON.parse(await readFile(path.join(dir,'status.json'))),delivery=JSON.parse(await readFile(path.join(dir,'mcp-delivery.json')));
+ const roles=[{role:'ui',family:'Brand Sans',styles:['Regular','Medium'],label:'UI and body text',options:[{family:'Brand Sans Display',styles:['Regular','Medium','Bold'],note:'closest'},{family:'Inter',styles:['Regular','Medium','Bold'],note:'recommended'}]},
+  {role:'display',family:'Brand Serif',styles:['Bold'],label:'Display and headings',options:[{family:'Inter',styles:['Bold'],note:'recommended'}]}];
+ await writeFile(path.join(dir,'mcp-delivery.json'),JSON.stringify({...delivery,preflight:{passed:false,roles}}));await writeFile(path.join(dir,'status.json'),JSON.stringify({...status,status:'needs-fonts'}));
+ const flow=await jobs.status();assert.equal(flow.job.status,'needs-fonts');assert.deepEqual(flow.job.fonts,roles);assert.equal(flow.figma.canStart,true);assert.equal(flow.recoveryPrompt,null);
+ assert.equal((await f.post('/api/publish-fonts',{choices:[{role:'ui',family:'Brand Sans'},{role:'display',family:'Brand Serif'}]})).status,400,'keeping every font needs a re-check, not preparation');
+ assert.equal((await f.post('/api/publish-fonts',{choices:[{role:'ui',family:'Comic Sans'},{role:'display',family:'Brand Serif'}]})).status,400,'only listed fonts');
+ assert.equal((await f.post('/api/publish-fonts',{choices:[{role:'ui',family:'Inter'},{role:'display',family:'Brand Serif'}]})).status,202);
+ const saved=JSON.parse(await readFile(path.join(f.output,'manager/setup.json'))),choice=saved.answerFiles.at(-1);
+ assert.equal(saved.inputRevision,ready.inputRevision+1);
+ const text=await readFile(path.join(f.root,ready.inputPath,choice),'utf8');
+ assert.match(text,/Replace "Brand Sans" \(Regular, Medium\) with "Inter"/);assert.match(text,/Keep "Brand Serif"/);assert.match(text,/Decided by: user \(Publish font check\)/);
+ const request=JSON.parse(await readFile(path.join(f.output,'manager/setup-jobs',saved.jobId,'request.json')));assert.equal(request.fontChoiceFile,choice);assert.equal(request.previousJobId,ready.jobId);
+ assert.equal(JSON.parse(await readFile(path.join(f.output,'ds-create-ledger.json'))).foundationReview.status,'pending');
+});
