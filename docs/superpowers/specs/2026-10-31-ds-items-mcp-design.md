@@ -15,6 +15,8 @@ Decisions made with the user:
 3. Builder controls save through the same path as the MCP tools. They stop being previews.
 4. Figma is updated when the user asks for a sync, from chat or from Builder. Only the difference is sent.
 5. Editing is unrestricted: add, delete and rename any item, including the items the ds-create contract names. Safety comes from reference checks and warnings, not from locks.
+6. Figma is only read on demand: a "Check Figma" button in Builder, and the first step of every sync. Nothing polls Figma. Builder cannot call Figma MCP itself (the remote server only accepts listed clients, and `use_figma` is remote-only), and its rate limits (10–20 calls per minute, 200 per day on Professional and Organization) rule out polling.
+7. Every session has a sync state, and the difference between the local files and what is in Figma is visible at all times, from phase 1 on.
 
 ## Current state (2026-10-31)
 
@@ -27,10 +29,12 @@ Decisions made with the user:
 
 ## Phases
 
-1. The Figma setting, the item store, MCP item tools and Builder saving, for foundations.
-2. Sync with Figma: first sync creates everything (replacing Publish to Figma), later syncs push the difference and pull Figma edits through validation.
-3. Parts in the same store and the same sync, Button first.
-4. `build` with Figma off: Parts, Components and the docs site from the saved files only. This lifts the `source.review: synced` gate in `reference/build.md` when Figma is off.
+1. The Figma setting, the item store, MCP item tools, Builder saving, and the sync state with its local diff (section 3, *Sync state*), for foundations. Publish writes the baseline from this phase on.
+2. `build` and the docs site from the saved files, with Figma off: Parts, Components and site tokens come from `foundations.json`, not from a Figma export. This lifts the `source.review: synced` gate in `reference/build.md` when Figma is off. After this phase the whole pipeline works without Figma.
+3. Parts in the same store, Button first.
+4. Sync with Figma: first sync creates everything (replacing Publish to Figma), later syncs push the difference and pull Figma edits through validation. Figma becomes an optional layer on top of a pipeline that already works.
+
+Local first, Figma last: Figma is the slowest part (every read and write goes through an agent, under rate limits), so nothing earlier waits on it.
 
 Each phase gets its own plan and review.
 
@@ -109,6 +113,7 @@ All tools take `session`. All writes return the new revision, a short diff and a
 | `ds_create_items_change` | Apply ops (section 1) with `expectedRevision`, a one-line `reason`, optional `dryRun`, and `confirmed` for wide changes. Returns the impact. |
 | `ds_create_items_history` | Recent revisions: number, author, reason, op count, time. |
 | `ds_create_items_restore` | Restore an earlier revision as a new one. |
+| `ds_create_items_diff` | The sync state and the diff between local and the Figma baseline: added, changed (old → new), renamed, deleted. |
 | `ds_create_change_requests` | List the Builder change-request cards, or mark one `done` with the revision that applied it. |
 
 Agent flow for a direction:
@@ -118,13 +123,40 @@ Agent flow for a direction:
 
 The same tools are available without MCP through the terminal host: `node kit/manager/cli.mjs mcp {tool} --json '{…}'`.
 
-## 3. Sync with Figma
+## 3. Sync with Figma (phase 4; sync state in phase 1)
 
 Applies when the session's Figma setting is on. Sections 1 and 2 work the same either way.
 
+### Sync state (phase 1)
+
+| State | Meaning | What a save does |
+|---|---|---|
+| `local` | Never published to Figma, or Figma is off | Saves only. No baseline, no diff. |
+| `in-sync` | Local revision equals the baseline | The next save moves the state to `local-changes`. |
+| `local-changes` | Local differs from the baseline | The diff against the baseline grows. |
+| `figma-changes` | The last Figma check found changes made in Figma | Proposals wait in the Agent tab. |
+| `conflict` | The same field changed on both sides | The user picks a side per field. |
+
+- The local diff (local against baseline) is computed from files only, so Builder shows it in real time with no AI and no Figma call: added, changed (old → new), renamed, deleted.
+- `/api/state` carries the state and the diff count; `ds_create_items_diff` returns the full diff to agents.
+- `figma-changes` and `conflict` only appear after a Figma check (phase 4).
+
 ### Baseline
 
-`figma/synced.json` is the snapshot of the last revision confirmed in Figma, plus the Figma ids of each variable and style by name. Every successful sync replaces it.
+`figma/synced.json` is the snapshot of the last revision confirmed in Figma, plus the Figma ids of each variable and style by name, a hash per item, and a hash per collection and style group. Today's Publish writes it on a successful finish (phase 1). Every successful sync replaces it.
+
+### Checking Figma
+
+Only on demand: the **Check Figma** button in Builder, or the first step of a sync. The button queues a `figma-check-request` through `ds_create_wait`; with no agent waiting, Builder shows a copy prompt.
+
+The check runs in two levels, so an unchanged file costs one small call:
+
+1. One `use_figma` call computes a hash per collection and style group inside Figma and compares it with the baseline hashes. When nothing changed, it returns only that, in a few hundred bytes.
+2. Only for groups that differ, a second call compares item hashes and returns the changed items with their values.
+
+A full export (about 125 KB for 434 variables, 18 text and 8 effect styles) is only used after a push, to confirm Figma now matches local.
+
+Text set directly on a single layer, not through its style or variable, is not part of the token compare. The file audit reports it as a warning ("layer detached from style").
 
 ### First sync
 
@@ -132,7 +164,7 @@ With no baseline, the sync creates everything in the Figma file. This replaces t
 
 ### Three-way compare
 
-The agent exports Figma with the existing export script. `ds_create_sync_plan` compares baseline, local and Figma per item and field:
+From the changed items the check returns, `ds_create_sync_plan` compares baseline, local and Figma per item and field:
 
 - Changed only locally: **push**.
 - Changed only in Figma: **proposal**.
@@ -156,7 +188,7 @@ Progress and cancel reuse `ds_create_publish_progress` and `ds_create_publish_ca
 
 ### Builder
 
-- The Publish dialog's Figma step shows "N local changes not in Figma" and a **Sync to Figma** button. The button queues a `sync-request` through `ds_create_wait`, or shows a copy prompt when no agent is waiting.
+- The Publish dialog's Figma step shows the sync state, "N local changes not in Figma" with the diff list (phase 1), a **Check Figma** button, and a **Sync to Figma** button. The button queues a `sync-request` through `ds_create_wait`, or shows a copy prompt when no agent is waiting.
 - Proposals and conflicts appear as cards in the Agent tab, with Accept and Reject.
 
 ## 4. Parts (phase 3)

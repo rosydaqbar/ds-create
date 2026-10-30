@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Agents and Builder change foundation items through one local store, exposed as MCP tools, with a per-session Figma on/off setting.
+**Goal:** Agents and Builder change foundation items through one local store, exposed as MCP tools, with a per-session Figma on/off setting and a visible sync state and diff against what was last published to Figma.
 
 **Architecture:** A pure op engine (`ops.mjs`) turns a draft plus a list of ops into a new draft, plan and warnings. A store (`store.mjs`) wraps it with revision checks, a cross-process file lock, atomic writes, pack regeneration and history. Read helpers (`query.mjs`) resolve values and references. MCP tools, `POST /api/foundations` and Builder autosave all call the store. The Figma setting lives in the ledger as `flags.figma`.
 
@@ -35,7 +35,8 @@
 3. Renaming a variable must also update `codeSyntax.WEB` and every reference, or the pack and Figma names drift. (Task 1 test `rename cascades`.)
 4. Sessions without `foundation-plan.json` (legacy, and the publish fixture) must still save: skip plan and pack updates instead of failing. (Task 3 test `saves without a plan`.)
 5. Restoring an old revision must create a new revision number, not reuse the old one. (Task 3 test `restore copies forward`.)
-6. "Make the brand color blue" must regenerate the whole brand ramp from its anchors, report every semantic color that moves, and stop for discussion instead of saving. (Task 2 test `brand anchor change is wide`, Task 3 test `wide change needs confirmation`.)
+6. "Make the brand color blue" must regenerate the whole brand ramp from its anchors, report every semantic color that moves, and stop for discussion instead of saving. (Task 2 test `brand anchor change reports impact`, Task 3 test `wide change needs confirmation`.)
+7. With Figma off, the sync state must stay `local` and Builder must not show any Figma diff, even if an old `figma/synced.json` is still on disk. (Task 8 test `state follows the baseline`.)
 
 ---
 
@@ -246,12 +247,36 @@ Name and product fields (`ds-name`, `ds-product`) stay previews in this phase. S
 - [ ] **Step 4: Run** `node --test tests/*.test.mjs` — Expected: no new failures. Restart Builder and open http://127.0.0.1:49854 read-only in headless Chrome: the controls render and no error appears. Do not save anything to the live session.
 - [ ] **Step 5: Checkpoint.**
 
-### Task 8: Docs
+### Task 8: Sync state, baseline and local diff
+
+**Files:**
+- Create: `kit/manager/foundations/baseline.mjs`
+- Modify: `kit/manager/server/publish.mjs` (on an accepted `completed` finish, write the baseline)
+- Modify: `kit/manager/server/index.mjs` (`/api/state` adds `sync: {state, revision, baselineRevision, changes}`)
+- Modify: `kit/mcp/server.mjs` (tool `ds_create_items_diff`), `tests/manager-mcp.test.mjs` (tool list)
+- Modify: `kit/manager/client/features/build.mjs` + `kit/manager/client/index.html` (Figma step shows the state and the diff list; hidden when Figma is off)
+- Test: `tests/manager-item-baseline.test.mjs`
+
+**Interfaces:**
+- Consumes: `readFigmaSetting` (Task 6), `createItemStore().read()` (Task 3).
+- Produces:
+  - `itemHashes(draft) -> {items:{'variable:{name}'|'textStyle:{name}'|'effectStyle:{name}'|'gridStyle:{name}'|'collection:{name}': sha256 hex (16 chars)}, groups:{'{collection}'|'textStyles'|'effectStyles'|'gridStyles': sha256 hex (16 chars)}}`. Hash input is the item's canonical JSON (sorted keys), so key order never changes a hash.
+  - `writeBaseline(outputDir, draft) -> void` writes `figma/synced.json` = `{format:'ds-create/figma-baseline@1', revision, time, draft, hashes:itemHashes(draft)}`. Figma ids are added in phase 4.
+  - `localDiff(baselineDraft, draft) -> {added:[{kind,name}], changed:[{kind,name,fields:[{field, from, to}]}], renamed:[{kind,from,to}], deleted:[{kind,name}]}`. A rename is a delete plus an add whose item JSON is equal apart from `name` and `codeSyntax`.
+  - `syncState(outputDir) -> {state:'local'|'in-sync'|'local-changes', revision, baselineRevision|null, changes:number}`: `local` when Figma is off or there is no baseline; `in-sync` when the hashes match; otherwise `local-changes`. (`figma-changes` and `conflict` arrive in phase 4.)
+  - `ds_create_items_diff {session}` read-only → `{...syncState, diff: localDiff(...)}` (diff empty for `local`).
+- [ ] **Step 1: Write the failing tests**: `hashes ignore key order`; `diff lists a changed value` (baseline radius/control alias `scale/radius/8`, local `scale/radius/12` → `changed[0].fields[0]` = `{field:'values.Value', from:{alias:'scale/radius/8'}, to:{alias:'scale/radius/12'}}`); `diff detects a rename` (rename `radius/sm` → `radius/small` gives one `renamed` entry, not an add and a delete); `state follows the baseline` (no baseline → `local`; `writeBaseline` then read → `in-sync`; a store change → `local-changes` with `changes:1`; `writeFigmaSetting(false)` → `local`); `publish finish writes the baseline` (through the publish fixture's successful MCP finish path, `figma/synced.json` exists with the published revision).
+- [ ] **Step 2: Run** `node --test tests/manager-item-baseline.test.mjs` — Expected: FAIL.
+- [ ] **Step 3: Implement.** Builder copy: state labels "Not in Figma yet", "In sync with Figma", "{n} changes not in Figma"; the diff list shows `name: old → new` per row, up to 50 rows, then "and {n} more".
+- [ ] **Step 4: Run** `node --test tests/*.test.mjs` — Expected: no new failures.
+- [ ] **Step 5: Checkpoint.**
+
+### Task 9: Docs
 
 **Files:**
 - Modify: `skills/ds-create/reference/agent-mcp.md` (section "Item tools": the 6 tools, the op shapes, the color ramp rule, and the flow "read, dry-run, discuss when `wide`, apply with `confirmed` only after the user agrees, report the revision")
 - Modify: `skills/ds-create/SKILL.md` (one rule line: change items with `ds_create_items_change`; never edit `foundations.json` by hand)
-- Modify: `skills/ds-create/reference/init.md`, `init-web.md`, `build.md` (`--no-figma` row: "Figma off for this session (ledger `flags.figma: false`)"; build notes that Figma-off build arrives in phase 4)
+- Modify: `skills/ds-create/reference/init.md`, `init-web.md`, `build.md` (`--no-figma` row: "Figma off for this session (ledger `flags.figma: false`)"; build notes that Figma-off build arrives in phase 2)
 - Modify: `workflow/MANAGER.md` (Builder controls save; Undo last change; Use Figma switch)
 
 - [ ] **Step 1:** Write the doc changes.
