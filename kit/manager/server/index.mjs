@@ -9,6 +9,9 @@ import {PublishError} from './files.mjs';
 import {buildStatus, createSetupJobs, requestBuild, uploadLimits, workerConnectionStatus} from './setup.mjs';
 import {createParts} from './parts.mjs';
 import {createChangeRequests} from './changes.mjs';
+import {readFigmaSetting, writeFigmaSetting} from './settings.mjs';
+import {createItemStore} from '../foundations/store.mjs';
+import {syncState} from '../foundations/baseline.mjs';
 import {preparedFonts} from '../client/assets/fonts/catalog.mjs';
 
 export function createManagerServer({ outputDir, workspace = path.resolve(outputDir, '../../..'), jobsOptions = {}, setupOptions = {} }) {
@@ -16,11 +19,17 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
   const instance = randomUUID(), csrfToken = randomBytes(24).toString('hex');
   const setup = createSetupJobs({ ...setupOptions, outputDir, workspace });
   const partJobs = createParts({ outputDir }), changeRequests = createChangeRequests({ outputDir });
+  // Builder controls save through the same store as the MCP item tools. The user is making the change by hand, so no discussion step.
+  const items = createItemStore({ outputDir });
   // Publish runs ds-create build. Each step needs at least one item, from Builder or from Figma.
   async function publishSteps(s, parts) {
     const local = s.foundations.filter(f => f.status === 'ready').length, figma = s.source?.review === 'synced';
     const prepared = parts.filter(p => ['review', 'synced'].includes(p.status)).length, inFigma = parts.filter(p => p.status === 'synced').length;
-    return { foundations: { ready: local > 0 || figma, local, total: s.foundations.length, figma }, parts: { ready: prepared > 0, prepared, inFigma, total: 19 }, components: { ready: false, built: 0, total: 8 }, build: { ...await buildStatus(outputDir), prompt: `Run ds-create build for the design system saved in Builder.\nds-create build --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
+    return { figma: await readFigmaSetting(outputDir), foundations: { ready: local > 0 || figma, local, total: s.foundations.length, figma }, parts: { ready: prepared > 0, prepared, inFigma, total: 19 }, components: { ready: false, built: 0, total: 8 }, build: { ...await buildStatus(outputDir), prompt: `Run ds-create build for the design system saved in Builder.\nds-create build --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
+  }
+  async function saveSettings(input) {
+    if (!input || Object.keys(input).join() !== 'figma' || typeof input.figma !== 'boolean') throw new PublishError('Send {figma: true|false}.', 400);
+    return { figma: await writeFigmaSetting(outputDir, input.figma) };
   }
   async function queueBuild() {
     const s = await getState(outputDir), steps = await publishSteps(s, await partJobs.status(s));
@@ -37,6 +46,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
       'client/ui-motion.mjs',
       'client/features/controls.js',
       'client/features/foundation-controls.mjs',
+      'client/features/foundation-save.mjs',
       'client/features/iconography.mjs',
       'client/features/parts.mjs',
       'client/features/change-requests.mjs',
@@ -69,12 +79,12 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
     const json = (code, value) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(req.method === 'HEAD' ? undefined : JSON.stringify(value)); };
     try {
       const route = new URL(req.url, `http://${host}`).pathname;
-      const mutations = ['/api/publish-figma', '/api/publish-cancel', '/api/publish-fonts', '/api/parts-prepare', '/api/parts-update', '/api/change-requests', '/api/build-request', '/api/setup-submit', '/api/setup-revise', '/api/setup-answers', '/api/setup-retry', '/api/setup-cancel'];
+      const mutations = ['/api/foundations', '/api/foundations-restore', '/api/settings', '/api/publish-figma', '/api/publish-cancel', '/api/publish-fonts', '/api/parts-prepare', '/api/parts-update', '/api/change-requests', '/api/build-request', '/api/setup-submit', '/api/setup-revise', '/api/setup-answers', '/api/setup-retry', '/api/setup-cancel'];
       if (req.method === 'POST' && mutations.includes(route)) {
         if (req.headers.origin !== `http://${host}` || req.headers['x-ds-create-token'] !== csrfToken || req.headers['sec-fetch-site'] === 'cross-site') { json(403, { error: 'Reopen this Builder tab before trying again.' }); return; }
         const upload = ['/api/setup-submit','/api/setup-revise'].includes(route), type = req.headers['content-type'] || '';
         if (upload ? !/^multipart\/form-data;\s*boundary=/i.test(type) : type.split(';')[0] !== 'application/json') { json(415, { error: upload ? 'Context upload requires form data.' : 'This action requires JSON.' }); return; }
-        const limit = upload ? uploadLimits.totalBytes + 128 * 1024 : route === '/api/setup-answers' ? 128 * 1024 : route === '/api/change-requests' ? 16 * 1024 : 4096;
+        const limit = upload ? uploadLimits.totalBytes + 128 * 1024 : route === '/api/setup-answers' ? 128 * 1024 : route === '/api/change-requests' ? 16 * 1024 : route === '/api/foundations' ? 64 * 1024 : 4096;
         if (Number(req.headers['content-length']) > limit) throw new PublishError('Request is too large.', 413);
         const chunks = []; let size = 0;
         for await (const chunk of req) { size += chunk.length; if (size > limit) throw new PublishError('Request is too large.', 413); chunks.push(chunk); }
@@ -86,7 +96,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
         if(transitioning)throw new PublishError('Another setup or publication action is being saved. Retry after it finishes.');
         transitioning=true;
         try {
-        const result = route === '/api/publish-figma' ? await jobs.start(input) : route === '/api/publish-cancel' ? await jobs.cancel() : route === '/api/publish-fonts' ? await setup.fontChoice(input) : route === '/api/parts-prepare' ? await partJobs.prepare(input, await getState(outputDir)) : route === '/api/parts-update' ? await partJobs.update(input, await getState(outputDir)) : route === '/api/change-requests' ? await changeRequests.update(input) : route === '/api/build-request' ? await queueBuild() :
+        const result = route === '/api/foundations' ? await items.change({ expectedRevision: input?.expectedRevision, ops: input?.ops, reason: input?.reason, author: 'builder', confirmed: true }) : route === '/api/foundations-restore' ? await items.restore({ revision: input?.revision, expectedRevision: input?.expectedRevision, author: 'builder' }) : route === '/api/settings' ? await saveSettings(input) : route === '/api/publish-figma' ? await jobs.start(input) : route === '/api/publish-cancel' ? await jobs.cancel() : route === '/api/publish-fonts' ? await setup.fontChoice(input) : route === '/api/parts-prepare' ? await partJobs.prepare(input, await getState(outputDir)) : route === '/api/parts-update' ? await partJobs.update(input, await getState(outputDir)) : route === '/api/change-requests' ? await changeRequests.update(input) : route === '/api/build-request' ? await queueBuild() :
           route === '/api/setup-revise' ? await setup.revise(input) : route === '/api/setup-submit' ? await setup.submit(input) : route === '/api/setup-answers' ? await setup.answer(input) : route === '/api/setup-retry' ? await setup.retry(input) : await setup.cancel();
         json(202,result); return;
         } finally { transitioning=false; }
@@ -94,7 +104,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
       if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }).end(); return; }
       if (route === '/api/worker') { json(200, await workerConnectionStatus(outputDir, workspace)); return; }
       if (['/api/state', '/api/health', '/api/publish-status', '/api/publish-flow', '/api/setup-flow'].includes(route)) {
-        const body = route === '/api/setup-flow' ? { ...await setup.status(), csrfToken } : route === '/api/publish-flow' ? { ...await jobs.status(), csrfToken } : route === '/api/publish-status' ? await getPublishStatus(outputDir) : route === '/api/state' ? await (async () => { const s = await getState(outputDir); const requests = await changeRequests.list(), parts = await partJobs.status(s); return { ...s, parts, publishSteps: await publishSteps(s, parts), changeRequests: requests, changePrompt: changeRequests.prompt(requests, { session: path.basename(outputDir), workspace }), csrfToken }; })() : { service: 'ds-create-manager', instance, pid: process.pid, outputDir };
+        const body = route === '/api/setup-flow' ? { ...await setup.status(), figma: await readFigmaSetting(outputDir), csrfToken } : route === '/api/publish-flow' ? { ...await jobs.status(), csrfToken } : route === '/api/publish-status' ? await getPublishStatus(outputDir) : route === '/api/state' ? await (async () => { const s = await getState(outputDir); const requests = await changeRequests.list(), parts = await partJobs.status(s); const [last] = s.source?.kind === 'local' ? await items.history({ limit: 1 }) : []; return { ...s, source: { ...s.source, savedBy: ['mcp', 'builder'].includes(last?.author) ? last.author : null, canUndo: s.source?.kind === 'local' && await items.canUndo(s.source.revision) }, typeScale: await items.typeScale(), figma: await readFigmaSetting(outputDir), sync: await syncState(outputDir), parts, publishSteps: await publishSteps(s, parts), changeRequests: requests, changePrompt: changeRequests.prompt(requests, { session: path.basename(outputDir), workspace }), csrfToken }; })() : { service: 'ds-create-manager', instance, pid: process.pid, outputDir };
         json(200, body); return;
       }
       if (!routes.has(route)) { res.writeHead(404).end('Not found'); return; }

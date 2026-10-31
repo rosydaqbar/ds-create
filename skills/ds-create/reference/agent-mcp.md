@@ -24,6 +24,43 @@ Keep the MCP connection open until finishing. Disconnect/dead process blocks its
 
 After review, the user approves the saved hash and target through Publish. Use the publication tools in `reference/publish-mcp.md`: status, claim, progress, finish, cancel. The same connection/server protocol applies; no special agent/runtime adapter is introduced. Publication starts with a source-derived read-only preflight operation through the host's existing Figma tool. Its actual returned font/inventory result drives the runner: a face Figma cannot load ends the attempt as `needs-fonts` with nothing written, and the user resolves it in Builder; a valid result returns the compiled FAST generation plan on the same job (reference/manager-fast.md). Generation still verifies edit access and frozen values. Confirmed export/audit are independently checked before unlocking build.
 
+## Item tools
+
+Agents read and change foundation items through DS Create MCP. Every tool takes `session` and works on the saved local files only; none of them reads or writes Figma. In a session without `ds_create_*` tools, call them through the terminal host (`background-worker.md`, *Without DS Create MCP tools*).
+
+| Tool | Use |
+| --- | --- |
+| `ds_create_items_list` | Find items by domain, collection, kind, type, name prefix or text. Values are resolved per mode. |
+| `ds_create_items_get` | Read items in full, with the alias chain and `usedBy`. The name `rules` returns the editable rules. |
+| `ds_create_items_change` | Save a list of ops as one revision. |
+| `ds_create_items_history` · `ds_create_items_restore` | List revisions; restore one as a new revision. |
+| `ds_create_items_diff` | The sync state and the local changes not yet in Figma. |
+| `ds_create_change_requests` | Read the user's Builder change requests; mark one `done` with the revision that applied it. |
+
+Ops, each with `target: "foundations"`:
+
+- `set`: one mode's `value` or `alias`, or `fields` (description, scopes, codeSyntax, style properties);
+- `add`: a variable, style, collection or mode;
+- `rename`: updates every alias, binding and effect color that points at the item;
+- `delete`: refused while the item is used, unless `replaceWith` names its replacement;
+- `apply` with a recipe: `radius-base {rem}`, `space-base {rem}`, `shadow-seed {seed}`, `type-family {family, role?}`, `type-scale {percent}`, `palette-ramp {family, anchors, replace?}`.
+
+In a new system, setting a literal value on a semantic token stores it on a primitive of the same family. If no primitive holds that value, the store creates one: `radius/control` at 12 aliases `scale/radius/12`, and a hex brand color aliases `palette/custom/{hex}`.
+
+`foundation-rules.json` records each palette family's anchors from preparation. The steps between anchors use the same OKLab interpolation as preparation. Change a palette color by changing its anchors with `palette-ramp`, or by setting an anchor step. Setting any other step breaks the ramp.
+
+When the user asks for a change:
+
+1. Read the items it names with `ds_create_items_list` or `ds_create_items_get`, and note the `revision`.
+2. Call `ds_create_items_change` with `dryRun: true`.
+3. If the result has `wide` set, or the direction can be read more than one way, show the user which items will change, which rule is affected and any contrast warnings, then wait for their answer. Resend with `confirmed: true` only after they agree.
+4. Otherwise save the same ops with the same `expectedRevision`. A 409 means the draft changed meanwhile: read again and redo the change.
+5. Report the new revision in one line; Builder picks it up on its own. Mark the change request `done` if the change came from one.
+
+A change is wide when it breaks a color rule, touches more palette families than `discuss.maxFamilies`, moves more semantic tokens than `discuss.maxSemantics`, or renames or deletes a name preparation produced (`contract`). The limits are stored in `foundation-rules.json`. To change them, use `set` with `kind: "rules"`; that change always needs the user's agreement first.
+
+Never edit `foundations.json`, `foundation-plan.json` or the `foundations/` pack by hand.
+
 ## Waiting and verification
 
 After a preparation finish, call `ds_create_wait` again so the Publish click reaches the same agent, or end the turn. Future automatic delivery requires a new pending tool request; a detached Node process cannot wake an ended chat. Source/request/proof/exclusive-owner gates remain unchanged. Verify actual delivery and claims separately from synthetic fixtures. Publication retains its separate approval and MCP lease and is never automatically retried by preparation delivery.

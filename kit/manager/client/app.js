@@ -13,6 +13,7 @@ import { setupWeb } from './features/setup.mjs';
 import { setupChangeRequests } from './features/change-requests.mjs';
 import { setupBuild } from './features/build.mjs';
 import { setupWorkerConnection } from './features/worker-connection.mjs';
+import { setupFoundationSave } from './features/foundation-save.mjs';
 
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -43,12 +44,21 @@ let state;
 let signature = '';
 let query = '';
 let selectedMode = '';
-let fetching = false;
+let fetching = null;
 let controls;
 let motion;
 let inspectorRoute;
 let inspectorNeedsReset = true;
 const draft = { name: null, product: null, values: new Map(), settings: new Map() };
+// Control edits stay as previews only until their save lands; then the saved draft is what Builder shows.
+const saver = setupFoundationSave({ getState: () => state, refresh });
+const selectionSettings = ['motion-duration-token', 'motion-easing-token'];
+// The typeface control sets the interface family (font/family/ui) when the system has one; display and code keep theirs.
+const uiFamilyToken = () => state?.foundations.find(f => f.id === 'typography')?.variables.some(v => v.name === 'font/family/ui');
+function clearPreviews() {
+  draft.values.clear();
+  for (const key of [...draft.settings.keys()]) if (!selectionSettings.includes(key)) draft.settings.delete(key);
+}
 let selectedToken = 'color/text/primary';
 // Foundation pages work like Part pages: a card or row selects one item; the page card itself selects the page.
 let selectedItem = null;
@@ -253,7 +263,7 @@ function foundationWorkspace(f) {
     const choices = fontChoices(typeFamilies(f));
     const family = previewTypeface(f);
     const options = (name, families) => families.length ? `<optgroup label="${name}">${families.map(v => `<option value="${escape(v)}" ${family === v ? 'selected' : ''}>${escape(typefaceLabel(v))}</option>`).join('')}</optgroup>` : '';
-    return `<section class="inspector-section"><h3>Typeface</h3><label class="workspace-field" for="type-family"><span>Preview family</span><select id="type-family">${options('System fonts', choices.system)}${options('Prepared fonts', choices.prepared)}</select></label><div class="workspace-font-sample" data-font="${escape(family)}">Aa Bb Cc</div><p id="type-font-status" class="workspace-help" role="status"></p><p class="workspace-help">${choices.system.length ? 'Your system font is selected by default. You can also preview a prepared font.' : 'No font specified. Choose Inter, Geist, or Plus Jakarta Sans.'}</p>${field('type-scale', 'Preview scale', draft.settings.get('type-scale') || 100, 'number', 'min="50" max="200" step="5"')}</section>`;
+    return `<section class="inspector-section"><h3>Typeface</h3><label class="workspace-field" for="type-family"><span>UI typeface</span><select id="type-family">${options('System fonts', choices.system)}${options('Prepared fonts', choices.prepared)}</select></label><div class="workspace-font-sample" data-font="${escape(family)}">Aa Bb Cc</div><p id="type-font-status" class="workspace-help" role="status"></p><p class="workspace-help">${choices.system.length ? 'Choosing a font saves it for the interface and the text styles that use it. Display and code fonts stay as they are.' : 'No font specified. Choose Inter, Geist, or Plus Jakarta Sans.'}</p>${field('type-scale', 'Type scale (%)', draft.settings.get('type-scale') || state?.typeScale || 100, 'number', 'min="50" max="200" step="5"')}</section>`;
   }
   if (f.id === 'shape') return controls.radiusWorkspace(f);
   if (f.id === 'space') return spacingWorkspace(f);
@@ -304,7 +314,7 @@ function inspector(f) {
   if (item && f.status === 'ready' && !['color', 'motion'].includes(f.id)) { const panel = itemPanel(f, item); if (panel) return panel; }
   if (state.setup && state.setup.status !== 'ready') return `<h2>Setup</h2><p class="workspace-help">Add context, answer any open questions, then review your foundations before publishing to Figma.</p><button class="button" data-open-setup>Open context</button>`;
   const identity = `<section class="inspector-section"><h3>Identity</h3>${field('ds-name', 'Name', displayName(), 'text', 'maxlength="80"')}<dl>${property('Input slug', state.inputSlug || state.slug)}</dl><label class="workspace-field" for="ds-product"><span>Product</span><select id="ds-product">${['Web', 'App', 'Web and App'].map(v => `<option ${v === (draft.product || state.product) ? 'selected' : ''}>${v}</option>`).join('')}</select></label></section><section class="inspector-section"><h3>Foundation output</h3><dl>${property('Variables', state.summary.variables)}${property('Collections', state.summary.collections)}${property('Text styles', state.summary.textStyles)}${property('Effect styles', state.summary.effectStyles)}</dl></section>`;
-  return `<div class="workspace-panel-header"><h2>${escape(f?.id === 'shape' ? 'Radius' : f?.id === 'elevation' ? 'Shadow' : f?.name || 'System')}</h2><span class="label-beta">Preview</span></div><p class="workspace-disclaimer">Changes stay in this preview.</p>${f?.id === 'color' && f.status === 'ready' ? colorWorkspace(f) : f ? foundationWorkspace(f) : identity}<div class="workspace-reset"><button id="reset-preview" class="button">Reset preview</button><small>Nothing is saved to Figma or your files.</small></div>`;
+  return `<div class="workspace-panel-header"><h2>${escape(f?.id === 'shape' ? 'Radius' : f?.id === 'elevation' ? 'Shadow' : f?.name || 'System')}</h2></div><p id="foundation-save-status" class="workspace-disclaimer" role="status" aria-live="polite">${escape(saver.text(state) || 'Changes stay in this preview.')}</p>${f?.id === 'color' && f.status === 'ready' ? colorWorkspace(f) : f ? foundationWorkspace(f) : identity}${f && state?.source?.kind === 'local' ? `<div class="workspace-reset"><button id="undo-change" class="button" ${state.source.canUndo ? '' : 'disabled'}>Undo last change</button><small>Restores the previous revision. Figma is not touched.</small></div>` : '<div class="workspace-reset"><button id="reset-preview" class="button">Reset preview</button><small>Nothing is saved to Figma or your files.</small></div>'}`;
 }
 
 function applySpecimens(f) {
@@ -313,7 +323,7 @@ function applySpecimens(f) {
   document.querySelectorAll('[data-library-icon-size]').forEach(el=>{const n=Number(el.dataset.libraryIconSize);if(Number.isFinite(n)&&n>0&&n<=48){el.style.width=`${n}px`;el.style.height=`${n}px`;}});
   const typography = state.foundations.find(f => f.id === 'typography');
   document.querySelectorAll('[data-font]').forEach(el => { const family = fontStack(previewTypeface(typography)); if (CSS.supports('font-family', family)) el.style.fontFamily = family; });
-  document.querySelectorAll('[data-type-size]').forEach(el => { const size = Number(el.dataset.typeSize) * Number(draft.settings.get('type-scale') || 100) / 100; if (Number.isFinite(size) && size > 0) el.style.fontSize = `${Math.min(size, 96)}px`; });
+  document.querySelectorAll('[data-type-size]').forEach(el => { const size = Number(el.dataset.typeSize) * Number(draft.settings.get('type-scale') || state.typeScale || 100) / (state.typeScale || 100); if (Number.isFinite(size) && size > 0) el.style.fontSize = `${Math.min(size, 96)}px`; });
   document.querySelectorAll('[data-measure]').forEach(el => { const size = Number(el.dataset.measure); if (Number.isFinite(size) && size >= 0) el.style.width = `${size}px`; });
   document.querySelectorAll('[data-radius]').forEach(el => { const size = Number(el.dataset.radius); if (Number.isFinite(size) && size >= 0) el.style.borderRadius = `${size}px`; });
   document.querySelectorAll('[data-effect]').forEach(el => {
@@ -380,9 +390,13 @@ function render() {
   $('announcer').textContent = `${f?.name || 'Init'}: ${labels[f?.status || state.status]}`;
 }
 
+// One state request at a time; a refresh asked for during one waits for it and then fetches again.
 async function refresh() {
-  if (fetching) return;
-  fetching = true;
+  while (fetching) await fetching;
+  fetching = load();
+  try { await fetching; } finally { fetching = null; }
+}
+async function load() {
   try {
     const response = await fetch('/api/state', { cache: 'no-store', signal: AbortSignal.timeout(builderSettings.network.readTimeoutMs) });
     if (!response.ok) throw new Error('State unavailable');
@@ -391,12 +405,13 @@ async function refresh() {
     const nextSignature = JSON.stringify(next);
     publisher.update(next);
     if (state?.system !== next.system) draft.name = null;
+    if (state && next.source?.revision !== state.source?.revision && !saver.pending()) clearPreviews();
     if (nextSignature !== signature) { state = next; signature = nextSignature; render(); }
   } catch {
     publisher.update(null);
     $('connection-error').hidden = false;
     if (!state) $('content').innerHTML = documentFrame('Waiting for your workspace', 'The local server is not responding.', '<div class="empty-state"><p>Retry the connection, or restart DS Create Builder from your agent.</p></div>');
-  } finally { fetching = false; }
+  }
 }
 
 function theme(value) {
@@ -487,6 +502,7 @@ $('primitive-picker-options').addEventListener('click', e => {
   const key = valueKey(token.name, modeFor(f));
   if (savedResult(token, modeFor(f)).alias === option.dataset.primitiveOption) draft.values.delete(key);
   else draft.values.set(key, { alias: option.dataset.primitiveOption });
+  saver.save(`${token.name} ${modeFor(f)}`, [{ op: 'set', name: token.name, mode: modeFor(f), alias: option.dataset.primitiveOption }]);
   selectedToken = token.name;
   render();
   closeDialog($('primitive-picker'));
@@ -511,13 +527,14 @@ $('inspector').addEventListener('input', e => {
   else if (['space-base-rem', 'type-scale'].includes(target.id)) {
     if (!target.validity.valid || target.value === '') return;
     draft.settings.set(target.id, Number(target.value)); render();
+    saver.save(target.id === 'space-base-rem' ? 'spacing base' : 'type scale', [target.id === 'space-base-rem' ? { op: 'apply', recipe: 'space-base', rem: Number(target.value) } : { op: 'apply', recipe: 'type-scale', percent: Number(target.value) }]);
   }
 });
 $('inspector').addEventListener('change', e => {
   if (motion.change(e)) return;
   const target = e.target;
   if (target.id === 'ds-product') { draft.product = target.value; }
-  else if (target.id === 'type-family') { draft.settings.set('family', target.value); render(); }
+  else if (target.id === 'type-family') { draft.settings.set('family', target.value); render(); saver.save('typeface', [{ op: 'apply', recipe: 'type-family', family: target.value, ...(uiFamilyToken() ? { role: 'ui' } : {}) }]); }
 });
 $('inspector').addEventListener('click', e => {
   if (motion.click(e)) return;
@@ -525,6 +542,7 @@ $('inspector').addEventListener('click', e => {
   if (trigger) { openPrimitivePicker(trigger); return; }
   const mode = e.target.closest('[data-mode]');
   if (mode) { selectedMode = mode.dataset.mode; render(); }
+  if (e.target.closest('#undo-change')) saver.undo();
   if (e.target.closest('#reset-preview')) { draft.name = null; draft.product = null; draft.values.clear(); draft.settings.clear(); render(); }
 });
 // Selecting on foundation pages. The canvas captures the pointer for panning, so look up what sits under the cursor.
@@ -560,13 +578,13 @@ $('content').addEventListener('click', e => {
   const row = [...document.querySelectorAll('[data-token-row]')].find(el => el.dataset.tokenRow === selectedToken);
   if (row) { row.closest('details').open = true; row.scrollIntoView({ block: 'nearest' }); row.querySelector('[data-choose-primitive]').focus({ preventScroll: true }); }
 });
-controls = createFoundationControls({ foundation: id => state?.foundations.find(f => f.id === id), draft, resultFor, savedResult, modeFor, valueKey, escape, icon, previewCard, modeControls, selectable, selectClass, updatePreview: () => {
+controls = createFoundationControls({ foundation: id => state?.foundations.find(f => f.id === id), draft, resultFor, savedResult, modeFor, valueKey, escape, icon, previewCard, modeControls, selectable, selectClass, save: saver.save, updatePreview: () => {
   const f = state.foundations.find(f => f.id === route());
   if (!f || !['shape', 'elevation'].includes(f.id)) return;
   const warnings = state.warnings.map(w => `<div class="notice error-notice">${escape(w)}</div>`).join('');
   $('content').innerHTML = warnings + foundation(f); markPage(f); applySpecimens(f); changes.sync(); canvas.refresh(route());
 } });
-motion = createMotionPreview({ draft, resultFor, modeFor, escape, previewCard, modeControls, selectable, selectClass, renderAll: render, renderCanvas: () => {
+motion = createMotionPreview({ draft, resultFor, modeFor, escape, previewCard, modeControls, selectable, selectClass, save: saver.save, renderAll: render, renderCanvas: () => {
   motion.stop();
   const f = state.foundations.find(f => f.id === 'motion');
   $('content').innerHTML = state.warnings.map(w => `<div class="notice error-notice">${escape(w)}</div>`).join('') + foundation(f);

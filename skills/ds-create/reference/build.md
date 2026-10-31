@@ -27,6 +27,7 @@ Re-read the ledger. When an earlier round left a page `building` or `qa`, offer 
 | `--no-gl` | no Guidelines frames in Figma (ledger `flags.guidelines: false`, §5), and Q3 = Figma only: the docs site is skipped, even when `--site` is also passed |
 | `--upto foundations\|parts\|components\|all` · `--pages 2.1,2.5` | Q2 how far |
 | `--figma-only` · `--site` | Q3 where |
+| `--no-figma` | Figma off for this session (ledger `flags.figma: false`). A build without Figma is not available yet: say so in one line and stop, or offer to turn Figma back on |
 | `--yolo` · `--step` | Q4 pace |
 
 Ask only the questions no flag answers, in one message. A word that isn't a flag gets one short question.

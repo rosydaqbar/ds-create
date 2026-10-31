@@ -7,6 +7,7 @@ import { IconButton } from '../src/components/parts/IconButton';
 import { Label } from '../src/components/parts/Label';
 import { HelpText } from '../src/components/parts/HelpText';
 import { Badge } from '../src/components/parts/Badge';
+import { Switch } from '../src/components/parts/Switch';
 import { Divider } from '../src/components/parts/Divider';
 import { FeaturedIcon } from '../src/components/parts/FeaturedIcon';
 import { TextField, TextareaField } from '../src/components/components/TextField';
@@ -84,6 +85,12 @@ export const markup = renderToStaticMarkup(
               <HelpText hint="Token formats for these platforms follow your project context." />
             </div>
             <span id="setup-tokenization-status" className="sr-only" role="status" aria-live="polite" aria-atomic="true" />
+          </div>
+        </SettingRow>
+        <SettingRow label="Use Figma" id="setup-figma-label">
+          <div className="flex items-start justify-between gap-xl">
+            <HelpText id="setup-figma-hint" hint="Build and sync this design system in a Figma file too. Turn it off to keep it in Builder and the docs site." />
+            <Switch id="setup-figma" size="md" defaultChecked aria-labelledby="setup-figma-label" aria-describedby="setup-figma-hint" />
           </div>
         </SettingRow>
       </section>

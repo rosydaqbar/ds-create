@@ -1,7 +1,7 @@
 import { openDialog, closeDialog } from '../ui-motion.mjs';
-import { rounded, radiusBase, deriveRadii, colorOpacity, shadowSeed, deriveShadows, shadowCSS, isShadow, shadowEffect, cssColor } from './foundation-controls.mjs';
+import { rounded, radiusBase, deriveRadii, colorOpacity, shadowSeed, deriveShadows, shadowCSS, isShadow, shadowEffect, cssColor, draftEffect } from './foundation-controls.mjs';
 
-export function createFoundationControls({ foundation, draft, resultFor, savedResult, modeFor, valueKey, escape, icon, previewCard, modeControls, updatePreview, selectable = () => '', selectClass = () => '' }) {
+export function createFoundationControls({ foundation, draft, resultFor, savedResult, modeFor, valueKey, escape, icon, previewCard, modeControls, updatePreview, selectable = () => '', selectClass = () => '', save = () => {} }) {
   const $ = id => document.getElementById(id);
   const label = name => name.split('/').slice(1).join(' ').replaceAll('-', ' ').replace(/^./, c => c.toUpperCase());
   const unit = (id, text, value, suffix, attrs = '', data = '') => `<span class="unit-input"><input id="${id}" aria-label="${escape(text)}" type="number" value="${rounded(value)}" ${attrs} ${data}/><span>${suffix}</span></span>`;
@@ -141,6 +141,7 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
       else draft.values.set(valueKey(row.name, modeFor(f)), row.value);
     }
     update();
+    save('radius base', [{ op: 'apply', recipe: 'radius-base', rem: value }]);
   }
   $('inspector').addEventListener('input', event => {
     const target = event.target;
@@ -150,10 +151,12 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     else if (target.dataset.radiusStep) {
       const f = foundation('shape');
       draft.values.set(valueKey(target.dataset.radiusStep, modeFor(f)), Number(target.value) * 16); update();
+      save(`radius ${target.dataset.radiusStep}`, [{ op: 'set', name: target.dataset.radiusStep, mode: modeFor(f), value: Number(target.value) * 16 }]);
     } else if (target.dataset.shadowSeed) {
       const key = target.hasAttribute('data-opacity') ? 'opacity' : target.dataset.shadowSeed;
       if (key === 'blur' && Number(target.value) < 0) return;
       draft.settings.set('shadow-seed', { ...seed(), [key]: key === 'color' ? target.value : Number(target.value) }); update();
+      save('shadow seed', [{ op: 'apply', recipe: 'shadow-seed', seed: seed() }]);
     }
   });
   $('inspector').addEventListener('click', event => {
@@ -162,7 +165,12 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     const trigger = event.target.closest('[data-shadow-edit]');
     if (trigger) { editorName = trigger.dataset.shadowEdit; triggerId = trigger.id; renderEditor(); openDialog($('shadow-editor')); positionEditor(); $('shadow-editor-close').focus(); }
   });
-  function storeLayers(layers) { draft.settings.set(overrideKey(editorName), layers); update(); for (const reset of [$('shadow-reset-step'), $('item-shadow-reset')]) if (reset) reset.hidden = false; }
+  function storeLayers(layers) {
+    draft.settings.set(overrideKey(editorName), layers); update();
+    // Shadow layers are edited here; any blur effects on the style are kept as they are.
+    const others = (styleForEditor()?.effects || []).filter(e => !isShadow(e));
+    save(`shadow ${editorName}`, [{ op: 'set', kind: 'effectStyle', name: editorName, fields: { effects: [...layers.map(draftEffect), ...structuredClone(others)] } }]);
+    for (const reset of [$('shadow-reset-step'), $('item-shadow-reset')]) if (reset) reset.hidden = false; }
   // Layer controls live in the floating editor or in the panel, so listen at the document.
   const inLayers = target => target.closest?.('#shadow-editor-layers, #item-shadow-layers');
   document.addEventListener('input', event => {

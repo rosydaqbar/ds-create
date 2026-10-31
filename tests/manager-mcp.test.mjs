@@ -23,7 +23,7 @@ async function awaitJob(f,status){for(let i=0;i<100;i++){const r=await f.flow();
 
 test('real SDK stdio lifecycle: portable tools, browser queue, exclusive lease, progress, unchanged approval and safe retry',async t=>{
  const f=await fixture(t),a=await client(t,f),b=await client(t,f);
- const tools=await a.c.listTools();assert.deepEqual(tools.tools.map(x=>x.name).sort(),['ds_create_prepare','ds_create_prepare_cancel','ds_create_prepare_compile','ds_create_prepare_finish','ds_create_prepare_progress','ds_create_prepare_status','ds_create_prepare_wait','ds_create_publish','ds_create_publish_cancel','ds_create_publish_finish','ds_create_publish_preflight','ds_create_publish_progress','ds_create_publish_status','ds_create_wait']);
+ const tools=await a.c.listTools();assert.deepEqual(tools.tools.map(x=>x.name).sort(),['ds_create_change_requests','ds_create_items_change','ds_create_items_diff','ds_create_items_get','ds_create_items_history','ds_create_items_list','ds_create_items_restore','ds_create_prepare','ds_create_prepare_cancel','ds_create_prepare_compile','ds_create_prepare_finish','ds_create_prepare_progress','ds_create_prepare_status','ds_create_prepare_wait','ds_create_publish','ds_create_publish_cancel','ds_create_publish_finish','ds_create_publish_preflight','ds_create_publish_progress','ds_create_publish_status','ds_create_wait']);
  assert.equal((await a.good('ds_create_publish',{session:'fixture'})).status,'waiting');
  const queued=await queue(f),ledgerFile=path.join(f.output,'ds-create-ledger.json'),before=await readFile(ledgerFile,'utf8'),request=await readFile(path.join(f.output,'manager/jobs',queued.job.id,'request.json'),'utf8');
  assert.equal((await f.flow()).job.status,'queued');
@@ -74,7 +74,8 @@ test('completion text cannot fake success; only matching confirmed fixture outpu
  await writeFile(path.join(f.output,'figma/figma-variables.json'),JSON.stringify({...draft,format:'ds-create/figma-variables@1'}));
  await writeFile(path.join(f.output,'figma/audit-file.json'),JSON.stringify({mode:'file',sourceHash:f.initial.figma.hash,result:{fail:0},simulation:true}));
  const file=path.join(f.output,'ds-create-ledger.json'),l=await json(file);l.sequence=l.sequence.map(e=>({...e,status:'done'}));l.foundationReview.figmaHash=f.initial.figma.hash;l.tokens={audit:{fail:0,file:'figma/audit-file.json'}};await writeFile(file,JSON.stringify(l));
- assert.equal((await a.good('ds_create_publish_finish',{...creds(r),outcome:'completed',message:'Fixture export and audit saved.'})).status,'succeeded');assert.equal((await f.flow()).build.available,true);
+ assert.equal((await a.good('ds_create_publish_finish',{...creds(r),outcome:'completed',message:'Fixture export and audit saved.'})).status,'succeeded');
+ const baseline=await json(path.join(f.output,'figma/synced.json'));assert.equal(baseline.format,'ds-create/figma-baseline@1');assert.equal(baseline.revision,(await json(path.join(f.output,'foundations.json'))).revision);assert.equal((await f.flow()).build.available,true);
 });
 test('a pending MCP tool receives a new browser request without typing into another chat',async t=>{
  const f=await fixture(t),a=await client(t,f);const pending=a.good('ds_create_publish',{session:'fixture',wait_seconds:5});await new Promise(r=>setTimeout(r,100));await queue(f);

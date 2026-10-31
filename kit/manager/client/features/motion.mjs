@@ -10,7 +10,7 @@ export function motionPlan(duration, easing, reduced, distance) {
       [{ opacity: 1, transform: 'translateX(0px)' }, { opacity: 1, transform: `translateX(${travel}px)` }] };
 }
 
-export function createMotionPreview({ draft, resultFor, modeFor, escape, previewCard, modeControls, renderAll, renderCanvas, selectable = () => '', selectClass = () => '' }) {
+export function createMotionPreview({ draft, resultFor, modeFor, escape, previewCard, modeControls, renderAll, renderCanvas, selectable = () => '', selectClass = () => '', save = () => {} }) {
   const active = new Map();
   const media = matchMedia('(prefers-reduced-motion: reduce)');
   const short = name => name.split('/').at(-1).replaceAll('-', ' ');
@@ -102,7 +102,7 @@ export function createMotionPreview({ draft, resultFor, modeFor, escape, preview
     if (e.target.id !== 'motion-duration-ms') return false;
     if (!current || !e.target.validity.valid || e.target.value === '') return true;
     const m = model(current), ms = milliseconds(e.target.value);
-    if (m.d && ms !== null) { draft.settings.set(durationKey(m.d.name, m.mode), ms); renderCanvas(); }
+    if (m.d && ms !== null) { draft.settings.set(durationKey(m.d.name, m.mode), ms); renderCanvas(); save(`${m.d.name} ${m.mode}`, [{ op: 'set', name: m.d.name, mode: m.mode, value: ms / 1000 }]); }
     return true;
   }
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });

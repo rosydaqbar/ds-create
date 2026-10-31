@@ -1,3 +1,4 @@
+import {writeBaseline} from '../foundations/baseline.mjs';
 import {PublishError, inputFreshness, selectedInputSlug, snapshotInputs, withJobLock, writeJSON} from './files.mjs';
 import {access, mkdir, open, readFile, realpath} from 'node:fs/promises';
 import path from 'node:path';
@@ -215,6 +216,8 @@ export async function mcpPublishAction({outputDir,workspace,id,attempt,owner,lea
    const diff=compareFoundations(draft,actual);await writeJSON(path.join(f.dir,'foundation-diff.json'),{...diff,sourceHash:f.request.hash});
    const targetKey=value=>{try{return new URL(value).pathname.split('/')[2];}catch{return null;}};
    if(state.status==='error'||!state.initDone||state.source.review!=='synced'||state.source.hash!==f.request.hash||state.summary.audit!=='Passed'||targetKey(state.figmaUrl)!==targetKey(f.request.figmaUrl)||!diff.match||audit?.mode!=='file'||audit.sourceHash!==f.request.hash||audit.result?.fail!==0){status='failed';detail='Completion rejected: matching confirmed Figma export and a passing source-bound full file audit are required.';}
+   // What Figma now holds becomes the baseline that local changes are compared against.
+   if(status==='succeeded')await writeBaseline(outputDir,draft);
   }
   await writeJSON(f.statusFile,{...job,status,message:detail,finished:new Date().toISOString()});return {status};
  });

@@ -32,3 +32,18 @@ test('change requests keep one card per canvas item, with notes the agent can re
   await changes.update({ action: 'remove', id: first.id });
   assert.deepEqual(await changes.list(), []);
 });
+
+test('done marks a request and keeps it out of the prompt', async t => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'ds-changes-')); t.after(() => rm(dir, { recursive: true, force: true }));
+  const changes = createChangeRequests({ outputDir: dir });
+  const context = { page: 'Shape', section: 'Radius', item: 'radius/control' };
+  const { id } = await changes.update({ action: 'add', route: 'shape', key: 'radius/control', context });
+  await changes.update({ action: 'add', route: 'shape', key: 'radius/sm', context: { ...context, item: 'radius/sm' } });
+  await changes.update({ action: 'done', id, revision: 5 });
+  const [done] = await changes.list();
+  assert.equal(done.status, 'done');
+  assert.equal(done.doneRevision, 5);
+  const text = changes.prompt(await changes.list(), { session: 's', workspace: '/w' });
+  assert.doesNotMatch(text, /radius\/control/);
+  assert.match(text, /1\. radius\/sm/);
+});

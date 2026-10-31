@@ -6,6 +6,8 @@ Sets up the baseline of a design system: the inputs are read, the basics are set
 
 **Load:** the global set (`SKILL.md` §1), `workspace/input/README.md`, `workflow/QUESTIONNAIRE.md` §1, §2, §3, §9 and §10, `specs/SYSTEM.md` Part C, `specs/guidance/02-tokens.md` and `workflow/MANAGER.md`. For an existing file, also `workflow/INITIATOR.md` Part B §2 (*Inspect first*).
 
+**Figma off.** A chat-led init requires Figma, because it ends with an audited Figma file. When the user wants a system without Figma, start it with `ds-create init-web --no-figma` instead.
+
 **Order.** Steps 0, 1 and 2 run before anything is asked. The first reply is always the start report (§2), and no question comes before it.
 
 # 0. Take in what came with the command

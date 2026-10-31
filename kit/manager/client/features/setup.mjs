@@ -119,6 +119,7 @@ export function setupWeb({ onChange = () => {}, progress = () => null } = {}) {
       const r=await fetch('/api/setup-flow',{cache:'no-store',signal:AbortSignal.timeout(builderSettings.network.readTimeoutMs)});if(!r.ok)throw new Error();
       if(networkFailed){networkFailed=false;error('');}
       const next=await r.json(),s=JSON.stringify(next),previous=flow?.status;flow=next;
+      if(document.activeElement!==$('setup-figma'))$('setup-figma').checked=next.figma!==false;
       if(s!==signature){signature=s;paint();onChange();if(dialog.open && previous!==next.status && next.status==='ready')$('setup-review').focus();}
       else preparation.sync(flow,busy);
     }catch{networkFailed=true;preparation.disconnected();if(dialog.open)error('Connection lost. Your entries remain here. Reopen Context when Builder reconnects.');}
@@ -167,6 +168,8 @@ export function setupWeb({ onChange = () => {}, progress = () => null } = {}) {
   function back(){if(busy)return;error('');step=1;paint();dialog.scrollTop=0;$('setup-project-name').focus({preventScroll:true});}
   $('setup-back').addEventListener('click',back);
   $('setup-stepper').addEventListener('click',e=>{const button=e.target.closest('[data-step-index]');if(button)(button.dataset.stepIndex==='0'?back:advance)();});
+  // Use Figma applies at once, like any switch; the setting lives in the ledger, not in the saved context.
+  $('setup-figma').addEventListener('change',e=>post('/api/settings',{figma:e.target.checked}));
   $('setup-initial').addEventListener('submit',e=>{
     e.preventDefault();if(step===1){advance();return;}
     if(!validateGeneral()){step=1;paint();return;}

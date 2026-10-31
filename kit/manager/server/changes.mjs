@@ -44,6 +44,10 @@ export function createChangeRequests({ outputDir }) {
       const request = find(input.id);
       request.notes = request.notes.filter(n => n.id !== input.noteId);
       request.updated = now;
+    } else if (input?.action === 'done') {
+      const request = find(input.id);
+      if (!Number.isInteger(input.revision) || input.revision < 1) throw new PublishError('Send the revision that applied this change.', 400);
+      Object.assign(request, { status: 'done', doneRevision: input.revision, updated: now });
     } else if (input?.action === 'remove') {
       find(input.id);
       data.requests = data.requests.filter(r => r.id !== input.id);
@@ -52,7 +56,8 @@ export function createChangeRequests({ outputDir }) {
     return { requests: data.requests };
   }
   // A paste-ready prompt for any agent, in the same shape as the continuation prompt.
-  function prompt(requests, { session, workspace }) {
+  function prompt(all, { session, workspace }) {
+    const requests = all.filter(r => r.status !== 'done');
     if (!requests.length) return '';
     const items = requests.map((r, i) => {
       const where = [r.context.page, r.context.section, r.context.group].filter(Boolean).join(' › ');
