@@ -2,6 +2,7 @@
 // It never touches files. Structural errors throw ItemError; contract and contrast problems come back as warnings.
 import {validateFoundations, validatePlan, contrastReport} from './validate.mjs';
 import {paletteRamp} from './compiler.mjs';
+import {partRefs, replaceInPart} from '../parts/refs.mjs';
 import {deriveRadii, shadowSeed, deriveShadows, isShadow, cssColor, draftEffect} from '../client/features/foundation-controls.mjs';
 
 export class ItemError extends Error { constructor(message) { super(message); this.status = 400; } }
@@ -211,6 +212,11 @@ export function isWide(impact, ops = [], rules = null) {
   return reasons.length ? reasons.join('; ') : null;
 }
 
+// Parts built on a renamed or replaced item point at its new name in the same revision.
+function partsFollow(ctx, from, to) {
+  for (const [id, part] of Object.entries(ctx.parts)) { const next = replaceInPart(part, from, to); if (next) { ctx.parts[id] = next; ctx.partsChanged.add(id); } }
+}
+
 function applyOne(draft, plan, op, changes, ctx) {
   const kind = op.kind || 'variable';
   if (kind === 'rules') {
@@ -270,19 +276,22 @@ function applyOne(draft, plan, op, changes, ctx) {
       replaceReferences(draft, op.from, op.to);
     }
     planRename(plan, op.from, op.to);
+    partsFollow(ctx, op.from, op.to);
     changes.push({kind, name: op.to, action: 'rename', from: op.from, to: op.to});
   } else if (op.op === 'delete') {
     itemOf(draft, kind, op.name);
+    const partUsers = Object.keys(ctx.parts).filter(id => partRefs(ctx.parts[id], op.name).length);
     if (kind === 'variable') {
       const refs = referencesTo(draft, op.name).filter(r => !(r.kind === 'variable' && r.name === op.name));
-      const users = new Set(refs.map(r => r.kind + ':' + r.name)).size;
+      const users = new Set(refs.map(r => r.kind + ':' + r.name)).size + partUsers.length;
       if (users && !op.replaceWith) throw new ItemError(`${op.name} is used by ${users} item${users === 1 ? '' : 's'}; pass replaceWith to delete it.`);
       if (op.replaceWith) {
         const target = draft.variables.find(v => v.name === op.replaceWith), source = draft.variables.find(v => v.name === op.name);
         if (!target || target.type !== source.type) throw new ItemError(`${op.replaceWith} cannot replace ${op.name}: it is missing or a different type.`);
         replaceReferences(draft, op.name, op.replaceWith);
+        partsFollow(ctx, op.name, op.replaceWith);
       }
-    }
+    } else if (partUsers.length) throw new ItemError(`${op.name} is used by ${partUsers.length} item${partUsers.length === 1 ? '' : 's'}; rename it instead, or change those Parts first.`);
     draft[lists[kind]] = draft[lists[kind]].filter(x => x.name !== op.name);
     planDelete(plan, op.name);
     changes.push({kind, name: op.name, action: 'delete'});
@@ -321,10 +330,10 @@ export function draftWarnings(draft, plan, rules = null) {
   return warnings;
 }
 
-export function applyOps(draft, ops, {plan = null, rules = null} = {}) {
+export function applyOps(draft, ops, {plan = null, rules = null, parts = {}} = {}) {
   if (!Array.isArray(ops) || !ops.length) throw new ItemError('Send at least one op.');
   const next = structuredClone(draft), nextPlan = plan ? structuredClone(plan) : null, changes = [];
-  const ctx = {rules: rules ? structuredClone(rules) : null, broken: [], ramps: []};
+  const ctx = {rules: rules ? structuredClone(rules) : null, broken: [], ramps: [], parts: structuredClone(parts || {}), partsChanged: new Set()};
   for (const op of ops) for (const step of expand(next, op, ctx)) applyOne(next, nextPlan, step, changes, ctx);
   // Primitives the store created and nothing uses any more leave in the same revision; preparation's stay.
   if (ctx.rules?.created) ctx.rules.created = ctx.rules.created.filter(name => {
@@ -336,5 +345,7 @@ export function applyOps(draft, ops, {plan = null, rules = null} = {}) {
   });
   const check = validateFoundations(next);
   if (!check.valid) throw new ItemError(check.errors.slice(0, 5).join(' '));
-  return {draft: next, plan: nextPlan, rules: ctx.rules, changes, warnings: draftWarnings(next, nextPlan, ctx.rules), impact: {...measureImpact(draft, next), rulesBroken: ctx.broken, ramps: ctx.ramps}};
+  for (const id of ctx.partsChanged) changes.push({kind: 'part', name: id, action: 'set'});
+  const changedParts = Object.fromEntries([...ctx.partsChanged].map(id => [id, ctx.parts[id]]));
+  return {draft: next, plan: nextPlan, rules: ctx.rules, parts: changedParts, changes, warnings: draftWarnings(next, nextPlan, ctx.rules), impact: {...measureImpact(draft, next), rulesBroken: ctx.broken, ramps: ctx.ramps}};
 }

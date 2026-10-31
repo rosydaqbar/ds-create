@@ -15,7 +15,7 @@ const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
 const command = args[0];
 let slug = arg('--slug');
 const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|build [--slug {slug}] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
+const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|build|tokens|approve|compare [--slug {slug}] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -66,7 +66,7 @@ async function main() {
     if(command==='sessions'||sessions.length){console.log(JSON.stringify({action:command==='sessions'?'list':'choose-session',sessions,newCommand:'ds-create init-web --new'},null,2));return;}
   }
   if(command==='init-web'&&!slug)slug=`session-${randomUUID()}`;
-  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'build'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
+  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'build', 'tokens', 'approve', 'compare'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
   if (command === 'wait') {
     const { waitForPreparation } = await import('./server/setup.mjs');
     const controller = new AbortController(), stop = () => controller.abort();
@@ -88,10 +88,48 @@ async function main() {
     if (writes) await mkdir(dir, { recursive: true });
     if (await realpath(dir) !== path.join(base, slug, 'manager')) throw new Error('Manager output must stay inside the selected system folder.');
   } catch (e) { if (e.code !== 'ENOENT' || writes) throw e; }
+  // The site's token file from the local files; works without a running Builder. Figma page ids come along when
+  // a Figma export exists, so "Open in Figma" links work.
+  if (command === 'tokens') {
+    const out = arg('--out');
+    if (!out) throw new Error('Give the file to write with --out path.');
+    const { toTokenExport } = await import('./foundations/export.mjs');
+    const { readParts, PART_FORMAT } = await import('./parts/files.mjs');
+    const draft = await readJSON(path.join(output, 'foundations.json'));
+    if (!draft) throw new Error(`No saved foundations for ${slug}.`);
+    const { partStatus } = await import('./parts/files.mjs');
+    const saved = await readParts(output), stale = Object.values(saved).find(p => partStatus(p, draft) !== 'ready');
+    // A Part built on older foundations could point at names that are gone; prepare it first.
+    if (stale) throw new Error(`${stale.name} is outdated; prepare it again before writing tokens.`);
+    const parts = Object.fromEntries(Object.entries(saved).filter(([, p]) => p.format === PART_FORMAT));
+    const figma = await readJSON(path.join(output, 'figma/figma-variables.json'));
+    await mkdir(path.dirname(path.resolve(out)), { recursive: true });
+    await writeFile(path.resolve(out), JSON.stringify(toTokenExport(draft, parts, { pages: figma?.pages }), null, 2) + '\n');
+    console.log(JSON.stringify({ written: path.resolve(out), parts: Object.keys(parts) }));
+    return;
+  }
+  // Is Figma behind the local files? Compares the saved Figma export with foundations.json plus the Part tokens.
+  // Exit 1 when it differs or there is no export to compare.
+  if (command === 'compare') {
+    const { compareFoundations } = await import('./foundations/compare.mjs');
+    const { withParts } = await import('./foundations/baseline.mjs');
+    const { readParts } = await import('./parts/files.mjs');
+    const draft = await readJSON(path.join(output, 'foundations.json')), figma = await readJSON(path.join(output, 'figma/figma-variables.json'));
+    if (!draft) throw new Error(`No saved foundations for ${slug}.`);
+    if (!figma) { console.log(JSON.stringify({ match: null, reason: 'No Figma export yet: figma/figma-variables.json is missing.' })); process.exitCode = 1; return; }
+    const local = withParts(draft, await readParts(output)), { differences } = compareFoundations(local, figma);
+    // Figma keeps Part tokens the files dropped (a removed size, a deleted Part); those are differences too.
+    const names = new Set(local.variables.map(v => v.name));
+    for (const v of figma.variables || []) if (v.collection === 'Components' && !names.has(v.name)) differences.push(`Extra in Figma: ${v.name}`);
+    const match = !differences.length;
+    console.log(JSON.stringify({ match, differences }));
+    if (!match) process.exitCode = 1;
+    return;
+  }
   // --no-figma keeps this session out of Figma (ledger flags.figma); Builder's Use Figma switch can turn it back on.
   if (command === 'init-web' && args.includes('--no-figma')) await writeFigmaSetting(output, false);
   // The user decides; the agent carries out the matching Builder action through the running Builder.
-  if (['publish', 'retry', 'fonts', 'parts', 'build'].includes(command)) {
+  if (['publish', 'retry', 'fonts', 'parts', 'build', 'approve'].includes(command)) {
     const runtime = await activeRuntime(dir);
     if (!runtime) throw new Error('DS Create Builder is not running for this session. Run init-web --slug first.');
     const get = async route => { const r = await fetch(runtime.url + route, { cache: 'no-store' }); if (!r.ok) throw new Error(`${route}: ${r.status}`); return r.json(); };
@@ -105,6 +143,10 @@ async function main() {
       if (!figmaUrl) throw new Error('Give the approved Figma file with --figma URL.');
       if (flow.figma.reason) throw new Error(flow.figma.reason);
       console.log(JSON.stringify(await post('/api/publish-figma', { hash: flow.figma.hash, figmaUrl }, flow.csrfToken)));
+    } else if (command === 'approve') {
+      // Approves the saved foundations exactly as Builder's button does; run it only after the user approved them.
+      const s = await get('/api/state');
+      console.log(JSON.stringify(await post('/api/foundations-approve', { hash: s.source?.hash }, s.csrfToken)));
     } else if (command === 'parts') {
       const s = await get('/api/state');
       console.log(JSON.stringify(await post('/api/parts-prepare', { ids: arg('--ids') ? arg('--ids').split(',') : (s.parts || []).map(p => p.id) }, s.csrfToken)));
@@ -147,7 +189,7 @@ async function main() {
     const state = await getState(output);
     const pointer = await readJSON(path.join(dir, 'figma-job.json'));
     const job = /^[0-9a-f-]{36}$/.test(pointer?.id || '') ? await readJSON(path.join(dir, 'jobs', pointer.id, 'status.json')) : null;
-    console.log(JSON.stringify({ running: !!active, url: active?.url || null, status: state.status, initDone: state.initDone, source: state.source, setup: state.setup,
+    console.log(JSON.stringify({ running: !!active, url: active?.url || null, status: state.status, initDone: state.initDone, source: state.source, buildGate: state.buildGate, setup: state.setup,
       publishJob: job ? { id: job.id, status: job.status, message: job.message } : null, ...state.summary }, null, 2));
     return;
   }

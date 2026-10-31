@@ -5,6 +5,7 @@ import {mkdir, readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {writeJSON} from '../server/files.mjs';
 import {readFigmaSetting} from '../server/settings.mjs';
+import {readParts} from '../parts/files.mjs';
 
 const lists = {variables: 'variable', textStyles: 'textStyle', effectStyles: 'effectStyle', gridStyles: 'gridStyle'};
 const sorted = value => Array.isArray(value) ? value.map(sorted) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(k => [k, sorted(value[k])])) : value;
@@ -27,9 +28,18 @@ export function itemHashes(draft) {
   return {items, groups: Object.fromEntries(Object.entries(members).map(([group, list]) => [group, hash(list.sort())]))};
 }
 
-export async function writeBaseline(outputDir, draft) {
+// Part tokens join the draft as the Components collection, so they diff like any other variable.
+export function withParts(draft, parts = {}) {
+  const tokens = Object.values(parts).flatMap(p => p?.format === 'ds-create/part@2' ? p.tokens || [] : []);
+  if (!tokens.length) return draft;
+  return {...draft, collections: [...draft.collections.filter(c => c.name !== 'Components'), {name: 'Components', modes: ['Value']}], variables: [...draft.variables, ...tokens]};
+}
+
+// components: the Part tokens confirmed in Figma with this baseline (none until Parts are built there).
+export async function writeBaseline(outputDir, draft, parts = {}) {
   await mkdir(path.join(outputDir, 'figma'), {recursive: true});
-  await writeJSON(path.join(outputDir, 'figma/synced.json'), {format: 'ds-create/figma-baseline@1', revision: draft.revision, time: new Date().toISOString(), draft, hashes: itemHashes(draft)});
+  const full = withParts(draft, parts);
+  await writeJSON(path.join(outputDir, 'figma/synced.json'), {format: 'ds-create/figma-baseline@1', revision: draft.revision, time: new Date().toISOString(), draft, components: full.variables.filter(v => v.collection === 'Components'), hashes: itemHashes(full)});
 }
 
 function fieldChanges(before, after) {
@@ -65,6 +75,7 @@ export async function syncState(outputDir) {
   const [draft, base, figma] = await Promise.all([readJSON(path.join(outputDir, 'foundations.json')), readJSON(path.join(outputDir, 'figma/synced.json')), readFigmaSetting(outputDir)]);
   const empty = {added: [], changed: [], renamed: [], deleted: []};
   if (!figma || !draft || base?.format !== 'ds-create/figma-baseline@1') return {state: 'local', revision: draft?.revision ?? null, baselineRevision: null, changes: 0, diff: empty};
-  const diff = localDiff(base.draft, draft), changes = diff.added.length + diff.changed.length + diff.renamed.length + diff.deleted.length;
+  const confirmed = base.components?.length ? {...base.draft, collections: [...base.draft.collections, {name: 'Components', modes: ['Value']}], variables: [...base.draft.variables, ...base.components]} : base.draft;
+  const diff = localDiff(confirmed, withParts(draft, await readParts(outputDir))), changes = diff.added.length + diff.changed.length + diff.renamed.length + diff.deleted.length;
   return {state: changes ? 'local-changes' : 'in-sync', revision: draft.revision, baselineRevision: base.revision, changes, diff};
 }

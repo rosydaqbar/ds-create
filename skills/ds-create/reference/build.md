@@ -8,11 +8,11 @@ Asks four questions, then builds exactly the pages the answers allow, in the fix
 
 Before any question, check:
 - `workspace/input/{slug}/answers/01-init.md` exists;
-- the ledger marks steps 1–4 `done`;
-- for a local draft/review record, `node kit/manager/cli.mjs status --slug {slug}` reports `initDone: true` and `source.review: synced` (current saved hash approved and generated/audited in Figma); legacy export-only baselines retain their existing gate;
+- the ledger marks step 1 `done`, and steps 2–4 too when the round includes Figma;
+- for a round with the site, `node kit/manager/cli.mjs status --slug {slug}` reports `buildGate.site.ready: true`; for a round with Figma, `buildGate.figma.ready: true`. Figma completion is required only when the round includes Figma. The site needs only foundations approved in Builder (Approve foundations, or `node kit/manager/cli.mjs approve --slug {slug}` after the user approved them). Figma also needs them published to Figma. Legacy export-only baselines keep their existing gate;
 - the platform is settled (Web, App, or Web and App).
 
-If any is missing, stop with one line: "Init isn't done for {slug}. Run `/ds-create init` first." Then say what is missing.
+If any is missing, stop with one line: "Init isn't done for {slug}. Run `/ds-create init` first." Then say what is missing, using the `buildGate` reason when that is what blocks the round.
 
 Re-read the ledger. When an earlier round left a page `building` or `qa`, offer to finish it before new pages.
 
@@ -24,13 +24,16 @@ Re-read the ledger. When an earlier round left a page `building` or `qa`, offer 
 | --- | --- |
 | `fast-mode`, `fast` · `default` | Q1 engine (the user's own choice, so YOLO rules don't apply) |
 | `--review` · `--no-review` | Q1's F2 checkpoint (fast mode); without either, YOLO answers it, otherwise ask |
-| `--no-gl` | no Guidelines frames in Figma (ledger `flags.guidelines: false`, §5), and Q3 = Figma only: the docs site is skipped, even when `--site` is also passed |
+| `--no-gl` | no Guidelines frames in Figma (ledger `flags.guidelines: false`, §5), and Figma only: the docs site is skipped, even when `--site` is also passed |
 | `--upto foundations\|parts\|components\|all` · `--pages 2.1,2.5` | Q2 how far |
-| `--figma-only` · `--site` | Q3 where |
-| `--no-figma` | Figma off for this session (ledger `flags.figma: false`). A build without Figma is not available yet: say so in one line and stop, or offer to turn Figma back on |
+| `--figma-only` | Figma only: no docs site this round |
+| `--no-figma` | the docs site only, and Figma off for this session (ledger `flags.figma: false`) |
+| `--site` | the site and Figma, the same as no flag (kept for older prompts) |
 | `--yolo` · `--step` | Q4 pace |
 
 Ask only the questions no flag answers, in one message. A word that isn't a flag gets one short question.
+
+**Outputs follow from the flags, not from a question.** With no flag, a round builds the docs site and Figma. `--no-figma`, or a session whose Figma setting is off, builds the site only. `--figma-only` and `--no-gl` build Figma only. Both outputs read the same local files, so neither waits for the other.
 
 Ask the remaining questions in this order, one message each, or all in one message when the user prefers. Show what the inputs or an earlier round already answered.
 
@@ -64,22 +67,20 @@ Rules:
 - **Existing file.** For each page in scope that already exists, also ask its action: Keep, Audit, Improve, Refactor, Rebuild, Replace or Skip (`workflow/QUESTIONNAIRE.md` §4).
 - **Documentation depth** (`workflow/QUESTIONNAIRE.md` §11): ask only when the user brings it up. The default is every extra.
 
-## Q3 · Where
+## The site's kind
 
-> **Figma only, or Figma and the docs site?**
-
-The kind of site follows from init:
+There is no Q3. The kind of site follows from init:
 - Web gets the React and Tailwind site and package (`workflow/WEB.md`).
 - App gets React Native previews with React Native, Swift and Kotlin code (`workflow/APP.md`).
 - Web and App gets both.
 
-The site covers the same pages as Q2. Publishing (step 26) happens only when the user asks for it. A `--no-gl` round is always Figma only: Q3 isn't asked, and `--site` is ignored (the summary says so in one line).
+The site covers the same pages as Q2. Publishing (step 26) happens only when the user asks for it. A `--no-gl` round is always Figma only, and `--site` is ignored (the summary says so in one line).
 
 ## Q4 · Pace
 
 > **YOLO everything, or one page at a time?** One page at a time stops after each page for your OK.
 
-In YOLO the AI also answers Q2 and Q3 when the user left them open, as AI decisions with reasons (`SKILL.md` §2.3). Q1 stays the user's.
+In YOLO the AI also answers Q2 when the user left it open, as AI decisions with reasons (`SKILL.md` §2.3). Q1 stays the user's.
 
 # 3. Summary and answers
 
@@ -88,7 +89,7 @@ Show the summary and wait for the user's OK. It lists:
 - the library steps, then the docs steps, in build order, with the added dependencies and the sets added for a page marked;
 - the page actions on an existing file;
 - the references;
-- Figma only, or with the site and its kind;
+- the outputs (site, Figma or both, from the flags) and the kind of site;
 - the pace;
 - every AI decision.
 
@@ -101,7 +102,7 @@ Then:
 
 The steps are those of `workflow/INITIATOR.md` Part B §6. Steps 1–4 belong to init.
 
-Every round runs the library phase before the documentation phase: the sets a page shows exist before the page is drawn.
+In Figma, every round runs the library phase before the documentation phase: the sets a page shows exist before the page is drawn.
 
 | Answer | Steps that run | Steps skipped |
 | --- | --- | --- |
@@ -111,8 +112,9 @@ Every round runs the library phase before the documentation phase: the sets a pa
 | Q2 = Everything | + Sections and Layouts sets at 9–10 · + 18 Sections · 19 Layouts · 20 Screens | — |
 | Q2 = named pages | 5, 6 and 11 for those pages; the library steps of those pages and of every set they show or contain; then each page's docs step | every other page |
 | Q1 = Fast | steps 11–20 follow `workflow/FAST.md`; steps 5–10 always use the standard engine | — |
-| Q3 = Figma and site | 22 site setup · 23 site pages · 24 foundation and guidance site pages · 25 build and package | 26 until the user asks |
-| Q3 = Figma only, or `--no-gl` | — | 22–26 |
+| site in the round (no flag, `--site`, `--no-figma`) | 22 site setup · 23 site pages · 24 foundation and guidance site pages · 25 build and package | 26 until the user asks |
+| Figma only (`--figma-only`, `--no-gl`) | — | 22–26 |
+| site only (`--no-figma`, or Figma off) | — | 5–21 |
 | (always) | 21 closing step: the plugin data is cleared in the last round; a round that leaves pages for later keeps it (`workflow/GOTCHAS.md` G8) | — |
 
 **The sets a round needs.** Before the summary, list every set the round's doc pages show: their Overview compositions, Guidelines examples and visuals, from each page file. Every such set gets its library step in this round, even when its own docs aren't in scope (01 Getting started shows `Button` and `Text field`, so a Foundations round builds those sets and the Parts they contain). Show them in the summary as "added for {page}". Their docs steps are added in the round that documents them.
@@ -120,6 +122,10 @@ Every round runs the library phase before the documentation phase: the sets a pa
 Steps 5, 6 and 11 run once per system: a later round reuses the page tree, the foundation assets and the Doc kit, and adds only the pages it needs. A step the ledger marks `done` is not run again unless the user asks.
 
 # 5. Build
+
+**Prepare the round's Parts first.** Before either output starts, prepare local files for the Parts the round needs: call `ds_create_parts_prepare` with their `ids` (or `node kit/manager/cli.mjs mcp ds_create_parts_prepare --json '{"session":"{slug}","ids":["button"]}'`). The part files are the source of truth for the sets; the site and Figma both read them. Only Button has a template so far. A page that needs a Part without a template is blocked in every output of the round: list it in the summary with the missing template.
+
+**Order.** For a round with both outputs, place the site steps (22–25) before the Figma steps (5–21) in `sequence`. Keep the existing step numbers. Within Figma, the library steps still come before the documentation steps. This order is a default, not a dependency; in fast mode the site may also overlap F1, as `workflow/FAST.md` §5 describes.
 
 Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 and its gates.
 
@@ -143,7 +149,9 @@ Work through `sequence` in order, following `workflow/INITIATOR.md` Part B §6 a
 
 **Fast mode generates only.** A fast round never audits and never stops to fix findings, in the library phase too. Page audits, the copy check and the QA lists run through `qa`, when the user asks.
 
-**Docs site.** With the site in scope (Q3), steps 22–25 follow `workflow/WEB.md`: `scripts/scope.mjs` fits the copied site to the round (W1), `scripts/export-diff.mjs` exports only the tokens that changed (W2). `npm run build` must pass. `npm run qa` is not run here.
+**Docs site.** With the site in the round, steps 22–25 follow `workflow/WEB.md`: `scripts/scope.mjs` fits the copied site to the round (W1), and `node kit/manager/cli.mjs tokens --slug {slug} --out {web}/tokens/figma-variables.json` writes the tokens from the local files (W2). Nothing is read from Figma for the site. `npm run build` must pass. `npm run qa` is not run here.
+
+**Figma.** With Figma in the round, the library steps draw every set from its part file: the `Components` variables are created exactly as the file says. At the end, one export saves `figma/figma-variables.json`; run the `tokens` command again so the site gets the page ids. Then run `node kit/manager/cli.mjs compare --slug {slug}`: `match: true` means Figma matches the local files. Any `differences` (exit code 1) are reported as "Figma is behind": the local files win, and Figma needs a sync. `match: null` means there is no export to compare; say so in the report.
 
 # 6. Report
 
@@ -153,6 +161,7 @@ End every round with:
 Built this round   {pages, each with its audit result; fast mode: not audited}
 Engine             {Default | Fast}; pages that fell back to Default: {list or none}
 Docs site          {not in scope | built at workspace/output/{slug}/web/ (npm run dev)}
+Figma              {not in scope | built; matches the local files | built; Figma is behind: {differences}}
 Still open         {pages not done, conflicts, spec gaps}
 Decided by the AI  {each with its reason, or none}
 QA                 hasn't run since these changes{; fast mode: no page is audited yet}. Run /ds-create qa?

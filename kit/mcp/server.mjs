@@ -12,6 +12,8 @@ import {cancelMcpJob, claimMcpJob, figmaPrompt, latestPublish, mcpPublishAction,
 import {cancelMcpPreparation, claimMcpPreparation, createSetupJobs, latestMcpPreparation, mcpPrepareAction, setupPrompt, waitForPreparation} from '../manager/server/setup.mjs';
 import {writeFoundationFastPlan} from '../manager/foundations/publish.mjs';
 import {createItemStore} from '../manager/foundations/store.mjs';
+import {createPartStore} from '../manager/parts/store.mjs';
+import {readParts} from '../manager/parts/files.mjs';
 import {listItems, getItems} from '../manager/foundations/query.mjs';
 import {syncState} from '../manager/foundations/baseline.mjs';
 import {createChangeRequests} from '../manager/server/changes.mjs';
@@ -22,7 +24,7 @@ const result=data=>({content:[{type:'text',text:JSON.stringify(data)}],structure
 const publicJob=job=>job?Object.fromEntries(['id','runner','status','hash','figmaUrl','message','started','updated','finished','progress','cancelRequested','cancelRequestedAt'].filter(k=>job[k]!==undefined).map(k=>[k,job[k]])):null;
 
 export function createDsCreateMcp(workspace){
- const server=new McpServer({name:'ds-create',version:'0.2.0'}, {instructions:'Operate only the selected local workspace. Item tools (ds_create_items_*) read and change the saved local foundations and never touch Figma; a wide change needs the user\'s agreement before you resend it with confirmed:true. Preparation claims saved context and stops at a validated local draft awaiting review; it has no Figma authorization. Publish claims an already approved Builder request; it does not write Figma itself. Use your configured Figma tools to carry out its exact instructions, report progress before writes and finish with real export/audit evidence. A queued job cannot wake an idle chat: hold ds_create_wait pending to receive Prepare and Publish clicks from Builder. Never change approvals or fabricate completed output.'});
+ const server=new McpServer({name:'ds-create',version:'0.2.0'}, {instructions:'Operate only the selected local workspace. Item tools (ds_create_items_*, ds_create_parts_prepare) read and change the saved local foundations and Parts and never touch Figma; a wide change needs the user\'s agreement before you resend it with confirmed:true. Preparation claims saved context and stops at a validated local draft awaiting review; it has no Figma authorization. Publish claims an already approved Builder request; it does not write Figma itself. Use your configured Figma tools to carry out its exact instructions, report progress before writes and finish with real export/audit evidence. A queued job cannot wake an idle chat: hold ds_create_wait pending to receive Prepare and Publish clicks from Builder. Never change approvals or fabricate completed output.'});
  const owner=randomUUID(),owned=new Map(),inflight=new Set(),shutdown=new AbortController();let closing=false,closingPromise;
  const tool=(name,description,schema,handler,readOnly=false)=>server.registerTool(name,{description,inputSchema:z.object(schema).strict(),annotations:{readOnlyHint:readOnly,destructiveHint:false,openWorldHint:false}},async(args,extra)=>{
   if(closing)return {content:[{type:'text',text:'MCP connection is closing.'}],isError:true};
@@ -120,21 +122,42 @@ export function createDsCreateMcp(workspace){
   const outputDir=await sessionOutput(workspace,args.session),current=await latestMcpPreparation(outputDir);return current?.jobId?cancelMcpPreparation(outputDir,current.jobId):{stopped:false};
  });
  // Item tools: read and change foundation items in the saved local files. None of them reads or writes Figma.
+ // The foundations plus one Part's tokens, so item helpers resolve them like any variable.
+ const partDraftOf=(draft,part)=>({...draft,collections:[...draft.collections,{name:'Components',modes:['Value']}],variables:[...draft.variables,...(part.tokens||[])]});
  const store=async args=>createItemStore({outputDir:await sessionOutput(workspace,args.session)});
  const itemOp=z.object({op:z.enum(['set','add','rename','delete','apply']),target:z.string()}).passthrough();
- tool('ds_create_items_list','List foundation items (variables and styles) from the saved local draft with resolved values per mode. Filter by domain (color, typography, space, shape, elevation, motion), collection, kind, type, name prefix or text. Does not touch Figma.',{session,domain:z.string().optional(),collection:z.string().optional(),kind:z.enum(['variable','textStyle','effectStyle','gridStyle']).optional(),type:z.string().optional(),prefix:z.string().optional(),query:z.string().max(200).optional(),limit:z.number().int().min(1).max(200).optional(),cursor:z.number().int().min(0).optional()},async args=>{
-  const {session:_,...filters}=args,{revision,draft}=await (await store(args)).read();return {revision,...listItems(draft,filters)};
+ const parts=async args=>createPartStore({outputDir:await sessionOutput(workspace,args.session)});
+ // target: "foundations" (default), "parts" (the Parts list) or "part:{id}" (one Part's tokens).
+ const target=z.string().regex(/^(foundations|parts|part:[a-z0-9-]+)$/).optional();
+ const partId=t=>t?.startsWith('part:')?t.slice(5):null;
+ tool('ds_create_items_list','List foundation items (variables and styles) from the saved local draft with resolved values per mode. Filter by domain (color, typography, space, shape, elevation, motion), collection, kind, type, name prefix or text. target "parts" lists the Parts with their status; target "part:{id}" lists that Part\'s tokens. Does not touch Figma.',{session,target,domain:z.string().optional(),collection:z.string().optional(),kind:z.enum(['variable','textStyle','effectStyle','gridStyle']).optional(),type:z.string().optional(),prefix:z.string().optional(),query:z.string().max(200).optional(),limit:z.number().int().min(1).max(200).optional(),cursor:z.number().int().min(0).optional()},async args=>{
+  const {session:_,target:t,...filters}=args;
+  if(t==='parts')return {parts:await (await parts(args)).list()};
+  const {revision,draft}=await (await store(args)).read();
+  if(partId(t)){const p=await (await parts(args)).read(partId(t));return {revision:p.revision,...listItems(partDraftOf(draft,p.part),{...filters,collection:'Components'})};}
+  return {revision,...listItems(draft,filters)};
  },true);
- tool('ds_create_items_get','Read named foundation items in full: definition, resolved value and alias chain per mode, and everything that uses them. The name "rules" returns the editable rules (discussion limits, palette ramps, contract names). Does not touch Figma.',{session,names:z.array(z.string().min(1)).min(1).max(50)},async args=>{
-  const {revision,draft,rules}=await (await store(args)).read(),names=args.names.filter(n=>n!=='rules');
-  const items=getItems(draft,names);return {revision,items:args.names.map(n=>n==='rules'?{kind:'rules',item:rules}:items[names.indexOf(n)])};
+ tool('ds_create_items_get','Read named items in full: definition, resolved value and alias chain per mode, and everything that uses them (Parts included). The name "rules" returns the editable foundation rules. With target "part:{id}", reads that Part\'s tokens; the name "part" returns the whole part file (inputs, overrides, properties). Does not touch Figma.',{session,target,names:z.array(z.string().min(1)).min(1).max(50)},async args=>{
+  const {revision,draft,rules}=await (await store(args)).read();
+  if(partId(args.target)){
+   const p=await (await parts(args)).read(partId(args.target)),names=args.names.filter(n=>n!=='part'),items=getItems(partDraftOf(draft,p.part),names);
+   return {revision:p.revision,items:args.names.map(n=>n==='part'?{kind:'part',item:p.part}:items[names.indexOf(n)])};
+  }
+  const names=args.names.filter(n=>n!=='rules'),items=getItems(draft,names,{parts:await readParts(await sessionOutput(workspace,args.session))});return {revision,items:args.names.map(n=>n==='rules'?{kind:'rules',item:rules}:items[names.indexOf(n)])};
  },true);
- tool('ds_create_items_change','Change foundation items in the saved local draft as one new revision: ops set, add, rename, delete and apply (recipes radius-base, space-base, shadow-seed, type-family, type-scale, palette-ramp); set kind "rules" edits the rules. Send expectedRevision from your last read. Dry-run first. When the result has wide set (status needs-discussion), show the impact to the user and resend with confirmed:true only after they agree. Does not touch Figma.',{session,expectedRevision:z.number().int().min(1),ops:z.array(itemOp).min(1).max(200),reason:z.string().trim().min(1).max(200),dryRun:z.boolean().optional(),confirmed:z.boolean().optional()},async args=>{
-  try{return {status:args.dryRun?'dry-run':'saved',...await (await store(args)).change({expectedRevision:args.expectedRevision,ops:args.ops,reason:args.reason,author:'mcp',dryRun:!!args.dryRun,confirmed:!!args.confirmed})};}
+ tool('ds_create_items_change','Change items in the saved local files as one new revision. Foundations (target "foundations"): ops set, add, rename, delete and apply (recipes radius-base, space-base, shadow-seed, type-family, type-scale, palette-ramp); set kind "rules" edits the rules. A Part (target "part:{id}"): set field "inputs" (its structure: sizes, emphases, tones, states, properties, token roles) or "overrides" (token choices), value null clears it; apply recipe "recompile". One target per save. Send expectedRevision from your last read. Dry-run first. When the result has wide set (status needs-discussion), show the impact to the user and resend with confirmed:true only after they agree. Does not touch Figma.',{session,expectedRevision:z.number().int().min(1),ops:z.array(itemOp).min(1).max(200),reason:z.string().trim().min(1).max(200),dryRun:z.boolean().optional(),confirmed:z.boolean().optional()},async args=>{
+  const targets=[...new Set(args.ops.map(o=>o.target))];
+  if(targets.length>1)throw new Error('Send one target per save.');
+  const input={expectedRevision:args.expectedRevision,ops:args.ops,reason:args.reason,author:'mcp',dryRun:!!args.dryRun,confirmed:!!args.confirmed};
+  try{return {status:args.dryRun?'dry-run':'saved',...(partId(targets[0])?await (await parts(args)).change({id:partId(targets[0]),...input}):await (await store(args)).change(input))};}
   catch(e){if(e.status===428)return {status:'needs-discussion',wide:e.wide,impact:e.impact,warnings:e.warnings,message:e.message};throw e;}
  });
- tool('ds_create_items_history','List recent revisions of the saved foundation draft with author, reason and op count, newest first. Does not touch Figma.',{session,limit:z.number().int().min(1).max(100).optional()},async args=>({revisions:await (await store(args)).history({limit:args.limit})}),true);
- tool('ds_create_items_restore','Restore an earlier revision of the foundation draft as a new revision; history is kept. Send expectedRevision from your last read. Does not touch Figma.',{session,revision:z.number().int().min(1),expectedRevision:z.number().int().min(1)},async args=>(await store(args)).restore({revision:args.revision,expectedRevision:args.expectedRevision,author:'mcp'}));
+ tool('ds_create_parts_prepare','Prepare Parts in the saved local files: compile each from its brand-agnostic template, the system\'s saved inputs and the approved foundations, validate, and save a new revision with its generated pack. Without ids, prepares every Part that is not current. Needs foundations approved in Builder. Does not touch Figma.',{session,ids:z.array(z.string().regex(/^[a-z0-9-]+$/)).min(1).max(100).optional()},async args=>{
+  const p=await parts(args),ids=args.ids||(await p.list()).filter(x=>x.status!=='ready').map(x=>x.id);
+  return ids.length?p.prepare({ids,author:'mcp',reason:'Prepare Parts'}):{prepared:[]};
+ });
+ tool('ds_create_items_history','List recent revisions of the saved foundation draft, or of one Part with target "part:{id}", with author, reason and op count, newest first. Does not touch Figma.',{session,target,limit:z.number().int().min(1).max(100).optional()},async args=>({revisions:partId(args.target)?await (await parts(args)).history(partId(args.target),{limit:args.limit}):await (await store(args)).history({limit:args.limit})}),true);
+ tool('ds_create_items_restore','Restore an earlier revision of the foundation draft, or of one Part with target "part:{id}", as a new revision; history is kept. Send expectedRevision from your last read. Does not touch Figma.',{session,target,revision:z.number().int().min(1),expectedRevision:z.number().int().min(1)},async args=>partId(args.target)?(await parts(args)).restore({id:partId(args.target),revision:args.revision,expectedRevision:args.expectedRevision,author:'mcp'}):(await store(args)).restore({revision:args.revision,expectedRevision:args.expectedRevision,author:'mcp'}));
  tool('ds_create_items_diff','The sync state (local, in-sync, local-changes) and what changed locally since the last confirmed Figma publish: added, changed (old → new), renamed, deleted. Computed from local files; does not read Figma.',{session},async args=>syncState(await sessionOutput(workspace,args.session)),true);
  tool('ds_create_change_requests','List the change requests the user saved in Builder (item, where it sits, notes), or mark one done with the revision that applied it.',{session,action:z.enum(['list','done']).optional(),id:uuid.optional(),revision:z.number().int().min(1).optional()},async args=>{
   const changes=createChangeRequests({outputDir:await sessionOutput(workspace,args.session)});

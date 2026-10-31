@@ -26,7 +26,7 @@ function paintSync(sync, useFigma) {
   $('build-sync-diff').hidden = !items.length;
 }
 
-export function setupBuild({ getState }) {
+export function setupBuild({ getState, refresh = async () => {} }) {
   const dialog = $('build-dialog');
   const step = name => dialog.querySelector(`[data-step="${name}"]`);
   const paint = (name, state, label, text) => {
@@ -40,12 +40,15 @@ export function setupBuild({ getState }) {
     if (!s) return;
     const f = s.foundations, p = s.parts, c = s.components, b = s.build;
     const useFigma = s.figma !== false;
+    // Saved foundations wait for the user's approval here; Figma is not needed for it.
+    const source = getState()?.source, pending = source?.kind === 'local' && source.review === 'pending' && f.local > 0;
     paint('foundations', f.ready ? 'done' : 'todo', f.ready ? 'Ready' : 'Needed',
-      f.ready ? `${f.local ? `${f.local} of ${f.total} ready in Builder` : 'Not in Builder'}${useFigma ? ` · ${f.figma ? 'In Figma' : 'Figma is optional'}` : ''}` : 'No foundations yet. Add your context to prepare them.');
+      f.ready ? `${f.local ? `${f.local} of ${f.total} ready in Builder` : 'Not in Builder'}${useFigma ? ` · ${f.figma ? 'In Figma' : 'Figma is optional'}` : ''}` : pending ? 'Review the foundations, then approve them.' : 'No foundations yet. Add your context to prepare them.');
+    $('approve-foundations').hidden = !pending;
     // With Figma off for this session, the Figma action leaves the stepper.
     $('publish').hidden = !useFigma;
     paintSync(getState()?.sync, useFigma);
-    dialog.querySelector('[data-build-context]').hidden = f.ready;
+    dialog.querySelector('[data-build-context]').hidden = f.ready || pending;
     paint('parts', p.ready ? 'done' : f.ready ? 'todo' : 'locked', p.ready ? 'Ready' : 'Needed',
       `${p.prepared} of ${p.total} Parts prepared${p.inFigma ? ` (${p.inFigma} in Figma)` : ''} · ${c.built} of ${c.total} Components${p.ready ? '' : '. Prepare at least one Part.'}`);
     step('parts').querySelector('[data-prepare-parts]').hidden = p.ready || !f.ready;
@@ -68,6 +71,17 @@ export function setupBuild({ getState }) {
   // Publish to Figma (optional) opens its own panel, so this one steps aside.
   $('publish').addEventListener('click', () => { if (!$('publish').disabled) dialog.close(); });
   dialog.querySelector('[data-build-context]').addEventListener('click', () => { dialog.close(); $('setup-open').click(); });
+  $('approve-foundations').addEventListener('click', async () => {
+    const button = $('approve-foundations'), state = getState();
+    button.disabled = true; $('approve-feedback').textContent = '';
+    try {
+      const response = await fetch('/api/foundations-approve', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-DS-Create-Token': state?.csrfToken || '' }, body: JSON.stringify({ hash: state?.source?.hash }), signal: AbortSignal.timeout(15000) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'The foundations could not be approved.');
+      await refresh(); sync();
+    } catch (error) { $('approve-feedback').textContent = error.message; }
+    button.disabled = false;
+  });
   $('build-copy').addEventListener('click', async () => {
     if ($('build-copy').disabled) return;
     try { await navigator.clipboard.writeText(getState()?.publishSteps?.build.prompt || ''); $('build-copied').textContent = 'Copied. Paste it into your agent.'; }

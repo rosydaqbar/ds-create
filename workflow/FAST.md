@@ -133,12 +133,13 @@ The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes onl
 - **Small returns.** A set call returns its set and part ids and counts, nothing else: no snapshot, no layer dump (a full export of a 360-variant set came back at 140 KB and only filled the context).
 - **One registry at the end.** After the last set, one read-only `kit/tools/figma/registry.js` call (~12 KB back for 30 sets and 170 icons) and `node kit/tools/build/registry.mjs --slug {slug}` write every set file and the icon map. This is the library gate's export in a fast round; the full layer snapshot (`kit/tools/figma/export-sets.js`) is exported on call, for QA or a site agent that needs layers. Re-run the registry when a later step changes a set.
 
-**F0 · Base (right after the registry, read-only).** F1 agents take collection names, component tokens and page ids from the build's token base, so it has to describe the file as built. Init's token plan has no Components collection and no page ids: agents reading it wrote "no component tokens" and guessed every `figma:` line.
+**F0 · Base (right after the registry).** F1 agents take collection names, component tokens and page ids from the build's token base. The base comes from the local files: `node kit/manager/cli.mjs tokens --slug {slug} --out workspace/output/{slug}/fast/tokens.json` writes the foundations plus every prepared Part's tokens (the `Components` collection). The local files supply the token values. The Figma export supplies the page ids and shows whether Figma matches the local files:
 1. Send `kit/web/scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back). Save the return as `workspace/output/{slug}/figma/hash.json`.
-2. From the repo root, run `node kit/web/scripts/export-diff.mjs --slug {slug} --hash workspace/output/{slug}/figma/hash.json`. It prints the `ROWS` that differ from the base; for a new system that is usually the Components collection alone.
-3. Send `figma-export.js` with `MODE = 'rows'` and those `ROWS`, save the return, and re-run with `--merge {rows file}`. It checks every hash, then writes `figma/figma-variables.json` with every collection and the page ids.
+2. From the repo root, run `node kit/web/scripts/export-diff.mjs --slug {slug} --hash workspace/output/{slug}/figma/hash.json`. Send `figma-export.js` with `MODE = 'rows'` and the `ROWS` it prints, save the returned rows, and run `node kit/web/scripts/export-diff.mjs --slug {slug} --hash workspace/output/{slug}/figma/hash.json --merge {rows file}`. It writes `figma/figma-variables.json` with the page ids.
+3. Run the `tokens` command again. Its output now includes the page ids.
+4. Run `node kit/manager/cli.mjs compare --slug {slug}`. `match: true` means Figma matches the local files; any `differences` (exit code 1) mean Figma is behind, which goes into the round's report and never changes the base.
 
-The site's W2 later fetches only what changed after F0 (usually the `Documentation` collection from F3), so a round with the site fetches the component rows once, not twice. In a Figma-only round, F0 is the only export.
+The site's W2 runs the same `tokens` command, so a round with the site reads Figma for page ids once.
 
 **F1 · Data (after F0, no Figma calls).** The manifests name real sets, so they are written once steps 6–10 are done and the set snapshots exist.
 1. Run `node kit/tools/build/pack.mjs --slug {slug} --init`. It copies the default manifests of the reading pages into `workspace/output/{slug}/fast/`.

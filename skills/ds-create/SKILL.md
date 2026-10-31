@@ -53,7 +53,7 @@ One skill, six commands. Each command has its own reference file. Load it before
    - the Figma file: a link, or permission to create one.
 
    YOLO never skips a check to save time. In particular, a page is drawn only after its `knowledge/` topics are read, recorded under `loaded`, and its copy passes `kit/tools/content/guard.mjs --page` (`workflow/COPY.md` §1). This is a hard rule in YOLO and in fast mode.
-5. **Gates.** `build` runs only after `init` is done, including approval and successful audited Figma generation of the current local draft. It runs only the steps its answers allow (`reference/build.md` §4). The page gates of `workflow/INITIATOR.md` Part B §6 apply to every page.
+5. **Gates.** `build` runs per output: the docs site needs the current local draft approved in Builder; Figma also needs it generated and audited in Figma (`node kit/manager/cli.mjs status` → `buildGate`). The local files are the source of truth, and Figma is an output built from them. It runs only the steps its flags and answers allow (`reference/build.md` §4). The page gates of `workflow/INITIATOR.md` Part B §6 apply to every page.
 6. **QA on call.** The slow checks run only through `qa` (`workflow/INITIATOR.md` Part B, *QA on call*). The cheap ones run inside `build`: each page's own audit, the copy check at the end of a level, and `npm run build`. In fast mode the build doesn't run these either: page audits and the copy check move to `qa` too, so a fast build only generates (`workflow/INITIATOR.md` Part B §6, *Gates*, *Fast mode*). At the end of `build`, offer `qa` in one line, and never run it unasked.
 7. **Figma.** Load the `figma-use` skill before the first `use_figma` call. Send one writing call at a time, and follow `workflow/GOTCHAS.md` §1.
 8. **The repo stays brand-agnostic.** Brand names, file keys, product copy and knowledge rules live only in `workspace/input/`, `workspace/output/` and the Figma file (`workspace/input/README.md` I6, I7). When copying or distributing the skill, exclude all saved project inputs, outputs, session runtimes and caches; retain only the workspace README templates. Repository maintenance must not preserve a particular project as a dependency of the skill.
@@ -77,7 +77,8 @@ One skill, six commands. Each command has its own reference file. Load it before
    - publish an approved revision: `node kit/manager/cli.mjs publish --slug {session} [--figma URL]` (an explicit "publish", "go", "lanjut" or "do it yourself" for the reviewed revision and file is that approval);
    - prepare again after inputs or a decision changed, or retry a blocked preparation: `node kit/manager/cli.mjs retry --slug {session}`;
    - re-check fonts after the user uploaded them: `publish` again; apply a chosen replacement: `node kit/manager/cli.mjs fonts --slug {session} --choice ui=Inter --choice display=Inter`;
-   - prepare Parts for review once the foundations are in Figma: `node kit/manager/cli.mjs parts --slug {session} [--ids button]`;
+   - approve the saved foundations once the user approved them in chat: `node kit/manager/cli.mjs approve --slug {session}`;
+   - prepare Parts once the foundations are approved: `node kit/manager/cli.mjs parts --slug {session} [--ids button]`, or `ds_create_parts_prepare`;
    - save a decision given in chat under `workspace/input/{slug}/chat/` first, so the action reads it.
 
    Then claim the resulting event yourself (`ds_create_wait` or `ds_create_prepare` / `ds_create_publish`). Ask only for a decision the inputs leave open, never for a click, a reconnect or a restart the agent can avoid. Builder's buttons remain for users who prefer them.

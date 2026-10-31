@@ -26,7 +26,7 @@ After review, the user approves the saved hash and target through Publish. Use t
 
 ## Item tools
 
-Agents read and change foundation items through DS Create MCP. Every tool takes `session` and works on the saved local files only; none of them reads or writes Figma. In a session without `ds_create_*` tools, call them through the terminal host (`background-worker.md`, *Without DS Create MCP tools*).
+Agents read and change foundation items and Parts through DS Create MCP. Every tool takes `session` and works on the saved local files only; none of them reads or writes Figma. In a session without `ds_create_*` tools, call them through the terminal host (`background-worker.md`, *Without DS Create MCP tools*).
 
 | Tool | Use |
 | --- | --- |
@@ -34,7 +34,8 @@ Agents read and change foundation items through DS Create MCP. Every tool takes 
 | `ds_create_items_get` | Read items in full, with the alias chain and `usedBy`. The name `rules` returns the editable rules. |
 | `ds_create_items_change` | Save a list of ops as one revision. |
 | `ds_create_items_history` · `ds_create_items_restore` | List revisions; restore one as a new revision. |
-| `ds_create_items_diff` | The sync state and the local changes not yet in Figma. |
+| `ds_create_items_diff` | The sync state and the local changes not yet in Figma, Part tokens included. |
+| `ds_create_parts_prepare` | Compile Parts from their templates and the approved foundations. Pass the `ids` a build round needs; omit `ids` only to prepare every Part that is not current. |
 | `ds_create_change_requests` | Read the user's Builder change requests; mark one `done` with the revision that applied it. |
 
 Ops, each with `target: "foundations"`:
@@ -59,7 +60,21 @@ When the user asks for a change:
 
 A change is wide when it breaks a color rule, touches more palette families than `discuss.maxFamilies`, moves more semantic tokens than `discuss.maxSemantics`, or renames or deletes a name preparation produced (`contract`). The limits are stored in `foundation-rules.json`. To change them, use `set` with `kind: "rules"`; that change always needs the user's agreement first.
 
-Never edit `foundations.json`, `foundation-plan.json` or the `foundations/` pack by hand.
+### Parts
+
+Each Part is a local file, `parts/{id}.json`, compiled from a brand-agnostic template. The template holds the default structure (sizes, emphases, tones, states, properties, token roles); the system's own choices are its `inputs`, and token picks made in Builder are its `overrides`.
+
+- `ds_create_items_list` with `target: "parts"` lists the Parts and their status (`not-prepared`, `outdated`, `ready`); with `target: "part:{id}"` it lists that Part's tokens.
+- `ds_create_items_get` with `target: "part:{id}"` reads its tokens; the name `part` returns the whole file.
+- `ds_create_items_change` ops with `target: "part:{id}"`: `set` with `field: "inputs"` or `"overrides"` and an object `value` (merged; `null` clears it), or `apply` with `recipe: "recompile"`. One target per save.
+- Adding or removing a size, emphasis, tone, state or property is wide: show the user what changes and resend with `confirmed: true` only after they agree.
+- `ds_create_items_history` and `ds_create_items_restore` take the same `target`.
+
+A foundation rename updates every Part that uses the name in the same save. Deleting a foundation item a Part uses is refused unless `replaceWith` names its replacement.
+
+Changing, preparing or restoring Parts requires approved foundations. Every foundation save, including an Undo, clears the approval. If a Part change is refused because the approval was cleared, ask the user to approve the current foundation revision with **Approve foundations** in Builder's **Publish** dialog. Then retry the change.
+
+Never edit `foundations.json`, `foundation-plan.json` or the `foundations/` pack by hand. The same goes for `parts/`.
 
 ## Waiting and verification
 

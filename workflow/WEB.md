@@ -4,9 +4,9 @@ This file turns a generated Figma design system into a **Tailwind-ready React li
 
 **The documentation site is built for every product type**: Web, App, or Web and App (`workflow/QUESTIONNAIRE.md` §10). Tokens, foundations and components are always documented here. For an App product, the component pages preview every component in React Native, rendered in the browser with react-native-web, and the Code tab shows React Native, Swift and Kotlin code (§7.1, `workflow/APP.md`). For a Web product, the site also ships the React library and its package.
 
-It is a reusable workflow. The starting point is the brand-agnostic template in `kit/web/`; every build copies it and fills it from its own Figma file. Nothing in `kit/web/` belongs to a brand: the tokens are neutral placeholders, the logo is a placeholder, and the brand's own sentences live in one file, `src/brand/copy.ts`, for the build to answer.
+It is a reusable workflow. The starting point is the brand-agnostic template in `kit/web/`; every build copies it and fills it from the system's local files in `workspace/output/{system-slug}/`. Nothing in `kit/web/` belongs to a brand: the tokens are neutral placeholders, the logo is a placeholder, and the brand's own sentences live in one file, `src/brand/copy.ts`, for the build to answer.
 
-Figma stays the source of truth. The web version never invents values: tokens come from the Figma variables, component properties come from the Figma component sets, documentation comes from the page specs and the Figma Guidelines frames.
+The local files are the source of truth: `foundations.json` for tokens and styles, and `parts/{id}.json` for each Part's properties and component tokens. The web version never invents values. Figma is an output built from the same files, not an input: when code and Figma differ, Figma is behind and needs a sync. Documentation comes from the page specs and the copy files.
 
 # 1. When this runs
 
@@ -14,7 +14,7 @@ Figma stays the source of truth. The web version never invents values: tokens co
 - Later, at any time, as its own task ("implement the system for web", "build the docs site").
 - After a component is added through `workflow/EXTEND.md`.
 
-It runs **after** the Figma pages it implements exist. A component is documented only when its Figma page is complete. When the product includes App (`workflow/APP.md`), the App previews use this same token export and changelog, and they fill in as `workflow/APP.md` A3 writes each component.
+It runs once the foundations are approved in Builder and the round's Parts have current local files (`ds_create_parts_prepare`). It does not wait for Figma: with Figma in the round, the site goes first by default. When the product includes App (`workflow/APP.md`), the App previews use this same token file and changelog, and they fill in as `workflow/APP.md` A3 writes each component.
 
 # 2. What is produced
 
@@ -22,7 +22,7 @@ It runs **after** the Figma pages it implements exist. A component is documented
 workspace/output/{system-slug}/web/        a copy of ds-create/web, filled for the brand (README §5)
 ├─ COPY-GUIDE.md                 voice and copy rules for every word on the site
 ├─ tokens/
-│  ├─ figma-variables.json       export of the Figma file (input): variables, styles, page ids
+│  ├─ figma-variables.json       token file written from the local files (input): variables, styles, Part tokens, page ids when Figma has them
 │  ├─ accepted.json              what the owner approved: unsupported modes, contrast pairs (copied from the ledger)
 │  └─ tokens.dtcg.json           DTCG tokens (generated)
 ├─ public/brand/                 logo, mark and flag files exported from 1.8 Brand assets
@@ -93,7 +93,7 @@ Do not add a CSS-in-JS library, a second styling system or a component library u
 
 # 4. Workflow
 
-Run the steps in order. Each step names its exit check. At initiation they are steps 22–26 of the build sequence (`workflow/INITIATOR.md` Part B §6): they start only when every Figma step is done in the ledger, the file audit included, and they follow the same gates. In a fast round, W1 and the component files of W4 may be prepared during F1 (`workflow/FAST.md` §5, *While F1 runs*); their steps still check and mark them in order.
+Run the steps in order. Each step names its exit check. At initiation they are steps 22–26 of the build sequence (`workflow/INITIATOR.md` Part B §6). They start when `node kit/manager/cli.mjs status --slug {slug}` reports `buildGate.site.ready: true`, and they follow the same gates. In a fast round, W1 and the component files of W4 may be prepared during F1 (`workflow/FAST.md` §5, *While F1 runs*); their steps still check and mark them in order.
 
 ## W1 · Copy the template
 
@@ -103,19 +103,19 @@ Then fit the copy to the round: `node scripts/scope.mjs --upto {parts|components
 
 Exit check: `npm run build` passes on the scoped copy.
 
-## W2 · Export tokens from Figma
+## W2 · Tokens from the local files
 
-1. **With a local base** (the usual case: `workspace/output/{system-slug}/figma/figma-variables.json` written by init's token step, a fast round's F0 or a previous round; after F0, usually only the `Documentation` collection differs): run `scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back) and save the return as `hash.json`. `node scripts/export-diff.mjs --hash hash.json` compares each collection in 16 buckets, and the style lists, with the base and prints the `ROWS` to fetch; when nothing changed it writes the export at once. Otherwise send the script with `MODE = 'rows'` and those `ROWS` (one collection per call when a return would pass 20 KB), save each return, and run `node scripts/export-diff.mjs --hash hash.json --merge rows.json …`. It writes both export files and checks the result against every hash first: a mismatch writes nothing.
-2. **Without a base**, run `scripts/figma-export.js` (`MODE = 'full'`) and save the returned JSON as `workspace/output/{system-slug}/figma/figma-variables.json` (the one export every target shares) and copy it to the project's `tokens/figma-variables.json`. It includes `pages` (page ids and names): the site uses them for every "Open in Figma" button.
-3. Tool output is capped at about 20 KB. When a full export is bigger, set `PART` at the top of the script and export in slices — for example `Color` in two halves, then the other collections, then `styles: true` — saving each result as `tokens/parts/01.json`, `02.json`, …, then run `npm run tokens:merge`. Prefer the hash path: a return that has to be re-typed into a file costs as much as the call itself.
+1. From the repo root, run `node kit/manager/cli.mjs tokens --slug {system-slug} --out workspace/output/{system-slug}/web/tokens/figma-variables.json`. It writes `foundations.json` plus every Part's tokens (the `Components` collection) in the export format the site's scripts read. When a Figma export exists (`figma/figma-variables.json`), the command copies its page ids for the "Open in Figma" buttons; without one, those buttons are hidden. The file keeps its name so the site's scripts read it unchanged.
+2. Run the command again whenever the foundations or a Part change, and after a Figma round to pick up the page ids.
+3. This step makes no Figma calls. It uses a saved Figma export only for page ids, when one exists; tokens and styles come from the local files. `scripts/figma-export.js` and `scripts/export-diff.mjs` remain for Figma's own checks (Publish, and the comparison at the end of a Figma round).
 4. Run `npm run tokens`, then `npm run check:contrast`.
 5. When the owner approved exceptions in the ledger (a mode that isn't supported, contrast pairs below AA), write them to `tokens/accepted.json`: `{ "unsupportedModes": { "Color": ["Dark"] }, "contrast": ["color/text/x on color/fill/y"] }`. The token, React Native token and contrast scripts and QA read it; the export itself is never edited.
 
-Exit check: the script reports every variable, text style and effect style of the Figma file; no alias is unresolved; **`check:contrast` reports all pairs AA**, or lists only the pairs approved in `accepted.json`. A contrast failure is fixed in the Figma variables (1.1 Color QA) and exported again — never patched in `figma-variables.json` or in code (§8).
+Exit check: the file holds every variable, text style and effect style of `foundations.json` and every prepared Part's tokens; no alias is unresolved; **`check:contrast` reports all pairs AA**, or lists only the pairs approved in `accepted.json`. A contrast failure is fixed in the local files (`ds_create_items_change`), then step 1 runs again — never patched in `figma-variables.json` or in code (§8).
 
 ## W3 · Brand assets and identity
 
-1. Export from `1.8 Brand assets` the lockup for light and dark surfaces, the mark and any flags as SVG into `public/brand/` (flags in `public/brand/flags/{code}.svg`) with the names in `src/ds.config.ts`. Flags are inlined into the components, so they ship inside the package. When the library step drew an asset from a local SVG, it saved that SVG to `workspace/output/{system-slug}/brand/` at the same time: copy those files and confirm them with one read-only call that returns only the length and fnv hash of each `exportAsync({ format: 'SVG_STRING' })`, instead of returning and re-typing the SVGs.
+1. Copy the lockup for light and dark surfaces, the mark and any flags as SVG into `public/brand/` (flags in `public/brand/flags/{code}.svg`) with the names in `src/ds.config.ts`, from `workspace/output/{system-slug}/brand/` and the system's inputs. Flags are inlined into the components, so they ship inside the package. Nothing is exported from Figma for this.
 2. Fill `ds.config.ts` from `00 Cover`: system name, version, `product` (`'web'`, `'app'` or `'both'`, from `workflow/QUESTIONNAIRE.md` §10), `modes` (`['Light', 'Dark']`, or `['Light']` when Dark isn't supported; the site then hides its Dark toggle and QA checks Light only), `packageName` (the npm name product teams will install, e.g. `@acme/design-system`), description (what the product is and what the system covers, in one or two sentences), and the Figma file link.
 3. When the brand typeface is a web font, add its stylesheet to `fontStylesheets`; the family names already come from `font/family/*`. When the brand typeface can't ship (licensing), name the stand-in in a comment and in the Typography page.
 4. Keep `src/icons/index.tsx` on Lucide. Add the icons the product needs there (they reach Figma through `kit/tools/figma/icons.mjs`). Only an existing file with its own icon library replaces the imports; keep the names.
@@ -127,7 +127,7 @@ Exit check: the header shows the real logo in both color modes; text renders in 
 
 Work in page order (2.x, then 3.x, then 4.x), only for pages in scope. For each page:
 
-1. Load the page's spec (`parts/…`, `components/…`, `sections/…`) and read the published set in Figma.
+1. Load the page's spec (`parts/…`, `components/…`, `sections/…`) and the local file of every Part it uses, `workspace/output/{system-slug}/parts/{id}.json`. Read the properties, variants and component tokens from those files, not from Figma. The `.md` note next to each file explains its saved inputs and decisions.
 2. Load the Impeccable skill (`/impeccable`, product register) before writing UI or copy. Its design hook checks every edit to a UI file; fix each finding before moving on.
 3. Write the component in `src/components/{level}/{Name}.tsx` following §6.
 4. Write the documentation module `src/docs/stories/{id}-{slug}.doc.tsx` following §7, in the voice of `COPY-GUIDE.md`. Its sentences go into the page's copy file as `web` or `both` lines (`workflow/COPY.md`): `npm run copy` lays them over the story, so a sentence that is only in the story is overwritten as soon as the copy file has that topic.
@@ -333,11 +333,11 @@ Rules:
 # 8. Keeping code and Figma in sync
 
 - Changed variables or styles: run W2 again; components update without edits.
-- **A token is wrong (contrast, value): fix it in the Figma variable, then export.** Never patch `figma-variables.json` or the generated files — the next export would undo it silently.
+- **A token is wrong (contrast, value): fix it in the local files (`ds_create_items_change`), then run W2 again.** Never patch `figma-variables.json` or the generated files: the next run would undo it silently.
 - Changed component properties: change the component and its doc module in the same task.
 - A change the web needs that Figma doesn't show yet (an accessibility fix that changes a layout, like a side-by-side stepper): update the page spec and the Figma component in the same task, and add a changelog item.
 - New component: `workflow/EXTEND.md` builds the Figma page, then W4 for that page.
-- A difference between code and Figma is a bug in code, unless the user decides otherwise.
+- Compare both outputs with the local files. If the code differs, fix the code. If Figma differs, report "Figma is behind" and sync it from the local files.
 
 # 9. QA
 
@@ -350,9 +350,9 @@ Automated gates. `npm run build` runs on every build; `npm run qa` runs on call 
 
 Also fail QA when:
 - a component contains a hex value, a raw pixel value that has a token, or a Tailwind default color, radius or shadow;
-- a prop name or value differs from the Figma property (`variant` for Emphasis, `destructive` for Tone=danger);
+- a prop name or value differs from the property in the part file (`variant` for Emphasis, `destructive` for Tone=danger);
 - a Figma variant is missing from the component or from its matrix;
-- hover, pressed, focus, disabled or loading looks different from the Figma variant;
+- hover, pressed, focus, disabled or loading uses different tokens from the part file's treatment for that variant;
 - the page is wrong in Dark, or a themed subtree (`data-theme` on a section) does not switch;
 - a component breaks a rule in §6.4, or is not keyboard accessible;
 - something appears, moves or disappears without its 1.6 Motion pairing, or ignores the Reduced mode;

@@ -3,11 +3,12 @@ import {readFile, rename, unlink, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes, randomUUID} from 'node:crypto';
-import {getPublishStatus, getState} from './state.mjs';
+import {getPublishStatus, getState, readJSON} from './state.mjs';
 import {createFigmaJobs} from './publish.mjs';
-import {PublishError} from './files.mjs';
+import {PublishError, writeJSON} from './files.mjs';
 import {buildStatus, createSetupJobs, requestBuild, uploadLimits, workerConnectionStatus} from './setup.mjs';
 import {createParts} from './parts.mjs';
+import {ItemError} from '../foundations/ops.mjs';
 import {createChangeRequests} from './changes.mjs';
 import {readFigmaSetting, writeFigmaSetting} from './settings.mjs';
 import {createItemStore} from '../foundations/store.mjs';
@@ -25,7 +26,20 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
   async function publishSteps(s, parts) {
     const local = s.foundations.filter(f => f.status === 'ready').length, figma = s.source?.review === 'synced';
     const prepared = parts.filter(p => ['review', 'synced'].includes(p.status)).length, inFigma = parts.filter(p => p.status === 'synced').length;
-    return { figma: await readFigmaSetting(outputDir), foundations: { ready: local > 0 || figma, local, total: s.foundations.length, figma }, parts: { ready: prepared > 0, prepared, inFigma, total: 19 }, components: { ready: false, built: 0, total: 8 }, build: { ...await buildStatus(outputDir), prompt: `Run ds-create build for the design system saved in Builder.\nds-create build --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
+    return { figma: await readFigmaSetting(outputDir), foundations: { ready: ['approved', 'synced'].includes(s.source?.review) || s.source?.kind !== 'local' && local > 0, local, total: s.foundations.length, figma }, parts: { ready: prepared > 0, prepared, inFigma, total: 19 }, components: { ready: false, built: 0, total: 8 }, build: { ...await buildStatus(outputDir), prompt: `Run ds-create build for the design system saved in Builder.\nds-create build --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
+  }
+  // The user approves the saved foundations in Builder; no Figma publish needed. An approval that a Figma
+  // publish already confirmed is kept as it is.
+  async function approveFoundations(input) {
+    if (!input || Object.keys(input).join() !== 'hash' || typeof input.hash !== 'string') throw new PublishError('Send the hash of the revision you reviewed.', 400);
+    const s = await getState(outputDir);
+    if (s.source?.kind !== 'local' || s.source.hash !== input.hash) throw new PublishError('The foundations changed. Review the current revision before approving.', 409);
+    if (['approved', 'synced'].includes(s.source.review)) return { approved: input.hash };
+    // Builder can only show the approval when the draft is current and its checks pass; say why it can't.
+    if (s.warnings?.length) throw new PublishError(s.warnings[0], 409);
+    const file = path.join(outputDir, 'ds-create-ledger.json'), ledger = await readJSON(file) || {};
+    await writeJSON(file, { ...ledger, foundationReview: { status: 'approved', hash: input.hash, approvedBy: 'user', approvedAt: new Date().toISOString(), approvalSource: 'builder:approve' } });
+    return { approved: input.hash };
   }
   async function saveSettings(input) {
     if (!input || Object.keys(input).join() !== 'figma' || typeof input.figma !== 'boolean') throw new PublishError('Send {figma: true|false}.', 400);
@@ -79,7 +93,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
     const json = (code, value) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(req.method === 'HEAD' ? undefined : JSON.stringify(value)); };
     try {
       const route = new URL(req.url, `http://${host}`).pathname;
-      const mutations = ['/api/foundations', '/api/foundations-restore', '/api/settings', '/api/publish-figma', '/api/publish-cancel', '/api/publish-fonts', '/api/parts-prepare', '/api/parts-update', '/api/change-requests', '/api/build-request', '/api/setup-submit', '/api/setup-revise', '/api/setup-answers', '/api/setup-retry', '/api/setup-cancel'];
+      const mutations = ['/api/foundations', '/api/foundations-restore', '/api/foundations-approve', '/api/settings', '/api/publish-figma', '/api/publish-cancel', '/api/publish-fonts', '/api/parts-prepare', '/api/parts-update', '/api/change-requests', '/api/build-request', '/api/setup-submit', '/api/setup-revise', '/api/setup-answers', '/api/setup-retry', '/api/setup-cancel'];
       if (req.method === 'POST' && mutations.includes(route)) {
         if (req.headers.origin !== `http://${host}` || req.headers['x-ds-create-token'] !== csrfToken || req.headers['sec-fetch-site'] === 'cross-site') { json(403, { error: 'Reopen this Builder tab before trying again.' }); return; }
         const upload = ['/api/setup-submit','/api/setup-revise'].includes(route), type = req.headers['content-type'] || '';
@@ -96,7 +110,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
         if(transitioning)throw new PublishError('Another setup or publication action is being saved. Retry after it finishes.');
         transitioning=true;
         try {
-        const result = route === '/api/foundations' ? await items.change({ expectedRevision: input?.expectedRevision, ops: input?.ops, reason: input?.reason, author: 'builder', confirmed: true }) : route === '/api/foundations-restore' ? await items.restore({ revision: input?.revision, expectedRevision: input?.expectedRevision, author: 'builder' }) : route === '/api/settings' ? await saveSettings(input) : route === '/api/publish-figma' ? await jobs.start(input) : route === '/api/publish-cancel' ? await jobs.cancel() : route === '/api/publish-fonts' ? await setup.fontChoice(input) : route === '/api/parts-prepare' ? await partJobs.prepare(input, await getState(outputDir)) : route === '/api/parts-update' ? await partJobs.update(input, await getState(outputDir)) : route === '/api/change-requests' ? await changeRequests.update(input) : route === '/api/build-request' ? await queueBuild() :
+        const result = route === '/api/foundations' ? await items.change({ expectedRevision: input?.expectedRevision, ops: input?.ops, reason: input?.reason, author: 'builder', confirmed: true }) : route === '/api/foundations-restore' ? await items.restore({ revision: input?.revision, expectedRevision: input?.expectedRevision, author: 'builder' }) : route === '/api/foundations-approve' ? await approveFoundations(input) : route === '/api/settings' ? await saveSettings(input) : route === '/api/publish-figma' ? await jobs.start(input) : route === '/api/publish-cancel' ? await jobs.cancel() : route === '/api/publish-fonts' ? await setup.fontChoice(input) : route === '/api/parts-prepare' ? await partJobs.prepare(input, await getState(outputDir)) : route === '/api/parts-update' ? await partJobs.update(input, await getState(outputDir)) : route === '/api/change-requests' ? await changeRequests.update(input) : route === '/api/build-request' ? await queueBuild() :
           route === '/api/setup-revise' ? await setup.revise(input) : route === '/api/setup-submit' ? await setup.submit(input) : route === '/api/setup-answers' ? await setup.answer(input) : route === '/api/setup-retry' ? await setup.retry(input) : await setup.cancel();
         json(202,result); return;
         } finally { transitioning=false; }
@@ -111,8 +125,10 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
       const [file, type] = routes.get(route), body = await readFile(path.join(managerDir, file));
       res.writeHead(200, { 'Content-Type': type }); res.end(req.method === 'HEAD' ? undefined : body);
     } catch (e) {
-      if (!(e instanceof PublishError)) console.error(e);
-      json(e instanceof PublishError ? e.status : 500, { error: e instanceof PublishError ? e.message : 'Could not read the current workspace. Retry after its files are saved.' });
+      // Store and template refusals carry their own status and one-sentence reason.
+      const known = e instanceof PublishError || e instanceof ItemError;
+      if (!known) console.error(e);
+      json(known ? e.status : 500, { error: known ? e.message : 'Could not read the current workspace. Retry after its files are saved.' });
     }
   });
   return { server, instance, jobs, setup };

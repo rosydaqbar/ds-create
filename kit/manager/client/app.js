@@ -446,7 +446,7 @@ new MutationObserver(() => {
   $('tab-agent-dot').dataset.connection = state;
   if (state === 'disconnected' && was !== 'disconnected') showTab($('tab-agent'));
 }).observe($('worker-connection'), { attributes: true, attributeFilter: ['data-connection'] });
-const build = setupBuild({ getState: () => state });
+const build = setupBuild({ getState: () => state, refresh: async () => { signature = ''; await refresh(); } });
 const changes = setupChangeRequests({ getState: () => state, refresh: async () => { signature = ''; await refresh(); }, showAgent: () => showTab($('tab-agent')) });
 const setup = setupWeb({ onChange: refresh, progress: () => state?.foundations ? { foundations: state.foundations, parts: state.parts || [] } : null });
 $('search-icon').innerHTML = icon('search');

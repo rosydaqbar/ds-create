@@ -9,7 +9,7 @@ This file covers what changes on the documentation site when the product is an *
 
 That is all an App product gets in code. ds-create previews; it doesn't provide app libraries, packages or app projects. The React Native components exist only so the docs can render the previews, and they live inside the docs project. Swift and Kotlin exist only as code on the Code tab.
 
-Figma stays the source of truth. The previews and the code never invent values: tokens come from the Figma variables, props from the Figma component sets, documentation from the page specs.
+The local files are the source of truth. The previews and the code never invent values: tokens come from `foundations.json` and the part files, props from the part files, documentation from the page specs.
 
 ## Nothing is installed or built
 
@@ -34,7 +34,7 @@ Everything lives in the docs project:
 ```text
 workspace/output/{system-slug}/web/            the docs site (workflow/WEB.md), product 'app' or 'both'
 ├─ react-native/                     React Native source for the previews (copy of ds-create/app/react-native)
-│  ├─ tokens/tokens.ts               generated from the Figma export
+│  ├─ tokens/tokens.ts               generated from the token file (`workflow/WEB.md` W2)
 │  ├─ theme/                         ThemeProvider, useTheme: color mode, reduced motion, text size; anatomy()
 │  ├─ icons/                         icon registry (system icon names → lucide-react-native)
 │  └─ specs/components/{parts,components,sections}/   one file per published set
@@ -65,19 +65,19 @@ After `workflow/WEB.md` W1, copy `ds-create/app/react-native/` to `workspace/out
 
 ## A2 · Tokens
 
-From `workspace/output/{system-slug}/web/`, generate the React Native tokens from the same export the docs use (`workflow/WEB.md` W2, contrast gate included):
+From `workspace/output/{system-slug}/web/`, generate the React Native tokens from the same token file the docs use (`workflow/WEB.md` W2, contrast gate included):
 
 ```sh
 node ../../../kit/app/scripts/build-rn-tokens.mjs --in tokens/figma-variables.json --out react-native/tokens
 ```
 
-(Or copy `kit/app/scripts/build-rn-tokens.mjs` into `kit/web/scripts/` and run it from there.) Never edit `tokens.ts`; fix values in Figma and export again. Modes listed in `tokens/accepted.json` `unsupportedModes` are left out, and `darkColors` then repeats Light.
+(Or copy `kit/app/scripts/build-rn-tokens.mjs` into `kit/web/scripts/` and run it from there.) Never edit `tokens.ts`; fix values in the local files (`ds_create_items_change`) and run `workflow/WEB.md` W2 again. Modes listed in `tokens/accepted.json` `unsupportedModes` are left out, and `darkColors` then repeats Light.
 
 ## A3 · Components
 
 Work in page order (2.x, then 3.x, then 4.x), only for pages in scope. For each page:
 
-1. Load its spec and read the Figma set.
+1. Load its spec and the local file of every Part it uses (`workspace/output/{system-slug}/parts/{id}.json`). Read the properties, variants and component tokens from those files.
 2. Write the React Native component in `react-native/components/{level}/`, following §6, and export it from `components/index.ts`.
 3. Add the `app` block to the page's story (§7): hero, examples with their React Native, Swift and Kotlin code, variant matrices, anatomy, Guidelines visuals and "In apps" notes. Add the component to `src/docs/app/app.d.ts`.
 4. Look at the page in App preview, in Light and Dark.
@@ -166,7 +166,7 @@ Stories import the previews as a namespace (`import * as App from '@app'`) and u
 
 # 8. Keeping the previews and Figma in sync
 
-- Changed variables or styles: export again (`workflow/WEB.md` W2) and run A2.
+- Changed variables or styles: run `workflow/WEB.md` W2 again, then A2.
 - Changed component properties: change the React Native component and the story's `app` block, including the Swift and Kotlin code, in the same task.
 - A difference between a preview and Figma is a bug in the preview, unless the user decides otherwise.
 

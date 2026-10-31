@@ -2,6 +2,7 @@
 // with their alias chain and everything that references them.
 import {foundations} from '../server/state.mjs';
 import {ItemError, referencesTo, resolveIn} from './ops.mjs';
+import {partRefs} from '../parts/refs.mjs';
 
 const styleLists = {textStyles: 'textStyle', effectStyles: 'effectStyle', gridStyles: 'gridStyle'};
 
@@ -40,13 +41,14 @@ export function listItems(draft, {domain, collection, kind, type, prefix, query,
   return {items: page, next: cursor + limit < rows.length ? cursor + limit : null, total: rows.length};
 }
 
-export function getItems(draft, names) {
+export function getItems(draft, names, {parts = {}} = {}) {
   const byName = new Map(draft.variables.map(v => [v.name, v])), items = allItems(draft);
   return names.map(name => {
     const found = items.find(x => x.item.name === name);
     if (!found) throw new ItemError(`Unknown item: ${name}.`);
     const seen = new Set(), usedBy = [];
     for (const r of found.kind === 'variable' ? referencesTo(draft, name) : []) { const key = r.kind + ':' + r.name + ':' + r.via; if (!seen.has(key)) { seen.add(key); usedBy.push({kind: r.kind, name: r.name, via: r.via}); } }
+    for (const [id, part] of Object.entries(parts)) for (const via of partRefs(part, name)) usedBy.push({kind: 'part', name: id, via});
     const modes = found.kind === 'variable' ? modesOf(draft, found.item) : [];
     return {kind: found.kind, item: structuredClone(found.item), resolved: Object.fromEntries(modes.map(m => [m, resolveIn(byName, name, m)])), aliasChain: Object.fromEntries(modes.map(m => [m, chain(byName, name, m)])), usedBy};
   });

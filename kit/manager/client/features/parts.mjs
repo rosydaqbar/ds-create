@@ -27,6 +27,7 @@ import { openDialog, closeDialog } from '../ui-motion.mjs';
 // Plain words for people; the property values stay exact in the Properties table and Figma.
 const words = { xs: 'Extra small', sm: 'Small', md: 'Medium', lg: 'Large', xl: 'Extra large', rest: 'Normal', hover: 'Hover', pressed: 'Pressed', focus: 'Focused', disabled: 'Disabled', loading: 'Loading', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', brand: 'Brand', danger: 'Danger', body: 'Body', heading: 'Heading', display: 'Display', regular: 'Regular', medium: 'Medium', bold: 'Bold' };
 const say = v => words[v] || v;
+const toneHeading = tone => tone === 'brand' ? 'Brand · everyday actions' : tone === 'danger' ? 'Danger · destructive actions' : say(tone)[0].toUpperCase() + say(tone).slice(1);
 const valueOf = (d, kind, name) => name ? d.preview.options[kind].find(o => o.name === name)?.value ?? null : null;
 const tokensFor = (d, tone, em, state) => ({ ...d.treatments[tone][em][state], ...(view.edits.treatments[`${tone}|${em}|${state}`] || {}) });
 const sizeTokens = (d, size) => { const s = d.sizes.find(x => x.size === size), e = view.edits.sizes[size] || {}; return { ...s, ...e, padding: { ...s.padding, ...(e.padding || {}) } }; };
@@ -57,6 +58,8 @@ export function partPage(part, helpers) {
   if (!part) return documentFrame('Part not found', 'Choose a Part from the navigation.', '<div class="empty-state"><a class="button" href="#overview">Go to Overview</a></div>');
   if (!part.draft) return emptyPart(part, helpers);
   const d = part.draft, p = d.preview, states = d.properties.find(x => x.name === 'State').values, sel = view.selection;
+  // Tones come from this system's Button, which may have more or fewer than the template's brand and danger.
+  const tones = Object.keys(p.treatments);
   const cell = (tone, em, size, s, iconOnly) => {
     const chosen = !!view.selected && sel.tone === tone && sel.emphasis === em && sel.size === size && sel.state === s && sel.iconOnly === iconOnly;
     return `<button type="button" class="part-cell${chosen ? ' is-selected' : ''}" role="cell" data-part-cell="${escape([tone, em, size, s, iconOnly].join('|'))}" aria-label="${escape(`${tone} ${em} ${size} ${s}${iconOnly ? ' icon only' : ''}`)}" aria-pressed="${chosen}">${buttonCell(sizeFor(d, size), treatmentFor(d, tone, em, s), { iconOnly, state: s }, escape)}</button>`;
@@ -65,7 +68,7 @@ export function partPage(part, helpers) {
     ${Object.keys(p.treatments[tone]).map(em => p.sizes.map(size => `<div class="part-matrix-row" role="row"><span role="rowheader">${escape(say(em))} · ${escape(say(size.size))}</span>${states.map(s => cell(tone, em, size.size, s, iconOnly)).join('')}</div>`).join('')).join('')}</div>`;
   const body = `
     <section class="section" aria-labelledby="part-types"><div class="section-intro"><h2 id="part-types">Button types</h2><p>Primary is for the main action on a screen, Secondary for supporting actions, Tertiary for quiet ones. Click a card to change its size, state, icons and label in the panel.</p></div>
-      ${['brand', 'danger'].map(tone => `<h3 class="part-subheading">${tone === 'brand' ? 'Brand · everyday actions' : 'Danger · destructive actions'}</h3><div class="part-type-grid">${Object.keys(p.treatments[tone]).map(em => {
+      ${tones.map(tone => `<h3 class="part-subheading">${escape(toneHeading(tone))}</h3><div class="part-type-grid">${Object.keys(p.treatments[tone]).map(em => {
         const key = `${tone}|${em}`, c = card(key), chosen = view.selected === key;
         return previewCard(`<span>${escape(em[0].toUpperCase() + em.slice(1))}</span>`, buttonCell(sizeFor(d, c.size), treatmentFor(d, tone, em, c.state), c, escape),
           { interactive: true, className: `part-type-card ${chosen ? 'is-selected' : ''}`, stageClass: 'part-type-stage', attributes: `data-part-type="${escape(key)}" aria-pressed="${chosen}" aria-label="Select ${escape(tone)} ${escape(em)} button"`,
@@ -73,7 +76,7 @@ export function partPage(part, helpers) {
       }).join('')}</div>`).join('')}</section>
     <section class="section" aria-labelledby="part-decisions"><div class="section-heading"><h2 id="part-decisions">Choices we made for you</h2><small>Version ${d.revision} · ${d.variantCount} button variations</small></div>
       <ul class="part-decisions">${d.decisions.map(x => `<li><strong>${escape(x.key)}:</strong> ${escape(x.value)}<small>${escape(x.reason || '')}</small></li>`).join('')}${d.notes.length ? `<li><strong>Some hover colors stay the same.</strong><small>Your colors have no separate hover shade for ${escape([...new Set(d.notes.map(n => n.split(' → ')[0].split('/').slice(1, 3).join(' ')))].join(', '))}, so those buttons keep their normal color when hovered.</small></li>` : ''}</ul></section>
-    ${['brand', 'danger'].map(tone => `<section class="section" aria-labelledby="part-${tone}"><div class="section-heading"><h2 id="part-${tone}">${tone === 'brand' ? 'All brand buttons' : 'All danger buttons'}</h2></div>${block(tone, false)}<h3 class="part-subheading">Icon only</h3>${block(tone, true)}</section>`).join('')}`;
+    ${tones.map(tone => `<section class="section" aria-labelledby="part-${escape(tone)}"><div class="section-heading"><h2 id="part-${escape(tone)}">${escape(`All ${say(tone).toLowerCase()} buttons`)}</h2></div>${block(tone, false)}<h3 class="part-subheading">Icon only</h3>${block(tone, true)}</section>`).join('')}`;
   // The page card wraps everything; selecting it (no button chosen) shows the Part overview in the panel.
   return documentFrame(`${part.page} ${part.name}`, part.description, body, partStatus(part, badge))
     .replace('<article class="docs-reading-card"', `<article tabindex="0" data-part-wrapper aria-label="${escape(part.name)} page" class="docs-reading-card part-page${view.selected ? '' : ' is-selected'}"`);
@@ -126,7 +129,7 @@ export function partInspector(part, { escape }) {
       ${spacing}
       ${measure('gap', 'Icon gap', 'space', z.gap)}</section>`;
   const reset = `<div class="workspace-reset"><button type="button" class="button" data-part-reset>Reset</button><small>Puts every color and size back to the choices we made for you.</small><p class="workspace-help part-save-status" data-part-save-status role="status"></p></div>`;
-  const types = Object.keys(p.treatments).length * Object.keys(p.treatments.brand).length, statesCount = prop('State').length;
+  const types = Object.keys(p.treatments).length * Object.keys(Object.values(p.treatments)[0] || {}).length, statesCount = prop('State').length;
   if (overview) return head + `
     <section class="inspector-section"><h3>Summary</h3><dl><div class="property"><dt>Status</dt><dd>${escape(statusLabels[part.status] || part.status)}</dd></div><div class="property"><dt>Button types</dt><dd>${types}</dd></div><div class="property"><dt>Sizes</dt><dd>${d.sizes.length}</dd></div><div class="property"><dt>States</dt><dd>${statesCount}</dd></div><div class="property"><dt>Variations</dt><dd>${d.variantCount}</dd></div><div class="property"><dt>Version</dt><dd>${d.revision}</dd></div></dl>
       <p class="workspace-help">Click a button type or a variation on the page to change its colors and size.</p></section>

@@ -6,6 +6,7 @@ import {validateFoundations} from '../foundations/validate.mjs';
 import {checkWebDraft} from './verify.mjs';
 import {compareFoundations} from '../foundations/compare.mjs';
 import {inputFreshness, selectedInputSlug, snapshotInputs} from './files.mjs';
+import {readFigmaSetting} from './settings.mjs';
 
 export const foundations = [
   { id: 'color', name: 'Color', page: '1.1', description: 'Color roles establish contrast, content hierarchy, and feedback across interface states.', prefixes: ['palette/', 'color/'] },
@@ -138,6 +139,17 @@ export function resolveValue(variable, mode, byName, seen = new Set()) {
   return { value: selected };
 }
 
+// Whether a build round may produce each output. The site needs only foundations approved in Builder; Figma also
+// needs them published there, because its steps bind to the variables in the file.
+export function buildGate(state, { figma }) {
+  // Legacy export-only systems keep their old gate: init done.
+  const approved = state.source?.kind === 'local' ? ['approved', 'synced'].includes(state.source.review) && state.setup?.status !== 'outdated' : !!state.initDone;
+  return {
+    site: approved ? { ready: true, reason: null } : { ready: false, reason: 'Approve your foundations in Builder first.' },
+    figma: !figma ? { ready: false, reason: 'Figma is off for this session.' } : state.initDone ? { ready: true, reason: null } : { ready: false, reason: 'Publish your foundations to Figma first.' },
+  };
+}
+
 export async function getState(outputDir, { preparing = false } = {}) {
   const warnings = [];
   const [ledger, progress] = await Promise.all([
@@ -210,6 +222,7 @@ export async function getState(outputDir, { preparing = false } = {}) {
     setup: setup ? { status: fresh.fresh?setup.status:setup.status==='ready'?'outdated':setup.status, message: fresh.fresh?setup.message || '':fresh.message } : null,
     slug: path.basename(outputDir), inputSlug:selectedInputSlug(setup,path.basename(outputDir)), product: scope.productType || scope.product || scope.platform || 'Not settled yet',
     figmaUrl, preview: ledger?.preview === true, status, initDone, warnings, source,
+    buildGate: buildGate({ source, initDone, setup: setup ? { status: fresh.fresh ? setup.status : 'outdated' } : null }, { figma: await readFigmaSetting(outputDir) }),
     updated: Math.max(...modified) ? new Date(Math.max(...modified)).toISOString() : null,
     steps: [1, 2, 3, 4].map(n => {
       const e = initSteps.find(e => Number(e.step) === n);
