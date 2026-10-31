@@ -81,6 +81,7 @@ One skill, six commands. Each command has its own reference file. Load it before
    - save a decision given in chat under `workspace/input/{slug}/chat/` first, so the action reads it.
 
    Then claim the resulting event yourself (`ds_create_wait` or `ds_create_prepare` / `ds_create_publish`). Ask only for a decision the inputs leave open, never for a click, a reconnect or a restart the agent can avoid. Builder's buttons remain for users who prefer them.
+16. **Change items through the item tools.** To change a token, style or rule in a saved draft, use `ds_create_items_change` (`reference/agent-mcp.md`, *Item tools*). Dry-run first, and discuss a wide change with the user before resending it with `confirmed: true`. Never edit `foundations.json` by hand.
 
 # 3. The answers folder
 

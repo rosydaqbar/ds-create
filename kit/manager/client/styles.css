@@ -804,3 +804,9 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .build-fallback .button { justify-self: start; }
 .build-error { margin: 10px 0 0; font-size: 13px; color: var(--color-text-danger, #b42318); }
 .build-error[hidden] { display: none; }
+
+/* Sync state in the Publish stepper: what is in Figma, and the local changes that are not yet. */
+.build-sync { display: grid; gap: 6px; margin-top: 8px; }
+.build-sync-state { margin: 0; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
+.build-sync[data-state="local-changes"] .build-sync-state { color: var(--color-text-primary); }
+.build-sync-diff { margin: 0; padding: 8px 10px; list-style: none; display: grid; gap: 4px; max-height: 180px; overflow: auto; border: 1px solid var(--color-border-subtle); border-radius: 8px; background: var(--color-surface-sunken, var(--color-surface-base)); font: 12px/1.4 var(--font-family-mono, ui-monospace, monospace); color: var(--color-text-secondary); overflow-wrap: anywhere; }

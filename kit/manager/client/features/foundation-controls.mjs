@@ -27,6 +27,15 @@ export const cssColor = value => value && typeof value === 'object' && ['r', 'g'
 export const isShadow = effect => ['DROP_SHADOW', 'INNER_SHADOW'].includes(effect.type);
 // Local drafts store Figma's effect shape (offset.x/y, radius); legacy exports use x/y/blur. Read either.
 export const shadowEffect = e => isShadow(e) ? { ...e, x: e.x ?? e.offset?.x ?? 0, y: e.y ?? e.offset?.y ?? 0, blur: e.blur ?? e.radius ?? 0, spread: e.spread ?? 0 } : e;
+// Back to the draft's Figma shape: offset and radius, token colors as aliases, opacity 0–1 only when it is not full.
+// Builder controls carry opacity as a percent; values of 1 or less are already a fraction.
+export function draftEffect(e) {
+  if (!isShadow(e)) return structuredClone(e);
+  const { x = 0, y = 0, blur = 0, opacity, offset, radius, ...rest } = structuredClone(e);
+  const color = typeof rest.color === 'string' && /^(color|palette)\//.test(rest.color) ? { alias: rest.color } : rest.color;
+  const fraction = opacity === undefined ? 1 : opacity > 1 ? opacity / 100 : opacity;
+  return { ...rest, color, offset: { x, y }, radius: blur, ...(Math.round(fraction * 100) !== 100 ? { opacity: Math.round(fraction * 100) / 100 } : {}) };
+}
 export function shadowSeed(style, resolve) {
   const e = style?.effects?.map(shadowEffect).find(isShadow);
   if (!e) return null;

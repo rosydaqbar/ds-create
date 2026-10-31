@@ -11,6 +11,10 @@ import {sessionOutput} from '../manager/server/files.mjs';
 import {cancelMcpJob, claimMcpJob, figmaPrompt, latestPublish, mcpPublishAction, preflightOperation} from '../manager/server/publish.mjs';
 import {cancelMcpPreparation, claimMcpPreparation, createSetupJobs, latestMcpPreparation, mcpPrepareAction, setupPrompt, waitForPreparation} from '../manager/server/setup.mjs';
 import {writeFoundationFastPlan} from '../manager/foundations/publish.mjs';
+import {createItemStore} from '../manager/foundations/store.mjs';
+import {listItems, getItems} from '../manager/foundations/query.mjs';
+import {syncState} from '../manager/foundations/baseline.mjs';
+import {createChangeRequests} from '../manager/server/changes.mjs';
 
 const session=z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).describe('Stable Builder session id, not the project display name or input folder.');
 const uuid=z.string().uuid();
@@ -18,7 +22,7 @@ const result=data=>({content:[{type:'text',text:JSON.stringify(data)}],structure
 const publicJob=job=>job?Object.fromEntries(['id','runner','status','hash','figmaUrl','message','started','updated','finished','progress','cancelRequested','cancelRequestedAt'].filter(k=>job[k]!==undefined).map(k=>[k,job[k]])):null;
 
 export function createDsCreateMcp(workspace){
- const server=new McpServer({name:'ds-create',version:'0.2.0'}, {instructions:'Operate only the selected local workspace. Preparation claims saved context and stops at a validated local draft awaiting review; it has no Figma authorization. Publish claims an already approved Builder request; it does not write Figma itself. Use your configured Figma tools to carry out its exact instructions, report progress before writes and finish with real export/audit evidence. A queued job cannot wake an idle chat: hold ds_create_wait pending to receive Prepare and Publish clicks from Builder. Never change approvals or fabricate completed output.'});
+ const server=new McpServer({name:'ds-create',version:'0.2.0'}, {instructions:'Operate only the selected local workspace. Item tools (ds_create_items_*) read and change the saved local foundations and never touch Figma; a wide change needs the user\'s agreement before you resend it with confirmed:true. Preparation claims saved context and stops at a validated local draft awaiting review; it has no Figma authorization. Publish claims an already approved Builder request; it does not write Figma itself. Use your configured Figma tools to carry out its exact instructions, report progress before writes and finish with real export/audit evidence. A queued job cannot wake an idle chat: hold ds_create_wait pending to receive Prepare and Publish clicks from Builder. Never change approvals or fabricate completed output.'});
  const owner=randomUUID(),owned=new Map(),inflight=new Set(),shutdown=new AbortController();let closing=false,closingPromise;
  const tool=(name,description,schema,handler,readOnly=false)=>server.registerTool(name,{description,inputSchema:z.object(schema).strict(),annotations:{readOnlyHint:readOnly,destructiveHint:false,openWorldHint:false}},async(args,extra)=>{
   if(closing)return {content:[{type:'text',text:'MCP connection is closing.'}],isError:true};
@@ -114,6 +118,28 @@ export function createDsCreateMcp(workspace){
  });
  tool('ds_create_prepare_cancel','Cancel queued preparation immediately or request that its owning MCP agent stop safely. Does not delete saved context or undo partial local output.',{session},async args=>{
   const outputDir=await sessionOutput(workspace,args.session),current=await latestMcpPreparation(outputDir);return current?.jobId?cancelMcpPreparation(outputDir,current.jobId):{stopped:false};
+ });
+ // Item tools: read and change foundation items in the saved local files. None of them reads or writes Figma.
+ const store=async args=>createItemStore({outputDir:await sessionOutput(workspace,args.session)});
+ const itemOp=z.object({op:z.enum(['set','add','rename','delete','apply']),target:z.string()}).passthrough();
+ tool('ds_create_items_list','List foundation items (variables and styles) from the saved local draft with resolved values per mode. Filter by domain (color, typography, space, shape, elevation, motion), collection, kind, type, name prefix or text. Does not touch Figma.',{session,domain:z.string().optional(),collection:z.string().optional(),kind:z.enum(['variable','textStyle','effectStyle','gridStyle']).optional(),type:z.string().optional(),prefix:z.string().optional(),query:z.string().max(200).optional(),limit:z.number().int().min(1).max(200).optional(),cursor:z.number().int().min(0).optional()},async args=>{
+  const {session:_,...filters}=args,{revision,draft}=await (await store(args)).read();return {revision,...listItems(draft,filters)};
+ },true);
+ tool('ds_create_items_get','Read named foundation items in full: definition, resolved value and alias chain per mode, and everything that uses them. The name "rules" returns the editable rules (discussion limits, palette ramps, contract names). Does not touch Figma.',{session,names:z.array(z.string().min(1)).min(1).max(50)},async args=>{
+  const {revision,draft,rules}=await (await store(args)).read(),names=args.names.filter(n=>n!=='rules');
+  const items=getItems(draft,names);return {revision,items:args.names.map(n=>n==='rules'?{kind:'rules',item:rules}:items[names.indexOf(n)])};
+ },true);
+ tool('ds_create_items_change','Change foundation items in the saved local draft as one new revision: ops set, add, rename, delete and apply (recipes radius-base, space-base, shadow-seed, type-family, type-scale, palette-ramp); set kind "rules" edits the rules. Send expectedRevision from your last read. Dry-run first. When the result has wide set (status needs-discussion), show the impact to the user and resend with confirmed:true only after they agree. Does not touch Figma.',{session,expectedRevision:z.number().int().min(1),ops:z.array(itemOp).min(1).max(200),reason:z.string().trim().min(1).max(200),dryRun:z.boolean().optional(),confirmed:z.boolean().optional()},async args=>{
+  try{return {status:args.dryRun?'dry-run':'saved',...await (await store(args)).change({expectedRevision:args.expectedRevision,ops:args.ops,reason:args.reason,author:'mcp',dryRun:!!args.dryRun,confirmed:!!args.confirmed})};}
+  catch(e){if(e.status===428)return {status:'needs-discussion',wide:e.wide,impact:e.impact,warnings:e.warnings,message:e.message};throw e;}
+ });
+ tool('ds_create_items_history','List recent revisions of the saved foundation draft with author, reason and op count, newest first. Does not touch Figma.',{session,limit:z.number().int().min(1).max(100).optional()},async args=>({revisions:await (await store(args)).history({limit:args.limit})}),true);
+ tool('ds_create_items_restore','Restore an earlier revision of the foundation draft as a new revision; history is kept. Send expectedRevision from your last read. Does not touch Figma.',{session,revision:z.number().int().min(1),expectedRevision:z.number().int().min(1)},async args=>(await store(args)).restore({revision:args.revision,expectedRevision:args.expectedRevision,author:'mcp'}));
+ tool('ds_create_items_diff','The sync state (local, in-sync, local-changes) and what changed locally since the last confirmed Figma publish: added, changed (old → new), renamed, deleted. Computed from local files; does not read Figma.',{session},async args=>syncState(await sessionOutput(workspace,args.session)),true);
+ tool('ds_create_change_requests','List the change requests the user saved in Builder (item, where it sits, notes), or mark one done with the revision that applied it.',{session,action:z.enum(['list','done']).optional(),id:uuid.optional(),revision:z.number().int().min(1).optional()},async args=>{
+  const changes=createChangeRequests({outputDir:await sessionOutput(workspace,args.session)});
+  if(args.action==='done')return changes.update({action:'done',id:args.id,revision:args.revision});
+  return {requests:await changes.list()};
  });
  async function cleanup(){
   if(closingPromise)return closingPromise;closing=true;shutdown.abort();

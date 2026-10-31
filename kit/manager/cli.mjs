@@ -6,6 +6,7 @@ import {spawn} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {colors, effects, values} from '../web/scripts/chrome-fallbacks.mjs';
 import {foundations, getState, observedSetup, readJSON} from './server/state.mjs';
+import {writeFigmaSetting} from './server/settings.mjs';
 
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -14,7 +15,7 @@ const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
 const command = args[0];
 let slug = arg('--slug');
 const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|build [--slug {slug}] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
+const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|build [--slug {slug}] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -87,6 +88,8 @@ async function main() {
     if (writes) await mkdir(dir, { recursive: true });
     if (await realpath(dir) !== path.join(base, slug, 'manager')) throw new Error('Manager output must stay inside the selected system folder.');
   } catch (e) { if (e.code !== 'ENOENT' || writes) throw e; }
+  // --no-figma keeps this session out of Figma (ledger flags.figma); Builder's Use Figma switch can turn it back on.
+  if (command === 'init-web' && args.includes('--no-figma')) await writeFigmaSetting(output, false);
   // The user decides; the agent carries out the matching Builder action through the running Builder.
   if (['publish', 'retry', 'fonts', 'parts', 'build'].includes(command)) {
     const runtime = await activeRuntime(dir);
