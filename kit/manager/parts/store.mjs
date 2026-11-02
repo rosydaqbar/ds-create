@@ -6,7 +6,7 @@ import {randomUUID} from 'node:crypto';
 import {ItemError} from '../foundations/ops.mjs';
 import {assertApproved, withLock} from '../foundations/store.mjs';
 import {PublishError} from '../server/files.mjs';
-import {partTemplates, templateFor} from './templates.mjs';
+import {buildOrder, partTemplates, templateFor} from './templates.mjs';
 import {buildPart, partFile, partStatus, readPart, readParts} from './files.mjs';
 import {createPartPack} from './pack.mjs';
 import {validatePart} from './validate.mjs';
@@ -19,23 +19,32 @@ const plain = x => x && typeof x === 'object' && !Array.isArray(x);
 // Inputs merge object by object (a list is replaced whole), so changing one role keeps the others.
 const deepMerge = (base, over) => plain(base) && plain(over) ? Object.fromEntries([...new Set([...Object.keys(base), ...Object.keys(over)])].map(k => [k, k in over ? deepMerge(base[k], over[k]) : base[k]])) : structuredClone(over);
 // Token choices merge per variant key and per size, the same way Builder saves them.
-function mergeOverrides(base, over) {
+export function mergeOverrides(base, over) {
   const out = {...structuredClone(base)};
   for (const [key, value] of Object.entries(over)) {
     if (key === 'treatments' && plain(value)) { out.treatments = {...(out.treatments || {})}; for (const [k, t] of Object.entries(value)) out.treatments[k] = {...(out.treatments[k] || {}), ...t}; }
     else if (key === 'sizes' && plain(value)) { out.sizes = {...(out.sizes || {})}; for (const [k, z] of Object.entries(value)) out.sizes[k] = {...(out.sizes[k] || {}), ...z, ...(z?.padding || out.sizes[k]?.padding ? {padding: {...(out.sizes[k]?.padding || {}), ...(z?.padding || {})}} : {})}; }
+    // Other Parts: map is set → row → slot, measures set → size → slot.
+    else if (['map', 'measures'].includes(key) && plain(value)) { out[key] = structuredClone(out[key] || {}); for (const [set, rows] of Object.entries(value)) { out[key][set] ||= {}; for (const [k, slots] of Object.entries(rows || {})) out[key][set][k] = {...(out[key][set][k] || {}), ...slots}; } }
     else out[key] = structuredClone(value);
   }
   return out;
 }
 
 // A change to sizes, emphases, tones, states or properties changes the contract: that is the user's call.
-function structureChange(template, before, after) {
+// users: the names of the prepared templates that use this Part, directly or through another; they become
+// outdated. broken: those that cannot be prepared again on the new structure, with the first reason.
+const and = list => list.length > 1 ? `${list.slice(0, -1).join(', ')} and ${list.at(-1)}` : list[0];
+export function structureChange(template, before, after, users = [], broken = []) {
   const a = template.contract(before), b = template.contract(after);
-  if (same(a.properties, b.properties) && a.variantCount === b.variantCount) return null;
-  const names = p => new Set(p.properties.map(x => x.name + '=' + JSON.stringify(x.values ?? x.default)));
+  if (same(a.properties, b.properties) && a.variantCount === b.variantCount && same(a.sets, b.sets)) return null;
+  const props = c => (c.sets || [c]).flatMap(s => s.properties);
+  const names = c => new Set(props(c).map(x => x.name + '=' + JSON.stringify(x.values ?? x.default)));
   const was = names(a), now = names(b), moved = [...new Set([...was, ...now].filter(x => !was.has(x) || !now.has(x)).map(x => x.split('=')[0]))];
-  return `${template.set} structure changes (${moved.join(', ') || 'properties'}; ${a.variantCount} → ${b.variantCount} variants)`;
+  const counts = a.sets && b.sets ? [...new Set([...a.sets, ...b.sets].map(s => s.name))].map(n => `${n} ${a.sets.find(s => s.name === n)?.variantCount ?? 0} → ${b.sets.find(s => s.name === n)?.variantCount ?? 0}`).join(', ') : `${a.variantCount} → ${b.variantCount}`;
+  const outdated = users.length ? `; ${and(users)} ${users.length > 1 ? 'use it and become' : 'uses it and becomes'} outdated` : '';
+  const stuck = broken.length ? `; ${and(broken.map(b => b.name))} cannot be prepared again until ${broken.length > 1 ? 'their' : 'its'} inputs change (${broken[0].reason.replace(/\.$/, '')})` : '';
+  return `${template.set} structure changes (${moved.join(', ') || 'properties'}; ${counts} variants${outdated}${stuck})`;
 }
 
 export function createPartStore({outputDir}) {
@@ -69,7 +78,7 @@ export function createPartStore({outputDir}) {
 
   async function list() {
     const draft = await readJSON(file('foundations.json')), parts = await readParts(outputDir);
-    return partTemplates.map(t => ({id: t.id, page: t.page, name: t.name, set: t.set, level: t.level, status: draft ? partStatus(parts[t.id], draft) : 'not-prepared', revision: parts[t.id]?.revision || 0}));
+    return partTemplates.map(t => ({id: t.id, page: t.page, name: t.name, set: t.set, level: t.level, status: draft ? partStatus(parts[t.id], draft, parts) : 'not-prepared', revision: parts[t.id]?.revision || 0}));
   }
   async function read(id) {
     templateFor(id);
@@ -82,12 +91,12 @@ export function createPartStore({outputDir}) {
   async function prepare({ids, author, reason = 'Prepare Parts'}) {
     checkInput({reason, author});
     if (!Array.isArray(ids) || !ids.length) throw new ItemError('Choose the Parts to prepare.');
-    const wanted = ids.map(id => templateFor(id));
+    ids.forEach(templateFor);
     return lock(async () => {
       await assertApproved(outputDir);
       const ctx = await context(), built = {...ctx.parts}, saved = [];
-      for (const t of partTemplates.filter(x => wanted.includes(x))) {
-        for (const use of t.uses) if (partStatus(built[use], ctx.draft) !== 'ready') throw new ItemError(`${t.name} needs ${templateFor(use).name} first.`);
+      for (const t of buildOrder(ids)) {
+        for (const use of t.uses) if (partStatus(built[use], ctx.draft, built) !== 'ready') throw new ItemError(`${t.name} needs ${templateFor(use).name} first.`);
         const previous = ctx.parts[t.id];
         const part = buildPart(t, {draft: ctx.draft, plan: ctx.plan, inputs: previous?.inputs || {}, overrides: previous?.overrides || {}, previous, parts: built});
         built[t.id] = part; saved.push({...part, prepared: new Date().toISOString()});
@@ -114,12 +123,28 @@ export function createPartStore({outputDir}) {
         if (op.op === 'apply' && op.recipe === 'recompile') { changes.push({field: 'recompile'}); continue; }
         if (op.op !== 'set' || !['inputs', 'overrides'].includes(op.field)) throw new ItemError('Part ops are set on inputs or overrides, and apply recompile.');
         if (op.value !== null && (typeof op.value !== 'object' || Array.isArray(op.value))) throw new ItemError(`Send ${op.field} as an object, or null to clear it.`);
+        // Button's token choices are treatments and sizes; every other Part's are map and measures.
+        const shape = t.preview ? ['treatments', 'sizes'] : ['map', 'measures'];
+        if (op.field === 'overrides' && op.value && Object.keys(op.value).some(k => !shape.includes(k))) throw new ItemError(`${t.name} overrides take ${shape.join(' and ')}.`);
         if (op.field === 'inputs') { for (const k of Object.keys(op.value || {})) if (!t.fields.includes(k)) throw new ItemError(`${t.name} has no input ${k}.`); inputs = op.value === null ? {} : deepMerge(inputs, op.value); }
         else overrides = op.value === null ? {} : mergeOverrides(overrides, op.value);
         changes.push({field: op.field});
       }
-      const wide = structureChange(t, current.inputs || {}, inputs);
       const part = buildPart(t, {draft: ctx.draft, plan: ctx.plan, inputs, overrides, previous: current, parts: ctx.parts});
+      // Every prepared template that uses this one, directly or through another, in build order. Each is built
+      // against the new structure, so the message names those that would be refused.
+      const reach = new Set([id]);
+      for (const x of buildOrder(partTemplates.map(y => y.id))) if (x.uses.some(u => reach.has(u))) reach.add(x.id);
+      const users = buildOrder([...reach].filter(x => x !== id && ctx.parts[x])), broken = [];
+      let wide = null;
+      if (structureChange(t, current.inputs || {}, inputs)) {
+        const built = {...ctx.parts, [id]: part};
+        for (const u of users) {
+          try { built[u.id] = buildPart(u, {draft: ctx.draft, plan: ctx.plan, inputs: ctx.parts[u.id].inputs || {}, overrides: ctx.parts[u.id].overrides || {}, previous: ctx.parts[u.id], parts: built}); }
+          catch (e) { broken.push({name: u.name, reason: e.message}); }
+        }
+        wide = structureChange(t, current.inputs || {}, inputs, users.map(u => u.name), broken);
+      }
       if (dryRun) return {revision: current.revision, changes, wide, dryRun: true};
       if (wide && !confirmed) throw Object.assign(new PublishError(`This change is wide: ${wide}. Discuss it with the user, then resend with confirmed: true.`, 428), {changes, wide});
       await commit(ctx, [{...part, prepared: current.prepared, updated: new Date().toISOString()}], {author, reason: reason.trim(), ops});

@@ -62,11 +62,16 @@ A change is wide when it breaks a color rule, touches more palette families than
 
 ### Parts
 
-Each Part is a local file, `parts/{id}.json`, compiled from a brand-agnostic template. The template holds the default structure (sizes, emphases, tones, states, properties, token roles); the system's own choices are its `inputs`, and token picks made in Builder are its `overrides`.
+Each Part, Component and Section is a local file, `parts/{id}.json`, compiled from a brand-agnostic template. In this section, "Part" means a Part, Component or Section unless a line says otherwise. The template holds the default structure (sizes, emphases, tones, states, properties, token roles). The system's changes to that structure are stored in `inputs`. Token picks made in Builder are stored in `overrides`.
 
-- `ds_create_items_list` with `target: "parts"` lists the Parts and their status (`not-prepared`, `outdated`, `ready`); with `target: "part:{id}"` it lists that Part's tokens.
+- `ds_create_items_list` with `target: "parts"` lists the Parts with their level (`parts`, `components`, `sections`) and status (`not-prepared`, `outdated`, `ready`); with `target: "part:{id}"` it lists that Part's tokens.
 - `ds_create_items_get` with `target: "part:{id}"` reads its tokens; the name `part` returns the whole file.
 - `ds_create_items_change` ops with `target: "part:{id}"`: `set` with `field: "inputs"` or `"overrides"` and an object `value` (merged; `null` clears it), or `apply` with `recipe: "recompile"`. One target per save.
+- Button's `overrides` hold `treatments` and `sizes`. For every other Part they hold `map` and `measures`, keyed by set → variant (or size) → slot, as in its part file. The store refuses an override for a variant, size or slot the Part does not have.
+- `ds_create_parts_prepare` prepares a Part only after the Parts it uses. If `ids` leaves out a Part another one uses, the error names the missing Part. Without `ids` it prepares every Part, Component and Section that is not `ready`.
+- A Component or Section file records `instances` for each set, in rows keyed like its token map. Each slot names the Part, Component or same-page set it holds and the variant of that set. A property the spec does not set takes that Part's default. If an instance names a variant its Part does not have, preparing fails with a one-sentence error.
+- A Part, Component or Section becomes `outdated` when a Part it uses changes its structure. The message for a wide Part change names every prepared template that uses the Part, directly or through another, and the ones that cannot be prepared again until their inputs change. After the user agrees, change those inputs, then prepare the changed Part and its users.
+- On a Part's first prepare, Node drops any tone or category family that has no colors in the foundations and records that as a decision. Adding a dropped tone or category family back is a structure change.
 - Adding or removing a size, emphasis, tone, state or property is wide: show the user what changes and resend with `confirmed: true` only after they agree.
 - `ds_create_items_history` and `ds_create_items_restore` take the same `target`.
 

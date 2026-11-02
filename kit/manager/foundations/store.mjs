@@ -123,9 +123,9 @@ export function createItemStore({outputDir}) {
       // the user's call, like any wide change.
       const saved = await readParts(outputDir), broken = [];
       for (const [id, part] of Object.entries(saved)) {
-        if (partStatus(part, current.draft) !== 'ready') continue;
+        if (partStatus(part, current.draft, saved) !== 'ready') continue;
         const t = templateFor(id), next = result.parts[id] || part;
-        try { buildPart(t, {draft: result.draft, plan: result.plan, inputs: next.inputs || {}, overrides: next.overrides || {}, previous: part, parts: saved}); }
+        try { buildPart(t, {draft: result.draft, plan: result.plan, inputs: next.inputs || {}, overrides: next.overrides || {}, previous: next, parts: saved}); }
         catch (e) { broken.push(`${t.name} could not be prepared again: ${e.message}`); }
       }
       if (broken.length) result.warnings.push(...broken);

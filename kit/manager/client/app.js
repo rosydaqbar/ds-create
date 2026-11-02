@@ -8,7 +8,7 @@ import { cssColor, rounded } from './features/foundation-controls.mjs';
 import { createMotionPreview } from './features/motion.mjs';
 import { setupPublish } from './features/publish.mjs';
 import { iconographyContent } from './features/iconography.mjs';
-import { overviewParts, partInspector, partPage, partStatus, setupParts } from './features/parts.mjs';
+import { overviewParts, partInspector, partLevels, partPage, partStatus, setupParts } from './features/parts.mjs';
 import { setupWeb } from './features/setup.mjs';
 import { setupChangeRequests } from './features/change-requests.mjs';
 import { setupBuild } from './features/build.mjs';
@@ -123,7 +123,7 @@ function renderNav() {
   if (!state) return;
   const term = $('nav-search').value.trim().toLowerCase();
   const items = state.foundations.filter(f => f.name.toLowerCase().includes(term));
-  $('nav').innerHTML = `<a class="nav-link" href="#overview" ${route() === 'overview' ? 'aria-current="page"' : ''}>${icon('overview')}<span>Overview</span></a><div class="nav-heading">Foundations</div>${items.map(f => `<a class="nav-link" href="#${f.id}" ${route() === f.id ? 'aria-current="page"' : ''}>${icon(f.id)}<span>${escape(f.name)}</span><span class="nav-dot" data-status="${f.status}" aria-label="${escape(labels[f.status])}"></span></a>`).join('')}${items.length ? '' : '<p class="nav-hint">No foundations match.</p>'}${(state.parts || []).length ? `<div class="nav-heading">Parts</div>${state.parts.filter(p => p.name.toLowerCase().includes(term)).map(p => `<a class="nav-link" href="#part-${escape(p.id)}" ${route() === 'part-' + p.id ? 'aria-current="page"' : ''}>${icon('overview')}<span>${escape(p.name)}</span><span class="nav-dot" data-status="${escape({ review: 'review', synced: 'ready', outdated: 'error' }[p.status] || 'pending')}" aria-label="${escape(p.status)}"></span></a>`).join('')}` : ''}`;
+  $('nav').innerHTML = `<a class="nav-link" href="#overview" ${route() === 'overview' ? 'aria-current="page"' : ''}>${icon('overview')}<span>Overview</span></a><div class="nav-heading">Foundations</div>${items.map(f => `<a class="nav-link" href="#${f.id}" ${route() === f.id ? 'aria-current="page"' : ''}>${icon(f.id)}<span>${escape(f.name)}</span><span class="nav-dot" data-status="${f.status}" aria-label="${escape(labels[f.status])}"></span></a>`).join('')}${items.length ? '' : '<p class="nav-hint">No foundations match.</p>'}${partLevels.map(([level, heading]) => { const list = (state.parts || []).filter(p => (p.level || 'parts') === level); return list.length ? `<div class="nav-heading">${heading}</div>${list.filter(p => p.name.toLowerCase().includes(term)).map(p => `<a class="nav-link" href="#part-${escape(p.id)}" ${route() === 'part-' + p.id ? 'aria-current="page"' : ''}>${icon('overview')}<span>${escape(p.name)}</span><span class="nav-dot" data-status="${escape({ review: 'review', synced: 'ready', outdated: 'error' }[p.status] || 'pending')}" aria-label="${escape(p.status)}"></span></a>`).join('')}` : ''; }).join('')}`;
 }
 
 function preview(f) {

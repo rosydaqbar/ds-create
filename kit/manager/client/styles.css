@@ -681,6 +681,11 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .part-stage { display: flex; align-items: center; justify-content: center; min-height: 160px; padding: 32px; border: 1px solid var(--color-border-default); border-radius: 8px; background: #ffffff; }
 .part-toggle { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 14px; }
 .part-toggle input:disabled + span { color: var(--color-text-secondary); }
+.part-table-wrap { overflow-x: auto; margin-bottom: 24px; }
+.part-table { table-layout: auto; min-width: 100%; }
+.part-table th:first-child, .part-table th:last-child { width: auto; }
+.part-table code { font-size: 12px; }
+.part-none { color: var(--color-text-tertiary); }
 .part-token-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .part-token-table th { width: 92px; padding: 6px 8px 6px 0; color: var(--color-text-secondary); font-weight: 500; text-align: left; vertical-align: top; }
 .part-token-table td { padding: 6px 0; overflow-wrap: anywhere; }

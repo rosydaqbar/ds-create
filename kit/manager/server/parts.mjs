@@ -1,15 +1,45 @@
 import path from 'node:path';
 import {readJSON} from './state.mjs';
 import {PublishError} from './files.mjs';
-import {templateFor} from '../parts/templates.mjs';
+import {partTemplates, templateFor} from '../parts/templates.mjs';
 import {createPartStore} from '../parts/store.mjs';
 
-// Parts are compiled locally from their template and the approved foundations. Only Button is wired so far.
-export const parts = [
-  { id: 'button', name: 'Button', page: '2.1', set: 'Button', description: 'The primary way to trigger an action, in three emphasis levels and two tones.' },
-];
-
-const previewButton = templateFor('button').preview;
+// What each page is for, from specs/parts/00-parts.md, specs/components/00-components.md and
+// specs/sections/00-sections.md §1.
+const purposes = {
+  button: 'The primary way to trigger an action, in three emphasis levels and two tones.',
+  'icon-button': 'A compact square action with an icon and no visible label, for toolbars, close and utility actions.',
+  link: 'Navigates to another page, section or resource through text, inline or standalone.',
+  badge: 'A compact label for status, count, category or metadata. It does nothing when clicked.',
+  tag: 'A compact value chip that can be removed, counted or selected, used in filters and multi-value inputs.',
+  avatar: 'Represents one person or entity with an image, initials or a placeholder icon, plus an optional indicator.',
+  checkbox: 'The checkbox box: unchecked, checked or mixed.',
+  radio: 'The radio control: one choice in a set of options that exclude each other.',
+  switch: 'The on/off switch for settings that apply immediately.',
+  'text-control': 'The box users type into or open: single-line, multi-line and select trigger.',
+  label: 'The field label with an optional required marker and help icon.',
+  'help-text': 'A hint or validation message under a field.',
+  tooltip: 'A short floating description attached to an element.',
+  progress: 'Shows how far a task has progressed, as a bar or a ring.',
+  spinner: 'Loading of unknown length; also used inside the loading state of Button and Icon button.',
+  divider: 'Separates groups of content horizontally or vertically.',
+  kbd: 'Shows a keyboard key or shortcut.',
+  slider: 'Picks a value or a range by dragging a handle along a track.',
+  'featured-icon': 'An icon inside a tinted shape that gives a message or card a visual anchor.',
+  'button-group': 'Connected actions or a compact view switcher.',
+  'text-field': 'Label + Text control + Help text, plus textarea and code fields.',
+  'choice-field': 'Labeled checkbox, radio and switch; choice cards and groups.',
+  'avatar-group': 'Overlapping avatar stacks and avatar + name rows.',
+  select: 'Select and multi-select fields with their option list.',
+  menu: 'Dropdown and context menus with their item rows.',
+  'social-button': 'Sign-in buttons with provider marks, and their groups.',
+  'badge-group': 'A badge with a one-line announcement message that links.',
+  'rich-text-editor': 'Toolbar, floating toolbar and editing surface for formatted text.',
+  'video-player': '16:9 media frame with overlay action and playback controls.',
+};
+// Parts, Components and Sections are compiled locally from their template and the approved foundations, one per
+// page in page order.
+export const parts = partTemplates.map(t => ({ id: t.id, name: t.name, page: t.page, set: t.set, level: t.level, description: purposes[t.id] || '' }));
 
 // Builder's Parts list and actions. Every save goes through the part store, the same path as the MCP tools.
 export function createParts({ outputDir }) {
@@ -23,7 +53,7 @@ export function createParts({ outputDir }) {
       const status = row?.status === 'ready' ? 'review' : row?.status || 'not-prepared';
       return { ...p, status, revision: saved?.revision || 0, prepared: saved?.prepared || null, variantCount: saved?.variantCount || null,
         canPrepare: ready, reason: ready ? null : 'Approve your foundations in Builder before preparing Parts.',
-        draft: saved && status !== 'outdated' && draft ? { ...saved, preview: previewButton(saved, draft) } : null };
+        draft: saved && status !== 'outdated' && draft ? { ...saved, ...(templateFor(p.id).preview ? { preview: templateFor(p.id).preview(saved, draft) } : {}) } : null };
     }));
   }
   async function prepare(input) {
@@ -33,6 +63,8 @@ export function createParts({ outputDir }) {
   // Saves token assignments chosen in Builder as a new revision of the part.
   async function update(input) {
     if (!input || Object.keys(input).some(k => !['id', 'overrides', 'reset'].includes(k)) || !parts.some(p => p.id === input.id) || typeof input.overrides !== 'object' && input.reset !== true) throw new PublishError('Send the Part and its token choices.', 400);
+    // Builder edits Button's tokens in place; every other Part is changed through the agent (ds_create_items_change).
+    if (!templateFor(input.id).preview) throw new PublishError('Change this Part through the agent.', 400);
     const current = await readJSON(path.join(outputDir, 'parts', input.id + '.json'));
     if (!current) throw new PublishError('Prepare this Part before changing it.', 412);
     const draft = await readJSON(path.join(outputDir, 'foundations.json'));

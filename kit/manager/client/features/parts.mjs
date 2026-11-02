@@ -12,14 +12,23 @@ Object.defineProperty(view, 'selection', { get: () => card(view.selected || 'bra
 
 export function partStatus(part, badge) { return badge(statusTone[part.status] || 'pending', statusLabels[part.status] || part.status); }
 
+// The sidebar and the Overview group the templates by level, in this order.
+export const partLevels = [['parts', 'Parts'], ['components', 'Components'], ['sections', 'Sections']];
+const levelNotes = {
+  parts: 'Parts are the smallest interactive pieces, built from your foundations. Prepare them here, review every variant, then publish them to Figma.',
+  components: 'Components put Parts together into fields, menus and groups.',
+  sections: 'Sections put Parts and Components together into larger regions of a screen.',
+};
+
 export function overviewParts(parts = [], { escape, badge, icon }) {
   if (!parts.length) return '';
   const canPrepare = parts.some(p => p.canPrepare), reason = parts.find(p => p.reason)?.reason || '';
-  return `<section class="section" aria-labelledby="parts-heading"><div class="section-heading"><h2 id="parts-heading">Parts</h2><small>${parts.filter(p => p.status === 'review' || p.status === 'synced').length} of ${parts.length} prepared</small></div>
-    <p class="setup-note">Parts are the smallest interactive pieces, built from your foundations. Prepare them here, review every variant, then publish them to Figma.</p>
-    <div class="foundation-list">${parts.map(p => `<a class="foundation-row" href="#part-${escape(p.id)}">${icon('overview')}<div><strong>${escape(p.page)} ${escape(p.name)}</strong><small>${escape(p.description)}</small></div><div class="row-meta">${p.variantCount ? `<span class="count">${p.variantCount} variants</span>` : ''}${partStatus(p, badge)}</div></a>`).join('')}</div>
-    <div class="parts-actions"><button class="button button-primary" type="button" data-prepare-parts ${canPrepare ? '' : 'disabled'}>${parts.some(p => p.status === 'review') && !parts.some(p => p.status === 'not-prepared' || p.status === 'outdated') ? 'Prepare Parts again' : 'Prepare Parts'}</button>${canPrepare ? '' : `<small>${escape(reason)}</small>`}<span class="parts-feedback" role="status" aria-live="polite" data-parts-feedback></span></div>
-  </section>`;
+  const groups = partLevels.map(([level, heading]) => [level, heading, parts.filter(p => (p.level || 'parts') === level)]).filter(([, , list]) => list.length);
+  return groups.map(([level, heading, list], i) => `<section class="section" aria-labelledby="${level}-heading"><div class="section-heading"><h2 id="${level}-heading">${heading}</h2><small>${list.filter(p => p.status === 'review' || p.status === 'synced').length} of ${list.length} prepared</small></div>
+    <p class="setup-note">${levelNotes[level]}</p>
+    <div class="foundation-list">${list.map(p => `<a class="foundation-row" href="#part-${escape(p.id)}">${icon('overview')}<div><strong>${escape(p.page)} ${escape(p.name)}</strong><small>${escape(p.description)}</small></div><div class="row-meta">${p.variantCount ? `<span class="count">${p.variantCount} variants</span>` : ''}${partStatus(p, badge)}</div></a>`).join('')}</div>
+    ${i === groups.length - 1 ? `<div class="parts-actions"><button class="button button-primary" type="button" data-prepare-parts ${canPrepare ? '' : 'disabled'}>${parts.some(p => p.status === 'review') && !parts.some(p => p.status === 'not-prepared' || p.status === 'outdated') ? 'Prepare Parts again' : 'Prepare Parts'}</button>${canPrepare ? '' : `<small>${escape(reason)}</small>`}<span class="parts-feedback" role="status" aria-live="polite" data-parts-feedback></span></div>` : ''}
+  </section>`).join('');
 }
 
 const px = n => `${Number(n) || 0}px`;
@@ -53,10 +62,38 @@ function emptyPart(part, { escape, badge, documentFrame }) {
   return documentFrame(`${part.page} ${part.name}`, part.description, `<div class="empty-state"><h2>${part.status === 'outdated' ? 'Your foundations changed' : 'Not prepared yet'}</h2><p>${part.status === 'outdated' ? 'Prepare this Part again so it uses the current foundations.' : 'Prepare Parts to build every variant from your published foundations.'}</p><button class="button button-primary" type="button" data-prepare-parts ${part.canPrepare ? '' : 'disabled'}>Prepare Parts</button>${part.canPrepare ? '' : `<small>${escape(part.reason || '')}</small>`}<span class="parts-feedback" role="status" aria-live="polite" data-parts-feedback></span></div>`, partStatus(part, badge));
 }
 
+// Every Part except Button, and every Component and Section: a read-only review of its sets, token map, measures,
+// instances and component tokens. The agent changes these; Builder shows what is saved.
+const table = (head, rows, escape) => `<div class="part-table-wrap"><table class="value-table part-table"><thead><tr>${head.map(h => `<th scope="col">${escape(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${c === null || c === undefined || c === '' ? '<span class="part-none">—</span>' : `<code>${escape(c)}</code>`}</td>` : `<th scope="row">${escape(c)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const slotsOf = rows => [...new Set(Object.values(rows || {}).flatMap(r => Object.keys(r)))];
+const plainKey = key => key === '*' ? 'Every variant' : key.split('|').map(p => p.split('=')[1]).map(say).join(' · ');
+// An instance cell: the Part (or same-page set) and the variant values this row sets.
+const instanceText = i => i ? `${i.set} ${Object.entries(i.variant || {}).map(([k, v]) => `${k}=${v}`).join(', ')}`.trim() : '';
+const tokenValue = v => v?.alias || (v && typeof v === 'object' && 'r' in v ? `rgba(${[v.r, v.g, v.b].map(n => Math.round(n * 255)).join(', ')}, ${v.a ?? 1})` : String(v));
+function genericPage(part, { escape, badge, documentFrame }) {
+  const d = part.draft, sets = d.sets || [];
+  const decisions = [...d.decisions.map(x => `<li><strong>${escape(x.key)}:</strong> ${escape(x.value)}<small>${escape(x.reason || '')}</small></li>`), ...d.notes.map(n => `<li><strong>Fallback role</strong><small>${escape(n)}</small></li>`)];
+  const body = `<section class="section" aria-labelledby="part-decisions"><div class="section-heading"><h2 id="part-decisions">Choices we made for you</h2><small>Version ${d.revision} · ${d.variantCount} variations</small></div>
+      ${decisions.length ? `<ul class="part-decisions">${decisions.join('')}</ul>` : '<p class="setup-note">The spec decided everything for this Part; nothing needed a choice.</p>'}
+      <p class="setup-note">Ask the agent to change any of this. Builder shows what is saved.</p></section>
+    ${sets.map((set, i) => {
+      const map = d.map?.[set.name], measures = d.measures?.[set.name], slots = slotsOf(map), sizes = Object.keys(measures || {}), measureSlots = slotsOf(measures);
+      const instances = d.instances?.[set.name], held = slotsOf(instances);
+      return `<section class="section" aria-labelledby="part-set-${i}"><div class="section-heading"><h2 id="part-set-${i}">${escape(set.name)}</h2><small>${set.private ? 'Private part · ' : ''}${set.variantCount} variants</small></div>
+        <h3 class="part-subheading">Properties</h3>${table(['Property', 'Type', 'Values', 'Default'], set.properties.map(p => [p.name, p.type, (p.values || []).join(', '), p.default === null ? '' : String(p.default)]), escape)}
+        ${map ? `<h3 class="part-subheading">Token map</h3>${table(['Variant', ...slots], Object.entries(map).map(([key, row]) => [plainKey(key), ...slots.map(sl => row[sl])]), escape)}` : ''}
+        ${measures ? `<h3 class="part-subheading">Measures</h3>${table(['Size', ...measureSlots], sizes.map(z => [z === '*' ? 'Every size' : say(z), ...measureSlots.map(sl => measures[z][sl])]), escape)}` : ''}
+        ${held.length ? `<h3 class="part-subheading">Instances</h3>${table(['Variant', ...held], Object.entries(instances).map(([key, row]) => [plainKey(key), ...held.map(sl => instanceText(row[sl]))]), escape)}` : ''}</section>`;
+    }).join('')}
+    ${d.tokens.length ? `<section class="section" aria-labelledby="part-tokens"><div class="section-heading"><h2 id="part-tokens">Component tokens</h2><small>${d.tokens.length} in the Components collection</small></div>${table(['Token', 'Value', 'Description'], d.tokens.map(t => [t.name, Object.values(t.values).map(tokenValue).join(', '), t.description]), escape)}</section>` : ''}`;
+  return documentFrame(`${part.page} ${part.name}`, part.description, body, partStatus(part, badge));
+}
+
 export function partPage(part, helpers) {
   const { escape, badge, documentFrame, previewCard } = helpers;
   if (!part) return documentFrame('Part not found', 'Choose a Part from the navigation.', '<div class="empty-state"><a class="button" href="#overview">Go to Overview</a></div>');
   if (!part.draft) return emptyPart(part, helpers);
+  if (!part.draft.preview) return genericPage(part, helpers);
   const d = part.draft, p = d.preview, states = d.properties.find(x => x.name === 'State').values, sel = view.selection;
   // Tones come from this system's Button, which may have more or fewer than the template's brand and danger.
   const tones = Object.keys(p.treatments);
@@ -87,6 +124,11 @@ export function partInspector(part, { escape }) {
   const overview = part?.draft && !view.selected;
   const head = overview ? `<div class="workspace-panel-header"><h2>${escape(part.name)}</h2><span class="label-beta">Overview</span></div><p class="workspace-disclaimer">Every choice is kept as soon as you make it.</p>` : `<div class="workspace-panel-header"><h2>${escape(part?.draft ? `${view.selection.emphasis[0].toUpperCase() + view.selection.emphasis.slice(1)} ${view.selection.tone} button` : part?.name || 'Part')}</h2><span class="label-beta">Preview</span></div><p class="workspace-disclaimer">Every choice is kept as soon as you make it.</p>`;
   if (!part?.draft) return head + `<section class="inspector-section"><p class="workspace-help">${escape(part?.status === 'outdated' ? 'Prepare this Part again to use the current foundations.' : 'Prepare Parts to review and adjust this Part.')}</p></section>`;
+  if (!part.draft.preview) {
+    const d = part.draft;
+    return `<div class="workspace-panel-header"><h2>${escape(part.name)}</h2><span class="label-beta">Overview</span></div><p class="workspace-disclaimer">Ask the agent to change this Part.</p>
+      <section class="inspector-section"><h3>Summary</h3><dl><div class="property"><dt>Status</dt><dd>${escape(statusLabels[part.status] || part.status)}</dd></div>${(d.sets || []).map(x => `<div class="property"><dt>${escape(x.name)}</dt><dd>${x.variantCount} variants</dd></div>`).join('')}<div class="property"><dt>Component tokens</dt><dd>${d.tokens.length}</dd></div><div class="property"><dt>Version</dt><dd>${d.revision}</dd></div></dl></section>`;
+  }
   const d = part.draft, p = d.preview, sel = view.selection, prop = name => d.properties.find(x => x.name === name).values;
   const select = (key, label, values) => `<label class="workspace-field" for="part-${key}"><span>${escape(label)}</span><select id="part-${key}" data-part-control="${key}">${values.map(v => `<option value="${escape(v)}" ${sel[key] === v ? 'selected' : ''}>${escape(say(v))}</option>`).join('')}</select></label>`;
   const toggle = (key, label, disabled = false) => `<label class="part-toggle" for="part-${key}"><input id="part-${key}" type="checkbox" data-part-control="${key}" ${sel[key] ? 'checked' : ''} ${disabled ? 'disabled' : ''}/><span>${escape(label)}</span></label>`;

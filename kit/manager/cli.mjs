@@ -98,7 +98,7 @@ async function main() {
     const draft = await readJSON(path.join(output, 'foundations.json'));
     if (!draft) throw new Error(`No saved foundations for ${slug}.`);
     const { partStatus } = await import('./parts/files.mjs');
-    const saved = await readParts(output), stale = Object.values(saved).find(p => partStatus(p, draft) !== 'ready');
+    const saved = await readParts(output), stale = Object.values(saved).find(p => partStatus(p, draft, saved) !== 'ready');
     // A Part built on older foundations could point at names that are gone; prepare it first.
     if (stale) throw new Error(`${stale.name} is outdated; prepare it again before writing tokens.`);
     const parts = Object.fromEntries(Object.entries(saved).filter(([, p]) => p.format === PART_FORMAT));

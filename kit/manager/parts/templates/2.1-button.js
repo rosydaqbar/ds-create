@@ -1,6 +1,7 @@
 // Premade Part template. Brand-agnostic: every structural choice below is an input with a default from
 // specs/parts/2.1-button.md, and a system may change any of it. compile never holds a brand value.
 import {ItemError} from '../../foundations/ops.mjs';
+import {merge, resolver} from '../kit.mjs';
 
 export const id = 'button';
 export const page = '2.1';
@@ -8,7 +9,7 @@ export const name = 'Button';
 export const set = 'Button';
 export const level = 'parts';
 export const spec = 'specs/parts/2.1-button.md';
-export const uses = [];
+export const uses = ['spinner'];
 export const fields = ['sizes', 'emphases', 'tones', 'states', 'stateRoles', 'defaultVariant', 'properties', 'roles', 'toneRoles', 'effects', 'labelWeights', 'depth'];
 
 const live = (fill, border, text, icon) => ({fill, border, text, icon});
@@ -78,7 +79,6 @@ export const defaults = {
 
 // Object inputs (roles, toneRoles, effects…) merge into the defaults, so changing one role keeps the rest.
 const plain = x => x && typeof x === 'object' && !Array.isArray(x);
-const merge = (base, over) => plain(base) && plain(over) ? Object.fromEntries([...new Set([...Object.keys(base), ...Object.keys(over)])].map(k => [k, k in over ? merge(base[k], over[k]) : base[k]])) : structuredClone(over === undefined ? base : over);
 const settings = inputs => merge(defaults, inputs || {});
 
 // One sentence for a structure this template cannot build.
@@ -113,23 +113,6 @@ export function contract(inputs = {}) {
   const s = settings(inputs), props = [...variants(s), ...s.properties];
   const tokens = s.sizes.flatMap(z => [...['top', 'right', 'bottom', 'left'].map(side => `button/padding-${side}/${z.size}`), `button/gap/${z.size}`]);
   return {properties: props, variantCount: props.filter(p => p.type === 'variant').reduce((n, p) => n * p.values.length, 1), tokens};
-}
-
-function resolver(draft) {
-  const vars = new Map(draft.variables.map(v => [v.name, v]));
-  const modes = Object.fromEntries(draft.collections.map(c => [c.name, c.modes]));
-  const resolve = (name, depth = 0) => {
-    const v = vars.get(name);
-    if (!v || depth > 12) return null;
-    const x = v.values[modes[v.collection]?.[0]] ?? Object.values(v.values)[0];
-    return x && typeof x === 'object' && x.alias ? resolve(x.alias, depth + 1) : x;
-  };
-  const css = value => {
-    if (typeof value === 'string') return value;
-    if (value && typeof value === 'object' && 'r' in value) return `rgba(${[value.r, value.g, value.b].map(n => Math.round(n * 255)).join(', ')}, ${value.a ?? 1})`;
-    return null;
-  };
-  return {vars, has: name => vars.has(name), value: resolve, color: name => css(resolve(name))};
 }
 
 const list = items => items.length < 2 ? items.join('') : items.slice(0, -1).join(', ') + ' and ' + items.at(-1);
