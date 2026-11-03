@@ -7,8 +7,8 @@ import {deriveRadii, shadowSeed, deriveShadows, isShadow, cssColor, draftEffect}
 
 export class ItemError extends Error { constructor(message) { super(message); this.status = 400; } }
 
-const lists = {variable: 'variables', textStyle: 'textStyles', effectStyle: 'effectStyles', gridStyle: 'gridStyles'};
-const styleDomain = {textStyle: 'typography', effectStyle: 'elevation', gridStyle: 'space'};
+const lists = {variable: 'variables', textStyle: 'textStyles', effectStyle: 'effectStyles', gridStyle: 'gridStyles', paintStyle: 'paintStyles'};
+const styleDomain = {textStyle: 'typography', effectStyle: 'elevation', gridStyle: 'space', paintStyle: 'color'};
 const variableFields = ['description', 'scopes', 'codeSyntax', 'hiddenFromPublishing'];
 const web = name => `var(--${name.replaceAll('/', '-')})`;
 const isAlias = value => value && typeof value === 'object' && Object.hasOwn(value, 'alias');
@@ -27,18 +27,21 @@ export function resolveIn(byName, name, mode, seen = new Set()) {
   return isAlias(x) ? resolveIn(byName, x.alias, mode, new Set(seen).add(name)) : x;
 }
 
-// Every item that points at a variable: aliases, text-style bindings and effect colors.
+const stopsOf = s => (s.paints || []).flatMap(p => p?.stops || []);
+// Every item that points at a variable: aliases, text-style bindings, effect colors and gradient stops.
 export function referencesTo(draft, name) {
   const refs = [];
   for (const v of draft.variables) for (const [mode, value] of Object.entries(v.values || {})) if (value?.alias === name) { refs.push({kind: 'variable', name: v.name, via: 'alias', mode}); }
   for (const s of draft.textStyles || []) for (const [key, ref] of Object.entries(s.bound || {})) if (ref === name) refs.push({kind: 'textStyle', name: s.name, via: 'bound.' + key});
   for (const s of draft.effectStyles || []) if ((s.effects || []).some(e => e.color?.alias === name)) refs.push({kind: 'effectStyle', name: s.name, via: 'effect color'});
+  for (const s of draft.paintStyles || []) if (stopsOf(s).some(x => x?.color?.alias === name)) refs.push({kind: 'paintStyle', name: s.name, via: 'gradient stop'});
   return refs;
 }
 function replaceReferences(draft, from, to) {
   for (const v of draft.variables) for (const value of Object.values(v.values || {})) if (value?.alias === from) value.alias = to;
   for (const s of draft.textStyles || []) for (const key of Object.keys(s.bound || {})) if (s.bound[key] === from) s.bound[key] = to;
   for (const s of draft.effectStyles || []) for (const e of s.effects || []) if (e.color?.alias === from) e.color.alias = to;
+  for (const s of draft.paintStyles || []) for (const x of stopsOf(s)) if (x?.color?.alias === from) x.color.alias = to;
 }
 
 function domainFor(plan, draft, name, kind, type, collection) {
@@ -284,7 +287,9 @@ function applyOne(draft, plan, op, changes, ctx) {
     if (kind === 'variable') {
       const refs = referencesTo(draft, op.name).filter(r => !(r.kind === 'variable' && r.name === op.name));
       const users = new Set(refs.map(r => r.kind + ':' + r.name)).size + partUsers.length;
-      if (users && !op.replaceWith) throw new ItemError(`${op.name} is used by ${users} item${users === 1 ? '' : 's'}; pass replaceWith to delete it.`);
+      // When a gradient stop uses the color the refusal names that gradient; otherwise it counts the users.
+      const stops = [...new Set(refs.filter(r => r.kind === 'paintStyle').map(r => r.name))];
+      if (users && !op.replaceWith) throw new ItemError(stops.length ? `${op.name} is used by ${stops.join(', ')} (gradient stop).` : `${op.name} is used by ${users} item${users === 1 ? '' : 's'}; pass replaceWith to delete it.`);
       if (op.replaceWith) {
         const target = draft.variables.find(v => v.name === op.replaceWith), source = draft.variables.find(v => v.name === op.name);
         if (!target || target.type !== source.type) throw new ItemError(`${op.replaceWith} cannot replace ${op.name}: it is missing or a different type.`);
@@ -311,9 +316,9 @@ export function measureImpact(before, after) {
   }
   const moved = new Set([...primitives, ...semantics.map(s => s.name)]);
   const styles = [];
-  for (const list of ['textStyles', 'effectStyles', 'gridStyles']) for (const s of after[list] || []) {
+  for (const list of ['textStyles', 'effectStyles', 'gridStyles', 'paintStyles']) for (const s of after[list] || []) {
     const old = (before[list] || []).find(x => x.name === s.name);
-    const refs = [...Object.values(s.bound || {}), ...(s.effects || []).map(e => e.color?.alias).filter(Boolean)];
+    const refs = [...Object.values(s.bound || {}), ...[...(s.effects || []), ...stopsOf(s)].map(x => x?.color?.alias).filter(Boolean)];
     if (!same(old, s) || refs.some(r => moved.has(r))) styles.push(s.name);
   }
   const families = [...new Set(primitives.map(n => n.match(/^palette\/[^/]+/)?.[0]).filter(Boolean))];

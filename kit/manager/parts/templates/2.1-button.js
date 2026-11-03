@@ -1,7 +1,7 @@
 // Premade Part template. Brand-agnostic: every structural choice below is an input with a default from
 // specs/parts/2.1-button.md, and a system may change any of it. compile never holds a brand value.
 import {ItemError} from '../../foundations/ops.mjs';
-import {merge, resolver} from '../kit.mjs';
+import {merge, paintContrast, paintCss, paintOf, resolver} from '../kit.mjs';
 
 export const id = 'button';
 export const page = '2.1';
@@ -159,13 +159,17 @@ export function compile(inputs, {draft, plan, overrides = {}}) {
     for (const side of sides) tokens.push({name: `button/padding-${side}/${z.size}`, collection: 'Components', type: 'FLOAT', values: {Value: {alias: z.padding[side]}}, description: `${side[0].toUpperCase() + side.slice(1)} padding of ${z.size} buttons, outside the optical text inset.`, scopes: ['GAP'], codeSyntax: {WEB: `var(--button-padding-${side}-${z.size})`}});
     tokens.push({name: `button/gap/${z.size}`, collection: 'Components', type: 'FLOAT', values: {Value: {alias: z.gap}}, description: `Space between the icon and label of ${z.size} buttons.`, scopes: ['GAP'], codeSyntax: {WEB: `var(--button-gap-${z.size})`}});
   }
-  const defined = n => r.has(n) || draft.effectStyles.some(e => e.name === n);
+  // A fill may be a gradient (paint style); the validator keeps gradients out of every other slot.
+  const defined = n => r.has(n) || draft.effectStyles.some(e => e.name === n) || !!paintOf(draft, n);
   const treatments = Object.fromEntries(s.tones.map(tone => [tone, Object.fromEntries(s.emphases.map(e => [e, Object.fromEntries(s.states.map(st => [st, {...treatment(s, tone, e, st, depth, defined, notes), ...(overrides.treatments?.[`${tone}|${e}|${st}`] || {})}]))]))]));
-  const missing = [...new Set(Object.values(treatments).flatMap(t => Object.values(t).flatMap(e => Object.values(e).flatMap(x => [x.fill, x.border, x.text, x.icon].filter(Boolean)))).filter(n => !r.has(n)))];
+  const missing = [...new Set(Object.values(treatments).flatMap(t => Object.values(t).flatMap(e => Object.values(e).flatMap(x => [x.fill, x.border, x.text, x.icon].filter(Boolean)))).filter(n => !r.has(n) && !paintOf(draft, n)))];
   for (const z of sizeRows) for (const n of [z.height, z.icon, z.inset, z.radius, z.borderWidth, z.gap, ...Object.values(z.padding)]) if (!r.has(n)) missing.push(n);
   for (const t of Object.values(treatments).flatMap(x => Object.values(x).flatMap(y => Object.values(y)))) if (t.effect && !defined(t.effect)) missing.push(t.effect);
   for (const z of sizeRows) if (!draft.textStyles.some(t => t.name === z.label)) missing.push(z.label);
   if (missing.length) throw Object.assign(new ItemError('The foundations are missing roles the Button needs: ' + [...new Set(missing)].slice(0, 6).join(', ')), {status: 412});
+  // Text on a gradient fill is checked against every stop.
+  for (const [tone, ems] of Object.entries(treatments)) for (const [em, states] of Object.entries(ems)) for (const [st, t] of Object.entries(states))
+    if (paintOf(draft, t.fill) && r.has(t.text)) for (const n of paintContrast(draft, {where: `${title(tone)} ${em} ${st} text`, text: t.text, paint: t.fill})) if (!notes.includes(n)) notes.push(n);
   const c = contract(s), variantProps = c.properties.filter(p => p.type === 'variant');
   return {
     id, page, name, set,
@@ -179,7 +183,8 @@ export function compile(inputs, {draft, plan, overrides = {}}) {
 // Resolved values for Builder's preview only; Figma and the site use the token names above.
 export function preview(part, draft) {
   const r = resolver(draft), withTokens = {...draft, variables: [...draft.variables, ...part.primitives, ...part.tokens], collections: [...draft.collections, {name: 'Components', modes: ['Value']}]}, rp = resolver(withTokens);
-  const shadow = n => { const e = draft.effectStyles.find(x => x.name === n); return e ? e.effects.map(x => `${x.offset?.x ?? 0}px ${x.offset?.y ?? 0}px ${x.radius ?? 0}px ${x.spread ?? 0}px ${x.color?.alias ? r.color(x.color.alias) : 'transparent'}`).join(', ') : null; };
+  // Shadows only: an inner shadow is drawn inside the button; hidden layers and blurs are not shadows.
+  const shadow = n => { const e = draft.effectStyles.find(x => x.name === n); return e ? e.effects.filter(x => ['DROP_SHADOW', 'INNER_SHADOW'].includes(x.type) && x.visible !== false).map(x => `${x.type === 'INNER_SHADOW' ? 'inset ' : ''}${x.offset?.x ?? 0}px ${x.offset?.y ?? 0}px ${x.radius ?? 0}px ${x.spread ?? 0}px ${x.color?.alias ? r.color(x.color.alias) : 'transparent'}`).join(', ') : null; };
   const colors = prefixes => draft.variables.filter(v => v.type === 'COLOR' && prefixes.some(p => v.name.startsWith(p))).map(v => ({name: v.name, value: r.color(v.name)}));
   const numbers = prefixes => draft.variables.filter(v => v.type === 'FLOAT' && prefixes.some(p => v.name.startsWith(p))).map(v => ({name: v.name, value: r.value(v.name)}));
   const style = n => { const st = draft.textStyles.find(t => t.name === n); return st && {fontFamily: st.fontFamily, fontStyle: st.fontStyle, fontSize: st.fontSize, lineHeight: st.lineHeight?.value ?? null, letterSpacing: st.letterSpacing?.value ?? 0, weight: r.value(st.bound?.fontWeight) ?? 400}; };
@@ -187,11 +192,12 @@ export function preview(part, draft) {
     sizes: part.sizes.map(z => ({size: z.size, height: rp.value(z.height), padding: Object.fromEntries(Object.entries(z.padding).map(([k, v]) => [k, rp.value(v)])), gap: rp.value(z.gap), icon: rp.value(z.icon), inset: rp.value(z.inset), radius: rp.value(z.radius), borderWidth: rp.value(z.borderWidth), label: style(z.label), labelStyle: z.label})),
     // Token choices per control, with their resolved value, so Builder can preview any assignment.
     options: {
-      fill: colors(['color/fill/', 'color/surface/']), border: colors(['color/border/']), text: colors(['color/text/']), icon: colors(['color/icon/']),
+      // Gradients come after the colors, drawn with their stops resolved.
+      fill: [...colors(['color/fill/', 'color/surface/']), ...(draft.paintStyles || []).map(g => ({name: g.name, value: paintCss(draft, g.name, r)}))], border: colors(['color/border/']), text: colors(['color/text/']), icon: colors(['color/icon/']),
       effect: draft.effectStyles.map(e => ({name: e.name, value: shadow(e.name)})),
       height: numbers(['size/control/']), space: numbers(['space/']).filter(o => !o.name.endsWith('/optical')), radius: numbers(['radius/']),
       label: draft.textStyles.map(t => ({name: t.name, value: style(t.name)})),
     },
-    treatments: Object.fromEntries(Object.entries(part.treatments).map(([tone, e]) => [tone, Object.fromEntries(Object.entries(e).map(([em, st]) => [em, Object.fromEntries(Object.entries(st).map(([x, t]) => [x, {fill: r.color(t.fill), border: t.border ? r.color(t.border) : null, text: r.color(t.text), icon: r.color(t.icon), shadow: t.effect ? shadow(t.effect) : null}]))]))])),
+    treatments: Object.fromEntries(Object.entries(part.treatments).map(([tone, e]) => [tone, Object.fromEntries(Object.entries(e).map(([em, st]) => [em, Object.fromEntries(Object.entries(st).map(([x, t]) => [x, {fill: paintOf(draft, t.fill) ? paintCss(draft, t.fill, r) : r.color(t.fill), border: t.border ? r.color(t.border) : null, text: r.color(t.text), icon: r.color(t.icon), shadow: t.effect ? shadow(t.effect) : null}]))]))])),
   };
 }

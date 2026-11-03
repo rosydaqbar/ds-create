@@ -9,6 +9,9 @@ export const set = 'Link';
 export const level = 'parts';
 export const spec = 'specs/parts/2.3-link.md';
 export const uses = [];
+// A fill or background slot the kit component never draws as a background takes a color only: a CSS gradient
+// cannot show there (parts/validate.mjs refuses it, Builder offers none). A link draws no background at all.
+export const solidSlots = {Link: {fill: 'it is not drawn as a background, so it cannot show a gradient'}};
 
 // A weight list: the first face the text styles have, closest to semibold first.
 const semibold = size => [`type/body/${size}/semibold`, `type/body/${size}/medium`, `type/body/${size}/bold`];

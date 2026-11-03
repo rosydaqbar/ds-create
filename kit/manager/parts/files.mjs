@@ -26,7 +26,7 @@ export async function readParts(outputDir) {
 const keyOf = draft => {
   const keys = new Map();
   for (const v of draft.variables) keys.set(v.name, 'variable:' + v.name);
-  for (const [list, kind] of [['textStyles', 'textStyle'], ['effectStyles', 'effectStyle'], ['gridStyles', 'gridStyle']]) for (const s of draft[list] || []) keys.set(s.name, kind + ':' + s.name);
+  for (const [list, kind] of [['textStyles', 'textStyle'], ['effectStyles', 'effectStyle'], ['gridStyles', 'gridStyle'], ['paintStyles', 'paintStyle']]) for (const s of draft[list] || []) keys.set(s.name, kind + ':' + s.name);
   return keys;
 };
 // Every foundation name the compiled Part mentions, with that item's current hash.
@@ -41,6 +41,8 @@ function dependencies(compiled, draft) {
   };
   for (const m of Object.values(compiled.mixes || {})) chain(m.role);
   walk({tokens: compiled.tokens.map(t => t.values), mixes: compiled.mixes, sizes: compiled.sizes, treatments: compiled.treatments, map: compiled.map, measures: compiled.measures, overrides: compiled.overrides});
+  // A gradient draws its stops' colors, so every item on each stop's alias chain counts too.
+  for (const g of (draft.paintStyles || []).filter(p => found.has(p.name))) for (const p of g.paints || []) for (const st of p.stops || []) if (st.color?.alias) chain(st.color.alias);
   return Object.fromEntries([...found].sort().map(n => [n, hashes[keys.get(n)]]));
 }
 
@@ -63,7 +65,7 @@ export function buildPart(template, {draft, plan, inputs = {}, overrides = {}, p
   // compiles against the old name standing in for the new item, and every old name is then written as the new one.
   const renames = previous?.renames || {}, standIns = {};
   let view = draft;
-  for (const [from, to] of Object.entries(renames)) for (const list of ['variables', 'textStyles', 'effectStyles']) {
+  for (const [from, to] of Object.entries(renames)) for (const list of ['variables', 'textStyles', 'effectStyles', 'paintStyles']) {
     const item = (draft[list] || []).find(x => x.name === to);
     if (item && !(draft[list] || []).some(x => x.name === from)) { view = view === draft ? structuredClone(draft) : view; view[list].push({...structuredClone(item), name: from}); standIns[from] = to; }
   }
@@ -80,8 +82,12 @@ export function buildPart(template, {draft, plan, inputs = {}, overrides = {}, p
 // parts: the saved Parts. A Part is outdated when a Part it uses is not ready or changed its structure.
 export function partStatus(part, draft, parts = {}) {
   if (!part) return 'not-prepared';
-  if (part.format !== PART_FORMAT || !part.depends) return 'outdated';
+  return staleBy(part, draft, parts) ? 'outdated' : 'ready';
+}
+// What made a saved Part outdated: 'foundations', the id of the first Part it uses that changed, or null when current.
+export function staleBy(part, draft, parts = {}) {
+  if (part.format !== PART_FORMAT || !part.depends) return 'foundations';
   const keys = keyOf(draft), hashes = itemHashes(draft).items;
-  if (!Object.entries(part.depends).every(([n, h]) => keys.has(n) && hashes[keys.get(n)] === h)) return 'outdated';
-  return Object.entries(part.usesHash || {}).every(([u, h]) => parts[u] && partStatus(parts[u], draft, parts) === 'ready' && structureHash(parts[u]) === h) ? 'ready' : 'outdated';
+  if (!Object.entries(part.depends).every(([n, h]) => keys.has(n) && hashes[keys.get(n)] === h)) return 'foundations';
+  return Object.entries(part.usesHash || {}).find(([u, h]) => !(parts[u] && partStatus(parts[u], draft, parts) === 'ready' && structureHash(parts[u]) === h))?.[0] || null;
 }

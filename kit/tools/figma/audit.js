@@ -7,7 +7,7 @@
 //   PAGE = '2.1 Button'    page checks for one page: canvas (loose nodes, frame order, y = 0, gap,
 //                          overlap), frame names for the page type, unbound fills/strokes/gradients,
 //                          text without a text style, padding/gap/radius/stroke without a variable,
-//                          effects without an effect style, layer opacity, default layer names,
+//                          effects without an effect style, gradient fills without a paint style, layer opacity, default layer names,
 //                          variant naming and the Part C §4.2 property vocabulary.
 //   LIBRARY = true         with PAGE, at a library step (INITIATOR Part B §6, steps 6–10): the same checks, except
 //                          that only the holding frames are expected (Component or Layout, and .Main); the doc frames
@@ -49,7 +49,7 @@ if (!PAGE) {
   const byName = new Map(vars.map((v) => [v.name, v]));
   const colById = new Map(cols.map((c) => [c.id, c]));
   const colorCol = cols.find((c) => c.name === 'Color');
-  out.counts = { collections: cols.length, variables: vars.length, textStyles: (await figma.getLocalTextStylesAsync()).length, effectStyles: (await figma.getLocalEffectStylesAsync()).length };
+  out.counts = { collections: cols.length, variables: vars.length, textStyles: (await figma.getLocalTextStylesAsync()).length, effectStyles: (await figma.getLocalEffectStylesAsync()).length, paintStyles: (await figma.getLocalPaintStylesAsync()).length };
 
   for (const v of vars) {
     const col = colById.get(v.variableCollectionId);
@@ -189,6 +189,8 @@ if (PAGE) {
         hit(`${where}-unbound-radius`, lvl, 'Corner radius is bound to radius/* variables', `${n.cornerRadius} on ${pathOf(n)}`);
       if ('effects' in n && Array.isArray(n.effects) && n.effects.some((e) => e.visible !== false) && !n.effectStyleId)
         hit(`${where}-effect-no-style`, lvl, 'Effects come from effect styles', pathOf(n));
+      if ('fills' in n && Array.isArray(n.fills) && n.fills.some((p) => p.visible !== false && p.type.startsWith('GRADIENT')) && !n.fillStyleId)
+        hit(`${where}-gradient-no-style`, lvl, 'Gradient fills come from paint styles', pathOf(n));
       if ('opacity' in n && n.opacity < 1 && !bound(n, 'opacity')) hit(`${where}-layer-opacity`, comp && ACCEPTED.frozenComponentValues ? 'info' : 'warn', 'No opacity on layers; use a color role', `${Math.round(n.opacity * 100)}% on ${pathOf(n)}`);
       if (comp && !isComp && DEFAULT_NAME.test(n.name)) hit('default-layer-name', 'fail', 'Layers inside components use anatomy names (SYSTEM Part C §4.1)', pathOf(n));
     }

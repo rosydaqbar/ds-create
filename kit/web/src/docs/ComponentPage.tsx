@@ -15,6 +15,7 @@ export { PageHeader } from './DocPage';
 const tw = new Map<string, { css: string; tailwind: string | null }>([
   ...tokens.variables.map((v) => [v.name, { css: v.css, tailwind: v.tailwind }] as const),
   ...tokens.effectStyles.map((e) => [e.name, { css: e.css, tailwind: e.tailwind }] as const),
+  ...(tokens.paintStyles ?? []).map((g) => [g.name, { css: g.css, tailwind: g.tailwind }] as const),
   ...tokens.textStyles.map((t) => [t.name, { css: '', tailwind: t.className }] as const),
 ]);
 

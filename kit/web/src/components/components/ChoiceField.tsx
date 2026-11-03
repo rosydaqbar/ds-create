@@ -110,12 +110,12 @@ export type ChoiceCardType = 'icon' | 'icon-card' | 'avatar' | 'payment' | 'radi
 export type ChoiceBreakpoint = 'mobile' | 'desktop';
 
 const cardPad = {
-  desktop: { sm: 'p-xl', md: 'p-2xl' },
-  mobile: { sm: 'p-lg', md: 'p-xl' },
+  desktop: { sm: 'p-(--choice-card-padding-desktop-sm)', md: 'p-(--choice-card-padding-desktop-md)' },
+  mobile: { sm: 'p-(--choice-card-padding-mobile-sm)', md: 'p-(--choice-card-padding-mobile-md)' },
 } as const;
 const cardGap = {
-  desktop: { sm: 'gap-md', md: 'gap-lg' },
-  mobile: { sm: 'gap-md', md: 'gap-md' },
+  desktop: { sm: 'gap-(--choice-card-gap-desktop-sm)', md: 'gap-(--choice-card-gap-desktop-md)' },
+  mobile: { sm: 'gap-(--choice-card-gap-mobile-sm)', md: 'gap-(--choice-card-gap-mobile-md)' },
 } as const;
 const cardText = { sm: 'type-body-sm-medium', md: 'type-body-md-medium' } as const;
 const cardSub = { sm: 'type-body-sm-regular', md: 'type-body-md-regular' } as const;

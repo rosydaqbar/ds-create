@@ -43,9 +43,9 @@ const outline = 'bg-surface-base border-border-default text-text-secondary';
 
 /** Padding-y is reduced by the border so heights match Figma's inside stroke (22 · 24 · 28). */
 const sizeClass: Record<BadgeSize, string> = {
-  sm: 'py-[calc(var(--space-xxs)_-_var(--border-width-default))] gap-(--space-xs) type-body-xs-medium',
-  md: 'py-[calc(var(--space-xxs)_-_var(--border-width-default))] gap-(--space-xs) type-body-sm-medium',
-  lg: 'py-[calc(var(--space-xs)_-_var(--border-width-default))] gap-(--space-xs) type-body-sm-medium',
+  sm: 'py-[calc(var(--badge-padding-y-sm)_-_var(--border-width-default))] gap-(--badge-gap-sm) type-body-xs-medium',
+  md: 'py-[calc(var(--badge-padding-y-md)_-_var(--border-width-default))] gap-(--badge-gap-md) type-body-sm-medium',
+  lg: 'py-[calc(var(--badge-padding-y-lg)_-_var(--border-width-default))] gap-(--badge-gap-lg) type-body-sm-medium',
 };
 const padStart = { sm: 'pl-(--badge-padding-x-sm)', md: 'pl-(--badge-padding-x-md)', lg: 'pl-(--badge-padding-x-lg)' };
 const padEnd = { sm: 'pr-(--badge-padding-x-sm)', md: 'pr-(--badge-padding-x-md)', lg: 'pr-(--badge-padding-x-lg)' };

@@ -31,7 +31,15 @@ export interface TokenEffectStyle {
   name: string;
   css: string;
   tailwind: string;
-  effects: { type: string; x: number; y: number; blur: number; spread: number; color: unknown }[];
+  effects: { type: string; visible?: boolean; blendMode?: string; x: number; y: number; blur: number; spread: number; color: unknown }[];
+  light: string;
+  dark: string;
+}
+export interface TokenPaintStyle {
+  name: string;
+  css: string;
+  tailwind: string;
+  paints: { type: string; angle: number; stops: { position: number; color: unknown }[] }[];
   light: string;
   dark: string;
 }
@@ -44,5 +52,7 @@ export interface TokenData {
   variables: TokenVariable[];
   textStyles: TokenTextStyle[];
   effectStyles: TokenEffectStyle[];
+  /** Gradients (paint styles); absent in a system without any. */
+  paintStyles?: TokenPaintStyle[];
   gridStyles: { name: string; grids: { pattern: string; count: number; gutter: number; margin: number; alignment: string }[] }[];
 }

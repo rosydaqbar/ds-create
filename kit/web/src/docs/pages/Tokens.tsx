@@ -32,7 +32,7 @@ function chainOf(name: string, mode = 'Light'): string[] {
   return out;
 }
 const primitiveOf = (name: string, mode = 'Light') => chainOf(name, mode).at(-1) ?? name;
-const exists = (name: string) => byName.has(name) || tokens.textStyles.some((s) => s.name === name) || tokens.effectStyles.some((s) => s.name === name);
+const exists = (name: string) => byName.has(name) || tokens.textStyles.some((s) => s.name === name) || tokens.effectStyles.some((s) => s.name === name) || !!tokens.paintStyles?.some((s) => s.name === name);
 /** "a, b and c" (no serial comma, as in the rest of the docs). */
 const joinList = (items: string[]) => (items.length < 2 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`);
 const pageTo = (id: string) => {
@@ -50,7 +50,7 @@ const collectionInfo: Record<string, { holds: string; shownOn: ReactNode; sample
   Size: { holds: 'Control, icon, avatar, indicator, track, width, container, measure and touch sizes.', shownOn: <TextLinkTo id="1.3" label="1.3 Space & layout" />, samples: ['size/control/md', 'size/icon/md', 'size/touch-min'] },
   Shape: { holds: 'Radius roles and border widths.', shownOn: <TextLinkTo id="1.4" label="1.4 Shape" />, samples: ['radius/control', 'radius/surface', 'border/width/default'] },
   Motion: { holds: 'Durations, easings and delays.', shownOn: <TextLinkTo id="1.6" label="1.6 Motion" />, samples: ['motion/duration/fast', 'motion/duration/base', 'motion/easing/enter'] },
-  Components: { holds: 'Component tokens, used only where no semantic role fits.', shownOn: 'each component’s Anatomy tab', samples: ['button/padding-x/md', 'switch/thumb/fill', 'avatar/placeholder/fill'] },
+  Components: { holds: 'Component tokens, used only where no semantic role fits.', shownOn: 'each component’s Anatomy tab', samples: ['button/padding-left/md', 'switch/thumb/fill', 'avatar/placeholder/fill'] },
   Documentation: { holds: 'Measures and roles for the Figma documentation kit.', shownOn: '9.1 Doc kit (Figma only)', samples: ['doc/space/block', 'doc/measure/reading', 'doc/surface/stage'] },
 };
 
@@ -71,7 +71,7 @@ const MAP = (
   ['focus/default', '--focus-default', 'shadow-focus-default'],
   ['motion/duration/base', '--motion-duration-base', 'duration-(--motion-duration-base)'],
   ['motion/easing/enter', '--motion-easing-enter', 'ease-enter'],
-  ['button/padding-x/md', '--button-padding-x-md', 'px-(--button-padding-x-md)'],
+  ['button/padding-left/md', '--button-padding-left-md', 'pl-(--button-padding-left-md)'],
   ] as const
 ).filter(([n]) => exists(n));
 
@@ -84,9 +84,10 @@ const PATTERNS = [
   ['Size', 'size/{group}/{step} · size/touch-min', 'size/control/md'],
   ['Shape', 'radius/{role} · border/width/{role}', 'radius/control, border/width/focus'],
   ['Effect styles', 'elevation/{level} · focus/{tone} · blur/backdrop/{step}', 'elevation/overlay, focus/danger'],
+  ...(tokens.paintStyles?.length ? [['Paint styles', 'color/gradient/{name}', tokens.paintStyles[0].name]] : []),
   ['Grid styles', 'grid/{breakpoint}', 'grid/desktop'],
   ['Motion', 'motion/{duration | easing | delay}/{role}', 'motion/duration/base'],
-  ['Components', '{component}[/{part}]/{property}[/{size | state}]', 'button/padding-x/md, switch/thumb/fill'],
+  ['Components', '{component}[/{part}]/{property}[/{size | state}]', 'button/padding-left/md, switch/thumb/fill'],
   ['Documentation', 'doc/{group}/{role}', 'doc/space/block'],
 ];
 
@@ -104,7 +105,7 @@ function componentChain(prefer: string[], test: (t: TokenVariable) => boolean) {
   const found = prefer.map((n) => byName.get(n)).find(ok) ?? tokens.variables.find(ok);
   return found ? chainOf(found.name).slice(0, 3).reverse() : null;
 }
-const paddingChain = componentChain(['button/padding-x/lg', 'button/padding-x/md', 'button/padding-x/sm', 'button/padding-x/xl'], (t) => t.type === 'FLOAT');
+const paddingChain = componentChain(['button/padding-left/lg', 'button/padding-left/md', 'button/padding-left/sm', 'button/padding-left/xl'], (t) => t.type === 'FLOAT');
 const SIZE_WORD: Record<string, string> = { xs: 'extra-small', sm: 'small', md: 'medium', lg: 'large', xl: 'extra-large' };
 const withArticle = (w: string) => `${/^[aeiou]/i.test(w) ? 'An' : 'A'} ${w}`;
 const colorChain = componentChain(['switch/thumb/fill'], (t) => t.type === 'COLOR');
@@ -325,8 +326,8 @@ function Overview() {
               steps={paddingChain}
               result={paddingChain[2].startsWith('button/') ? <Button size={(paddingChain[2].split('/').pop() as 'sm' | 'md' | 'lg' | 'xl') ?? 'md'} label="Save changes" /> : <ValueChip name={paddingChain[2]} />}
               note={
-                paddingChain[2].startsWith('button/padding-x/')
-                  ? `${withArticle(SIZE_WORD[paddingChain[2].split('/').pop() ?? ''] ?? 'sized')} button’s horizontal padding needs a component token, because no general spacing role means “button padding”.`
+                paddingChain[2].startsWith('button/padding-left/')
+                  ? `${withArticle(SIZE_WORD[paddingChain[2].split('/').pop() ?? ''] ?? 'sized')} button needs a component token for its left padding, because no general spacing role covers button padding.`
                   : 'This value needs a component token, because no general role describes it.'
               }
             />
@@ -732,8 +733,9 @@ const rows: Row[] = [
   ...tokens.variables.map((t) => ({ name: t.name, collection: t.collection, hay: `${t.name} ${codeHay(t.name, `${t.css} ${t.tailwind ?? ''}`)}`.toLowerCase() })),
   ...tokens.textStyles.map((t) => ({ name: t.name, collection: 'Text styles', hay: `${t.name} ${codeHay(t.name, t.className)}`.toLowerCase() })),
   ...tokens.effectStyles.map((t) => ({ name: t.name, collection: 'Effect styles', hay: `${t.name} ${codeHay(t.name, `${t.css} ${t.tailwind}`)}`.toLowerCase() })),
+  ...(tokens.paintStyles ?? []).map((t) => ({ name: t.name, collection: 'Paint styles', hay: `${t.name} ${codeHay(t.name, `${t.css} ${t.tailwind}`)}`.toLowerCase() })),
 ];
-const groups = [...tokens.collections.map((c) => c.name), 'Text styles', 'Effect styles'];
+const groups = [...tokens.collections.map((c) => c.name), 'Text styles', 'Effect styles', ...(tokens.paintStyles?.length ? ['Paint styles'] : [])];
 const PAGE = 120;
 
 function Reference() {

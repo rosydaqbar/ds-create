@@ -11,7 +11,7 @@ function generate(accepted, extra = {}) {
   try {
     mkdirSync(join(dir, 'scripts'));
     mkdirSync(join(dir, 'tokens'));
-    for (const f of ['build-tokens.mjs', 'chrome-fallbacks.mjs']) copyFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url)), join(dir, 'scripts', f));
+    for (const f of ['build-tokens.mjs', 'token-model.mjs', 'chrome-fallbacks.mjs']) copyFileSync(fileURLToPath(new URL(`./${f}`, import.meta.url)), join(dir, 'scripts', f));
     const src = {
       file: { name: 'Mode regression fixture' },
       collections: [
@@ -36,6 +36,7 @@ function generate(accepted, extra = {}) {
     execFileSync(process.execPath, [join(dir, 'scripts/build-tokens.mjs')], { stdio: 'pipe' });
     const generated = readFileSync(join(dir, 'src/tokens/tokens.gen.ts'), 'utf8');
     return {
+      generated,
       data: JSON.parse(generated.split('export const tokens: TokenData = ')[1].trim().slice(0, -1)),
       css: readFileSync(join(dir, 'src/styles/tokens.css'), 'utf8'),
       chrome: readFileSync(join(dir, 'src/styles/chrome.gen.css'), 'utf8'),
@@ -147,4 +148,96 @@ test('native Figma motion serializes seconds and easing objects without losing a
   const token=data.variables.find(v=>v.name==='motion/duration/base');
   assert.equal(token.modes.Standard.value,'0.2s');assert.equal(token.modes.Reduced.value,'0s');
   assert.equal(token.modes.Standard.alias,'scale/duration/base');
+});
+
+test('the token data from local files type-checks: raw easing values and effects with visible and blendMode', () => {
+  const curve = { type: 'CUSTOM_CUBIC_BEZIER', easingFunctionCubicBezier: { x1: 0.2, y1: 0, x2: 0, y2: 1 } };
+  const { data, generated } = generate(null, {
+    file: 'foundations.json',
+    variables: [{ name: 'scale/easing/standard', collection: 'Primitives', type: 'EASING', description: '', values: { Value: curve } }],
+    // The shape kit/manager's local token export writes (foundations/export.mjs).
+    effectStyles: [{ name: 'elevation/control', effects: [{ type: 'DROP_SHADOW', visible: true, blendMode: 'NORMAL', x: 0, y: 1, blur: 2, spread: 0, color: { r: 0, g: 0, b: 0, a: 0.1 } }] }],
+  });
+  assert.equal(data.variables[0].modes.Value.alias, null);
+  const dir = mkdtempSync(join(tmpdir(), 'ds-token-types-'));
+  try {
+    writeFileSync(join(dir, 'tokens.gen.ts'), generated);
+    copyFileSync(fileURLToPath(new URL('../src/tokens/types.ts', import.meta.url)), join(dir, 'types.ts'));
+    const tsc = fileURLToPath(new URL('../node_modules/typescript/bin/tsc', import.meta.url));
+    execFileSync(process.execPath, [tsc, '--noEmit', '--strict', '--target', 'es2022', '--moduleResolution', 'bundler', '--module', 'esnext', join(dir, 'tokens.gen.ts')], { stdio: 'pipe' });
+  } catch (e) { assert.fail(String(e.stdout || e.message)); }
+  finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('stageCss scopes a system\'s variables, dark values and text styles under one selector, as plain CSS', async () => {
+  const { stageCss } = await import('./token-model.mjs');
+  const css = stageCss({
+    file: 'foundations.json', collections: [{ name: 'Primitives', modes: ['Value'] }, { name: 'Color', modes: ['Light', 'Dark'] }],
+    variables: [
+      { name: 'palette/base/white', collection: 'Primitives', type: 'COLOR', values: { Value: '#ffffff' } },
+      { name: 'palette/base/black', collection: 'Primitives', type: 'COLOR', values: { Value: '#000000' } },
+      { name: 'color/text/primary', collection: 'Color', type: 'COLOR', values: { Light: { alias: 'palette/base/black' }, Dark: { alias: 'palette/base/white' } } },
+    ],
+    textStyles: [{ name: 'type/body/md/regular', fontFamily: 'Example Sans', fontStyle: 'Regular', fontSize: 16, lineHeight: 24, letterSpacing: 0 }],
+    effectStyles: [], gridStyles: [],
+  }, '.ds-stage');
+  assert.match(css, /^\.ds-stage \{\n  --palette-base-white: #ffffff;/);
+  assert.match(css, /--color-text-primary: var\(--palette-base-black\);/);
+  assert.match(css, /\.ds-stage\[data-theme="dark"\], \[data-theme="dark"\] \.ds-stage \{\n  --color-text-primary: var\(--palette-base-white\);/);
+  assert.match(css, /\.ds-stage \.type-body-md-regular \{\n  font-family: "Example Sans", system-ui/);
+  // Names the system lacks still get the site defaults, so a sample Part never draws with an empty value.
+  assert.match(css, /\.ds-stage \{[^}]*--color-text-tertiary:/);
+  assert.doesNotMatch(css, /@theme|@utility|:root/);
+  // A system without Dark leaves the dark block out, so its drawings keep their Light values.
+  assert.doesNotMatch(stageCss({ file: 'x', collections: [], variables: [], textStyles: [], effectStyles: [], gridStyles: [] }, '.ds-stage', { dark: false }), /data-theme/);
+});
+
+const gradientFixture = {
+  variables: [
+    { name: 'palette/base/white', collection: 'Primitives', type: 'COLOR', values: { Value: '#ffffff' } },
+    { name: 'palette/base/black', collection: 'Primitives', type: 'COLOR', values: { Value: '#000000' } },
+    { name: 'palette/brand/500', collection: 'Primitives', type: 'COLOR', values: { Value: '#c33734' } },
+    { name: 'palette/brand/700', collection: 'Primitives', type: 'COLOR', values: { Value: '#7a1f1d' } },
+    { name: 'color/text/primary', collection: 'Color', type: 'COLOR', values: { Light: { alias: 'palette/base/black' }, Dark: { alias: 'palette/base/white' } } },
+  ],
+  paintStyles: [
+    { name: 'color/gradient/brand', description: '', paints: [{ type: 'GRADIENT_LINEAR', angle: 180, stops: [{ position: 0, color: { alias: 'palette/brand/500' } }, { position: 1, color: { alias: 'palette/brand/700' } }] }] },
+    { name: 'color/gradient/text-fade', description: '', paints: [{ type: 'GRADIENT_LINEAR', angle: 90, stops: [{ position: 0, color: { alias: 'color/text/primary' } }, { position: 0.5, color: { r: 1, g: 0, b: 0, a: 0.5 } }, { position: 1, color: { r: 0, g: 0, b: 0, a: 1 } }] }] },
+  ],
+};
+
+test('gradientCss writes angle, var() stops, trailing-zero-free percentages and literal colors', async () => {
+  const { gradientCss } = await import('./token-model.mjs');
+  assert.equal(gradientCss(gradientFixture.paintStyles[0].paints[0]), 'linear-gradient(180deg, var(--palette-brand-500) 0%, var(--palette-brand-700) 100%)');
+  assert.equal(gradientCss(gradientFixture.paintStyles[1].paints[0]), 'linear-gradient(90deg, var(--color-text-primary) 0%, rgba(255, 0, 0, 0.5) 50%, #000000 100%)');
+  assert.equal(gradientCss({ angle: 45, stops: [{ position: 0.125, color: { alias: 'a/b.c' } }, { position: 1, color: { alias: 'x' } }] }, (c) => c.alias), 'linear-gradient(45deg, a/b.c 12.5%, x 100%)');
+});
+
+test('a gradient is declared in the light and dark blocks, resolves per mode, and stays out of the Tailwind theme', () => {
+  const { data, css } = generate(null, gradientFixture);
+  const light = css.split('\n').filter((l) => /--color-gradient-/.test(l));
+  assert.ok(css.includes('--color-gradient-brand: linear-gradient(180deg, var(--palette-brand-500) 0%, var(--palette-brand-700) 100%);'));
+  assert.ok(css.includes('--color-gradient-text-fade: linear-gradient(90deg, var(--palette-base-black) 0%, rgba(255, 0, 0, 0.5) 50%, #000000 100%);'));
+  assert.ok(css.includes('--color-gradient-text-fade: linear-gradient(90deg, var(--palette-base-white) 0%'), 'dark value follows the aliased semantic');
+  assert.equal(light.filter((l) => l.includes('--color-gradient-brand:')).length, 2, 'declared in both the light and the dark block');
+  // The `@theme inline` block carries the --color-* mappings; the plain `@theme` block is only the resets.
+  const theme = css.match(/@theme inline \{[\s\S]*?\n\}/)?.[0] ?? '';
+  assert.match(theme, /--color-text-primary: var\(--color-text-primary\);/, 'the inline block is the one that maps colors');
+  assert.doesNotMatch(theme, /gradient/);
+  assert.doesNotMatch(css.match(/@theme \{[\s\S]*?\n\}/)?.[0] ?? '', /gradient/);
+  const g = data.paintStyles.find((s) => s.name === 'color/gradient/text-fade');
+  assert.equal(g.css, '--color-gradient-text-fade');
+  assert.equal(g.tailwind, 'bg-(image:--color-gradient-text-fade)');
+  assert.match(g.light, /var\(--palette-base-black\) 0%/);
+  assert.match(g.dark, /var\(--palette-base-white\) 0%/);
+  assert.equal(data.paintStyles.length, 2);
+});
+
+test('stageCss holds a gradient in the light block and redeclares an aliased one in the dark block', async () => {
+  const { stageCss } = await import('./token-model.mjs');
+  const css = stageCss({ file: 'x', collections: [{ name: 'Primitives', modes: ['Value'] }, { name: 'Color', modes: ['Light', 'Dark'] }], textStyles: [], effectStyles: [], gridStyles: [], ...gradientFixture }, '.ds-stage');
+  const [light, dark] = css.split('.ds-stage[data-theme="dark"]');
+  assert.match(light, /--color-gradient-brand: linear-gradient\(180deg, var\(--palette-brand-500\) 0%, var\(--palette-brand-700\) 100%\);/);
+  assert.match(dark, /--color-gradient-text-fade: linear-gradient\(90deg, var\(--palette-base-white\) 0%/);
+  assert.doesNotMatch(css, /@theme/);
 });

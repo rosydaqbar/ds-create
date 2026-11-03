@@ -1,3 +1,4 @@
+import { copyText } from './clipboard.mjs';
 import { builderSettings } from '../../shared/ui-settings.mjs';
 import { normalizeInterfaceDetails, tokenizationPreview, platformsForDevices, devicesForPlatforms } from '../../shared/interface.mjs';
 import { preparationView } from './preparation.mjs';
@@ -148,7 +149,7 @@ export function setupWeb({ onChange = () => {}, progress = () => null } = {}) {
 
   $('setup-edit').addEventListener('click',editContext);
   $('setup-edit-cancel').addEventListener('click',()=>{editing=false;step=1;pending=[];files();error('');paint();$('setup-edit').focus();});
-  $('setup-copy-resume').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(flow.resumeCommand);const label=$('setup-copy-resume').querySelector('[data-anatomy="label"]');label.textContent='Copied';setTimeout(()=>{label.textContent='Copy resume command';},1500);}catch{error('Copy failed. Select the resume command above and copy it.');}});
+  $('setup-copy-resume').addEventListener('click',async()=>{try{await copyText(flow.resumeCommand);const label=$('setup-copy-resume').querySelector('[data-anatomy="label"]');label.textContent='Copied';setTimeout(()=>{label.textContent='Copy resume command';},1500);}catch{error('Copy failed. Select the resume command above and copy it.');}});
   $('setup-open').addEventListener('click',async()=>{await refresh();if(flow?.status==='questions'){location.hash='overview';preparation.reply();}else if(!dialog.open)open();});
   $('setup-close').addEventListener('click',close);$('setup-explore').addEventListener('click',()=>{close();location.hash='overview';});$('setup-review').addEventListener('click',()=>{close();location.hash='overview';});
   dialog.addEventListener('cancel',e=>{e.preventDefault();close();});

@@ -85,3 +85,9 @@ SESSION.md
 # Design hook (impeccable): local settings, never in git.
 .impeccable/
 .orca/
+
+# Maintainer tests stay local; they are not published.
+tests/
+
+# Maintainer planning (specs and plans) stays local; the repo is public.
+docs/superpowers/

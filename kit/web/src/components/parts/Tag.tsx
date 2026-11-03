@@ -20,12 +20,12 @@ export type TagSize = 'sm' | 'md' | 'lg';
 export type TagType = 'text' | 'removable' | 'count';
 
 const sizeClass: Record<TagSize, string> = {
-  sm: 'h-(--tag-height-sm) gap-(--space-xs) type-body-xs-medium',
-  md: 'h-(--tag-height-md) gap-(--space-sm) type-body-sm-medium',
-  lg: 'h-(--tag-height-lg) gap-(--space-sm) type-body-sm-medium',
+  sm: 'h-(--tag-height-sm) gap-(--tag-gap-sm) type-body-xs-medium',
+  md: 'h-(--tag-height-md) gap-(--tag-gap-md) type-body-sm-medium',
+  lg: 'h-(--tag-height-lg) gap-(--tag-gap-lg) type-body-sm-medium',
 };
-const padStart = { sm: 'pl-(--space-md)', md: 'pl-(--tag-padding-x-md)', lg: 'pl-(--space-lg)' };
-const padEnd = { sm: 'pr-(--space-md)', md: 'pr-(--tag-padding-x-md)', lg: 'pr-(--space-lg)' };
+const padStart = { sm: 'pl-(--tag-padding-x-sm)', md: 'pl-(--tag-padding-x-md)', lg: 'pl-(--tag-padding-x-lg)' };
+const padEnd = { sm: 'pr-(--tag-padding-x-sm)', md: 'pr-(--tag-padding-x-md)', lg: 'pr-(--tag-padding-x-lg)' };
 const padEndTight = { sm: 'pr-(--tag-padding-x-tight-sm)', md: 'pr-(--tag-padding-x-tight-md)', lg: 'pr-(--tag-padding-x-tight-lg)' };
 const dotSize = { sm: 'size-(--size-indicator-xs)', md: 'size-(--size-indicator-xs)', lg: 'size-(--size-indicator-sm)' };
 

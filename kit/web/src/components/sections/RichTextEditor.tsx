@@ -54,7 +54,7 @@ const SIZE_SELECT_WIDTH = 'w-[7.5rem]';
 /** Input min height per Size (Figma 120 / 160): no size token exists. */
 /** Space the floating toolbar needs above a selection before it flips below (toolbar height + gap). */
 const FLIP_MARGIN = 64;
-const MIN_HEIGHT: Record<RichTextSize, string> = { sm: 'min-h-[7.5rem]', md: 'min-h-[10rem]' };
+const MIN_HEIGHT: Record<RichTextSize, string> = { sm: 'min-h-(--rich-text-editor-input-min-height-sm)', md: 'min-h-(--rich-text-editor-input-min-height-md)' };
 
 /* ---------- toolbar ---------- */
 
@@ -265,8 +265,8 @@ export function RichTextFloatingToolbar({ type = 'simple', formats, onCommand, c
 /* ---------- editor ---------- */
 
 const contentSize: Record<RichTextSize, string> = {
-  sm: 'px-xl py-lg type-body-sm-regular',
-  md: 'px-2xl py-xl type-body-md-regular',
+  sm: 'px-(--rich-text-editor-input-padding-x-sm) py-(--rich-text-editor-input-padding-y-sm) type-body-sm-regular',
+  md: 'px-(--rich-text-editor-input-padding-x-md) py-(--rich-text-editor-input-padding-y-md) type-body-md-regular',
 };
 /** Content model: heading, paragraph, list, link, quote, code block. Blocks are spaced by space/md. */
 const contentStyles = cn(
@@ -548,7 +548,7 @@ export function RichTextEditor({
   const boxStyle: CSSProperties | undefined = height ? { height } : undefined;
 
   return (
-    <div className={cn('flex w-full min-w-0 flex-col', size === 'sm' ? 'gap-md' : 'gap-lg', className)} {...rest}>
+    <div className={cn('flex w-full min-w-0 flex-col', size === 'sm' ? 'gap-(--rich-text-editor-gap-sm)' : 'gap-(--rich-text-editor-gap-md)', className)} {...rest}>
       {!floatingMode && (
         <div ref={toolbar}>
           <RichTextToolbar

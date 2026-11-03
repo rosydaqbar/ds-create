@@ -22,16 +22,24 @@ export function validatePart(part, template, {draft, parts = {}, inputs = {}} = 
   const prefixes = [...new Set([template.set, ...want.map(s => s.name)].map(setPrefix))];
   const pattern = new RegExp(`^(${prefixes.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})/[a-z0-9-]+(/[a-z0-9-]+)*$`);
   const variables = new Set([...(draft?.variables || []).map(v => v.name), ...(part.tokens || []).map(t => t.name), ...template.uses.flatMap(u => (parts[u]?.tokens || []).map(t => t.name))]);
-  const known = new Set([...variables, ...(draft?.textStyles || []).map(t => t.name), ...(draft?.effectStyles || []).map(e => e.name)]);
+  const paints = new Set((draft?.paintStyles || []).map(p => p.name));
+  const known = new Set([...variables, ...(draft?.textStyles || []).map(t => t.name), ...(draft?.effectStyles || []).map(e => e.name), ...paints]);
   for (const t of part.tokens || []) {
     if (!pattern.test(t.name)) errors.push(`${t.name} does not follow ${prefixes[0]}/{role}/{variant}.`);
     for (const v of Object.values(t.values || {})) if (v?.alias && !variables.has(v.alias)) errors.push(`${t.name} aliases ${v.alias}, which does not exist.`);
   }
   for (const [tone, ems] of Object.entries(part.treatments || {})) for (const [em, states] of Object.entries(ems)) for (const [state, t] of Object.entries(states))
-    for (const field of ['fill', 'text', 'icon']) if (!t?.[field]) errors.push(`${template.set} ${tone}/${em}/${state} has no ${field}.`);
+    for (const field of ['fill', 'border', 'text', 'icon', 'effect']) {
+      if (['fill', 'text', 'icon'].includes(field) && !t?.[field]) errors.push(`${template.set} ${tone}/${em}/${state} has no ${field}.`);
+      // A gradient fills; it never colors an outline, text, icon or shadow.
+      else if (field !== 'fill' && paints.has(t?.[field])) errors.push(`${template.set} ${tone}/${em}/${state} ${field} uses ${t[field]}, a gradient. Only the fill can use a gradient.`);
+    }
   for (const r of c.rows || []) if (!part.map?.[r.set]?.[r.key]) errors.push(`${r.set} ${r.key} has no token map.`);
   for (const [area, sets] of [['map', part.map], ['measures', part.measures]]) for (const [set, rows] of Object.entries(sets || {})) for (const [key, slots] of Object.entries(rows || {})) for (const [slot, token] of Object.entries(slots || {}))
     if (typeof token === 'string' && !known.has(token)) errors.push(`${set} ${key} ${slot} uses ${token}, which does not exist.`);
+    else if (paints.has(token) && (area !== 'map' || !['fill', 'background'].includes(slot))) errors.push(`${set} ${key} ${slot} uses ${token}, a gradient. Only fill and background slots can use a gradient.`);
+    // A fill the kit component draws as a stroke, an SVG fill or a text color: the template says why.
+    else if (paints.has(token) && template.solidSlots?.[set]?.[slot]) errors.push(`${set} ${slot} takes a color: ${template.solidSlots[set][slot]}.`);
   // Every instance names a Part the template uses (or a set on its own page) and a variant that set has.
   const setsOf = p => p ? p.sets || [{name: p.set, properties: p.properties}] : [];
   for (const r of c.instanceRows || []) if (!part.instances?.[r.set]?.[r.key]) errors.push(`${r.set} ${r.key} has no instances.`);
@@ -39,6 +47,7 @@ export function validatePart(part, template, {draft, parts = {}, inputs = {}} = 
     const where = `${set} ${key} ${slot}`, own = i.part === template.id, used = own ? part : parts[i.part];
     if (!own && !template.uses.includes(i.part)) { errors.push(`${where} uses ${i.part}, which ${template.name} does not list in uses.`); continue; }
     const target = setsOf(used).find(x => x.name === i.set), owner = own ? template.name : used?.name || i.part;
+    if (!used) { errors.push(`${where} uses ${i.set || i.part}, which is not prepared yet.`); continue; }
     if (!target) { errors.push(`${where} uses ${i.set || i.part}, which ${owner} does not have.`); continue; }
     for (const [prop, value] of Object.entries(i.variant || {})) {
       const p = target.properties.find(x => x.name === prop && x.type === 'variant');

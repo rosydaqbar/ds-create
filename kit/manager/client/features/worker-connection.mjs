@@ -1,3 +1,4 @@
+import { copyText } from './clipboard.mjs';
 import { builderSettings } from '../../shared/ui-settings.mjs';
 export function setupWorkerConnection(){
  const $=id=>document.getElementById(id),root=$('worker-connection'),recovery=$('worker-recovery'),prompt=$('worker-spawn-prompt'),recheck=$('worker-recheck');
@@ -33,7 +34,7 @@ export function setupWorkerConnection(){
  }
  $('worker-copy-prompt').addEventListener('click',async()=>{
   if(recovery.hidden||!prompt.value)return;
-  try{await navigator.clipboard.writeText(prompt.value);text('worker-copy-feedback','Copied. Paste into your agent to continue.');}
+  try{await copyText(prompt.value);text('worker-copy-feedback','Copied. Paste into your agent to continue.');}
   catch{if(!recovery.hidden){prompt.focus();prompt.select();text('worker-copy-feedback','Copy the selected prompt manually.');}}
  });
  recheck.addEventListener('click',check);

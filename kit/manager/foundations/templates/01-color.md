@@ -6,7 +6,7 @@ Draft hash: `{{draftHash}}`
 
 ## Fixed behavior
 
-Source palette anchors and semantic exceptions. Node creates ramps, aliases and both selected appearance modes.
+Source palette anchors and semantic exceptions. Node creates ramps, aliases and both selected appearance modes. It also creates the paint style `color/gradient/brand` at 180°: its first stop is the brand ramp's middle step and its second is two steps darker (the darkest step if fewer remain), with each stop aliasing the corresponding brand palette step. The default gradient needs no input. If the brand ramp has fewer than two steps, the compiler skips the gradient without recording a decision.
 This template is premade. AI extracts source facts and identifies necessary exceptions; Node expands and validates the result.
 
 ## Saved Builder choices

@@ -30,7 +30,7 @@ Agents read and change foundation items and Parts through DS Create MCP. Every t
 
 | Tool | Use |
 | --- | --- |
-| `ds_create_items_list` | Find items by domain, collection, kind, type, name prefix or text. Values are resolved per mode. |
+| `ds_create_items_list` | Find items by domain, collection, kind (`variable`, `textStyle`, `effectStyle`, `gridStyle`, `paintStyle`), type, name prefix or text. Values are resolved per mode. |
 | `ds_create_items_get` | Read items in full, with the alias chain and `usedBy`. The name `rules` returns the editable rules. |
 | `ds_create_items_change` | Save a list of ops as one revision. |
 | `ds_create_items_history` · `ds_create_items_restore` | List revisions; restore one as a new revision. |
@@ -42,7 +42,7 @@ Ops, each with `target: "foundations"`:
 
 - `set`: one mode's `value` or `alias`, or `fields` (description, scopes, codeSyntax, style properties);
 - `add`: a variable, style, collection or mode;
-- `rename`: updates every alias, binding and effect color that points at the item;
+- `rename`: updates every alias, binding, effect color and gradient stop that points at the item;
 - `delete`: refused while the item is used, unless `replaceWith` names its replacement;
 - `apply` with a recipe: `radius-base {rem}`, `space-base {rem}`, `shadow-seed {seed}`, `type-family {family, role?}`, `type-scale {percent}`, `palette-ramp {family, anchors, replace?}`.
 
@@ -53,10 +53,11 @@ In a new system, setting a literal value on a semantic token stores it on a prim
 When the user asks for a change:
 
 1. Read the items it names with `ds_create_items_list` or `ds_create_items_get`, and note the `revision`.
-2. Call `ds_create_items_change` with `dryRun: true`.
-3. If the result has `wide` set, or the direction can be read more than one way, show the user which items will change, which rule is affected and any contrast warnings, then wait for their answer. Resend with `confirmed: true` only after they agree.
-4. Otherwise save the same ops with the same `expectedRevision`. A 409 means the draft changed meanwhile: read again and redo the change.
-5. Report the new revision in one line; Builder picks it up on its own. Mark the change request `done` if the change came from one.
+2. If no existing token fits, add one that follows the naming in `specs/SYSTEM.md` and tell the user what you added; wait for their approval of the new foundations before moving on. If ds-create cannot express the change, say so and propose the feature.
+3. Call `ds_create_items_change` with `dryRun: true`.
+4. If the result has `wide` set, or the direction can be read more than one way, show the user which items will change, which rule is affected and any contrast warnings, then wait for their answer. Resend with `confirmed: true` only after they agree.
+5. Otherwise save the same ops with the same `expectedRevision`. A 409 means the draft changed meanwhile: read again and redo the change.
+6. Report the new revision in one line; Builder picks it up on its own. Mark the change request `done` if the change came from one.
 
 A change is wide when it breaks a color rule, touches more palette families than `discuss.maxFamilies`, moves more semantic tokens than `discuss.maxSemantics`, or renames or deletes a name preparation produced (`contract`). The limits are stored in `foundation-rules.json`. To change them, use `set` with `kind: "rules"`; that change always needs the user's agreement first.
 
@@ -67,7 +68,7 @@ Each Part, Component and Section is a local file, `parts/{id}.json`, compiled fr
 - `ds_create_items_list` with `target: "parts"` lists the Parts with their level (`parts`, `components`, `sections`) and status (`not-prepared`, `outdated`, `ready`); with `target: "part:{id}"` it lists that Part's tokens.
 - `ds_create_items_get` with `target: "part:{id}"` reads its tokens; the name `part` returns the whole file.
 - `ds_create_items_change` ops with `target: "part:{id}"`: `set` with `field: "inputs"` or `"overrides"` and an object `value` (merged; `null` clears it), or `apply` with `recipe: "recompile"`. One target per save.
-- Button's `overrides` hold `treatments` and `sizes`. For every other Part they hold `map` and `measures`, keyed by set → variant (or size) → slot, as in its part file. The store refuses an override for a variant, size or slot the Part does not have.
+- Button's `overrides` hold `treatments`, keyed `tone|emphasis|state` (`{"brand|primary|rest": {"effect": "elevation/raised"}}`), and `sizes`, keyed by size. The `treatments` a Button part file shows are nested tone → emphasis → state, but its overrides are not. For every other Part, `overrides` hold `map` and `measures`, keyed by set → variant (or size) → slot as in its part file. For every other Part, `overrides` also hold `tokens`, which maps one of the Part's own component tokens to the foundation role it points at (`{"badge/padding-y/sm": "space/lg"}`). Builder saves its choices to the same fields. The store rejects an override for a variant, size, slot or token the Part does not have. It also rejects a primitive token, and a token whose kind differs from the one it replaces.
 - `ds_create_parts_prepare` prepares a Part only after the Parts it uses. If `ids` leaves out a Part another one uses, the error names the missing Part. Without `ids` it prepares every Part, Component and Section that is not `ready`.
 - A Component or Section file records `instances` for each set, in rows keyed like its token map. Each slot names the Part, Component or same-page set it holds and the variant of that set. A property the spec does not set takes that Part's default. If an instance names a variant its Part does not have, preparing fails with a one-sentence error.
 - A Part, Component or Section becomes `outdated` when a Part it uses changes its structure. The message for a wide Part change names every prepared template that uses the Part, directly or through another, and the ones that cannot be prepared again until their inputs change. After the user agrees, change those inputs, then prepare the changed Part and its users.

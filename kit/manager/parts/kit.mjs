@@ -1,7 +1,14 @@
 // Shared helpers for Part templates. A template holds its page's structure as data; these turn that data into
 // variants, filled token roles and component tokens the same way for every Part.
+import {existsSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 import {ItemError} from '../foundations/ops.mjs';
 import {setPrefix} from './validate.mjs';
+import {colorReader, contrastOf, rgba} from '../foundations/validate.mjs';
+
+// The site's gradient CSS: next to this folder in a session's Builder copy (cli.mjs copies it), or in the repo.
+const rules = ['../web/scripts/token-model.mjs', '../../web/scripts/token-model.mjs'].map(p => new URL(p, import.meta.url)).find(u => existsSync(fileURLToPath(u)));
+const {gradientCss, stopCss} = await import(rules);
 
 export const plain = x => !!x && typeof x === 'object' && !Array.isArray(x);
 // Object inputs merge into the defaults, so changing one role keeps the rest; a list is replaced whole.
@@ -25,11 +32,40 @@ export function resolver(draft) {
   return {vars, has: name => vars.has(name), value: resolve, color: name => css(resolve(name))};
 }
 
-// A foundation color as {r, g, b} in 0–1, from a hex string or a color object; null for anything else.
+// A foundation color as {r, g, b, a} in 0–1, from a hex string (#rgb, #rgba, #rrggbb, #rrggbbaa) or a color
+// object; null for anything else.
 export function rgbOf(value) {
-  if (plain(value) && 'r' in value) return {r: value.r, g: value.g, b: value.b};
-  const hex = typeof value === 'string' && value.match(/^#([0-9a-f]{6})([0-9a-f]{2})?$/i)?.[1];
-  return hex ? Object.fromEntries(['r', 'g', 'b'].map((k, i) => [k, parseInt(hex.slice(i * 2, i * 2 + 2), 16) / 255])) : null;
+  if (plain(value) && 'r' in value) return {r: value.r, g: value.g, b: value.b, a: value.a ?? 1};
+  const m = typeof value === 'string' && value.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i)?.[1];
+  if (!m) return null;
+  const hex = m.length <= 4 ? [...m].map(c => c + c).join('') : m, part = i => parseInt(hex.slice(i * 2, i * 2 + 2), 16) / 255;
+  return {r: part(0), g: part(1), b: part(2), a: hex.length === 8 ? part(3) : 1};
+}
+
+// Gradients (paint styles) fill these slots only, in Button and every kit Part; every other slot keeps its kind.
+export const paintSlots = ['fill', 'background'];
+export const paintOf = (draft, name) => (draft.paintStyles || []).find(p => p.name === name) || null;
+// A gradient as CSS with its stops resolved to colors, the value Builder's chips and drawings show.
+export function paintCss(draft, name, r = resolver(draft)) {
+  const g = paintOf(draft, name);
+  return g ? g.paints.map(p => gradientCss(p, c => c?.alias ? r.color(c.alias) : stopCss(c))).reverse().join(', ') : null;
+}
+// Text on a gradient: its contrast against every stop in every mode of the Color collection, one note per stop
+// below the minimum, worded like the foundation contrast check (foundations/validate.mjs, whose math this uses).
+export function paintContrast(draft, {where, text, paint, minimum = 4.5}) {
+  const g = paintOf(draft, paint), read = colorReader(draft), notes = [];
+  if (!g) return notes;
+  const owner = draft.variables.find(v => v.name === text)?.collection, modes = draft.collections.find(c => c.name === 'Color')?.modes || draft.collections.find(c => c.name === owner)?.modes || [];
+  for (const mode of modes) {
+    const ink = read(text, mode), base = read('color/surface/base', mode);
+    if (!ink) continue;
+    g.paints.flatMap(p => p.stops || []).forEach((s, i) => {
+      const c = s.color?.alias ? read(s.color.alias, mode) : rgba(s.color), ratio = c ? contrastOf(ink, c, base) : undefined;
+      if (ratio === undefined || ratio !== null && ratio >= minimum) return;
+      notes.push(`Contrast: ${mode} ${where} ${text} on ${paint} stop ${i + 1} (${s.color?.alias || stopCss(s.color)}) is ${ratio?.toFixed(2) || 'unresolved'}; requires ${minimum}:1.`);
+    });
+  }
+  return notes;
 }
 
 // Every combination of the variant properties, keeping only those `exists` accepts.
@@ -58,7 +94,8 @@ export function fillRole(role, vars = {}, has = () => true, notes = []) {
 const scopeWords = [[/^(padding|gap|inset|overlap)/, ['GAP']], [/radius/, ['CORNER_RADIUS']], [/thickness|^ring/, ['STROKE_FLOAT']]];
 const scopes = (path, variant, type) => {
   const segments = String(path).split('/');
-  if (type === 'COLOR') return [segments.at(-1), variant].includes('text') ? ['TEXT_FILL'] : ['FRAME_FILL', 'SHAPE_FILL'];
+  // Text colors fill text; a foreground (fg) colors text and the icons beside it.
+  if (type === 'COLOR') return [segments.at(-1), variant].includes('text') ? ['TEXT_FILL'] : [segments.at(-1), variant].includes('fg') ? ['TEXT_FILL', 'SHAPE_FILL'] : ['FRAME_FILL', 'SHAPE_FILL'];
   for (const role of segments.reverse()) for (const [word, scope] of scopeWords) if (word.test(role)) return [...scope];
   return ['WIDTH_HEIGHT'];
 };
@@ -73,7 +110,7 @@ export function componentToken({set, role, variant = null, value, type = 'FLOAT'
 
 // One sentence naming the roles the foundations lack.
 export function requireRoles(name, names, draft, extra = []) {
-  const known = new Set([...draft.variables.map(v => v.name), ...draft.textStyles.map(t => t.name), ...draft.effectStyles.map(e => e.name), ...extra]);
+  const known = new Set([...draft.variables.map(v => v.name), ...draft.textStyles.map(t => t.name), ...draft.effectStyles.map(e => e.name), ...(draft.paintStyles || []).map(p => p.name), ...extra]);
   const missing = [...new Set(names.filter(n => n && !known.has(n)))];
   if (missing.length) throw Object.assign(new ItemError(`The foundations are missing roles the ${name} needs: ${missing.slice(0, 6).join(', ')}`), {status: 412});
 }
@@ -164,7 +201,7 @@ export function definePart(def) {
   function compile(inputs, {draft, overrides = {}, parts = {}} = {}) {
     const s = settings(inputs), st = structure(s), notes = [], decisions = [...(def.decide?.(draft, s) || [])];
     const own = new Set([...st.tokens.map(t => t.name), ...Object.values(parts).flatMap(p => (p.tokens || []).map(t => t.name))]);
-    const known = new Set([...draft.variables.map(v => v.name), ...draft.textStyles.map(t => t.name), ...draft.effectStyles.map(e => e.name), ...own]);
+    const known = new Set([...draft.variables.map(v => v.name), ...draft.textStyles.map(t => t.name), ...draft.effectStyles.map(e => e.name), ...(draft.paintStyles || []).map(p => p.name), ...own]);
     const has = n => known.has(n);
     let flat = false;
     const fill = (role, v, slot) => { const out = fillRole(role, v, has, notes); if (Array.isArray(role) && role.at(-1) === null && out === null && slot === 'effect') flat = true; return out; };
@@ -199,17 +236,38 @@ export function definePart(def) {
       const c = rgbOf(r.value(v.mix));
       if (!c) throw Object.assign(new ItemError(`The foundations are missing roles the ${def.name} needs: ${v.mix}`), {status: 412});
       mixes[t.name] = {role: v.mix, alpha: v.alpha};
-      t.values = {Value: {r: c.r, g: c.g, b: c.b, a: v.alpha}};
+      t.values = {Value: {r: c.r, g: c.g, b: c.b, a: v.alpha * c.a}};
+    }
+    // The system's choice of what one of this Part's component tokens points at (Builder's spacing and size
+    // pickers), like Button's sizes: always a foundation role of the same kind, never a primitive.
+    const variable = n => draft.variables.find(v => v.name === n) || Object.values(parts).flatMap(p => p.tokens || []).find(t => t.name === n);
+    for (const [name, to] of Object.entries(overrides.tokens || {})) {
+      const t = st.tokens.find(x => x.name === name);
+      if (!t) throw new ItemError(`${def.name} has no token ${name}.`);
+      if (to === name) throw new ItemError(`${name} cannot point at itself.`);
+      const target = typeof to === 'string' ? variable(to) : null;
+      if (!target) throw new ItemError(`${name} takes a token your foundations have; ${to} is not one.`);
+      if (target.collection === 'Primitives') throw new ItemError(`${name} takes a foundation role, not the primitive ${to}.`);
+      const kind = x => x.type === 'COLOR' ? 'a color' : 'a number';
+      if (kind(target) !== kind(t)) throw new ItemError(`${name} holds ${kind(t)}; ${to} holds ${kind(target)}.`);
+      t.values = {Value: {alias: to}};
+      delete mixes[name];
     }
     const measures = Object.fromEntries(Object.entries(st.measures).map(([set, sizes]) => [set, Object.fromEntries(Object.entries(sizes).map(([size, slots]) => [size, Object.fromEntries(Object.entries(slots).map(([slot, v]) => [slot, fill(v, size === '*' ? {} : {size}, slot)]))]))]));
     const used = [map, measures].flatMap(a => Object.values(a).flatMap(rows => Object.values(rows).flatMap(slots => Object.values(slots)))).filter(n => typeof n === 'string');
     requireRoles(def.name, [...used, ...st.tokens.flatMap(t => Object.values(t.values).map(v => v?.alias).filter(Boolean))], draft, [...own]);
     if (flat) decisions.push({key: 'Shadow', value: 'No shadow', decidedBy: 'AI', reason: `Your foundations use flat surfaces without shadows, so the ${def.name} has none.`});
-    const sets = summary(st.sets), first = st.sets[0];
+    const sets = summary(st.sets), first = st.sets[0], chosen = withOverrides(def.name, {map, measures}, overrides, new Set(st.tokens.map(t => t.name)));
+    // Text on a gradient fill is checked against every stop: the text color of the same row.
+    for (const [set, rows] of Object.entries(chosen.map)) for (const [key, slots] of Object.entries(rows)) for (const slot of paintSlots) {
+      if (!paintOf(draft, slots[slot])) continue;
+      for (const [textSlot, text] of Object.entries(slots)) if (['text', 'label', 'fg'].includes(textSlot) && draft.variables.some(v => v.name === text && v.type === 'COLOR'))
+        for (const n of paintContrast(draft, {where: `${set} ${key} ${textSlot}`, text, paint: slots[slot]})) if (!notes.includes(n)) notes.push(n);
+    }
     return {id: def.id, page: def.page, name: def.name, set: def.set,
       sets, properties: sets[0].properties, variantCount: sets.reduce((n, x) => n + x.variantCount, 0),
       variantPattern: first.properties.filter(p => p.type === 'variant').map(p => `${p.name}=${p.default}`).join(', '),
-      primitives: [], tokens: st.tokens, ...(st.instanceRows.length ? {instances} : {}), ...(Object.keys(mixes).length ? {mixes} : {}), ...withOverrides(def.name, {map, measures}, overrides, new Set(st.tokens.map(t => t.name))), decisions, notes, overrides};
+      primitives: [], tokens: st.tokens, ...(st.instanceRows.length ? {instances} : {}), ...(Object.keys(mixes).length ? {mixes} : {}), ...chosen, decisions, notes, overrides};
   }
   const out = {fields: Object.keys(def.defaults), defaults: def.defaults, checkInputs, contract, compile};
   if (def.adapt) out.adapt = (draft, plan, parts = {}) => def.adapt(draft, settings({}), plan, parts);
@@ -219,7 +277,7 @@ export function definePart(def) {
 // Drops list values whose role the foundations lack, for a template's adapt. probe(value) → the role names
 // that value needs. Returns the kept list and a decision naming what was dropped, or null.
 export function keepAvailable(draft, name, list, probe, one) {
-  const known = new Set([...draft.variables.map(v => v.name), ...draft.textStyles.map(t => t.name), ...draft.effectStyles.map(e => e.name)]);
+  const known = new Set([...draft.variables.map(v => v.name), ...draft.textStyles.map(t => t.name), ...draft.effectStyles.map(e => e.name), ...(draft.paintStyles || []).map(p => p.name)]);
   const kept = list.filter(x => probe(x).every(n => known.has(n))), gone = list.filter(x => !kept.includes(x));
   const many = one.endsWith('y') ? one.slice(0, -1) + 'ies' : one + 's';
   return {kept, decision: gone.length ? {key: `${name} ${many}`, value: kept.join(', ') || 'none', decidedBy: 'AI', reason: `Your colors have no ${gone.join(', ')} ${gone.length > 1 ? many : one}, so the ${name} has no ${gone.join(', ')} variants.`} : null};

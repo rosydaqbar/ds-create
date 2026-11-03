@@ -83,11 +83,16 @@ export async function localDirectory(workspace, relative) {
   }
   return dir;
 }
+// Actions on a job are short (a claim, a progress note, Stop), so a held lock is waited on for up to 2s; a lock
+// still held after that is a live action, and the caller is told to retry.
 export async function withJobLock(dir,kind,fn){
  const file=path.join(dir,kind+'-action.lock');let handle;
- try{handle=await open(file,'wx');}catch(error){
-  if(error.code==='EEXIST')throw new Error(`Another ${kind==='prepare'?'preparation':'publish'} action is being saved. Retry after it finishes.`);
-  throw error;
+ for(let waited=0;!handle;waited+=25){
+  try{handle=await open(file,'wx');}catch(error){
+   if(error.code!=='EEXIST')throw error;
+   if(waited>=2000)throw new PublishError(`Another ${kind==='prepare'?'preparation':'publish'} action is being saved. Retry after it finishes.`);
+   await new Promise(r=>setTimeout(r,25));
+  }
  }
  try{return await fn();}finally{await handle.close();await unlink(file);}
 }

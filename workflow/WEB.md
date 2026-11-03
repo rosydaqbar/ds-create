@@ -111,7 +111,7 @@ Exit check: `npm run build` passes on the scoped copy.
 4. Run `npm run tokens`, then `npm run check:contrast`.
 5. When the owner approved exceptions in the ledger (a mode that isn't supported, contrast pairs below AA), write them to `tokens/accepted.json`: `{ "unsupportedModes": { "Color": ["Dark"] }, "contrast": ["color/text/x on color/fill/y"] }`. The token, React Native token and contrast scripts and QA read it; the export itself is never edited.
 
-Exit check: the file holds every variable, text style and effect style of `foundations.json` and every prepared Part's tokens; no alias is unresolved; **`check:contrast` reports all pairs AA**, or lists only the pairs approved in `accepted.json`. A contrast failure is fixed in the local files (`ds_create_items_change`), then step 1 runs again — never patched in `figma-variables.json` or in code (§8).
+Exit check: the file holds every variable, text style, effect style and paint style of `foundations.json` and every prepared Part's tokens; no alias is unresolved; **`check:contrast` reports all pairs AA**, or lists only the pairs approved in `accepted.json`. A contrast failure is fixed in the local files (`ds_create_items_change`), then step 1 runs again — never patched in `figma-variables.json` or in code (§8).
 
 ## W3 · Brand assets and identity
 
@@ -130,6 +130,7 @@ Work in page order (2.x, then 3.x, then 4.x), only for pages in scope. For each 
 1. Load the page's spec (`parts/…`, `components/…`, `sections/…`) and the local file of every Part it uses, `workspace/output/{system-slug}/parts/{id}.json`. Read the properties, variants and component tokens from those files, not from Figma. The `.md` note next to each file explains its saved inputs and decisions.
 2. Load the Impeccable skill (`/impeccable`, product register) before writing UI or copy. Its design hook checks every edit to a UI file; fix each finding before moving on.
 3. Write the component in `src/components/{level}/{Name}.tsx` following §6.
+   Then, from the repo root, run `node kit/manager/cli.mjs check-site --slug {system-slug}`. The site starts as a copy of `kit/web`, and the command lists the changes each copied component needs to match its part file. It reports values this system dropped from the template or added to it, such as a Badge tone with no matching foundation color. It also reports unused component tokens, and variables the component uses that no part file defines. Fix every finding for the page.
 4. Write the documentation module `src/docs/stories/{id}-{slug}.doc.tsx` following §7, in the voice of `COPY-GUIDE.md`. Its sentences go into the page's copy file as `web` or `both` lines (`workflow/COPY.md`): `npm run copy` lays them over the story, so a sentence that is only in the story is overwritten as soon as the copy file has that topic.
 5. Look at the page in both color modes. Full QA runs on call (`workflow/INITIATOR.md` Part B, *QA on call*): when the user asks, `npm run qa -- --pages {id}` checks only this page.
 
@@ -137,7 +138,7 @@ On an App-only product, steps 3 and 4 are written for the app instead. The templ
 
 Mode: the same choice as the Figma build (`workflow/QUESTIONNAIRE.md` §8). **YOLO everything** implements every page in one pass; **One by one** stops after each page for review.
 
-Exit check per page: QA §9 passes.
+Exit check per page: `check-site` reports no findings for the page, and QA §9 passes.
 
 ## W5 · Foundations and guidance pages
 
@@ -196,6 +197,7 @@ Names are the Figma variable names with `/` replaced by `-` (specs/SYSTEM.md Par
 | `font/size/body-md` | `--font-size-body-md` | `text-body-md` (with its line height) |
 | `type/body/md/regular` (text style) | — | `type-body-md-regular` (family, size, line height, spacing, weight) |
 | `elevation/raised`, `focus/default` (effect styles) | `--elevation-raised`, `--focus-default` | `shadow-raised`, `shadow-focus-default` |
+| `color/gradient/brand` (paint style) | `--color-gradient-brand` | `bg-(image:--color-gradient-brand)` |
 | `motion/easing/enter` | `--motion-easing-enter` | `ease-enter` |
 | `size/control/md`, `motion/duration/base`, component tokens | `--size-control-md`, `--button-padding-x-md` | arbitrary values: `h-(--size-control-md)`, `duration-(--motion-duration-base)` |
 | `palette/*`, `scale/*` (primitives) | `--palette-brand-600` | none — never used by components |

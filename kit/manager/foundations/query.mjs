@@ -4,7 +4,7 @@ import {foundations} from '../server/state.mjs';
 import {ItemError, referencesTo, resolveIn} from './ops.mjs';
 import {partRefs} from '../parts/refs.mjs';
 
-const styleLists = {textStyles: 'textStyle', effectStyles: 'effectStyle', gridStyles: 'gridStyle'};
+const styleLists = {textStyles: 'textStyle', effectStyles: 'effectStyle', gridStyles: 'gridStyle', paintStyles: 'paintStyle'};
 
 function allItems(draft) {
   return [...draft.variables.map(item => ({kind: 'variable', item})), ...Object.entries(styleLists).flatMap(([list, kind]) => (draft[list] || []).map(item => ({kind, item})))];

@@ -2,14 +2,14 @@ import {iconLibrary, libraryIcons} from '../client/assets/icons/catalog.mjs';
 import {readFile, stat, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {validateFoundations} from '../foundations/validate.mjs';
+import {newSystem, validateFoundations} from '../foundations/validate.mjs';
 import {checkWebDraft} from './verify.mjs';
 import {compareFoundations} from '../foundations/compare.mjs';
 import {inputFreshness, selectedInputSlug, snapshotInputs} from './files.mjs';
 import {readFigmaSetting} from './settings.mjs';
 
 export const foundations = [
-  { id: 'color', name: 'Color', page: '1.1', description: 'Color roles establish contrast, content hierarchy, and feedback across interface states.', prefixes: ['palette/', 'color/'] },
+  { id: 'color', name: 'Color', page: '1.1', description: 'Color roles establish contrast, content hierarchy, and feedback across interface states.', prefixes: ['palette/', 'color/'], styles: 'paintStyles' },
   { id: 'typography', name: 'Typography', page: '1.2', description: 'A shared type scale gives headings, body text, and interface labels distinct levels of emphasis.', prefixes: ['font/'], styles: 'textStyles' },
   { id: 'space', name: 'Spacing', page: '1.3', description: 'Consistent gaps and padding group related content and give layouts a clear rhythm.', prefixes: ['space/', 'size/'], styles: 'gridStyles' },
   { id: 'shape', name: 'Shape', page: '1.4', description: 'Corner radii and borders define the edges of controls and surfaces.', prefixes: ['radius/', 'border/'] },
@@ -58,9 +58,9 @@ export async function getPublishStatus(outputDir) {
 
 function validPayload(data) {
   return Array.isArray(data?.variables) && Array.isArray(data.collections) &&
-    ['textStyles', 'effectStyles', 'gridStyles'].every(k => data[k] === undefined || Array.isArray(data[k])) &&
+    ['textStyles', 'effectStyles', 'gridStyles', 'paintStyles'].every(k => data[k] === undefined || Array.isArray(data[k])) &&
     data.collections.every(c => typeof c?.name === 'string' && Array.isArray(c.modes) && c.modes.every(m => typeof m === 'string')) &&
-    ['textStyles', 'effectStyles', 'gridStyles'].every(k => (data[k] || []).every(s => typeof s?.name === 'string')) &&
+    ['textStyles', 'effectStyles', 'gridStyles', 'paintStyles'].every(k => (data[k] || []).every(s => typeof s?.name === 'string')) &&
     data.variables.every(v => typeof v?.name === 'string' && typeof v.collection === 'string' && v.values && typeof v.values === 'object' && !Array.isArray(v.values));
 }
 
@@ -78,7 +78,7 @@ async function loadSource(outputDir, ledger, warnings = []) {
     try { data = JSON.parse(bytes.toString('utf8')); } catch { /* reported below */ }
     const hash = createHash('sha256').update(bytes).digest('hex');
     const valid = data?.format === 'ds-create/foundations@1' && Number.isInteger(data.revision) && data.revision > 0 && validPayload(data) && validateFoundations(data).valid &&
-      data.variables.length + (data.textStyles?.length || 0) + (data.effectStyles?.length || 0) > 0;
+      data.variables.length + (data.textStyles?.length || 0) + (data.effectStyles?.length || 0) + (data.paintStyles?.length || 0) > 0;
     if (!valid) warnings.push('Local foundation draft is invalid. Ask the agent to save foundations.json again.');
     const setup=await observedSetup(outputDir);
     const fresh=await inputFreshness(outputDir,setup);
@@ -229,10 +229,12 @@ export async function getState(outputDir, { preparing = false } = {}) {
       return { step: n, name: ['Read inputs', 'Verify Figma', 'Confirm foundations', 'Generate Figma foundations'][n - 1], required: true, status: e?.status || 'todo', note: e?.note || '' };
     }),
     summary: { variables: variables.length, collections: collections.length, textStyles: exported?.textStyles?.length || 0,
-      effectStyles: exported?.effectStyles?.length || 0, ready: items.filter(f => f.status === 'ready').length,
+      effectStyles: exported?.effectStyles?.length || 0, paintStyles: exported?.paintStyles?.length || 0, ready: items.filter(f => f.status === 'ready').length,
       audit: audit?.fail === 0 ? 'Passed' : audit?.fail > 0 ? `${audit.fail} findings` : 'Not checked yet' },
     collections: collections.map(c => ({ ...c, count: variables.filter(v => v.collection === c.name).length })),
     foundations: items,
+    // Gradient stops in a new system may alias palette colors only (validatePlan); Builder's picker follows it.
+    paletteStopsOnly: newSystem(plan),
   };
 }
 

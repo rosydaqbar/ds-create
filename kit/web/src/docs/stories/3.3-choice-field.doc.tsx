@@ -71,7 +71,7 @@ const bankMark = (
   </span>
 );
 
-const groupOptions = (type: ChoiceCardType): ChoiceGroupOption[] =>
+export const groupOptions = (type: ChoiceCardType): ChoiceGroupOption[] =>
   type === 'icon-card' || type === 'icon'
     ? plans.map((p) => ({ ...p, badge: undefined }))
     : type === 'avatar'

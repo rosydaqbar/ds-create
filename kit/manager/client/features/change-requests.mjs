@@ -1,6 +1,7 @@
 // Change requests: "+ Make Change" sits on the right border of whatever is selected on the canvas (an item or
 // the page card). It records where the item lives (page, section, group) and what it shows, as a card in the
 // Agent tab where the user adds notes. Items with a request carry a "Selected" mark on the canvas.
+import { copyText } from './clipboard.mjs';
 const $ = id => document.getElementById(id);
 const compact = (text, max) => { const t = String(text || '').replace(/\s+/g, ' ').trim(); return t.length > max ? `${t.slice(0, max - 1)}…` : t; };
 const route = () => location.hash.slice(1) || 'overview';
@@ -127,7 +128,7 @@ export function setupChangeRequests({ getState, refresh, showAgent }) {
   $('change-request-copy').addEventListener('click', async () => {
     const text = getState()?.changePrompt;
     if (!text) return;
-    try { await navigator.clipboard.writeText(text); $('change-request-copied').textContent = 'Copied. Paste it into your agent.'; }
+    try { await copyText(text); $('change-request-copied').textContent = 'Copied. Paste it into your agent.'; }
     catch { say('Copy failed. Try again, or allow clipboard access for this page.'); }
     setTimeout(() => { $('change-request-copied').textContent = ''; }, 2500);
   });

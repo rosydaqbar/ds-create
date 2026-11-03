@@ -6,7 +6,7 @@ import type { TokenVariable } from '@/tokens/types';
 import { cn } from '@/lib/cn';
 import { Badge, Button, Checkbox, Divider, HelpText, Icon, Label, Link, TextControl, TextField } from '@/components';
 import { AnchorHeading, DocPage } from '../../DocPage';
-import { PreviewCard, Bullets, Caption, DoDont, InlineCode, P, productHasWeb, TokenTable } from '../../blocks';
+import { PreviewCard, breakable, Bullets, Caption, CodeBlock, DoDont, InlineCode, P, productHasWeb, TokenBadge, tokenCodeColumns, tokenCodeNames, TokenTable } from '../../blocks';
 import { figmaNodeFor } from '../../meta';
 import { supportedModes, unsupportedModes } from '../../modes';
 import { brandCopy } from '@/brand/copy';
@@ -41,6 +41,16 @@ const stepOf = (name: string | null) => name?.split('/')[2] ?? null;
 const cap = (s: string) => s[0].toUpperCase() + s.slice(1).replace(/-/g, ' ');
 /** "a", "a and b", "a, b and c". */
 const list = (items: string[]) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`);
+
+/** Gradients (paint styles); empty in a system without any. */
+const GRADIENTS = tokens.paintStyles ?? [];
+/** A stop's name: its palette step (`brand/500`) or the literal color. */
+const stopName = (color: unknown) => {
+  const c = color as { alias?: string; r?: number; g?: number; b?: number; a?: number } | null;
+  if (c?.alias) return short(c.alias);
+  if (c && typeof c.r === 'number') return `#${[c.r, c.g ?? 0, c.b ?? 0].map((x) => Math.round(x * 255).toString(16).padStart(2, '0')).join('')}${(c.a ?? 1) < 1 ? ` ${Math.round((c.a ?? 1) * 100)}%` : ''}`;
+  return String(color);
+};
 
 /* ---------- WCAG contrast ---------- */
 const rgba = (hex: string) => {
@@ -209,6 +219,11 @@ function swapCss(cls: string, family: string, steps: Record<string, string>) {
       const s = mode === 'Light' ? e.light : e.dark;
       if (s?.includes('var(--palette')) lines.push(`${e.css}:${s};`);
     }
+    // Gradients read palette steps too, so they follow the swapped family.
+    for (const g of GRADIENTS) {
+      const s = mode === 'Light' ? g.light : g.dark;
+      if (s.includes('var(--palette')) lines.push(`${g.css}:${s};`);
+    }
     return lines.join('');
   };
   return `.${cls}{${block('Light')}}[data-theme="dark"] .${cls}{${block('Dark')}}`;
@@ -335,6 +350,21 @@ function FamilyRow({ title, family, note, badges = [], dark = false }: { title: 
           ))}
         </div>
       </PreviewCard>
+    </div>
+  );
+}
+
+/** One gradient: the specimen drawn from its CSS variable, the style name, the stops and the angle. */
+function GradientCard({ g }: { g: (typeof GRADIENTS)[number] }) {
+  const paint = g.paints[0];
+  return (
+    <div data-gradient-card={g.name} className="flex min-w-0 flex-col gap-sm">
+      <div className="h-24 rounded-surface border border-border-subtle" style={{ backgroundImage: `var(${g.css})` }} />
+      <div className="flex min-w-0 flex-col gap-xs">
+        <span className="type-code-sm-medium break-words text-text-primary">{slashes(g.name)}</span>
+        <span className="type-body-xs-regular text-text-tertiary">{paint?.stops.map((st) => stopName(st.color)).join(' → ')}</span>
+        {paint && <span className="type-body-xs-regular text-text-tertiary">{paint.angle}° linear</span>}
+      </div>
     </div>
   );
 }
@@ -653,6 +683,18 @@ function Overview() {
           </ReadingDetail>
         </Block>
 
+        {GRADIENTS.length > 0 && (
+          <Block title="Gradients" intro="Gradients are paint styles because variables cannot hold them. A gradient stop linked to a palette step updates when that step changes.">
+            <ReadingDetail topic="Gradients">
+              <div className="grid min-w-0 gap-xl sm:grid-cols-2 lg:grid-cols-3">
+                {GRADIENTS.map((g) => (
+                  <GradientCard key={g.name} g={g} />
+                ))}
+              </div>
+            </ReadingDetail>
+          </Block>
+        )}
+
         <Block
           title={`Roles in ${MODES_TEXT}`}
           intro={
@@ -715,6 +757,17 @@ function TokensTab() {
   const fillTones = [...known, ...extra].map((t) => ({ t, names: groupNames(`color/fill/${t}/`, ['color/fill/neutral/track']) })).filter((x) => x.names.length > 0);
   const special = [...groupNames('color/fill/').filter((n) => n.split('/').length === 3), 'color/fill/neutral/track'].filter(has);
   const groups = GROUPS.map((g) => ({ ...g, names: groupNames(g.prefix) })).filter((g) => g.names.length > 0);
+  const gradientCss = (m: Mode) => GRADIENTS.map((g) => `  ${g.css}: ${m === 'Light' ? g.light : g.dark};`).join('\n');
+  const gradientRecipe = `/* Tailwind utility */
+<div class="${GRADIENTS[0]?.tailwind}">…</div>
+
+/* CSS variables, generated from the Figma paint styles */
+:root, [data-theme="light"] {
+${gradientCss('Light')}
+}
+[data-theme="dark"] {
+${gradientCss('Dark')}
+}`;
   return (
     <div className="flex flex-col gap-5xl">
       <P>
@@ -748,6 +801,39 @@ function TokensTab() {
             </ScrollRegion>
           </Block>
         ),
+      )}
+      {GRADIENTS.length > 0 && (
+        <Block title="Gradients" intro="Apply a gradient with its Tailwind class or CSS variable. Both switch with the color mode.">
+          <ScrollRegion label="Gradient styles">
+            <table className="w-full border-collapse text-left">
+              <thead className="bg-surface-sunken">
+                <tr className="type-body-xs-semibold text-text-tertiary">
+                  <th className="px-lg py-md">Style</th>
+                  {tokenCodeColumns.map((c) => (
+                    <th key={c} className="px-lg py-md">
+                      {c}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {GRADIENTS.map((g) => (
+                  <tr key={g.name} className="border-t border-border-subtle align-top">
+                    <td className="px-lg py-md">
+                      <TokenBadge name={g.name} />
+                    </td>
+                    {tokenCodeNames(g).map((c, i) => (
+                      <td key={tokenCodeColumns[i]} className="type-code-sm-regular px-lg py-md text-text-secondary">
+                        {breakable(c)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollRegion>
+          {productHasWeb && <CodeBlock lang="css" code={gradientRecipe} label="Gradient CSS recipe" />}
+        </Block>
       )}
     </div>
   );

@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 const PAUSE_MS = 300;
 
 export function setupFoundationSave({ getState, refresh }) {
-  const queue = new Map();
+  const queue = new Map(), failed = new Map();
   let timer = null, sending = null, status = null;
   const local = () => getState()?.source?.kind === 'local';
   // A status without a revision (saving, an error) holds until the next revision arrives.
@@ -23,8 +23,8 @@ export function setupFoundationSave({ getState, refresh }) {
     timer = null;
     if (sending) await sending;
     if (!queue.size) return;
-    const keys = [...queue.keys()], ops = [...queue.values()].flat();
-    queue.clear();
+    const keys = [...queue.keys()], ops = [...queue.values()].flat(), handlers = keys.map(k => [k, failed.get(k)]).filter(([, fn]) => fn);
+    queue.clear(); for (const k of keys) failed.delete(k);
     sending = (async () => {
       say('Saving…');
       const reason = `Edited in Builder: ${keys.join(', ')}`.slice(0, 200);
@@ -37,6 +37,8 @@ export function setupFoundationSave({ getState, refresh }) {
         } catch (e) {
           if (e.status === 409 && attempt === 0) { await refresh(); continue; }
           say(e.message);
+          // Only a control that asked is told; a newer edit queued for it meanwhile keeps its preview.
+          for (const [k, fn] of handlers) if (!queue.has(k)) fn(e);
           return;
         }
       }
@@ -46,10 +48,12 @@ export function setupFoundationSave({ getState, refresh }) {
     if (queue.size) schedule();
   }
   function schedule() { clearTimeout(timer); timer = setTimeout(flush, PAUSE_MS); }
-  // key names the control, so a slider dragged ten times sends only its last value.
-  function save(key, ops) {
+  // key names the control, so a slider dragged ten times sends only its last value. onError runs when the save is
+  // refused (not for a stale revision that the retry fixes).
+  function save(key, ops, { onError = null } = {}) {
     if (!local()) return;
     queue.set(key, ops.map(op => ({ target: 'foundations', ...op })));
+    if (onError) failed.set(key, onError); else failed.delete(key);
     schedule();
   }
   async function undo() {

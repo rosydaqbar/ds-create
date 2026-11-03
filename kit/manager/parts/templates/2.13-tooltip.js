@@ -10,6 +10,9 @@ export const set = 'Tooltip';
 export const level = 'parts';
 export const spec = 'specs/parts/2.13-tooltip.md';
 export const uses = [];
+// A fill or background slot the kit component never draws as a background takes a color only: a CSS gradient
+// cannot show there (parts/validate.mjs refuses it, Builder offers none). The arrow is an SVG path; the body is a background.
+export const solidSlots = {'Tooltip arrow': {fill: 'it is drawn as an SVG fill, which cannot show a gradient'}};
 
 const text = 'Tooltips are used to describe or identify an element. In most scenarios, tooltips help the user understand meaning, function or alt-text.';
 export const {fields, defaults, checkInputs, contract, compile} = definePart({

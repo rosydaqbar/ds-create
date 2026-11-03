@@ -14,6 +14,8 @@ export function rgba(value) {
   return null;
 }
 const literal = (type,v) => type==='COLOR'?!!rgba(v):type==='TIMING'?validTiming(v):type==='EASING'?validEasing(v):type==='FLOAT'?finite(v):type==='STRING'?typeof v==='string':type==='BOOLEAN'?typeof v==='boolean':false;
+// A new system holds the 1.1 naming and binding contract (gradient stops alias palette/* only); Builder reads it too.
+export const newSystem = plan => plan?.systemMode === 'new';
 export function validateFoundations(data) {
   const errors=[], fail=message=>errors.push(message);
   if(!data || !Array.isArray(data.collections) || !Array.isArray(data.variables))return {valid:false,errors:['Collections and variables must be arrays.']};
@@ -43,7 +45,7 @@ export function validateFoundations(data) {
     }else if(!literal(v.type,value))fail(`${v.name}: alias has no usable value for ${mode}.`);
   }
   for(const v of vars.values())for(const mode of Object.keys(v.values||{}))resolve(v,mode);
-  for(const list of ['textStyles','effectStyles','gridStyles']){
+  for(const list of ['textStyles','effectStyles','gridStyles','paintStyles']){
     const rows=data[list]??[];if(!Array.isArray(rows)){fail(`${list} must be an array.`);continue;}
     const names=new Set();
     for(const s of rows){
@@ -59,6 +61,21 @@ export function validateFoundations(data) {
           if(!['DROP_SHADOW','INNER_SHADOW','LAYER_BLUR','BACKGROUND_BLUR'].includes(e?.type)||![e.x??e.offset?.x??0,e.y??e.offset?.y??0,e.blur??e.radius??0,e.spread??0].every(finite)||(e.blur??e.radius??0)<0||e.opacity!==undefined&&(!finite(e.opacity)||e.opacity<0||e.opacity>1))fail(`${s.name}: invalid effect geometry.`);
           if(e?.type?.includes('SHADOW')&&!rgba(e.color)&&!(named(e.color?.alias)&&vars.get(e.color.alias)?.type==='COLOR'))fail(`${s.name}: invalid shadow color.`);
         }
+      }
+      if(list==='paintStyles'){
+        if(!Array.isArray(s.paints)||!s.paints.length){fail(`${s.name} needs at least one paint.`);continue;}
+        s.paints.forEach((p,i)=>{
+          const label=s.paints.length>1?`${s.name} paint ${i+1}`:s.name;
+          if(p?.type!=='GRADIENT_LINEAR'){fail(`${label} type must be GRADIENT_LINEAR.`);return;}
+          if(!finite(p.angle))fail(`${label} angle must be a finite number.`);
+          if(!Array.isArray(p.stops)||p.stops.length<2){fail(`${label} needs at least two stops.`);return;}
+          p.stops.forEach((x,n)=>{
+            if(!finite(x?.position)||x.position<0||x.position>1)fail(`${label} stop ${n+1} position must be between 0 and 1.`);
+            else if(n&&finite(p.stops[n-1]?.position)&&x.position<p.stops[n-1].position)fail(`${label} stop ${n+1} position must not be below stop ${n}.`);
+            const c=x?.color;
+            if(!(c&&typeof c==='object'&&(named(c.alias)?vars.get(c.alias)?.type==='COLOR':!Object.hasOwn(c,'alias')&&rgba(c))))fail(`${label} stop ${n+1} color must alias a color variable or be an rgba color.`);
+          });
+        });
       }
       if(list==='gridStyles'&&(!Array.isArray(s.grids)||s.grids.some(g=>!['COLUMNS','ROWS','GRID'].includes(g.pattern))))fail(`${s.name}: invalid grid.`);
       for(const [key,ref] of Object.entries(s.bound||{}))if(!named(ref)||!vars.has(ref)||vars.get(ref).type!==(['fontFamily','fontStyle'].includes(key)?'STRING':'FLOAT'))fail(`${s.name}: invalid binding ${key}.`);
@@ -81,12 +98,12 @@ export function validatePlan(plan,data,snapshot,revision) {
       continue;
     }
     if(scope?.status!=='included'||!Array.isArray(scope.variables)||!Array.isArray(scope.styles)){fail(`${domain}: record its included names or explicit exclusion.`);continue;}
-    const styleList=domain==='typography'?'textStyles':domain==='elevation'?'effectStyles':domain==='space'?'gridStyles':null;
+    const styleList=domain==='typography'?'textStyles':domain==='elevation'?'effectStyles':domain==='space'?'gridStyles':domain==='color'?'paintStyles':null;
     const styles=new Set((data?.[styleList]||[]).map(s=>s.name));
     if(!scope.variables.length&&!scope.styles.length||scope.variables.some(n=>!vars.has(n))||scope.styles.some(n=>!styles.has(n)))fail(`${domain}: mapped foundation values/styles are missing.`);
     if(domain==='typography'&&!scope.styles.length||domain==='elevation'&&!scope.styles.length)fail(`${domain}: usable styles are required when included.`);
   }
-  if(!domains.some(d=>plan?.domains?.[d]?.status==='included')||!(data?.variables?.length||data?.textStyles?.length||data?.effectStyles?.length))fail('Include at least one usable foundation in the approved scope.');
+  if(!domains.some(d=>plan?.domains?.[d]?.status==='included')||!(data?.variables?.length||data?.textStyles?.length||data?.effectStyles?.length||data?.paintStyles?.length))fail('Include at least one usable foundation in the approved scope.');
   if(plan?.motionPolicy==='basic-ui'){
     const scope=plan.domains?.motion,collection=data.collections.find(c=>c.name==='Motion');
     const required=['duration/instant','duration/fast','duration/base','duration/slow','duration/loop','easing/standard','easing/enter','easing/exit','easing/linear','delay/tooltip','delay/toast','delay/debounce'].map(n=>'motion/'+n);
@@ -98,7 +115,7 @@ export function validatePlan(plan,data,snapshot,revision) {
       if(!v||v.collection!=='Motion'||!allowed.includes(v.type))fail(name+': missing or incompatible basic motion token; new systems require '+(easing?'EASING objects.':'TIMING seconds.'));
     }
   }
-  if(plan?.systemMode==='new'){
+  if(newSystem(plan)){
     const grammar=new Map(Object.entries({Primitives:/^(palette|scale)\/[a-z0-9-]+\/[a-z0-9/-]+$/,Color:/^color\/[a-z0-9-]+\/[a-z0-9/-]+$/,Typography:/^font\/(family|weight|size|line-height|letter-spacing)\/[a-z0-9-]+$/,Space:/^space\/[a-z0-9-]+$/,Size:/^size\/[a-z0-9/-]+$/,Shape:/^(radius\/[a-z0-9-]+|border\/width\/[a-z0-9-]+)$/,Motion:/^motion\/(duration|easing|delay)\/[a-z0-9-]+$/}));
     for(const c of data?.collections||[])if(!grammar.has(c.name))fail(`${c.name}: use the foundation collection contract for a new system.`);
     for(const v of data?.variables||[]){
@@ -110,16 +127,32 @@ export function validatePlan(plan,data,snapshot,revision) {
       if(v.collection!=='Primitives'&&!named(v.description))fail(`${v.name}: describe its UI purpose.`);
     }
     for(const s of data?.textStyles||[])if(!/^type\/(display|heading|body|label|link|overline|code)\/[^/]+\/[^/]+$/.test(s.name))fail(`${s.name}: use the text style naming contract.`);
+    // 1.1 §3: gradient names and stops bound to palette primitives.
+    for(const s of data?.paintStyles||[]){
+      if(!/^color\/gradient\/(brand|(brand|neutral|linear)-[1-9]\d*)$/.test(s.name))fail(`${s.name}: use the gradient naming contract.`);
+      for(const p of s.paints||[])(p?.stops||[]).forEach((x,n)=>{if(!/^palette\//.test(x?.color?.alias||''))fail(`${s.paints.length>1?`${s.name} paint ${s.paints.indexOf(p)+1}`:s.name} stop ${n+1} must alias a palette/* variable in a new system.`);});
+    }
   }
   return {valid:!errors.length,errors:[...new Set(errors)]};
 }
 
 // Init subset of the full file audit's text pairs, plus focus and every solid tone.
-export function contrastReport(draft){
+// Color math shared by this check and the Part warnings (parts/kit.mjs paintContrast): colors are [r, g, b, a] in 0–1.
+// colorReader resolves a variable in one mode, following aliases; a one-value variable reads the same in every mode.
+export function colorReader(draft){
  const byName=new Map(draft.variables.map(v=>[v.name,v]));
- function resolve(name,mode,seen=new Set()){if(seen.has(name))throw new Error('Circular color alias');seen.add(name);const v=byName.get(name),x=v?.values?.[mode]??(Object.keys(v?.values||{}).length===1?Object.values(v.values)[0]:undefined);return x?.alias?resolve(x.alias,mode,seen):rgba(x);}
- const luminance=rgb=>rgb.slice(0,3).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4).reduce((n,c,i)=>n+c*[.2126,.7152,.0722][i],0);
- const over=(a,b)=>[...a.slice(0,3).map((c,i)=>c*a[3]+b[i]*(1-a[3])),1],pairs=[];
+ return function resolve(name,mode,seen=new Set()){if(seen.has(name))throw new Error('Circular color alias');seen.add(name);const v=byName.get(name),x=v?.values?.[mode]??(Object.keys(v?.values||{}).length===1?Object.values(v.values)[0]:undefined);return x?.alias?resolve(x.alias,mode,seen):rgba(x);};
+}
+export const luminance=rgb=>rgb.slice(0,3).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4).reduce((n,c,i)=>n+c*[.2126,.7152,.0722][i],0);
+export const over=(a,b)=>[...a.slice(0,3).map((c,i)=>c*a[3]+b[i]*(1-a[3])),1];
+// The contrast of ink on a background; a see-through one sits on base. null when nothing opaque backs it.
+export function contrastOf(a,b,base){
+ if((a[3]!==1||b[3]!==1)&&(!base||base[3]!==1))return null;
+ const surface=b[3]===1?b:over(b,base),ink=a[3]===1?a:over(a,surface),x=luminance(ink),y=luminance(surface);
+ return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+}
+export function contrastReport(draft){
+ const resolve=colorReader(draft),pairs=[];
  for(const role of ['primary','secondary','tertiary','placeholder','brand','danger','warning','success','info'])for(const surface of ['base','raised','sunken','overlay'])pairs.push(['color/text/'+role,'color/surface/'+surface,4.5]);
  pairs.push(['color/border/focus','color/surface/base',3],['color/text/inverse','color/surface/inverse',4.5]);
  for(const v of draft.variables.filter(v=>/^color\/fill\/[^/]+\/solid(?:\/(hover|pressed|selected))?$/.test(v.name)))pairs.push([v.name.includes('/neutral/')?'color/text/inverse':'color/text/on-solid',v.name,4.5]);
@@ -130,8 +163,8 @@ export function contrastReport(draft){
   const base=resolve('color/surface/base',mode);
   for(const [foreground,background,minimum]of pairs){
    const a=resolve(foreground,mode),b=resolve(background,mode);if(!a||!b)continue;
-   if((a[3]!==1||b[3]!==1)&&(!base||base[3]!==1)){results.push({foreground,background,mode,minimum,pass:false,reason:'Translucent contrast requires an opaque backing surface.'});continue;}
-   const surface=b[3]===1?b:over(b,base),ink=a[3]===1?a:over(a,surface),x=luminance(ink),y=luminance(surface),ratio=(Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+   const ratio=contrastOf(a,b,base);
+   if(ratio===null){results.push({foreground,background,mode,minimum,pass:false,reason:'Translucent contrast requires an opaque backing surface.'});continue;}
    results.push({foreground,background,mode,minimum,ratio,pass:ratio>=minimum});
   }
  }

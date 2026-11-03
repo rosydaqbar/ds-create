@@ -58,3 +58,19 @@ export function shadowCSS(effects, resolve) {
     return `${e.type === 'INNER_SHADOW' ? 'inset ' : ''}${dimensions.map(n => `${n}px`).join(' ')} ${ink}`;
   }).filter(Boolean).join(', ') || 'none';
 }
+// Gradients, in the same CSS form as kit/web/scripts/token-model.mjs gradientCss (Builder cannot import kit/web).
+// A literal stop ({r,g,b,a} in 0–1) is hex when opaque, else rgba(); colorOf turns a stop color into CSS.
+export const stopCSS = c => {
+  if (!c || typeof c !== 'object') return String(c);
+  const h = x => Math.round(Math.min(1, Math.max(0, x)) * 255), a = c.a ?? 1;
+  return a >= 1 ? '#' + [c.r, c.g, c.b].map(x => h(x).toString(16).padStart(2, '0')).join('') : `rgba(${h(c.r)}, ${h(c.g)}, ${h(c.b)}, ${+a.toFixed(3)})`;
+};
+export const gradientCSS = (paint, colorOf = c => c && c.alias ? `var(--${c.alias.replaceAll('/', '-').replaceAll('.', '_')})` : stopCSS(c)) =>
+  `linear-gradient(${+(paint.angle ?? 180).toFixed(2)}deg, ${paint.stops.map(s => `${colorOf(s.color)} ${+(s.position * 100).toFixed(2)}%`).join(', ')})`;
+// Figma paints later paints on top; CSS paints the first background layer on top, so the order is reversed (as in the site export).
+export const paintsCSS = (paints, colorOf) => paints.filter(p => p.type === 'GRADIENT_LINEAR' && p.stops?.length).reverse().map(p => gradientCSS(p, colorOf)).join(', ') || 'none';
+// Back to the draft's shape: a numeric angle, stops in order with 0–1 positions, picked color names as aliases.
+export function draftPaint(paint) {
+  const { angle, stops = [], ...rest } = structuredClone(paint);
+  return { ...rest, angle: rounded(Number(angle ?? 180)), stops: stops.map(s => ({ ...s, position: rounded(Math.min(1, Math.max(0, Number(s.position) || 0))), color: typeof s.color === 'string' ? { alias: s.color } : s.color })).sort((a, b) => a.position - b.position) };
+}

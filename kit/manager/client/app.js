@@ -4,11 +4,12 @@ import { createCanvas } from './canvas.mjs';
 import { preparedFonts, fontChoices, fontStack } from './assets/fonts/catalog.mjs';
 import { spacingScale } from './features/spacing.mjs';
 import { createFoundationControls } from './features/controls.js';
-import { cssColor, rounded } from './features/foundation-controls.mjs';
+import { cssColor, rounded, stopCSS, paintsCSS, draftPaint } from './features/foundation-controls.mjs';
 import { createMotionPreview } from './features/motion.mjs';
 import { setupPublish } from './features/publish.mjs';
 import { iconographyContent } from './features/iconography.mjs';
 import { overviewParts, partInspector, partLevels, partPage, partStatus, setupParts } from './features/parts.mjs';
+import { drawItems, setupItems } from './features/items.mjs';
 import { setupWeb } from './features/setup.mjs';
 import { setupChangeRequests } from './features/change-requests.mjs';
 import { setupBuild } from './features/build.mjs';
@@ -150,7 +151,7 @@ function overview() {
       <ol class="init-steps">${state.steps.map(s => `<li class="step ${escape(s.status)}"><div class="step-title">${s.status === 'done' ? icon('check') : ['building', 'qa'].includes(s.status) ? '<span class="spinner" aria-hidden="true"></span>' : ''}${escape(s.name)}</div><small>${escape({ done: 'Complete', skip: 'Skipped', building: 'In progress', qa: 'Checking', error: 'Needs attention' }[s.status] || 'Waiting')}</small></li>`).join('')}</ol>
       ${skipped.length ? `<p class="setup-note">${skipped.some(s => s.step === 2) ? 'Figma verification is required. This step was skipped; initialization remains incomplete until Figma is verified.' : 'A required step was skipped. Complete it before marking initialization complete.'}</p>` : ''}
     </section>
-    ${state.source?.kind === 'local' ? `<section class="section" aria-labelledby="draft-review-heading"><div class="section-intro"><h2 id="draft-review-heading">${state.source.review === 'invalid' ? 'Restore the foundation draft' : state.source.review === 'synced' ? 'Foundations in Figma' : state.source.review === 'approved' ? 'Ready to generate in Figma' : 'Review before Figma'}</h2><p>${state.source.review === 'invalid' ? 'The saved draft is missing or invalid. Ask the agent to restore it before reviewing or continuing to Figma.' : state.source.review === 'synced' ? 'This saved revision has been generated and audited in Figma.' : state.source.review === 'approved' ? 'The saved draft is approved. Open Publish to generate it in Figma with the local agent.' : 'Inspect the saved draft. Ask the agent for changes, or open Publish to approve this revision and generate it in Figma.'}</p><p>Controller edits are previews. Ask the agent to save any changes before approving.</p><small>Saved draft · Revision ${escape(state.source.revision || 'unavailable')}</small></div></section>` : ''}
+    ${state.source?.kind === 'local' ? `<section class="section" aria-labelledby="draft-review-heading"><div class="section-intro"><h2 id="draft-review-heading">${state.source.review === 'invalid' ? 'Restore the foundation draft' : state.source.review === 'synced' ? 'Foundations in Figma' : state.source.review === 'approved' ? 'Foundations approved' : 'Review before you build'}</h2><p>${state.source.review === 'invalid' ? `The saved draft is missing or invalid. Ask the agent to restore it before reviewing or building.` : state.source.review === 'synced' ? 'This saved revision has been generated and audited in Figma.' : state.source.review === 'approved' ? `Open Publish to see the next build steps.${state.figma === false ? '' : ' Publish to Figma is also available.'}` : 'Edit the foundations here or ask the agent to make changes. Changes save automatically. When the draft is ready, click Approve foundations in Publish.'}</p><small>Saved draft · Revision ${escape(state.source.revision || 'unavailable')}</small></div></section>` : ''}
     <section class="section" aria-labelledby="foundation-preview"><div class="section-heading"><h2 id="foundation-preview">Foundation preview</h2></div><div class="preview-grid">${['color', 'typography'].map(id => {
       const f = state.foundations.find(f => f.id === id);
       return previewCard(`<a href="#${id}">${escape(f.name)}</a>${icon('arrow')}`, preview(f));
@@ -227,13 +228,47 @@ function spacingWorkspace(f) {
   return `<section class="inspector-section"><h3>Base unit</h3><label class="spacing-field" for="space-base-rem"><span>Spacing</span><span class="spacing-unit-input"><input id="space-base-rem" type="number" min="0.0625" max="4" step="0.0625" value="${spacing.base.rem}" aria-label="Base spacing in rem" /><span>rem</span></span></label></section><section class="inspector-section"><h3>Density</h3><dl class="spacing-density">${spacing.density.map(step => `<div data-density="${step.multiple}"><dt>×${step.multiple}</dt><dd><span class="density-measure" style="width:${step.px * measureScale}px" aria-hidden="true"></span><code>${step.rem}rem (${step.px}px)</code></dd></div>`).join('')}</dl></section>`;
 }
 
+// Gradients are Color's paint styles, drawn as cards after the palettes. A stop alias resolves in the shown mode;
+// an imported literal stop stays as it is. Edits stay as previews (draft.settings) until their save lands.
+const gradients = f => (f?.styles || []).filter(s => s.paints?.length);
+const gradientMatches = f => gradients(f).filter(s => `${s.name} ${s.description || ''}`.toLowerCase().includes(query.toLowerCase()));
+const paintsFor = s => draft.settings.get(`paint:${s.name}`) || s.paints;
+function stopColor(f, color) {
+  if (!color?.alias) return stopCSS(color);
+  const v = f.variables.find(x => x.name === color.alias), r = v ? resultFor(v, modeFor(f)) : null, value = cssColor(r?.value);
+  return r && !r.error && typeof value === 'string' ? value : 'transparent';
+}
+const paintCSS = (f, s) => paintsCSS(paintsFor(s), c => stopColor(f, c));
+const stopLabel = color => color?.alias?.replace(/^palette\//, '') || stopCSS(color);
+function gradientSection(f) {
+  const list = gradientMatches(f);
+  return list.length ? `<section class="section"><div class="section-intro"><h2>Gradients</h2><p>Each gradient blends between its color stops.</p></div><div class="color-grid">${list.map(s => {
+    const p = paintsFor(s)[0];
+    return previewCard(`<span>${escape(tokenLabel(s.name))}</span>`, `<span class="gradient-sample" data-paint="${escape(s.name)}"></span>`, { select: s.name, className: 'gradient-card', stageClass: 'color-stage', caption: `<span class="specimen-caption"><code>${escape(s.name).replaceAll('/', '/<wbr>')}</code><small>${escape(`${rounded(p.angle ?? 180)}° · ${p.stops?.length || 0} stops`)}</small></span>` });
+  }).join('')}</div></section>` : '';
+}
+function gradientPanel(f, s, head) {
+  const p = paintsFor(s)[0], n = p.stops.length;
+  return head(s.name) + `<p id="foundation-save-status" class="workspace-disclaimer" role="status" aria-live="polite">${escape(saver.text(state))}</p><section class="inspector-section"><span class="gradient-sample gradient-panel-sample" data-paint="${escape(s.name)}" aria-hidden="true"></span>${s.description ? `<p class="workspace-help">${escape(s.description)}</p>` : ''}<label class="spacing-field" for="gradient-angle"><span>Angle</span><span class="spacing-unit-input"><input id="gradient-angle" type="number" min="-360" max="360" step="1" value="${rounded(p.angle ?? 180)}" aria-label="Gradient angle in degrees" /><span>°</span></span></label></section><section class="inspector-section"><h3>Stops</h3><div class="gradient-stops">${p.stops.map((stop, i) => `<div class="gradient-stop" data-stop-row="${i}"><span class="gradient-stop-label">Stop ${i + 1}</span><button id="gradient-stop-${i}" type="button" class="token-input token-binding" data-gradient-stop="${i}" aria-label="Choose color for stop ${i + 1}" aria-haspopup="dialog" aria-controls="primitive-picker" title="${escape(stop.color?.alias ? `Linked to ${stop.color.alias}` : 'Custom value')}"><span class="token-chip" data-color="${escape(stopColor(f, stop.color))}" aria-hidden="true"></span><span>${escape(stopLabel(stop.color))}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><span class="unit-input"><input id="gradient-stop-${i}-position" type="number" min="0" max="100" step="1" value="${rounded(stop.position * 100)}" aria-label="Stop ${i + 1} position in percent" data-gradient-position="${i}" /><span>%</span></span><button type="button" class="icon-button" data-gradient-remove="${i}" aria-label="Remove stop ${i + 1}" ${n <= 2 ? 'disabled' : ''}>${icon('trash')}</button></div>`).join('')}</div><div class="shadow-editor-footer"><button id="gradient-add-stop" type="button" class="button">Add stop</button></div></section>`;
+}
+// One edit to a gradient's first paint; the paint is saved whole, other paints are kept.
+function editGradient(name, change) {
+  const s = gradients(state.foundations.find(x => x.id === 'color')).find(x => x.name === name); if (!s) return;
+  const paints = structuredClone(paintsFor(s)); change(paints[0]); paints[0] = draftPaint(paints[0]);
+  draft.settings.set(`paint:${name}`, paints);
+  // A refused save drops the preview, so the card and panel draw the saved gradient beside the error.
+  saver.save(`gradient ${name}`, [{ op: 'set', kind: 'paintStyle', name, fields: { paints } }], { onError: () => { draft.settings.delete(`paint:${name}`); render(); } });
+  render();
+}
+const selectedGradient = () => route() === 'color' && selectedItem?.startsWith('color|') ? selectedItem.slice(6) : null;
+
 function colorDocument(f) {
   if (f.status !== 'ready') return documentFrame(f.name, f.description, emptyFoundation(f), badge(f.status));
   const mode = modeFor(f);
-  return documentFrame(f.name, f.description, colorGroups(f).map(([key, rows]) => `<section class="section"><div class="section-intro"><h2>${escape(groupNames[key] || key)}</h2><p>${escape(groupDescriptions[key] || 'Color roles from your design system.')}</p></div><div class="color-grid">${rows.map(v => {
+  return documentFrame(f.name, f.description, (colorGroups(f).map(([key, rows]) => `<section class="section"><div class="section-intro"><h2>${escape(groupNames[key] || key)}</h2><p>${escape(groupDescriptions[key] || 'Color roles from your design system.')}</p></div><div class="color-grid">${rows.map(v => {
     const value = resultFor(v, mode);
-    return previewCard(`<span>${escape(tokenLabel(v.name))}</span>`, `<span class="color-sample" data-color="${escape(valueText(value))}"></span>`, { interactive: true, className: `color-token-card ${v.name === selectedToken ? 'is-selected' : ''}`, stageClass: 'color-stage', attributes: `data-select-token="${escape(v.name)}" aria-pressed="${v.name === selectedToken}" aria-label="Select ${escape(v.name)}"`, caption: `<span class="specimen-caption"><code>${escape(v.name).replaceAll('/', '/<wbr>')}</code><small>${escape(valueText(value))}</small></span>` });
-  }).join('')}</div></section>`).join('') || '<section class="section"><p>No semantic tokens match your filter.</p></section>', badge(f.status));
+    return previewCard(`<span>${escape(tokenLabel(v.name))}</span>`, `<span class="color-sample" data-color="${escape(valueText(value))}"></span>`, { interactive: true, className: `color-token-card ${selectedItem === `color|${v.name}` ? 'is-selected' : ''}`, stageClass: 'color-stage', attributes: `data-select-token="${escape(v.name)}" aria-pressed="${selectedItem === `color|${v.name}`}" aria-label="Select ${escape(v.name)}"`, caption: `<span class="specimen-caption"><code>${escape(v.name).replaceAll('/', '/<wbr>')}</code><small>${escape(valueText(value))}</small></span>` });
+  }).join('')}</div></section>`).join('') || '<section class="section"><p>No semantic tokens match your filter.</p></section>') + gradientSection(f), badge(f.status));
 }
 
 const property = (name, value) => `<div class="property"><dt>${escape(name)}</dt><dd>${escape(value)}</dd></div>`;
@@ -252,7 +287,7 @@ function colorWorkspace(f) {
     const value = valueText(result);
     const edited = draft.values.has(valueKey(v.name, mode));
     return `<div class="token-control ${v.name === selectedToken ? 'is-selected' : ''}" data-token-row="${escape(v.name)}"><label for="token-value-${i}" title="${escape(v.name)}"><span>${escape(tokenLabel(v.name))}</span>${edited ? '<small>Edited</small>' : ''}${!result.alias ? '<small class="custom-value-label">Custom value</small>' : ''}</label><button id="token-value-${i}" class="token-input token-binding" data-choose-primitive="${escape(v.name)}" aria-label="Choose primitive for ${escape(v.name)}" aria-haspopup="dialog" aria-controls="primitive-picker" title="${escape(result.error || (result.alias ? `Linked to ${result.alias}` : 'Custom value'))}"><span class="token-chip" data-color="${escape(value)}" aria-hidden="true"></span><span>${escape(result.alias?.replace(/^palette\//, '') || 'Custom value')}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><code class="token-path">${escape(v.name)}</code></div>`;
-  }).join('')}</div></details>`).join('') || '<p class="workspace-help">No semantic tokens match your filter.</p>'}`;
+  }).join('')}</div></details>`).join('') || '<p class="workspace-help">No semantic tokens match your filter.</p>'}${gradientMatches(f).length ? `<details class="token-group" data-group="paint-styles" open><summary>Gradients<span>${gradientMatches(f).length}</span></summary><div>${gradientMatches(f).map(s => `<div class="token-control"><label for="gradient-select-${escape(s.name.split('/').at(-1))}" title="${escape(s.name)}"><span>${escape(tokenLabel(s.name))}</span></label><button id="gradient-select-${escape(s.name.split('/').at(-1))}" type="button" class="token-input token-binding" data-select-gradient="${escape(s.name)}" aria-label="Edit ${escape(s.name)}"><span class="token-chip" data-paint="${escape(s.name)}" aria-hidden="true"></span><span>${escape(`${rounded(paintsFor(s)[0].angle ?? 180)}° · ${paintsFor(s)[0].stops?.length || 0} stops`)}</span>${icon('arrow')}</button><code class="token-path">${escape(s.name)}</code></div>`).join('')}</div></details>` : ''}`;
 }
 
 function foundationWorkspace(f) {
@@ -278,6 +313,7 @@ function itemPanel(f, key) {
   const head = (title, note = '') => `<div class="workspace-panel-header"><h2>${escape(title)}</h2><span class="label-beta">Selected</span></div><p class="workspace-disclaimer">${escape(note || `Click the page to go back to the ${f.name} settings.`)}</p>`;
   const list = rows => `<dl>${rows.filter(([, v]) => v !== undefined && v !== null && v !== '').map(([n, v]) => property(n, v)).join('')}</dl>`;
   const px = v => `${rounded(Number(v))}px`;
+  if (f.id === 'color') { const s = gradients(f).find(x => x.name === key); return s ? gradientPanel(f, s, head) : ''; }
   if (f.id === 'typography') {
     const s = f.styles.find(x => x.name === key); if (!s) return '';
     const t = textStyle(f, s), lh = t.lineHeight?.value ?? t.lineHeight, ls = t.letterSpacing?.value ?? t.letterSpacing;
@@ -311,7 +347,7 @@ function itemPanel(f, key) {
 }
 function inspector(f) {
   const item = f && selectedItem?.startsWith(`${f.id}|`) ? selectedItem.slice(f.id.length + 1) : null;
-  if (item && f.status === 'ready' && !['color', 'motion'].includes(f.id)) { const panel = itemPanel(f, item); if (panel) return panel; }
+  if (item && f.status === 'ready' && f.id !== 'motion' && (f.id !== 'color' || gradients(f).some(s => s.name === item))) { const panel = itemPanel(f, item); if (panel) return panel; }
   if (state.setup && state.setup.status !== 'ready') return `<h2>Setup</h2><p class="workspace-help">Add context, answer any open questions, then review your foundations before publishing to Figma.</p><button class="button" data-open-setup>Open context</button>`;
   const identity = `<section class="inspector-section"><h3>Identity</h3>${field('ds-name', 'Name', displayName(), 'text', 'maxlength="80"')}<dl>${property('Input slug', state.inputSlug || state.slug)}</dl><label class="workspace-field" for="ds-product"><span>Product</span><select id="ds-product">${['Web', 'App', 'Web and App'].map(v => `<option ${v === (draft.product || state.product) ? 'selected' : ''}>${v}</option>`).join('')}</select></label></section><section class="inspector-section"><h3>Foundation output</h3><dl>${property('Variables', state.summary.variables)}${property('Collections', state.summary.collections)}${property('Text styles', state.summary.textStyles)}${property('Effect styles', state.summary.effectStyles)}</dl></section>`;
   return `<div class="workspace-panel-header"><h2>${escape(f?.id === 'shape' ? 'Radius' : f?.id === 'elevation' ? 'Shadow' : f?.name || 'System')}</h2></div><p id="foundation-save-status" class="workspace-disclaimer" role="status" aria-live="polite">${escape(saver.text(state) || 'Changes stay in this preview.')}</p>${f?.id === 'color' && f.status === 'ready' ? colorWorkspace(f) : f ? foundationWorkspace(f) : identity}${f && state?.source?.kind === 'local' ? `<div class="workspace-reset"><button id="undo-change" class="button" ${state.source.canUndo ? '' : 'disabled'}>Undo last change</button><small>Restores the previous revision. Figma is not touched.</small></div>` : '<div class="workspace-reset"><button id="reset-preview" class="button">Reset preview</button><small>Nothing is saved to Figma or your files.</small></div>'}`;
@@ -326,6 +362,9 @@ function applySpecimens(f) {
   document.querySelectorAll('[data-type-size]').forEach(el => { const size = Number(el.dataset.typeSize) * Number(draft.settings.get('type-scale') || state.typeScale || 100) / (state.typeScale || 100); if (Number.isFinite(size) && size > 0) el.style.fontSize = `${Math.min(size, 96)}px`; });
   document.querySelectorAll('[data-measure]').forEach(el => { const size = Number(el.dataset.measure); if (Number.isFinite(size) && size >= 0) el.style.width = `${size}px`; });
   document.querySelectorAll('[data-radius]').forEach(el => { const size = Number(el.dataset.radius); if (Number.isFinite(size) && size >= 0) el.style.borderRadius = `${size}px`; });
+  document.querySelectorAll('[data-border-width]').forEach(el => { const size = Number(el.dataset.borderWidth); if (Number.isFinite(size) && size >= 0) el.style.borderWidth = `${size}px`; });
+  const colors = state.foundations.find(x => x.id === 'color');
+  document.querySelectorAll('[data-paint]').forEach(el => { const s = gradients(colors).find(x => x.name === el.dataset.paint), css = s ? paintCSS(colors, s) : 'none'; if (CSS.supports('background-image', css)) el.style.backgroundImage = css; });
   document.querySelectorAll('[data-effect]').forEach(el => {
     const style = f?.styles.find(s => s.name === el.dataset.effect);
     const value = style ? controls.cssFor(style) : 'none';
@@ -370,11 +409,12 @@ function render() {
   if (route().startsWith('part-')) { document.title = `${part?.name || 'Part'} · ${displayName()} · DS Create Builder`; $('canvas-title').textContent = part?.name || 'Part'; $('canvas-subtitle').textContent = part ? `${part.page} · ${part.description}` : ''; }
   $('content').innerHTML = warnings + (route() === 'overview' ? overview() : route().startsWith('part-') ? partPage(part, { escape, badge, documentFrame, previewCard }) : f ? foundation(f) : documentFrame('View not found', 'Choose a foundation from the navigation.', '<div class="empty-state"><a class="button" href="#overview">Go to Overview</a></div>'));
   markPage(f);
-  $('inspector').innerHTML = route().startsWith('part-') ? partInspector(part, { escape }) : inspector(f);
+  $('inspector').innerHTML = route().startsWith('part-') ? partInspector(part, { escape, options: state.partOptions, parts: state.parts }) : inspector(f);
   document.querySelectorAll('.token-group, .control-details').forEach(el => { const key = el.dataset.group || el.id; if (openGroups.has(key)) el.open = openGroups.get(key); });
   $('inspector').scrollTop = panelScroll;
   if ($('inspector').getClientRects().length) inspectorNeedsReset = false;
   applySpecimens(f);
+  drawItems(state);
   controls.syncInspector();
   controls.syncDialog();
   setup.visibility();
@@ -424,6 +464,7 @@ let savedTheme;
 try { savedTheme = localStorage.getItem('ds-manager-theme'); } catch { /* use system preference */ }
 theme(savedTheme === 'dark' || !savedTheme && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 setupParts({ getState: () => state, refresh: async () => { signature = ''; await refresh(); }, render: () => render() });
+setupItems({ getState: () => state, refresh: async () => { signature = ''; await refresh(); }, render: () => render() });
 $('theme').addEventListener('click', () => theme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
 installInteractionMotion();
 const publisher = setupPublish();
@@ -454,14 +495,17 @@ $('nav-search').addEventListener('input', renderNav);
 $('retry').addEventListener('click', refresh);
 document.querySelector('.skip-link').addEventListener('click', e => { e.preventDefault(); $('main').focus(); });
 let pickerTarget;
+// The picker serves semantic tokens (primitives only) and gradient stops: palette first, then semantic colors, except
+// in a new system, whose stops must alias palette colors (state.paletteStopsOnly, from the validator).
+const pickerStop = f => { const s = gradients(f).find(x => x.name === pickerTarget?.gradient); return s && paintsFor(s)[0].stops[pickerTarget.stop]; };
 function renderPrimitiveOptions() {
   const f = state.foundations.find(f => f.id === 'color');
-  const token = f.variables.find(v => v.name === pickerTarget?.name);
-  if (!token) return;
+  const token = f.variables.find(v => v.name === pickerTarget?.name), stop = pickerTarget?.gradient ? pickerStop(f) : null;
+  if (!token && !stop) return;
   const term = $('primitive-picker-search').value.trim().toLowerCase();
-  const all = primitiveColors(f);
+  const all = !stop ? primitiveColors(f) : state.paletteStopsOnly ? primitiveColors(f).filter(p => p.name.startsWith('palette/')) : [...primitiveColors(f), ...semanticColors(f)];
   const matches = all.filter(p => p.name.toLowerCase().includes(term));
-  const alias = resultFor(token, modeFor(f)).alias;
+  const alias = stop ? stop.color?.alias : resultFor(token, modeFor(f)).alias;
   $('primitive-picker-options').innerHTML = matches.map(p => {
     const result = savedResult(p, modeFor(f));
     return `<button type="button" role="option" aria-selected="${p.name === alias}" data-primitive-option="${escape(p.name)}" ${result.error ? 'disabled' : ''}><span class="token-chip" data-color="${escape(valueText(result))}" aria-hidden="true"></span><span>${escape(p.name)}</span>${p.name === alias ? icon('check') : ''}</button>`;
@@ -469,11 +513,11 @@ function renderPrimitiveOptions() {
   $('primitive-picker-options').querySelectorAll('[data-color]').forEach(el => {
     if (CSS.supports('color', el.dataset.color)) el.style.backgroundColor = el.dataset.color;
   });
-  $('primitive-picker-count').textContent = `${matches.length} of ${all.length} primitives`;
+  $('primitive-picker-count').textContent = `${matches.length} of ${all.length} ${stop ? 'colors' : 'primitives'}`;
 }
-function openPrimitivePicker(trigger) {
-  pickerTarget = { name: trigger.dataset.choosePrimitive, triggerId: trigger.id };
-  $('primitive-picker-role').textContent = pickerTarget.name;
+function openPrimitivePicker(trigger, target = { name: trigger.dataset.choosePrimitive }) {
+  pickerTarget = { ...target, triggerId: trigger.id };
+  $('primitive-picker-role').textContent = target.gradient ? `${target.gradient} · stop ${target.stop + 1}` : target.name;
   $('primitive-picker-search').value = '';
   renderPrimitiveOptions();
   const picker = $('primitive-picker');
@@ -497,6 +541,7 @@ $('primitive-picker').addEventListener('click', e => {
 $('primitive-picker-options').addEventListener('click', e => {
   const option = e.target.closest('[data-primitive-option]');
   if (!option || option.disabled) return;
+  if (pickerTarget.gradient) { const { stop } = pickerTarget; editGradient(pickerTarget.gradient, p => { p.stops[stop].color = { alias: option.dataset.primitiveOption }; }); closeDialog($('primitive-picker')); return; }
   const f = state.foundations.find(f => f.id === 'color');
   const token = f.variables.find(v => v.name === pickerTarget.name);
   const key = valueKey(token.name, modeFor(f));
@@ -534,12 +579,27 @@ $('inspector').addEventListener('change', e => {
   if (motion.change(e)) return;
   const target = e.target;
   if (target.id === 'ds-product') { draft.product = target.value; }
+  else if (target.matches('#gradient-angle, [data-gradient-position]') && selectedGradient()) {
+    if (!target.validity.valid || target.value === '') return;
+    editGradient(selectedGradient(), p => { if (target.id === 'gradient-angle') p.angle = Number(target.value); else p.stops[Number(target.dataset.gradientPosition)].position = Number(target.value) / 100; });
+  }
   else if (target.id === 'type-family') { draft.settings.set('family', target.value); render(); saver.save('typeface', [{ op: 'apply', recipe: 'type-family', family: target.value, ...(uiFamilyToken() ? { role: 'ui' } : {}) }]); }
 });
 $('inspector').addEventListener('click', e => {
   if (motion.click(e)) return;
   const trigger = e.target.closest('[data-choose-primitive]');
   if (trigger) { openPrimitivePicker(trigger); return; }
+  const stop = e.target.closest('[data-gradient-stop]'), gradient = selectedGradient();
+  if (stop && gradient) { openPrimitivePicker(stop, { gradient, stop: Number(stop.dataset.gradientStop) }); return; }
+  const remove = e.target.closest('[data-gradient-remove]');
+  if (remove && !remove.disabled && gradient) { editGradient(gradient, p => { if (p.stops.length > 2) p.stops.splice(Number(remove.dataset.gradientRemove), 1); }); return; }
+  if (e.target.closest('#gradient-add-stop') && gradient) {
+    // The new stop splits the widest gap and starts with the color on its left.
+    editGradient(gradient, p => { let at = 0; for (let i = 1; i < p.stops.length - 1; i++) if (p.stops[i + 1].position - p.stops[i].position > p.stops[at + 1].position - p.stops[at].position) at = i; p.stops.splice(at + 1, 0, { position: (p.stops[at].position + p.stops[at + 1].position) / 2, color: structuredClone(p.stops[at].color) }); });
+    return;
+  }
+  const pick = e.target.closest('[data-select-gradient]');
+  if (pick) { selectedItem = `color|${pick.dataset.selectGradient}`; render(); return; }
   const mode = e.target.closest('[data-mode]');
   if (mode) { selectedMode = mode.dataset.mode; render(); }
   if (e.target.closest('#undo-change')) saver.undo();

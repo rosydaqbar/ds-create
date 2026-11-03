@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, type ReactNode } from 'react';
 import { Animated, Pressable, StyleSheet, View, type GestureResponderEvent, type StyleProp, type ViewStyle } from 'react-native';
+import { gradients } from '../../tokens/tokens';
 import { anatomy, toEasing, useTheme, type TextStyleName, type Theme, type ThemeShadows } from '../../theme';
 import { Icon, type IconName } from '../../icons';
 import { a11yState, dim, FocusRing, num, role, touchSlop, useInteraction, useStateColors, type Interaction } from './_shared';
@@ -40,6 +41,8 @@ export interface ButtonProps {
   trailingIcon?: IconName;
   /** Figma `Icon only=true`: a square button with one icon; `label` becomes its accessibility label. */
   iconOnly?: boolean;
+  /** A gradient (paint style) as the fill, by its key in `gradients` (`color/gradient/brand` is `brand`). Primary emphasis only. */
+  fillGradient?: string;
   /** Figma `State=loading`: a spinner in the leading slot, presses ignored, announced as busy. */
   loading?: boolean;
   /** Figma `Show loading text`: keeps the label next to the spinner while loading. */
@@ -66,18 +69,18 @@ interface StateColors {
 }
 
 /**
- * `size/control/*`, `button/padding-x/*`, `button/gap/*` and the label style for each size (spec §4).
+ * `size/control/*`, `button/padding-{top,right,bottom,left}/*`, `button/gap/*` and the label style for each size.
  * Without component tokens: the control size, then the space scale.
  */
 function sizeTokens(theme: Theme, size: ButtonSize) {
   const c = theme.component;
   const table = {
-    xs: { height: dim('size', 'controlXs', 32), paddingX: num(c.buttonPaddingXXs, dim('space', 'md', 8)), gap: num(c.buttonGapXs, dim('space', 'xs', 4)), text: 'bodySmSemibold' },
-    sm: { height: dim('size', 'controlSm', 36), paddingX: num(c.buttonPaddingXSm, dim('space', 'lg', 12)), gap: num(c.buttonGapSm, dim('space', 'xs', 4)), text: 'bodySmSemibold' },
-    md: { height: dim('size', 'controlMd', 40), paddingX: num(c.buttonPaddingXMd, dim('space', 'lg', 12)), gap: num(c.buttonGapMd, dim('space', 'sm', 6)), text: 'bodySmSemibold' },
-    lg: { height: dim('size', 'controlLg', 44), paddingX: num(c.buttonPaddingXLg, dim('space', 'xl', 16)), gap: num(c.buttonGapLg, dim('space', 'sm', 6)), text: 'bodyMdSemibold' },
-    xl: { height: dim('size', 'controlXl', 48), paddingX: num(c.buttonPaddingXXl, dim('space', 'xl', 16)), gap: num(c.buttonGapXl, dim('space', 'md', 8)), text: 'bodyMdSemibold' },
-  } satisfies Record<ButtonSize, { height: number; paddingX: number; gap: number; text: string }>;
+    xs: { height: dim('size', 'controlXs', 32), padding: { top: num(c.buttonPaddingTopXs, 0), right: num(c.buttonPaddingRightXs, dim('space', 'md', 8)), bottom: num(c.buttonPaddingBottomXs, 0), left: num(c.buttonPaddingLeftXs, dim('space', 'md', 8)) }, gap: num(c.buttonGapXs, dim('space', 'xs', 4)), text: 'bodySmSemibold' },
+    sm: { height: dim('size', 'controlSm', 36), padding: { top: num(c.buttonPaddingTopSm, 0), right: num(c.buttonPaddingRightSm, dim('space', 'lg', 12)), bottom: num(c.buttonPaddingBottomSm, 0), left: num(c.buttonPaddingLeftSm, dim('space', 'lg', 12)) }, gap: num(c.buttonGapSm, dim('space', 'xs', 4)), text: 'bodySmSemibold' },
+    md: { height: dim('size', 'controlMd', 40), padding: { top: num(c.buttonPaddingTopMd, 0), right: num(c.buttonPaddingRightMd, dim('space', 'lg', 12)), bottom: num(c.buttonPaddingBottomMd, 0), left: num(c.buttonPaddingLeftMd, dim('space', 'lg', 12)) }, gap: num(c.buttonGapMd, dim('space', 'sm', 6)), text: 'bodySmSemibold' },
+    lg: { height: dim('size', 'controlLg', 44), padding: { top: num(c.buttonPaddingTopLg, 0), right: num(c.buttonPaddingRightLg, dim('space', 'xl', 16)), bottom: num(c.buttonPaddingBottomLg, 0), left: num(c.buttonPaddingLeftLg, dim('space', 'xl', 16)) }, gap: num(c.buttonGapLg, dim('space', 'sm', 6)), text: 'bodyMdSemibold' },
+    xl: { height: dim('size', 'controlXl', 48), padding: { top: num(c.buttonPaddingTopXl, 0), right: num(c.buttonPaddingRightXl, dim('space', 'xl', 16)), bottom: num(c.buttonPaddingBottomXl, 0), left: num(c.buttonPaddingLeftXl, dim('space', 'xl', 16)) }, gap: num(c.buttonGapXl, dim('space', 'md', 8)), text: 'bodyMdSemibold' },
+  } satisfies Record<ButtonSize, { height: number; padding: { top: number; right: number; bottom: number; left: number }; gap: number; text: string }>;
   return table[size];
 }
 
@@ -151,6 +154,7 @@ export function Button({
   showLoadingText = true,
   disabled = false,
   fullWidth = false,
+  fillGradient,
   onPress,
   onLongPress,
   accessibilityHint,
@@ -170,7 +174,9 @@ export function Button({
   const states = interactionColors(theme, emphasis, tone);
   const current: StateColors = disabled ? disabledColors(theme, emphasis) : states[interaction];
   const stateColor = useStateColors(states as Record<Interaction, Record<keyof StateColors, string>>, interaction, !!previewState);
-  const animate = (pick: keyof StateColors) => (disabled ? current[pick] : stateColor(pick));
+  // React Native has no built-in gradient: a gradient fill is drawn as its first stop's color.
+  const firstStop = emphasis === 'primary' && !disabled ? gradients[fillGradient ?? '']?.stops[0]?.[theme.scheme] : undefined;
+  const animate = (pick: keyof StateColors) => (pick === 'fill' && firstStop ? firstStop : disabled ? current[pick] : stateColor(pick));
 
   // Depth only on primary and secondary, never when disabled (spec §7). Absent when the brand has no depth.
   const elevation: Partial<ThemeShadows> = theme.shadows;
@@ -210,7 +216,10 @@ export function Button({
           {
             minHeight: s.height,
             gap: s.gap,
-            paddingHorizontal: iconOnly ? 0 : s.paddingX,
+            paddingTop: iconOnly ? 0 : s.padding.top,
+            paddingRight: iconOnly ? 0 : s.padding.right,
+            paddingBottom: iconOnly ? 0 : s.padding.bottom,
+            paddingLeft: iconOnly ? 0 : s.padding.left,
             borderRadius: radius,
             borderWidth: dim('borderWidth', 'default', 1),
             backgroundColor: animate('fill'),

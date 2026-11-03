@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { forceAttr, type ForceStateProps } from '@/lib/types';
 import { Icon, type IconName } from '@/icons';
@@ -20,11 +20,11 @@ export const buttonVariants = cva(
   {
     variants: {
       size: {
-        xs: 'h-(--size-control-xs) px-(--button-padding-x-xs) gap-(--button-gap-xs) type-body-sm-semibold',
-        sm: 'h-(--size-control-sm) px-(--button-padding-x-sm) gap-(--button-gap-sm) type-body-sm-semibold',
-        md: 'h-(--size-control-md) px-(--button-padding-x-md) gap-(--button-gap-md) type-body-sm-semibold',
-        lg: 'h-(--size-control-lg) px-(--button-padding-x-lg) gap-(--button-gap-lg) type-body-md-semibold',
-        xl: 'h-(--size-control-xl) px-(--button-padding-x-xl) gap-(--button-gap-xl) type-body-md-semibold',
+        xs: 'h-(--size-control-xs) gap-(--button-gap-xs) type-body-sm-semibold',
+        sm: 'h-(--size-control-sm) gap-(--button-gap-sm) type-body-sm-semibold',
+        md: 'h-(--size-control-md) gap-(--button-gap-md) type-body-sm-semibold',
+        lg: 'h-(--size-control-lg) gap-(--button-gap-lg) type-body-md-semibold',
+        xl: 'h-(--size-control-xl) gap-(--button-gap-xl) type-body-md-semibold',
       },
       emphasis: { primary: '', secondary: '', tertiary: '' },
       tone: { brand: '', danger: '' },
@@ -46,6 +46,12 @@ export const buttonVariants = cva(
       { emphasis: 'primary', className: 'is-disabled:border-border-disabled is-disabled:bg-fill-neutral-subtle-disabled is-disabled:text-text-disabled' },
       { emphasis: 'secondary', className: 'is-disabled:border-border-disabled is-disabled:bg-surface-base is-disabled:text-text-disabled' },
       { emphasis: 'tertiary', className: 'is-disabled:bg-fill-none is-disabled:text-text-disabled' },
+      // Padding per side from the Part file (button/padding-{side}/{size}); icon-only squares have none.
+      { iconOnly: false, size: 'xs', className: 'pt-(--button-padding-top-xs) pr-(--button-padding-right-xs) pb-(--button-padding-bottom-xs) pl-(--button-padding-left-xs)' },
+      { iconOnly: false, size: 'sm', className: 'pt-(--button-padding-top-sm) pr-(--button-padding-right-sm) pb-(--button-padding-bottom-sm) pl-(--button-padding-left-sm)' },
+      { iconOnly: false, size: 'md', className: 'pt-(--button-padding-top-md) pr-(--button-padding-right-md) pb-(--button-padding-bottom-md) pl-(--button-padding-left-md)' },
+      { iconOnly: false, size: 'lg', className: 'pt-(--button-padding-top-lg) pr-(--button-padding-right-lg) pb-(--button-padding-bottom-lg) pl-(--button-padding-left-lg)' },
+      { iconOnly: false, size: 'xl', className: 'pt-(--button-padding-top-xl) pr-(--button-padding-right-xl) pb-(--button-padding-bottom-xl) pl-(--button-padding-left-xl)' },
       // Icon-only squares: side = control height.
       { iconOnly: true, size: 'xs', className: 'w-(--size-control-xs)' },
       { iconOnly: true, size: 'sm', className: 'w-(--size-control-sm)' },
@@ -77,6 +83,11 @@ export interface ButtonProps
   showLoadingText?: boolean;
   /** Stretch to the container (content stays centred). */
   fullWidth?: boolean;
+  /** A gradient (paint style) as the fill, by its role (`color/gradient/brand` is `brand`). Primary emphasis only. */
+  gradient?: string;
+  /** Gradient for the hover and pressed states; they keep `gradient` when left out. */
+  gradientHover?: string;
+  gradientPressed?: string;
   children?: ReactNode;
 }
 
@@ -93,7 +104,11 @@ export function Button({
   loading = false,
   showLoadingText = true,
   fullWidth = false,
+  gradient,
+  gradientHover,
+  gradientPressed,
   forceState,
+  style,
   disabled,
   className,
   type = 'button',
@@ -101,6 +116,10 @@ export function Button({
 }: ButtonProps) {
   const text = label ?? children;
   const showText = !iconOnly && (!loading || showLoadingText);
+  // A paint fill is an image, not a color: the role goes in a variable so the classes stay static.
+  const paint = gradient && emphasis === 'primary' && !disabled;
+  const paintVar = (role?: string) => `var(--color-gradient-${role ?? gradient})`;
+  const paintStyle = paint ? ({ '--button-paint': paintVar(gradient), '--button-paint-hover': paintVar(gradientHover), '--button-paint-pressed': paintVar(gradientPressed) } as CSSProperties) : undefined;
   return (
     <button
       data-anatomy="root"
@@ -108,7 +127,8 @@ export function Button({
       disabled={disabled}
       aria-busy={loading || undefined}
       aria-label={iconOnly && typeof text === 'string' ? text : undefined}
-      className={cn(buttonVariants({ size, emphasis, tone, iconOnly }), fullWidth && 'w-full', loading && 'pointer-events-none', className)}
+      className={cn(buttonVariants({ size, emphasis, tone, iconOnly }), paint && 'bg-(image:--button-paint) is-hover:bg-(image:--button-paint-hover) is-pressed:bg-(image:--button-paint-pressed)', fullWidth && 'w-full', loading && 'pointer-events-none', className)}
+      style={paintStyle ? { ...paintStyle, ...style } : style}
       {...forceAttr(forceState)}
       {...rest}
     >

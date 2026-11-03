@@ -1,3 +1,4 @@
+import { copyText } from './clipboard.mjs';
 import { builderSettings } from '../../shared/ui-settings.mjs';
 import { renderPublishProgress } from './publish-progress.mjs';
 import { revealInteraction } from '../ui-motion.mjs';
@@ -129,7 +130,7 @@ export function setupPublish() {
   });
   $('publish-recovery-copy').addEventListener('click', async () => {
     const prompt = $('publish-recovery-prompt');
-    try { await navigator.clipboard.writeText(prompt.value); $('publish-recovery-feedback').textContent = 'Copied. Paste into your agent to continue.'; }
+    try { await copyText(prompt.value); $('publish-recovery-feedback').textContent = 'Copied. Paste into your agent to continue.'; }
     catch { prompt.focus(); prompt.select(); $('publish-recovery-feedback').textContent = 'Copy the selected prompt manually.'; }
   });
   $('publish-recheck').addEventListener('click', () => { showError(''); check(); });
@@ -138,14 +139,16 @@ export function setupPublish() {
   dialog.addEventListener('close', () => { clearInterval(timer); request?.abort(); request = null; $('publish-open').focus({ preventScroll: true }); });
   $('publish-command').addEventListener('click', e => e.target.select());
   $('publish-copy').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText('ds-create build'); $('publish-copy-feedback').textContent = 'Command copied. Paste it into your agent.'; }
+    try { await copyText('ds-create build'); $('publish-copy-feedback').textContent = 'Command copied. Paste it into your agent.'; }
     catch { $('publish-command').focus(); $('publish-command').select(); $('publish-copy-feedback').textContent = 'Copy the selected command manually.'; }
   });
   return { update(state) {
     const ready = publishReady(state);
-    const reason = ready ? 'Publish foundations to Figma' : !state ? 'Checking foundation readiness. Reconnect to Builder if this persists.' : ['queued', 'running'].includes(state.setup?.status) ? 'Foundations are being prepared. Wait until the draft is ready.' : 'Prepare foundations or run ds-create init before publishing.';
+    const reason = ready ? 'Publish foundations to Figma' : !state ? 'Checking foundation readiness. Reconnect to Builder if this persists.' : ['queued', 'running'].includes(state.setup?.status) ? 'Foundations are being prepared. Wait until the draft is ready.' : state.source?.kind === 'local' && ['approved', 'synced'].includes(state.source.review) && !state.steps?.some(step => step.step === 1 && step.status === 'done') ? 'Complete the first step of ds-create init before using Publish to Figma.' : state.warnings?.length ? state.warnings[0] : 'Prepare foundations or run ds-create init before publishing.';
     $('publish').disabled = !ready;
     $('publish').title = reason;
     $('publish').setAttribute('aria-label', ready ? 'Publish to Figma' : `Publish to Figma: ${reason}`);
+    // A disabled button says why next to it, not only in a tooltip.
+    $('publish-reason').hidden = ready || $('publish').hidden; $('publish-reason').textContent = ready ? '' : reason;
   } };
 }

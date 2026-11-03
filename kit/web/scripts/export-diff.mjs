@@ -43,7 +43,7 @@ if (OUT && !fs.existsSync(OUT)) {
 }
 // The build's own base first: tokens/figma-variables.json in a fresh site copy is the template's placeholder.
 const basePath = arg('--base') || (OUT ? [path.join(OUT, 'figma', 'figma-variables.json')] : ['../figma/figma-variables.json', 'tokens/figma-variables.json']).find((f) => fs.existsSync(f));
-const base = basePath && fs.existsSync(basePath) ? read(basePath) : { variables: [], textStyles: [], effectStyles: [], gridStyles: [] };
+const base = basePath && fs.existsSync(basePath) ? read(basePath) : { variables: [], textStyles: [], effectStyles: [], gridStyles: [], paintStyles: [] };
 
 const fnv = (s) => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h; };
 const canon = (e, modes) => JSON.stringify([e.name, e.collection, e.type, e.description, modes.map((m) => e.values[m])]);
@@ -63,7 +63,9 @@ for (const c of H.collections) {
   const diff = hb.map((h, i) => (h === c.b[i] ? -1 : i)).filter((i) => i >= 0);
   if (diff.length) want[c.name] = diff.length > 10 ? 'all' : diff;
 }
-const stylesDiffer = H.styles.text !== styleHash(base.textStyles) || H.styles.effect !== styleHash(base.effectStyles) || H.styles.grid !== styleHash(base.gridStyles);
+// A hash from an exporter older than paint styles carries no `paint`; it is not compared.
+const paintDiffers = H.styles.paint !== undefined && H.styles.paint !== styleHash(base.paintStyles);
+const stylesDiffer = H.styles.text !== styleHash(base.textStyles) || H.styles.effect !== styleHash(base.effectStyles) || H.styles.grid !== styleHash(base.gridStyles) || paintDiffers;
 if (stylesDiffer) want.styles = true;
 
 const rowFiles = many('--merge');
@@ -80,7 +82,7 @@ let fetched = {};
 for (const f of rowFiles) {
   const r = read(f);
   for (const [c, list] of Object.entries(r.rows || {})) rows[c] = (rows[c] || []).concat(list);
-  for (const k of ['textStyles', 'effectStyles', 'gridStyles']) if (r[k]) fetched[k] = r[k];
+  for (const k of ['textStyles', 'effectStyles', 'gridStyles', 'paintStyles']) if (r[k]) fetched[k] = r[k];
 }
 const fromRow = (c) => ([name, type, description, ...vals]) => ({ name, collection: c.name, type, description, values: Object.fromEntries(c.modes.map((m, i) => [m, typeof vals[i] === 'string' && vals[i].startsWith('@') ? { alias: vals[i].slice(1) } : vals[i]])) });
 const problems = [];
@@ -110,6 +112,7 @@ const out = {
   textStyles: fetched.textStyles || base.textStyles || [],
   effectStyles: fetched.effectStyles || base.effectStyles || [],
   gridStyles: fetched.gridStyles || base.gridStyles || [],
+  paintStyles: fetched.paintStyles || base.paintStyles || [],
   pages: H.pages,
 };
 // Verify against every hash before writing anything.
@@ -123,6 +126,7 @@ for (const c of H.collections) {
 if (styleHash(out.textStyles) !== H.styles.text) problems.push('text styles differ (fetch ROWS { styles: true })');
 if (styleHash(out.effectStyles) !== H.styles.effect) problems.push('effect styles differ (fetch ROWS { styles: true })');
 if (styleHash(out.gridStyles) !== H.styles.grid) problems.push('grid styles differ (fetch ROWS { styles: true })');
+if (H.styles.paint !== undefined && styleHash(out.paintStyles) !== H.styles.paint) problems.push('paint styles differ (fetch ROWS { styles: true })');
 if (problems.length) {
   console.error('export-diff: nothing written:\n  ' + problems.join('\n  '));
   process.exit(1);
@@ -132,4 +136,4 @@ const targets = OUT ? [path.join(OUT, 'figma', 'figma-variables.json'), path.joi
 if (!OUT && fs.existsSync('../figma')) targets.push('../figma/figma-variables.json');
 if (OUT) fs.mkdirSync(path.join(OUT, 'figma'), { recursive: true });
 for (const t of targets) fs.writeFileSync(t, JSON.stringify(out, null, 2) + '\n');
-console.log(`export-diff: ${variables.length} variables, ${out.textStyles.length} text styles, ${out.effectStyles.length} effect styles, ${out.gridStyles.length} grid styles, ${out.pages.length} pages → ${targets.join(', ')}; every hash matches Figma${orderOk ? '' : ' (variable order differs from Figma; names and values match)'}.${OUT ? '' : ' Next: npm run tokens'}`);
+console.log(`export-diff: ${variables.length} variables, ${out.textStyles.length} text styles, ${out.effectStyles.length} effect styles, ${out.gridStyles.length} grid styles, ${out.paintStyles.length} paint styles, ${out.pages.length} pages → ${targets.join(', ')}; every hash matches Figma${orderOk ? '' : ' (variable order differs from Figma; names and values match)'}.${OUT ? '' : ' Next: npm run tokens'}`);

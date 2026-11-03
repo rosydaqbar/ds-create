@@ -32,6 +32,9 @@ export function toTokenExport(draft, parts = {}, {pages, file = 'Local files'} =
     textStyles: (draft.textStyles || []).map(textStyle),
     effectStyles: (draft.effectStyles || []).map(s => ({...s, effects: s.effects.map(effect)})),
     gridStyles: structuredClone(draft.gridStyles || []),
+    // Only a system with gradients carries the list, so exports saved before gradients compare unchanged. Stop colors
+    // stay as saved ({alias} or {r,g,b,a}), the form validation accepts.
+    ...(draft.paintStyles?.length ? {paintStyles: structuredClone(draft.paintStyles)} : {}),
     ...(pages ? {pages} : {}),
   };
 }

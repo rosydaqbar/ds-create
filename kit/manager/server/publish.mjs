@@ -252,20 +252,22 @@ export function fontRoles(draft){
 }
 export const recommendedFonts=['Inter','Geist','Plus Jakarta Sans'];
 const roleLabels={ui:'UI and body text',display:'Display and headings',mono:'Code'};
+// Paint styles join the inventory only when the system has them, so other systems keep the read they had.
+const paintInventory=draft=>!!draft?.paintStyles?.length;
 export function preflightOperation(request,draft){
- const fonts=requiredFonts(draft);
+ const fonts=requiredFonts(draft),paints=paintInventory(draft);
  return {kind:'figma-preflight',readOnly:true,fileKey:new URL(request.figmaUrl).pathname.split('/')[2],sourceHash:request.hash,
   instructions:'Load the applicable Figma tool skill, then execute this read-only code using your existing connected Figma authoring tool on fileKey. Do not regenerate the draft or load generation specs first. Send its actual returned object through ds_create_publish_preflight on the same MCP connection. A tool error must finish blocked with its actual reason. No Figma writes are authorized by this operation. The preflight acknowledgement supplies the next operation or ends the job.',
   code:`const required = ${JSON.stringify(fonts)};
 const recommended = ${JSON.stringify(recommendedFonts)};
-const [available, collections, textStyles, effectStyles] = await Promise.all([figma.listAvailableFontsAsync(), figma.variables.getLocalVariableCollectionsAsync(), figma.getLocalTextStylesAsync(), figma.getLocalEffectStylesAsync()]);
+const [available, collections, textStyles, effectStyles${paints?', paintStyles':''}] = await Promise.all([figma.listAvailableFontsAsync(), figma.variables.getLocalVariableCollectionsAsync(), figma.getLocalTextStylesAsync(), figma.getLocalEffectStylesAsync()${paints?', figma.getLocalPaintStylesAsync()':''}]);
 const families = new Map();
 for (const a of available) families.set(a.fontName.family, [...(families.get(a.fontName.family) || []), a.fontName.style]);
 const words = s => s.toLowerCase().split(/\\s+/).filter(Boolean);
 const option = family => ({family, styles: families.get(family).slice(0, 40)});
 const similar = family => { const w = words(family), score = f => words(f).filter(x => w.includes(x)).length; return [...families.keys()].filter(f => f !== family && score(f) >= Math.min(2, w.length)).sort((a, b) => score(b) - score(a) || a.length - b.length).slice(0, 3); };
 const missing = [...new Set(required.filter(f => !(families.get(f.family) || []).includes(f.style)).map(f => f.family))];
-return {fonts: required.map(f => ({...f, available: (families.get(f.family) || []).includes(f.style)})), inventory: {collections: collections.length, variables: collections.reduce((n,c) => n + c.variableIds.length, 0), textStyles: textStyles.length, effectStyles: effectStyles.length},
+return {fonts: required.map(f => ({...f, available: (families.get(f.family) || []).includes(f.style)})), inventory: {collections: collections.length, variables: collections.reduce((n,c) => n + c.variableIds.length, 0), textStyles: textStyles.length, effectStyles: effectStyles.length${paints?', paintStyles: paintStyles.length':''}},
   alternatives: missing.map(family => ({family, similar: similar(family).map(option), recommended: recommended.filter(f => f !== family && families.has(f)).map(option)}))};`};
 }
 const fontOption=o=>o&&typeof o.family==='string'&&o.family.trim()&&o.family.length<=200&&Array.isArray(o.styles)&&o.styles.length&&o.styles.length<=40&&o.styles.every(s=>typeof s==='string'&&s&&s.length<=100);
@@ -277,7 +279,7 @@ export function evaluatePreflight(draft,result){
   if(typeof font?.available!=='boolean'||seen.has(key(font))||!expected.some(f=>key(f)===key(font)))throw new Error('Preflight font result differs from the approved font set.');
   seen.set(key(font),font.available);
  }
- if(!result.inventory||!['collections','variables','textStyles','effectStyles'].every(k=>Number.isSafeInteger(result.inventory[k])&&result.inventory[k]>=0))throw new Error('Return the actual read-only file inventory.');
+ if(!result.inventory||!['collections','variables','textStyles','effectStyles',...paintInventory(draft)?['paintStyles']:[]].every(k=>Number.isSafeInteger(result.inventory[k])&&result.inventory[k]>=0))throw new Error('Return the actual read-only file inventory.');
  const missing=expected.filter(f=>!seen.get(key(f)));
  const alternatives=result.alternatives===undefined?[]:result.alternatives;
  if(!Array.isArray(alternatives)||alternatives.length>20||alternatives.some(a=>!missing.some(f=>f.family===a?.family)||!['similar','recommended'].every(k=>Array.isArray(a[k])&&a[k].length<=10&&a[k].every(fontOption))))throw new Error('Return the font alternatives exactly as the preflight code produced them.');
@@ -298,6 +300,6 @@ export function figmaPrompt(request,requestFile,fastPlan){
  return `Publish approved foundations for session ${request.slug} in ${request.workspace}.
 Read ${requestFile}, skills/ds-create/reference/${fastPlan?'manager-fast.md':'publish-mcp.md and init.md (approved Figma continuation)'} and the applicable Figma tool skill. Inputs: workspace/input/${request.inputSlug||request.slug}/; outputs: workspace/output/${request.slug}/.
 The user already approved revision ${request.revision}, SHA256 ${request.hash}, target ${request.figmaUrl}. Use that existing target and approval. Do not alter foundations.json. Preserve frozen values, names, metadata and exact font identities; every approved face must load in Figma (the stepped preflight checks this first), and actual write failures must be reported. No new client, file, font substitution/installation, components/docs, build, deployment or Builder restart.
-${fastPlan?`Verify the compiled plan ${fastPlan.file}, its sourceHash and call hashes. Execute its ${fastPlan.calls.length} calls in order through the existing Figma authoring tool; retain actual results and errors. Do not regenerate the approved data or blindly retry ambiguous writes.`:'Follow the approved publication contract through the existing Figma tools: inventory/access, variables, styles, readback and full-file audit. Preserve partial output; continue independent work when one style fails.'}
+${fastPlan?`Verify the compiled plan ${fastPlan.file}, its sourceHash and call hashes. Execute its ${fastPlan.calls.length} calls in order through the existing Figma authoring tool; retain actual results and errors. Do not regenerate the approved data or blindly retry ambiguous writes.`:'Follow the approved publication contract through the existing Figma tools: inventory/access, variables, styles, readback and full-file audit. Preserve partial output and continue independent work when another style fails. For a paint style, prepare every paint and its stop bindings before creating the style. If any stop cannot bind, remove the style if it was created, finish with a blocked status, and report the style name and the failed stop.'}
 Report progress and cancellation through ds_create_publish_progress with the same lease before every write. Export actual output losslessly to figma/figma-variables.json and save the real mode:file audit to figma/audit-file.json with sourceHash ${request.hash}. Matching approved output and a passing audit are required before marking the ledger synced. Finish completed/blocked/failed/cancelled through ds_create_publish_finish; a successful tool return or planned export alone is not completion. Keep the MCP connection open until finishing.`;
 }

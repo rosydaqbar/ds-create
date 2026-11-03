@@ -15,7 +15,7 @@ const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
 const command = args[0];
 let slug = arg('--slug');
 const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|build|tokens|approve|compare [--slug {slug}] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
+const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|build|tokens|approve|compare|check-site [--slug {slug}] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -66,7 +66,7 @@ async function main() {
     if(command==='sessions'||sessions.length){console.log(JSON.stringify({action:command==='sessions'?'list':'choose-session',sessions,newCommand:'ds-create init-web --new'},null,2));return;}
   }
   if(command==='init-web'&&!slug)slug=`session-${randomUUID()}`;
-  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'build', 'tokens', 'approve', 'compare'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
+  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'build', 'tokens', 'approve', 'compare', 'check-site'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
   if (command === 'wait') {
     const { waitForPreparation } = await import('./server/setup.mjs');
     const controller = new AbortController(), stop = () => controller.abort();
@@ -124,6 +124,20 @@ async function main() {
     const match = !differences.length;
     console.log(JSON.stringify({ match, differences }));
     if (!match) process.exitCode = 1;
+    return;
+  }
+  // What the docs site's components still have to change to match the part files (workflow/WEB.md W4).
+  // Exit 1 when a page needs changes.
+  if (command === 'check-site') {
+    const { checkSite } = await import('./parts/site-check.mjs');
+    const { readParts, PART_FORMAT } = await import('./parts/files.mjs');
+    const site = path.resolve(arg('--site') || path.join(output, 'web')), dir = path.join(site, 'src/components');
+    const files = await readdir(dir, { recursive: true }).catch(e => { if (e.code === 'ENOENT') throw new Error(`No site components at ${dir}. Copy kit/web first (workflow/WEB.md W1).`); throw e; });
+    const sources = await Promise.all(files.filter(f => f.endsWith('.tsx')).map(async f => ({ file: f, text: await readFile(path.join(dir, f), 'utf8') })));
+    const parts = Object.fromEntries(Object.entries(await readParts(output)).filter(([, p]) => p.format === PART_FORMAT));
+    const pages = checkSite(parts, sources);
+    console.log(JSON.stringify({ ok: !pages.length, pages }, null, 2));
+    if (pages.length) process.exitCode = 1;
     return;
   }
   // --no-figma keeps this session out of Figma (ledger flags.figma); Builder's Use Figma switch can turn it back on.
@@ -208,6 +222,9 @@ async function main() {
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('Port must be an integer from 0 to 65535.');
   await cp(path.join(ROOT, 'kit/manager'), dir, { recursive: true, filter: source => !['cli.mjs', 'README.md'].includes(path.relative(path.join(ROOT, 'kit/manager'), source)) });
   await cp(path.join(ROOT, 'kit/web/src/styles/docs-presentation.css'), path.join(dir, 'docs-presentation.css'));
+  // Builder draws Parts with the site's own token rules (server/stage.mjs).
+  await mkdir(path.join(dir, 'web/scripts'), { recursive: true });
+  for (const file of ['token-model.mjs', 'chrome-fallbacks.mjs']) await cp(path.join(ROOT, 'kit/web/scripts', file), path.join(dir, 'web/scripts', file));
   // The same chrome defaults as web docs; these are viewer styles, never brand token data.
   const declarations = [...colors, ...values, ...effects].map(([name, value]) => `  ${name}: ${value};`).join('\n');
   await writeFile(path.join(dir, 'chrome.css'), `/* Generated from kit/web/scripts/chrome-fallbacks.mjs. */\n:root {\n${declarations}\n}\n`);

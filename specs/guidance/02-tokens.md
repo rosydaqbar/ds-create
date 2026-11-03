@@ -70,7 +70,7 @@ Primitives  →  Semantic (Color, Typography, Space, Size, Shape, Motion)  →  
 
 - **Primitive variables** hold raw values (`palette/brand/600`, `scale/space/16`). They are hidden from pickers and never bound directly in components.
 - **Semantic variables** alias primitives and say what a value is for (`color/fill/brand/solid`, `space/md`). Components bind these.
-- **Component variables** exist only where a component needs a value no semantic role expresses, such as a button's horizontal padding per size (`button/padding-x/md`). They alias semantic variables.
+- **Component variables** exist only where a component needs a value that no semantic role covers, such as a button's left padding per size (`button/padding-left/md`). They alias semantic variables.
 - **Category variables** (`color/category/*`) are utility colors for badges, tags, avatars and charts. They carry no status meaning.
 
 **Visual: one value through the layers.** `palette/brand/600` → `color/fill/brand/solid` → `button/primary/brand/fill` → a `Button` instance, each step a card with its swatch and name. A second row shows `scale/space/16` → `space/xl` → a card's padding.
@@ -133,10 +133,11 @@ Patterns by domain:
 | Space | `space/{step}`, `space/optical` | `space/md` |
 | Size | `size/{group}/{step}`, `size/touch-min` | `size/control/md` |
 | Shape | `radius/{role}`, `border/width/{role}` | `radius/control`, `border/width/focus` |
+| Paint styles | `color/gradient/{role}` | `color/gradient/brand` |
 | Effect styles | `elevation/{level}`, `focus/{tone}`, `blur/backdrop/{step}` | `elevation/overlay`, `focus/danger` |
 | Grid styles | `grid/{breakpoint}` | `grid/desktop` |
 | Motion | `motion/{duration, easing, delay}/{role}` | `motion/duration/base` |
-| Components | `{component}[/{part}][/{emphasis}][/{tone}]/{property}[/{state}]` | `button/padding-x/md`, `button/primary/brand/fill/hover` |
+| Components | `{component}[/{part}][/{emphasis}][/{tone}]/{property}[/{state}]` | `button/padding-left/md`, `button/primary/brand/fill/hover` |
 | Documentation | `doc/{group}/{role}` | `doc/space/block` |
 
 **Visual: name anatomy.** `color/fill/brand/solid/hover` split into its segments, each with a callout, next to the swatch and a button in its hover state.

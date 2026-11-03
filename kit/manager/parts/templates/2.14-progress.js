@@ -9,6 +9,9 @@ export const set = 'Progress';
 export const level = 'parts';
 export const spec = 'specs/parts/2.14-progress.md';
 export const uses = [];
+// A fill or background slot the kit component never draws as a background takes a color only: a CSS gradient
+// cannot show there (parts/validate.mjs refuses it, Builder offers none). Progress circles draw the fill as an arc stroke.
+export const solidSlots = {Progress: {fill: 'it is drawn as a stroke, which cannot show a gradient'}};
 
 // A weight list: the first face the text styles have, closest to semibold first.
 const semibold = (scale, size) => [`type/${scale}/${size}/semibold`, `type/${scale}/${size}/medium`, `type/${scale}/${size}/bold`];

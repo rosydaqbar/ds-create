@@ -5,7 +5,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {foundationTemplates,templateHash} from './templates.mjs';
 const hash=body=>createHash('sha256').update(body).digest('hex');
-const lists=['variables','textStyles','effectStyles','gridStyles'];
+// paintStyles joins a payload only when it has gradients, so packs saved before gradients stay valid.
+const lists=['variables','textStyles','effectStyles','gridStyles','paintStyles'];
 const prefix='// Generated from the saved Builder foundation. Do not edit.\nexport const foundation = ';
 const suffix=';\nexport default foundation;\n';
 export const foundationPackFiles=['manifest.json','package.json',...foundationTemplates.flatMap(t=>[t.name+'.js',t.name+'.md'])].map(file=>'foundations/'+file);
@@ -14,8 +15,9 @@ function subset(draft,plan,id){
  const styles=new Set(scope.styles||[]),result={collections:[],variables:[],textStyles:[],effectStyles:[],gridStyles:[]};
  function include(name){if(names.has(name)&&result.variables.some(v=>v.name===name))return;const v=vars.get(name);if(!v)throw new Error('Missing foundation dependency '+name);names.add(name);if(result.variables.some(v=>v.name===name))return;result.variables.push(v);for(const value of Object.values(v.values))if(value?.alias)include(value.alias);}
  for(const name of names)include(name);
- for(const list of ['textStyles','effectStyles','gridStyles'])for(const style of draft[list]||[])if(styles.has(style.name)){
-  result[list].push(style);for(const ref of Object.values(style.bound||{}))include(ref);for(const effect of style.effects||[])if(effect.color?.alias)include(effect.color.alias);
+ for(const list of ['textStyles','effectStyles','gridStyles','paintStyles'])for(const style of draft[list]||[])if(styles.has(style.name)){
+  (result[list]||=[]).push(style);for(const ref of Object.values(style.bound||{}))include(ref);for(const effect of style.effects||[])if(effect.color?.alias)include(effect.color.alias);
+  for(const paint of style.paints||[])for(const stop of paint.stops||[])if(stop.color?.alias)include(stop.color.alias);
  }
  const cols=new Set(result.variables.map(v=>v.collection));result.collections=draft.collections.filter(c=>cols.has(c.name));
  return result;
@@ -32,6 +34,7 @@ function inputNotes(scope){
 }
 function styleNote(s){
  if(s.fontFamily)return `${s.fontFamily} / ${s.fontStyle||'Regular'} · ${s.fontSize}px / ${JSON.stringify(s.lineHeight)}`;
+ if(s.paints)return s.paints.map(p=>`${p.type} ${p.angle}deg: `+(p.stops||[]).map(x=>`${x.color?.alias||JSON.stringify(x.color)} ${x.position}`).join(', ')).join('; ');
  if(s.effects)return s.effects.map(e=>`${e.type}: offset ${e.offset?.x??e.x??0},${e.offset?.y??e.y??0}; blur ${e.radius??e.blur??0}; spread ${e.spread??0}; color ${e.color?.alias||JSON.stringify(e.color)}`).join('; ');
  return `${s.grids?.length||0} saved grids`;
 }
@@ -41,12 +44,12 @@ export function createFoundationPack({draft,plan,decision,request}){
   const scope=plan.domains[t.id],data=scope.status==='included'?subset(draft,plan,t.id):{collections:[],variables:[],textStyles:[],effectStyles:[],gridStyles:[]};
   const payload={format:'ds-create/foundation-module@1',domain:t.id,template:t.name,status:scope.status,inputHash:plan.inputHash,revision:draft.revision,data};
   const js=prefix+JSON.stringify(payload,null,2)+suffix;
-  const summary=scope.status==='excluded'?scope.reason:table([['Variable / style','Type','Saved modes / values'],['---','---','---'],...data.variables.filter(v=>v.collection!=='Primitives'&&(scope.variables||[]).includes(v.name)).slice(0,12).map(v=>[v.name,v.type,JSON.stringify(v.values)]),...['textStyles','effectStyles','gridStyles'].flatMap(kind=>data[kind].map(s=>[s.name,kind,styleNote(s)]))]);
+  const summary=scope.status==='excluded'?scope.reason:table([['Variable / style','Type','Saved modes / values'],['---','---','---'],...data.variables.filter(v=>v.collection!=='Primitives'&&(scope.variables||[]).includes(v.name)).slice(0,12).map(v=>[v.name,v.type,JSON.stringify(v.values)]),...['textStyles','effectStyles','gridStyles','paintStyles'].flatMap(kind=>(data[kind]||[]).map(s=>[s.name,kind,styleNote(s)]))]);
   const details=scope.status==='included'?summary+`\n\nComplete definitions and primitive dependencies: ${t.name}.js (${data.variables.length} variables). This note shows up to12 semantic roles; generated defaults are not copied in full.`:summary;
   const slots={project:request.projectName,inputRevision:plan.inputRevision,revision:draft.revision,inputHash:plan.inputHash,draftHash,builder:code({platform:plan.product.platform,modes:request.interfaceDetails?.modes||draft.collections.find(c=>c.name==='Color')?.modes,projectName:request.projectName}),inputs:inputNotes(decision.domains?.[t.id]||scope),decisions:plan.decisions.filter(d=>decisionKeys[t.id].test(d.key)).map(d=>`- ${d.key}: ${d.value} · ${d.decidedBy} · ${d.source}${d.reason?' · '+d.reason:''}`).join('\n'),summary:details,sources:[...new Set(plan.decisions.map(d=>d.source))].map(name=>'- '+name).join('\n')+`\n- Complete decisions: manager/setup-jobs/${request.id||'current-job'}/decisions.json\n- Full decision rationale: reports/init.md`};
   const md=readFileSync(new URL(`./templates/${t.name}.md`,import.meta.url),'utf8').replace(/\{\{(\w+)\}\}/g,(_,key)=>slots[key]??'');
   files.push(['foundations/'+t.name+'.js',js],['foundations/'+t.name+'.md',md]);
-  entries.push({domain:t.id,template:t.name,status:scope.status,files:Object.fromEntries(['js','md'].map(ext=>{const name='foundations/'+t.name+'.'+ext;return [ext,{file:name,sha256:hash(files.find(([f])=>f===name)[1])}];})),counts:Object.fromEntries(lists.map(k=>[k,data[k].length]))});
+  entries.push({domain:t.id,template:t.name,status:scope.status,files:Object.fromEntries(['js','md'].map(ext=>{const name='foundations/'+t.name+'.'+ext;return [ext,{file:name,sha256:hash(files.find(([f])=>f===name)[1])}];})),counts:Object.fromEntries(lists.filter(k=>data[k]).map(k=>[k,data[k].length]))});
  }
  const manifest={format:'ds-create/foundation-pack@1',inputHash:plan.inputHash,inputRevision:plan.inputRevision,revision:draft.revision,draftHash,templateHash,entries};
  files.push(['foundations/manifest.json',JSON.stringify(manifest,null,2)+'\n']);return {manifest,files};

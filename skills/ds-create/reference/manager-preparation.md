@@ -19,7 +19,7 @@ Normal included scope:
 
 | Domain | Premade pair | Parse only these inputs when supplied |
 | --- | --- | --- |
-| color | 01-color.js + .md | palette anchors/purpose, tone roles, explicit semantic overrides |
+| color | 01-color.js + .md | palette anchors/purpose, tone roles, explicit semantic overrides; `color/gradient/brand` is always created |
 | typography | 02-typography.js + .md | exact families; faces per family (e.g. display.regular = Roman); supplied scale rows |
 | space | 03-spacing.js + .md | base unit, explicit spacing/size/grid exceptions |
 | shape | 04-radius.js + .md | square/soft preset, explicit radius/border exceptions |

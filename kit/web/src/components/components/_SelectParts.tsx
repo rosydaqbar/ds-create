@@ -23,8 +23,12 @@ export type SelectOptionType = 'default' | 'icon' | 'avatar' | 'dot';
 export const selectListSurface =
   'overflow-hidden rounded-surface border-(length:--border-width-default) border-border-subtle bg-surface-raised shadow-overlay';
 
-/** Content padding: y sm space/sm, md–lg space/md; x sm–md space/md, lg space/lg. */
-const contentPad: Record<SelectPartSize, string> = { sm: 'py-sm px-md', md: 'py-md px-md', lg: 'py-md px-lg' };
+/** Content padding: select/option/padding-y/{Size} and select/option/padding-x/{Size}. */
+const contentPad: Record<SelectPartSize, string> = {
+  sm: 'py-(--select-option-padding-y-sm) px-(--select-option-padding-x-sm)',
+  md: 'py-(--select-option-padding-y-md) px-(--select-option-padding-x-md)',
+  lg: 'py-(--select-option-padding-y-lg) px-(--select-option-padding-x-lg)',
+};
 const textStyle: Record<SelectPartSize, string> = { sm: 'type-body-sm-medium', md: 'type-body-md-medium', lg: 'type-body-md-medium' };
 const supportStyle: Record<SelectPartSize, string> = { sm: 'type-body-sm-regular', md: 'type-body-md-regular', lg: 'type-body-md-regular' };
 

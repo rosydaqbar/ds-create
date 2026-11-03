@@ -23,7 +23,10 @@ export function createFoundationControls({ foundation, draft, resultFor, savedRe
     return `<section class="section"><div class="section-intro"><h2>Corner radius</h2><p>Use consistent corner shapes for controls, surfaces, and overlays.</p></div><div class="radius-grid">${radii.map(v => {
       const value = resultFor(v, modeFor(f));
       return previewCard(`<span>${escape(label(v.name))}</span><code>${Number(value.value) >= 999 ? 'Full' : `${rounded(Number(value.value))}px`}</code>`, `<div class="radius-specimen" data-radius="${Number(value.value)}"></div>`, { select: v.name, stageClass: 'radius-stage', caption: `<div class="specimen-caption"><code>${escape(v.name)}</code><small>${escape(value.alias || 'Preview value')}</small></div>` });
-    }).join('')}</div></section>${borders.length ? `<section class="section"><div class="section-heading"><h2>Border widths</h2></div><dl class="border-values">${borders.map(v => `<div class="${selectClass(v.name)}" ${selectable(v.name)}><dt><code>${escape(v.name)}</code></dt><dd>${escape(resultFor(v, modeFor(f)).value)}px</dd></div>`).join('')}</dl></section>` : ''}`;
+    }).join('')}</div></section>${borders.length ? `<section class="section"><div class="section-intro"><h2>Border widths</h2><p>Use the same outline weights for controls, surfaces, focus rings, and selected items.</p></div><div class="radius-grid">${borders.map(v => {
+      const value = resultFor(v, modeFor(f)), name = v.name.split('/').at(-1);
+      return previewCard(`<span>${escape(name[0].toUpperCase() + name.slice(1).replaceAll('-', ' '))}</span><code>${rounded(Number(value.value))}px</code>`, `<div class="border-specimen" data-border-width="${Number(value.value)}"></div>`, { select: v.name, stageClass: 'radius-stage', caption: `<div class="specimen-caption"><code>${escape(v.name)}</code><small>${escape(value.alias || 'Preview value')}</small></div>` });
+    }).join('')}</div></section>` : ''}`;
   }
   function resolveColor(color) {
     if (!color?.alias) return color;

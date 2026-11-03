@@ -12,7 +12,9 @@
 //                                  value = number | '#rrggbb[aa]' | 'other/variable' (an alias). Code syntax var(--a-b),
 //                                  Primitives hidden from publishing. Returns the count.
 //   K.v(name) / K.paint(name)      a variable / a solid paint bound to it
-//   K.fill, K.stroke, K.pad, K.pad4, K.gap, K.radius, K.size, K.minW   bind node properties to variables
+//   K.fill, K.stroke, K.pad, K.pad4, K.gap, K.radius, K.size, K.minW   bind node properties to variables; K.fill throws
+//                                  for a paint style name (a gradient), which needs K.fillStyle
+//   await K.fillStyle(node, name)  apply a paint style by name (setFillStyleIdAsync)
 //   K.AL(dir, name), K.FR(name)    an auto-layout frame (strokes outside layout) / a plain frame, both without fill
 //   K.arc(parent, D, w, color, start?, end?, name?)   a ring or ring segment (never a pie wedge), inset by half its width
 //   await K.text(parent, chars, style, color, name)   text with a text style and a color role
@@ -30,9 +32,12 @@ async function libkit(figma) {
   const V = new Map((await figma.variables.getLocalVariablesAsync()).map((x) => [x.name, x]));
   const TS = new Map((await figma.getLocalTextStylesAsync()).map((s) => [s.name, s]));
   const ES = new Map((await figma.getLocalEffectStylesAsync()).map((s) => [s.name, s]));
+  const PS = new Map((await figma.getLocalPaintStylesAsync()).map((s) => [s.name, s]));
   const v = (n) => { const x = V.get(n); if (!x) throw new Error('no variable ' + n); return x; };
   const paint = (n) => figma.variables.setBoundVariableForPaint({ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }, 'color', v(n));
-  const fill = (node, n) => { node.fills = n ? [paint(n)] : []; return node; };
+  // Synchronous: a variable binds a solid fill. A paint style name throws rather than return an unawaited Promise.
+  const fill = (node, n) => { if (n && !V.has(n) && PS.has(n)) throw new Error(n + ' is a paint style; use await K.fillStyle(node, name).'); node.fills = n ? [paint(n)] : []; return node; };
+  const fillStyle = async (node, n) => { const s = PS.get(n); if (!s) throw new Error('no paint style ' + n); await node.setFillStyleIdAsync(s.id); return node; };
   // New auto-layout frames count their stroke in layout, so a bordered hug-sized variant would grow by the stroke width.
   const stroke = (node, n, w, align) => { node.strokes = [paint(n)]; node.strokeAlign = align || 'INSIDE'; node.setBoundVariable('strokeWeight', v(w || 'border/width/default')); if ('strokesIncludedInLayout' in node) node.strokesIncludedInLayout = false; return node; };
   const pad = (node, x, y) => { if (x) { node.setBoundVariable('paddingLeft', v(x)); node.setBoundVariable('paddingRight', v(x)); } if (y) { node.setBoundVariable('paddingTop', v(y)); node.setBoundVariable('paddingBottom', v(y)); } return node; };
@@ -139,5 +144,5 @@ async function libkit(figma) {
   const props = (set) => Object.fromEntries(Object.entries(set.componentPropertyDefinitions).map(([k, d]) => [k.split('#')[0], d.type === 'VARIANT' ? d.variantOptions : d.type === 'BOOLEAN' ? 'BOOLEAN:' + d.defaultValue : d.type]));
   const pageOf = (n) => { let p = n; while (p && p.type !== 'PAGE') p = p.parent; return p; };
   const entry = (set) => ({ id: set.id, name: set.name, type: set.type, page: (pageOf(set) || {}).name, props: set.type === 'COMPONENT_SET' || !(set.parent && set.parent.type === 'COMPONENT_SET') ? props(set) : {}, variants: set.type === 'COMPONENT_SET' ? set.children.length : 1, default: set.type === 'COMPONENT_SET' ? set.defaultVariant.name : undefined });
-  return { V, TS, ES, v, paint, fill, stroke, pad, pad4, gap, radius, size, minW, AL, FR, arc, tokens, text, effect, loadPage, comp, comps, icon, iconInst, matrix, vname, variant, holder, combine, props, entry };
+  return { V, TS, ES, PS, v, paint, fill, fillStyle, stroke, pad, pad4, gap, radius, size, minW, AL, FR, arc, tokens, text, effect, loadPage, comp, comps, icon, iconInst, matrix, vname, variant, holder, combine, props, entry };
 }

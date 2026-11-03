@@ -7,7 +7,7 @@ import {ItemError} from '../foundations/ops.mjs';
 import {assertApproved, withLock} from '../foundations/store.mjs';
 import {PublishError} from '../server/files.mjs';
 import {buildOrder, partTemplates, templateFor} from './templates.mjs';
-import {buildPart, partFile, partStatus, readPart, readParts} from './files.mjs';
+import {buildPart, partFile, partStatus, readPart, readParts, staleBy} from './files.mjs';
 import {createPartPack} from './pack.mjs';
 import {validatePart} from './validate.mjs';
 
@@ -26,11 +26,30 @@ export function mergeOverrides(base, over) {
     else if (key === 'sizes' && plain(value)) { out.sizes = {...(out.sizes || {})}; for (const [k, z] of Object.entries(value)) out.sizes[k] = {...(out.sizes[k] || {}), ...z, ...(z?.padding || out.sizes[k]?.padding ? {padding: {...(out.sizes[k]?.padding || {}), ...(z?.padding || {})}} : {})}; }
     // Other Parts: map is set → row → slot, measures set → size → slot.
     else if (['map', 'measures'].includes(key) && plain(value)) { out[key] = structuredClone(out[key] || {}); for (const [set, rows] of Object.entries(value)) { out[key][set] ||= {}; for (const [k, slots] of Object.entries(rows || {})) out[key][set][k] = {...(out[key][set][k] || {}), ...slots}; } }
+    // A component token choice per token name; null drops that one choice.
+    else if (key === 'tokens' && plain(value)) { out.tokens = {...(out.tokens || {})}; for (const [k, v] of Object.entries(value)) { if (v === null) delete out.tokens[k]; else out.tokens[k] = v; } }
     else out[key] = structuredClone(value);
   }
   return out;
 }
 
+// Button's choices are keyed as Builder saves them: treatments by tone|emphasis|state, sizes by size. The compile
+// reads only those keys, so a key sent in a change that the Button does not have is refused, and choices saved for
+// a tone, emphasis, state or size the structure no longer has are dropped.
+const treatmentSlots = ['fill', 'border', 'text', 'icon', 'effect'];
+const hasTreatment = (part, key) => { const [tone, emphasis, state] = key.split('|'); return !!part.treatments[tone]?.[emphasis]?.[state]; };
+function checkButtonOverrides(t, part, sent) {
+  for (const [key, slots] of Object.entries(sent.treatments)) {
+    if (!hasTreatment(part, key)) throw new ItemError(`${t.name} treatments are keyed tone|emphasis|state, like brand|primary|rest; ${key} is not one.`);
+    const slot = Object.keys(slots || {}).find(s => !treatmentSlots.includes(s));
+    if (slot) throw new ItemError(`${t.name} treatments set fill, border, text, icon or effect; ${slot} is not one.`);
+  }
+  for (const size of Object.keys(sent.sizes)) if (!part.sizes.some(z => z.size === size)) throw new ItemError(`${t.name} has no size ${size}.`);
+  const {treatments, sizes, ...rest} = part.overrides || {};
+  part.overrides = {...rest,
+    ...(treatments ? {treatments: Object.fromEntries(Object.entries(treatments).filter(([key]) => hasTreatment(part, key)))} : {}),
+    ...(sizes ? {sizes: Object.fromEntries(Object.entries(sizes).filter(([size]) => part.sizes.some(z => z.size === size)))} : {})};
+}
 // A change to sizes, emphases, tones, states or properties changes the contract: that is the user's call.
 // users: the names of the prepared templates that use this Part, directly or through another; they become
 // outdated. broken: those that cannot be prepared again on the new structure, with the first reason.
@@ -78,7 +97,10 @@ export function createPartStore({outputDir}) {
 
   async function list() {
     const draft = await readJSON(file('foundations.json')), parts = await readParts(outputDir);
-    return partTemplates.map(t => ({id: t.id, page: t.page, name: t.name, set: t.set, level: t.level, status: draft ? partStatus(parts[t.id], draft, parts) : 'not-prepared', revision: parts[t.id]?.revision || 0}));
+    return partTemplates.map(t => {
+      const status = draft ? partStatus(parts[t.id], draft, parts) : 'not-prepared';
+      return {id: t.id, page: t.page, name: t.name, set: t.set, level: t.level, status, revision: parts[t.id]?.revision || 0, ...(status === 'outdated' ? {staleBy: staleBy(parts[t.id], draft, parts)} : {})};
+    });
   }
   async function read(id) {
     templateFor(id);
@@ -118,19 +140,20 @@ export function createPartStore({outputDir}) {
       if (!current) throw new PublishError(`${t.name} is not prepared yet.`, 412);
       if (current.revision !== expectedRevision) throw new PublishError(`${t.name} changed to revision ${current.revision}. Reload and try again.`, 409);
       let inputs = structuredClone(current.inputs || {}), overrides = structuredClone(current.overrides || {});
-      const changes = [];
+      const changes = [], sent = {treatments: {}, sizes: {}};
       for (const op of ops) {
         if (op.op === 'apply' && op.recipe === 'recompile') { changes.push({field: 'recompile'}); continue; }
         if (op.op !== 'set' || !['inputs', 'overrides'].includes(op.field)) throw new ItemError('Part ops are set on inputs or overrides, and apply recompile.');
         if (op.value !== null && (typeof op.value !== 'object' || Array.isArray(op.value))) throw new ItemError(`Send ${op.field} as an object, or null to clear it.`);
-        // Button's token choices are treatments and sizes; every other Part's are map and measures.
-        const shape = t.preview ? ['treatments', 'sizes'] : ['map', 'measures'];
-        if (op.field === 'overrides' && op.value && Object.keys(op.value).some(k => !shape.includes(k))) throw new ItemError(`${t.name} overrides take ${shape.join(' and ')}.`);
+        // Button's token choices are treatments and sizes; every other Part's are map, measures and tokens.
+        const shape = t.preview ? ['treatments', 'sizes'] : ['map', 'measures', 'tokens'];
+        if (op.field === 'overrides' && op.value && Object.keys(op.value).some(k => !shape.includes(k))) throw new ItemError(`${t.name} overrides take ${shape.slice(0, -1).join(', ')} and ${shape.at(-1)}.`);
         if (op.field === 'inputs') { for (const k of Object.keys(op.value || {})) if (!t.fields.includes(k)) throw new ItemError(`${t.name} has no input ${k}.`); inputs = op.value === null ? {} : deepMerge(inputs, op.value); }
-        else overrides = op.value === null ? {} : mergeOverrides(overrides, op.value);
+        else { overrides = op.value === null ? {} : mergeOverrides(overrides, op.value); Object.assign(sent.treatments, op.value?.treatments); Object.assign(sent.sizes, op.value?.sizes); }
         changes.push({field: op.field});
       }
       const part = buildPart(t, {draft: ctx.draft, plan: ctx.plan, inputs, overrides, previous: current, parts: ctx.parts});
+      if (t.preview) checkButtonOverrides(t, part, sent);
       // Every prepared template that uses this one, directly or through another, in build order. Each is built
       // against the new structure, so the message names those that would be refused.
       const reach = new Set([id]);

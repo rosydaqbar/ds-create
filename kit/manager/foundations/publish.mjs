@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {validateFoundations} from './validate.mjs';
 import {verifyFoundationPack} from './pack.mjs';
+import {angleToTransform} from './gradient.mjs';
 const unsupported=message=>Object.assign(new Error(message),{code:'MANAGER_FAST_UNSUPPORTED'});
 
 // Fixed renderer + approved data, following FAST's batching pattern. No agent codegen.
@@ -78,12 +79,12 @@ export async function renderFoundationBatch(figma,{phase,definitions}){
     verified++;
    }
   }else if(phase==='styles'){
-   const [text,effects,grids]=await Promise.all([figma.getLocalTextStylesAsync(),figma.getLocalEffectStylesAsync(),figma.getLocalGridStylesAsync()]);
-   const existing={textStyles:unique(text,'text style'),effectStyles:unique(effects,'effect style'),gridStyles:unique(grids,'grid style')};
+   const [text,effects,grids,paints]=await Promise.all([figma.getLocalTextStylesAsync(),figma.getLocalEffectStylesAsync(),figma.getLocalGridStylesAsync(),figma.getLocalPaintStylesAsync()]);
+   const existing={textStyles:unique(text,'text style'),effectStyles:unique(effects,'effect style'),gridStyles:unique(grids,'grid style'),paintStyles:unique(paints,'paint style')};
    const fontFailures=new Map(),loaded=new Set();
    const measurement=(x,fallback)=>x==null?fallback:typeof x==='number'?{unit:'PIXELS',value:x}:x;
    const resolve=(v,seen=new Set())=>{
-    if(seen.has(v.id))throw new Error('Circular effect alias');seen.add(v.id);
+    if(seen.has(v.id))throw new Error('Circular color alias');seen.add(v.id);
     const x=Object.values(v.valuesByMode)[0];return x?.type==='VARIABLE_ALIAS'?resolve(byId.get(x.id),seen):x;
    };
    const effectView=e=>{
@@ -97,6 +98,15 @@ export async function renderFoundationBatch(figma,{phase,definitions}){
     }
     return result;
    };
+   // A gradient is verified by its direction (the angle of gradientTransform, rounded past float32 noise), stop
+   // positions and exact stop bindings; like an effect's, a bound stop's cached RGBA is not its identity.
+   const paintView=p=>{
+    const result={type:p.type,visible:p.visible??true,opacity:p.opacity??1,blendMode:p.blendMode??'NORMAL'},t=p.gradientTransform;
+    if(t)result.angle=Math.round(((Math.atan2(t[0][0],-t[0][1])*180/Math.PI)%360+360)%360*1000)/1000%360;
+    if(p.gradientStops)result.stops=p.gradientStops.map(x=>({position:x.position,color:x.boundVariables?.color?{alias:x.boundVariables.color.id}:color(x.color)}));
+    return result;
+   };
+   const view=(kind,k,x)=>kind==='effectStyles'&&k==='effects'?x.map(effectView):kind==='paintStyles'&&k==='paints'?x.map(paintView):x;
    for(const {kind,definition:d} of definitions){
     let s=existing[kind].get(d.name),created=false,fontLoadFailed=false;
     const fontKey=kind==='textStyles'?JSON.stringify([d.fontFamily,d.fontStyle??'Regular']):null;
@@ -122,19 +132,31 @@ export async function renderFoundationBatch(figma,{phase,definitions}){
        return effect;
       })};
       if(d.description!==undefined)fields.description=d.description;
+     }else if(kind==='paintStyles'){
+      // Every paint is built before the style exists. setBoundVariableForPaint is SOLID-only: a stop binds through boundVariables.color.
+      fields={paints:d.paints.map((p,i)=>{
+       const paint={type:p.type,gradientTransform:p.gradientTransform,gradientStops:p.stops.map((x,n)=>{
+        if(!x.color?.alias)return {position:x.position,color:color(x.color)};
+        const ref=vars.get(x.color.alias);if(!ref)throw new Error('Missing alias/binding: '+x.color.alias+' for '+d.name+(d.paints.length>1?' paint '+(i+1):'')+' stop '+(n+1)+'.');
+        return {position:x.position,color:color(resolve(ref)),boundVariables:{color:figma.variables.createVariableAlias(ref)}};
+       })};
+       for(const key of ['visible','opacity','blendMode'])if(p[key]!==undefined)paint[key]=p[key];
+       return paint;
+      })};
+      if(d.description!==undefined)fields.description=d.description;
      }else{fields={layoutGrids:d.grids};if(d.description!==undefined)fields.description=d.description;}
      const bindings=Object.entries(d.bound??{}).map(([field,name])=>[field,variable(name)]);
-     const matches=()=>Object.entries(fields).every(([k,x])=>kind==='effectStyles'&&k==='effects'?contains(s.effects.map(effectView),x.map(effectView)):contains(s[k],x))&&bindings.every(([field,v])=>s.boundVariables?.[field]?.id===v.id);
+     const matches=()=>Object.entries(fields).every(([k,x])=>contains(view(kind,k,s[k]),view(kind,k,x)))&&bindings.every(([field,v])=>s.boundVariables?.[field]?.id===v.id);
      const mismatch=label=>{
       const paths=[];
       const inspect=(a,b,p)=>{if(paths.length>=6||contains(a,b))return;if(!a||!b||typeof a!=='object'||typeof b!=='object'){paths.push(p);return;}if(Array.isArray(b)&&a.length!==b.length)paths.push(p+'.length');for(const k of Object.keys(b))inspect(a[k],b[k],p+'.'+k);};
-      for(const [k,wanted]of Object.entries(fields))inspect(kind==='effectStyles'&&k==='effects'?s.effects.map(effectView):s[k],kind==='effectStyles'&&k==='effects'?wanted.map(effectView):wanted,k);
+      for(const [k,wanted]of Object.entries(fields))inspect(view(kind,k,s[k]),view(kind,k,wanted),k);
       for(const [field,v]of bindings)if(s.boundVariables?.[field]?.id!==v.id)paths.push('boundVariables.'+field);
       return new Error(label+': '+d.name+(paths.length?' ['+paths.slice(0,6).join(', ')+']':''));
      };
      if(s){if(!matches())throw new Error('Existing style conflicts: '+d.name);reused++;}
      else{
-      s=kind==='textStyles'?figma.createTextStyle():kind==='effectStyles'?figma.createEffectStyle():figma.createGridStyle();created=true;
+      s=kind==='textStyles'?figma.createTextStyle():kind==='effectStyles'?figma.createEffectStyle():kind==='paintStyles'?figma.createPaintStyle():figma.createGridStyle();created=true;
       s.name=d.name;
       // Font inventory is advisory. Preserve the exact approved font identity;
       // actual assignment errors are recorded once per face, never substituted.
@@ -157,15 +179,23 @@ export async function renderFoundationBatch(figma,{phase,definitions}){
 }
 
 export function compileFoundationCalls(draft,{maxChars=45000}={}){
+ // Checked before validation: a gradient type the validator does not know yet still takes the standard path.
+ for(const d of Array.isArray(draft?.paintStyles)?draft.paintStyles:[])for(const p of Array.isArray(d?.paints)?d.paints:[]){
+  if(p?.type!=='GRADIENT_LINEAR')throw unsupported('FAST does not support paint type: '+p?.type);
+  const unknown=[...Object.keys(p).filter(k=>!['type','angle','stops','visible','opacity','blendMode'].includes(k)),...(Array.isArray(p.stops)?p.stops:[]).flatMap(x=>x&&typeof x==='object'?Object.keys(x).filter(k=>!['position','color'].includes(k)):[])];
+  if(unknown.length)throw unsupported('FAST does not support paint metadata: '+[...new Set(unknown)].join(', '));
+ }
  const check=validateFoundations(draft);if(!check.valid)throw new Error(check.errors.join(' '));
- const allowed={collection:['name','modes','hiddenFromPublishing'],variable:['name','collection','type','values','description','scopes','codeSyntax','hiddenFromPublishing'],textStyles:['name','fontFamily','fontStyle','fontSize','lineHeight','letterSpacing','description','textCase','textDecoration','paragraphSpacing','paragraphIndent','listSpacing','hangingPunctuation','hangingList','leadingTrim','bound'],effectStyles:['name','description','effects'],gridStyles:['name','description','grids']};
+ const allowed={collection:['name','modes','hiddenFromPublishing'],variable:['name','collection','type','values','description','scopes','codeSyntax','hiddenFromPublishing'],textStyles:['name','fontFamily','fontStyle','fontSize','lineHeight','letterSpacing','description','textCase','textDecoration','paragraphSpacing','paragraphIndent','listSpacing','hangingPunctuation','hangingList','leadingTrim','bound'],effectStyles:['name','description','effects'],paintStyles:['name','description','paints'],gridStyles:['name','description','grids']};
  const supported=(d,kind)=>{const unknown=Object.keys(d).filter(k=>!allowed[kind].includes(k));if(unknown.length)throw unsupported('FAST does not support '+kind+' metadata: '+unknown.join(', '));};
  draft.collections.forEach(d=>supported(d,'collection'));draft.variables.forEach(d=>supported(d,'variable'));
  const byName=new Map(draft.variables.map(v=>[v.name,v])),ordered=[],seen=new Set();
  const visit=v=>{if(seen.has(v.name))return;seen.add(v.name);for(const x of Object.values(v.values))if(x?.alias)visit(byName.get(x.alias));ordered.push(v);};
  draft.variables.forEach(visit);
- const styles=['effectStyles','gridStyles','textStyles'].flatMap(kind=>(draft[kind]??[]).map(definition=>{
+ const styles=['effectStyles','paintStyles','gridStyles','textStyles'].flatMap(kind=>(draft[kind]??[]).map(definition=>{
   supported(definition,kind);
+  // The renderer is serialized without imports, so the direction is compiled here.
+  if(kind==='paintStyles')return {kind,definition:{...definition,paints:definition.paints.map(p=>({...p,gradientTransform:angleToTransform(p.angle)}))}};
   if(kind==='effectStyles')for(const e of definition.effects){
    const unknown=Object.keys(e).filter(k=>!['type','visible','blendMode','offset','x','y','blur','radius','spread','color','opacity'].includes(k));
    if(unknown.length)throw unsupported('FAST does not support effect metadata: '+unknown.join(', '));

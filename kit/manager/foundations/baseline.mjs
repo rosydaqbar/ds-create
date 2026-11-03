@@ -7,7 +7,7 @@ import {writeJSON} from '../server/files.mjs';
 import {readFigmaSetting} from '../server/settings.mjs';
 import {readParts} from '../parts/files.mjs';
 
-const lists = {variables: 'variable', textStyles: 'textStyle', effectStyles: 'effectStyle', gridStyles: 'gridStyle'};
+const lists = {variables: 'variable', textStyles: 'textStyle', effectStyles: 'effectStyle', gridStyles: 'gridStyle', paintStyles: 'paintStyle'};
 const sorted = value => Array.isArray(value) ? value.map(sorted) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(k => [k, sorted(value[k])])) : value;
 const canonical = value => JSON.stringify(sorted(value));
 const hash = value => createHash('sha256').update(canonical(value)).digest('hex').slice(0, 16);

@@ -160,7 +160,7 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Button', target: 'button', description: 'A secondary Button (2.1) underneath, so it shares the Button’s sizes and icon-only form. In layouts it usually fills the width.', tokens: ['size/control/lg', 'button/padding-x/lg', 'button/gap/lg', 'radius/control'] },
+      { name: 'Button', target: 'button', description: 'A secondary Button (2.1) underneath, so it shares the Button’s sizes and icon-only form. In layouts it usually fills the width.', tokens: ['size/control/lg', 'button/padding-left/lg', 'button/padding-right/lg', 'button/gap/lg', 'radius/control'] },
       { name: 'Leading icon · Social mark', target: 'leading-icon', description: 'The provider’s mark from 1.8 Brand assets, centered and at its official proportions. It grows with the button size.', tokens: ['size/icon/md', 'size/icon/lg'] },
       { name: 'Text padding', target: 'text-padding', description: 'A little optical padding on both sides of the label, the same as in a Button, so social buttons and buttons line up.', tokens: ['space/optical'] },
       { name: 'Label', target: 'label', description: '“Sign in with {Provider}”. On icon-only buttons it’s hidden, but screen readers still announce it. The larger size uses a larger text style.', tokens: ['type/body/sm/semibold', 'type/body/md/semibold'] },
@@ -186,7 +186,7 @@ export default defineDoc({
     ...socialProviders.flatMap((p) => [`social-button/${p}/fill`, `social-button/${p}/fill/hover`, `social-button/${p}/fg`]),
     'color/surface/base', 'color/surface/base/hover', 'color/border/default', 'color/text/secondary', 'color/text/primary',
     'color/icon/secondary', 'color/icon/primary',
-    'size/control/md', 'size/control/lg', 'button/padding-x/md', 'button/padding-x/lg', 'button/gap/md', 'button/gap/lg', 'space/optical',
+    'size/control/md', 'size/control/lg', 'button/padding-left/md', 'button/padding-right/md', 'button/padding-left/lg', 'button/padding-right/lg', 'button/gap/md', 'button/gap/lg', 'space/optical',
     'size/icon/md', 'size/icon/lg', 'type/body/sm/semibold', 'type/body/md/semibold', 'radius/control', 'elevation/control',
     'space/lg', 'focus/default',
   ],

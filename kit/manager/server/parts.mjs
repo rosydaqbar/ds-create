@@ -3,6 +3,9 @@ import {readJSON} from './state.mjs';
 import {PublishError} from './files.mjs';
 import {partTemplates, templateFor} from '../parts/templates.mjs';
 import {createPartStore} from '../parts/store.mjs';
+import {readParts} from '../parts/files.mjs';
+import {kindOf} from './stage.mjs';
+import {paintSlots} from '../parts/kit.mjs';
 
 // What each page is for, from specs/parts/00-parts.md, specs/components/00-components.md and
 // specs/sections/00-sections.md §1.
@@ -44,16 +47,26 @@ export const parts = partTemplates.map(t => ({ id: t.id, name: t.name, page: t.p
 // Builder's Parts list and actions. Every save goes through the part store, the same path as the MCP tools.
 export function createParts({ outputDir }) {
   const store = createPartStore({ outputDir });
+  // What the compiler picks before any Builder choice, so Builder can show and reset a choice. Kept per revision.
+  const picks = new Map();
+  function defaultsOf(saved, draft, all) {
+    const key = `${saved.id}:${saved.revision}:${saved.foundationsHash}`;
+    if (!picks.has(key)) {
+      const c = templateFor(saved.id).compile(saved.inputs || {}, {draft, parts: all});
+      picks.set(key, {map: c.map, measures: c.measures, tokens: Object.fromEntries(c.tokens.map(t => [t.name, t.values.Value?.alias ?? null]))});
+    }
+    return picks.get(key);
+  }
   async function status(state) {
-    const draft = await readJSON(path.join(outputDir, 'foundations.json')), list = await store.list();
+    const draft = await readJSON(path.join(outputDir, 'foundations.json')), list = await store.list(), all = draft ? await readParts(outputDir) : {};
     const ready = ['approved', 'synced'].includes(state?.source?.review);
     return Promise.all(parts.map(async p => {
       const row = list.find(x => x.id === p.id), saved = row?.revision ? (await store.read(p.id)).part : null;
       // Builder reads "review" for a Part whose file is current.
       const status = row?.status === 'ready' ? 'review' : row?.status || 'not-prepared';
-      return { ...p, status, revision: saved?.revision || 0, prepared: saved?.prepared || null, variantCount: saved?.variantCount || null,
+      return { ...p, status, ...(row?.staleBy ? { staleBy: row.staleBy === 'foundations' ? 'foundations' : templateFor(row.staleBy).name } : {}), revision: saved?.revision || 0, prepared: saved?.prepared || null, variantCount: saved?.variantCount || null,
         canPrepare: ready, reason: ready ? null : 'Approve your foundations in Builder before preparing Parts.',
-        draft: saved && status !== 'outdated' && draft ? { ...saved, ...(templateFor(p.id).preview ? { preview: templateFor(p.id).preview(saved, draft) } : {}) } : null };
+        draft: saved && status !== 'outdated' && draft ? { ...saved, ...(templateFor(p.id).preview ? { preview: templateFor(p.id).preview(saved, draft) } : { defaults: defaultsOf(saved, draft, all), solidSlots: templateFor(p.id).solidSlots || {} }) } : null };
     }));
   }
   async function prepare(input) {
@@ -63,20 +76,24 @@ export function createParts({ outputDir }) {
   // Saves token assignments chosen in Builder as a new revision of the part.
   async function update(input) {
     if (!input || Object.keys(input).some(k => !['id', 'overrides', 'reset'].includes(k)) || !parts.some(p => p.id === input.id) || typeof input.overrides !== 'object' && input.reset !== true) throw new PublishError('Send the Part and its token choices.', 400);
-    // Builder edits Button's tokens in place; every other Part is changed through the agent (ds_create_items_change).
-    if (!templateFor(input.id).preview) throw new PublishError('Change this Part through the agent.', 400);
+    if (!templateFor(input.id).preview) return updateKit(input);
     const current = await readJSON(path.join(outputDir, 'parts', input.id + '.json'));
     if (!current) throw new PublishError('Prepare this Part before changing it.', 412);
     const draft = await readJSON(path.join(outputDir, 'foundations.json'));
     // The variants this system's Button has now, after any change to its structure.
     const tones = Object.keys(current.treatments || {}), emphases = Object.keys(current.treatments?.[tones[0]] || {}), states = Object.keys(current.treatments?.[tones[0]]?.[emphases[0]] || {}), sizes = (current.sizes || []).map(z => z.size);
-    // Only semantic tokens and styles can be assigned; raw primitives stay hidden.
-    const known = new Set([...draft.variables.filter(v => v.collection !== 'Primitives').map(v => v.name), ...draft.effectStyles.map(e => e.name), ...draft.textStyles.map(t => t.name)]);
+    // Only semantic tokens and styles can be assigned; raw primitives stay hidden. A gradient fills only.
+    const paints = new Set((draft.paintStyles || []).map(p => p.name));
+    const known = new Set([...draft.variables.filter(v => v.collection !== 'Primitives').map(v => v.name), ...draft.effectStyles.map(e => e.name), ...draft.textStyles.map(t => t.name), ...paints]);
     const clean = { treatments: {}, sizes: {} }, ok = v => typeof v === 'string' && known.has(v) || v === null;
     for (const [key, t] of Object.entries(input.overrides?.treatments || {})) {
       const [tone, em, st] = key.split('|');
       if (!tones.includes(tone) || !emphases.includes(em) || !states.includes(st)) throw new PublishError('Unknown button variant: ' + key, 400);
-      for (const [field, v] of Object.entries(t || {})) { if (!['fill', 'border', 'text', 'icon', 'effect'].includes(field) || !ok(v) || v === null && !['border', 'effect'].includes(field)) throw new PublishError(`Choose an existing token for ${field}.`, 400); (clean.treatments[key] ||= {})[field] = v; }
+      for (const [field, v] of Object.entries(t || {})) {
+        if (!['fill', 'border', 'text', 'icon', 'effect'].includes(field) || !ok(v) || v === null && !['border', 'effect'].includes(field)) throw new PublishError(`Choose an existing token for ${field}.`, 400);
+        if (paints.has(v) && field !== 'fill') throw new PublishError(`${current.name} ${field} takes ${field === 'effect' ? 'an effect' : 'a color'}; ${v} is a gradient.`, 400);
+        (clean.treatments[key] ||= {})[field] = v;
+      }
     }
     for (const [size, z] of Object.entries(input.overrides?.sizes || {})) {
       if (!sizes.includes(size)) throw new PublishError('Unknown button size: ' + size, 400);
@@ -91,6 +108,31 @@ export function createParts({ outputDir }) {
     for (const [k, t] of Object.entries(clean.treatments)) merged.treatments[k] = { ...(merged.treatments[k] || {}), ...t };
     for (const [k, z] of Object.entries(clean.sizes)) merged.sizes[k] = { ...(merged.sizes[k] || {}), ...z, padding: { ...(merged.sizes[k]?.padding || {}), ...(z.padding || {}) } };
     const r = await store.change({ id: input.id, expectedRevision: current.revision, ops: [{ target: 'part:' + input.id, op: 'set', field: 'overrides', value: input.reset === true ? null : merged }], reason: input.reset === true ? 'Reset token choices in Builder' : 'Token choices in Builder', author: 'builder', confirmed: true });
+    return { saved: input.id, revision: r.revision };
+  }
+  // Every other Part: map slots per variant row, measure slots per size, and what its own component tokens point
+  // at. A choice is a foundation role of the same kind as what it replaces; the store and the template check the rest.
+  async function updateKit(input) {
+    const current = await readJSON(path.join(outputDir, 'parts', input.id + '.json'));
+    if (!current) throw new PublishError('Prepare this Part before changing it.', 412);
+    const draft = await readJSON(path.join(outputDir, 'foundations.json')), all = await readParts(outputDir), name = current.name;
+    if (input.reset !== true) {
+      if (Object.keys(input.overrides || {}).some(k => !['map', 'measures', 'tokens'].includes(k))) throw new PublishError(`${name} takes map, measures and tokens choices.`, 400);
+      const role = to => { const kind = to === null ? null : kindOf(to, draft, all); if (to !== null && !kind) throw new PublishError(`Choose one of your foundation roles; ${to} is not one.`, 400); return kind; };
+      const word = k => ({ text: 'a text style', effect: 'an effect', paint: 'a gradient' })[k] || `a ${k}`;
+      for (const area of ['map', 'measures']) for (const [set, rows] of Object.entries(input.overrides?.[area] || {})) {
+        if (!current[area]?.[set]) throw new PublishError(`${name} has no ${set}.`, 400);
+        for (const [key, slots] of Object.entries(rows || {})) for (const [slot, to] of Object.entries(slots || {})) {
+          const kind = role(to), was = Object.values(current[area][set]).map(r => r?.[slot]).find(v => typeof v === 'string');
+          // A fill or background slot swaps between a color and a gradient; every other slot keeps its kind.
+          const fills = area === 'map' && paintSlots.includes(slot), want = was ? kindOf(was, draft, all) : null, same = k => fills && ['color', 'paint'].includes(k) ? 'color' : k;
+          if (kind === 'paint' && !fills) throw new PublishError(`${set} ${slot} takes ${word(want && want !== 'paint' ? want : 'color')}; ${to} is a gradient.`, 400);
+          if (kind && want && same(kind) !== same(want)) throw new PublishError(`${set} ${slot} takes ${word(want)}; ${to} is ${word(kind)}.`, 400);
+        }
+      }
+      for (const [token, to] of Object.entries(input.overrides?.tokens || {})) if (to !== null && role(to) === 'paint') throw new PublishError(`${token} takes a color or a number; ${to} is a gradient.`, 400);
+    }
+    const r = await store.change({ id: input.id, expectedRevision: current.revision, ops: [{ target: 'part:' + input.id, op: 'set', field: 'overrides', value: input.reset === true ? null : input.overrides }], reason: input.reset === true ? 'Reset token choices in Builder' : 'Token choice in Builder', author: 'builder' });
     return { saved: input.id, revision: r.revision };
   }
   return { status, prepare, update };

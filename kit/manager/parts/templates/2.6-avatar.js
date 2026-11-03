@@ -11,6 +11,9 @@ export const set = 'Avatar';
 export const level = 'parts';
 export const spec = 'specs/parts/2.6-avatar.md';
 export const uses = [];
+// A fill or background slot the kit component never draws as a background takes a color only: a CSS gradient
+// cannot show there (parts/validate.mjs refuses it, Builder offers none). The verified indicator colors its mark as text.
+export const solidSlots = {'Avatar indicator': {fill: 'the verified mark draws it as a text color, which cannot show a gradient'}};
 
 // A weight list: the first face the text styles have, closest to semibold first.
 const semibold = (scale, size) => [`type/${scale}/${size}/semibold`, `type/${scale}/${size}/medium`, `type/${scale}/${size}/bold`];

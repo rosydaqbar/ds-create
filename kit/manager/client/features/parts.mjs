@@ -33,6 +33,7 @@ export function overviewParts(parts = [], { escape, badge, icon }) {
 
 const px = n => `${Number(n) || 0}px`;
 import { openDialog, closeDialog } from '../ui-motion.mjs';
+import { itemPage, itemInspector } from './items.mjs';
 // Plain words for people; the property values stay exact in the Properties table and Figma.
 const words = { xs: 'Extra small', sm: 'Small', md: 'Medium', lg: 'Large', xl: 'Extra large', rest: 'Normal', hover: 'Hover', pressed: 'Pressed', focus: 'Focused', disabled: 'Disabled', loading: 'Loading', primary: 'Primary', secondary: 'Secondary', tertiary: 'Tertiary', brand: 'Brand', danger: 'Danger', body: 'Body', heading: 'Heading', display: 'Display', regular: 'Regular', medium: 'Medium', bold: 'Bold' };
 const say = v => words[v] || v;
@@ -58,42 +59,26 @@ function buttonCell(size, t, o, escape) {
   return `<span class="part-button" style="${escape(style)}">${content}</span>`;
 }
 
-function emptyPart(part, { escape, badge, documentFrame }) {
-  return documentFrame(`${part.page} ${part.name}`, part.description, `<div class="empty-state"><h2>${part.status === 'outdated' ? 'Your foundations changed' : 'Not prepared yet'}</h2><p>${part.status === 'outdated' ? 'Prepare this Part again so it uses the current foundations.' : 'Prepare Parts to build every variant from your published foundations.'}</p><button class="button button-primary" type="button" data-prepare-parts ${part.canPrepare ? '' : 'disabled'}>Prepare Parts</button>${part.canPrepare ? '' : `<small>${escape(part.reason || '')}</small>`}<span class="parts-feedback" role="status" aria-live="polite" data-parts-feedback></span></div>`, partStatus(part, badge));
-}
+// A Part's notes: a role that fell back to another ("wanted → fallback"), or text on a gradient that fails contrast
+// against a stop.
+export const fallbacks = d => (d.notes || []).filter(n => n.includes(' → '));
+export const contrastNotes = (d, escape) => { const list = (d.notes || []).filter(n => !n.includes(' → '));
+  return list.length ? `<li><strong>Text has too little contrast against these gradient stops.</strong>${list.map(n => `<small>${escape(n)}</small>`).join('')}</li>` : ''; };
+// A gradient's value is long CSS; controls and pickers name it instead.
+const isGradient = value => /gradient\(/.test(String(value ?? ''));
 
-// Every Part except Button, and every Component and Section: a read-only review of its sets, token map, measures,
-// instances and component tokens. The agent changes these; Builder shows what is saved.
-const table = (head, rows, escape) => `<div class="part-table-wrap"><table class="value-table part-table"><thead><tr>${head.map(h => `<th scope="col">${escape(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => i ? `<td>${c === null || c === undefined || c === '' ? '<span class="part-none">—</span>' : `<code>${escape(c)}</code>`}</td>` : `<th scope="row">${escape(c)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-const slotsOf = rows => [...new Set(Object.values(rows || {}).flatMap(r => Object.keys(r)))];
-const plainKey = key => key === '*' ? 'Every variant' : key.split('|').map(p => p.split('=')[1]).map(say).join(' · ');
-// An instance cell: the Part (or same-page set) and the variant values this row sets.
-const instanceText = i => i ? `${i.set} ${Object.entries(i.variant || {}).map(([k, v]) => `${k}=${v}`).join(', ')}`.trim() : '';
-const tokenValue = v => v?.alias || (v && typeof v === 'object' && 'r' in v ? `rgba(${[v.r, v.g, v.b].map(n => Math.round(n * 255)).join(', ')}, ${v.a ?? 1})` : String(v));
-function genericPage(part, { escape, badge, documentFrame }) {
-  const d = part.draft, sets = d.sets || [];
-  const decisions = [...d.decisions.map(x => `<li><strong>${escape(x.key)}:</strong> ${escape(x.value)}<small>${escape(x.reason || '')}</small></li>`), ...d.notes.map(n => `<li><strong>Fallback role</strong><small>${escape(n)}</small></li>`)];
-  const body = `<section class="section" aria-labelledby="part-decisions"><div class="section-heading"><h2 id="part-decisions">Choices we made for you</h2><small>Version ${d.revision} · ${d.variantCount} variations</small></div>
-      ${decisions.length ? `<ul class="part-decisions">${decisions.join('')}</ul>` : '<p class="setup-note">The spec decided everything for this Part; nothing needed a choice.</p>'}
-      <p class="setup-note">Ask the agent to change any of this. Builder shows what is saved.</p></section>
-    ${sets.map((set, i) => {
-      const map = d.map?.[set.name], measures = d.measures?.[set.name], slots = slotsOf(map), sizes = Object.keys(measures || {}), measureSlots = slotsOf(measures);
-      const instances = d.instances?.[set.name], held = slotsOf(instances);
-      return `<section class="section" aria-labelledby="part-set-${i}"><div class="section-heading"><h2 id="part-set-${i}">${escape(set.name)}</h2><small>${set.private ? 'Private part · ' : ''}${set.variantCount} variants</small></div>
-        <h3 class="part-subheading">Properties</h3>${table(['Property', 'Type', 'Values', 'Default'], set.properties.map(p => [p.name, p.type, (p.values || []).join(', '), p.default === null ? '' : String(p.default)]), escape)}
-        ${map ? `<h3 class="part-subheading">Token map</h3>${table(['Variant', ...slots], Object.entries(map).map(([key, row]) => [plainKey(key), ...slots.map(sl => row[sl])]), escape)}` : ''}
-        ${measures ? `<h3 class="part-subheading">Measures</h3>${table(['Size', ...measureSlots], sizes.map(z => [z === '*' ? 'Every size' : say(z), ...measureSlots.map(sl => measures[z][sl])]), escape)}` : ''}
-        ${held.length ? `<h3 class="part-subheading">Instances</h3>${table(['Variant', ...held], Object.entries(instances).map(([key, row]) => [plainKey(key), ...held.map(sl => instanceText(row[sl]))]), escape)}` : ''}</section>`;
-    }).join('')}
-    ${d.tokens.length ? `<section class="section" aria-labelledby="part-tokens"><div class="section-heading"><h2 id="part-tokens">Component tokens</h2><small>${d.tokens.length} in the Components collection</small></div>${table(['Token', 'Value', 'Description'], d.tokens.map(t => [t.name, Object.values(t.values).map(tokenValue).join(', '), t.description]), escape)}</section>` : ''}`;
-  return documentFrame(`${part.page} ${part.name}`, part.description, body, partStatus(part, badge));
+// An outdated Part names what changed: the foundations, or a Part it uses.
+const changed = part => part.staleBy && part.staleBy !== 'foundations' ? part.staleBy : null;
+function emptyPart(part, { escape, badge, documentFrame }) {
+  const by = changed(part);
+  return documentFrame(`${part.page} ${part.name}`, part.description, `<div class="empty-state"><h2>${part.status === 'outdated' ? (by ? `${escape(by)} changed` : 'Your foundations changed') : 'Not prepared yet'}</h2><p>${part.status === 'outdated' ? `Prepare this Part again so it uses the current ${by ? escape(by) : 'foundations'}.` : 'Prepare Parts to build every variant from your published foundations.'}</p><button class="button button-primary" type="button" data-prepare-parts ${part.canPrepare ? '' : 'disabled'}>Prepare Parts</button>${part.canPrepare ? '' : `<small>${escape(part.reason || '')}</small>`}<span class="parts-feedback" role="status" aria-live="polite" data-parts-feedback></span></div>`, partStatus(part, badge));
 }
 
 export function partPage(part, helpers) {
   const { escape, badge, documentFrame, previewCard } = helpers;
   if (!part) return documentFrame('Part not found', 'Choose a Part from the navigation.', '<div class="empty-state"><a class="button" href="#overview">Go to Overview</a></div>');
   if (!part.draft) return emptyPart(part, helpers);
-  if (!part.draft.preview) return genericPage(part, helpers);
+  if (!part.draft.preview) return itemPage(part, { ...helpers, partStatus });
   const d = part.draft, p = d.preview, states = d.properties.find(x => x.name === 'State').values, sel = view.selection;
   // Tones come from this system's Button, which may have more or fewer than the template's brand and danger.
   const tones = Object.keys(p.treatments);
@@ -112,7 +97,7 @@ export function partPage(part, helpers) {
             caption: `<span class="specimen-caption">${escape(`${say(c.size)} · ${say(c.state)}${c.iconOnly ? ' · Icon only' : ''}`)}</span>` });
       }).join('')}</div>`).join('')}</section>
     <section class="section" aria-labelledby="part-decisions"><div class="section-heading"><h2 id="part-decisions">Choices we made for you</h2><small>Version ${d.revision} · ${d.variantCount} button variations</small></div>
-      <ul class="part-decisions">${d.decisions.map(x => `<li><strong>${escape(x.key)}:</strong> ${escape(x.value)}<small>${escape(x.reason || '')}</small></li>`).join('')}${d.notes.length ? `<li><strong>Some hover colors stay the same.</strong><small>Your colors have no separate hover shade for ${escape([...new Set(d.notes.map(n => n.split(' → ')[0].split('/').slice(1, 3).join(' ')))].join(', '))}, so those buttons keep their normal color when hovered.</small></li>` : ''}</ul></section>
+      <ul class="part-decisions">${d.decisions.map(x => `<li><strong>${escape(x.key)}:</strong> ${escape(x.value)}<small>${escape(x.reason || '')}</small></li>`).join('')}${fallbacks(d).length ? `<li><strong>Some hover colors stay the same.</strong><small>Your colors have no separate hover shade for ${escape([...new Set(fallbacks(d).map(n => n.split(' → ')[0].split('/').slice(1, 3).join(' ')))].join(', '))}, so those buttons keep their normal color when hovered.</small></li>` : ''}${contrastNotes(d, escape)}</ul></section>
     ${tones.map(tone => `<section class="section" aria-labelledby="part-${escape(tone)}"><div class="section-heading"><h2 id="part-${escape(tone)}">${escape(`All ${say(tone).toLowerCase()} buttons`)}</h2></div>${block(tone, false)}<h3 class="part-subheading">Icon only</h3>${block(tone, true)}</section>`).join('')}`;
   // The page card wraps everything; selecting it (no button chosen) shows the Part overview in the panel.
   return documentFrame(`${part.page} ${part.name}`, part.description, body, partStatus(part, badge))
@@ -120,15 +105,12 @@ export function partPage(part, helpers) {
 }
 
 // The right-hand panel: the same Preview workspace pattern as the foundations.
-export function partInspector(part, { escape }) {
+export function partInspector(part, helpers) {
+  const { escape } = helpers;
   const overview = part?.draft && !view.selected;
   const head = overview ? `<div class="workspace-panel-header"><h2>${escape(part.name)}</h2><span class="label-beta">Overview</span></div><p class="workspace-disclaimer">Every choice is kept as soon as you make it.</p>` : `<div class="workspace-panel-header"><h2>${escape(part?.draft ? `${view.selection.emphasis[0].toUpperCase() + view.selection.emphasis.slice(1)} ${view.selection.tone} button` : part?.name || 'Part')}</h2><span class="label-beta">Preview</span></div><p class="workspace-disclaimer">Every choice is kept as soon as you make it.</p>`;
-  if (!part?.draft) return head + `<section class="inspector-section"><p class="workspace-help">${escape(part?.status === 'outdated' ? 'Prepare this Part again to use the current foundations.' : 'Prepare Parts to review and adjust this Part.')}</p></section>`;
-  if (!part.draft.preview) {
-    const d = part.draft;
-    return `<div class="workspace-panel-header"><h2>${escape(part.name)}</h2><span class="label-beta">Overview</span></div><p class="workspace-disclaimer">Ask the agent to change this Part.</p>
-      <section class="inspector-section"><h3>Summary</h3><dl><div class="property"><dt>Status</dt><dd>${escape(statusLabels[part.status] || part.status)}</dd></div>${(d.sets || []).map(x => `<div class="property"><dt>${escape(x.name)}</dt><dd>${x.variantCount} variants</dd></div>`).join('')}<div class="property"><dt>Component tokens</dt><dd>${d.tokens.length}</dd></div><div class="property"><dt>Version</dt><dd>${d.revision}</dd></div></dl></section>`;
-  }
+  if (!part?.draft) return head + `<section class="inspector-section"><p class="workspace-help">${escape(part?.status === 'outdated' ? `Prepare this Part again to use the current ${part && changed(part) || 'foundations'}.` : 'Prepare Parts to review and adjust this Part.')}</p></section>`;
+  if (!part.draft.preview) return itemInspector(part, { escape, options: helpers.options, parts: helpers.parts, statusLabel: v => statusLabels[v] || v });
   const d = part.draft, p = d.preview, sel = view.selection, prop = name => d.properties.find(x => x.name === name).values;
   const select = (key, label, values) => `<label class="workspace-field" for="part-${key}"><span>${escape(label)}</span><select id="part-${key}" data-part-control="${key}">${values.map(v => `<option value="${escape(v)}" ${sel[key] === v ? 'selected' : ''}>${escape(say(v))}</option>`).join('')}</select></label>`;
   const toggle = (key, label, disabled = false) => `<label class="part-toggle" for="part-${key}"><input id="part-${key}" type="checkbox" data-part-control="${key}" ${sel[key] ? 'checked' : ''} ${disabled ? 'disabled' : ''}/><span>${escape(label)}</span></label>`;
@@ -137,7 +119,7 @@ export function partInspector(part, { escape }) {
   const chip = (kind, value) => kind === 'fill' || kind === 'border' || kind === 'text' || kind === 'icon' ? `<span class="token-chip" style="background:${escape(value || 'transparent')}" aria-hidden="true"></span>`
     : kind === 'effect' ? `<span class="token-chip part-chip-effect" style="box-shadow:${escape(value || 'none')}" aria-hidden="true"></span>` : `<span class="token-chip part-chip-text" aria-hidden="true">${kind === 'label' ? 'Aa' : '↔'}</span>`;
   const short = (kind, name) => name ? name.replace(/^color\//, '').replace(/^type\//, '') : 'None';
-  const shownValue = (kind, value) => value === null || value === undefined ? '' : kind === 'label' ? `${value.fontSize}px` : typeof value === 'number' ? `${value}px` : kind === 'effect' ? '' : String(value);
+  const shownValue = (kind, value) => value === null || value === undefined ? '' : kind === 'label' ? `${value.fontSize}px` : typeof value === 'number' ? `${value}px` : kind === 'effect' ? '' : isGradient(value) ? 'Gradient' : String(value);
   const binding = (id, label, kind, name, attrs, optional = false) => { const value = valueOf(d, kind, name);
     return `<div class="token-control part-binding"><label for="${id}"><span>${escape(label)}</span>${shownValue(kind, value) ? `<small class="custom-value-label">${escape(shownValue(kind, value))}</small>` : ''}</label><button id="${id}" type="button" class="token-input token-binding" data-part-pick="${kind}" data-label="${escape(label)}" data-current="${escape(name || '')}" ${optional ? 'data-optional="true"' : ''} ${attrs} aria-haspopup="dialog" aria-label="Choose a token for ${escape(label)}" title="${escape(name || 'None')}">${chip(kind, value)}<span>${escape(short(kind, name))}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>`; };
   const color = (field, label, kind, optional) => binding(`part-${field}`, label, kind, t[field], `data-part-token="${escape(key)}" data-field="${field}"`, optional);
@@ -201,7 +183,7 @@ export function setupParts({ getState, refresh, render }) {
     const term = dialog.querySelector('[data-part-picker-search]').value.trim().toLowerCase(), all = d.preview.options[target.kind];
     const matches = all.filter(o => o.name.toLowerCase().includes(term)), colorKind = ['fill', 'border', 'text', 'icon'].includes(target.kind);
     const chipFor = o => colorKind ? `<span class="token-chip" style="background:${esc(o.value)}" aria-hidden="true"></span>` : target.kind === 'effect' ? `<span class="token-chip part-chip-effect" style="box-shadow:${esc(o.value)}" aria-hidden="true"></span>` : `<span class="token-chip part-chip-text" aria-hidden="true">${target.kind === 'label' ? 'Aa' : '↔'}</span>`;
-    const detail = o => target.kind === 'label' ? `${o.value?.fontSize}px` : typeof o.value === 'number' ? `${o.value}px` : colorKind ? o.value : '';
+    const detail = o => target.kind === 'label' ? `${o.value?.fontSize}px` : typeof o.value === 'number' ? `${o.value}px` : colorKind ? (isGradient(o.value) ? 'Gradient' : o.value) : '';
     const check = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
     dialog.querySelector('[data-part-picker-options]').innerHTML = (target.optional ? `<button type="button" role="option" aria-selected="${!target.current}" data-part-option=""><span class="token-chip" aria-hidden="true"></span><span>None</span>${!target.current ? check : ''}</button>` : '')
       + matches.map(o => `<button type="button" role="option" aria-selected="${o.name === target.current}" data-part-option="${esc(o.name)}">${chipFor(o)}<span>${esc(o.name)}</span><small class="part-option-value">${esc(detail(o))}</small>${o.name === target.current ? check : ''}</button>`).join('')

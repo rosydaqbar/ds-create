@@ -6,11 +6,12 @@
 // A snapshot holds: set id, name and description; componentPropertyDefinitions, read from the set (never
 // from a variant); every variant with its property values and size; the default variant's layer tree
 // (names, types, auto layout: direction, padding, gap, sizing, alignment; radius; fills, strokes, effects;
-// text style, font, size, line height, weight, characters; nested instances with main name and id); and,
-// for every other variant, only what differs from that tree (changed keys only, null = removed). A paint is
-// { hex, var }: var is the bound variable's name, "raw" when unbound, or "external" (with ext: its name when
-// Figma can read it) when bound to a variable that isn't local. `bind` lists bound spacing, radius, size and
-// stroke variables the same way. Numbers are rounded to 0.1; positions are left out.
+// fillStyle, the paint style the fills come from (a gradient); text style, font, size, line height, weight,
+// characters; nested instances with main name and id); and, for every other variant, only what differs from that
+// tree (changed keys only, null = removed). A paint is { hex, var }: var is the bound variable's name, "raw" when
+// unbound, or "external" (with ext: its name when Figma can read it) when bound to a variable that isn't local.
+// `bind` lists bound spacing, radius, size and stroke variables the same way. Numbers are rounded to 0.1;
+// positions are left out.
 //
 // CALL PATTERN
 // 1. Plan (optional): LIST_ONLY = true lists the page's sets with variant and layer counts. On a very large
@@ -89,6 +90,7 @@ const layer = async (n, isRoot) => {
   }
   if ('cornerRadius' in n && n.type !== 'TEXT') { const r = n.cornerRadius === figma.mixed ? four([n.topLeftRadius, n.topRightRadius, n.bottomRightRadius, n.bottomLeftRadius].map(R)) : R(n.cornerRadius); if (r) o.radius = r; }
   const f = await paints(n.fills); if (f) o.fills = f;
+  if ('fillStyleId' in n) { const fs = await styleRef(n.fillStyleId); if (fs) o.fillStyle = fs; }
   const s = await paints(n.strokes); if (s) { o.strokes = s; o.strokeWeight = n.strokeWeight === figma.mixed ? four([n.strokeTopWeight, n.strokeRightWeight, n.strokeBottomWeight, n.strokeLeftWeight].map(R)) : R(n.strokeWeight); if (n.strokeAlign) o.strokeAlign = n.strokeAlign; }
   if ('effects' in n && n.effects.some((e) => e.visible !== false)) {
     o.effects = { style: (await styleRef(n.effectStyleId)) || 'raw', list: [] };

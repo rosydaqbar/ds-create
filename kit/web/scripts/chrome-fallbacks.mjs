@@ -157,7 +157,10 @@ export const values = [
   ['--border-width-strong', '2px'],
   ['--border-width-focus', '2px'],
   ['--button-gap-md', 'var(--space-sm)'],
-  ['--button-padding-x-md', 'var(--space-lg)'],
+  ['--button-padding-top-md', '0px'],
+  ['--button-padding-right-md', 'var(--space-lg)'],
+  ['--button-padding-bottom-md', '0px'],
+  ['--button-padding-left-md', 'var(--space-lg)'],
 
   ['--motion-duration-fast', '120ms'],
   ['--motion-duration-base', '200ms'],

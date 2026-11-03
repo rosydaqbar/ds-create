@@ -48,7 +48,7 @@ const addonHeight: Record<TextFieldPartSize, string> = {
   md: 'h-(--size-control-md)',
   lg: 'h-(--size-control-lg)',
 };
-const addonPadX: Record<TextFieldPartSize, string> = { sm: 'px-lg', md: 'px-lg', lg: 'px-xl' };
+const addonPadX: Record<TextFieldPartSize, string> = { sm: 'px-(--text-field-addon-padding-x-sm)', md: 'px-(--text-field-addon-padding-x-md)', lg: 'px-(--text-field-addon-padding-x-lg)' };
 const addonText: Record<TextFieldPartSize, string> = { sm: 'type-body-sm-regular', md: 'type-body-md-regular', lg: 'type-body-md-regular' };
 
 /** Shared addon frame: border, outer-side radius, colours; `[--addon-icon]` carries the icon colour per state. */
@@ -279,7 +279,7 @@ export const cellSize = {
   md: 'size-(--code-field-cell-size-md) type-display-sm-semibold',
   lg: 'size-(--code-field-cell-size-lg) type-display-md-semibold',
 } as const;
-export const cellGap = { sm: 'gap-md', md: 'gap-lg', lg: 'gap-lg' } as const;
+export const cellGap = { sm: 'gap-(--code-field-gap-sm)', md: 'gap-(--code-field-gap-md)', lg: 'gap-(--code-field-gap-lg)' } as const;
 
 export interface CellProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
   size: 'sm' | 'md' | 'lg';

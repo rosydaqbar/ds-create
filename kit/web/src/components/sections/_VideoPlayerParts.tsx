@@ -396,10 +396,11 @@ export function VideoScrubPreview({ time = 102, duration = 252, poster, showIndi
 
 /* ---------- .Main/Video player actions bar ---------- */
 
+/** The fade above the controls (video-player/bar/fade/{Size}) and the bar's padding (video-player/bar/padding/{Size}). */
 const barPad: Record<VideoPlayerSize, string> = {
-  sm: 'pt-3xl px-md pb-md',
-  md: 'pt-4xl px-lg pb-lg',
-  lg: 'pt-5xl px-xl pb-xl',
+  sm: 'pt-(--video-player-bar-fade-sm) px-(--video-player-bar-padding-sm) pb-(--video-player-bar-padding-sm)',
+  md: 'pt-(--video-player-bar-fade-md) px-(--video-player-bar-padding-md) pb-(--video-player-bar-padding-md)',
+  lg: 'pt-(--video-player-bar-fade-lg) px-(--video-player-bar-padding-lg) pb-(--video-player-bar-padding-lg)',
 };
 
 export interface VideoActionsBarProps {
@@ -555,12 +556,16 @@ export function VideoActionsBar({
 
 /* ---------- .Main/Video player overlay action ---------- */
 
-/** 56 · 64 · 80 circles with 24 · 28 · 32 icons (no size tokens exist for these). */
-const overlayBox: Record<VideoPlayerSize, string> = { sm: 'size-[3.5rem]', md: 'size-[4rem]', lg: 'size-[5rem]' };
+/** Circle and icon sizes per player size: video-player/overlay/size/{Size} and video-player/overlay/icon/{Size}. */
+const overlayBox: Record<VideoPlayerSize, string> = {
+  sm: 'size-(--video-player-overlay-size-sm)',
+  md: 'size-(--video-player-overlay-size-md)',
+  lg: 'size-(--video-player-overlay-size-lg)',
+};
 const overlayIcon: Record<VideoPlayerSize, CSSProperties> = {
-  sm: { width: 'var(--size-icon-lg)', height: 'var(--size-icon-lg)' },
-  md: { width: '1.75rem', height: '1.75rem' },
-  lg: { width: 'var(--size-icon-xl)', height: 'var(--size-icon-xl)' },
+  sm: { width: 'var(--video-player-overlay-icon-sm)', height: 'var(--video-player-overlay-icon-sm)' },
+  md: { width: 'var(--video-player-overlay-icon-md)', height: 'var(--video-player-overlay-icon-md)' },
+  lg: { width: 'var(--video-player-overlay-icon-lg)', height: 'var(--video-player-overlay-icon-lg)' },
 };
 
 export interface VideoOverlayActionProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'children'> {

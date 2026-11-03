@@ -319,6 +319,10 @@ export function appTokenNames(name: string): { rn: string; swift: string; kotlin
     const m = camel(seg);
     return { rn: `theme.shadows.${m}`, swift: `DSTokens.Shadow.${m}`, kotlin: `DsShadows.${m}` };
   }
+  if (tokens.paintStyles?.some((g) => g.name === name)) {
+    const m = camel(seg.slice(2)) || camel(seg);
+    return { rn: `gradients.${m}`, swift: `DSTokens.Gradient.${m}`, kotlin: `DsGradients.${m}` };
+  }
   if (tokens.textStyles.some((t) => t.name === name)) {
     const m = member(rest);
     return { rn: `theme.text('${m}')`, swift: `DSTokens.TextStyle.${m}`, kotlin: `DsTextStyles.${m}` };
@@ -362,7 +366,7 @@ export function tokenCodeNames(r: { name: string; css?: string | null; tailwind?
 
 /** `label` names the scrollable region; by default the group the tokens share, so two tables on a page never share a name. */
 export function TokenTable({ names, modes = supportedModes, label }: { names: string[]; modes?: string[]; label?: string }) {
-  const rows = names.map((n) => varByName.get(n) ?? tokens.effectStyles.find((e) => e.name === n) ?? tokens.textStyles.find((t) => t.name === n) ?? { name: n });
+  const rows = names.map((n) => varByName.get(n) ?? tokens.effectStyles.find((e) => e.name === n) ?? tokens.paintStyles?.find((g) => g.name === n) ?? tokens.textStyles.find((t) => t.name === n) ?? { name: n });
   return (
     <div tabIndex={0} role="region" aria-label={label ?? `${names[0]?.split('/').slice(0, -1).join('/') || 'Token'} tokens`} className="overflow-x-auto rounded-surface border border-border-subtle outline-none focus-visible:shadow-focus-default">
       <table className="w-full border-collapse text-left">

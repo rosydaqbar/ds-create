@@ -455,7 +455,7 @@ function Overview() {
           ))}
         </div>
         <Caption>
-          Underneath are {tokens.variables.length} variables, {tokens.textStyles.length} text styles and {tokens.effectStyles.length} effect styles. See{' '}
+          Underneath are {tokens.variables.length} variables, {tokens.textStyles.length} text styles and {tokens.effectStyles.length} effect styles{tokens.paintStyles?.length ? <>, plus {tokens.paintStyles.length} {tokens.paintStyles.length === 1 ? 'gradient' : 'gradients'}</> : null}. See{' '}
           <TextLink to="/guidance/02-tokens">02 Tokens</TextLink> for how they’re organized.
         </Caption>
       </Topic>
@@ -816,7 +816,7 @@ function ForDesigners() {
           </div>
         </Visual>
         <Caption>
-          Button: Horizontal, gap <InlineCode>{chainOf('button/gap/md')[1] ?? 'button/gap/md'}</InlineCode>, padding <InlineCode>button/padding-x/md</InlineCode> × 0, Hug × Fixed{' '}
+          Button: Horizontal, gap <InlineCode>{chainOf('button/gap/md')[1] ?? 'button/gap/md'}</InlineCode>, left padding <InlineCode>button/padding-left/md</InlineCode>, right padding <InlineCode>button/padding-right/md</InlineCode>, 0 top and bottom, Hug × Fixed{' '}
           {px('size/control/md')}. Text field: Vertical, gap{' '}
           <InlineCode>space/sm</InlineCode>, Fill width.
         </Caption>

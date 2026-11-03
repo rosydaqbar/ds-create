@@ -150,7 +150,7 @@ export default defineDoc({
       </div>
     ),
     parts: [
-      { name: 'Root', target: 'root', description: 'The clickable container. Its height and padding are set by the size.', tokens: ['size/control/md', 'button/padding-x/md', 'radius/control'] },
+      { name: 'Root', target: 'root', description: 'The clickable container. Its height and padding are set by the size.', tokens: ['size/control/md', 'button/padding-left/md', 'button/padding-right/md', 'radius/control'] },
       { name: 'Leading icon', target: 'leading-icon', description: 'An optional icon before the label. While loading, a spinner takes its place.', tokens: ['size/icon/md'] },
       { name: 'Text padding', target: 'text-padding', description: 'A thin wrapper around the label that evens out the space, so buttons with and without icons both look centered.', tokens: ['space/optical'] },
       { name: 'Label', target: 'label', description: 'One line of text that sets the button’s width. Larger sizes use a larger text style.', tokens: ['type/body/sm/semibold'] },
@@ -179,7 +179,7 @@ export default defineDoc({
     'color/fill/neutral/subtle/hover', 'color/fill/neutral/subtle/pressed',
     'color/fill/danger/solid', 'color/fill/danger/solid/hover', 'color/fill/danger/subtle/hover', 'color/border/danger/subtle', 'color/text/danger',
     'color/fill/neutral/subtle/disabled', 'color/border/disabled', 'color/text/disabled',
-    'radius/control', 'size/control/md', 'button/padding-x/md', 'button/gap/md', 'space/optical', 'size/icon/md',
+    'radius/control', 'size/control/md', 'button/padding-left/md', 'button/padding-right/md', 'button/gap/md', 'space/optical', 'size/icon/md',
     'type/body/sm/semibold', 'elevation/control', 'focus/default', 'focus/danger',
   ],
   guidelines: [

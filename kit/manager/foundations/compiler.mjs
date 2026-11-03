@@ -16,7 +16,7 @@ const strict=(obj,keys,label)=>{if(!obj||typeof obj!=='object'||Array.isArray(ob
 const alias=name=>({alias:name});
 const safe=value=>typeof value==='number'?String(value).replace(/^-/,'minus-').replaceAll('.','p'):String(value).toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'');
 const roles={color:['Color'],typography:['Typography'],space:['Space','Size'],shape:['Shape'],motion:['Motion'],elevation:[]};
-const styles={typography:'textStyles',space:'gridStyles',elevation:'effectStyles'};
+const styles={color:'paintStyles',typography:'textStyles',space:'gridStyles',elevation:'effectStyles'};
 
 // Interpolate in OKLab between caller-pinned anchors. Endpoints and brand anchors are never inferred.
 function lab(hex){const [r,g,b]=rgba(hex).slice(0,3).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b),m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b),s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);return [.2104542553*l+.793617785*m-.0040720468*s,1.9779984951*l-2.428592205*m+.4505937099*s,.0259040371*l+.7827717662*m-.808675766*s];}
@@ -31,7 +31,7 @@ export function paletteRamp({anchors,steps=[50,100,200,300,400,500,600,700,800,9
  }));
 }
 function builder(platform){
- const data={collections:[],variables:[],textStyles:[],effectStyles:[],gridStyles:[]},map=new Map();
+ const data={collections:[],variables:[],textStyles:[],effectStyles:[],gridStyles:[],paintStyles:[]},map=new Map();
  const collection=(name,modes=['Value'])=>{if(!data.collections.some(c=>c.name===name))data.collections.push({name,modes});};
  function add(name,type,value,description,scopes=[]){
   const prior=map.get(name);if(prior){if(prior.type!==type||JSON.stringify(prior.values)!==JSON.stringify({Value:value}))throw new Error('Conflicting primitive '+name);return name;}
@@ -77,6 +77,9 @@ function colorRecipe(b,r,modes){
   b.semantic(name,'Color','COLOR',values,row.description,name.startsWith('color/text/')?['TEXT_FILL']:['FRAME_FILL','SHAPE_FILL','STROKE_COLOR']);
  }
  if(Object.keys(overrides).some(name=>!rows.some(r=>r.name===name)))throw new Error('Unknown color override; use explicit extra definitions for new roles.');
+ // color/gradient/brand always exists (1.1 section 3): the brand ramp's middle step fading two steps darker, or to the darkest step.
+ const ramp=Object.keys(palettes[tones.brand]||{}).map(Number).sort((x,y)=>x-y);
+ if(ramp.length>1){const i=Math.floor((ramp.length-1)/2),stop=(step,position)=>({position,color:alias('palette/'+tones.brand+'/'+step)});b.data.paintStyles.push({name:'color/gradient/brand',description:'Brand fade for raised controls and highlights.',paints:[{type:'GRADIENT_LINEAR',angle:180,stops:[stop(ramp[i],0),stop(ramp[Math.min(i+2,ramp.length-1)],1)]}]});}
 }
 function typographyRecipe(b,r){
  strict(r,['families','faces','display','code','rows','weights','extra'],'typography recipe');
@@ -152,7 +155,7 @@ export function compileDomain(domain,recipe,{platform,modes,dependencies}){
   if(Object.keys(recipe.values||{}).some(n=>!defaults.motion[n]))throw new Error('Unknown motion role; use extra definitions.');
  }
  if(domain==='elevation')elevationRecipe(b,recipe,dependencies);
- if(recipe.extra){strict(recipe.extra,['collections','variables','textStyles','effectStyles','gridStyles'],'extra definitions');for(const key of Object.keys(b.data))b.data[key].push(...(recipe.extra[key]||[]));}
+ if(recipe.extra){strict(recipe.extra,['collections','variables','textStyles','effectStyles','gridStyles','paintStyles'],'extra definitions');for(const key of Object.keys(b.data))b.data[key].push(...(recipe.extra[key]||[]));}
  return b.data;
 }
 export function validateCoverage(pack,coverage,{allowUnreadable=false}={}){
@@ -174,7 +177,7 @@ export function validateDecisionPack(decision,request,pack){
 }
 export function assembleFoundations(decision,request,pack,parts,frozen=null,revision=1){
  const locked=validateDecisionPack(decision,request,pack),draft={...(frozen||{}),format:'ds-create/foundations@1',revision};
- for(const list of ['collections','variables','textStyles','effectStyles','gridStyles']){
+ for(const list of ['collections','variables','textStyles','effectStyles','gridStyles','paintStyles']){
   const found=new Map((frozen?.[list]||[]).map(x=>[x.name,x]));
   for(const part of Object.values(parts))for(const item of part[list]||[]){const old=found.get(item.name);if(old&&JSON.stringify(old)!==JSON.stringify(item))throw new Error('Conflicting or frozen definition '+item.name);found.set(item.name,item);}
   draft[list]=[...found.values()];

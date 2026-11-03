@@ -625,13 +625,13 @@ function MenuAnnotated() {
 }
 
 function OpticalSteps() {
-  const pad = cssv('button/padding-x/md');
+  const pad = { paddingLeft: cssv('button/padding-left/md'), paddingRight: cssv('button/padding-right/md') };
   return (
     <Panel>
       <div className="grid gap-xl md:grid-cols-3">
         <div className="flex flex-col items-start gap-md rounded-control bg-surface-base p-lg">
           <Tag bad>1 · Even padding only</Tag>
-          <span className="type-body-sm-semibold inline-flex h-(--size-control-md) items-center gap-(--button-gap-md) rounded-control bg-fill-brand-solid text-text-on-solid" style={{ paddingInline: pad }}>
+          <span className="type-body-sm-semibold inline-flex h-(--size-control-md) items-center gap-(--button-gap-md) rounded-control bg-fill-brand-solid text-text-on-solid" style={pad}>
             <Icon name="files/cloud-upload" size="md" />
             Upload
           </span>
@@ -645,7 +645,8 @@ function OpticalSteps() {
         <div className="flex flex-col gap-sm rounded-control bg-surface-base p-lg">
           <span className="type-body-sm-semibold text-text-primary">3 · Measurements</span>
           {[
-            ['Outer padding', `button/padding-x/md · ${num('button/padding-x/md')}`],
+            ['Left padding', `button/padding-left/md · ${num('button/padding-left/md')}`],
+            ['Right padding', `button/padding-right/md · ${num('button/padding-right/md')}`],
             ['Icon box', `size/icon/md · ${num('size/icon/md')}`],
             ['Gap', `button/gap/md · ${num('button/gap/md')}`],
             ['Optical inset', `space/optical · ${num('space/optical')}`],
@@ -665,16 +666,16 @@ function PaddingAnatomy() {
   const zoom = 4;
   const seg = (label: string, token: string, tone: 'pad' | 'part' | 'opt') => ({ label, token, tone });
   const segs = [
-    seg('padding', 'button/padding-x/md', 'pad'),
+    seg('padding', 'button/padding-left/md', 'pad'),
     seg('icon', 'size/icon/md', 'part'),
     seg('gap', 'button/gap/md', 'opt'),
     seg('optical', 'space/optical', 'opt'),
     seg('label', '', 'part'),
     seg('optical', 'space/optical', 'opt'),
-    seg('padding', 'button/padding-x/md', 'pad'),
+    seg('padding', 'button/padding-right/md', 'pad'),
   ];
   const tone = { pad: 'bg-category-pink-subtle text-category-pink-text', part: 'bg-fill-brand-subtle text-site-brand-on-tint', opt: 'bg-fill-warning-subtle text-site-warning-on-tint' };
-  const perceived = num('button/padding-x/md') + num('space/optical');
+  const perceived = num('button/padding-right/md') + num('space/optical');
   return (
     <Panel>
       <div className="flex flex-col gap-xl">
@@ -692,7 +693,8 @@ function PaddingAnatomy() {
         </div>
         <ul className="grid gap-sm sm:grid-cols-2">
           {[
-            ['Outer padding', 'button/padding-x/md'],
+            ['Left padding', 'button/padding-left/md'],
+            ['Right padding', 'button/padding-right/md'],
             ['Icon frame', 'size/icon/md'],
             ['Icon to label gap', 'button/gap/md'],
             ['Optical inset', 'space/optical'],
@@ -706,7 +708,7 @@ function PaddingAnatomy() {
           ))}
         </ul>
         <span className="type-body-sm-regular text-text-secondary">
-          Visible space after the label: {num('button/padding-x/md')} + {num('space/optical')} = {perceived}. Segments are drawn at {zoom}×.
+          Visible space after the label: {num('button/padding-right/md')} + {num('space/optical')} = {perceived}. Segments are drawn at {zoom}×.
         </span>
       </div>
     </Panel>
