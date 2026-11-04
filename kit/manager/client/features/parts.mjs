@@ -275,7 +275,7 @@ export function setupParts({ getState, refresh, render }) {
     }
     const button = e.target.closest('[data-prepare-parts]');
     if (!button || button.disabled) return;
-    const state = getState(), feedback = () => document.querySelector('[data-parts-feedback]');
+    const state = getState(), host = button.closest('#build-dialog') ? '#build-dialog' : '#content', feedback = () => document.querySelector(`${host} [data-parts-feedback]`);
     button.disabled = true; button.textContent = 'Preparing…';
     try {
       const response = await fetch('/api/parts-prepare', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-DS-Create-Token': state?.csrfToken || '' }, body: JSON.stringify({ ids: (state?.parts || []).map(p => p.id) }), signal: AbortSignal.timeout(30000) });

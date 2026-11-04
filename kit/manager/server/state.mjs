@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {newSystem, validateFoundations} from '../foundations/validate.mjs';
 import {checkWebDraft} from './verify.mjs';
 import {compareFoundations} from '../foundations/compare.mjs';
-import {inputFreshness, selectedInputSlug, snapshotInputs} from './files.mjs';
+import {inputFreshness, listBrandFiles, selectedInputSlug, snapshotInputs} from './files.mjs';
 import {readFigmaSetting} from './settings.mjs';
 
 export const foundations = [
@@ -175,6 +175,10 @@ export async function getState(outputDir, { preparing = false } = {}) {
   const tokenStep = initSteps.find(e => Number(e.step) === 4);
   const working = tokenStep && ['building', 'qa'].includes(tokenStep.status);
   const collections = exported?.collections || [];
+  // The logos the user put in Context; drawing the asset components belongs to build.
+  let brandFiles = [], brandError = null;
+  try { ({ files: brandFiles, error: brandError } = await listBrandFiles(path.resolve(outputDir, '../../..'), setup, path.basename(outputDir))); }
+  catch { brandError = 'Context files could not be read. Check the files and try again.'; }
   const items = foundations.map(f => {
     const mapping=plan?.domains?.[f.id];
     const rows = variables.filter(v => mapping?.status==='included'?mapping.variables?.includes(v.name):f.prefixes.some(prefix => v.name.startsWith(prefix)) || v.collection.toLowerCase() === f.name.toLowerCase());
@@ -201,10 +205,14 @@ export async function getState(outputDir, { preparing = false } = {}) {
       status=library?'ready':'pending';
       message=library?'Lucide library reference. Figma icon components are created during the library build.':'Settle whether this is a new system. Existing icon libraries are preserved.';
     }
+    if(f.id==='brand-assets'){
+      status=brandFiles.length?'ready':'pending';
+      message=brandError||(brandFiles.length?'These logo files come from Context. Asset components are created during the library build.':'Add your logo files in Context.');
+    }
     const rawModes = [...new Set(rows.flatMap(v => Object.keys(v.values)))];
     const modes = rawModes.length > 1 ? rawModes.filter(m => m !== 'Value') : rawModes;
     if (!modes.length && f.id === 'elevation' && styles.length) modes.push(...(collections.find(c => c.name === 'Color')?.modes || []));
-    return { ...f, status, message, count: library?libraryIcons.length:rows.length + styles.length, modes, ...(library?{library}:{}),
+    return { ...f, status, message, count: library?libraryIcons.length:f.id==='brand-assets'?brandFiles.length:rows.length + styles.length, modes, ...(library?{library}:{}), ...(f.id==='brand-assets'?{assets:brandFiles}:{}),
       variables: rows.map(v => ({ ...v, resolved: Object.fromEntries(Object.keys(v.values).map(mode => [mode, resolveValue(v, mode, byName)])) })), styles };
   });
   const audit = tokenStep?.audit || ledger?.tokens?.audit;

@@ -8,6 +8,7 @@ import { cssColor, rounded, stopCSS, paintsCSS, draftPaint } from './features/fo
 import { createMotionPreview } from './features/motion.mjs';
 import { setupPublish } from './features/publish.mjs';
 import { iconographyContent } from './features/iconography.mjs';
+import { brandAssetsContent, brandVariants, fileSize, typeName } from './features/brand-assets.mjs';
 import { overviewParts, partInspector, partLevels, partPage, partStatus, setupParts } from './features/parts.mjs';
 import { drawItems, setupItems } from './features/items.mjs';
 import { setupWeb } from './features/setup.mjs';
@@ -156,14 +157,14 @@ function overview() {
       const f = state.foundations.find(f => f.id === id);
       return previewCard(`<a href="#${id}">${escape(f.name)}</a>${icon('arrow')}`, preview(f));
     }).join('')}</div></section>
-    <section class="section" aria-labelledby="foundations-heading"><div class="section-heading"><h2 id="foundations-heading">Foundation library</h2><small>${state.summary.ready} ready to inspect</small></div><div class="foundation-list">${state.foundations.map(f => `<a class="foundation-row" href="#${f.id}">${icon(f.id)}<div><strong>${escape(f.name)}</strong><small>${escape(f.description)}</small></div><div class="row-meta">${f.count ? `<span class="count">${f.count} ${f.styles.length && !f.variables.length ? 'styles' : 'items'}</span>` : ''}${badge(f.status, f.later && f.status === 'pending' ? 'Not generated yet' : labels[f.status])}</div>${icon('arrow')}</a>`).join('')}</div></section>
+    <section class="section" aria-labelledby="foundations-heading"><div class="section-heading"><h2 id="foundations-heading">Foundation library</h2><small>${state.summary.ready} ready to inspect</small></div><div class="foundation-list">${state.foundations.map(f => `<a class="foundation-row" href="#${f.id}">${icon(f.id)}<div><strong>${escape(f.name)}</strong><small>${escape(f.description)}</small></div><div class="row-meta">${f.count ? `<span class="count">${f.count} ${f.styles.length && !f.variables.length ? 'styles' : 'items'}</span>` : ''}${badge(f.status, f.id === 'brand-assets' && f.status === 'pending' ? 'No logo files yet' : f.later && f.status === 'pending' ? 'Not generated yet' : labels[f.status])}</div>${icon('arrow')}</a>`).join('')}</div></section>
     ${overviewParts(state.parts, { escape, badge, icon })}
     `, badge(state.status, names[state.status]), 'data-system-name');
 }
 
 function emptyFoundation(f) {
-  const title = f.status === 'generating' ? 'Generating...' : f.status === 'error' ? 'This foundation needs attention' : f.status === 'skipped' ? 'Not in this init' : f.later ? 'Not generated yet' : 'Waiting for this foundation';
-  return `<div class="empty-state">${f.status === 'generating' ? '<span class="spinner" aria-hidden="true"></span>' : icon(f.id)}<h2>${title}</h2><p>${escape(f.message)}</p>${f.status === 'generating' ? '<small>This view updates automatically. You can keep working in your agent.</small>' : ''}</div>`;
+  const title = f.status === 'generating' ? 'Generating...' : f.status === 'error' ? 'This foundation needs attention' : f.status === 'skipped' ? 'Not in this init' : f.id === 'brand-assets' ? 'No logo files yet' : f.later ? 'Not generated yet' : 'Waiting for this foundation';
+  return `<div class="empty-state">${f.status === 'generating' ? '<span class="spinner" aria-hidden="true"></span>' : icon(f.id)}<h2>${title}</h2><p>${escape(f.message)}</p>${f.status === 'generating' ? '<small>This view updates automatically. You can keep working in your agent.</small>' : ''}${f.id === 'brand-assets' && state.setup ? '<button class="button" data-open-setup>Open context</button>' : ''}</div>`;
 }
 
 function variableTable(rows, mode) {
@@ -181,6 +182,7 @@ function foundation(f) {
     const sizes=space.variables.filter(v=>v.name.startsWith('size/icon/')).map(v=>({name:v.name,value:resultFor(v,modeFor(space)).value})).filter(v=>Number.isFinite(v.value)&&v.value>0&&v.value<=48).sort((a,b)=>a.value-b.value);
     return documentFrame(f.name,f.description,iconographyContent({query,escape,previewCard,sizes,ink,base,selectable,selectClass}),badge('ready','Library reference'));
   }
+  if (f.id === 'brand-assets' && f.status === 'ready') return documentFrame(f.name, f.description, brandAssetsContent({ assets: f.assets || [], query, escape, previewCard }), badge('ready', 'From Context'));
   if (f.id === 'color') return colorDocument(f);
   if (f.id === 'space') return spacingDocument(f);
   if (f.id === 'motion' && f.status === 'ready') return documentFrame(f.name, f.description, motion.content(f, query), badge(f.status));
@@ -294,6 +296,7 @@ function foundationWorkspace(f) {
   if(f.id==='iconography' && f.library)return `<section class="inspector-section"><h3>Library</h3><dl>${property('Base',f.library.name)}${property('Version',f.library.version)}${property('License',f.library.license)}${property('Construction','24px grid · 2px stroke')}</dl><p class="workspace-help">Local library reference. Figma icon components are created during the library build.</p></section><section class="inspector-section"><h3>Find an icon</h3><label class="search-field">${icon('search')}<input id="token-search" type="search" aria-label="Filter icons" placeholder="Search icons..." value="${escape(query)}" /></label></section>`;
   // Pages with several modes still get a mode switch; the old Inspect search only filtered token tables.
   if (f.status !== 'ready') return `<section class="inspector-section">${badge(f.status)}<p class="workspace-help">${escape(f.message)}</p></section>`;
+  if (f.id === 'brand-assets') return `<section class="inspector-section"><h3>Source</h3><p class="workspace-help">Add or replace logo files in Context.</p>${state.setup ? '<button class="button" data-open-setup>Open context</button>' : ''}</section>`;
   if (f.id === 'typography') {
     const choices = fontChoices(typeFamilies(f));
     const family = previewTypeface(f);
@@ -336,6 +339,10 @@ function itemPanel(f, key) {
     const v = f.variables.find(x => x.name === key); if (!v) return '';
     const r = resultFor(v, modeFor(f)), n = Number(r.value);
     return head(v.name) + `<section class="inspector-section"><h3>Value</h3>${list([['Size', n >= 999 ? 'Full' : px(n)], ['Rem', n >= 999 ? '' : `${rounded(n / 16)}rem`], ['From', r.alias]])}${v.description ? `<p class="workspace-help">${escape(v.description)}</p>` : ''}</section>`;
+  }
+  if (f.id === 'brand-assets') {
+    const a = (f.assets || []).find(x => x.key === key); if (!a) return '';
+    return head(a.name) + `<section class="inspector-section"><h3>File</h3><span class="brand-asset-stage brand-asset-panel-stage"><span class="brand-asset-pane" data-surface="light"><img src="${escape(a.url)}" alt="" /></span><span class="brand-asset-pane" data-surface="dark"><img src="${escape(a.url)}" alt="" /></span></span>${list([['Name', a.name], ['Folder', a.path.includes('/') ? a.path.slice(0, a.path.lastIndexOf('/') + 1) : 'Context folder'], ['Type', typeName(a.type)], ['Size', fileSize(a.size)], ['Labels from the file name', brandVariants(a.name).join(', ')]])}<p class="workspace-help">Preview of the file from Context. Asset components are created during the library build.</p></section>`;
   }
   if (f.id === 'iconography') {
     const el = document.querySelector(`[data-select-item="${CSS.escape(key)}"]`), glyph = el?.querySelector('svg')?.outerHTML || '';

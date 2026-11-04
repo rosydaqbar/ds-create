@@ -88,7 +88,7 @@ Overview shows the four init steps, foundation readiness, palette/type previews 
 - Elevation: effect styles and shadow specimens.
 - Motion: duration/easing variables and their exported modes.
 - Iconography: a new system exposes the prepared Lucide library reference during init; actual Figma icon components are made at build step 6. Existing icon libraries are preserved.
-- Brand assets: “Not generated yet” during init; asset/library components are made at build step 6. No asset gallery is fabricated.
+- Brand assets: during init, Builder shows the SVG, PNG, JPEG and WebP files in the session's Context inputs, including files placed directly in `workspace/input/`. Each file appears on a light and a dark background. If no image files are found, Builder asks for logo files in Context. Asset/library components are made at build step 6. Builder does not create logos or an asset gallery of its own.
 
 Manager readiness means saved data is inspectable, not that documentation pages or components exist. The original token audit remains the init gate; the inspector reports its saved result separately. Re-running init reuses the export and healthy Manager process without recreating frozen Figma values.
 

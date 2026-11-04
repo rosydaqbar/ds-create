@@ -3,9 +3,9 @@ import {readFile, rename, unlink, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes, randomUUID} from 'node:crypto';
-import {getPublishStatus, getState, readJSON} from './state.mjs';
+import {getPublishStatus, getState, observedSetup, readJSON} from './state.mjs';
 import {createFigmaJobs} from './publish.mjs';
-import {PublishError, writeJSON} from './files.mjs';
+import {PublishError, readBrandFile, writeJSON} from './files.mjs';
 import {buildStatus, createSetupJobs, requestBuild, uploadLimits, workerConnectionStatus} from './setup.mjs';
 import {createParts} from './parts.mjs';
 import {stageOptions, stageStyles} from './stage.mjs';
@@ -26,11 +26,12 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
   const items = createItemStore({ outputDir });
   // Publish runs ds-create build. Each step needs at least one item, from Builder or from Figma.
   async function publishSteps(s, parts) {
-    const local = s.foundations.filter(f => f.status === 'ready').length, figma = s.source?.review === 'synced';
+    // Brand assets shows the user's Context files; it is not a foundation Builder prepares, so it never opens this step.
+    const local = s.foundations.filter(f => f.status === 'ready' && f.id !== 'brand-assets').length, figma = s.source?.review === 'synced';
     // Each level counts its own templates: 19 Parts, 8 Components and 2 Sections today, more when templates are added.
     const level = name => { const list = parts.filter(p => (p.level || 'parts') === name), prepared = list.filter(p => ['review', 'synced'].includes(p.status)).length;
       return { ready: prepared > 0, prepared, inFigma: list.filter(p => p.status === 'synced').length, total: list.length }; };
-    return { figma: await readFigmaSetting(outputDir), foundations: { ready: ['approved', 'synced'].includes(s.source?.review) || s.source?.kind !== 'local' && local > 0, local, total: s.foundations.length, figma }, parts: level('parts'), components: level('components'), sections: level('sections'), build: { ...await buildStatus(outputDir), prompt: `Run ds-create build for the design system saved in Builder.\nds-create build --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
+    return { figma: await readFigmaSetting(outputDir), foundations: { ready: ['approved', 'synced'].includes(s.source?.review) || s.source?.kind !== 'local' && local > 0, local, total: s.foundations.length, figma }, parts: { ...level('parts'), prompt: `Prepare the Parts, Components and Sections saved in Builder.\nUse DS Create MCP to call ds_create_parts_prepare with session: "${path.basename(outputDir)}".\nds-create init-web --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}\n\nCheck that the foundations are approved in Builder first. If they are not, tell me and wait. Do not approve them yourself.` }, components: level('components'), sections: level('sections'), build: { ...await buildStatus(outputDir), prompt: `Run ds-create build for the design system saved in Builder.\nds-create build --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
   }
   // The user approves the saved foundations in Builder; no Figma publish needed. An approval that a Figma
   // publish already confirmed is kept as it is.
@@ -66,6 +67,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
       'client/features/foundation-controls.mjs',
       'client/features/foundation-save.mjs',
       'client/features/iconography.mjs',
+      'client/features/brand-assets.mjs',
       'client/features/parts.mjs',
       'client/features/items.mjs',
       'client/features/change-requests.mjs',
@@ -132,6 +134,15 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
       if (route === '/api/stage.css') {
         const draft = await readJSON(path.join(outputDir, 'foundations.json'));
         res.writeHead(200, { 'Content-Type': 'text/css; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(req.method === 'HEAD' || !draft ? undefined : stageStyles(draft, await readParts(outputDir))); return;
+      }
+      // A logo from Context, for an <img> on the Brand assets page. Same origin only; an SVG never runs script here.
+      if (route.startsWith('/api/brand-assets/')) {
+        if (req.headers['sec-fetch-site'] === 'cross-site') { res.writeHead(403).end('Same origin only'); return; }
+        let key; try { key = decodeURIComponent(route.slice('/api/brand-assets/'.length)); } catch { key = null; }
+        const file = key && await readBrandFile(workspace, await observedSetup(outputDir), path.basename(outputDir), key);
+        if (!file) { res.writeHead(404).end('Not found'); return; }
+        res.writeHead(200, { 'Content-Type': file.type, 'Content-Security-Policy': "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox", 'Cross-Origin-Resource-Policy': 'same-origin' });
+        res.end(req.method === 'HEAD' ? undefined : file.bytes); return;
       }
       if (!routes.has(route)) { res.writeHead(404).end('Not found'); return; }
       const [file, type] = routes.get(route), body = await readFile(path.join(managerDir, file));

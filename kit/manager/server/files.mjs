@@ -64,6 +64,50 @@ export async function inputFreshness(outputDir, setup) {
   }catch(e){return {fresh:false,message:e.message};}
 }
 
+// 1.8 Brand assets shows the logo files the user put in Context: the image files in this session's input folder and
+// the shared files directly in workspace/input/ (listRootInputs, stored as ../name like the snapshot). Symlinks and dot
+// files are skipped. An upload replaced by a newer one of the same name (setup.files lists the current ones) is an
+// archive, not a logo. A key is the file name, or its path when two files share a name. The URL carries the file time
+// so a replaced logo redraws. An unreadable root input hides the root files and sets error.
+export const brandTypes = {svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp'};
+const brandType = name => brandTypes[path.extname(name).slice(1).toLowerCase()] || null;
+export async function listBrandFiles(workspace, setup, sessionSlug) {
+  const input = await inputDirectory(workspace); if (!input) return { files: [], error: null };
+  const root = path.join(input, selectedInputSlug(setup, sessionSlug)), found = [];
+  const add = async (full, name, rel) => { const info = await lstat(full); found.push({ name, path: rel, size: info.size, mtimeMs: Math.trunc(info.mtimeMs), type: brandType(name) }); };
+  let session = true;
+  try { const info = await lstat(root); if (!info.isDirectory() || info.isSymbolicLink()) session = false; }
+  catch (e) { if (e.code === 'ENOENT') session = false; else throw e; }
+  const active = Array.isArray(setup?.files) ? new Set(setup.files.map(f => f?.path)) : null;
+  async function walk(dir, prefix = '') {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const rel = prefix + entry.name;
+      if (entry.name.startsWith('.') || entry.isSymbolicLink()) continue;
+      if (entry.isDirectory()) await walk(path.join(dir, entry.name), rel + '/');
+      else if (entry.isFile() && brandType(entry.name) && (!active || !rel.startsWith('uploads/') || active.has(rel))) await add(path.join(dir, entry.name), entry.name, rel);
+    }
+  }
+  if (session) await walk(root);
+  let error = null;
+  try { for (const entry of await listRootInputs(workspace)) if (brandType(entry.name)) await add(path.join(input, entry.name), entry.name, entry.path); }
+  catch { error = 'Context files could not be read. Check the files and try again.'; found.splice(0, found.length, ...found.filter(f => !f.path.startsWith('../'))); }
+  const names = found.map(f => f.name);
+  const files = found.map(f => ({ ...f, key: names.indexOf(f.name) === names.lastIndexOf(f.name) ? f.name : f.path }))
+    .sort((a, b) => a.key.localeCompare(b.key, 'en')).map(f => ({ ...f, url: `/api/brand-assets/${encodeURIComponent(f.key)}?v=${f.mtimeMs}` }));
+  return { files, error };
+}
+// The bytes of one listed logo, or null. Only a key from the current list is served, and the file must still be a
+// regular file with no symlink on its path: a session file inside the session folder, a root file directly in
+// workspace/input/.
+export async function readBrandFile(workspace, setup, sessionSlug, key) {
+  const file = (await listBrandFiles(workspace, setup, sessionSlug)).files.find(f => f.key === key); if (!file || !brandType(file.name)) return null;
+  const inputRoot = await realpath(await inputDirectory(workspace)), shared = file.path.startsWith('../');
+  const base = shared ? inputRoot : await realpath(path.join(inputRoot, selectedInputSlug(setup, sessionSlug)));
+  const full = path.join(base, shared ? file.name : file.path), real = await realpath(full).catch(() => null);
+  if (real !== full || (shared ? path.dirname(real) !== inputRoot : !real.startsWith(base + path.sep)) || !(await lstat(real)).isFile()) return null;
+  return { bytes: await readFile(real), type: file.type };
+}
+
 export class PublishError extends Error {
   constructor(message, status = 409) { super(message); this.status = status; }
 }

@@ -52,7 +52,12 @@ export function setupBuild({ getState, refresh = async () => {} }) {
     dialog.querySelector('[data-build-context]').hidden = f.ready || pending;
     paint('parts', p.ready ? 'done' : f.ready ? 'todo' : 'locked', p.ready ? 'Ready' : 'Needed',
       `Prepared: ${[[p, 'Parts'], [c, 'Components'], [s.sections, 'Sections']].filter(([x]) => x).map(([x, name]) => `${x.prepared} of ${x.total} ${name}${x.inFigma ? ` (${x.inFigma} in Figma)` : ''}`).join(' · ')}${p.ready ? '' : '. Prepare at least one Part.'}`);
-    step('parts').querySelector('[data-prepare-parts]').hidden = p.ready || !f.ready;
+    // Foundations first: while Parts cannot be prepared, say why instead of offering a click the server refuses.
+    const blocked = (getState()?.parts || []).find(x => x.canPrepare === false), reason = step('parts').querySelector('[data-parts-reason]');
+    reason.textContent = blocked ? `${blocked.reason || 'Approve your foundations in Builder before preparing Parts.'}${pending ? ' Click Approve foundations in step 1.' : ''}` : '';
+    reason.hidden = !blocked;
+    step('parts').querySelector('[data-prepare-parts]').hidden = p.ready || !f.ready || !!blocked;
+    step('parts').querySelector('[data-parts-copy]').hidden = p.ready;
     const open = f.ready && p.ready;
     paint('build', open ? 'todo' : 'locked', open ? 'Ready' : 'Locked',
       open ? 'Copy this prompt into your agent. It runs ds-create build from what is ready now.' : 'Unlocks when Foundations and Parts each have at least one item.');
@@ -88,6 +93,12 @@ export function setupBuild({ getState, refresh = async () => {} }) {
     try { await copyText(getState()?.publishSteps?.build.prompt || ''); $('build-copied').textContent = 'Copied. Paste it into your agent.'; }
     catch { $('build-copied').textContent = 'Copy the prompt above manually.'; }
     setTimeout(() => { $('build-copied').textContent = ''; }, 2500);
+  });
+  step('parts').querySelector('[data-parts-copy]').addEventListener('click', async () => {
+    const copied = step('parts').querySelector('[data-parts-copied]');
+    try { await copyText(getState()?.publishSteps?.parts?.prompt || ''); copied.textContent = 'Copied. Paste it into your agent.'; }
+    catch { copied.textContent = 'Couldn\'t copy the prompt. Ask your agent to prepare the Parts with DS Create MCP.'; }
+    setTimeout(() => { copied.textContent = ''; }, 2500);
   });
   return { sync };
 }
