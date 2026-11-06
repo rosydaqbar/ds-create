@@ -53,8 +53,7 @@ Two files per page, both in `workspace/output/{system-slug}/`. Neither holds a v
 
 **Where the data comes from.**
 - **Sources, only from this build:** the page spec, the default manifest (`workflow/templates/fast/`), this system's inputs and copy files, its set snapshots (`workspace/output/{slug}/figma/sets/`) and its Figma file.
-- **`dev/examples/` is a reference only.** It may be read to understand how a page or visual works. Nothing is copied from it, and it never replaces writing the manifest and copy file from the sources above: a page filled from a finished example skips the rules this mode exists for.
-- `kit/tools/build/pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`workflow/GOTCHAS.md` G43).
+- **`dev/examples/` is a reference only:** see GOTCHAS G43.
 
 **The copy file**, `copy/{id}-{kebab name}.md`, holds every sentence (`workflow/COPY.md`).
 

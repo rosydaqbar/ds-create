@@ -19,7 +19,7 @@ It runs once the foundations are approved in Builder and the round's Parts have 
 # 2. What is produced
 
 ```text
-workspace/output/{system-slug}/web/        a copy of kit/web, filled for the brand (README §5)
+workspace/output/{system-slug}/web/        a copy of kit/web, filled for the brand (README §2)
 ├─ COPY-GUIDE.md                 voice and copy rules for every word on the site
 ├─ tokens/
 │  ├─ figma-variables.json       token file written from the local files (input): variables, styles, Part tokens, page ids when Figma has them
@@ -97,7 +97,7 @@ Run the steps in order. Each step names its exit check. At initiation they are s
 
 ## W1 · Copy the template
 
-Copy `kit/web/` to `workspace/output/{system-slug}/web/` (README §5), or to another location only when the user explicitly asks for one. Never create the build inside `kit/web/` or `dev/examples/`: the template stays placeholder-only, and `dev/examples/` holds only builds the user asked to keep as references. Run `npm install`, then `npx playwright install chromium` once for QA. `.npmrc` sets `legacy-peer-deps`, so the React Native web packages install without pulling in `react-native` or any mobile toolchain.
+Copy `kit/web/` to `workspace/output/{system-slug}/web/` (README §2), or to another location only when the user explicitly asks for one. Never create the build inside `kit/web/` or `dev/examples/`: the template stays placeholder-only, and `dev/examples/` holds only builds the user asked to keep as references. Run `npm install`, then `npx playwright install chromium` once for QA. `.npmrc` sets `legacy-peer-deps`, so the React Native web packages install without pulling in `react-native` or any mobile toolchain.
 
 Then fit the copy to the round: `node scripts/scope.mjs --upto {parts|components|sections|layouts}` (add `--no-gl` when the Figma pages have no Guidelines frames; a `build --no-gl` round itself skips the site, so this applies to a later site round on such a system). It removes the stories and components above the round's scope, moves the ones the site itself still imports (docs controls such as Select) to `src/docs/controls/` with every import rewritten, and lists the foundation pages whose visuals use them, for W5. Then `npm run index`, and `npm run pin-props`: it writes the template's current variant defaults (size, emphasis, tone, type…) into every docs usage that leaves them out, so W4 can change a component's defaults without resizing the site's own pages. Use `npm ci` when a lockfile is present.
 

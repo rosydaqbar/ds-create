@@ -46,12 +46,9 @@ Then, per step:
 - Code in scope (any product type) → load `workflow/WEB.md`, and for every page documented on the site, the same page file used for its Figma page
 - Product type App or Web and App → also load `workflow/APP.md`, and for every page with an App preview, the same page file used for its Figma page
 
-The exact page → file mapping is in `README.md`.
+The exact page → file mapping is in `specs/SYSTEM.md` Part D and in the 00 file of each level folder.
 
-**Examples are references, never sources.**
-- `dev/examples/` (finished reference builds) may be read to understand a pattern, but nothing is copied from it: no sentences, page data, values or code.
-- A page is never filled from an example in place of its spec and this system's own inputs and file.
-- The `workspace/input/` and `workspace/output/` folders of other systems are not read at all (`workflow/GOTCHAS.md` G43).
+**Examples are references, never sources:** see GOTCHAS G43.
 
 ## Loading per step
 
@@ -62,7 +59,7 @@ The full specification is large (several hundred KB). Loading every page file at
 
 ## Progress ledger
 
-Keep a ledger on disk at `workspace/output/{system-slug}/ds-create-ledger.json` (README §5), even for a Figma-only build. Write initial init entries after inputs/basic choices, expand them after final confirmation, and update after every step and every page:
+Keep a ledger on disk at `workspace/output/{system-slug}/ds-create-ledger.json` (README §2), even for a Figma-only build. Write initial init entries after inputs/basic choices, expand them after final confirmation, and update after every step and every page:
 
 ```text
 scope            the confirmed summary (`workflow/QUESTIONNAIRE.md` §12): pages, mode, formats, product type, code

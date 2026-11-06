@@ -23,7 +23,7 @@ You write the **docs data** for your pages, three files each, named `{id}-{kebab
 
 ## Rules
 - **Flags.** `--no-gl`: no Guidelines anywhere. Part pages: the copy has `# Summary`, `# Sets`, `# Examples`, `# When to use`, `# When not to use`, `# Anatomy` only; the manifest has no `topics`. Foundation pages: no `Guidelines` frame, no `# Guidelines` section. (fast-pack drops them anyway when the ledger has `flags.guidelines: false`; leaving them out saves writing them.)
-- **Examples are references, never sources.** Never read other systems' `workspace/input/` or `workspace/output/`; nothing from `dev/examples/` is copied (fast-pack refuses it).
+- **Examples are references, never sources:** see GOTCHAS G43.
 - **Values are never typed.** Name tokens and sets; the renderer reads values from the file. Never invent a token name: if unsure it exists, don't name it.
 - **Product-flavored compositions.** Use the spec's compositions with this product's content where natural, and "for example" for anything the product hasn't shipped. Only sets from the set files; a composition that needs a set the system doesn't have is rebuilt from what exists or dropped (say so in the report). Icons in recipes by name: `"Icon": "Icon/{category}/{name}"`.
 - **Recipes**: `{ "set": "{set name}", "props": { "{property}": "{value}" }, "text": { "{TEXT property}": "…" } }`, names and values exactly as in the set file.

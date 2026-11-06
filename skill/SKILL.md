@@ -59,12 +59,7 @@ One skill, six commands. Each command has its own reference file. Load it before
 6. **QA on call.** The slow checks run only through `qa` (`workflow/INITIATOR.md` Part B, *QA on call*). The cheap ones run inside `build`: each page's own audit, the copy check at the end of a level, and `npm run build`. In fast mode the build doesn't run these either: page audits and the copy check move to `qa` too, so a fast build only generates (`workflow/INITIATOR.md` Part B §6, *Gates*, *Fast mode*). At the end of `build`, offer `qa` in one line, and never run it unasked.
 7. **Figma.** Load the `figma-use` skill before the first `use_figma` call. Send one writing call at a time, and follow `workflow/GOTCHAS.md` §1.
 8. **The repo stays brand-agnostic.** Brand names, file keys, product copy and knowledge rules live only in `workspace/input/`, `workspace/output/` and the Figma file (`workspace/input/README.md` I6, I7). When copying or distributing the skill, exclude all saved project inputs, outputs, session runtimes and caches; retain only the workspace README templates. Repository maintenance must not preserve a particular project as a dependency of the skill.
-9. **Examples are references, never sources.**
-   - `dev/examples/` may be read to understand a pattern: how a kind of page reads, or how a visual is composed.
-   - Nothing is copied from it: no sentences, manifests, page data, values or code.
-   - It never replaces a step. Every page is still written from its spec, the templates and tools, this system's `workspace/input/{slug}/` and `workspace/output/{slug}/`, and its own Figma file, through the same manifest and copy-file rules.
-   - Other systems' `workspace/input/` and `workspace/output/` folders are not read at all.
-   - `kit/tools/build/pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`workflow/GOTCHAS.md` G43).
+9. **Examples are references, never sources:** see GOTCHAS G43 (`workflow/GOTCHAS.md`).
 10. **No repo edits during a build.** The specs, templates and tools are read, never changed, while `init`, `build` or `qa` runs.
    - Lessons and tool bugs go into the build notes (`workspace/output/{slug}/reports/`), and into the repo only after the round, when the maintainer asks.
    - A blocking tool bug is patched once in the file's cached copy (`workflow/FAST.md` §6), or the page falls back to the standard engine. Never loop on it.

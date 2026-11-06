@@ -9,7 +9,7 @@ Page
       └─ Items      the things the block shows
 ```
 
-In this repo: specs/SYSTEM.md Part A gives each page's frames; the page's own file (README §3) says what each frame holds.
+In this repo: specs/SYSTEM.md Part A gives each page's frames; the page's own file says what each frame holds.
 
 ## 1. Page
 
