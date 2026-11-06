@@ -6,7 +6,7 @@ import {isProject, projectSlug, workspaceOf} from './layout.mjs';
 
 const sha = data => createHash('sha256').update(data).digest('hex');
 // Derived indexes and the generated decision transcription are not source inputs.
-const generated = new Set(['sources.md', 'answers/01-init.md']);
+const generated = new Set(['sources.md', 'answers/01-init.md', '.gitkeep']);
 const rootBookkeeping = new Set(['README.md', '.DS_Store']);
 // The folder that holds input: workspace/input (one folder per session) or, in a project, input/ itself.
 async function inputDirectory(workspace) {

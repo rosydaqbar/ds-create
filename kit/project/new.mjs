@@ -20,6 +20,8 @@ export function newProject({name, engine, cwd = process.cwd(), install = true}) 
   write(path.join(root, 'package.json'), {name: slug, private: true, type: 'module', devDependencies: {'ds-create': engine}});
   write(path.join(root, 'ds-create.json'), {name, slug, schemaVersion: SCHEMA_VERSION, figma: {url: null}});
   write(path.join(root, '.mcp.json'), {mcpServers: {'ds-create': {command: 'npx', args: ['--no', 'ds-create', 'mcp']}}});
+  writeFileSync(path.join(root, '.gitignore'), ['node_modules/', 'output/manager/runtime.json', 'output/manager/port.json', 'output/manager/server.log', 'output/manager/.mcp-host.*'].join('\n') + '\n');
+  for (const keep of ['input', 'output']) writeFileSync(path.join(root, keep, '.gitkeep'), '');
   writeSkill(root);
   if (install) {
     const r = spawnSync('npm', ['install'], {cwd: root, stdio: 'inherit'});

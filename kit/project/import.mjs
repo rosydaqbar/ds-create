@@ -23,7 +23,7 @@ function blockImportedWork(manager) {
   const file = path.join(manager, 'setup.json'), setup = readJson(file);
   if (setup && ACTIVE.has(setup.status)) writeFileSync(file, JSON.stringify({...setup, status: 'blocked', message: mark.message, readyInputHash: null, questions: []}, null, 2) + '\n');
 }
-const isEmpty = dir => !existsSync(dir) || readdirSync(dir).length === 0;
+const isEmpty = dir => !existsSync(dir) || readdirSync(dir).every(name => name === '.gitkeep');
 
 // Copies one session of an old repo into the project. Throws with a plain message when it cannot.
 export function importSession({project, oldRepo, slug}) {
