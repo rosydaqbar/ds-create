@@ -101,6 +101,7 @@ The root holds the README and one folder per job: what to build, how, why, the c
 
 ```text
 README.md            this file: structure and file map (always loaded)
+AGENTS.md            notes for agents that work on this repo (kept at the root so agent tools find it)
 SKILL.md             the overview skill published to the Antikode skill vault: what ds-create is, and how to clone and link this repo
 skills/              ds-create/: the ds-create skill, the way in: /ds-create init-web · init · build · learn · qa · status (SKILL.md and one
                      reference file per command). Link it into .claude/skills/ once after cloning (Start here); .claude/ is never committed
@@ -144,11 +145,11 @@ kit/                 reusable execution code and templates
   README.md          which kit folders run and which are copied into projects
 
 dev/                 maintainer files, not used by a build
-  dev/examples/      finished builds made with ds-create, for reference only (never copied into a new build)
+  examples/          finished builds made with ds-create, for reference only (never copied into a new build)
   maintain/          bundled icon/default-data generation
   ROADMAP.md         planned levels, components, renames and tooling (not built until specified)
-  AGENTS.md          notes for agents that work on this repo
   check-paths.mjs, rewrite-paths.mjs   path checks and path rewrites for moves
+
 workspace/            the WORK: every system's inputs and outputs live here, apart from the repo's own files
   input/             what the user provides for each system: briefs, brand files, the existing system, references, chat notes
                      (git-ignored except workspace/input/README.md)

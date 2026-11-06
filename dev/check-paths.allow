@@ -18,3 +18,6 @@ knowledge/2.1-button.md
 # Planned roadmap specs that do not exist yet.
 specs/guidance/03-content.md
 specs/guidance/04-accessibility.md
+
+# README tree lists dev/ children by short name, next to their siblings.
+examples/
