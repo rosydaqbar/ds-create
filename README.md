@@ -14,6 +14,21 @@ The six commands, and what each one does, are listed in `skill/SKILL.md`.
 
 The skill ships with the repo in `skill/` and stays brand-agnostic. Open the workspace in your chosen agent and load `skill/SKILL.md`, or register that folder using the client's own skill-discovery mechanism. Command syntax and settings locations belong to the client; no agent or IDE is required by ds-create. Builder work uses the standard MCP interface described in `skill/reference/mcp.md`.
 
+## Start a project
+
+One folder holds one design system. While ds-create is not published, pack it and point `new` at the tarball:
+
+```bash
+npm pack
+npx --package ./ds-create-0.2.0.tgz ds-create new acme --engine file:$PWD/ds-create-0.2.0.tgz
+cd acme
+npx ds-create builder
+```
+
+Then run `/ds-create builder` in your agent. Put your files in `input/`; the design system is written to `output/`. `npx ds-create migrate` updates an older project, `npx ds-create skill` rewrites its skill, and `npx ds-create import <old-repo> --slug <name>` brings in a session from the old `workspace/` layout.
+
+The sections below describe the older `workspace/` layout, which still works in a checkout of this repo.
+
 ## Install from the skill vault
 
 `anti-skill update` replaces the installed skill folder. A build writes `workspace/input/{slug}/` and `workspace/output/{slug}/` into the folder it runs in, so it never runs inside the installed skill folder.

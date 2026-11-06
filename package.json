@@ -17,6 +17,7 @@
     "kit/",
     "README.md",
     "!kit/**/node_modules",
+    "!kit/**/*.test.mjs",
     "!kit/web/scripts/build-manager-*",
     "!kit/web/scripts/manager-*.tsx",
     "!kit/mcp/package.json",
