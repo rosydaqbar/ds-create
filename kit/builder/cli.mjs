@@ -15,7 +15,7 @@ const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
 const command = args[0];
 let slug = arg('--slug');
 const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|compare|check-site [--slug {slug}] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
+const usage = 'node kit/builder/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|compare|check-site [--slug {slug}] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/builder/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/builder/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -217,7 +217,7 @@ async function main() {
   // Reuse the session's last port so the Builder link stays the same across restarts.
   const saved = Number((await readJSON(path.join(dir, 'port.json')))?.port) || 0, port = Number(arg('--port') || saved);
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('Port must be an integer from 0 to 65535.');
-  await cp(path.join(ROOT, 'kit/manager'), dir, { recursive: true, filter: source => !['cli.mjs', 'README.md'].includes(path.relative(path.join(ROOT, 'kit/manager'), source)) });
+  await cp(path.join(ROOT, 'kit/builder'), dir, { recursive: true, filter: source => !['cli.mjs', 'README.md'].includes(path.relative(path.join(ROOT, 'kit/builder'), source)) });
   await cp(path.join(ROOT, 'kit/web/src/styles/docs-presentation.css'), path.join(dir, 'docs-presentation.css'));
   // Builder draws Parts with the site's own token rules (server/stage.mjs).
   await mkdir(path.join(dir, 'web/scripts'), { recursive: true });

@@ -200,7 +200,7 @@ Also turn clip content on: `figma.createComponent()` starts with it off, and the
 *Why:* a variable table in a reading column squeezed its Usage cell to a few characters per line, and the frame grew to over 7,000 px.
 *Check:* no reading frame is taller than its content warrants, and no table cell wraps one word per line.
 
-**G43. Use finished builds as references, never as sources.** `examples/` may be read to understand a pattern. Nothing is copied from it (sentences, manifests, page data, values, code), and it never replaces a step: every page is still written from its spec, the templates and tools, this system's inputs and its own Figma file. Other systems' `workspace/input/` and `workspace/output/` folders are not read at all.
+**G43. Use finished builds as references, never as sources.** `dev/examples/` may be read to understand a pattern. Nothing is copied from it (sentences, manifests, page data, values, code), and it never replaces a step: every page is still written from its spec, the templates and tools, this system's inputs and its own Figma file. Other systems' `workspace/input/` and `workspace/output/` folders are not read at all.
 *Why:* in fast mode, an agent filled pages from a finished example instead of writing the manifests and copy from the build's own sources, which made the fast-mode rules pointless.
 *Check:* `kit/tools/build/pack.mjs --check` reports no copy line taken word for word from an example and no line naming one.
 

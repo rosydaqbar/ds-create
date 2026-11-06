@@ -121,7 +121,6 @@ workflow/            HOW to build it: process, gates and lessons
   WEB.md             the documentation site (every product type) and, for Web products, the Tailwind-ready React library and package
   APP.md             App products on the docs site: React Native previews (react-native-web) and React Native, Swift and Kotlin code
   EXTEND.md          adding a component at any level after initiation
-  ROADMAP.md         planned levels, components, renames and tooling (not built until specified)
   templates/         structure.md: the structure every page is built with (page → frames → blocks → items; no content);
                      agent-brief.md: the brief for docs-site page agents; fast/: the default fast-mode manifests (structure only)
 
@@ -129,7 +128,7 @@ knowledge/           WHY: the reasoning behind the specs, from the maintainer's 
                      (badges-and-tags.md, buttons.md, color.md, motion.md, radius.md, spacing.md)
 
 kit/                 reusable execution code and templates
-  manager/           local Builder application (see kit/manager/README.md)
+  builder/           local Builder application (see kit/builder/README.md)
     cli.mjs          Builder lifecycle entry point
     client/          browser shell, feature modules and licensed assets
     server/          HTTP/API, source intake, job execution and verification
@@ -140,18 +139,23 @@ kit/                 reusable execution code and templates
     figma/           Figma renderers, libraries, exports, audits and copy
     build/           manifest packing, renderer cache, ledger and registry
     content/         copy guard and editorial checks
-    maintain/        bundled icon/default-data generation
   web/               brand-agnostic React/Tailwind documentation template
   app/               React Native source for App previews and its token script
+  README.md          which kit folders run and which are copied into projects
 
-examples/            finished builds made with ds-create, for reference only (never copied into a new build)
+dev/                 maintainer files, not used by a build
+  dev/examples/      finished builds made with ds-create, for reference only (never copied into a new build)
+  maintain/          bundled icon/default-data generation
+  ROADMAP.md         planned levels, components, renames and tooling (not built until specified)
+  AGENTS.md          notes for agents that work on this repo
+  check-paths.mjs, rewrite-paths.mjs   path checks and path rewrites for moves
 workspace/            the WORK: every system's inputs and outputs live here, apart from the repo's own files
   input/             what the user provides for each system: briefs, brand files, the existing system, references, chat notes
                      (git-ignored except workspace/input/README.md)
   output/            everything a build generates: one folder per system (git-ignored except workspace/output/README.md)
 ```
 
-The MCP entry point is `node kit/mcp/server.mjs --workspace /absolute/workspace`; install its dependencies with `npm ci --prefix kit/mcp`. An agent session without the `ds_create_*` tools calls them through `node kit/manager/cli.mjs mcp {tool} --json '{…}'`, which installs the dependencies and starts a terminal host holding one MCP connection (`kit/mcp/host.mjs`), so no restart is needed.
+The MCP entry point is `node kit/mcp/server.mjs --workspace /absolute/workspace`; install its dependencies with `npm ci --prefix kit/mcp`. An agent session without the `ds_create_*` tools calls them through `node kit/builder/cli.mjs mcp {tool} --json '{…}'`, which installs the dependencies and starts a terminal host holding one MCP connection (`kit/mcp/host.mjs`), so no restart is needed.
 
 # 3. File map
 
@@ -234,7 +238,7 @@ Every page is built with the structure in `workflow/templates/structure.md` (pag
 | Parts, Components, Sections and Layouts in Figma | `kit/tools/figma/docbuilder.js`, cached once at step 11 (`workflow/INITIATOR.md` Part B §6) |
 | Docs site (`workflow/WEB.md`, `workflow/APP.md`) | `workflow/WEB.md`, plus `workflow/APP.md` for App products; docs agents start from `workflow/templates/agent-brief.md` |
 
-`examples/` holds finished reference builds, not inputs: read one only to understand a pattern, and never copy from it (`workflow/GOTCHAS.md` G43). Never open generated files (`kit/web/src/tokens/tokens.gen.ts`, `kit/web/tokens/tokens.dtcg.json`, `kit/web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
+`dev/examples/` holds finished reference builds, not inputs: read one only to understand a pattern, and never copy from it (`workflow/GOTCHAS.md` G43). Never open generated files (`kit/web/src/tokens/tokens.gen.ts`, `kit/web/tokens/tokens.dtcg.json`, `kit/web/src/styles/tokens.css`); read their source, `tokens/figma-variables.json`.
 
 Load page files at the step that builds them, not all at once, and keep the progress ledger on disk (`workflow/INITIATOR.md` Part B §0: *Loading per step* and *Progress ledger*). After any context compaction, re-read the global files and the ledger before continuing.
 
@@ -334,7 +338,7 @@ workspace/output/{system-slug}/
 └─ reports/                QA reports and reviews
 ```
 
-`{system-slug}` is the system name in lowercase kebab case (`Acme Design System` → `acme`). `workspace/input/` and `workspace/output/` are git-ignored, except their README files, so no brand is ever committed. Never write a build into the executor folders or into `examples/`. Use another location only when the user explicitly asks for one; a finished build becomes a committed reference in `examples/` only when the user asks. The Figma file itself lives in Figma.
+`{system-slug}` is the system name in lowercase kebab case (`Acme Design System` → `acme`). `workspace/input/` and `workspace/output/` are git-ignored, except their README files, so no brand is ever committed. Never write a build into the executor folders or into `dev/examples/`. Use another location only when the user explicitly asks for one; a finished build becomes a committed reference in `dev/examples/` only when the user asks. The Figma file itself lives in Figma.
 
 **Design quality.** Every docs-site build is generated and checked with the [Impeccable](https://www.npmjs.com/package/impeccable) skill and its anti-AI-slop rules. Install it once per machine in this repo:
 
@@ -362,14 +366,14 @@ Syncium is a complete example built with ds-create from one set of brand guideli
 
 This example is a reference. An agent may read it to understand a pattern, but never copies from it and never uses it in place of a page's spec and the system's own inputs (`workflow/GOTCHAS.md` G43).
 
-The web version is in [`examples/syncium`](examples/syncium). It has the explorer site and an installable package, `@syncium/design-system`. The explorer covers:
+The web version is in [`dev/examples/syncium`](dev/examples/syncium). It has the explorer site and an installable package, `@syncium/design-system`. The explorer covers:
 - Getting started for designers, developers and product managers;
 - searchable tokens, a changelog and status labels;
 - eight foundations, each with Overview, Tokens and Guidelines;
 - 29 components with a playground, every variant, anatomy, guidelines and code.
 
 ```bash
-cd examples/syncium
+cd dev/examples/syncium
 npm install
 npm run dev            # explorer on http://localhost:5173/
 npm run build:package  # the installable package in package/

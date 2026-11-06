@@ -38,7 +38,7 @@ export async function generateDefaults(root){
  return {format:'ds-create/foundation-defaults@1',sources:hashes,colors,typography,space,shape,motion};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- const root=fileURLToPath(new URL('../../../',import.meta.url)),defaults=await generateDefaults(root);
- await writeFile(new URL('../../manager/foundations/defaults.json',import.meta.url),JSON.stringify(defaults,null,2)+'\n');
+ const root=fileURLToPath(new URL('../../',import.meta.url)),defaults=await generateDefaults(root);
+ await writeFile(new URL('../../kit/builder/foundations/defaults.json',import.meta.url),JSON.stringify(defaults,null,2)+'\n');
  console.log('Foundation defaults generated from '+Object.keys(defaults.sources).length+' authoritative contracts.');
 }

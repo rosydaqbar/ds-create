@@ -155,7 +155,7 @@ test('the token data from local files type-checks: raw easing values and effects
   const { data, generated } = generate(null, {
     file: 'foundations.json',
     variables: [{ name: 'scale/easing/standard', collection: 'Primitives', type: 'EASING', description: '', values: { Value: curve } }],
-    // The shape kit/manager's local token export writes (foundations/export.mjs).
+    // The shape kit/builder's local token export writes (foundations/export.mjs).
     effectStyles: [{ name: 'elevation/control', effects: [{ type: 'DROP_SHADOW', visible: true, blendMode: 'NORMAL', x: 0, y: 1, blur: 2, spread: 0, color: { r: 0, g: 0, b: 0, a: 0.1 } }] }],
   });
   assert.equal(data.variables[0].modes.Value.alias, null);

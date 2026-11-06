@@ -9,7 +9,7 @@ Thumbs.db
 node_modules/
 dist/
 kit/web/package/
-examples/*/package/
+dev/examples/*/package/
 *.tsbuildinfo
 *.log
 

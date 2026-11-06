@@ -13,8 +13,8 @@ import { FeaturedIcon } from '../src/components/parts/FeaturedIcon';
 import { TextField, TextareaField } from '../src/components/components/TextField';
 import { ChoiceCard } from '../src/components/components/ChoiceField';
 import { StepNavigation } from '../src/components/components/StepNavigation';
-import { interfaceModes, interfacePlatforms } from '../../manager/shared/interface.mjs';
-import { builderSettings } from '../../manager/shared/ui-settings.mjs';
+import { interfaceModes, interfacePlatforms } from '../../builder/shared/interface.mjs';
+import { builderSettings } from '../../builder/shared/ui-settings.mjs';
 
 function SettingRow({ label, id, htmlFor, required, optional, rowId, savedInterface, children }: {
   label: string; id?: string; htmlFor?: string; required?: boolean; optional?: boolean; rowId?: string; savedInterface?: boolean; children: ReactNode;

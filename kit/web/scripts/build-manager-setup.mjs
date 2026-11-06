@@ -10,7 +10,7 @@ import { compile, optimize } from '@tailwindcss/node';
 import { colors, values, effects, textStyles } from './chrome-fallbacks.mjs';
 
 const web = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const manager = path.resolve(web, '../manager');
+const manager = path.resolve(web, '../builder');
 const temp = await mkdtemp(path.join(web, '.manager-setup-'));
 try {
   await build({

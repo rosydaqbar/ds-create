@@ -1,7 +1,7 @@
 // Regenerate after changing a web component or its docs sample:
 // node kit/web/scripts/build-manager-items.mjs
 // Builder's Part pages draw these white-label components with the system's tokens. Dependencies are
-// maintainer-only; init-web serves the committed result (kit/manager/client/items/).
+// maintainer-only; init-web serves the committed result (kit/builder/client/items/).
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,7 @@ import { Scanner } from '@tailwindcss/oxide';
 import { tokenModel } from './token-model.mjs';
 
 const web = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const out = path.resolve(web, '../manager/client/items');
+const out = path.resolve(web, '../builder/client/items');
 await mkdir(out, { recursive: true });
 
 // The docs samples read the generated token data and page copy, as the site build does.
@@ -46,4 +46,4 @@ const candidates = scanner.scan();
 const compiler = await compile(source, { base: web, onDependency() {} });
 const css = optimize(compiler.build(candidates), { minify: true }).code;
 await writeFile(path.join(out, 'items.css'), css);
-console.log(`Builder items: ${candidates.length} candidates, ${Math.round(css.length / 1024)} KB CSS, bundle written to kit/manager/client/items/.`);
+console.log(`Builder items: ${candidates.length} candidates, ${Math.round(css.length / 1024)} KB CSS, bundle written to kit/builder/client/items/.`);

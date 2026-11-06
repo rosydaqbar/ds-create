@@ -49,7 +49,7 @@ Then, per step:
 The exact page → file mapping is in `README.md`.
 
 **Examples are references, never sources.**
-- `examples/` (finished reference builds) may be read to understand a pattern, but nothing is copied from it: no sentences, page data, values or code.
+- `dev/examples/` (finished reference builds) may be read to understand a pattern, but nothing is copied from it: no sentences, page data, values or code.
 - A page is never filled from an example in place of its spec and this system's own inputs and file.
 - The `workspace/input/` and `workspace/output/` folders of other systems are not read at all (`workflow/GOTCHAS.md` G43).
 

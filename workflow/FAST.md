@@ -53,7 +53,7 @@ Two files per page, both in `workspace/output/{system-slug}/`. Neither holds a v
 
 **Where the data comes from.**
 - **Sources, only from this build:** the page spec, the default manifest (`workflow/templates/fast/`), this system's inputs and copy files, its set snapshots (`workspace/output/{slug}/figma/sets/`) and its Figma file.
-- **`examples/` is a reference only.** It may be read to understand how a page or visual works. Nothing is copied from it, and it never replaces writing the manifest and copy file from the sources above: a page filled from a finished example skips the rules this mode exists for.
+- **`dev/examples/` is a reference only.** It may be read to understand how a page or visual works. Nothing is copied from it, and it never replaces writing the manifest and copy file from the sources above: a page filled from a finished example skips the rules this mode exists for.
 - `kit/tools/build/pack.mjs --check` refuses a copy line taken word for word from an example, and any line that names one (`workflow/GOTCHAS.md` G43).
 
 **The copy file**, `copy/{id}-{kebab name}.md`, holds every sentence (`workflow/COPY.md`).
@@ -133,11 +133,11 @@ The steps are those of `workflow/INITIATOR.md` Part B §6. Fast mode changes onl
 - **Small returns.** A set call returns its set and part ids and counts, nothing else: no snapshot, no layer dump (a full export of a 360-variant set came back at 140 KB and only filled the context).
 - **One registry at the end.** After the last set, one read-only `kit/tools/figma/registry.js` call (~12 KB back for 30 sets and 170 icons) and `node kit/tools/build/registry.mjs --slug {slug}` write every set file and the icon map. This is the library gate's export in a fast round; the full layer snapshot (`kit/tools/figma/export-sets.js`) is exported on call, for QA or a site agent that needs layers. Re-run the registry when a later step changes a set.
 
-**F0 · Base (right after the registry).** F1 agents take collection names, component tokens and page ids from the build's token base. The base comes from the local files: `node kit/manager/cli.mjs tokens --slug {slug} --out workspace/output/{slug}/fast/tokens.json` writes the foundations plus every prepared Part's tokens (the `Components` collection). The local files supply the token values. The Figma export supplies the page ids and shows whether Figma matches the local files:
+**F0 · Base (right after the registry).** F1 agents take collection names, component tokens and page ids from the build's token base. The base comes from the local files: `node kit/builder/cli.mjs tokens --slug {slug} --out workspace/output/{slug}/fast/tokens.json` writes the foundations plus every prepared Part's tokens (the `Components` collection). The local files supply the token values. The Figma export supplies the page ids and shows whether Figma matches the local files:
 1. Send `kit/web/scripts/figma-export.js` with `MODE = 'hash'` (read-only, ~3 KB back). Save the return as `workspace/output/{slug}/figma/hash.json`.
 2. From the repo root, run `node kit/web/scripts/export-diff.mjs --slug {slug} --hash workspace/output/{slug}/figma/hash.json`. Send `figma-export.js` with `MODE = 'rows'` and the `ROWS` it prints, save the returned rows, and run `node kit/web/scripts/export-diff.mjs --slug {slug} --hash workspace/output/{slug}/figma/hash.json --merge {rows file}`. It writes `figma/figma-variables.json` with the page ids.
 3. Run the `tokens` command again. Its output now includes the page ids.
-4. Run `node kit/manager/cli.mjs compare --slug {slug}`. `match: true` means Figma matches the local files; any `differences` (exit code 1) mean Figma is behind, which goes into the round's report and never changes the base.
+4. Run `node kit/builder/cli.mjs compare --slug {slug}`. `match: true` means Figma matches the local files; any `differences` (exit code 1) mean Figma is behind, which goes into the round's report and never changes the base.
 
 The site's W2 runs the same `tokens` command, so a round with the site reads Figma for page ids once.
 
@@ -239,4 +239,4 @@ Measured on the first full fast round (tokens, 19 Parts, Figma and site), to poi
 | F4 pages, 30 | 19 min | 32 calls, each printed then typed | 4 batch calls; 02 Tokens alone, so no batch stops at 70 s |
 | Site W2–W3 | 10 min | a ~100 KB export | hash export: ~3 KB when nothing changed; component rows fetched once, at F0 |
 
-Each phase is proven when its pages, built from manifests alone on a copy of a finished build, pass the page gate. Trials run on copies only, on scratch pages that are removed afterwards. Update this table and `workflow/ROADMAP.md` when a phase lands.
+Each phase is proven when its pages, built from manifests alone on a copy of a finished build, pass the page gate. Trials run on copies only, on scratch pages that are removed afterwards. Update this table and `dev/ROADMAP.md` when a phase lands.

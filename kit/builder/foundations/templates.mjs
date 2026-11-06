@@ -21,7 +21,7 @@ export function resolveTemplateDecisions(raw){
  }
  return decision;
 }
-export function templateCatalog(){return foundationTemplates.map(t=>({id:t.id,template:t.name,inputs:t.fields,defaults:t.defaults,memory:`kit/manager/foundations/templates/${t.name}.md`}));}
+export function templateCatalog(){return foundationTemplates.map(t=>({id:t.id,template:t.name,inputs:t.fields,defaults:t.defaults,memory:`kit/builder/foundations/templates/${t.name}.md`}));}
 
 export async function seedFoundationInputs(request,pack,jobDir){
  const platform=pack.locked?.platform||null;

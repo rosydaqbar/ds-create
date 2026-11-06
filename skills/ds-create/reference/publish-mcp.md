@@ -4,9 +4,9 @@ Publish is a local MCP workflow usable by any compatible client. It does not lau
 
 ## Publication delivery and execution
 
-Preparation delivery (`reference/background-worker.md`) never claims Publish. A Publish click, or `node kit/manager/cli.mjs publish --slug {session}` run by the agent once the user approved the revision and file in chat (`SKILL.md` rule 15), saves the exact reviewed approval and queues its MCP continuation. A pending `ds_create_wait` receives it as `publish-request` (`background-worker.md`); without one, the Publish dialog shows the continuation prompt. The host's executing agent uses its existing Figma connection and the protocol below. Preparation startup does not start an AI waiter or authorize publication, and no Node PID proves that Figma execution is ready. No separate Figma OAuth/client registration is needed.
+Preparation delivery (`reference/background-worker.md`) never claims Publish. A Publish click, or `node kit/builder/cli.mjs publish --slug {session}` run by the agent once the user approved the revision and file in chat (`SKILL.md` rule 15), saves the exact reviewed approval and queues its MCP continuation. A pending `ds_create_wait` receives it as `publish-request` (`background-worker.md`); without one, the Publish dialog shows the continuation prompt. The host's executing agent uses its existing Figma connection and the protocol below. Preparation startup does not start an AI waiter or authorize publication, and no Node PID proves that Figma execution is ready. No separate Figma OAuth/client registration is needed.
 
-Without `ds_create_*` tools in the session, call each `ds_create_publish*` tool below through `node kit/manager/cli.mjs mcp {tool} --json '{…}'` (`background-worker.md`, *Without DS Create MCP tools*); the Figma writes still go through the host's own Figma tools.
+Without `ds_create_*` tools in the session, call each `ds_create_publish*` tool below through `node kit/builder/cli.mjs mcp {tool} --json '{…}'` (`background-worker.md`, *Without DS Create MCP tools*); the Figma writes still go through the host's own Figma tools.
 
 The numbered operations below are the agent integration protocol, not end-user instructions. Integrations can still use the same standard tools. The user sees publication task rows, current public activity, elapsed time and actual blockers.
 

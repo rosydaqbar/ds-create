@@ -1,6 +1,6 @@
 # Output
 
-Everything ds-create generates goes here, never into the executor folders (`web/`, `app/`, `templates/`, `tools/`, `workflow/`, the page specs) and never into `examples/`. What the user provides goes into `workspace/input/` (`workspace/input/README.md`), not here. Nothing in this folder is committed except this file: `.gitignore` ignores `workspace/output/*`.
+Everything ds-create generates goes here, never into the executor folders (`web/`, `app/`, `templates/`, `tools/`, `workflow/`, the page specs) and never into `dev/examples/`. What the user provides goes into `workspace/input/` (`workspace/input/README.md`), not here. Nothing in this folder is committed except this file: `.gitignore` ignores `workspace/output/*`.
 
 ```text
 workspace/output/
@@ -18,4 +18,4 @@ workspace/output/
 
 `{system-slug}` is the system name in lowercase kebab case (`Acme Design System` → `acme`; drop "design system"). The Figma file itself lives in Figma; this folder holds the local foundation source and confirmed outputs from Figma.
 
-A different location is used only when the user explicitly asks for one. A finished build becomes a committed reference only when the user asks to add it to `examples/`.
+A different location is used only when the user explicitly asks for one. A finished build becomes a committed reference only when the user asks to add it to `dev/examples/`.

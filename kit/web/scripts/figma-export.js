@@ -93,7 +93,7 @@ const gridStyles = !withStyles ? [] : (await figma.getLocalGridStylesAsync()).ma
 }));
 
 // Gradient paint styles, the kind ds-create models (linear only; solid color styles stay out of the token export).
-// The angle repeats transformToAngle in kit/manager/foundations/gradient.mjs, since this script cannot import it;
+// The angle repeats transformToAngle in kit/builder/foundations/gradient.mjs, since this script cannot import it;
 // tests/manager-foundation-validation.test.mjs checks the two agree. It is rounded past Figma's float32 storage.
 const angleOf = (t) => (Math.round(((((Math.atan2(t[0][0], -t[0][1]) * 180) / Math.PI) % 360) + 360) % 360 * 1000) / 1000) % 360;
 const paintStyles = !withStyles ? [] : (await figma.getLocalPaintStylesAsync()).filter((s) => s.paints.length && s.paints.every((p) => p.type === 'GRADIENT_LINEAR')).map((s) => ({

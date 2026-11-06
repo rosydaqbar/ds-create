@@ -27,7 +27,7 @@
  *   - a block or topic title that the copy file doesn't have, and a copy topic the manifest doesn't place;
  *   - a set name that isn't in the build's snapshots (workspace/output/{slug}/figma/sets/);
  *   - an instances visual without items, and do / don't pairs that don't match the copy's do and don't lines;
- *   - a copy line taken word for word from a reference build in examples/, and any copy or manifest line that names
+ *   - a copy line taken word for word from a reference build in dev/examples/, and any copy or manifest line that names
  *     one: examples are references, never sources (workflow/GOTCHAS.md G43);
  *   - a copy line that cites knowledge/ instead of explaining it (kit/tools/content/guard.mjs, workflow/COPY.md §1);
  *   - HARD RULE: a page whose knowledge topics (knowledge/README.md §3) aren't in its ledger entry's `loaded`: the copy
@@ -71,7 +71,7 @@ const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').tr
  * Reference builds (workflow/GOTCHAS.md G43): their names and their sentences, read by this tool so the agent doesn't have to.
  * A sentence is a string of 40 or more characters with spaces, from the example's source, docs and copy files.
  */
-const EXAMPLES = path.join(ROOT, 'examples');
+const EXAMPLES = path.join(ROOT, 'dev/examples');
 const reference = (() => {
   const names = new Set();
   const sentences = new Map();
@@ -116,7 +116,7 @@ function referenceErrors(text, where) {
     const line = raw.replace(/^\[[^\]]*\]\s+/, '').trim();
     if (!line) continue;
     const ex = line.length >= 40 && reference.sentences.get(norm(line));
-    if (ex) errs.push(`${where}: copied word for word from examples/${ex}: "${line.slice(0, 80)}" (examples are references, never sources: workflow/GOTCHAS.md G43)`);
+    if (ex) errs.push(`${where}: copied word for word from dev/examples/${ex}: "${line.slice(0, 80)}" (examples are references, never sources: workflow/GOTCHAS.md G43)`);
     const nm = nameRe && line.match(nameRe);
     if (nm) errs.push(`${where}: names the reference build "${nm[1]}": "${line.slice(0, 80)}"`);
   }

@@ -107,7 +107,7 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 
 - **The inputs are the ground truth.** They are read before any question is asked, and every answer shows where it came from.
 - **The repo stays brand-agnostic.** Brand names, file keys and product copy live only in `workspace/input/`, `workspace/output/` and the Figma file. Skill distributions contain only the workspace README templates, never saved project data or runtime sessions.
-- **Examples are references, never sources.** `examples/` explains a pattern; nothing is copied from it.
+- **Examples are references, never sources.** `dev/examples/` explains a pattern; nothing is copied from it.
 - **No repo edits during a build.** Lessons go into the build notes, and into the repo after the round, when the maintainer asks.
 - **The specs win.** A system's own knowledge and frozen values come first, then the specs. The repo's `knowledge/` explains the reasoning, and never overrides a spec.
 
@@ -120,7 +120,7 @@ One numbered sequence, the same for a new system and an existing file (`workflow
 | `workflow/` | **how** to build: `INITIATOR.md` (sequence, gates, ledger), `FAST.md`, `COPY.md`, `WEB.md`, `APP.md`, `GOTCHAS.md`, templates |
 | `knowledge/` | **why** it works: design rationale with examples, never rules |
 | `kit/` | the **code**: Figma tools (`kit/tools/`), the docs-site template (`kit/web/`), the app previews (`kit/app/`) |
-| `examples/` | finished reference builds, to read, never to copy |
+| `dev/examples/` | finished reference builds, to read, never to copy |
 | `workspace/input/`, `workspace/output/` | each system's files and builds; local only, never committed |
 
 The README holds the full file map and loading rules.

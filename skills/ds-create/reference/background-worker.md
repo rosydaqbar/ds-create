@@ -9,7 +9,7 @@ After verifying Builder health, give its URL to the user in commentary for them 
 A terminal tool host can use the same Node waiter through the existing Builder entry point:
 
 ```text
-node kit/manager/cli.mjs wait --workspace /absolute/workspace --slug saved-session
+node kit/builder/cli.mjs wait --workspace /absolute/workspace --slug saved-session
 ```
 
 This only delivers the event. Execution still uses DS Create MCP: native tools, or the terminal host below when the session has none. The command does not claim work or provide a second execution protocol. There is no detached listener to start or control endpoint to connect.
@@ -23,16 +23,16 @@ The short-lived `preparation-wait.json` registration identifies a live pending r
 A session that started before DS Create MCP was registered has no `ds_create_*` tools, and most hosts load MCP servers only at session start. Never ask the user to restart or reconnect. Use the terminal host, which ships with the skill:
 
 ```text
-node kit/manager/cli.mjs mcp tools                                   # every tool and its input schema
-node kit/manager/cli.mjs mcp ds_create_wait --json '{"session":"saved-session"}'
-node kit/manager/cli.mjs mcp ds_create_prepare_finish --json-file /tmp/finish.json
+node kit/builder/cli.mjs mcp tools                                   # every tool and its input schema
+node kit/builder/cli.mjs mcp ds_create_wait --json '{"session":"saved-session"}'
+node kit/builder/cli.mjs mcp ds_create_prepare_finish --json-file /tmp/finish.json
 ```
 
 - The first call installs `kit/mcp` dependencies when they are missing, then starts one background host per workspace (`kit/mcp/host.mjs`). The host holds one real MCP connection to `kit/mcp/server.mjs`, so every later CLI call is the same client: leases, exclusive ownership, cancellation and disconnect-blocks-unfinished-work behave exactly as with native tools.
 - Each call prints the tool's structured result as JSON. A tool error goes to stderr with exit code 1.
 - Run a pending wait as a foreground terminal command with a tool timeout above five minutes (for example 330000 ms). Killing the command cancels that wait on the host, as a host timeout would.
 - Keep one path per claimed attempt: a job claimed through the terminal host can only be progressed and finished through it, and a job claimed natively only through native tools.
-- `node kit/manager/cli.mjs mcp-host status|stop` inspects or stops the host. Stopping it, or two idle hours with no call, closes the connection and blocks any unfinished attempt it owns.
+- `node kit/builder/cli.mjs mcp-host status|stop` inspects or stops the host. Stopping it, or two idle hours with no call, closes the connection and blocks any unfinished attempt it owns.
 
 ## Execute the event
 
