@@ -74,7 +74,7 @@ skill/               the ds-create skill, the way in: /ds-create builder · init
 specs/               WHAT to build: the design system tree
   SYSTEM.md          page tree, page templates, token and component naming, audit routing (always loaded)
   guidance/ foundations/ parts/ components/ sections/ layouts/ screens/
-                     one spec per page, plus a 00 index per level (see the file map below)
+                     one spec per page, plus a 00 index per level (page → file mapping: `specs/SYSTEM.md` Part D and each level's 00 file)
 
 workflow/            HOW to build it: process, gates and lessons
   INITIATOR.md       generation logic: loading, ledger, build sequence, gates (always loaded)
@@ -173,6 +173,10 @@ npx impeccable install --project --providers=claude -y
 - Never drop approved Guidelines topics, diagrams, examples, matrices, anatomy or QA.
 - Page-specific requirements come from the page files, not from root-file summaries.
 - A local fix does not cancel unrelated approved requirements.
+
+# 4. Mandatory loading
+
+What to load before and during a build is in `workflow/INITIATOR.md` Part B §0.
 
 # Example: Syncium
 

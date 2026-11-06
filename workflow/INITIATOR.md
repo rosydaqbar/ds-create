@@ -46,7 +46,7 @@ Then, per step:
 - Code in scope (any product type) → load `workflow/WEB.md`, and for every page documented on the site, the same page file used for its Figma page
 - Product type App or Web and App → also load `workflow/APP.md`, and for every page with an App preview, the same page file used for its Figma page
 
-The exact page → file mapping is in `specs/SYSTEM.md` Part D and in the 00 file of each level folder.
+Each level's 00 file holds its name → file table; Foundations map by number to `specs/foundations/1.x-*.md`.
 
 **Examples are references, never sources:** see GOTCHAS G43.
 
