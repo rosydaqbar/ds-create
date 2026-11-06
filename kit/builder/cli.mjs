@@ -7,6 +7,7 @@ import {randomUUID} from 'node:crypto';
 import {colors, effects, values} from '../web/scripts/chrome-fallbacks.mjs';
 import {foundations, getState, observedSetup, readJSON} from './server/state.mjs';
 import {writeFigmaSetting} from './server/settings.mjs';
+import {resolveProject} from '../paths.mjs';
 
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -15,8 +16,8 @@ const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
 const command = args[0] === 'init-web' ? 'builder' : args[0];
 if (args[0] === 'init-web') console.error('init-web is now builder.');
 let slug = arg('--slug');
-const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/builder/cli.mjs builder|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|compare|check-site [--slug {slug}] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/builder/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/builder/cli.mjs mcp-host start|status|stop';
+let workspace, project; // set in main() by resolveProject
+const usage = 'node kit/builder/cli.mjs builder|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|compare|check-site [--slug {slug}] [--project dir] [--workspace dir] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/builder/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/builder/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -30,6 +31,10 @@ async function activeRuntime(dir) {
 
 async function main() {
   if (Number(process.versions.node.split('.')[0]) < 20) throw new Error('DS Create Builder requires Node 20 or later.');
+  // Project mode (ds-create.json) or the workspace/ layout; the one place that decides where input and output live.
+  project = resolveProject({ project: arg('--project'), workspace: arg('--workspace') });
+  workspace = project.root;
+  if (project.mode === 'project') slug ??= project.slug;
   // Same DS Create MCP tools for agents whose session has no ds_create_* tools loaded (kit/mcp/host.mjs).
   if (command === 'mcp' || command === 'mcp-host') {
     const host = await import('../mcp/host-client.mjs');
@@ -56,9 +61,10 @@ async function main() {
   }
   if(command==='sessions'||command==='builder'&&!slug&&!args.includes('--new')){
     const sessions=[];
-    for(const entry of await readdir(path.join(workspace,'workspace/output'),{withFileTypes:true}).catch(e=>{if(e.code==='ENOENT')return [];throw e;})){
+    const entries=project.mode==='project'?[{name:project.slug,isDirectory:()=>true}]:await readdir(path.join(workspace,'workspace/output'),{withFileTypes:true}).catch(e=>{if(e.code==='ENOENT')return [];throw e;});
+    for(const entry of entries){
       if(!entry.isDirectory()||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.name))continue;
-      const output=path.join(workspace,'workspace/output',entry.name),setup=await observedSetup(output);
+      const output=project.outputDir(entry.name),setup=await observedSetup(output);
       const ledger=await readJSON(path.join(output,'ds-create-ledger.json'));
       if(!setup&&!ledger)continue;
       sessions.push({slug:entry.name,name:setup?.projectName||ledger?.system||entry.name,status:setup?.status||'initialized',resumeCommand:`ds-create builder --slug ${entry.name}`});
@@ -76,18 +82,19 @@ async function main() {
     finally { process.removeListener('SIGTERM', stop); process.removeListener('SIGINT', stop); }
     return;
   }
-  let output = path.join(workspace, 'workspace/output', slug);
+  let output = project.outputDir(slug);
   let dir = path.join(output, 'manager');
   const writes = ['builder', 'start', 'progress'].includes(command);
   if (writes) await mkdir(output, { recursive: true });
   // Keep each selected output isolated, including workspaces that contain symlinks.
   try {
-    const base = await realpath(path.join(workspace, 'workspace/output'));
+    // Workspace mode: workspace/output/{slug}. Project mode: the project's output/.
+    const expected = project.mode === 'project' ? path.join(await realpath(project.root), 'output') : path.join(await realpath(path.join(workspace, 'workspace/output')), slug);
     output = await realpath(output);
-    if (output !== path.join(base, slug)) throw new Error('Manager output must stay inside the selected system folder.');
+    if (output !== expected) throw new Error('Manager output must stay inside the selected system folder.');
     dir = path.join(output, 'manager');
     if (writes) await mkdir(dir, { recursive: true });
-    if (await realpath(dir) !== path.join(base, slug, 'manager')) throw new Error('Manager output must stay inside the selected system folder.');
+    if (await realpath(dir) !== path.join(expected, 'manager')) throw new Error('Manager output must stay inside the selected system folder.');
   } catch (e) { if (e.code !== 'ENOENT' || writes) throw e; }
   // The site's token file from the local files; works without a running Builder. Figma page ids come along when
   // a Figma export exists, so "Open in Figma" links work.

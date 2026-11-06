@@ -1,5 +1,5 @@
 import http from 'node:http';
-import {readFile, rename, unlink, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, rename, unlink, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes, randomUUID} from 'node:crypto';
@@ -17,8 +17,8 @@ import {createItemStore} from '../foundations/store.mjs';
 import {syncState} from '../foundations/baseline.mjs';
 import {preparedFonts} from '../client/assets/fonts/catalog.mjs';
 
-export function createManagerServer({ outputDir, workspace = path.resolve(outputDir, '../../..'), jobsOptions = {}, setupOptions = {} }) {
-  const managerDir = path.join(outputDir, 'manager');
+export function createManagerServer({ outputDir, workspace = path.resolve(outputDir, '../../..'), jobsOptions = {}, setupOptions = {}, codeDir }) {
+  const managerDir = codeDir || path.join(outputDir, 'manager');
   const instance = randomUUID(), csrfToken = randomBytes(24).toString('hex');
   const setup = createSetupJobs({ ...setupOptions, outputDir, workspace });
   const partJobs = createParts({ outputDir }), changeRequests = createChangeRequests({ outputDir });
@@ -152,8 +152,14 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const managerDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), outputDir = path.dirname(managerDir);
-  const { server, instance } = createManagerServer({ outputDir });
+  // --output <dir>: Builder runs from where it is installed and keeps its runtime state in <dir>/manager/.
+  // Without it, the folder is derived from this file's location (a session's copied manager/).
+  const here = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), flag = process.argv.indexOf('--output');
+  const outputArg = flag > 1 ? process.argv[flag + 1] : undefined;
+  if (flag > 1 && !outputArg) { console.error('--output needs a folder.'); process.exit(1); }
+  const outputDir = outputArg ? path.resolve(outputArg) : path.dirname(here), managerDir = path.join(outputDir, 'manager');
+  await mkdir(managerDir, { recursive: true });
+  const { server, instance } = createManagerServer({ outputDir, ...(outputArg ? { codeDir: here } : {}) });
   // A session keeps its address across restarts: the CLI asks for the last port and only a taken port falls back.
   const requested = Number(process.argv[2] || 0), prefer = process.argv[3] === 'prefer';
   let retried = false;

@@ -1,6 +1,7 @@
 import {lstat, mkdir, open, readFile, readdir, realpath, rename, unlink, writeFile} from 'node:fs/promises';
 import {createHash, randomUUID} from 'node:crypto';
 import path from 'node:path';
+import {existsSync, readFileSync} from 'node:fs';
 
 const sha = data => createHash('sha256').update(data).digest('hex');
 // Derived indexes and the generated decision transcription are not source inputs.
@@ -140,8 +141,18 @@ export async function withJobLock(dir,kind,fn){
  }
  try{return await fn();}finally{await handle.close();await unlink(file);}
 }
+// Workspace mode: workspace/output/{slug} with manager/ inside. Project mode (ds-create.json at the folder's root):
+// the project's output/, whose runtime state lives in output/manager/ and needs no copied code.
 export async function sessionOutput(workspace,slug){
  if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug||''))throw new Error('Provide the saved Builder session id.');
+ if(existsSync(path.join(workspace,'ds-create.json'))){
+  // Not kit/paths.mjs: this file is also copied into workspace sessions, which do not carry that file.
+  let own;try{own=JSON.parse(readFileSync(path.join(workspace,'ds-create.json'),'utf8')).slug;}catch{throw new Error('ds-create.json is not valid JSON.');}
+  if(slug!==own)throw new Error(`This project is ${own}.`);
+  const output=path.join(workspace,'output');
+  if(await realpath(output)!==output)throw new Error('Session must stay inside this workspace.');
+  return output;
+ }
  const output=path.join(workspace,'workspace/output',slug);
  if(await realpath(output)!==output||await realpath(path.join(output,'manager'))!==path.join(output,'manager'))throw new Error('Session must stay inside this workspace.');
  return output;
