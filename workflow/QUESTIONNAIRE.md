@@ -10,7 +10,7 @@ The questionnaire decides what gets preserved, audited, generated or rebuilt. St
 
 # 0. Who asks what
 
-The `ds-create` skill asks these questions in two rounds (`skills/ds-create/`). The questions stay as written here; the skill decides when each one is asked, and saves the answers in `workspace/input/{slug}/answers/`.
+The `ds-create` skill asks these questions in two rounds. Its commands are listed in `skill/SKILL.md`. The questions stay as written here; the skill decides when each one is asked, and saves the answers in `workspace/input/{slug}/answers/`.
 
 | Section | Asked by | When |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ The `ds-create` skill asks these questions in two rounds (`skills/ds-create/`). 
 | §11 Documentation depth | `/ds-create build` | only when the user brings it up |
 | §12 Confirmation summary | both | split: the init summary, then each build round's summary |
 
-Init prepares the local foundation draft and opens Builder before Figma generation. Review/approval happens in chat against the saved revision; controller edits are unsaved previews. Figma file/font readiness and final confirmation follow that review (`skills/ds-create/reference/init.md`).
+Init prepares the local foundation draft and opens Builder before Figma generation. Review/approval happens in chat against the saved revision; controller edits are unsaved previews. Figma file/font readiness and final confirmation follow that review (`skill/reference/init.md`).
 
 # 1. Product
 

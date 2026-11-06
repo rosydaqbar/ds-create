@@ -32,9 +32,9 @@ workspace/input/
 ```
 
 - The user adds files to `brief/`, `brand/`, `design-system/` and `references/`, in any format the agent can read: Markdown, text, PDF, images, office documents, exported JSON, or a file of links.
-- The agent writes `sources.md`, `answers/`, `knowledge/` and `chat/`. It also creates the system's folder when there is none, and saves files the user attaches in chat into the folder that fits (`skills/ds-create/reference/init.md` §0). It never edits, renames or deletes a file the user added.
+- The agent writes `sources.md`, `answers/`, `knowledge/` and `chat/`. It also creates the system's folder when there is none, and saves files the user attaches in chat into the folder that fits (`skill/reference/init.md` §0). It never edits, renames or deletes a file the user added.
 - `knowledge/` is shared: the user may write or edit it, and the agent adds entries and updates their status. Neither side deletes an entry: a rule that no longer holds is replaced (I7).
-- `answers/` holds the gates of a build: `01-init.md` for `/ds-create init`, then `02-build-YYYY-MM-DD.md` and so on, one per `/ds-create build` round. Every answer says who decided it (the user, or the AI in YOLO with its reason) and which steps it opens. The format is in `skills/ds-create/SKILL.md` §3.
+- `answers/` holds the gates of a build: `01-init.md` for `/ds-create init`, then `02-build-YYYY-MM-DD.md` and so on, one per `/ds-create build` round. Every answer says who decided it (the user, or the AI in YOLO with its reason) and which steps it opens. The format is in `skill/SKILL.md` §3.
 - A folder with nothing to put in it is left out.
 
 # 2. Rules

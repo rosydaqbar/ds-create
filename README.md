@@ -6,20 +6,37 @@ The repository is **not executable from root files alone**. Root files define th
 
 # Start here: the `ds-create` skill
 
-ds-create is used through its skill, `skills/ds-create/`: six commands that run the whole workflow and keep every answer you give.
+ds-create is used through its skill, `skill/`: six commands that run the whole workflow and keep every answer you give.
 
 The **maintainer** develops ds-create. The **builder** uses it to create and maintain a design system and its documentation. **Consumers** use that result: designers in Figma and developers through the web docs. Init gives the builder a local **DS Create Builder**, separate from the consumer docs site, to review a local foundation draft before Figma generation.
 
-| Command | What it does |
-| --- | --- |
-| `/ds-create init-web` | opens Builder immediately: enter context, upload files, answer setup questions and review generated local foundations before Figma |
-| `/ds-create init` | checks readiness, reads your inputs, asks only what is missing, opens a local draft in DS Create Builder for review, then generates the approved foundations as Figma variables and styles |
-| `/ds-create build` | asks how to draw the pages (Default or Fast mode), how far to go, where (Figma only, or with the docs site) and the pace, then builds exactly that |
-| `/ds-create learn` | keeps a rule you teach about your system (for example "buttons align left") in `workspace/input/{slug}/knowledge/`, applies it to what is built, and follows it in every later build |
-| `/ds-create qa` | runs the full checks, only when you ask |
-| `/ds-create status` | shows where the build stands and what to run next |
+The six commands, and what each one does, are listed in `skill/SKILL.md`.
 
-The skill ships with the repo in `skills/ds-create/` and stays brand-agnostic. Open the workspace in your chosen agent and load `skills/ds-create/SKILL.md`, or register that folder using the client's own skill-discovery mechanism. Command syntax and settings locations belong to the client; no agent or IDE is required by ds-create. Builder work uses the standard MCP interface described in `skills/ds-create/reference/agent-mcp.md`.
+The skill ships with the repo in `skill/` and stays brand-agnostic. Open the workspace in your chosen agent and load `skill/SKILL.md`, or register that folder using the client's own skill-discovery mechanism. Command syntax and settings locations belong to the client; no agent or IDE is required by ds-create. Builder work uses the standard MCP interface described in `skill/reference/mcp.md`.
+
+## Install from the skill vault
+
+`anti-skill update` replaces the installed skill folder. A build writes `workspace/input/{slug}/` and `workspace/output/{slug}/` into the folder it runs in, so it never runs inside the installed skill folder.
+
+1. **Find the workspace.** If the current folder, or one above it, holds `workflow/INITIATOR.md` and `specs/SYSTEM.md`, and is not the installed skill folder, that folder is the workspace. Go to step 3.
+2. **Copy it when there is none.** Ask once where it should live (default `~/ds-create`), then copy the installed skill folder there:
+
+   ```bash
+   rsync -a --include='/workspace/input/README.md' --include='/workspace/output/README.md' \
+     --exclude='/workspace/input/*' --exclude='/workspace/output/*' \
+     "<installed skill folder>/" ~/ds-create/
+   ```
+
+   The copy includes the workspace README templates and excludes saved project inputs, outputs, sessions, and caches.
+
+3. **Load the full skill** from `skill/SKILL.md` in the workspace, or register that folder through the client's own skill-discovery mechanism. Do not require a particular agent's settings folder or command syntax.
+4. **Work from the workspace root,** and follow `skill/SKILL.md` there. It routes each command to its reference file in `skill/reference/`.
+
+**Updating.** Run `anti-skill update ds-create`, then copy the new version over the workspace without touching `workspace/input/` and `workspace/output/`, so a system's files and builds stay as they are:
+
+```bash
+rsync -a --exclude workspace/input/ --exclude workspace/output/ "<installed skill folder>/" ~/ds-create/
+```
 
 ## Add your context to `workspace/input/`
 
@@ -31,7 +48,7 @@ Before the first build, give the agent what you know about the system. Everythin
    - `brand/`: brand guidelines, logo files, typefaces, color specs, tone of voice
    - `design-system/`: your existing system (docs, token exports, component lists, Figma library and code links)
    - `references/`: systems and products you like, used as inspiration only
-3. Start with **`/ds-create init-web`** to open an empty **DS Create Builder** immediately. Enter a Project name, then add Context / Instruction and Context files in its modal; the name sets the input folder (`Acme Design System` → `workspace/input/acme-design-system/`). The saved input slug stays stable on later name edits; the output/session ID and resume command stay separate. Node waits for preparation through one pending MCP tool call, which returns the event to the existing main agent. An ended tool call cannot wake an idle chat. Missing design questions stay in Builder. No agent/IDE CLI or product-specific bridge is selected. Publication remains a separate approved MCP continuation using the agent’s existing Figma connection. See `skills/ds-create/reference/background-worker.md`. Review it, then Publish to Figma. Setup can be resumed from saved state; no Figma link is required until Publish. See `skills/ds-create/reference/init-web.md`. For chat-led setup, use **`/ds-create init`**. The agent checks local readiness, reads the inputs, asks only what is missing and prepares `foundations.json`. It launches **DS Create Builder** in the background on localhost so you can review color, typography, spacing, radius and shadows before Figma generation. Send changes to the agent; controller edits are currently browser previews. Use **Publish → Publish to Figma** to approve the saved revision and queue its approved MCP continuation, or approve it in chat. The agent verifies the selected file/fonts and generates that revision in Figma. Publish then unlocks step2, **ds-create build**, with a copyable command for your agent. Init finishes with both links after the token audit passes. Figma is required before build; it is not required to open a new system's local draft. Existing systems preserve frozen values and may need a read-only Figma inventory before drafting. Builder is included for every product type and does not create the consumer docs site.
+3. Start with **`/ds-create init-web`** to open an empty **DS Create Builder** immediately. Enter a Project name, then add Context / Instruction and Context files in its modal; the name sets the input folder (`Acme Design System` → `workspace/input/acme-design-system/`). The saved input slug stays stable on later name edits; the output/session ID and resume command stay separate. Node waits for preparation through one pending MCP tool call, which returns the event to the existing main agent. An ended tool call cannot wake an idle chat. Missing design questions stay in Builder. No agent/IDE CLI or product-specific bridge is selected. Publication remains a separate approved MCP continuation using the agent’s existing Figma connection. See `skill/reference/mcp.md`. Review it, then Publish to Figma. Setup can be resumed from saved state; no Figma link is required until Publish. See `skill/reference/init-web.md`. For chat-led setup, use **`/ds-create init`**. The agent checks local readiness, reads the inputs, asks only what is missing and prepares `foundations.json`. It launches **DS Create Builder** in the background on localhost so you can review color, typography, spacing, radius and shadows before Figma generation. Send changes to the agent; controller edits are currently browser previews. Use **Publish → Publish to Figma** to approve the saved revision and queue its approved MCP continuation, or approve it in chat. The agent verifies the selected file/fonts and generates that revision in Figma. Publish then unlocks step2, **ds-create build**, with a copyable command for your agent. Init finishes with both links after the token audit passes. Figma is required before build; it is not required to open a new system's local draft. Existing systems preserve frozen values and may need a read-only Figma inventory before drafting. Builder is included for every product type and does not create the consumer docs site.
 4. Then run **`/ds-create build`**. It asks four questions: how to draw the pages (Default or Fast mode), how far to go (foundations, Parts, Components, everything, or only the pages you name), where (Figma only, or Figma and the docs site), and the pace. Then it builds exactly that. Run it again later to add more.
 5. Run **`/ds-create qa`** whenever you want the full checks, and **`/ds-create status`** to see where the build stands.
 
@@ -102,8 +119,8 @@ The root holds the README and one folder per job: what to build, how, why, the c
 ```text
 README.md            this file: structure and file map (always loaded)
 AGENTS.md            notes for agents that work on this repo (kept at the root so agent tools find it)
-SKILL.md             the overview skill published to the Antikode skill vault: what ds-create is, and how to clone and link this repo
-skills/              ds-create/: the ds-create skill, the way in: /ds-create init-web · init · build · learn · qa · status (SKILL.md and one
+SKILL.md             a pointer to skill/SKILL.md (the vault-published entry)
+skill/               the ds-create skill, the way in: /ds-create init-web · init · build · learn · qa · status (SKILL.md and one
                      reference file per command). Link it into .claude/skills/ once after cloning (Start here); .claude/ is never committed
 
 specs/               WHAT to build: the design system tree

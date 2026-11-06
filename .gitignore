@@ -73,7 +73,7 @@ workspace/input/*
 !workspace/input/README.md
 
 # 8. Agent settings
-# Local agent settings and installed skills never go into git. The ds-create skill lives in skills/ds-create/;
+# Local agent settings and installed skills never go into git. The ds-create skill lives in skill/;
 # each user links it into .claude/skills/ on their own machine (README, Start here).
 .claude/
 .agents/

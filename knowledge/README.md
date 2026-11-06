@@ -25,7 +25,7 @@ This folder is agnostic: principles only, no brand, no product, no client file, 
 - **For a judgment call where the specs are silent.** The reasoning helps choose. The choice is noted in the build notes as a judgment, with the topic it leaned on.
 - **Never as an override.** A spec, the system's knowledge (`workspace/input/{slug}/knowledge/`) and frozen values all come first. When an example's numbers differ from a spec, that's expected, not a gap.
 - **When it is read.** The index (§3) is part of the global set (`workflow/INITIATOR.md` Part B §0). A topic file is read when its pages are built, or when a judgment call needs it.
-- **Who writes it.** Only the maintainer, or the agent when the maintainer asks. An entry can also come from researched evidence the maintainer approved, finding by finding; its Source line says so. A build never adds to it (`skills/ds-create/SKILL.md`, *No repo edits during a build*). A build lesson about tools or the Figma API goes to `workflow/GOTCHAS.md`. A lesson about design craft is offered to the maintainer for this folder.
+- **Who writes it.** Only the maintainer, or the agent when the maintainer asks. An entry can also come from researched evidence the maintainer approved, finding by finding; its Source line says so. A build never adds to it (`skill/SKILL.md`, *No repo edits during a build*). A build lesson about tools or the Figma API goes to `workflow/GOTCHAS.md`. A lesson about design craft is offered to the maintainer for this folder.
 - **Turning talk into entries.** The maintainer can just explain, in any language, or paste notes or code. The agent:
   - writes up the reasoning in the format of §2, not the technology behind it;
   - keeps the maintainer's numbers as the example;

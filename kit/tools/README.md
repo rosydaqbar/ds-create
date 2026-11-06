@@ -1,6 +1,6 @@
 # Workflow tools
 
-Run Node commands from the repository root. The command references under `skills/ds-create/reference/` specify when each tool runs.
+Run Node commands from the repository root. The command references under `skill/reference/` specify when each tool runs.
 
 | Directory | Responsibility |
 | --- | --- |
