@@ -156,12 +156,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   // Without it, the folder is derived from this file's location (a session's copied manager/).
   const here = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), flag = process.argv.indexOf('--output');
   const outputArg = flag > 1 ? process.argv[flag + 1] : undefined;
-  if (flag > 1 && !outputArg) { console.error('--output needs a folder.'); process.exit(1); }
+  if (flag > 1 && (!outputArg || outputArg.startsWith('--'))) { console.error('--output needs a folder.'); process.exit(1); }
   const outputDir = outputArg ? path.resolve(outputArg) : path.dirname(here), managerDir = path.join(outputDir, 'manager');
   await mkdir(managerDir, { recursive: true });
   const { server, instance } = createManagerServer({ outputDir, ...(outputArg ? { codeDir: here } : {}) });
   // A session keeps its address across restarts: the CLI asks for the last port and only a taken port falls back.
-  const requested = Number(process.argv[2] || 0), prefer = process.argv[3] === 'prefer';
+  const portArg = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : 0, requested = Number(portArg), prefer = process.argv.slice(2, 4).includes('prefer');
   let retried = false;
   server.on('error', e => { if (prefer && e.code === 'EADDRINUSE' && !retried) { retried = true; server.listen(0, '127.0.0.1'); return; } console.error(e.message); process.exitCode = 1; });
   server.on('listening', async () => {

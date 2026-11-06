@@ -25,7 +25,8 @@ function findProjectRoot(cwd) {
 // Project mode: one folder with ds-create.json, input/ and output/ at its root.
 // Workspace mode: workspace/input/{slug} and workspace/output/{slug} under `root`.
 export function resolveProject({cwd = process.cwd(), project, workspace, engineRoot = ENGINE_ROOT} = {}) {
-  let root = project ? path.resolve(cwd, project) : findProjectRoot(cwd);
+  // --project beats everything; an explicit --workspace beats the search; the search is the default.
+  let root = project ? path.resolve(cwd, project) : workspace ? null : findProjectRoot(cwd);
   if (project && !existsSync(path.join(root, PROJECT_FILE))) throw new Error(NO_PROJECT);
   if (root) {
     const {slug} = readProject(root);
