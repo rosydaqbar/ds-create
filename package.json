@@ -1,0 +1,29 @@
+{
+  "name": "ds-create",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "ds-create": "kit/cli.mjs"
+  },
+  "files": [
+    "skill/",
+    "specs/",
+    "workflow/",
+    "knowledge/",
+    "kit/",
+    "README.md",
+    "!kit/**/node_modules",
+    "!kit/web/scripts/build-manager-*",
+    "!kit/web/scripts/manager-*.tsx",
+    "!kit/mcp/package.json",
+    "!kit/mcp/package-lock.json"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "4.6.7"
+  }
+}
