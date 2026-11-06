@@ -19,11 +19,11 @@ export function newProject({name, engine, cwd = process.cwd(), install = true}) 
   mkdirSync(path.join(root, 'output'), {recursive: true});
   write(path.join(root, 'package.json'), {name: slug, private: true, type: 'module', devDependencies: {'ds-create': engine}});
   write(path.join(root, 'ds-create.json'), {name, slug, schemaVersion: SCHEMA_VERSION, figma: {url: null}});
-  write(path.join(root, '.mcp.json'), {mcpServers: {'ds-create': {command: 'npx', args: ['ds-create', 'mcp']}}});
+  write(path.join(root, '.mcp.json'), {mcpServers: {'ds-create': {command: 'npx', args: ['--no', 'ds-create', 'mcp']}}});
   writeSkill(root);
   if (install) {
     const r = spawnSync('npm', ['install'], {cwd: root, stdio: 'inherit'});
-    if (r.status !== 0) throw new Error('npm install failed. Fix the --engine value, then run npm install in the project folder.');
+    if (r.status !== 0) throw new Error(`npm install failed. Run npm install in ${root} before any npx ds-create command.`);
   }
   return {root, slug};
 }

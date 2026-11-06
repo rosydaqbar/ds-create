@@ -23,4 +23,4 @@ The rules live in the pinned engine, so you read the version this project uses:
 - `node_modules/ds-create/specs/`: what to build.
 - `node_modules/ds-create/workflow/`: how to build it.
 
-Paths in those files that say `workspace/input/{slug}/` and `workspace/output/{slug}/` mean `input/` and `output/` in this project. Run engine commands as `npx ds-create <command>`, for example `npx ds-create builder`. After an engine upgrade, run `npx ds-create migrate` and `npx ds-create skill`.
+Paths in those files that say `workspace/input/{slug}/` and `workspace/output/{slug}/` mean `input/` and `output/` in this project. Run engine commands as `npx --no ds-create <command>`, for example `npx --no ds-create builder`. After an engine upgrade, run `npx --no ds-create migrate` and `npx --no ds-create skill`.

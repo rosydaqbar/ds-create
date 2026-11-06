@@ -34,7 +34,7 @@ if (command === 'builder' && rest[0] === 'stop') { command = 'stop'; rest = rest
 if (command === 'new') {
   try {
     const {root} = newProject({name: rest[0], engine: flag('--engine'), install: !args.includes('--no-install')});
-    console.log(`Created ${root}. Next: cd ${path.relative(process.cwd(), root) || '.'} && npx ds-create builder`);
+    console.log(`Created ${root}. Next: cd ${path.relative(process.cwd(), root) || '.'} && npx --no ds-create builder`);
     process.exit(0);
   } catch (e) { fail(e.message); }
 }

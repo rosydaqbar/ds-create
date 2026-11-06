@@ -22,10 +22,10 @@ One folder holds one design system. While ds-create is not published, pack it an
 npm pack
 npx --package ./ds-create-0.2.0.tgz ds-create new acme --engine file:$PWD/ds-create-0.2.0.tgz
 cd acme
-npx ds-create builder
+npx --no ds-create builder
 ```
 
-Then run `/ds-create builder` in your agent. Put your files in `input/`; the design system is written to `output/`. `npx ds-create migrate` updates an older project, `npx ds-create skill` rewrites its skill, and `npx ds-create import <old-repo> --slug <name>` brings in a session from the old `workspace/` layout.
+`--no` makes npx use the engine installed in the project and never download a package of the same name. Then run `/ds-create builder` in your agent. Put your files in `input/`; the design system is written to `output/`. `npx --no ds-create migrate` updates an older project, `npx --no ds-create skill` rewrites its skill, and `npx --no ds-create import <old-repo> --slug <name>` brings in a session from the old `workspace/` layout.
 
 The sections below describe the older `workspace/` layout, which still works in a checkout of this repo.
 
