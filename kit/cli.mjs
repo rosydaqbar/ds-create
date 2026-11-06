@@ -59,7 +59,8 @@ if (!['builder', 'status', 'mcp', ...PASS].includes(command)) fail(usage);
 let project;
 try { project = resolveProject({project: flag('--project'), workspace: flag('--workspace')}); } catch (e) { fail(e.message); }
 
-if (command === 'mcp') {
+// `mcp` alone is the stdio server; `mcp tools` or `mcp <tool> --json …` is the terminal host in the Builder CLI.
+if (command === 'mcp' && !(rest[0] && !rest[0].startsWith('--'))) {
   process.exit(await run(MCP, ['--workspace', project.root]));
 }
 // Project mode: the project root replaces --slug (the Builder takes the slug from ds-create.json).

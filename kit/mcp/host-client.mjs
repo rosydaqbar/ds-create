@@ -21,9 +21,12 @@ const MCP_DIR = fileURLToPath(new URL('./', import.meta.url));
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const alive = pid => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
 
-// A fresh clone has no node_modules (git-ignored); install the locked versions once, quietly to stderr.
+// The SDK normally resolves from the engine's own location (an installed package, or the root node_modules).
+// A checkout without it has kit/mcp/package.json; install the locked versions there once, quietly to stderr.
 export async function ensureDependencies() {
+  try { import.meta.resolve('@modelcontextprotocol/sdk/client/index.js'); return; } catch { /* look for kit/mcp/package.json */ }
   try { await access(path.join(MCP_DIR, 'node_modules/@modelcontextprotocol/sdk/package.json')); return; } catch { /* install below */ }
+  try { await access(path.join(MCP_DIR, 'package.json')); } catch { throw new Error('The MCP SDK is not installed. Run npm install in the project folder.'); }
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
   const r = spawnSync(npm, ['ci', '--prefix', MCP_DIR, '--no-audit', '--no-fund'], { stdio: ['ignore', process.stderr, process.stderr] });
   if (r.status !== 0) throw new Error(`Could not install DS Create MCP dependencies. Run: npm ci --prefix ${MCP_DIR}`);
