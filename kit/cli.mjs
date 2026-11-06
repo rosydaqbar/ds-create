@@ -11,8 +11,8 @@ import {importSession} from './project/import.mjs';
 
 const BUILDER = fileURLToPath(new URL('./builder/cli.mjs', import.meta.url));
 const MCP = fileURLToPath(new URL('./mcp/server.mjs', import.meta.url));
-const PASS = ['publish', 'retry', 'fonts', 'parts', 'approve', 'tokens', 'compare', 'check-site', 'wait', 'sessions', 'mcp-host', 'stop'];
-const usage = 'Usage: ds-create new <name> --engine <spec> [--no-install] | import <old-repo> --slug <s> | migrate | skill | builder [stop] | status | mcp | publish|retry|fonts|parts|approve|tokens|compare|check-site|wait|sessions|mcp-host|stop | --version\n       Flags: [--project dir] [--workspace dir] [--slug {slug}]';
+const PASS = ['publish', 'retry', 'fonts', 'parts', 'approve', 'tokens', 'compare', 'check-site', 'wait', 'sessions', 'progress', 'mcp-host', 'stop'];
+const usage = 'Usage: ds-create new <name> --engine <spec> [--no-install] | import <old-repo> --slug <s> | migrate | skill | builder [stop] | status | mcp | publish|retry|fonts|parts|approve|tokens|compare|check-site|wait|sessions|progress|mcp-host|stop | --version\n       Flags: [--project dir] [--workspace dir] [--slug {slug}]';
 
 const args = process.argv.slice(2);
 const flag = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
