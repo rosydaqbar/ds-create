@@ -1,4 +1,4 @@
-import {cpSync, existsSync, readFileSync, readdirSync, statSync, writeFileSync} from 'node:fs';
+import {cpSync, existsSync, lstatSync, readFileSync, readdirSync, statSync, writeFileSync} from 'node:fs';
 import path from 'node:path';
 
 // Builder code that older sessions copied into output/<slug>/manager/. The engine now runs from the package.
@@ -14,16 +14,18 @@ const isEmpty = dir => !existsSync(dir) || readdirSync(dir).length === 0;
 
 // Copies one session of an old repo into the project. Throws with a plain message when it cannot.
 export function importSession({project, oldRepo, slug}) {
+  if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('The slug must be lowercase letters, digits and single dashes, like acme-design.');
   const from = {input: path.join(path.resolve(oldRepo), 'workspace/input', slug), output: path.join(path.resolve(oldRepo), 'workspace/output', slug)};
   if (!existsSync(from.output) && !existsSync(from.input)) throw new Error(`No session ${slug} in ${path.resolve(oldRepo)}/workspace.`);
   const to = {input: path.join(project, 'input'), output: path.join(project, 'output')};
   for (const k of ['input', 'output']) if (!isEmpty(to[k])) throw new Error(`${to[k]} is not empty. Import into a new project.`);
-  if (existsSync(from.input)) cpSync(from.input, to.input, {recursive: true});
+  const noLinks = p => !lstatSync(p).isSymbolicLink();
+  if (existsSync(from.input)) cpSync(from.input, to.input, {recursive: true, filter: noLinks});
   if (existsSync(from.output)) {
     const manager = path.join(from.output, 'manager');
-    cpSync(from.output, to.output, {recursive: true, filter: p => p !== manager && !p.startsWith(manager + path.sep)});
+    cpSync(from.output, to.output, {recursive: true, filter: p => noLinks(p) && p !== manager && !p.startsWith(manager + path.sep)});
     if (existsSync(manager)) {
-      cpSync(manager, path.join(to.output, 'manager'), {recursive: true, filter: p => keepManager({root: manager, path: p})});
+      cpSync(manager, path.join(to.output, 'manager'), {recursive: true, filter: p => noLinks(p) && keepManager({root: manager, path: p})});
     }
   }
   const file = path.join(project, 'ds-create.json');
