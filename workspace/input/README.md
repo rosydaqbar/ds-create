@@ -2,7 +2,7 @@
 
 Everything the user provides for a design system goes here: product briefs, brand guidelines, the existing design system, references, and what the user says in chat. This folder is the ground truth a build starts from. `workflow/QUESTIONNAIRE.md` is answered from it first, and every later step reads it again.
 
-Nothing in this folder is committed except this file: `.gitignore` ignores `workspace/input/*`. Brand content stays here and in `workspace/output/`, never in the executor (`README.md` §5).
+Nothing in this folder is committed except this file: `.gitignore` ignores `workspace/input/*`. Brand content stays here and in `workspace/output/`, never in the executor (`README.md` §2).
 
 **For the user.**
 - For web-first setup, run `/ds-create builder` and enter the project name, context and uploaded files in Builder. Files keep their original names under `{session}/uploads/{batch}/`; context and subsequent web answers are saved in `chat/`. The opaque session folder stays stable when you choose a display name.
