@@ -15,7 +15,15 @@ const isEmpty = dir => !existsSync(dir) || readdirSync(dir).length === 0;
 // Copies one session of an old repo into the project. Throws with a plain message when it cannot.
 export function importSession({project, oldRepo, slug}) {
   if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('The slug must be lowercase letters, digits and single dashes, like acme-design.');
-  const from = {input: path.join(path.resolve(oldRepo), 'workspace/input', slug), output: path.join(path.resolve(oldRepo), 'workspace/output', slug)};
+  const old = path.resolve(oldRepo);
+  const output = path.join(old, 'workspace/output', slug);
+  // A session made in the web Builder has an output slug like session-<uuid>; its inputs sit under setup.json's inputSlug.
+  let inputSlug = slug;
+  try {
+    const found = JSON.parse(readFileSync(path.join(output, 'manager/setup.json'), 'utf8')).inputSlug;
+    if (typeof found === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(found)) inputSlug = found;
+  } catch { /* no setup.json: the input folder has the session slug */ }
+  const from = {input: path.join(old, 'workspace/input', inputSlug), output};
   if (!existsSync(from.output) && !existsSync(from.input)) throw new Error(`No session ${slug} in ${path.resolve(oldRepo)}/workspace.`);
   const to = {input: path.join(project, 'input'), output: path.join(project, 'output')};
   for (const k of ['input', 'output']) if (!isEmpty(to[k])) throw new Error(`${to[k]} is not empty. Import into a new project.`);
