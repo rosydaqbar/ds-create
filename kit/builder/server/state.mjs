@@ -8,6 +8,7 @@ import {checkWebDraft} from './verify.mjs';
 import {compareFoundations} from '../foundations/compare.mjs';
 import {inputFreshness, listBrandFiles, selectedInputSlug, snapshotInputs} from './files.mjs';
 import {readFigmaSetting} from './settings.mjs';
+import {risksOf} from './risks.mjs';
 
 export const foundations = [
   { id: 'color', name: 'Color', page: '1.1', description: 'Color roles establish contrast, content hierarchy, and feedback across interface states.', prefixes: ['palette/', 'color/'], styles: 'paintStyles' },
@@ -158,6 +159,8 @@ export async function getState(outputDir, { preparing = false } = {}) {
     readJSON(path.join(outputDir, 'manager/progress.json'), warnings),
   ]);
   const { data: savedData, info: source } = await loadSource(outputDir, ledger, warnings);
+  const risks = source.kind === 'local' && savedData ? await risksOf(outputDir, savedData) : { open: [], accepted: [] };
+  if (risks.error) warnings.push(risks.error);
   const setup = await observedSetup(outputDir);
   const fresh=await inputFreshness(outputDir,setup);
   const settingUp = !!setup && (setup.status !== 'ready'||!fresh.fresh) && !preparing;
@@ -231,6 +234,8 @@ export async function getState(outputDir, { preparing = false } = {}) {
     setup: setup ? { status: fresh.fresh?setup.status:setup.status==='ready'?'outdated':setup.status, message: fresh.fresh?setup.message || '':fresh.message } : null,
     slug: projectSlug(outputDir), inputSlug:selectedInputSlug(setup,projectSlug(outputDir)), product: scope.productType || scope.product || scope.platform || 'Not settled yet',
     figmaUrl, preview: ledger?.preview === true, status, initDone, warnings, source,
+    // Quality checks below their minimum: open until the user accepts them in Builder or in chat.
+    risks: exported ? risks : { open: [], accepted: [] },
     buildGate: buildGate({ source, initDone, setup: setup ? { status: fresh.fresh ? setup.status : 'outdated' } : null }, { figma: await readFigmaSetting(outputDir) }),
     updated: Math.max(...modified) ? new Date(Math.max(...modified)).toISOString() : null,
     steps: [1, 2, 3, 4].map(n => {

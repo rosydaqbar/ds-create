@@ -148,7 +148,15 @@ export function createDsCreateMcp(workspace){
   if(targets.length>1)throw new Error('Send one target per save.');
   const input={expectedRevision:args.expectedRevision,ops:args.ops,reason:args.reason,author:'mcp',dryRun:!!args.dryRun,confirmed:!!args.confirmed};
   try{return {status:args.dryRun?'dry-run':'saved',...(partId(targets[0])?await (await parts(args)).change({id:partId(targets[0]),...input}):await (await store(args)).change(input))};}
-  catch(e){if(e.status===428)return {status:'needs-discussion',wide:e.wide,impact:e.impact,warnings:e.warnings,message:e.message};throw e;}
+  catch(e){if(e.status===428)return {status:'needs-discussion',wide:e.wide,impact:e.impact,warnings:e.warnings,risks:e.risks,message:e.message};throw e;}
+ });
+ // Quality failures (contrast) are risks: they are listed, and work goes on once the user accepts them.
+ const riskShape=z.union([z.object({kind:z.literal('contrast'),foreground:z.string(),background:z.string(),mode:z.string()}).strict(),z.object({kind:z.literal('part-contrast'),part:z.string(),where:z.string(),text:z.string().optional(),paint:z.string().optional()}).strict()]);
+ tool('ds_create_risks','List the session\'s risks: foundation contrast pairs and text on a Part\'s gradient below their minimum, open or accepted by the user. Approve and Publish wait while a contrast risk is open. Reads local files only.',{session},async args=>{const {risksOf}=await import('../builder/server/risks.mjs');return risksOf(await sessionOutput(workspace,args.session));},true);
+ tool('ds_create_risks_accept','Record that the user accepted risks. Call it only after the user explicitly agreed to the listed risks (general permission to continue is not consent), and after saving their message verbatim in a file under input/chat/; pass that file as source. all accepts every open risk of both kinds; risks names them. Never accept on your own initiative.',{session,all:z.boolean().optional(),risks:z.array(riskShape).min(1).optional(),source:z.string().min(1)},async args=>{
+  if(!args.all&&!args.risks)throw new Error('Send all: true or the risks to accept.');
+  const {acceptRisks}=await import('../builder/server/risks.mjs');
+  return acceptRisks(await sessionOutput(workspace,args.session),{all:!!args.all,risks:args.risks||[],source:path.resolve(workspace,args.source)});
  });
  tool('ds_create_parts_prepare','Prepare Parts, Components and Sections in the saved local files: compile each from its brand-agnostic template, the system\'s saved inputs and the approved foundations, validate (every instance must name a variant its Part has), and save a new revision with its generated pack. Each is prepared after the templates it uses. Without ids, prepares every one that is not current; a Component or Section is outdated when a Part it uses changed its structure. Needs foundations approved in Builder. Does not touch Figma.',{session,ids:z.array(z.string().regex(/^[a-z0-9-]+$/)).min(1).max(100).optional()},async args=>{
   const p=await parts(args),ids=args.ids||(await p.list()).filter(x=>x.status!=='ready').map(x=>x.id);

@@ -838,3 +838,17 @@ select { max-width: 180px; min-height: 34px; padding: 5px 10px; border: 1px soli
 .build-sync-state { margin: 0; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
 .build-sync[data-state="local-changes"] .build-sync-state { color: var(--color-text-primary); }
 .build-sync-diff { margin: 0; padding: 8px 10px; list-style: none; display: grid; gap: 4px; max-height: 180px; overflow: auto; border: 1px solid var(--color-border-subtle); border-radius: 8px; background: var(--color-surface-sunken, var(--color-surface-base)); font: 12px/1.4 var(--font-family-mono, ui-monospace, monospace); color: var(--color-text-secondary); overflow-wrap: anywhere; }
+
+/* Risks in the Publish stepper: checks below their minimum that the user can accept, and the ones they accepted. */
+.build-risks { display: grid; gap: 8px; margin-top: 10px; }
+.build-risks[hidden] { display: none; }
+.build-risks-title { margin: 0; font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+.build-risk-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.build-risk-list:empty { display: none; }
+.build-risk { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; padding: 8px 10px; border: 1px solid var(--color-border-subtle); border-radius: 8px; background: var(--color-surface-sunken, var(--color-surface-base)); }
+.build-risk-text { display: grid; gap: 2px; min-width: 0; font-size: 12px; line-height: 1.4; color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.build-risk-text strong { color: var(--color-text-primary); font-weight: 600; }
+.build-risk .text-button { font-size: 12px; }
+.risk-mark { display: inline-block; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--color-border-default); font-size: 11px; font-weight: 600; color: var(--color-text-primary); }
+.accepted-risks { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.accepted-risks li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-secondary); overflow-wrap: anywhere; }

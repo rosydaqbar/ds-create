@@ -115,6 +115,8 @@ Ops, each with `target: "foundations"`:
 - `delete`: refused while the item is used, unless `replaceWith` names its replacement;
 - `apply` with a recipe: `radius-base {rem}`, `space-base {rem}`, `shadow-seed {seed}`, `type-family {family, role?}`, `type-scale {percent}`, `palette-ramp {family, anchors, replace?}`.
 
+A gradient is a `paintStyle` named `color/gradient/{role}`. Linear paints use `type: "GRADIENT_LINEAR"` with `angle` in degrees. Radial paints use `type: "GRADIENT_RADIAL"` with `center: [x, y]` from 0 to 1 of the layer, `size: [w, h]` for the ellipse's full width and height (both above 0, and either may exceed 1), and an optional `rotation` in degrees clockwise. Stops follow the same rules for both. The docs site approximates a rotated radial with the axis-aligned ellipse that contains it. `figma-export.js` skips skewed or mirrored Figma radials and lists them in `unsupportedPaints`.
+
 In a new system, setting a literal value on a semantic token stores it on a primitive of the same family. If no primitive holds that value, the store creates one: `radius/control` at 12 aliases `scale/radius/12`, and a hex brand color aliases `palette/custom/{hex}`.
 
 `foundation-rules.json` records each palette family's anchors from preparation. The steps between anchors use the same OKLab interpolation as preparation. Change a palette color by changing its anchors with `palette-ramp`, or by setting an anchor step. Setting any other step breaks the ramp.
@@ -124,11 +126,29 @@ When the user asks for a change:
 1. Read the items it names with `ds_create_items_list` or `ds_create_items_get`, and note the `revision`.
 2. If no existing token fits, add one that follows the naming in `specs/SYSTEM.md` and tell the user what you added; wait for their approval of the new foundations before moving on. If ds-create cannot express the change, say so and propose the feature.
 3. Call `ds_create_items_change` with `dryRun: true`.
-4. If the result has `wide` set, or the direction can be read more than one way, show the user which items will change, which rule is affected and any contrast warnings, then wait for their answer. Resend with `confirmed: true` only after they agree.
+4. If the result has `wide` set, or the direction can be read more than one way, show the user which items will change, which rule is affected and any open risks the change returns (`risks`), then wait for their answer. Resend with `confirmed: true` only after they agree.
 5. Otherwise save the same ops with the same `expectedRevision`. A 409 means the draft changed meanwhile: read again and redo the change.
 6. Report the new revision in one line; Builder picks it up on its own. Mark the change request `done` if the change came from one.
 
 A change is wide when it breaks a color rule, touches more palette families than `discuss.maxFamilies`, moves more semantic tokens than `discuss.maxSemantics`, or renames or deletes a name preparation produced (`contract`). The limits are stored in `foundation-rules.json`. To change them, use `set` with `kind: "rules"`; that change always needs the user's agreement first.
+
+### Risks
+
+A failed quality check is recorded as a risk. Two contrast checks can create risks:
+
+- `contrast`: a foundation pair below its minimum creates one risk per foreground, background and mode.
+- `part-contrast`: text on a Part's gradient below its minimum creates one risk per Part slot, text and gradient, using the lowest ratio across the stops.
+
+The draft is saved and the risk is listed. While a `contrast` risk is open, Approve and Publish to Figma are blocked with "Accept the N risks or change the values first." Parts are never blocked. Structural failures (a broken alias, a missing mode, an invalid value) still block.
+
+`ds_create_risks` lists the open and accepted risks. The user accepts them in Builder (Publish panel: **Proceed with these risks**, or **Accept** on one row) or in chat. In chat:
+
+1. Show the user the open risks: each pair or slot, its ratio and its minimum. Ask whether to keep the values.
+2. Accept only after the user explicitly agrees to those risks, for example "ikutin desainnya, gpp nggak WCAG". General permission to continue is not consent. Never accept a risk on your own initiative.
+3. Save the user's message verbatim in a file under the session's `input/chat/` folder.
+4. Call `ds_create_risks_accept` with `all: true` or the `risks`, and `source` set to that file. The terminal form is `node kit/builder/cli.mjs accept-risks --slug {session} --source <file>` with `--all`, `--pair "<fg> on <bg>" --mode <mode>` or `--part <id> --where "<slot>"`. `--all` covers both kinds; when both are open, the user's agreement must cover both. Without a source file, or with a missing one, the call is refused.
+
+Acceptances live in `output/accepted-risks.json`. Only Builder and the two chat calls above write it. Item tools and preparation do not. An acceptance remains valid when the values change. If the pair later passes, its record remains and applies again if the pair fails. **Restore the rule** in Builder removes it, and the risk is open again. The web step (`workflow/WEB.md` W2) copies the accepted pairs into `tokens/accepted.json`, where `check:contrast` lists them as accepted by the user.
 
 ### Parts
 

@@ -76,6 +76,7 @@ One skill, six commands. Each command has its own reference file. Load it before
    - re-check fonts after the user uploaded them: `publish` again; apply a chosen replacement: `node kit/builder/cli.mjs fonts --slug {session} --choice ui=Inter --choice display=Inter`;
    - approve the saved foundations once the user approved them in chat: `node kit/builder/cli.mjs approve --slug {session}`;
    - prepare Parts once the foundations are approved: `node kit/builder/cli.mjs parts --slug {session} [--ids button]`, or `ds_create_parts_prepare`;
+   - accept the listed risks after the user explicitly agrees to them (`reference/mcp.md#risks`): save their message under `workspace/input/{slug}/chat/`, then run `node kit/builder/cli.mjs accept-risks --slug {session} --all --source <that file>`, or `ds_create_risks_accept`. Permission to continue does not count as consent;
    - save a decision given in chat under `workspace/input/{slug}/chat/` first, so the action reads it.
 
    Then claim the resulting event yourself (`ds_create_wait` or `ds_create_prepare` / `ds_create_publish`). Ask only for a decision the inputs leave open, never for a click, a reconnect or a restart the agent can avoid. Builder's buttons remain for users who prefer them.

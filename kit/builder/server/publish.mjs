@@ -1,4 +1,5 @@
 import {writeBaseline} from '../foundations/baseline.mjs';
+import {openRisksMessage} from '../foundations/risks.mjs';
 import {PublishError, inputFreshness, selectedInputSlug, snapshotInputs, withJobLock, writeJSON} from './files.mjs';
 import {access, mkdir, open, readFile, realpath} from 'node:fs/promises';
 import path from 'node:path';
@@ -80,6 +81,8 @@ export function createFigmaJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
       if (currentFigma(state, input.hash, target.url)) return { complete: true, reused: true };
       const gate = await status();
       if (gate.figma.reason) throw new PublishError(gate.figma.reason, 412);
+      const open = (state.risks?.open || []).filter(r => r.kind === 'contrast');
+      if (open.length) throw new PublishError(openRisksMessage(open.length), 412);
       if (state.foundations.some(f => f.variables.some(v => Object.values(v.resolved).some(r => r.error)))) throw new PublishError('Resolve missing or circular token aliases with your agent before publishing.', 412);
       if(job?.hash === input.hash && targetFile(job.figmaUrl)?.key === target.key && ['blocked','failed','cancelled','interrupted','needs-fonts'].includes(job.status)) {
         try {return await queueMcpJob({outputDir,workspace,id:job.id});}catch(e){throw new PublishError(e.message,412);}

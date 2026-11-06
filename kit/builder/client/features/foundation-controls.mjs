@@ -65,12 +65,20 @@ export const stopCSS = c => {
   const h = x => Math.round(Math.min(1, Math.max(0, x)) * 255), a = c.a ?? 1;
   return a >= 1 ? '#' + [c.r, c.g, c.b].map(x => h(x).toString(16).padStart(2, '0')).join('') : `rgba(${h(c.r)}, ${h(c.g)}, ${h(c.b)}, ${+a.toFixed(3)})`;
 };
-export const gradientCSS = (paint, colorOf = c => c && c.alias ? `var(--${c.alias.replaceAll('/', '-').replaceAll('.', '_')})` : stopCSS(c)) =>
-  `linear-gradient(${+(paint.angle ?? 180).toFixed(2)}deg, ${paint.stops.map(s => `${colorOf(s.color)} ${+(s.position * 100).toFixed(2)}%`).join(', ')})`;
+// A radial paint's CSS ellipse; the same math as radialShape in kit/web/scripts/token-model.mjs (Builder serves this
+// file alone, so it carries its own copy; tests/radial.test.mjs checks the two agree).
+const radialShape = ({ center, size, rotation = 0 }) => {
+  const [w, h] = size, r = (rotation * Math.PI) / 180, c = Math.cos(r), s = Math.sin(r), pct = v => +v.toFixed(2) + '%';
+  return `ellipse ${pct(50 * Math.sqrt(w * w * c * c + h * h * s * s))} ${pct(50 * Math.sqrt(w * w * s * s + h * h * c * c))} at ${pct(center[0] * 100)} ${pct(center[1] * 100)}`;
+};
+export const gradientCSS = (paint, colorOf = c => c && c.alias ? `var(--${c.alias.replaceAll('/', '-').replaceAll('.', '_')})` : stopCSS(c)) => {
+  const stops = paint.stops.map(s => `${colorOf(s.color)} ${+(s.position * 100).toFixed(2)}%`).join(', ');
+  return paint.type === 'GRADIENT_RADIAL' ? `radial-gradient(${radialShape(paint)}, ${stops})` : `linear-gradient(${+(paint.angle ?? 180).toFixed(2)}deg, ${stops})`;
+};
 // Figma paints later paints on top; CSS paints the first background layer on top, so the order is reversed (as in the site export).
-export const paintsCSS = (paints, colorOf) => paints.filter(p => p.type === 'GRADIENT_LINEAR' && p.stops?.length).reverse().map(p => gradientCSS(p, colorOf)).join(', ') || 'none';
+export const paintsCSS = (paints, colorOf) => paints.filter(p => ['GRADIENT_LINEAR', 'GRADIENT_RADIAL'].includes(p.type) && p.stops?.length).reverse().map(p => gradientCSS(p, colorOf)).join(', ') || 'none';
 // Back to the draft's shape: a numeric angle, stops in order with 0–1 positions, picked color names as aliases.
 export function draftPaint(paint) {
   const { angle, stops = [], ...rest } = structuredClone(paint);
-  return { ...rest, angle: rounded(Number(angle ?? 180)), stops: stops.map(s => ({ ...s, position: rounded(Math.min(1, Math.max(0, Number(s.position) || 0))), color: typeof s.color === 'string' ? { alias: s.color } : s.color })).sort((a, b) => a.position - b.position) };
+  return { ...rest, ...(paint.type === 'GRADIENT_RADIAL' ? {} : { angle: rounded(Number(angle ?? 180)) }), stops: stops.map(s => ({ ...s, position: rounded(Math.min(1, Math.max(0, Number(s.position) || 0))), color: typeof s.color === 'string' ? { alias: s.color } : s.color })).sort((a, b) => a.position - b.position) };
 }

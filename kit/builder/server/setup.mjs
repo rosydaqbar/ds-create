@@ -293,7 +293,10 @@ export async function mcpPrepareAction({outputDir,workspace,id,owner,lease,attem
    const check=await checkPreparation(outputDir,workspace,{inputSlug:s.inputSlug,inputRevision:s.inputRevision,projectName:s.projectName});
    if(check.valid&&check.plan?.systemMode==='new'&&check.plan.motionPolicy!=='basic-ui'){check.valid=false;check.errors.push('New-system preparation requires the basic UI motion policy.');}
    if(!check.valid){status='failed';detail='Foundation checks failed: '+check.errors.slice(0,5).join(' ').slice(0,1700);}
-   else detail='Foundations are ready to review. Publish to Figma when you approve the saved draft.';
+   else{
+    const {risksOf,openContrast}=await import('./risks.mjs'),open=openContrast(await risksOf(outputDir)).length;
+    detail='Foundations are ready to review. '+(open?`${open} contrast ${open===1?'pair is':'pairs are'} below the minimum; the user accepts them in Publish or in chat before approving. `:'')+'Publish to Figma when you approve the saved draft.';
+   }
   }
   const now=new Date().toISOString(),next={...s,status,message:detail,questions:qs,readyInputHash:status==='ready'?f.request.inputHash:null,updated:now};
   await writeJSON(path.join(f.dir,'result.json'),{status,message:detail,questions:qs});await writeJSON(stateFile(outputDir),next);return {status,message:detail};

@@ -68,6 +68,26 @@ export function paintContrast(draft, {where, text, paint, minimum = 4.5}) {
   return notes;
 }
 
+// The same check as one risk for a slot's text on its gradient: the lowest ratio across every stop and mode, or
+// null when every stop meets the minimum. Its identity (where, text, paint, plus the Part) is what the user accepts.
+export function paintRisk(draft, {where, text, paint, minimum = 4.5}) {
+  const g = paintOf(draft, paint), read = colorReader(draft);
+  if (!g) return null;
+  const owner = draft.variables.find(v => v.name === text)?.collection, modes = draft.collections.find(c => c.name === 'Color')?.modes || draft.collections.find(c => c.name === owner)?.modes || [];
+  let lowest, failing = false;
+  for (const mode of modes) {
+    const ink = read(text, mode), base = read('color/surface/base', mode);
+    if (!ink) continue;
+    for (const s of g.paints.flatMap(p => p.stops || [])) {
+      const c = s.color?.alias ? read(s.color.alias, mode) : rgba(s.color), ratio = c ? contrastOf(ink, c, base) : undefined;
+      if (ratio === undefined || ratio !== null && ratio >= minimum) continue;
+      failing = true;
+      if (ratio !== null && (lowest === undefined || ratio < lowest)) lowest = ratio;
+    }
+  }
+  return failing ? {kind: 'part-contrast', where, text, paint, minimum, ratio: lowest ?? null} : null;
+}
+
 // Every combination of the variant properties, keeping only those `exists` accepts.
 export function variantsOf(properties, exists) {
   let combos = [{}];
@@ -258,16 +278,21 @@ export function definePart(def) {
     requireRoles(def.name, [...used, ...st.tokens.flatMap(t => Object.values(t.values).map(v => v?.alias).filter(Boolean))], draft, [...own]);
     if (flat) decisions.push({key: 'Shadow', value: 'No shadow', decidedBy: 'AI', reason: `Your foundations use flat surfaces without shadows, so the ${def.name} has none.`});
     const sets = summary(st.sets), first = st.sets[0], chosen = withOverrides(def.name, {map, measures}, overrides, new Set(st.tokens.map(t => t.name)));
+    const risks = [];
     // Text on a gradient fill is checked against every stop: the text color of the same row.
     for (const [set, rows] of Object.entries(chosen.map)) for (const [key, slots] of Object.entries(rows)) for (const slot of paintSlots) {
       if (!paintOf(draft, slots[slot])) continue;
       for (const [textSlot, text] of Object.entries(slots)) if (['text', 'label', 'fg'].includes(textSlot) && draft.variables.some(v => v.name === text && v.type === 'COLOR'))
-        for (const n of paintContrast(draft, {where: `${set} ${key} ${textSlot}`, text, paint: slots[slot]})) if (!notes.includes(n)) notes.push(n);
+      {
+        const where = `${set} ${key} ${textSlot}`, risk = paintRisk(draft, {where, text, paint: slots[slot]});
+        for (const n of paintContrast(draft, {where, text, paint: slots[slot]})) if (!notes.includes(n)) notes.push(n);
+        if (risk && !risks.some(r => r.where === risk.where && r.text === risk.text && r.paint === risk.paint)) risks.push(risk);
+      }
     }
     return {id: def.id, page: def.page, name: def.name, set: def.set,
       sets, properties: sets[0].properties, variantCount: sets.reduce((n, x) => n + x.variantCount, 0),
       variantPattern: first.properties.filter(p => p.type === 'variant').map(p => `${p.name}=${p.default}`).join(', '),
-      primitives: [], tokens: st.tokens, ...(st.instanceRows.length ? {instances} : {}), ...(Object.keys(mixes).length ? {mixes} : {}), ...chosen, decisions, notes, overrides};
+      primitives: [], tokens: st.tokens, ...(st.instanceRows.length ? {instances} : {}), ...(Object.keys(mixes).length ? {mixes} : {}), ...chosen, decisions, notes, ...(risks.length ? {risks} : {}), overrides};
   }
   const out = {fields: Object.keys(def.defaults), defaults: def.defaults, checkInputs, contract, compile};
   if (def.adapt) out.adapt = (draft, plan, parts = {}) => def.adapt(draft, settings({}), plan, parts);

@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {validateFoundations} from './validate.mjs';
 import {verifyFoundationPack} from './pack.mjs';
-import {angleToTransform} from './gradient.mjs';
+import {angleToTransform, radialToTransform} from './gradient.mjs';
 const unsupported=message=>Object.assign(new Error(message),{code:'MANAGER_FAST_UNSUPPORTED'});
 
 // Fixed renderer + approved data, following FAST's batching pattern. No agent codegen.
@@ -102,7 +102,8 @@ export async function renderFoundationBatch(figma,{phase,definitions}){
    // positions and exact stop bindings; like an effect's, a bound stop's cached RGBA is not its identity.
    const paintView=p=>{
     const result={type:p.type,visible:p.visible??true,opacity:p.opacity??1,blendMode:p.blendMode??'NORMAL'},t=p.gradientTransform;
-    if(t)result.angle=Math.round(((Math.atan2(t[0][0],-t[0][1])*180/Math.PI)%360+360)%360*1000)/1000%360;
+    // A radial (GRADIENT_RADIAL) is verified by its whole transform as Figma stores it: float32 on both sides.
+    if(t)if(p.type==='GRADIENT_RADIAL')result.transform=t.map(r=>r.map(n=>Math.fround(n)));else result.angle=Math.round(((Math.atan2(t[0][0],-t[0][1])*180/Math.PI)%360+360)%360*1000)/1000%360;
     if(p.gradientStops)result.stops=p.gradientStops.map(x=>({position:x.position,color:x.boundVariables?.color?{alias:x.boundVariables.color.id}:color(x.color)}));
     return result;
    };
@@ -181,8 +182,9 @@ export async function renderFoundationBatch(figma,{phase,definitions}){
 export function compileFoundationCalls(draft,{maxChars=45000}={}){
  // Checked before validation: a gradient type the validator does not know yet still takes the standard path.
  for(const d of Array.isArray(draft?.paintStyles)?draft.paintStyles:[])for(const p of Array.isArray(d?.paints)?d.paints:[]){
-  if(p?.type!=='GRADIENT_LINEAR')throw unsupported('FAST does not support paint type: '+p?.type);
-  const unknown=[...Object.keys(p).filter(k=>!['type','angle','stops','visible','opacity','blendMode'].includes(k)),...(Array.isArray(p.stops)?p.stops:[]).flatMap(x=>x&&typeof x==='object'?Object.keys(x).filter(k=>!['position','color'].includes(k)):[])];
+  if(!['GRADIENT_LINEAR','GRADIENT_RADIAL'].includes(p?.type))throw unsupported('FAST does not support paint type: '+p?.type);
+  const shape=p.type==='GRADIENT_RADIAL'?['center','size','rotation']:['angle'];
+  const unknown=[...Object.keys(p).filter(k=>!['type',...shape,'stops','visible','opacity','blendMode'].includes(k)),...(Array.isArray(p.stops)?p.stops:[]).flatMap(x=>x&&typeof x==='object'?Object.keys(x).filter(k=>!['position','color'].includes(k)):[])];
   if(unknown.length)throw unsupported('FAST does not support paint metadata: '+[...new Set(unknown)].join(', '));
  }
  const check=validateFoundations(draft);if(!check.valid)throw new Error(check.errors.join(' '));
@@ -195,7 +197,7 @@ export function compileFoundationCalls(draft,{maxChars=45000}={}){
  const styles=['effectStyles','paintStyles','gridStyles','textStyles'].flatMap(kind=>(draft[kind]??[]).map(definition=>{
   supported(definition,kind);
   // The renderer is serialized without imports, so the direction is compiled here.
-  if(kind==='paintStyles')return {kind,definition:{...definition,paints:definition.paints.map(p=>({...p,gradientTransform:angleToTransform(p.angle)}))}};
+  if(kind==='paintStyles')return {kind,definition:{...definition,paints:definition.paints.map(p=>({...p,gradientTransform:p.type==='GRADIENT_RADIAL'?radialToTransform(p):angleToTransform(p.angle)}))}};
   if(kind==='effectStyles')for(const e of definition.effects){
    const unknown=Object.keys(e).filter(k=>!['type','visible','blendMode','offset','x','y','blur','radius','spread','color','opacity'].includes(k));
    if(unknown.length)throw unsupported('FAST does not support effect metadata: '+unknown.join(', '));

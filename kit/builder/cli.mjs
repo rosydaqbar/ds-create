@@ -17,7 +17,7 @@ const command = args[0] === 'init-web' ? 'builder' : args[0];
 if (args[0] === 'init-web') console.error('init-web is now builder.');
 let slug = arg('--slug');
 let workspace, project; // set in main() by resolveProject
-const usage = 'node kit/builder/cli.mjs builder|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|compare|check-site [--slug {slug}] [--project dir] [--workspace dir] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/builder/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/builder/cli.mjs mcp-host start|status|stop';
+const usage = 'node kit/builder/cli.mjs builder|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|accept-risks|compare|check-site [--slug {slug}] [--project dir] [--workspace dir] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/builder/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/builder/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -73,7 +73,7 @@ async function main() {
     if(command==='sessions'||sessions.length){console.log(JSON.stringify({action:command==='sessions'?'list':'choose-session',sessions,newCommand:'ds-create builder --new'},null,2));return;}
   }
   if(command==='builder'&&!slug)slug=`session-${randomUUID()}`;
-  if (!['builder', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'tokens', 'approve', 'compare', 'check-site'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
+  if (!['builder', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'tokens', 'approve', 'accept-risks', 'compare', 'check-site'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
   if (command === 'wait') {
     const { waitForPreparation } = await import('./server/setup.mjs');
     const controller = new AbortController(), stop = () => controller.abort();
@@ -118,7 +118,32 @@ async function main() {
     const figma = await readJSON(path.join(output, 'figma/figma-variables.json'));
     await mkdir(path.dirname(path.resolve(out)), { recursive: true });
     await writeFile(path.resolve(out), JSON.stringify(toTokenExport(draft, parts, { pages: figma?.pages }), null, 2) + '\n');
-    console.log(JSON.stringify({ written: path.resolve(out), parts: Object.keys(parts) }));
+    // The pairs the user accepted as risks go next to the export, in tokens/accepted.json, for check:contrast and QA.
+    const { readAccepted, writeWebAccepted } = await import('./foundations/risks.mjs'), { risksOf } = await import('./server/risks.mjs');
+    const acceptedRisks = await writeWebAccepted(path.dirname(path.resolve(out)), { accepted: await readAccepted(output), open: (await risksOf(output, draft)).open });
+    console.log(JSON.stringify({ written: path.resolve(out), parts: Object.keys(parts), ...(acceptedRisks ? { acceptedRisks } : {}) }));
+    return;
+  }
+  // The user accepted risks in chat: the agent saved their words under input/chat/ first, and passes that file.
+  // --all, or --pair "<fg> on <bg>" --mode <mode>, or --part <id> --where "<slot>"; works without a running Builder.
+  if (command === 'accept-risks') {
+    const source = arg('--source');
+    if (!source) throw new Error('Save the user\'s message in input/chat/ first, then pass it with --source <file>.');
+    const { acceptRisks } = await import('./server/risks.mjs');
+    let risks = [];
+    if (!args.includes('--all')) {
+      const pair = arg('--pair'), part = arg('--part');
+      if (pair) {
+        const [foreground, background] = pair.split(' on ');
+        if (!foreground || !background || !arg('--mode')) throw new Error('Give --pair "<foreground> on <background>" with --mode <mode>.');
+        risks = [{ kind: 'contrast', foreground, background, mode: arg('--mode') }];
+      } else if (part) {
+        if (!arg('--where')) throw new Error('Give --part <id> with --where "<slot>".');
+        risks = [{ kind: 'part-contrast', part, where: arg('--where') }];
+      } else throw new Error('Give --all, --pair "<fg> on <bg>" --mode <mode>, or --part <id> --where "<slot>".');
+    }
+    const result = await acceptRisks(output, { all: args.includes('--all'), risks, source: path.resolve(workspace, source) });
+    console.log(JSON.stringify({ accepted: result.accepted, open: result.risks.open.length }));
     return;
   }
   // Is Figma behind the local files? Compares the saved Figma export with foundations.json plus the Part tokens.

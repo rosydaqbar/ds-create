@@ -1,7 +1,7 @@
 // Premade Part template. Brand-agnostic: every structural choice below is an input with a default from
 // specs/parts/2.1-button.md, and a system may change any of it. compile never holds a brand value.
 import {ItemError} from '../../foundations/ops.mjs';
-import {merge, paintContrast, paintCss, paintOf, resolver} from '../kit.mjs';
+import {merge, paintContrast, paintCss, paintOf, paintRisk, resolver} from '../kit.mjs';
 
 export const id = 'button';
 export const page = '2.1';
@@ -135,7 +135,7 @@ function treatment(s, tone, emphasis, state, depth, has, notes) {
 }
 
 export function compile(inputs, {draft, plan, overrides = {}}) {
-  const s = settings(inputs), r = resolver(draft), notes = [], decisions = [];
+  const s = settings(inputs), r = resolver(draft), notes = [], risks = [], decisions = [];
   const depth = s.depth !== 'auto' ? !!s.depth : plan?.domains?.elevation?.inputs?.treatment ? plan.domains.elevation.inputs.treatment !== 'none' : draft.effectStyles.some(e => e.name === s.effects.raised);
   const weight = s.labelWeights.find(w => draft.textStyles.some(st => st.name === `type/body/sm/${w}`));
   if (!weight) throw new ItemError('The foundations have no body text styles for the Button label.');
@@ -169,14 +169,18 @@ export function compile(inputs, {draft, plan, overrides = {}}) {
   if (missing.length) throw Object.assign(new ItemError('The foundations are missing roles the Button needs: ' + [...new Set(missing)].slice(0, 6).join(', ')), {status: 412});
   // Text on a gradient fill is checked against every stop.
   for (const [tone, ems] of Object.entries(treatments)) for (const [em, states] of Object.entries(ems)) for (const [st, t] of Object.entries(states))
-    if (paintOf(draft, t.fill) && r.has(t.text)) for (const n of paintContrast(draft, {where: `${title(tone)} ${em} ${st} text`, text: t.text, paint: t.fill})) if (!notes.includes(n)) notes.push(n);
+    if (paintOf(draft, t.fill) && r.has(t.text)) {
+      const where = `${title(tone)} ${em} ${st} text`, risk = paintRisk(draft, {where, text: t.text, paint: t.fill});
+      for (const n of paintContrast(draft, {where, text: t.text, paint: t.fill})) if (!notes.includes(n)) notes.push(n);
+      if (risk) risks.push(risk);
+    }
   const c = contract(s), variantProps = c.properties.filter(p => p.type === 'variant');
   return {
     id, page, name, set,
     variantPattern: variantProps.map(p => `${p.name}=${p.default}`).join(', '),
     properties: c.properties,
     variantCount: c.variantCount,
-    primitives, tokens, sizes: sizeRows, treatments, depth, decisions, notes, overrides,
+    primitives, tokens, sizes: sizeRows, treatments, depth, decisions, notes, ...(risks.length ? {risks} : {}), overrides,
   };
 }
 

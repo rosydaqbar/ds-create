@@ -66,8 +66,14 @@ export function validateFoundations(data) {
         if(!Array.isArray(s.paints)||!s.paints.length){fail(`${s.name} needs at least one paint.`);continue;}
         s.paints.forEach((p,i)=>{
           const label=s.paints.length>1?`${s.name} paint ${i+1}`:s.name;
-          if(p?.type!=='GRADIENT_LINEAR'){fail(`${label} type must be GRADIENT_LINEAR.`);return;}
-          if(!finite(p.angle))fail(`${label} angle must be a finite number.`);
+          if(!['GRADIENT_LINEAR','GRADIENT_RADIAL'].includes(p?.type)){fail(`${label} type must be GRADIENT_LINEAR or GRADIENT_RADIAL.`);return;}
+          if(p.type==='GRADIENT_LINEAR'&&!finite(p.angle))fail(`${label} angle must be a finite number.`);
+          if(p.type==='GRADIENT_RADIAL'){
+            // center [x, y] in 0–1 of the layer; size [w, h] the ellipse's full width and height, above 0 and may exceed 1.
+            if(!Array.isArray(p.center)||p.center.length!==2||!p.center.every(v=>finite(v)&&v>=0&&v<=1))fail(`${label} center must be two numbers from 0 to 1.`);
+            if(!Array.isArray(p.size)||p.size.length!==2||!p.size.every(v=>finite(v)&&v>0))fail(`${label} size must be two numbers above 0.`);
+            if(p.rotation!==undefined&&!finite(p.rotation))fail(`${label} rotation must be a finite number of degrees.`);
+          }
           if(!Array.isArray(p.stops)||p.stops.length<2){fail(`${label} needs at least two stops.`);return;}
           p.stops.forEach((x,n)=>{
             if(!finite(x?.position)||x.position<0||x.position>1)fail(`${label} stop ${n+1} position must be between 0 and 1.`);

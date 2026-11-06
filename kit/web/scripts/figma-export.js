@@ -92,16 +92,31 @@ const gridStyles = !withStyles ? [] : (await figma.getLocalGridStylesAsync()).ma
   grids: s.layoutGrids.map((g) => ({ pattern: g.pattern, count: g.count, gutter: g.gutterSize, margin: g.offset || 0, alignment: g.alignment })),
 }));
 
-// Gradient paint styles, the kind ds-create models (linear only; solid color styles stay out of the token export).
-// The angle repeats transformToAngle in kit/builder/foundations/gradient.mjs, since this script cannot import it;
-// tests/manager-foundation-validation.test.mjs checks the two agree. It is rounded past Figma's float32 storage.
+// Gradient paint styles, the kinds ds-create models: linear and radial (solid color styles stay out of the token export).
+// The angle repeats transformToAngle and radialOf repeats transformToRadial in kit/builder/foundations/gradient.mjs,
+// since this script cannot import them; tests check they agree. The angle is rounded past Figma's float32 storage.
 const angleOf = (t) => (Math.round(((((Math.atan2(t[0][0], -t[0][1]) * 180) / Math.PI) % 360) + 360) % 360 * 1000) / 1000) % 360;
-const paintStyles = !withStyles ? [] : (await figma.getLocalPaintStylesAsync()).filter((s) => s.paints.length && s.paints.every((p) => p.type === 'GRADIENT_LINEAR')).map((s) => ({
+const r4 = (v) => Math.round(v * 10000) / 10000 + 0;
+// A radial is kept only when its transform has perpendicular axes, a positive determinant and a centre inside the layer.
+const radialOf = (t) => {
+  const [[a, b, tx], [d, e, ty]] = t, det = a * e - b * d, n0 = Math.hypot(a, b), n1 = Math.hypot(d, e);
+  if (!(det > 0) || !n0 || !n1 || Math.abs(a * d + b * e) > 1e-6 * n0 * n1) return null;
+  const px = 0.5 - tx, py = 0.5 - ty, x = (e * px - b * py) / det, y = (-d * px + a * py) / det;
+  if (![x, y].every((v) => v >= -1e-6 && v <= 1 + 1e-6)) return null;
+  return { center: [r4(Math.min(1, Math.max(0, x))), r4(Math.min(1, Math.max(0, y)))], size: [r4(1 / n0), r4(1 / n1)], rotation: (Math.round(((((Math.atan2(b, a) * 180) / Math.PI) % 360) + 360) % 360 * 1000) / 1000) % 360 };
+};
+// A style with any other paint, or a radial ds-create cannot keep, is skipped and listed in unsupportedPaints.
+const unsupportedPaints = [];
+const paintStyles = !withStyles ? [] : (await figma.getLocalPaintStylesAsync()).filter((s) => s.paints.length && s.paints.every((p) => p.type === 'GRADIENT_LINEAR' || p.type === 'GRADIENT_RADIAL')).filter((s) => {
+  const bad = s.paints.findIndex((p) => p.type === 'GRADIENT_RADIAL' && !radialOf(p.gradientTransform));
+  if (bad >= 0) unsupportedPaints.push({ style: s.name, paint: bad + 1, reason: 'The radial gradient is skewed, mirrored or centred outside the layer.' });
+  return bad < 0;
+}).map((s) => ({
   name: s.name,
   description: s.description || '',
   paints: s.paints.map((p) => ({
     type: p.type,
-    angle: angleOf(p.gradientTransform),
+    ...(p.type === 'GRADIENT_RADIAL' ? radialOf(p.gradientTransform) : { angle: angleOf(p.gradientTransform) }),
     // A bound stop is its variable; its cached RGBA depends on the mode, so it is left out.
     stops: p.gradientStops.map((x) => ({ position: x.position, color: bound(x.boundVariables && x.boundVariables.color) ? { alias: bound(x.boundVariables.color) } : { r: x.color.r, g: x.color.g, b: x.color.b, a: x.color.a } })),
     visible: p.visible,
@@ -150,6 +165,8 @@ return {
   effectStyles,
   gridStyles,
   paintStyles,
+  // Paint styles left out because ds-create cannot keep them (see unsupportedPaints above); empty when none.
+  unsupportedPaints,
   // Page ids, so every docs page can link to its Figma page ("Open in Figma").
   pages: figma.root.children.map((p) => ({ id: p.id, name: p.name })),
 };

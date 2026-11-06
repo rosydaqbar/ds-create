@@ -82,7 +82,9 @@ const themes = hasDark ? ['light', 'dark'] : ['light'];
  * in the report (`approvedContrast`). The site chrome never relies on them.
  */
 const approvedPairs = (() => {
-  if (!(accepted.contrast ?? []).length) return { light: [], dark: [] };
+  // Pairs the owner approved and pairs the user accepted as risks are both documented exceptions here.
+  const listed = [...new Set([...(accepted.contrast ?? []), ...(accepted.acceptedRisks ?? [])])];
+  if (!listed.length) return { light: [], dark: [] };
   const vars = JSON.parse(fs.readFileSync(new URL('../tokens/figma-variables.json', import.meta.url), 'utf8')).variables;
   const byName = new Map(vars.map((v) => [v.name, v]));
   const hex = (name, mode, depth = 0) => {
@@ -93,7 +95,7 @@ const approvedPairs = (() => {
     return typeof val === 'string' && val.startsWith('#') ? val.slice(0, 7).toLowerCase() : null;
   };
   const resolve = (mode) =>
-    accepted.contrast
+    listed
       .map((pair) => {
         const [fg, bg] = pair.split(' on ');
         return { pair, fg: hex(fg, mode), bg: hex(bg, mode) };

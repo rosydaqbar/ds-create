@@ -23,7 +23,7 @@ workspace/output/{system-slug}/web/        a copy of kit/web, filled for the bra
 ├─ COPY-GUIDE.md                 voice and copy rules for every word on the site
 ├─ tokens/
 │  ├─ figma-variables.json       token file written from the local files (input): variables, styles, Part tokens, page ids when Figma has them
-│  ├─ accepted.json              what the owner approved: unsupported modes, contrast pairs (copied from the ledger)
+│  ├─ accepted.json              what the owner approved: unsupported modes, contrast pairs (copied from the ledger); pairs the user accepted as risks (written by step W2)
 │  └─ tokens.dtcg.json           DTCG tokens (generated)
 ├─ public/brand/                 logo, mark and flag files exported from 1.8 Brand assets
 ├─ scripts/
@@ -105,13 +105,13 @@ Exit check: `npm run build` passes on the scoped copy.
 
 ## W2 · Tokens from the local files
 
-1. From the repo root, run `node kit/builder/cli.mjs tokens --slug {system-slug} --out workspace/output/{system-slug}/web/tokens/figma-variables.json`. It writes `foundations.json` plus every Part's tokens (the `Components` collection) in the export format the site's scripts read. When a Figma export exists (`figma/figma-variables.json`), the command copies its page ids for the "Open in Figma" buttons; without one, those buttons are hidden. The file keeps its name so the site's scripts read it unchanged.
+1. From the repo root, run `node kit/builder/cli.mjs tokens --slug {system-slug} --out workspace/output/{system-slug}/web/tokens/figma-variables.json`. It also rewrites `acceptedRisks` in `tokens/accepted.json` with the contrast pairs accepted by the user (`output/accepted-risks.json`, `skill/reference/mcp.md#risks`). When a pair's rule is restored, that pair is removed from `acceptedRisks`, so `check:contrast` fails on it again. It writes `foundations.json` plus every Part's tokens (the `Components` collection) in the export format the site's scripts read. When a Figma export exists (`figma/figma-variables.json`), the command copies its page ids for the "Open in Figma" buttons; without one, those buttons are hidden. The file keeps its name so the site's scripts read it unchanged.
 2. Run the command again whenever the foundations or a Part change, and after a Figma round to pick up the page ids.
 3. This step makes no Figma calls. It uses a saved Figma export only for page ids, when one exists; tokens and styles come from the local files. `scripts/figma-export.js` and `scripts/export-diff.mjs` remain for Figma's own checks (Publish, and the comparison at the end of a Figma round).
 4. Run `npm run tokens`, then `npm run check:contrast`.
-5. When the owner approved exceptions in the ledger (a mode that isn't supported, contrast pairs below AA), write them to `tokens/accepted.json`: `{ "unsupportedModes": { "Color": ["Dark"] }, "contrast": ["color/text/x on color/fill/y"] }`. The token, React Native token and contrast scripts and QA read it; the export itself is never edited.
+5. When the owner approved exceptions in the ledger (a mode that isn't supported, contrast pairs below AA), merge them into `tokens/accepted.json`, keeping the `acceptedRisks` step 1 wrote: `{ "unsupportedModes": { "Color": ["Dark"] }, "contrast": ["color/text/x on color/fill/y"] }`. The token, React Native token and contrast scripts and QA read it; the export itself is never edited.
 
-Exit check: the file holds every variable, text style, effect style and paint style of `foundations.json` and every prepared Part's tokens; no alias is unresolved; **`check:contrast` reports all pairs AA**, or lists only the pairs approved in `accepted.json`. A contrast failure is fixed in the local files (`ds_create_items_change`), then step 1 runs again — never patched in `figma-variables.json` or in code (§8).
+Exit check: the file holds every variable, text style, effect style and paint style of `foundations.json` and every prepared Part's tokens; no alias is unresolved; **`check:contrast` reports all pairs AA**, or lists only the pairs approved or accepted in `accepted.json`. A contrast failure is fixed in the local files (`ds_create_items_change`), then step 1 runs again — never patched in `figma-variables.json` or in code (§8).
 
 ## W3 · Brand assets and identity
 

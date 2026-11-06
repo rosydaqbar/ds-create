@@ -1,7 +1,8 @@
 // Pure op engine for foundation items: a saved draft plus a list of ops becomes a new draft, plan, warnings and impact.
 // It never touches files. Structural errors throw ItemError; contract and contrast problems come back as warnings.
-import {validateFoundations, validatePlan, contrastReport} from './validate.mjs';
+import {validateFoundations, validatePlan} from './validate.mjs';
 import {paletteRamp} from './compiler.mjs';
+import {foundationRisks} from './risks.mjs';
 import {partRefs, replaceInPart} from '../parts/refs.mjs';
 import {deriveRadii, shadowSeed, deriveShadows, isShadow, cssColor, draftEffect} from '../client/features/foundation-controls.mjs';
 
@@ -326,12 +327,13 @@ export function measureImpact(before, after) {
 }
 
 // Plan checks that need the source snapshot (decisions, sources, product) belong to preparation, not to item edits.
+// Contrast below its minimum is not a warning: it comes back as a risk (draftRisks), which the user may accept.
+export const draftRisks = draft => foundationRisks(draft);
 const sourceOnly = /^(Foundation plan must|Record |Include at least)|exclusion needs a reason and source/;
 export function draftWarnings(draft, plan, rules = null) {
   const warnings = plan ? validatePlan(plan, draft, {hash: plan.inputHash, files: []}, plan.inputRevision).errors.filter(e => !sourceOnly.test(e)) : [];
   const names = new Set(Object.values(lists).flatMap(list => (draft[list] || []).map(x => x.name)));
   for (const name of rules?.contract || []) if (!names.has(name)) warnings.push(`Contract item ${name} is missing.`);
-  for (const p of contrastReport(draft).filter(p => !p.pass)) warnings.push(`Contrast: ${p.mode} ${p.foreground} on ${p.background} is ${p.ratio?.toFixed(2) || 'unresolved'}; requires ${p.minimum}:1.`);
   return warnings;
 }
 
@@ -352,5 +354,5 @@ export function applyOps(draft, ops, {plan = null, rules = null, parts = {}} = {
   if (!check.valid) throw new ItemError(check.errors.slice(0, 5).join(' '));
   for (const id of ctx.partsChanged) changes.push({kind: 'part', name: id, action: 'set'});
   const changedParts = Object.fromEntries([...ctx.partsChanged].map(id => [id, ctx.parts[id]]));
-  return {draft: next, plan: nextPlan, rules: ctx.rules, parts: changedParts, changes, warnings: draftWarnings(next, nextPlan, ctx.rules), impact: {...measureImpact(draft, next), rulesBroken: ctx.broken, ramps: ctx.ramps}};
+  return {draft: next, plan: nextPlan, rules: ctx.rules, parts: changedParts, changes, warnings: draftWarnings(next, nextPlan, ctx.rules), risks: draftRisks(next), impact: {...measureImpact(draft, next), rulesBroken: ctx.broken, ramps: ctx.ramps}};
 }

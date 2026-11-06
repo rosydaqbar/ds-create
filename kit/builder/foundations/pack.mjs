@@ -34,7 +34,7 @@ function inputNotes(scope){
 }
 function styleNote(s){
  if(s.fontFamily)return `${s.fontFamily} / ${s.fontStyle||'Regular'} · ${s.fontSize}px / ${JSON.stringify(s.lineHeight)}`;
- if(s.paints)return s.paints.map(p=>`${p.type} ${p.angle}deg: `+(p.stops||[]).map(x=>`${x.color?.alias||JSON.stringify(x.color)} ${x.position}`).join(', ')).join('; ');
+ if(s.paints)return s.paints.map(p=>`${p.type} ${p.type==='GRADIENT_RADIAL'?`center ${p.center} size ${p.size}${p.rotation?` rotation ${p.rotation}deg`:''}`:p.angle+'deg'}: `+(p.stops||[]).map(x=>`${x.color?.alias||JSON.stringify(x.color)} ${x.position}`).join(', ')).join('; ');
  if(s.effects)return s.effects.map(e=>`${e.type}: offset ${e.offset?.x??e.x??0},${e.offset?.y??e.y??0}; blur ${e.radius??e.blur??0}; spread ${e.spread??0}; color ${e.color?.alias||JSON.stringify(e.color)}`).join('; ');
  return `${s.grids?.length||0} saved grids`;
 }

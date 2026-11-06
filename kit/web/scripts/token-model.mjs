@@ -15,11 +15,18 @@ export const stopCss = (c) => {
   const a = c.a ?? 1;
   return a >= 1 ? '#' + [c.r, c.g, c.b].map((x) => h(x).toString(16).padStart(2, '0')).join('') : `rgba(${h(c.r)}, ${h(c.g)}, ${h(c.b)}, ${+a.toFixed(3)})`;
 };
-// One linear gradient paint ({angle, stops:[{position 0–1, color: {alias} | {r,g,b,a}}]}) as CSS. `colorOf` turns a
+// One gradient paint (linear {angle} or radial {center, size, rotation}, stops:[{position 0–1, color: {alias} | {r,g,b,a}}]}) as CSS. `colorOf` turns a
 // stop color into CSS; by default an alias becomes var(--its-name). Pure, so Builder's session copy runs it too.
 export function gradientCss(paint, colorOf = (c) => (c && c.alias ? `var(${cssName(c.alias)})` : stopCss(c))) {
   const stops = paint.stops.map((s) => `${colorOf(s.color)} ${+(s.position * 100).toFixed(2)}%`);
+  if (paint.type === 'GRADIENT_RADIAL') return `radial-gradient(${radialShape(paint)}, ${stops.join(', ')})`;
   return `linear-gradient(${+(paint.angle ?? 180).toFixed(2)}deg, ${stops.join(', ')})`;
+}
+// A radial paint ({center, size, rotation}) as a CSS ellipse: radii are half the size. A rotated ellipse becomes the
+// axis-aligned one spanning its bounding box, an approximation. Builder's foundation-controls.mjs carries a copy; tests/radial.test.mjs checks they agree.
+export function radialShape({ center, size, rotation = 0 }) {
+  const [w, h] = size, r = (rotation * Math.PI) / 180, c = Math.cos(r), s = Math.sin(r), pct = (v) => +v.toFixed(2) + '%';
+  return `ellipse ${pct(50 * Math.sqrt(w * w * c * c + h * h * s * s))} ${pct(50 * Math.sqrt(w * w * s * s + h * h * c * c))} at ${pct(center[0] * 100)} ${pct(center[1] * 100)}`;
 }
 
 export function tokenModel(src) {
@@ -117,7 +124,7 @@ export function tokenModel(src) {
   const effectName = (s) => cssName(s.name); // elevation/raised → --elevation-raised
   // Gradients: color/gradient/brand → --color-gradient-brand, stops resolved to their primitive per mode like effect colors.
   // Figma paints later paints on top; CSS paints the first background layer on top, so the order is reversed.
-  const paintCss = (style, modes) => style.paints.filter((p) => p.type === 'GRADIENT_LINEAR').slice().reverse()
+  const paintCss = (style, modes) => style.paints.filter((p) => ['GRADIENT_LINEAR', 'GRADIENT_RADIAL'].includes(p.type)).slice().reverse()
     .map((p) => gradientCss(p, (c) => (c && c.alias ? `var(${cssName(resolveVar(c.alias, modes).variable.name)})` : stopCss(c)))).join(', ');
   const paintName = (s) => cssName(s.name);
 

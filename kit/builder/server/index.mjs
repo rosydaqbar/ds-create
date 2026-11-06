@@ -19,6 +19,8 @@ import {syncState} from '../foundations/baseline.mjs';
 import {preparedFonts} from '../client/assets/fonts/catalog.mjs';
 import {parseServerArgs} from './args.mjs';
 import {builderCommand, projectSlug, workspaceOf} from './layout.mjs';
+import {acceptRisks, openContrast, restoreRisk} from './risks.mjs';
+import {openRisksMessage} from '../foundations/risks.mjs';
 
 // The site's chrome defaults: next to this folder in a session's Builder copy, or in the repo.
 const fallbacks = ['../web/scripts/chrome-fallbacks.mjs', '../../web/scripts/chrome-fallbacks.mjs'].map(p => new URL(p, import.meta.url)).find(u => existsSync(fileURLToPath(u)));
@@ -55,9 +57,20 @@ export function createManagerServer({ outputDir, workspace = workspaceOf(outputD
     if (['approved', 'synced'].includes(s.source.review)) return { approved: input.hash };
     // Builder can only show the approval when the draft is current and its checks pass; say why it can't.
     if (s.warnings?.length) throw new PublishError(s.warnings[0], 409);
+    const risks = openContrast(s.risks || { open: [] });
+    if (risks.length) throw new PublishError(openRisksMessage(risks.length), 409);
     const file = path.join(outputDir, 'ds-create-ledger.json'), ledger = await readJSON(file) || {};
     await writeJSON(file, { ...ledger, foundationReview: { status: 'approved', hash: input.hash, approvedBy: 'user', approvedAt: new Date().toISOString(), approvalSource: 'builder:approve' } });
     return { approved: input.hash };
+  }
+  // Builder's Proceed with these risks (all: true) and the per-row accept (risks: [one]); always source "builder".
+  async function acceptFromBuilder(input) {
+    if (!input || Object.keys(input).some(k => !['all', 'kind', 'risks'].includes(k)) || (input.all !== true && !Array.isArray(input.risks)) || (input.kind !== undefined && !['contrast', 'part-contrast'].includes(input.kind))) throw new PublishError('Send all: true (with a kind) or the risks to accept.', 400);
+    return acceptRisks(outputDir, { all: input.all === true, kind: input.kind, risks: input.risks || [], source: 'builder' });
+  }
+  async function restoreFromBuilder(input) {
+    if (!input || Object.keys(input).join() !== 'risk') throw new PublishError('Send the risk to restore.', 400);
+    return restoreRisk(outputDir, input.risk);
   }
   async function saveSettings(input) {
     if (!input || Object.keys(input).join() !== 'figma' || typeof input.figma !== 'boolean') throw new PublishError('Send {figma: true|false}.', 400);
@@ -109,7 +122,7 @@ export function createManagerServer({ outputDir, workspace = workspaceOf(outputD
     const json = (code, value) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(req.method === 'HEAD' ? undefined : JSON.stringify(value)); };
     try {
       const route = new URL(req.url, `http://${host}`).pathname;
-      const mutations = ['/api/foundations', '/api/foundations-restore', '/api/foundations-approve', '/api/settings', '/api/publish-figma', '/api/publish-cancel', '/api/publish-fonts', '/api/parts-prepare', '/api/parts-update', '/api/change-requests', '/api/setup-submit', '/api/setup-revise', '/api/setup-answers', '/api/setup-retry', '/api/setup-cancel'];
+      const mutations = ['/api/foundations', '/api/foundations-restore', '/api/foundations-approve', '/api/risks-accept', '/api/risks-restore', '/api/settings', '/api/publish-figma', '/api/publish-cancel', '/api/publish-fonts', '/api/parts-prepare', '/api/parts-update', '/api/change-requests', '/api/setup-submit', '/api/setup-revise', '/api/setup-answers', '/api/setup-retry', '/api/setup-cancel'];
       if (req.method === 'POST' && mutations.includes(route)) {
         if (req.headers.origin !== `http://${host}` || req.headers['x-ds-create-token'] !== csrfToken || req.headers['sec-fetch-site'] === 'cross-site') { json(403, { error: 'Reopen this Builder tab before trying again.' }); return; }
         const upload = ['/api/setup-submit','/api/setup-revise'].includes(route), type = req.headers['content-type'] || '';
@@ -126,7 +139,7 @@ export function createManagerServer({ outputDir, workspace = workspaceOf(outputD
         if(transitioning)throw new PublishError('Another setup or publication action is being saved. Retry after it finishes.');
         transitioning=true;
         try {
-        const result = route === '/api/foundations' ? await items.change({ expectedRevision: input?.expectedRevision, ops: input?.ops, reason: input?.reason, author: 'builder', confirmed: true }) : route === '/api/foundations-restore' ? await items.restore({ revision: input?.revision, expectedRevision: input?.expectedRevision, author: 'builder' }) : route === '/api/foundations-approve' ? await approveFoundations(input) : route === '/api/settings' ? await saveSettings(input) : route === '/api/publish-figma' ? await jobs.start(input) : route === '/api/publish-cancel' ? await jobs.cancel() : route === '/api/publish-fonts' ? await setup.fontChoice(input) : route === '/api/parts-prepare' ? await partJobs.prepare(input, await getState(outputDir)) : route === '/api/parts-update' ? await partJobs.update(input, await getState(outputDir)) : route === '/api/change-requests' ? await changeRequests.update(input) :
+        const result = route === '/api/foundations' ? await items.change({ expectedRevision: input?.expectedRevision, ops: input?.ops, reason: input?.reason, author: 'builder', confirmed: true }) : route === '/api/foundations-restore' ? await items.restore({ revision: input?.revision, expectedRevision: input?.expectedRevision, author: 'builder' }) : route === '/api/foundations-approve' ? await approveFoundations(input) : route === '/api/risks-accept' ? await acceptFromBuilder(input) : route === '/api/risks-restore' ? await restoreFromBuilder(input) : route === '/api/settings' ? await saveSettings(input) : route === '/api/publish-figma' ? await jobs.start(input) : route === '/api/publish-cancel' ? await jobs.cancel() : route === '/api/publish-fonts' ? await setup.fontChoice(input) : route === '/api/parts-prepare' ? await partJobs.prepare(input, await getState(outputDir)) : route === '/api/parts-update' ? await partJobs.update(input, await getState(outputDir)) : route === '/api/change-requests' ? await changeRequests.update(input) :
           route === '/api/setup-revise' ? await setup.revise(input) : route === '/api/setup-submit' ? await setup.submit(input) : route === '/api/setup-answers' ? await setup.answer(input) : route === '/api/setup-retry' ? await setup.retry(input) : await setup.cancel();
         json(202,result); return;
         } finally { transitioning=false; }

@@ -27,6 +27,15 @@ function paintSync(sync, useFigma) {
   $('build-sync-diff').hidden = !items.length;
 }
 
+// One risk in a line: the pair or the Part slot, its ratio and minimum, and where it shows.
+const ratioText = r => `${typeof r.ratio === 'number' ? r.ratio.toFixed(2) : 'Unresolved'}:1, needs ${r.minimum}:1`;
+export function riskLines(r) {
+  return r.kind === 'contrast'
+    ? { title: `${r.foreground} on ${r.background}`, detail: `${r.mode} · ${ratioText(r)} · Shown on 1.1 Color` }
+    : { title: `${r.part} · ${r.where}`, detail: `${r.text} on ${r.paint} · ${ratioText(r)} · Shown on the ${r.part} page` };
+}
+const identity = r => r.kind === 'contrast' ? { kind: r.kind, foreground: r.foreground, background: r.background, mode: r.mode } : { kind: r.kind, part: r.part, where: r.where, text: r.text, paint: r.paint };
+
 export function setupBuild({ getState, refresh = async () => {} }) {
   const dialog = $('build-dialog');
   const step = name => dialog.querySelector(`[data-step="${name}"]`);
@@ -36,9 +45,47 @@ export function setupBuild({ getState, refresh = async () => {} }) {
     el.querySelector('[data-state-label]').textContent = label;
     el.querySelector('[data-step-text]').textContent = text;
   };
+  async function send(endpoint, body) {
+    const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-DS-Create-Token': getState()?.csrfToken || '' }, body: JSON.stringify(body), signal: AbortSignal.timeout(15000) });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Builder could not save this. Try again.');
+    await refresh(); sync();
+  }
+  // Each step lists its open risks (accept one, or all with Proceed with these risks) and the accepted ones (Restore the rule).
+  function paintRisks(kind) {
+    const box = dialog.querySelector(`[data-risks="${kind}"]`), risks = getState()?.risks || { open: [], accepted: [] };
+    const open = risks.open.filter(r => r.kind === kind), accepted = risks.accepted.filter(r => r.kind === kind);
+    box.hidden = !open.length && !accepted.length;
+    if (box.hidden) return;
+    box.querySelector('[data-risk-title]').textContent = open.length ? `${open.length} ${open.length === 1 ? 'pair is' : 'pairs are'} below the contrast minimum.${kind === 'contrast' ? ' Accept these risks or change the values to enable Approve and Publish.' : ''}` : 'You accepted these risks.';
+    const row = (r, label, action) => {
+      const li = Object.assign(document.createElement('li'), { className: 'build-risk' }), text = Object.assign(document.createElement('span'), { className: 'build-risk-text' }), lines = riskLines(r);
+      if (action === 'restore') text.append(Object.assign(document.createElement('span'), { className: 'risk-mark', textContent: 'Accepted risk' }));
+      text.append(Object.assign(document.createElement('strong'), { textContent: lines.title }), Object.assign(document.createElement('span'), { textContent: lines.detail }));
+      const button = Object.assign(document.createElement('button'), { type: 'button', className: 'text-button', textContent: label });
+      button.addEventListener('click', async () => {
+        button.disabled = true; error.hidden = true;
+        try { await send(action === 'restore' ? '/api/risks-restore' : '/api/risks-accept', action === 'restore' ? { risk: identity(r) } : { risks: [identity(r)] }); }
+        catch (e) { error.textContent = e.message; error.hidden = false; button.disabled = false; }
+      });
+      li.append(text, button); return li;
+    };
+    const error = box.querySelector('[data-risk-error]');
+    box.querySelector('[data-risk-open]').replaceChildren(...open.map(r => row(r, 'Accept', 'accept')));
+    box.querySelector('[data-risk-accepted]').replaceChildren(...accepted.map(r => row(r, 'Restore the rule', 'restore')));
+    const proceed = box.querySelector('[data-risks-proceed]');
+    proceed.hidden = !open.length;
+    proceed.onclick = async () => {
+      proceed.disabled = true; error.hidden = true;
+      try { await send('/api/risks-accept', { all: true, kind }); }
+      catch (e) { error.textContent = e.message; error.hidden = false; }
+      proceed.disabled = false;
+    };
+  }
   function sync() {
     const s = getState()?.publishSteps;
     if (!s) return;
+    paintRisks('contrast'); paintRisks('part-contrast');
     const f = s.foundations, p = s.parts, c = s.components, b = s.build;
     const useFigma = s.figma !== false;
     // Saved foundations wait for the user's approval here; Figma is not needed for it.

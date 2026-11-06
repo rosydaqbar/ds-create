@@ -3,7 +3,8 @@
 import {mkdir, open, readFile, readdir, rename, stat, unlink, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash, randomUUID} from 'node:crypto';
-import {applyOps, defaultRules, draftWarnings, isWide, ItemError} from './ops.mjs';
+import {applyOps, defaultRules, draftRisks, draftWarnings, isWide, ItemError} from './ops.mjs';
+import {readAccepted, splitRisks} from './risks.mjs';
 import {validateFoundations} from './validate.mjs';
 import {createFoundationPack} from './pack.mjs';
 import {PublishError} from '../server/files.mjs';
@@ -130,7 +131,8 @@ export function createItemStore({outputDir}) {
       }
       if (broken.length) result.warnings.push(...broken);
       const wide = isWide(result.impact, ops, result.rules) || (broken.length ? broken.join(' ') : null);
-      const summary = {changes: result.changes, warnings: result.warnings, impact: result.impact, wide};
+      // Only open risks come back; an accepted one is the user's decision already. Item edits never write acceptances.
+      const summary = {changes: result.changes, warnings: result.warnings, risks: splitRisks(result.risks, await readAccepted(outputDir)).open, impact: result.impact, wide};
       if (dryRun) return {revision: current.revision, ...summary, dryRun: true};
       // Nothing changed (the same preset clicked again): no revision, and an approved draft stays approved.
       if (same(result.draft, current.draft) && same(result.plan, current.plan) && same(result.rules, current.rules)) return {revision: current.revision, ...summary, changes: [], wide: null, dryRun: false, unchanged: true};
@@ -168,7 +170,7 @@ export function createItemStore({outputDir}) {
       const now = await readParts(outputDir), bare = p => { const {revision: _r, updated: _u, prepared: _p, ...rest} = p || {}; return JSON.stringify(rest); };
       const parts = Object.fromEntries(Object.entries(snapshot.parts || {}).filter(([id, p]) => now[id] && bare(p) !== bare(now[id])));
       await commit(current, next, {plan, rules, author, reason: `Restore revision ${revision}`, ops: [], parts});
-      return {revision: next.revision, changes: [], warnings: draftWarnings(next, plan, rules)};
+      return {revision: next.revision, changes: [], warnings: draftWarnings(next, plan, rules), risks: splitRisks(draftRisks(next), await readAccepted(outputDir)).open};
     });
   }
 

@@ -16,11 +16,14 @@ const byName = new Map(src.variables.map((v) => [v.name, v]));
  * What the owner approved for this system (tokens/accepted.json, copied from the build ledger):
  *   unsupportedModes  { "Color": ["Dark"] }: modes Figma has but the system doesn't support; not checked.
  *   contrast          ["color/text/x on color/fill/y"]: pairs below AA the owner approved; listed, never failing.
+ *   acceptedRisks     ["color/text/x on color/fill/y"]: pairs the user accepted as risks in Builder or chat
+ *                     (output/accepted-risks.json); `ds-create tokens` rewrites this list every run.
  * The template has no accepted.json: every mode is checked and every pair must pass.
  */
 const accFile = path.join(root, 'tokens/accepted.json');
 const accepted = fs.existsSync(accFile) ? JSON.parse(fs.readFileSync(accFile, 'utf8')) : {};
 const approvedPairs = new Set(accepted.contrast ?? []);
+const acceptedRisks = new Set(accepted.acceptedRisks ?? []);
 const skipModes = accepted.unsupportedModes?.Color ?? [];
 const colorModes = (src.collections.find((c) => c.name === 'Color')?.modes ?? ['Light']).filter((m) => !skipModes.includes(m));
 for (const m of skipModes) console.log(`  ~ ${m} mode: not supported (approved in tokens/accepted.json), not checked`);
@@ -86,6 +89,7 @@ for (const mode of colorModes) {
     const line = `${mode.padEnd(6)} ${fg} on ${bg}: ${r.toFixed(2)}:1 (needs 4.5:1)`;
     if (exceptions.has(fg)) notes.push(`  ~ ${line} — exception: ${exceptions.get(fg)}`);
     else if (approvedPairs.has(`${fg} on ${bg}`)) notes.push(`  ~ ${line} — approved by the owner (tokens/accepted.json; documented on 1.1 Color)`);
+    else if (acceptedRisks.has(`${fg} on ${bg}`)) notes.push(`  ~ ${line} — accepted by the user (output/accepted-risks.json)`);
     else {
       failed++;
       console.log(`  ✕ ${line}`);

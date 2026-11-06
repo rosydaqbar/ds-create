@@ -4,7 +4,7 @@ For preparationVersion:2 this is the complete normal runtime contract. AI parses
 
 1. Read the trusted request and source-pack.json once. Read all extracted evidence before asking questions. Inspect flagged originals using existing native file/image tools; import token exports losslessly. Listed `../filename` entries refer ONLY to direct workspace/input/ files. Never traverse another system or execute source code.
 2. Fill the server-created foundation-inputs.json structure into decisions.json beside the request. template-catalog.json contains the6fixed template ids and input fields. Keep inputHash/inputRevision and coverage path/hash identities exact. Parse product meaning and supplied values; record source-backed exceptions. Do not generate per-system renderer code, derived primitive tables, Markdown summaries or hundreds of variable/style definitions.
-3. Invoke the owned compile action. Node expands templates, validates source/aliases/contrast, writes canonical draft/plan and paired JS/MD files, then returns a receipt. Correct only the named input/error and compile again. Ready is decided by the existing proof checks, not a message.
+3. Invoke the owned compile action. Node expands templates, validates source and aliases, lists contrast below its minimum as risks (`mcp.md#risks`; they never stop compile), writes canonical draft/plan and paired JS/MD files, then returns a receipt. Correct only the named input/error and compile again. Ready is decided by the existing proof checks, not a message.
 4. Finish ready/questions/blocked/failed/cancelled through the same owner. After finish, end the main agent turn; Node waits. No idle AI polling, subagents, Figma, font installation/substitution, approval or build.
 
 ## Input binding

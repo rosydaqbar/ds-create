@@ -79,6 +79,7 @@
           <div class="build-body"><div class="build-title"><h3>Foundations</h3><span class="build-state" data-state-label></span></div>
             <p class="build-text" data-step-text></p>
             <div id="build-sync" class="build-sync" hidden><p id="build-sync-state" class="build-sync-state"></p><ul id="build-sync-diff" class="build-sync-diff"></ul></div>
+            <div class="build-risks" data-risks="contrast" hidden><p class="build-risks-title" data-risk-title></p><ul class="build-risk-list" data-risk-open></ul><div class="build-actions"><button type="button" class="button" data-risks-proceed>Proceed with these risks</button></div><ul class="build-risk-list" data-risk-accepted></ul><p class="build-error" data-risk-error role="alert" hidden></p></div>
             <div class="build-actions"><button id="approve-foundations" type="button" class="button button-primary" hidden>Approve foundations</button><button id="publish" class="button" disabled title="Prepare foundations or run ds-create init before publishing." aria-haspopup="dialog" aria-controls="publish-dialog" aria-describedby="publish-reason">Publish to Figma</button><small id="publish-reason" class="workspace-help" hidden></small><button type="button" class="button" data-build-context hidden>Open Context</button><span class="parts-feedback" role="status" aria-live="polite" id="approve-feedback"></span></div></div>
         </li>
         <li class="build-step" data-step="parts" data-state="todo">
@@ -86,6 +87,7 @@
           <div class="build-body"><div class="build-title"><h3>Parts, Components &amp; Sections</h3><span class="build-state" data-state-label></span></div>
             <p class="build-text" data-step-text></p>
             <p class="build-text" data-parts-reason hidden></p>
+            <div class="build-risks" data-risks="part-contrast" hidden><p class="build-risks-title" data-risk-title></p><ul class="build-risk-list" data-risk-open></ul><div class="build-actions"><button type="button" class="button" data-risks-proceed>Proceed with these risks</button></div><ul class="build-risk-list" data-risk-accepted></ul><p class="build-error" data-risk-error role="alert" hidden></p></div>
             <div class="build-actions"><button type="button" class="button" data-prepare-parts hidden>Prepare Parts</button><button type="button" class="button" data-parts-copy>Copy prompt</button><span class="parts-feedback" role="status" aria-live="polite" data-parts-feedback></span><span class="parts-feedback" role="status" aria-live="polite" data-parts-copied></span></div></div>
         </li>
         <li class="build-step" data-step="build" data-state="locked">

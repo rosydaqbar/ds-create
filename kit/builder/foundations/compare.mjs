@@ -1,5 +1,5 @@
 import { rgba, validateFoundations } from './validate.mjs';
-import { canonicalAngle } from './gradient.mjs';
+import { canonicalAngle, canonicalRadial } from './gradient.mjs';
 // Compare the approved subset. Unrelated existing Figma content may remain.
 const measurement=(v,size,fallback=null)=>v===undefined?fallback:typeof v==='number'?v:v?.unit==='PIXELS'?v.value:v?.unit==='PERCENT'?v.value*size/100:v?.unit==='AUTO'?null:v;
 const color=v=>rgba(v)||v;
@@ -12,7 +12,8 @@ function effect(e){
 // Both sides carry the CSS angle; a readback converts Figma's gradientTransform before it gets here. Both are
 // canonicalised the way the exporter rounds, so 360 matches 0 and 12.34567 matches 12.346.
 function paint(p){
-  return {...metadata(p,['type','angle','gradientTransform','stops','visible','blendMode','opacity']),type:p.type,angle:typeof p.angle==='number'?canonicalAngle(p.angle):p.angle,
+  const radial=p.type==='GRADIENT_RADIAL'&&Array.isArray(p.center)&&Array.isArray(p.size)?canonicalRadial(p):null;
+  return {...metadata(p,['type','angle','center','size','rotation','gradientTransform','stops','visible','blendMode','opacity']),type:p.type,...(radial||{angle:typeof p.angle==='number'?canonicalAngle(p.angle):p.angle}),
     stops:(p.stops||[]).map(x=>({position:x.position,color:x.color?.alias?{alias:x.color.alias}:(c=>Array.isArray(c)?c.map(n=>Math.round(n*255)):c)(color(x.color))})),visible:p.visible??true,blendMode:p.blendMode??'NORMAL',opacity:p.opacity??1};
 }
 function style(s,kind){
