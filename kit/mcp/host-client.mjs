@@ -1,10 +1,13 @@
 // CLI side of the terminal host (host.mjs). Dependency-free, so it can install kit/mcp's packages first.
 import {spawn, spawnSync} from 'node:child_process';
-import {access, open, readFile, unlink} from 'node:fs/promises';
+import {access, mkdir, open, readFile, unlink} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {isProject} from '../builder/server/layout.mjs';
 
+// Workspace mode keeps the host record next to the sessions; a project keeps it with its runtime state.
 export const HOST_FILE = 'workspace/output/.mcp-host.json';
+export const hostFile = workspace => isProject(workspace) ? 'output/manager/.mcp-host.json' : HOST_FILE;
 export const HOST_HEADER = 'x-ds-create-host';
 // Longer than the 5-minute ds_create_wait so the server, not the host, ends a pending wait.
 export const CALL_TIMEOUT_MS = 6 * 60 * 1000;
@@ -26,9 +29,11 @@ export async function ensureDependencies() {
   if (r.status !== 0) throw new Error(`Could not install DS Create MCP dependencies. Run: npm ci --prefix ${MCP_DIR}`);
 }
 
+const logFile = workspace => path.join(workspace, hostFile(workspace).replace(/\.json$/, '.log'));
+
 export async function hostRecord(workspace) {
   let record;
-  try { record = JSON.parse(await readFile(path.join(workspace, HOST_FILE), 'utf8')); } catch { return null; }
+  try { record = JSON.parse(await readFile(path.join(workspace, hostFile(workspace)), 'utf8')); } catch { return null; }
   if (!/^http:\/\/127\.0\.0\.1:\d+$/.test(record?.url || '')) return null;
   try {
     const health = await fetch(`${record.url}/health`, { signal: AbortSignal.timeout(800) }).then(r => r.json());
@@ -41,7 +46,8 @@ export async function startHost(workspace) {
   if (running) return { ...running, token: undefined, reused: true };
   await ensureDependencies();
   // One host per workspace: the lock holds the starting process's pid, and a dead holder is cleared.
-  const lock = path.join(workspace, `${HOST_FILE}.lock`);
+  const lock = path.join(workspace, `${hostFile(workspace)}.lock`);
+  await mkdir(path.dirname(lock), { recursive: true });
   let handle;
   for (let i = 0; !handle; i++) {
     try { handle = await open(lock, 'wx'); await handle.write(String(process.pid)); }
@@ -56,7 +62,7 @@ export async function startHost(workspace) {
     }
   }
   try {
-    const log = await open(path.join(workspace, 'workspace/output/.mcp-host.log'), 'a');
+    const log = await open(logFile(workspace), 'a');
     const child = spawn(process.execPath, [path.join(MCP_DIR, 'host.mjs'), '--workspace', workspace], { detached: true, stdio: ['ignore', log.fd, log.fd] });
     await log.close(); child.unref();
     let exited = false; child.on('exit', () => { exited = true; });
@@ -66,7 +72,7 @@ export async function startHost(workspace) {
       if (record?.pid === child.pid) return { ...record, token: undefined, reused: false };
       await sleep(POLL_MS);
     }
-    throw new Error(`DS Create MCP host did not start. Check ${path.join(workspace, 'workspace/output/.mcp-host.log')}.`);
+    throw new Error(`DS Create MCP host did not start. Check ${logFile(workspace)}.`);
   } finally { await handle.close(); await unlink(lock).catch(() => {}); }
 }
 

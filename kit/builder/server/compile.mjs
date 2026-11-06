@@ -1,4 +1,5 @@
 import {lstat, readFile, rename, writeFile} from 'node:fs/promises';
+import {inputRel, outputRel, runtimeRel} from './layout.mjs';
 import path from 'node:path';
 import {digest, sourceBytes} from './sources.mjs';
 import {COMPILER_HASH, assembleFoundations, contrastReport, domainNames, validateDecisionPack} from '../foundations/compiler.mjs';
@@ -24,7 +25,7 @@ export async function compilePreparation(request,jobDir,{assertCurrent=async()=>
  }
  const platform=locked.platform||decision.product?.platform,modes=locked.modes||decision.modes||frozen?.collections.find(c=>c.name==='Color')?.modes;
  if(!['Web','App','Web and App'].includes(platform)||!Array.isArray(modes)||!modes.length)throw new Error('Settle platform and appearance modes before compilation.');
- const cache=await localDirectory(request.workspace,`workspace/output/${request.slug}/manager/preparation-cache/domains`),parts={},compiled=[],reused=[];
+ const cache=await localDirectory(request.workspace,`${runtimeRel(request.workspace,request.slug)}/preparation-cache/domains`),parts={},compiled=[],reused=[];
  for(const domain of domainNames){
   const scope=decision.domains[domain];if(scope.status==='excluded'||!scope.recipe)continue;
   let dependencies;
@@ -49,20 +50,20 @@ export async function compilePreparation(request,jobDir,{assertCurrent=async()=>
  await assertCurrent();
  const ledgerFile=path.join(request.outputDir,'ds-create-ledger.json');await regular(ledgerFile);
  const existing=await readJSON(ledgerFile)||{},now=new Date().toISOString();
- const ledger={...existing,system:request.projectName,scope:{...existing.scope,productType:plan.product.platform},answers:{...existing.answers,init:`workspace/input/${request.inputSlug||request.slug}/answers/01-init.md`},sequence:[...(existing.sequence||[]).filter(e=>![1,2,3,4].includes(Number(e.step))),...[1,2,3,4].map(step=>({...existing.sequence?.find(e=>Number(e.step)===step),step,status:step===1?'done':'todo'}))].sort((a,b)=>Number(a.step)-Number(b.step)),foundationReview:{status:'pending'}};
- const input=`workspace/input/${request.inputSlug||request.slug}`;
- await localDirectory(request.workspace,input+'/answers');await localDirectory(request.workspace,`workspace/output/${request.slug}/reports`);
+ const ledger={...existing,system:request.projectName,scope:{...existing.scope,productType:plan.product.platform},answers:{...existing.answers,init:`${inputRel(request.workspace,request.inputSlug||request.slug)}/answers/01-init.md`},sequence:[...(existing.sequence||[]).filter(e=>![1,2,3,4].includes(Number(e.step))),...[1,2,3,4].map(step=>({...existing.sequence?.find(e=>Number(e.step)===step),step,status:step===1?'done':'todo'}))].sort((a,b)=>Number(a.step)-Number(b.step)),foundationReview:{status:'pending'}};
+ const input=inputRel(request.workspace,request.inputSlug||request.slug);
+ await localDirectory(request.workspace,input+'/answers');await localDirectory(request.workspace,`${outputRel(request.workspace,request.slug)}/reports`);
  const sources='# Preparation sources\n\n'+pack.sources.map(s=>`- ${s.path} → ${path.resolve(request.workspace,input,s.path)} · sha256 ${s.hash} · ${s.archive?'archive':'active'} · ${decision.coverage.find(r=>r.path===s.path).status}`).join('\n')+'\n';
  const answers='# Init decisions\n\n'+plan.decisions.map((d,i)=>`## ${i+1} · ${d.key}\nAnswer: ${d.value}\nDecided by: ${d.decidedBy} (${d.source})${d.reason?' — '+d.reason:''}\nGates: local foundation preparation; Figma pending.\n`).join('\n');
  const report=`# Local foundation preparation\n\n${request.projectName} · revision ${revision}\nInput hash: ${request.inputHash}\nCompiler: ${COMPILER_HASH}\n\nAwaiting Builder review. Figma readiness, publication and audit remain pending; init is incomplete.\n\n## Design decisions\n\n`+plan.decisions.map(d=>`- ${d.key}: ${d.value} (${d.source})${d.reason?' — '+d.reason:''}`).join('\n')+'\n\n## Scope\n\n'+domainNames.map(id=>`- ${id}: ${plan.domains[id].status}${plan.domains[id].reason?' — '+plan.domains[id].reason:''}`).join('\n')+`\n\nContrast: ${contrast.length} tested pairs; ${failures.length} failures. Transparent pairs require explicit backing-surface resolution. Preview controller edits are not saved by this operation.\n`;
  const artifacts=[['foundation-plan.json',JSON.stringify(plan,null,2)+'\n'],['ds-create-ledger.json',JSON.stringify(ledger,null,2)+'\n'],['reports/init.md',report],['foundations.json',JSON.stringify(draft,null,2)+'\n']].map(([name,body])=>[path.join(request.outputDir,name),body]);
  const foundationPack=createFoundationPack({draft,plan,decision:rawDecision,request});
- await localDirectory(request.workspace,`workspace/output/${request.slug}/foundations`);
+ await localDirectory(request.workspace,`${outputRel(request.workspace,request.slug)}/foundations`);
  artifacts.push(...foundationPack.files.map(([name,body])=>[path.join(request.outputDir,name),body]));
  artifacts.unshift([path.join(request.workspace,input,'sources.md'),sources],[path.join(request.workspace,input,'answers/01-init.md'),answers]);
  // Stage the whole set before changing canonical files. Individual renames are atomic;
  // the owned setup remains running until the normal proof checks accept the complete set.
- const staging=await localDirectory(request.workspace,`workspace/output/${request.slug}/manager/setup-jobs/${request.id}/artifacts`);
+ const staging=await localDirectory(request.workspace,`${runtimeRel(request.workspace,request.slug)}/setup-jobs/${request.id}/artifacts`);
  for(const [i,[target,body]]of artifacts.entries()){await regular(target);await writeFile(path.join(staging,i+'.tmp'),body);}
  await assertCurrent();
  if((await snapshotInputs(request.workspace,request.inputSlug||request.slug)).hash!==request.inputHash)throw new Error('Inputs changed before committing artifacts.');

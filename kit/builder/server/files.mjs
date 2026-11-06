@@ -2,21 +2,32 @@ import {lstat, mkdir, open, readFile, readdir, realpath, rename, unlink, writeFi
 import {createHash, randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {existsSync, readFileSync} from 'node:fs';
+import {isProject, projectSlug, workspaceOf} from './layout.mjs';
 
 const sha = data => createHash('sha256').update(data).digest('hex');
 // Derived indexes and the generated decision transcription are not source inputs.
 const generated = new Set(['sources.md', 'answers/01-init.md']);
 const rootBookkeeping = new Set(['README.md', '.DS_Store']);
+// The folder that holds input: workspace/input (one folder per session) or, in a project, input/ itself.
 async function inputDirectory(workspace) {
   const base=await realpath(workspace);
+  if(isProject(workspace)){
+    try{const info=await lstat(path.join(base,'input'));if(!info.isDirectory()||info.isSymbolicLink())throw new Error('Input storage must use real workspace directories.');}
+    catch(e){if(e.code==='ENOENT')return null;throw e;}
+    return path.join(base,'input');
+  }
   for(const rel of ['workspace','workspace/input']){
     try{const info=await lstat(path.join(base,rel));if(!info.isDirectory()||info.isSymbolicLink())throw new Error('Input storage must use real workspace directories.');}
     catch(e){if(e.code==='ENOENT')return null;throw e;}
   }
   return path.join(base,'workspace/input');
 }
+// One session's input folder inside inputDirectory(): its slug folder, or the project's input/ itself.
+const sessionInput=(workspace,input,slug)=>isProject(workspace)?input:path.join(input,slug);
 // Metadata only for the Builder list; file bytes are read once per source snapshot.
 export async function listRootInputs(workspace) {
+  // A project has no shared files next to a session folder: input/ is the session.
+  if(isProject(workspace))return [];
   const input=await inputDirectory(workspace);if(!input)return [];
   const files=[];
   for(const entry of await readdir(input,{withFileTypes:true})){
@@ -32,7 +43,7 @@ export async function snapshotInputs(workspace, slug) {
   selectedInputSlug({inputSlug:slug});
   const input=await inputDirectory(workspace),files=[];
   if(!input)return {hash:sha('[]'),files};
-  const root=path.join(input,slug);
+  const root=sessionInput(workspace,input,slug);
   let selectedExists=true;
   try{const info=await lstat(root);if(!info.isDirectory()||info.isSymbolicLink())throw new Error('Input storage must use real workspace directories.');}
   catch(e){if(e.code==='ENOENT')selectedExists=false;else throw e;}
@@ -60,7 +71,7 @@ export async function inputFreshness(outputDir, setup) {
   if(!setup || setup.status!=='ready')return {fresh:!setup,message:setup?.message || 'Finish local preparation first.'};
   if(!setup.readyInputHash)return {fresh:false,message:'This draft predates input revision checks. Open Context and prepare it again.'};
   try{
-    const current=await snapshotInputs(path.resolve(outputDir,'../../..'),selectedInputSlug(setup,path.basename(outputDir)));
+    const current=await snapshotInputs(workspaceOf(outputDir),selectedInputSlug(setup,projectSlug(outputDir)));
     return {fresh:current.hash===setup.readyInputHash,hash:current.hash,message:current.hash===setup.readyInputHash?'':'Context files changed. Open Context and prepare the current inputs before publishing.'};
   }catch(e){return {fresh:false,message:e.message};}
 }
@@ -74,7 +85,7 @@ export const brandTypes = {svg: 'image/svg+xml', png: 'image/png', jpg: 'image/j
 const brandType = name => brandTypes[path.extname(name).slice(1).toLowerCase()] || null;
 export async function listBrandFiles(workspace, setup, sessionSlug) {
   const input = await inputDirectory(workspace); if (!input) return { files: [], error: null };
-  const root = path.join(input, selectedInputSlug(setup, sessionSlug)), found = [];
+  const root = sessionInput(workspace, input, selectedInputSlug(setup, sessionSlug)), found = [];
   const add = async (full, name, rel) => { const info = await lstat(full); found.push({ name, path: rel, size: info.size, mtimeMs: Math.trunc(info.mtimeMs), type: brandType(name) }); };
   let session = true;
   try { const info = await lstat(root); if (!info.isDirectory() || info.isSymbolicLink()) session = false; }
@@ -103,7 +114,7 @@ export async function listBrandFiles(workspace, setup, sessionSlug) {
 export async function readBrandFile(workspace, setup, sessionSlug, key) {
   const file = (await listBrandFiles(workspace, setup, sessionSlug)).files.find(f => f.key === key); if (!file || !brandType(file.name)) return null;
   const inputRoot = await realpath(await inputDirectory(workspace)), shared = file.path.startsWith('../');
-  const base = shared ? inputRoot : await realpath(path.join(inputRoot, selectedInputSlug(setup, sessionSlug)));
+  const base = shared ? inputRoot : await realpath(sessionInput(workspace, inputRoot, selectedInputSlug(setup, sessionSlug)));
   const full = path.join(base, shared ? file.name : file.path), real = await realpath(full).catch(() => null);
   if (real !== full || (shared ? path.dirname(real) !== inputRoot : !real.startsWith(base + path.sep)) || !(await lstat(real)).isFile()) return null;
   return { bytes: await readFile(real), type: file.type };

@@ -18,14 +18,12 @@ import {createItemStore} from '../foundations/store.mjs';
 import {syncState} from '../foundations/baseline.mjs';
 import {preparedFonts} from '../client/assets/fonts/catalog.mjs';
 import {parseServerArgs} from './args.mjs';
+import {builderCommand, projectSlug, workspaceOf} from './layout.mjs';
 
 // The site's chrome defaults: next to this folder in a session's Builder copy, or in the repo.
 const fallbacks = ['../web/scripts/chrome-fallbacks.mjs', '../../web/scripts/chrome-fallbacks.mjs'].map(p => new URL(p, import.meta.url)).find(u => existsSync(fileURLToPath(u)));
 const web = fallbacks ? await import(fallbacks) : null;
-// A project's output/ sits next to ds-create.json; a workspace session's output is workspace/output/{slug}.
-const defaultWorkspace = outputDir => existsSync(path.join(outputDir, '../ds-create.json')) ? path.resolve(outputDir, '..') : path.resolve(outputDir, '../../..');
-
-export function createManagerServer({ outputDir, workspace = defaultWorkspace(outputDir), jobsOptions = {}, setupOptions = {}, codeDir }) {
+export function createManagerServer({ outputDir, workspace = workspaceOf(outputDir), jobsOptions = {}, setupOptions = {}, codeDir }) {
   // With codeDir the Builder runs from the engine, which has no copied viewer styles: read them from kit/web.
   const engineAssets = new Map();
   if (codeDir && web) {
@@ -46,7 +44,7 @@ export function createManagerServer({ outputDir, workspace = defaultWorkspace(ou
     // Each level counts its own templates: 19 Parts, 8 Components and 2 Sections today, more when templates are added.
     const level = name => { const list = parts.filter(p => (p.level || 'parts') === name), prepared = list.filter(p => ['review', 'synced'].includes(p.status)).length;
       return { ready: prepared > 0, prepared, inFigma: list.filter(p => p.status === 'synced').length, total: list.length }; };
-    return { figma: await readFigmaSetting(outputDir), foundations: { ready: ['approved', 'synced'].includes(s.source?.review) || s.source?.kind !== 'local' && local > 0, local, total: s.foundations.length, figma }, parts: { ...level('parts'), prompt: `Prepare the Parts, Components and Sections saved in Builder.\nUse DS Create MCP to call ds_create_parts_prepare with session: "${path.basename(outputDir)}".\nds-create builder --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}\n\nCheck that the foundations are approved in Builder first. If they are not, tell me and wait. Do not approve them yourself.` }, components: level('components'), sections: level('sections'), build: { prompt: `Run /ds-create build for the design system saved in Builder.\nds-create builder --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
+    return { figma: await readFigmaSetting(outputDir), foundations: { ready: ['approved', 'synced'].includes(s.source?.review) || s.source?.kind !== 'local' && local > 0, local, total: s.foundations.length, figma }, parts: { ...level('parts'), prompt: `Prepare the Parts, Components and Sections saved in Builder.\nUse DS Create MCP to call ds_create_parts_prepare with session: "${projectSlug(outputDir)}".\n${builderCommand(workspace, projectSlug(outputDir))}\nWorkspace: ${workspace}\n\nCheck that the foundations are approved in Builder first. If they are not, tell me and wait. Do not approve them yourself.` }, components: level('components'), sections: level('sections'), build: { prompt: `Run /ds-create build for the design system saved in Builder.\n${builderCommand(workspace, projectSlug(outputDir))}\nWorkspace: ${workspace}` } };
   }
   // The user approves the saved foundations in Builder; no Figma publish needed. An approval that a Figma
   // publish already confirmed is kept as it is.
@@ -136,7 +134,7 @@ export function createManagerServer({ outputDir, workspace = defaultWorkspace(ou
       if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }).end(); return; }
       if (route === '/api/worker') { json(200, await workerConnectionStatus(outputDir, workspace)); return; }
       if (['/api/state', '/api/health', '/api/publish-status', '/api/publish-flow', '/api/setup-flow'].includes(route)) {
-        const body = route === '/api/setup-flow' ? { ...await setup.status(), figma: await readFigmaSetting(outputDir), csrfToken } : route === '/api/publish-flow' ? { ...await jobs.status(), csrfToken } : route === '/api/publish-status' ? await getPublishStatus(outputDir) : route === '/api/state' ? await (async () => { const s = await getState(outputDir); const requests = await changeRequests.list(), parts = await partJobs.status(s); const [last] = s.source?.kind === 'local' ? await items.history({ limit: 1 }) : []; return { ...s, source: { ...s.source, savedBy: ['mcp', 'builder'].includes(last?.author) ? last.author : null, canUndo: s.source?.kind === 'local' && await items.canUndo(s.source.revision) }, typeScale: await items.typeScale(), figma: await readFigmaSetting(outputDir), sync: await syncState(outputDir), parts, partOptions: await (async () => { const draft = await readJSON(path.join(outputDir, 'foundations.json')); return draft ? stageOptions(draft) : null; })(), publishSteps: await publishSteps(s, parts), changeRequests: requests, changePrompt: changeRequests.prompt(requests, { session: path.basename(outputDir), workspace }), csrfToken }; })() : { service: 'ds-create-manager', instance, pid: process.pid, outputDir };
+        const body = route === '/api/setup-flow' ? { ...await setup.status(), figma: await readFigmaSetting(outputDir), csrfToken } : route === '/api/publish-flow' ? { ...await jobs.status(), csrfToken } : route === '/api/publish-status' ? await getPublishStatus(outputDir) : route === '/api/state' ? await (async () => { const s = await getState(outputDir); const requests = await changeRequests.list(), parts = await partJobs.status(s); const [last] = s.source?.kind === 'local' ? await items.history({ limit: 1 }) : []; return { ...s, source: { ...s.source, savedBy: ['mcp', 'builder'].includes(last?.author) ? last.author : null, canUndo: s.source?.kind === 'local' && await items.canUndo(s.source.revision) }, typeScale: await items.typeScale(), figma: await readFigmaSetting(outputDir), sync: await syncState(outputDir), parts, partOptions: await (async () => { const draft = await readJSON(path.join(outputDir, 'foundations.json')); return draft ? stageOptions(draft) : null; })(), publishSteps: await publishSteps(s, parts), changeRequests: requests, changePrompt: changeRequests.prompt(requests, { session: projectSlug(outputDir), workspace }), csrfToken }; })() : { service: 'ds-create-manager', instance, pid: process.pid, outputDir };
         json(200, body); return;
       }
       // The system's tokens for Builder's Part drawings.
@@ -148,7 +146,7 @@ export function createManagerServer({ outputDir, workspace = defaultWorkspace(ou
       if (route.startsWith('/api/brand-assets/')) {
         if (req.headers['sec-fetch-site'] === 'cross-site') { res.writeHead(403).end('Same origin only'); return; }
         let key; try { key = decodeURIComponent(route.slice('/api/brand-assets/'.length)); } catch { key = null; }
-        const file = key && await readBrandFile(workspace, await observedSetup(outputDir), path.basename(outputDir), key);
+        const file = key && await readBrandFile(workspace, await observedSetup(outputDir), projectSlug(outputDir), key);
         if (!file) { res.writeHead(404).end('Not found'); return; }
         res.writeHead(200, { 'Content-Type': file.type, 'Content-Security-Policy': "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox", 'Cross-Origin-Resource-Policy': 'same-origin' });
         res.end(req.method === 'HEAD' ? undefined : file.bytes); return;

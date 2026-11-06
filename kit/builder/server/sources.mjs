@@ -1,4 +1,5 @@
 import {readFile} from 'node:fs/promises';
+import {inputRel, runtimeRel} from './layout.mjs';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {localDirectory, snapshotInputs, writeJSON} from './files.mjs';
@@ -67,7 +68,7 @@ export function extractSourceBounded(bytes,extension,{timeoutMs=10000}={}){
 export async function sourceBytes(request,key){
  const entry=request.inputSnapshot.find(e=>e.path===key);
  if(!entry)throw new Error('Source is outside this trusted snapshot.');
- const base=path.join(request.workspace,'workspace/input',request.inputSlug||request.slug);
+ const base=path.join(request.workspace,inputRel(request.workspace,request.inputSlug||request.slug));
  const bytes=await readFile(path.resolve(base,key));
  if(bytes.length!==entry.size||digest(bytes)!==entry.hash)throw new Error('Source changed while extracting. Prepare the current inputs.');
  return bytes;
@@ -76,7 +77,7 @@ export async function prepareSourcePack(request,jobDir){
  const started=Date.now();
  const before=await snapshotInputs(request.workspace,request.inputSlug||request.slug);
  if(before.hash!==request.inputHash)throw new Error('Context changed before source extraction.');
- const cache=await localDirectory(request.workspace,`workspace/output/${request.slug}/manager/preparation-cache/sources`),sources=[];
+ const cache=await localDirectory(request.workspace,`${runtimeRel(request.workspace,request.slug)}/preparation-cache/sources`),sources=[];
  let hits=0,misses=0;
  for(const entry of request.inputSnapshot){
   const extension=path.extname(entry.path).toLowerCase(),key=digest(JSON.stringify([EXTRACTOR_VERSION,extension,entry.hash]));

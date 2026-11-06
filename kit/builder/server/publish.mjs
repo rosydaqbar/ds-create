@@ -3,6 +3,7 @@ import {PublishError, inputFreshness, selectedInputSlug, snapshotInputs, withJob
 import {access, mkdir, open, readFile, realpath} from 'node:fs/promises';
 import path from 'node:path';
 import {existsSync} from 'node:fs';
+import {builderCommand, inputRel, outputRel, projectSlug} from './layout.mjs';
 import {createHash, randomUUID} from 'node:crypto';
 import {compareFoundations} from '../foundations/compare.mjs';
 import {checkWebDraft} from './verify.mjs';
@@ -60,7 +61,7 @@ export function createFigmaJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
     if (publicJob && job.hash !== state.source.hash && !running(job)) publicJob = { ...publicJob, status: 'outdated', fonts: undefined, message: 'The saved draft changed. Publish the current revision before building.' };
     const listener=await listenerStatus(outputDir,'publish'),wait=await readJSON(path.join(outputDir,'manager/preparation-wait.json'));
     // Same continuation as the agent status panel: a queued request nobody is waiting for.
-    const recoveryPrompt=job?.status==='queued'&&!listener.connected&&listener.deliveryState!=='delivered'?publishRecoveryPrompt(path.basename(outputDir),workspace):null;
+    const recoveryPrompt=job?.status==='queued'&&!listener.connected&&listener.deliveryState!=='delivered'?publishRecoveryPrompt(projectSlug(outputDir),workspace):null;
     return { simulation, listener, recoveryPrompt, waitExpired:!!recoveryPrompt&&wait?.expired===true,
       figma: { complete, canStart: !complete && !reason && !running(job) && !busy, reason, revision: state.source.revision || null, hash: state.source.hash || null, url: state.figmaUrl },
       build: { available: complete && !running(job), status: complete ? build.status : 'locked', command: 'ds-create build' }, job: publicJob };
@@ -83,8 +84,8 @@ export function createFigmaJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
       if(job?.hash === input.hash && targetFile(job.figmaUrl)?.key === target.key && ['blocked','failed','cancelled','interrupted','needs-fonts'].includes(job.status)) {
         try {return await queueMcpJob({outputDir,workspace,id:job.id});}catch(e){throw new PublishError(e.message,412);}
       }
-      const slug = path.basename(outputDir), setup=await readJSON(path.join(outputDir,'manager/setup.json')), inputSlug=selectedInputSlug(setup,slug);
-      const answersFile = path.join(workspace, 'workspace/input', inputSlug, 'answers/01-init.md');
+      const slug = projectSlug(outputDir), setup=await readJSON(path.join(outputDir,'manager/setup.json')), inputSlug=selectedInputSlug(setup,slug);
+      const answersFile = path.join(workspace, inputRel(workspace, inputSlug), 'answers/01-init.md');
       try { await access(answersFile); } catch { throw new PublishError('Init answers are missing. Continue ds-create init with your agent first.', 412); }
       if (!['Web', 'App', 'Web and App'].includes(state.product)) throw new PublishError('Settle Web, App, or Web and App through ds-create init first.', 412);
       const id = randomUUID(), dir = path.join(jobsDir, id);
@@ -130,7 +131,7 @@ export async function validatePublishRequest(outputDir,workspace,id){
  const files=await jobFiles(outputDir,id),r=await readJSON(files.requestFile),ledger=await readJSON(path.join(outputDir,'ds-create-ledger.json'));
  // A project's job that points at another folder came in with an import from an old repo; its records are never rewritten.
  if(r?.id===id&&(r.workspace!==workspace||r.outputDir!==outputDir)&&existsSync(path.join(workspace,'ds-create.json')))throw new Error('This job was imported. Start a new publish from Builder.');
- if(r?.id!==id||r.workspace!==workspace||r.outputDir!==outputDir||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(r.slug)||path.basename(outputDir)!==r.slug)throw new Error('Request does not belong to this workspace.');
+ if(r?.id!==id||r.workspace!==workspace||r.outputDir!==outputDir||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(r.slug)||projectSlug(outputDir)!==r.slug)throw new Error('Request does not belong to this workspace.');
  const approval=ledger?.foundationReview,expected=path.relative(workspace,files.requestFile);
  if(!['approved','synced'].includes(approval?.status)||approval.approvedBy!=='user'||approval.hash!==r.hash||approval.approvalSource!==expected)throw new Error('The saved request does not have the current user approval.');
  const target=new URL(r.figmaUrl),approvedTarget=new URL(ledger.figma?.url||'');
@@ -296,12 +297,12 @@ export function evaluatePreflight(draft,result){
  return {passed:!missing.length,missing,roles,fonts:expected.map(f=>({...f,available:seen.get(key(f))})),inventory:result.inventory};
 }
 export function publishRecoveryPrompt(slug,workspace){
- return `Publish the approved foundations saved in Builder.\nds-create builder --slug ${slug}\nWorkspace: ${workspace}`;
+ return `Publish the approved foundations saved in Builder.\n${builderCommand(workspace,slug)}\nWorkspace: ${workspace}`;
 }
 
 export function figmaPrompt(request,requestFile,fastPlan){
  return `Publish approved foundations for session ${request.slug} in ${request.workspace}.
-Read ${requestFile}, skill/reference/${fastPlan?'manager-fast.md':'mcp.md and init.md (approved Figma continuation)'} and the applicable Figma tool skill. Inputs: workspace/input/${request.inputSlug||request.slug}/; outputs: workspace/output/${request.slug}/.
+Read ${requestFile}, skill/reference/${fastPlan?'manager-fast.md':'mcp.md and init.md (approved Figma continuation)'} and the applicable Figma tool skill. Inputs: ${inputRel(request.workspace,request.inputSlug||request.slug)}/; outputs: ${outputRel(request.workspace,request.slug)}/.
 The user already approved revision ${request.revision}, SHA256 ${request.hash}, target ${request.figmaUrl}. Use that existing target and approval. Do not alter foundations.json. Preserve frozen values, names, metadata and exact font identities; every approved face must load in Figma (the stepped preflight checks this first), and actual write failures must be reported. No new client, file, font substitution/installation, components/docs, build, deployment or Builder restart.
 ${fastPlan?`Verify the compiled plan ${fastPlan.file}, its sourceHash and call hashes. Execute its ${fastPlan.calls.length} calls in order through the existing Figma authoring tool; retain actual results and errors. Do not regenerate the approved data or blindly retry ambiguous writes.`:'Follow the approved publication contract through the existing Figma tools: inventory/access, variables, styles, readback and full-file audit. Preserve partial output and continue independent work when another style fails. For a paint style, prepare every paint and its stop bindings before creating the style. If any stop cannot bind, remove the style if it was created, finish with a blocked status, and report the style name and the failed stop.'}
 Report progress and cancellation through ds_create_publish_progress with the same lease before every write. Export actual output losslessly to figma/figma-variables.json and save the real mode:file audit to figma/audit-file.json with sourceHash ${request.hash}. Matching approved output and a passing audit are required before marking the ledger synced. Finish completed/blocked/failed/cancelled through ds_create_publish_finish; a successful tool return or planned export alone is not completion. Keep the MCP connection open until finishing.`;

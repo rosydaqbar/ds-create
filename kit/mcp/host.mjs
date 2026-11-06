@@ -10,10 +10,10 @@ import {fileURLToPath} from 'node:url';
 import {Client} from '@modelcontextprotocol/sdk/client/index.js';
 import {StdioClientTransport} from '@modelcontextprotocol/sdk/client/stdio.js';
 
-import {CALL_TIMEOUT_MS, HOST_FILE, HOST_HEADER, IDLE_EXIT_MS, MAX_BODY} from './host-client.mjs';
+import {CALL_TIMEOUT_MS, hostFile, HOST_HEADER, IDLE_EXIT_MS, MAX_BODY} from './host-client.mjs';
 
 async function main(workspace) {
-  const file = path.join(workspace, HOST_FILE), token = randomUUID(), instance = randomUUID();
+  const file = path.join(workspace, hostFile(workspace)), token = randomUUID(), instance = randomUUID();
   const client = new Client({ name: 'ds-create-terminal-host', version: '1.0.0' });
   const transport = new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL('./server.mjs', import.meta.url)), '--workspace', workspace], stderr: 'inherit' });
   await client.connect(transport);

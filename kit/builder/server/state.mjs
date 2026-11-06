@@ -1,4 +1,5 @@
 import {iconLibrary, libraryIcons} from '../client/assets/icons/catalog.mjs';
+import {projectSlug, workspaceOf} from './layout.mjs';
 import {readFile, stat, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -82,7 +83,7 @@ async function loadSource(outputDir, ledger, warnings = []) {
     if (!valid) warnings.push('Local foundation draft is invalid. Ask the agent to save foundations.json again.');
     const setup=await observedSetup(outputDir);
     const fresh=await inputFreshness(outputDir,setup);
-    const proof=valid&&setup?await checkWebDraft(outputDir,path.resolve(outputDir,'../../..'),setup):{valid:true};
+    const proof=valid&&setup?await checkWebDraft(outputDir,workspaceOf(outputDir),setup):{valid:true};
     if(!fresh.fresh)warnings.push(fresh.message);
     if(!proof.valid)warnings.push('Foundation checks failed: '+(proof.errors?.slice(0,2).join(' ')||'Prepare the current draft again through Context.'));
     const approval = ledger?.foundationReview;
@@ -93,8 +94,8 @@ async function loadSource(outputDir, ledger, warnings = []) {
       const request = await readJSON(path.join(outputDir, 'manager/jobs', builderRequest[1], 'request.json'));
       const fileKey = value => { const url = figmaLink(value); return url ? new URL(url).pathname.match(/^\/(?:design|file)\/([A-Za-z0-9_-]+)(?:\/|$)/)?.[1] : null; };
       const target = ledger?.figma?.url || ledger?.figmaUrl || ledger?.scope?.figmaUrl || ledger?.scope?.figma;
-      let currentInputHash;try{currentInputHash=(await snapshotInputs(path.resolve(outputDir,'../../..'),selectedInputSlug(setup,path.basename(outputDir)))).hash;}catch{/* unreadable inputs invalidate approval */}
-      approved = request?.hash === hash && (request.inputSlug || path.basename(outputDir))===selectedInputSlug(setup,path.basename(outputDir)) && request.inputHash===currentInputHash && typeof currentInputHash==='string' && !!fileKey(target) && fileKey(request.figmaUrl) === fileKey(target);
+      let currentInputHash;try{currentInputHash=(await snapshotInputs(workspaceOf(outputDir),selectedInputSlug(setup,projectSlug(outputDir)))).hash;}catch{/* unreadable inputs invalidate approval */}
+      approved = request?.hash === hash && (request.inputSlug || projectSlug(outputDir))===selectedInputSlug(setup,projectSlug(outputDir)) && request.inputHash===currentInputHash && typeof currentInputHash==='string' && !!fileKey(target) && fileKey(request.figmaUrl) === fileKey(target);
     }
     const tokenStep = Array.isArray(ledger?.sequence) ? ledger.sequence.find(e => Number(e?.step) === 4) : null;
     const audit = tokenStep?.audit || ledger?.tokens?.audit;
@@ -177,7 +178,7 @@ export async function getState(outputDir, { preparing = false } = {}) {
   const collections = exported?.collections || [];
   // The logos the user put in Context; drawing the asset components belongs to build.
   let brandFiles = [], brandError = null;
-  try { ({ files: brandFiles, error: brandError } = await listBrandFiles(path.resolve(outputDir, '../../..'), setup, path.basename(outputDir))); }
+  try { ({ files: brandFiles, error: brandError } = await listBrandFiles(workspaceOf(outputDir), setup, projectSlug(outputDir))); }
   catch { brandError = 'Context files could not be read. Check the files and try again.'; }
   const items = foundations.map(f => {
     const mapping=plan?.domains?.[f.id];
@@ -226,9 +227,9 @@ export async function getState(outputDir, { preparing = false } = {}) {
   const scope = ledger?.scope || {};
   const figmaUrl = figmaLink(ledger?.figma?.url || ledger?.figmaUrl || scope.figmaUrl || scope.figma);
   return {
-    system: setup?.projectName || (typeof ledger?.system === 'string' ? ledger.system : scope.name || (setup ? 'Your design system' : path.basename(outputDir))),
+    system: setup?.projectName || (typeof ledger?.system === 'string' ? ledger.system : scope.name || (setup ? 'Your design system' : projectSlug(outputDir))),
     setup: setup ? { status: fresh.fresh?setup.status:setup.status==='ready'?'outdated':setup.status, message: fresh.fresh?setup.message || '':fresh.message } : null,
-    slug: path.basename(outputDir), inputSlug:selectedInputSlug(setup,path.basename(outputDir)), product: scope.productType || scope.product || scope.platform || 'Not settled yet',
+    slug: projectSlug(outputDir), inputSlug:selectedInputSlug(setup,projectSlug(outputDir)), product: scope.productType || scope.product || scope.platform || 'Not settled yet',
     figmaUrl, preview: ledger?.preview === true, status, initDone, warnings, source,
     buildGate: buildGate({ source, initDone, setup: setup ? { status: fresh.fresh ? setup.status : 'outdated' } : null }, { figma: await readFigmaSetting(outputDir) }),
     updated: Math.max(...modified) ? new Date(Math.max(...modified)).toISOString() : null,

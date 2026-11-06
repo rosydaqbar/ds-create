@@ -3,6 +3,7 @@ import {appendFile, cp, lstat, mkdir, open, readFile, readdir, realpath, rename,
 import path from 'node:path';
 import {createHash, randomUUID} from 'node:crypto';
 import {observedSetup, publicMessage, readJSON} from './state.mjs';
+import {builderCommand, inputBaseRel, inputRel, isProject, outputRel, projectSlug, runtimeRel} from './layout.mjs';
 import {PublishError, inputFreshness, listRootInputs, localDirectory, projectInputSlug, selectedInputSlug, sessionOutput, snapshotInputs, withJobLock, writeJSON} from './files.mjs';
 import {checkPreparation,checkWebDraft} from './verify.mjs';
 import {prepareSourcePack} from './sources.mjs';
@@ -16,7 +17,7 @@ import {setTimeout as delay} from 'node:timers/promises';
 export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 1000, simulation = false, runner = 'mcp', preparationVersion = 2 }) {
   if(runner!=='mcp')throw new Error('Preparation uses DS Create MCP.');
   if(preparationVersion!==2&&!simulation)throw new Error('Legacy preparation is restricted to existing saved requests and simulation.');
-  const file = path.join(outputDir, 'manager/setup.json'), slug = path.basename(outputDir);
+  const file = path.join(outputDir, 'manager/setup.json'), slug = projectSlug(outputDir);
   const readProgress = createSetupProgress();
   let busy = false;
   async function latest(checkQuestions = !busy) {
@@ -40,7 +41,7 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
     const publishing=/^[0-9a-f-]{36}$/.test(pointer?.id||'') && activeSetup(await readJSON(path.join(outputDir,'manager/jobs',pointer.id,'status.json')));
     const progress=/^[0-9a-f-]{36}$/.test(r.jobId || '') ? await readProgress(path.join(outputDir,'manager/setup-jobs',r.jobId)) : null;
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
-      files:r.files || [], rootFiles:rootInputs.files, rootFilesError:rootInputs.error, interfaceDetails:r.interfaceDetails||null, fastMode:true, inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create builder --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:true, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
+      files:r.files || [], rootFiles:rootInputs.files, rootFilesError:rootInputs.error, interfaceDetails:r.interfaceDetails||null, fastMode:true, inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:builderCommand(workspace,slug), canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:true, inputSlug:selectedInputSlug(r,slug), inputPath:`${inputRel(workspace,selectedInputSlug(r,slug))}/`,
       cancelRequested:!!r.cancelRequested,cancelRequestedAt:r.cancelRequestedAt||null, canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
       runner:r.runner||runner, progress, updatedAt:r.updated || null, canStop:activeSetup(r) && r.runner==='mcp' };
   }
@@ -57,7 +58,7 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
       const blocked = {...r,status:'blocked',questions:[],message:'Preview workspace: preparation is disabled. Start ds-create builder for your own system.'};
       await writeJSON(file,blocked); return {saved:true,status:'blocked'};
     }
-    const id = randomUUID(), dir = await localDirectory(workspace,`workspace/output/${slug}/manager/setup-jobs/${id}`);
+    const id = randomUUID(), dir = await localDirectory(workspace,`${runtimeRel(workspace,slug)}/setup-jobs/${id}`);
     const inputSlug=selectedInputSlug(r,slug),snapshot=await snapshotInputs(workspace,inputSlug),inputFiles=snapshot.files.map(f=>f.path);
     const request = {id,slug,inputSlug,preparationVersion,fastMode:true,interfaceDetails:r.interfaceDetails||null,projectName:r.projectName || null,workspace,outputDir,runner,timeoutMs,simulation,inputFiles,inputHash:snapshot.hash,inputSnapshot:snapshot.files,inputRevision:r.inputRevision || 1,activeFiles:r.files || [],contextFile:r.contextFile,submitted:r.submitted,...extra};
     await writeJSON(path.join(dir,'request.json'),request);
@@ -67,7 +68,8 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
   }
   async function locked(fn) { if(busy) throw new PublishError('Setup is already being saved.');busy=true;try{return await fn();}finally{busy=false;} }
   async function reserveInputs(r,name) {
-    if(r.inputSlug || r.submitted)return {inputSlug:selectedInputSlug(r,slug),created:false};
+    // A project's input/ is its own folder: nothing to reserve or rename.
+    if(r.inputSlug || r.submitted || isProject(workspace))return {inputSlug:selectedInputSlug(r,slug),created:false};
     let inputSlug;
     try{inputSlug=projectInputSlug(name);}catch(e){throw new PublishError(e.message,400);}
     const base=await localDirectory(workspace,'workspace/input'),target=path.join(base,inputSlug);
@@ -122,13 +124,13 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
     let committed=false;
     try{
       const batch=randomUUID();
-      const uploadDir=await localDirectory(workspace,`workspace/input/${inputSlug}/uploads/${batch}`);
+      const uploadDir=await localDirectory(workspace,`${inputRel(workspace,inputSlug)}/uploads/${batch}`);
       const saved=[];
       for(const f of files) {
         await writeFile(path.join(uploadDir,f.name),Buffer.from(await f.arrayBuffer()),{flag:'wx'});
         saved.push({name:f.name,size:f.size,path:`uploads/${batch}/${f.name}`});
       }
-      const chatDir=await localDirectory(workspace,`workspace/input/${inputSlug}/chat`);
+      const chatDir=await localDirectory(workspace,`${inputRel(workspace,inputSlug)}/chat`);
       const contextFile=`chat/${new Date().toISOString().slice(0,10)}-${batch}.md`;
       await writeFile(path.join(chatDir,path.basename(contextFile)),`# Context from Builder\n\n## Project name\n${name}\n\n## Context / Instruction\n${context}\n\n${interfaceDetails?'## Interface details (user selections)\n'+interfaceDetailsText(interfaceDetails)+'\n\n':''}Meaning: User-provided context and instructions for local foundation preparation.\nApplies to: this system, init.\n`,{flag:'wx'});
       const now=new Date().toISOString(),inputRevision=(r.inputRevision||0)+1;
@@ -147,7 +149,7 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
     if(!input || Object.keys(input).some(k=>!['jobId','answers'].includes(k)) || input.jobId!==r.jobId || r.status!=='questions') throw new PublishError('These questions changed. Reopen Context and answer the current questions.');
     const qs=setupQuestions(r.questions), a=input.answers;
     if(!qs || !Array.isArray(a) || a.length!==qs.length || new Set(a.map(x=>x?.id)).size!==qs.length || a.some(x=>!x || Object.keys(x).some(k=>!['id','value'].includes(k)) || !qs.some(q=>q.id===x.id) || typeof x.value!=='string' || !x.value.trim() || x.value.length>10000)) throw new PublishError('Answer every question before continuing.',400);
-    const chatDir=await localDirectory(workspace,`workspace/input/${selectedInputSlug(r,slug)}/chat`), name=`${new Date().toISOString().slice(0,10)}-${randomUUID()}.md`;
+    const chatDir=await localDirectory(workspace,`${inputRel(workspace,selectedInputSlug(r,slug))}/chat`), name=`${new Date().toISOString().slice(0,10)}-${randomUUID()}.md`;
     await writeFile(path.join(chatDir,name),'# Answers from Builder\n\n'+qs.map(q=>`## ${q.prompt}\n${a.find(x=>x.id===q.id).value}\n\nDecided by: user\nApplies to: init.\n`).join('\n'),{flag:'wx'});
     const next={...r,inputRevision:(r.inputRevision||1)+1,readyInputHash:null,answerFiles:[...(r.answerFiles || []),`chat/${name}`]};
     await writeJSON(file,next);return launch(next,{previousJobId:r.jobId,answerFile:`chat/${name}`});
@@ -176,7 +178,7 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
       sections.push(`## ${role.label} (font/family/${role.role})\nReplace "${role.family}" (${role.styles.join(', ')}) with "${option.family}". Faces available in Figma: ${option.styles.join(', ')}.\nUse the closest available face for each weight the system uses. The previous faces were not available to Figma's publishing tool.\n`);
     }
     if(!replaced)throw new PublishError('Keeping every font needs no new preparation. Make the fonts available in Figma, then check fonts again.',400);
-    const chatDir=await localDirectory(workspace,`workspace/input/${selectedInputSlug(r,slug)}/chat`), name=`${new Date().toISOString().slice(0,10)}-${randomUUID()}.md`;
+    const chatDir=await localDirectory(workspace,`${inputRel(workspace,selectedInputSlug(r,slug))}/chat`), name=`${new Date().toISOString().slice(0,10)}-${randomUUID()}.md`;
     await writeFile(path.join(chatDir,name),'# Font choices from Builder\n\n'+sections.join('\n')+'\nDecided by: user (Publish font check)\nApplies to: init, typography.\n',{flag:'wx'});
     const ledgerFile=path.join(outputDir,'ds-create-ledger.json'),ledger=await readJSON(ledgerFile);
     if(ledger)await writeJSON(ledgerFile,{...ledger,foundationReview:{status:'pending'},sequence:(ledger.sequence||[]).map(e=>[2,3,4].includes(Number(e.step))?{...e,status:'todo'}:e)});
@@ -218,7 +220,7 @@ async function event(dir,value){
 }
 export async function validatePrepareRequest(output,workspace,id){
  const f=await files(output,id),r=await readJSON(f.requestFile),s=await readJSON(stateFile(output));
- if(r?.id!==id||r.workspace!==workspace||r.outputDir!==output||r.slug!==path.basename(output)||r.runner!=='mcp'||s?.jobId!==id||s.runner!=='mcp')throw new Error('This preparation request does not belong to the current session.');
+ if(r?.id!==id||r.workspace!==workspace||r.outputDir!==output||r.slug!==projectSlug(output)||r.runner!=='mcp'||s?.jobId!==id||s.runner!=='mcp')throw new Error('This preparation request does not belong to the current session.');
  if(r.inputSlug!==selectedInputSlug(s,r.slug)||r.inputRevision!==s.inputRevision||r.projectName!==s.projectName)throw new Error('Preparation context identity changed. Prepare the current revision.');
  if(r.inputHash!==(await snapshotInputs(workspace,r.inputSlug)).hash)throw new Error('Context files changed. Prepare the current input before continuing.');
  if(s.preview&&!r.simulation)throw new Error('Sample preparation is disabled outside simulation.');
@@ -282,8 +284,8 @@ export async function mcpPrepareAction({outputDir,workspace,id,owner,lease,attem
     const receipt=await readJSON(path.join(f.dir,'compile-receipt.json'));
     if(receipt?.inputHash!==f.request.inputHash||receipt.inputRevision!==f.request.inputRevision||receipt.compiler!==COMPILER_HASH)throw new Error('Compile the decision pack through ds_create_prepare_compile before reporting ready.');
     if(digest(await readFile(path.join(outputDir,'foundations.json')))!==receipt.draftHash||digest(JSON.stringify(await readJSON(path.join(f.dir,'decisions.json'))))!==receipt.decisionHash)throw new Error('Compiled draft or decisions changed. Compile the current decisions again.');
-    const expected=[...['foundations.json','foundation-plan.json','ds-create-ledger.json','reports/init.md'].map(n=>`workspace/output/${f.request.slug}/${n}`),...['sources.md','answers/01-init.md'].map(n=>`workspace/input/${f.request.inputSlug}/${n}`)];
-    if(receipt.foundationPack){if(receipt.foundationPack.templateHash!==templateHash||JSON.stringify([...receipt.foundationPack.files].sort())!==JSON.stringify([...foundationPackFiles].sort()))throw new Error('Foundation templates changed; compile the current bindings again.');expected.push(...foundationPackFiles.map(n=>`workspace/output/${f.request.slug}/${n}`));await verifyFoundationPack(outputDir,await readJSON(path.join(outputDir,'foundations.json')));}
+    const expected=[...['foundations.json','foundation-plan.json','ds-create-ledger.json','reports/init.md'].map(n=>`${outputRel(workspace,f.request.slug)}/${n}`),...['sources.md','answers/01-init.md'].map(n=>`${inputRel(workspace,f.request.inputSlug)}/${n}`)];
+    if(receipt.foundationPack){if(receipt.foundationPack.templateHash!==templateHash||JSON.stringify([...receipt.foundationPack.files].sort())!==JSON.stringify([...foundationPackFiles].sort()))throw new Error('Foundation templates changed; compile the current bindings again.');expected.push(...foundationPackFiles.map(n=>`${outputRel(workspace,f.request.slug)}/${n}`));await verifyFoundationPack(outputDir,await readJSON(path.join(outputDir,'foundations.json')));}
     if(Object.keys(receipt.artifactHashes||{}).length!==expected.length)throw new Error('The compilation artifact receipt is incomplete. Compile again.');
     for(const name of expected)if(digest(await readFile(path.join(workspace,name)))!==receipt.artifactHashes[name])throw new Error('Compiled review artifacts changed. Compile the current decisions again.');
    }
@@ -361,7 +363,7 @@ export function createSetupProgress() {
 
 export async function preparationWaitStatus(output){
  const r=await readJSON(path.join(output,'manager/preparation-wait.json'));
- if(!Number.isInteger(r?.pid)||r.pid<=0||r.session!==path.basename(output)||r.mode!=='pending-tool'||!Number.isFinite(r.expiresAt)||r.expiresAt<=Date.now())return null;
+ if(!Number.isInteger(r?.pid)||r.pid<=0||r.session!==projectSlug(output)||r.mode!=='pending-tool'||!Number.isFinite(r.expiresAt)||r.expiresAt<=Date.now())return null;
  try{process.kill(r.pid,0);}catch(e){if(e.code==='ESRCH')return null;throw e;}
  return {connected:true,transportConnected:true,mode:'pending-tool',capabilities:['prepare','publish'],started:r.started,agentSeenAt:null,reason:null};
 }
@@ -478,7 +480,7 @@ export async function listenerStatus(output,capability='prepare'){
  return {connected:false,transportConnected:false,mode:'mcp',capabilities:[],reason:prepare?'No pending preparation tool call or active MCP preparation.':'No MCP client owns a publication attempt.'};
 }
 export async function workerConnectionStatus(output,workspace){
- const listener=await listenerStatus(output),session=path.basename(output);
+ const listener=await listenerStatus(output),session=projectSlug(output);
  const setup=await observedSetup(output);
  let preparationState=setup?.status||'empty',preparationMessage=setup?.message||'';
  if(preparationState==='ready'){
@@ -487,16 +489,16 @@ export async function workerConnectionStatus(output,workspace){
  }
  const wait=await readJSON(path.join(output,'manager/preparation-wait.json'));
  const waitExpired=!listener.connected&&wait?.expired===true;
- const recoveryPrompt=listener.connected||listener.deliveryState==='delivered'||!['empty','queued'].includes(preparationState)?null:`Continue preparing foundations from the inputs saved in Builder.\nds-create builder --slug ${session}\nWorkspace: ${workspace}`;
+ const recoveryPrompt=listener.connected||listener.deliveryState==='delivered'||!['empty','queued'].includes(preparationState)?null:`Continue preparing foundations from the inputs saved in Builder.\n${builderCommand(workspace,session)}\nWorkspace: ${workspace}`;
  return {connected:listener.connected,transportConnected:listener.transportConnected,mode:listener.mode,capabilities:listener.capabilities||[],reason:listener.reason||null,deliveryState:listener.deliveryState||null,lastSeenAt:listener.agentSeenAt||null,preparationState,preparationMessage,waitExpired,recoveryPrompt};
 }
 
 export function setupPrompt(request,requestFile){
- const input=`workspace/input/${request.inputSlug||request.slug}/`;
+ const ws=request.workspace,input=`${inputRel(ws,request.inputSlug||request.slug)}/`;
  return `Prepare LOCAL foundations for session ${request.slug} in ${request.workspace}. NO Figma read/write authorization.
 Read ${requestFile} and skill/reference/${request.preparationVersion===2?'manager-preparation.md (the complete local contract), plus the adjacent source-pack.json, foundation-inputs.json and template-catalog.json':'init.md (local stages only), builder.md and workflow/MANAGER.md'}.
-Inputs: ${input}; outputs: workspace/output/${request.slug}/. read EVERY file in the trusted snapshot before asking missing design questions. Listed ../filename entries are shared files directly in workspace/input/; other parent paths and other systems are outside scope. Inspect flagged originals; never execute or modify supplied sources. Earlier uploads are retained archives when superseded by activeFiles/latest context.
+Inputs: ${input}; outputs: ${outputRel(ws,request.slug)}/. read EVERY file in the trusted snapshot before asking missing design questions. ${isProject(ws)?'Parent paths':`Listed ../filename entries are shared files directly in ${inputBaseRel(ws)}/; other parent paths`} and other systems are outside scope. Inspect flagged originals; never execute or modify supplied sources. Earlier uploads are retained archives when superseded by activeFiles/latest context.
 Project name: ${JSON.stringify(request.projectName)}. Interface choices: ${JSON.stringify(request.interfaceDetails||null)}. Preserve these locked choices and frozen values; do not ask a new system to choose naming rules. Use sources for product/font/color choices; ask unresolved questions in Builder unless explicit YOLO permits an inference. YOLO still requires a real product description. New systems include basic Standard/Reduced UI motion and Lucide utility icons.
-${request.fontChoiceFile?`The user replaced fonts in Builder's Publish font check (${input}${request.fontChoiceFile}). Start from the previous decisions (workspace/output/${request.slug}/manager/setup-jobs/${request.previousJobId}/decisions.json) and change only the typography families and faces it names; keep every other decision and source.\n`:''}${request.preparationVersion===2?'Fill decisions.json with source coverage and template inputs, then invoke ds_create_prepare_compile. Correct its named errors; do not generate renderer code or hand-write canonical artifacts.':'Save the input-bound foundations.json, foundation-plan.json, answers/sources/report and pending-review ledger required by the local init contract.'}
+${request.fontChoiceFile?`The user replaced fonts in Builder's Publish font check (${input}${request.fontChoiceFile}). Start from the previous decisions (${runtimeRel(ws,request.slug)}/setup-jobs/${request.previousJobId}/decisions.json) and change only the typography families and faces it names; keep every other decision and source.\n`:''}${request.preparationVersion===2?'Fill decisions.json with source coverage and template inputs, then invoke ds_create_prepare_compile. Correct its named errors; do not generate renderer code or hand-write canonical artifacts.':'Save the input-bound foundations.json, foundation-plan.json, answers/sources/report and pending-review ledger required by the local init contract.'}
 Use the same MCP lease for progress before reads/writes and finish questions/ready/blocked/failed/cancelled. Revalidation errors or cancellation stop work. Ready requires saved proof and means awaiting review. No dependency installs, approval, Figma, build, repo edits or Builder restart. Keep the owning MCP connection open through finish.`;
 }
