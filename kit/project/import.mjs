@@ -10,6 +10,19 @@ const keepManager = src => {
   if (statSync(src.path).isDirectory()) return !DROP_DIRS.has(rel);
   return rel.endsWith('.json') && !DROP_FILES.has(rel);
 };
+const ACTIVE = new Set(['running', 'queued']);
+const readJson = file => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; } };
+// A job or setup copied while it was running has no owner in this project; its old pid may be alive or reused.
+function blockImportedWork(manager) {
+  const mark = {status: 'blocked', message: 'Imported while running', finished: new Date().toISOString()};
+  const jobs = path.join(manager, 'jobs');
+  if (existsSync(jobs)) for (const id of readdirSync(jobs)) {
+    const file = path.join(jobs, id, 'status.json'), status = readJson(file);
+    if (status && ACTIVE.has(status.status)) writeFileSync(file, JSON.stringify({...status, ...mark}, null, 2) + '\n');
+  }
+  const file = path.join(manager, 'setup.json'), setup = readJson(file);
+  if (setup && ACTIVE.has(setup.status)) writeFileSync(file, JSON.stringify({...setup, status: 'blocked', message: mark.message, readyInputHash: null, questions: []}, null, 2) + '\n');
+}
 const isEmpty = dir => !existsSync(dir) || readdirSync(dir).length === 0;
 
 // Copies one session of an old repo into the project. Throws with a plain message when it cannot.
@@ -34,6 +47,7 @@ export function importSession({project, oldRepo, slug}) {
     cpSync(from.output, to.output, {recursive: true, filter: p => noLinks(p) && p !== manager && !p.startsWith(manager + path.sep)});
     if (existsSync(manager)) {
       cpSync(manager, path.join(to.output, 'manager'), {recursive: true, filter: p => noLinks(p) && keepManager({root: manager, path: p})});
+      blockImportedWork(path.join(to.output, 'manager'));
     }
   }
   const file = path.join(project, 'ds-create.json');
