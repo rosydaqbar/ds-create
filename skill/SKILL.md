@@ -1,7 +1,7 @@
 ---
 name: ds-create
 version: 0.2.0
-description: Builds a design system in Figma, and optionally its documentation site, with the ds-create repo. Use when the user wants to open the Builder first (builder), start a design system (init), set up its tokens, build its documentation pages, Parts, Components, Sections or Layouts (build), teach it a lasting rule about the system that later builds must follow (learn), check a build (qa), or see how far a build is (status). Triggers on "ds-create", "design system for {brand}", "start the DS", "build the Button page", "run QA on the DS", "where is the DS build", "remember that buttons align left", "from now on the cards …".
+description: Builds a design system in Figma, and optionally its documentation site, with the ds-create repo. Use when the user wants to open the Builder first (builder), start a design system (init), set up its tokens, build its documentation pages, Parts, Components, Sections or Layouts (build), teach it a lasting rule about the system that later builds must follow (learn), check a build (qa), or see how far a build is (status). Triggers on "ds-create", "design system for {brand}", "start the DS", "build the Button page", "run QA on the DS", "where is the DS build", "remember that buttons align left", "from now on the cards …". Needs Node for local Builder review, then the Figma MCP with use_figma and an editable file for approved generation. Not for a single screen, mockup or one-off component in Figma (figma-generate-design, edit-figma-design), Antikode corporate websites on ATOMS (crea-corp-web), or a code-only component library with no Figma file.
 user-invocable: true
 argument-hint: "builder · init · build · learn · qa · status"
 ---
