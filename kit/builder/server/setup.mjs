@@ -40,7 +40,7 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
     const publishing=/^[0-9a-f-]{36}$/.test(pointer?.id||'') && activeSetup(await readJSON(path.join(outputDir,'manager/jobs',pointer.id,'status.json')));
     const progress=/^[0-9a-f-]{36}$/.test(r.jobId || '') ? await readProgress(path.join(outputDir,'manager/setup-jobs',r.jobId)) : null;
     return { enabled:true, simulation, status:r.status, jobId:r.jobId || null, message:r.message || '', context:r.context || '', projectName:r.projectName || ledger?.system || '', projectId:slug,
-      files:r.files || [], rootFiles:rootInputs.files, rootFilesError:rootInputs.error, interfaceDetails:r.interfaceDetails||null, fastMode:true, inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create init-web --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:true, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
+      files:r.files || [], rootFiles:rootInputs.files, rootFilesError:rootInputs.error, interfaceDetails:r.interfaceDetails||null, fastMode:true, inputRevision:r.inputRevision || 0, revisions:r.revisions || [], resumeCommand:`ds-create builder --slug ${slug}`, canEdit:!activeSetup(r)&&!publishing, questions:r.questions || [], available:true, inputSlug:selectedInputSlug(r,slug), inputPath:`workspace/input/${selectedInputSlug(r,slug)}/`,
       cancelRequested:!!r.cancelRequested,cancelRequestedAt:r.cancelRequestedAt||null, canRetry:!activeSetup(r) && !['empty','questions','ready'].includes(r.status) && !!r.submitted,
       runner:r.runner||runner, progress, updatedAt:r.updated || null, canStop:activeSetup(r) && r.runner==='mcp' };
   }
@@ -54,7 +54,7 @@ export function createSetupJobs({ outputDir, workspace, timeoutMs = 30 * 60 * 10
   }
   async function launch(r, extra = {}) {
     if (r.preview && !simulation) {
-      const blocked = {...r,status:'blocked',questions:[],message:'Preview workspace: preparation is disabled. Start ds-create init-web for your own system.'};
+      const blocked = {...r,status:'blocked',questions:[],message:'Preview workspace: preparation is disabled. Start ds-create builder for your own system.'};
       await writeJSON(file,blocked); return {saved:true,status:'blocked'};
     }
     const id = randomUUID(), dir = await localDirectory(workspace,`workspace/output/${slug}/manager/setup-jobs/${id}`);
@@ -487,14 +487,14 @@ export async function workerConnectionStatus(output,workspace){
  }
  const wait=await readJSON(path.join(output,'manager/preparation-wait.json'));
  const waitExpired=!listener.connected&&wait?.expired===true;
- const recoveryPrompt=listener.connected||listener.deliveryState==='delivered'||!['empty','queued'].includes(preparationState)?null:`Continue preparing foundations from the inputs saved in Builder.\nds-create init-web --slug ${session}\nWorkspace: ${workspace}`;
+ const recoveryPrompt=listener.connected||listener.deliveryState==='delivered'||!['empty','queued'].includes(preparationState)?null:`Continue preparing foundations from the inputs saved in Builder.\nds-create builder --slug ${session}\nWorkspace: ${workspace}`;
  return {connected:listener.connected,transportConnected:listener.transportConnected,mode:listener.mode,capabilities:listener.capabilities||[],reason:listener.reason||null,deliveryState:listener.deliveryState||null,lastSeenAt:listener.agentSeenAt||null,preparationState,preparationMessage,waitExpired,recoveryPrompt};
 }
 
 export function setupPrompt(request,requestFile){
  const input=`workspace/input/${request.inputSlug||request.slug}/`;
  return `Prepare LOCAL foundations for session ${request.slug} in ${request.workspace}. NO Figma read/write authorization.
-Read ${requestFile} and skill/reference/${request.preparationVersion===2?'manager-preparation.md (the complete local contract), plus the adjacent source-pack.json, foundation-inputs.json and template-catalog.json':'init.md (local stages only), init-web.md and workflow/MANAGER.md'}.
+Read ${requestFile} and skill/reference/${request.preparationVersion===2?'manager-preparation.md (the complete local contract), plus the adjacent source-pack.json, foundation-inputs.json and template-catalog.json':'init.md (local stages only), builder.md and workflow/MANAGER.md'}.
 Inputs: ${input}; outputs: workspace/output/${request.slug}/. read EVERY file in the trusted snapshot before asking missing design questions. Listed ../filename entries are shared files directly in workspace/input/; other parent paths and other systems are outside scope. Inspect flagged originals; never execute or modify supplied sources. Earlier uploads are retained archives when superseded by activeFiles/latest context.
 Project name: ${JSON.stringify(request.projectName)}. Interface choices: ${JSON.stringify(request.interfaceDetails||null)}. Preserve these locked choices and frozen values; do not ask a new system to choose naming rules. Use sources for product/font/color choices; ask unresolved questions in Builder unless explicit YOLO permits an inference. YOLO still requires a real product description. New systems include basic Standard/Reduced UI motion and Lucide utility icons.
 ${request.fontChoiceFile?`The user replaced fonts in Builder's Publish font check (${input}${request.fontChoiceFile}). Start from the previous decisions (workspace/output/${request.slug}/manager/setup-jobs/${request.previousJobId}/decisions.json) and change only the typography families and faces it names; keep every other decision and source.\n`:''}${request.preparationVersion===2?'Fill decisions.json with source coverage and template inputs, then invoke ds_create_prepare_compile. Correct its named errors; do not generate renderer code or hand-write canonical artifacts.':'Save the input-bound foundations.json, foundation-plan.json, answers/sources/report and pending-review ledger required by the local init contract.'}

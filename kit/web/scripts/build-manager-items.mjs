@@ -1,7 +1,7 @@
 // Regenerate after changing a web component or its docs sample:
 // node kit/web/scripts/build-manager-items.mjs
 // Builder's Part pages draw these white-label components with the system's tokens. Dependencies are
-// maintainer-only; init-web serves the committed result (kit/builder/client/items/).
+// maintainer-only; the Builder serves the committed result (kit/builder/client/items/).
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -1,9 +1,9 @@
 ---
 name: ds-create
 version: 0.1.6
-description: Builds a design system in Figma, and optionally its documentation site, with the ds-create repo. Use when the user wants to open the Builder first (init-web), start a design system (init), set up its tokens, build its documentation pages, Parts, Components, Sections or Layouts (build), teach it a lasting rule about the system that later builds must follow (learn), check a build (qa), or see how far a build is (status). Triggers on "ds-create", "design system for {brand}", "start the DS", "build the Button page", "run QA on the DS", "where is the DS build", "remember that buttons align left", "from now on the cards …".
+description: Builds a design system in Figma, and optionally its documentation site, with the ds-create repo. Use when the user wants to open the Builder first (builder), start a design system (init), set up its tokens, build its documentation pages, Parts, Components, Sections or Layouts (build), teach it a lasting rule about the system that later builds must follow (learn), check a build (qa), or see how far a build is (status). Triggers on "ds-create", "design system for {brand}", "start the DS", "build the Button page", "run QA on the DS", "where is the DS build", "remember that buttons align left", "from now on the cards …".
 user-invocable: true
-argument-hint: "init-web · init · build · learn · qa · status"
+argument-hint: "builder · init · build · learn · qa · status"
 ---
 
 # ds-create
@@ -12,7 +12,7 @@ One skill, six commands. Each command has its own reference file. Load it before
 
 | Command | Reference | What it does |
 | --- | --- | --- |
-| `init-web` | `reference/init-web.md` | Open/resume Builder (explicit session choice when saved sessions exist); collect/revise context/files and missing answers in the web, then prepare local foundations for review. |
+| `builder` | `reference/builder.md` | Open/resume Builder (explicit session choice when saved sessions exist); collect/revise context/files and missing answers in the web, then prepare local foundations for review. |
 | `init` | `reference/init.md` | Local readiness, inputs/basic choices, a foundation draft reviewed in DS Create Builder, then approved variables/styles in Figma. Settles Web or App. Ends with both links. |
 | `build` | `reference/build.md` | Four gate questions (engine, how far, where, pace), then builds exactly those pages. |
 | `learn` | `reference/learn.md` | Keeps a rule the user teaches about the system in `workspace/input/{slug}/knowledge/`, and applies it to what is already built. |
@@ -20,11 +20,12 @@ One skill, six commands. Each command has its own reference file. Load it before
 | `status` | `reference/status.md` | Reads the ledger: what is done, what is open, which checks haven't run. |
 
 **Routing.**
+- `init-web` is the former name of `builder` and is still accepted.
 - For Builder startup and review, verify its local health endpoint and provide the URL for the user to open and operate. Do not open or automate the browser, attach a browser debugger, or create tab groups. Do not claim rendered verification without observing it.
-- During `init-web`, hold a Builder wait pending as `reference/mcp.md#wait-for-builder` describes. A `publish-request` is claimed with `ds_create_publish` (`reference/mcp.md#publish`); its blocking font check comes first. Preparation never claims Publish. Legacy `DS_CREATE_AGENT_REQUEST` / `DS_CREATE_AGENT_CANCEL` injection is retired.
+- During `builder`, hold a Builder wait pending as `reference/mcp.md#wait-for-builder` describes. A `publish-request` is claimed with `ds_create_publish` (`reference/mcp.md#publish`); its blocking font check comes first. Preparation never claims Publish. Legacy `DS_CREATE_AGENT_REQUEST` / `DS_CREATE_AGENT_CANCEL` injection is retired.
 - **No `ds_create_*` tools in this session** (the DS Create MCP was not loaded when the session started): never ask for a restart or a reconnect. Call the same tools, with the same arguments, through the terminal host: `node kit/builder/cli.mjs mcp {tool} --json '{…}'` (`--json-file` for long arguments; `mcp tools` lists every tool with its schema). See `reference/mcp.md#event-delivery`, *Without DS Create MCP tools*.
 - Manager jobs use `reference/manager-fast.md`. Local preparation requests with `preparationVersion:2` require only `reference/manager-preparation.md`, their trusted request/source pack and premade foundation-inputs/template catalog (plus native inspection of flagged sources). AI parses supplied values/tweaks; Node fills paired foundation JS/MD templates and derived definitions. This is the official local-preparation exception to the global generation read set below; it uses the fixed local compiler rather than documentation-page generation. Legacy preparation keeps its original contract. Approved publication executes compiled data without repeating the full generation workflow; its separate exception also takes precedence over that global set.
-- When the first word is a command, load its reference and follow it. `init-web` is the web-first bootstrap; preserve explicit `--slug {slug}` / `--new` intent and its session-discovery response; follow its early-launch loading exception before the global generation set.
+- When the first word is a command, load its reference and follow it. `builder` is the web-first bootstrap; preserve explicit `--slug {slug}` / `--new` intent and its session-discovery response; follow its early-launch loading exception before the global generation set.
 - With no command, run `status` and end with the next command to run.
 - When the request clearly maps to one command ("set up the tokens" → `init`, "build Text field" → `build`, "check the site" → `qa`), use that command.
 - When the user states a lasting rule about the system ("buttons must align left, brand guideline"), at any point and even mid-build, run `learn` for it, then carry on with what was running.

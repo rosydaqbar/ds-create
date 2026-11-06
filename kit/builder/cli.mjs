@@ -12,10 +12,11 @@ import {writeFigmaSetting} from './server/settings.mjs';
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const args = process.argv.slice(2);
 const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
-const command = args[0];
+const command = args[0] === 'init-web' ? 'builder' : args[0];
+if (args[0] === 'init-web') console.error('init-web is now builder.');
 let slug = arg('--slug');
 const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/builder/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|compare|check-site [--slug {slug}] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/builder/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/builder/cli.mjs mcp-host start|status|stop';
+const usage = 'node kit/builder/cli.mjs builder|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|compare|check-site [--slug {slug}] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/builder/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/builder/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -53,20 +54,20 @@ async function main() {
     console.log(r.structuredContent ? JSON.stringify(r.structuredContent, null, 2) : text);
     return;
   }
-  if(command==='sessions'||command==='init-web'&&!slug&&!args.includes('--new')){
+  if(command==='sessions'||command==='builder'&&!slug&&!args.includes('--new')){
     const sessions=[];
     for(const entry of await readdir(path.join(workspace,'workspace/output'),{withFileTypes:true}).catch(e=>{if(e.code==='ENOENT')return [];throw e;})){
       if(!entry.isDirectory()||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.name))continue;
       const output=path.join(workspace,'workspace/output',entry.name),setup=await observedSetup(output);
       const ledger=await readJSON(path.join(output,'ds-create-ledger.json'));
       if(!setup&&!ledger)continue;
-      sessions.push({slug:entry.name,name:setup?.projectName||ledger?.system||entry.name,status:setup?.status||'initialized',resumeCommand:`ds-create init-web --slug ${entry.name}`});
+      sessions.push({slug:entry.name,name:setup?.projectName||ledger?.system||entry.name,status:setup?.status||'initialized',resumeCommand:`ds-create builder --slug ${entry.name}`});
     }
     sessions.sort((a,b)=>a.slug.localeCompare(b.slug));
-    if(command==='sessions'||sessions.length){console.log(JSON.stringify({action:command==='sessions'?'list':'choose-session',sessions,newCommand:'ds-create init-web --new'},null,2));return;}
+    if(command==='sessions'||sessions.length){console.log(JSON.stringify({action:command==='sessions'?'list':'choose-session',sessions,newCommand:'ds-create builder --new'},null,2));return;}
   }
-  if(command==='init-web'&&!slug)slug=`session-${randomUUID()}`;
-  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'tokens', 'approve', 'compare', 'check-site'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
+  if(command==='builder'&&!slug)slug=`session-${randomUUID()}`;
+  if (!['builder', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'tokens', 'approve', 'compare', 'check-site'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
   if (command === 'wait') {
     const { waitForPreparation } = await import('./server/setup.mjs');
     const controller = new AbortController(), stop = () => controller.abort();
@@ -77,7 +78,7 @@ async function main() {
   }
   let output = path.join(workspace, 'workspace/output', slug);
   let dir = path.join(output, 'manager');
-  const writes = ['init-web', 'start', 'progress'].includes(command);
+  const writes = ['builder', 'start', 'progress'].includes(command);
   if (writes) await mkdir(output, { recursive: true });
   // Keep each selected output isolated, including workspaces that contain symlinks.
   try {
@@ -141,11 +142,11 @@ async function main() {
     return;
   }
   // --no-figma keeps this session out of Figma (ledger flags.figma); Builder's Use Figma switch can turn it back on.
-  if (command === 'init-web' && args.includes('--no-figma')) await writeFigmaSetting(output, false);
+  if (command === 'builder' && args.includes('--no-figma')) await writeFigmaSetting(output, false);
   // The user decides; the agent carries out the matching Builder action through the running Builder.
   if (['publish', 'retry', 'fonts', 'parts', 'approve'].includes(command)) {
     const runtime = await activeRuntime(dir);
-    if (!runtime) throw new Error('DS Create Builder is not running for this session. Run init-web --slug first.');
+    if (!runtime) throw new Error('DS Create Builder is not running for this session. Run builder --slug first.');
     const get = async route => { const r = await fetch(runtime.url + route, { cache: 'no-store' }); if (!r.ok) throw new Error(`${route}: ${r.status}`); return r.json(); };
     const post = async (route, body, token) => {
       const r = await fetch(runtime.url + route, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: runtime.url, 'X-DS-Create-Token': token }, body: JSON.stringify(body) });
@@ -188,7 +189,7 @@ async function main() {
     console.log(`${id}: ${status}`);
     return;
   }
-  if (command === 'init-web' && !await readJSON(path.join(dir, 'setup.json')) && !await readJSON(path.join(output, 'ds-create-ledger.json'))) {
+  if (command === 'builder' && !await readJSON(path.join(dir, 'setup.json')) && !await readJSON(path.join(output, 'ds-create-ledger.json'))) {
     try { await accessDraft(); } catch (e) {
       if (e.code !== 'ENOENT') throw e;
       await writeFile(path.join(dir, 'setup.json'), JSON.stringify({ format: 'ds-create/setup@1', status: 'empty', fastMode: true, created: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx' });

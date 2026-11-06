@@ -1,6 +1,6 @@
 // Regenerate after changing setup composition or shared web components:
 // node kit/web/scripts/build-manager-setup.mjs
-// Dependencies are maintainer-only; init-web serves the committed static result.
+// Dependencies are maintainer-only; the Builder serves the committed static result.
 import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';

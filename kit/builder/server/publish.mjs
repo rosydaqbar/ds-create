@@ -293,7 +293,7 @@ export function evaluatePreflight(draft,result){
  return {passed:!missing.length,missing,roles,fonts:expected.map(f=>({...f,available:seen.get(key(f))})),inventory:result.inventory};
 }
 export function publishRecoveryPrompt(slug,workspace){
- return `Publish the approved foundations saved in Builder.\nds-create init-web --slug ${slug}\nWorkspace: ${workspace}`;
+ return `Publish the approved foundations saved in Builder.\nds-create builder --slug ${slug}\nWorkspace: ${workspace}`;
 }
 
 export function figmaPrompt(request,requestFile,fastPlan){

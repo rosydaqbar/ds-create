@@ -195,7 +195,7 @@ Before generating variables and components:
 # 6. Build sequence
 
 **Who runs which steps.** The `ds-create` skill (`skill/`) is the way in. Its commands run the steps below:
-- `/ds-create init-web` opens the empty Builder before context/questions. Its local preparation job follows init through saved-draft review, then the same explicit Figma approval/generation gates (`skill/reference/init-web.md`). Launching Builder alone does not complete init.
+- `/ds-create builder` opens the empty Builder before context/questions. Its local preparation job follows init through saved-draft review, then the same explicit Figma approval/generation gates (`skill/reference/builder.md`). Launching Builder alone does not complete init.
 - `/ds-create init` runs steps 1–4 and launches the builder's local DS Create Builder (`workflow/MANAGER.md`). Manager opens the local foundation draft before Figma readiness/generation; it is separate from the consumer docs site. User review is required before Figma writes.
 - `/ds-create build` runs steps 5–25 that its four answers allow (`skill/reference/build.md` §4), in rounds. Step 26 runs only when the user asks.
 - `/ds-create qa` runs the on-call checks (*QA on call*).

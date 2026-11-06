@@ -64,7 +64,7 @@ export function createChangeRequests({ outputDir }) {
       const notes = r.notes.length ? r.notes.map(n => `   - ${n.text.replace(/\n+/g, ' ')}`).join('\n') : '   - No notes yet. Propose the change from this context and ask before applying it.';
       return `${i + 1}. ${r.context.item}${where ? ` (${where})` : ''}${r.context.details ? `\n   Shows: ${r.context.details}` : ''}\n   Notes:\n${notes}`;
     }).join('\n\n');
-    return `Apply the change requests saved in Builder.\nds-create init-web --slug ${session}\nWorkspace: ${workspace}\nRequests: workspace/output/${session}/change-requests.json\n\n${items}\n\nChange only what each request names. Use an existing token when it matches the request. Otherwise add one that follows the naming in specs/SYSTEM.md, say what you added, and wait for me to approve the new foundations. If ds-create cannot express the change, say so and propose the feature instead of using a token that does not fit. Ask me before publishing to Figma.`;
+    return `Apply the change requests saved in Builder.\nds-create builder --slug ${session}\nWorkspace: ${workspace}\nRequests: workspace/output/${session}/change-requests.json\n\n${items}\n\nChange only what each request names. Use an existing token when it matches the request. Otherwise add one that follows the naming in specs/SYSTEM.md, say what you added, and wait for me to approve the new foundations. If ds-create cannot express the change, say so and propose the feature instead of using a token that does not fit. Ask me before publishing to Figma.`;
   }
   return { list, update, prompt };
 }

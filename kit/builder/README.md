@@ -3,7 +3,7 @@
 Run from the repository root:
 
 ```sh
-node kit/builder/cli.mjs init-web --new
+node kit/builder/cli.mjs builder --new
 ```
 
 | Location | Responsibility |
