@@ -1,7 +1,7 @@
 // Quality checks that fail become risks. A risk is recorded and shown, and once the user accepts it the work goes
 // on; structural errors (validateFoundations, validatePlan, formats) still block. Acceptances live in
 // output/accepted-risks.json, written only by Builder's accept and restore actions and the accept-risks command.
-import {mkdir, readFile, rename, writeFile} from 'node:fs/promises';
+import {mkdir, open, readFile, rename, stat, unlink, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {contrastReport} from './validate.mjs';
@@ -49,6 +49,25 @@ async function save(outputDir, risks) {
   await rename(temp, file);
 }
 
+// One writer at a time across processes (Builder, the CLI, the MCP server): a lock file next to the acceptances,
+// taken over when it is older than 30 s, as the foundation store does.
+async function locked(outputDir, fn) {
+  await mkdir(outputDir, {recursive: true});
+  const file = risksFile(outputDir) + '.lock', started = Date.now();
+  let handle;
+  while (!handle) {
+    try { handle = await open(file, 'wx'); }
+    catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      const info = await stat(file).catch(() => null);
+      if (info && Date.now() - info.mtimeMs > 30000) { await unlink(file).catch(() => {}); continue; }
+      if (Date.now() - started > 5000) throw new Error('Accepted risks are being saved by another process. Try again.');
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+  }
+  try { return await fn(); } finally { await handle.close(); await unlink(file).catch(() => {}); }
+}
+
 const record = (r, source, at) => {
   const keep = Object.fromEntries((identity[r.kind] || []).map(k => [k, r[k]]));
   return {kind: r.kind, ...keep, minimum: r.minimum, ratioWhenAccepted: typeof r.ratio === 'number' ? Math.round(r.ratio * 100) / 100 : null, acceptedBy: 'user', source, at};
@@ -57,17 +76,21 @@ const record = (r, source, at) => {
 // Adds acceptances for these risks; one that is already accepted keeps its first record.
 export async function writeAccepted(outputDir, risks, {source, now = new Date().toISOString()}) {
   if (typeof source !== 'string' || !/^(builder|chat:.+)$/.test(source)) throw new Error('An acceptance needs its source: builder, or chat:<file>.');
-  const current = await readAccepted(outputDir), keys = new Set(current.map(riskKey)), added = [];
-  for (const r of risks) { if (!isRisk(r) || keys.has(riskKey(r))) continue; keys.add(riskKey(r)); added.push(record(r, source, now)); }
-  if (added.length) await save(outputDir, [...current, ...added]);
-  return added;
+  return locked(outputDir, async () => {
+    const current = await readAccepted(outputDir), keys = new Set(current.map(riskKey)), added = [];
+    for (const r of risks) { if (!isRisk(r) || keys.has(riskKey(r))) continue; keys.add(riskKey(r)); added.push(record(r, source, now)); }
+    if (added.length) await save(outputDir, [...current, ...added]);
+    return added;
+  });
 }
 
 // Restore the rule: the acceptance record goes, so the risk is open again.
 export async function removeAccepted(outputDir, risk) {
-  const current = await readAccepted(outputDir), next = current.filter(a => riskKey(a) !== riskKey(risk));
-  if (next.length !== current.length) await save(outputDir, next);
-  return current.length - next.length;
+  return locked(outputDir, async () => {
+    const current = await readAccepted(outputDir), next = current.filter(a => riskKey(a) !== riskKey(risk));
+    if (next.length !== current.length) await save(outputDir, next);
+    return current.length - next.length;
+  });
 }
 
 export const openRisksMessage = n => `Accept the ${n} risk${n === 1 ? '' : 's'} or change the values first.`;

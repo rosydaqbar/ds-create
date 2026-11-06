@@ -1039,7 +1039,8 @@ export const darkShadows: typeof lightShadows = {
 };
 
 /** Gradients (paint styles): angle in degrees (CSS convention) and stops per mode. React Native has no built-in gradient. */
-export type GradientToken = { name: string; angle: number; stops: readonly { position: number; light: string; dark: string }[] };
+export type GradientStop = { position: number; light: string; dark: string };
+export type GradientToken = { name: string; stops: readonly GradientStop[] } & ({ type: 'linear'; angle: number } | { type: 'radial'; center: readonly [number, number]; size: readonly [number, number]; rotation: number });
 export const gradients: Record<string, GradientToken> = {};
 
 /** Motion in ms and cubic-bezier control points; Reduced applies when the OS asks for reduced motion. */

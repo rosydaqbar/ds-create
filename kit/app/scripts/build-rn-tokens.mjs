@@ -113,9 +113,11 @@ const textStyles = (src.textStyles ?? []).map((t) => {
 const h2 = (x) => Math.round(Math.min(1, Math.max(0, x)) * 255).toString(16).padStart(2, '0');
 const colorOf = (c, mode) => (c && typeof c === 'object' && 'alias' in c ? hex(resolve(c.alias, mode)) : typeof c === 'string' ? hex(c) : c && typeof c === 'object' && 'r' in c ? `#${h2(c.r)}${h2(c.g)}${h2(c.b)}${(c.a ?? 1) < 1 ? h2(c.a) : ''}` : '#000000');
 // Gradients (paint styles) as data: React Native has no gradient, so a component decides how to draw one.
+// Linear keeps its angle; radial keeps center [x, y] (0–1), size [w, h] (full width and height) and rotation (degrees).
+const shapeOf = (p) => p.type === 'GRADIENT_RADIAL' ? { type: 'radial', center: p.center, size: p.size, rotation: p.rotation ?? 0 } : { type: 'linear', angle: p.angle ?? 180 };
 const gradients = (src.paintStyles ?? [])
   .filter((p) => p.paints?.[0]?.stops?.length)
-  .map((p) => ({ name: p.name, key: camel(p.name.split('/').slice(2)) || camel(p.name.split('/')), angle: p.paints[0].angle ?? 180, stops: p.paints[0].stops.map((s) => ({ position: s.position, light: colorOf(s.color, 'Light'), dark: colorOf(s.color, 'Dark') })) }));
+  .map((p) => ({ name: p.name, key: camel(p.name.split('/').slice(2)) || camel(p.name.split('/')), ...shapeOf(p.paints[0]), stops: p.paints[0].stops.map((s) => ({ position: s.position, light: colorOf(s.color, 'Light'), dark: colorOf(s.color, 'Dark') })) }));
 const shadows = (src.effectStyles ?? [])
   .filter((e) => e.effects.some((x) => x.type === 'DROP_SHADOW' || x.type === 'INNER_SHADOW'))
   .map((e) => ({ name: e.name, key: camel(e.name.split('/')), layers: e.effects.filter((x) => x.type === 'DROP_SHADOW').map((x) => ({ x: x.x, y: x.y, blur: x.blur, spread: x.spread ?? 0, light: colorOf(x.color, 'Light'), dark: colorOf(x.color, 'Dark') })) }));
@@ -154,8 +156,9 @@ export const lightShadows: Record<${JSON.stringify(shadows.map((x) => x.key)).sl
 export const darkShadows: typeof lightShadows = ${JSON.stringify(sh('dark'), null, 2)};
 
 /** Gradients (paint styles): angle in degrees (CSS convention) and stops per mode. React Native has no built-in gradient. */
-export type GradientToken = { name: string; angle: number; stops: readonly { position: number; light: string; dark: string }[] };
-export const gradients: Record<string, GradientToken> = ${JSON.stringify(Object.fromEntries(gradients.map((g) => [g.key, { name: g.name, angle: g.angle, stops: g.stops }])), null, 2)};
+export type GradientStop = { position: number; light: string; dark: string };
+export type GradientToken = { name: string; stops: readonly GradientStop[] } & ({ type: 'linear'; angle: number } | { type: 'radial'; center: readonly [number, number]; size: readonly [number, number]; rotation: number });
+export const gradients: Record<string, GradientToken> = ${JSON.stringify(Object.fromEntries(gradients.map(({ key, ...g }) => [key, g])), null, 2)};
 
 /** Motion in ms and cubic-bezier control points; Reduced applies when the OS asks for reduced motion. */
 export type MotionTokens = { [K in keyof typeof standardMotion]: (typeof standardMotion)[K] extends readonly number[] ? readonly number[] : number };
