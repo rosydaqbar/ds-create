@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 export const HOST_FILE = 'workspace/output/.mcp-host.json';
 export const HOST_HEADER = 'x-ds-create-host';
-// Longer than the 5-minute ds_create_prepare_wait so the server, not the host, ends a pending wait.
+// Longer than the 5-minute ds_create_wait so the server, not the host, ends a pending wait.
 export const CALL_TIMEOUT_MS = 6 * 60 * 1000;
 // With no call for this long the agent has gone; closing blocks its unfinished attempts, as a disconnect would.
 export const IDLE_EXIT_MS = 2 * 60 * 60 * 1000;

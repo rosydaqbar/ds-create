@@ -4,7 +4,7 @@ DS Create has one execution protocol: its MCP server. Preparation and publicatio
 
 ## Wait for Builder
 
-After verifying Builder health, give its URL to the user in commentary for them to open and fill, then call `ds_create_wait({session})` through the connected DS Create MCP (`ds_create_prepare_wait` is the same tool under its earlier name). Keep that tool request pending for at most five minutes. Node waits without model requests and returns the next Builder event to the originating agent: `prepare-request` for Prepare foundations or saved answers, `publish-request` for Publish to Figma or Check fonts again. On `wait-expired`, end the turn without automatically rearming or polling. Builder shows a prominent disconnected panel with a short continuation prompt; saved inputs and queued jobs remain intact. Only user continuation starts another wait.
+After verifying Builder health, give its URL to the user in commentary for them to open and fill, then call `ds_create_wait({session})` through the connected DS Create MCP. Keep that tool request pending for at most five minutes. Node waits without model requests and returns the next Builder event to the originating agent: `prepare-request` for Prepare foundations or saved answers, `publish-request` for Publish to Figma or Check fonts again. On `wait-expired`, end the turn without automatically rearming or polling. Builder shows a prominent disconnected panel with a short continuation prompt; saved inputs and queued jobs remain intact. Only user continuation starts another wait.
 
 A terminal tool host can use the same Node waiter through the existing Builder entry point:
 

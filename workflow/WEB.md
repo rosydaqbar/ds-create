@@ -19,7 +19,7 @@ It runs once the foundations are approved in Builder and the round's Parts have 
 # 2. What is produced
 
 ```text
-workspace/output/{system-slug}/web/        a copy of ds-create/web, filled for the brand (README §5)
+workspace/output/{system-slug}/web/        a copy of kit/web, filled for the brand (README §5)
 ├─ COPY-GUIDE.md                 voice and copy rules for every word on the site
 ├─ tokens/
 │  ├─ figma-variables.json       token file written from the local files (input): variables, styles, Part tokens, page ids when Figma has them
@@ -97,7 +97,7 @@ Run the steps in order. Each step names its exit check. At initiation they are s
 
 ## W1 · Copy the template
 
-Copy `ds-create/web/` to `workspace/output/{system-slug}/web/` (README §5), or to another location only when the user explicitly asks for one. Never create the build inside `ds-create/web/` or `ds-create/examples/`: the template stays placeholder-only, and `examples/` holds only builds the user asked to keep as references. Run `npm install`, then `npx playwright install chromium` once for QA. `.npmrc` sets `legacy-peer-deps`, so the React Native web packages install without pulling in `react-native` or any mobile toolchain.
+Copy `kit/web/` to `workspace/output/{system-slug}/web/` (README §5), or to another location only when the user explicitly asks for one. Never create the build inside `kit/web/` or `examples/`: the template stays placeholder-only, and `examples/` holds only builds the user asked to keep as references. Run `npm install`, then `npx playwright install chromium` once for QA. `.npmrc` sets `legacy-peer-deps`, so the React Native web packages install without pulling in `react-native` or any mobile toolchain.
 
 Then fit the copy to the round: `node scripts/scope.mjs --upto {parts|components|sections|layouts}` (add `--no-gl` when the Figma pages have no Guidelines frames; a `build --no-gl` round itself skips the site, so this applies to a later site round on such a system). It removes the stories and components above the round's scope, moves the ones the site itself still imports (docs controls such as Select) to `src/docs/controls/` with every import rewritten, and lists the foundation pages whose visuals use them, for W5. Then `npm run index`, and `npm run pin-props`: it writes the template's current variant defaults (size, emphasis, tone, type…) into every docs usage that leaves them out, so W4 can change a component's defaults without resizing the site's own pages. Use `npm ci` when a lockfile is present.
 
@@ -362,7 +362,7 @@ Also fail QA when:
 - `src/brand/copy.ts` still has a `template(…)` slot or `brandCopy` isn't `'written'`, or a page's copy breaks `COPY-GUIDE.md`;
 - a component has no status in `meta.tsx`, or the release isn't in `changelog.ts`;
 - on an App product, a component page has no `app` block, or App preview shows a web component (§7.1);
-- a brand value is written into the template (`ds-create/web` stays placeholder-only).
+- a brand value is written into the template (`kit/web` stays placeholder-only).
 
 ### Shared documentation presentation
 

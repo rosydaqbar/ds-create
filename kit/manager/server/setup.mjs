@@ -377,20 +377,6 @@ async function pendingPublish(output,workspace){
 }
 
 // A Publish click in Builder queues one ds-create build for the agent; it is delivered once per attempt.
-async function pendingBuild(output){
- const dir=path.join(output,'manager/build'),requestFile=path.join(dir,'request.json'),request=await readJSON(requestFile);
- return request?.status==='queued'&&request.attempt?{dir,requestFile,request}:null;
-}
-export async function buildStatus(output){
- const build=await pendingBuild(output);if(!build)return {status:'none'};
- const receipt=await readJSON(path.join(build.dir,'prompt-delivery.json'));
- return {status:receipt?.event_id===build.request.attempt?'delivered':'waiting',attempt:build.request.attempt,created:build.request.created};
-}
-export async function requestBuild(output){
- const dir=path.join(output,'manager/build'),request={attempt:randomUUID(),status:'queued',created:new Date().toISOString(),command:'ds-create build'};
- await mkdir(dir,{recursive:true});const tmp=path.join(dir,`request.${request.attempt}.tmp`);await writeFile(tmp,JSON.stringify(request,null,2),{mode:0o600});await rename(tmp,path.join(dir,'request.json'));
- return request;
-}
 export async function waitForPreparation({workspace,session,signal,afterEvent,timeoutMs=PREPARATION_WAIT_MS}){
  signal?.throwIfAborted();
  if(!Number.isFinite(timeoutMs)||timeoutMs<=0||timeoutMs>PREPARATION_WAIT_MS)throw Error('Builder wait must be between 1 and 300000 milliseconds.');
@@ -399,8 +385,7 @@ export async function waitForPreparation({workspace,session,signal,afterEvent,ti
  if(afterEvent){
   const current=await latestMcpPreparation(output),publish=await pendingPublish(output,workspace);
   const prepare=current?.jobId?await validatePrepareRequest(output,workspace,current.jobId).catch(()=>null):null;
-  const build=await pendingBuild(output);
-  const target=publish?.delivery?.attempt===afterEvent?publish:build?.request.attempt===afterEvent?build:prepare&&(await readJSON(prepare.deliveryFile))?.attempt===afterEvent?prepare:null;
+  const target=publish?.delivery?.attempt===afterEvent?publish:prepare&&(await readJSON(prepare.deliveryFile))?.attempt===afterEvent?prepare:null;
   if(!target)throw Error('The acknowledged event is not the current preparation or publication attempt.');
   await saveReceipt(target,{event_id:afterEvent,status:'accepted',transport:'pending-tool',updated:new Date().toISOString()});
  }
@@ -439,12 +424,6 @@ export async function waitForPreparation({workspace,session,signal,afterEvent,ti
      await saveReceipt(publish,{event_id:publish.delivery.attempt,status:'handed-off',transport:'pending-tool',updated:new Date().toISOString()});
      return {event:'publish-request',event_id:publish.delivery.attempt,job_id:publish.job.id,session,workspace,request_file:publish.requestFile};
     }
-   }
-   const build=await pendingBuild(output);
-   if(build&&(await readJSON(path.join(build.dir,'prompt-delivery.json')))?.event_id!==build.request.attempt){
-    signal?.throwIfAborted();
-    await saveReceipt(build,{event_id:build.request.attempt,status:'handed-off',transport:'pending-tool',updated:new Date().toISOString()});
-    return {event:'build-request',event_id:build.request.attempt,session,workspace,request_file:build.requestFile};
    }
    if(Date.now()-refreshed>=5000){
     const saved=await readJSON(file);if(saved?.instance!==instance)throw Error('Builder receiver changed.');
@@ -514,7 +493,7 @@ export async function workerConnectionStatus(output,workspace){
 
 export function setupPrompt(request,requestFile){
  const input=`workspace/input/${request.inputSlug||request.slug}/`;
- return `Prepare LOCAL foundations for session ${request.slug} in ${request.workspace}. Mandatory --fast-mode; NO Figma read/write authorization.
+ return `Prepare LOCAL foundations for session ${request.slug} in ${request.workspace}. NO Figma read/write authorization.
 Read ${requestFile} and skills/ds-create/reference/${request.preparationVersion===2?'manager-preparation.md (the complete local contract), plus the adjacent source-pack.json, foundation-inputs.json and template-catalog.json':'init.md (local stages only), init-web.md and workflow/MANAGER.md'}.
 Inputs: ${input}; outputs: workspace/output/${request.slug}/. read EVERY file in the trusted snapshot before asking missing design questions. Listed ../filename entries are shared files directly in workspace/input/; other parent paths and other systems are outside scope. Inspect flagged originals; never execute or modify supplied sources. Earlier uploads are retained archives when superseded by activeFiles/latest context.
 Project name: ${JSON.stringify(request.projectName)}. Interface choices: ${JSON.stringify(request.interfaceDetails||null)}. Preserve these locked choices and frozen values; do not ask a new system to choose naming rules. Use sources for product/font/color choices; ask unresolved questions in Builder unless explicit YOLO permits an inference. YOLO still requires a real product description. New systems include basic Standard/Reduced UI motion and Lucide utility icons.

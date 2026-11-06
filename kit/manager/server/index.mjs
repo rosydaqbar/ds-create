@@ -6,7 +6,7 @@ import {randomBytes, randomUUID} from 'node:crypto';
 import {getPublishStatus, getState, observedSetup, readJSON} from './state.mjs';
 import {createFigmaJobs} from './publish.mjs';
 import {PublishError, readBrandFile, writeJSON} from './files.mjs';
-import {buildStatus, createSetupJobs, requestBuild, uploadLimits, workerConnectionStatus} from './setup.mjs';
+import {createSetupJobs, uploadLimits, workerConnectionStatus} from './setup.mjs';
 import {createParts} from './parts.mjs';
 import {stageOptions, stageStyles} from './stage.mjs';
 import {readParts} from '../parts/files.mjs';
@@ -31,7 +31,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
     // Each level counts its own templates: 19 Parts, 8 Components and 2 Sections today, more when templates are added.
     const level = name => { const list = parts.filter(p => (p.level || 'parts') === name), prepared = list.filter(p => ['review', 'synced'].includes(p.status)).length;
       return { ready: prepared > 0, prepared, inFigma: list.filter(p => p.status === 'synced').length, total: list.length }; };
-    return { figma: await readFigmaSetting(outputDir), foundations: { ready: ['approved', 'synced'].includes(s.source?.review) || s.source?.kind !== 'local' && local > 0, local, total: s.foundations.length, figma }, parts: { ...level('parts'), prompt: `Prepare the Parts, Components and Sections saved in Builder.\nUse DS Create MCP to call ds_create_parts_prepare with session: "${path.basename(outputDir)}".\nds-create init-web --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}\n\nCheck that the foundations are approved in Builder first. If they are not, tell me and wait. Do not approve them yourself.` }, components: level('components'), sections: level('sections'), build: { ...await buildStatus(outputDir), prompt: `Run ds-create build for the design system saved in Builder.\nds-create build --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
+    return { figma: await readFigmaSetting(outputDir), foundations: { ready: ['approved', 'synced'].includes(s.source?.review) || s.source?.kind !== 'local' && local > 0, local, total: s.foundations.length, figma }, parts: { ...level('parts'), prompt: `Prepare the Parts, Components and Sections saved in Builder.\nUse DS Create MCP to call ds_create_parts_prepare with session: "${path.basename(outputDir)}".\nds-create init-web --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}\n\nCheck that the foundations are approved in Builder first. If they are not, tell me and wait. Do not approve them yourself.` }, components: level('components'), sections: level('sections'), build: { prompt: `Run ds-create build for the design system saved in Builder.\nds-create build --slug ${path.basename(outputDir)}\nWorkspace: ${workspace}` } };
   }
   // The user approves the saved foundations in Builder; no Figma publish needed. An approval that a Figma
   // publish already confirmed is kept as it is.
@@ -49,12 +49,6 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
   async function saveSettings(input) {
     if (!input || Object.keys(input).join() !== 'figma' || typeof input.figma !== 'boolean') throw new PublishError('Send {figma: true|false}.', 400);
     return { figma: await writeFigmaSetting(outputDir, input.figma) };
-  }
-  async function queueBuild() {
-    const s = await getState(outputDir), steps = await publishSteps(s, await partJobs.status(s));
-    if (!steps.foundations.ready) throw new PublishError('Prepare your foundations, in Builder or in Figma, before publishing.', 412);
-    if (!steps.parts.ready) throw new PublishError('Prepare at least one Part before publishing.', 412);
-    return { queued: await requestBuild(outputDir) };
   }
   const jobs = createFigmaJobs({ ...jobsOptions, outputDir, workspace, setupGate: async () => { const flow = await setup.status(); return flow.enabled && flow.status !== 'ready' ? 'Finish preparing and reviewing local foundations before publishing to Figma.' : null; } });
   const routes = new Map([
@@ -102,7 +96,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
     const json = (code, value) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(req.method === 'HEAD' ? undefined : JSON.stringify(value)); };
     try {
       const route = new URL(req.url, `http://${host}`).pathname;
-      const mutations = ['/api/foundations', '/api/foundations-restore', '/api/foundations-approve', '/api/settings', '/api/publish-figma', '/api/publish-cancel', '/api/publish-fonts', '/api/parts-prepare', '/api/parts-update', '/api/change-requests', '/api/build-request', '/api/setup-submit', '/api/setup-revise', '/api/setup-answers', '/api/setup-retry', '/api/setup-cancel'];
+      const mutations = ['/api/foundations', '/api/foundations-restore', '/api/foundations-approve', '/api/settings', '/api/publish-figma', '/api/publish-cancel', '/api/publish-fonts', '/api/parts-prepare', '/api/parts-update', '/api/change-requests', '/api/setup-submit', '/api/setup-revise', '/api/setup-answers', '/api/setup-retry', '/api/setup-cancel'];
       if (req.method === 'POST' && mutations.includes(route)) {
         if (req.headers.origin !== `http://${host}` || req.headers['x-ds-create-token'] !== csrfToken || req.headers['sec-fetch-site'] === 'cross-site') { json(403, { error: 'Reopen this Builder tab before trying again.' }); return; }
         const upload = ['/api/setup-submit','/api/setup-revise'].includes(route), type = req.headers['content-type'] || '';
@@ -115,11 +109,11 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
         let input;
         try { input = upload ? await new Response(raw, { headers: { 'Content-Type': type } }).formData() : JSON.parse(raw.toString('utf8')); }
         catch { throw new PublishError('Could not read this request. Choose your files and retry.', 400); }
-        if (['/api/publish-cancel','/api/setup-cancel','/api/build-request'].includes(route) && (!input || Object.keys(input).length)) throw new PublishError(route === '/api/build-request' ? 'Publish takes no parameters.' : 'Stop takes no parameters.',400);
+        if (['/api/publish-cancel','/api/setup-cancel'].includes(route) && (!input || Object.keys(input).length)) throw new PublishError('Stop takes no parameters.',400);
         if(transitioning)throw new PublishError('Another setup or publication action is being saved. Retry after it finishes.');
         transitioning=true;
         try {
-        const result = route === '/api/foundations' ? await items.change({ expectedRevision: input?.expectedRevision, ops: input?.ops, reason: input?.reason, author: 'builder', confirmed: true }) : route === '/api/foundations-restore' ? await items.restore({ revision: input?.revision, expectedRevision: input?.expectedRevision, author: 'builder' }) : route === '/api/foundations-approve' ? await approveFoundations(input) : route === '/api/settings' ? await saveSettings(input) : route === '/api/publish-figma' ? await jobs.start(input) : route === '/api/publish-cancel' ? await jobs.cancel() : route === '/api/publish-fonts' ? await setup.fontChoice(input) : route === '/api/parts-prepare' ? await partJobs.prepare(input, await getState(outputDir)) : route === '/api/parts-update' ? await partJobs.update(input, await getState(outputDir)) : route === '/api/change-requests' ? await changeRequests.update(input) : route === '/api/build-request' ? await queueBuild() :
+        const result = route === '/api/foundations' ? await items.change({ expectedRevision: input?.expectedRevision, ops: input?.ops, reason: input?.reason, author: 'builder', confirmed: true }) : route === '/api/foundations-restore' ? await items.restore({ revision: input?.revision, expectedRevision: input?.expectedRevision, author: 'builder' }) : route === '/api/foundations-approve' ? await approveFoundations(input) : route === '/api/settings' ? await saveSettings(input) : route === '/api/publish-figma' ? await jobs.start(input) : route === '/api/publish-cancel' ? await jobs.cancel() : route === '/api/publish-fonts' ? await setup.fontChoice(input) : route === '/api/parts-prepare' ? await partJobs.prepare(input, await getState(outputDir)) : route === '/api/parts-update' ? await partJobs.update(input, await getState(outputDir)) : route === '/api/change-requests' ? await changeRequests.update(input) :
           route === '/api/setup-revise' ? await setup.revise(input) : route === '/api/setup-submit' ? await setup.submit(input) : route === '/api/setup-answers' ? await setup.answer(input) : route === '/api/setup-retry' ? await setup.retry(input) : await setup.cancel();
         json(202,result); return;
         } finally { transitioning=false; }

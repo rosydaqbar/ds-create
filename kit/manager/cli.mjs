@@ -15,7 +15,7 @@ const arg = k => args.includes(k) ? args[args.indexOf(k) + 1] : undefined;
 const command = args[0];
 let slug = arg('--slug');
 const workspace = path.resolve(arg('--workspace') || ROOT);
-const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|build|tokens|approve|compare|check-site [--slug {slug}] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
+const usage = 'node kit/manager/cli.mjs init-web|sessions|start|status|stop|progress|wait|publish|retry|fonts|parts|tokens|approve|compare|check-site [--slug {slug}] [--site path] [--out path] [--foundation color --status generating --message "…"] [--figma URL] [--choice role=Family] [--no-figma]\n       node kit/manager/cli.mjs mcp tools|{tool} [--json \'{…}\' | --json-file args.json]\n       node kit/manager/cli.mjs mcp-host start|status|stop';
 
 async function activeRuntime(dir) {
   const runtime = await readJSON(path.join(dir, 'runtime.json'));
@@ -66,7 +66,7 @@ async function main() {
     if(command==='sessions'||sessions.length){console.log(JSON.stringify({action:command==='sessions'?'list':'choose-session',sessions,newCommand:'ds-create init-web --new'},null,2));return;}
   }
   if(command==='init-web'&&!slug)slug=`session-${randomUUID()}`;
-  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'build', 'tokens', 'approve', 'compare', 'check-site'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
+  if (!['init-web', 'start', 'status', 'stop', 'progress', 'wait', 'publish', 'retry', 'fonts', 'parts', 'tokens', 'approve', 'compare', 'check-site'].includes(command) || !slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error(usage);
   if (command === 'wait') {
     const { waitForPreparation } = await import('./server/setup.mjs');
     const controller = new AbortController(), stop = () => controller.abort();
@@ -143,7 +143,7 @@ async function main() {
   // --no-figma keeps this session out of Figma (ledger flags.figma); Builder's Use Figma switch can turn it back on.
   if (command === 'init-web' && args.includes('--no-figma')) await writeFigmaSetting(output, false);
   // The user decides; the agent carries out the matching Builder action through the running Builder.
-  if (['publish', 'retry', 'fonts', 'parts', 'build', 'approve'].includes(command)) {
+  if (['publish', 'retry', 'fonts', 'parts', 'approve'].includes(command)) {
     const runtime = await activeRuntime(dir);
     if (!runtime) throw new Error('DS Create Builder is not running for this session. Run init-web --slug first.');
     const get = async route => { const r = await fetch(runtime.url + route, { cache: 'no-store' }); if (!r.ok) throw new Error(`${route}: ${r.status}`); return r.json(); };
@@ -164,9 +164,6 @@ async function main() {
     } else if (command === 'parts') {
       const s = await get('/api/state');
       console.log(JSON.stringify(await post('/api/parts-prepare', { ids: arg('--ids') ? arg('--ids').split(',') : (s.parts || []).map(p => p.id) }, s.csrfToken)));
-    } else if (command === 'build') {
-      const s = await get('/api/state');
-      console.log(JSON.stringify(await post('/api/build-request', {}, s.csrfToken)));
     } else if (command === 'retry') {
       const flow = await get('/api/setup-flow');
       console.log(JSON.stringify(await post('/api/setup-retry', {}, flow.csrfToken)));

@@ -378,7 +378,7 @@ Suggest the default from §1 Platforms (web platforms → Web, iOS or Android �
 - **Figma and code** (default): everything the product type includes. The documentation site is always on the web, whatever the product type: it is where tokens, foundations and components are browsed.
 - **Figma only for now**: only the Figma file, already adapted to the product type. Code can be added later with `workflow/WEB.md` and `workflow/APP.md`.
 
-The project is created in `workspace/output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`kit/web/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
+The project is created in `workspace/output/{system-slug}/web/`: the docs site, with the React library for Web and the React Native preview source (`kit/app/react-native/`) for App (README §5). Confirm the system slug with the user. Use another location only when the user explicitly asks for one. The component implementation mode (§8) applies to the code too. The output formats the product type needs are selected automatically: CSS, Tailwind and DTCG for the docs site and web.
 
 Nothing native is installed, created or built: no Xcode, Android SDK, simulators, emulators or app projects (`workflow/APP.md`, "Nothing is installed or built").
 
