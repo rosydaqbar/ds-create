@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Maintainer script (not shipped). Finds repo paths named in tracked files and tests/ that do not exist.
 //   node dev/check-paths.mjs [--json] [--root dir]
+// Paths listed in dev/check-paths.allow (under the root) are not reported.
 // Exits 1 when any path is missing.
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
@@ -10,7 +11,6 @@ import { fileURLToPath } from 'node:url';
 const PREFIXES = ['kit', 'workflow', 'specs', 'skill', 'skills', 'knowledge', 'dev', 'examples'];
 const TEXT = /\.(md|mjs|js|cjs|ts|tsx|json|html|css|yml|yaml|txt|sh)$/i;
 const SKIP_DIRS = new Set(['node_modules', '.git']);
-const SKIP_FILES = new Set(['tests/check-paths.test.mjs']); // holds the known-missing list on purpose
 // A path starts a token (not preceded by a word, dot, dash or slash) and runs to whitespace or a closing mark.
 const PATH_RE = new RegExp(`(?<![\\w./{}$-])((?:${PREFIXES.join('|')})/[^\\s"'\`()\\[\\]<>,;:|*]*)`, 'g');
 
@@ -32,20 +32,27 @@ async function listFiles(root) {
     files = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).split('\0').filter(Boolean);
   } catch { files = await walk(root); }
   const tests = await walk(path.join(root, 'tests'), root);
-  return [...new Set([...files, ...tests])].filter(f => TEXT.test(f) && !f.endsWith('package-lock.json') && !SKIP_FILES.has(f) && !f.split('/').includes('node_modules'));
+  return [...new Set([...files, ...tests])].filter(f => TEXT.test(f) && !f.endsWith('package-lock.json') && !f.split('/').includes('node_modules'));
 }
 
 async function exists(p) { try { await stat(p); return true; } catch { return false; } }
 
+async function readAllowed(root) {
+  try {
+    const text = await readFile(path.join(root, 'dev/check-paths.allow'), 'utf8');
+    return new Set(text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#')));
+  } catch { return new Set(); }
+}
+
 export async function findMissing(root) {
-  const missing = [];
+  const missing = [], allowed = await readAllowed(root);
   for (const file of (await listFiles(root)).sort()) {
     let text;
     try { text = await readFile(path.join(root, file), 'utf8'); } catch { continue; }
     const seen = new Set();
     for (const m of text.matchAll(PATH_RE)) {
       let p = m[1].replace(/[.…]+$/, '');
-      if (/[{}$…]/.test(p) || seen.has(p)) continue;
+      if (/[{}$…]/.test(p) || seen.has(p) || allowed.has(p)) continue;
       const last = p.split('/').pop();
       if (!(p.endsWith('/') || /\.[A-Za-z0-9]+$/.test(last))) continue;
       seen.add(p);

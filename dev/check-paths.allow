@@ -1,0 +1,20 @@
+# Paths that check-paths must not report. One per line; a "#" line explains the entries below it.
+
+# Generated at build time, never committed.
+kit/web/src/tokens/tokens.gen.ts
+kit/web/tokens/tokens.dtcg.json
+kit/web/src/styles/tokens.css
+
+# Written into each build by the impeccable tool, not part of the template.
+kit/web/.impeccable/config.json
+
+# A pattern, not a file.
+specs/layouts/5.x
+
+# Relative to workspace/input/{slug}/, one set per system.
+knowledge/system.md
+knowledge/2.1-button.md
+
+# Planned roadmap specs that do not exist yet.
+specs/guidance/03-content.md
+specs/guidance/04-accessibility.md
