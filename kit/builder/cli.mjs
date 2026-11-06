@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {cp, mkdir, open, readFile, readdir, realpath, rename, unlink, writeFile} from 'node:fs/promises';
+import {cp, lstat, mkdir, open, readFile, readdir, realpath, rename, unlink, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
@@ -86,6 +86,11 @@ async function main() {
   let dir = path.join(output, 'manager');
   const writes = ['builder', 'start', 'progress'].includes(command);
   if (writes) await mkdir(output, { recursive: true });
+  // A project keeps only runtime state in output/manager/; a symlink there, even a dangling one, could send it elsewhere.
+  if (project.mode === 'project') {
+    const st = await lstat(path.join(output, 'manager')).catch(e => { if (e.code === 'ENOENT') return null; throw e; });
+    if (st?.isSymbolicLink()) throw new Error('Manager output must stay inside the selected system folder.');
+  }
   // Keep each selected output isolated, including workspaces that contain symlinks.
   try {
     // Workspace mode: workspace/output/{slug}. Project mode: the project's output/.
@@ -225,17 +230,23 @@ async function main() {
   // Reuse the session's last port so the Builder link stays the same across restarts.
   const saved = Number((await readJSON(path.join(dir, 'port.json')))?.port) || 0, port = Number(arg('--port') || saved);
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('Port must be an integer from 0 to 65535.');
-  await cp(path.join(ROOT, 'kit/builder'), dir, { recursive: true, filter: source => !['cli.mjs', 'README.md'].includes(path.relative(path.join(ROOT, 'kit/builder'), source)) });
-  await cp(path.join(ROOT, 'kit/web/src/styles/docs-presentation.css'), path.join(dir, 'docs-presentation.css'));
-  // Builder draws Parts with the site's own token rules (server/stage.mjs).
-  await mkdir(path.join(dir, 'web/scripts'), { recursive: true });
-  for (const file of ['token-model.mjs', 'chrome-fallbacks.mjs']) await cp(path.join(ROOT, 'kit/web/scripts', file), path.join(dir, 'web/scripts', file));
-  // The same chrome defaults as web docs; these are viewer styles, never brand token data.
-  const declarations = [...colors, ...values, ...effects].map(([name, value]) => `  ${name}: ${value};`).join('\n');
-  await writeFile(path.join(dir, 'chrome.css'), `/* Generated from kit/web/scripts/chrome-fallbacks.mjs. */\n:root {\n${declarations}\n}\n`);
+  // Workspace mode keeps a copy of Builder in the session. A project runs it from the engine and copies nothing.
+  if (project.mode !== 'project') {
+    await cp(path.join(ROOT, 'kit/builder'), dir, { recursive: true, filter: source => !['cli.mjs', 'README.md'].includes(path.relative(path.join(ROOT, 'kit/builder'), source)) });
+    await cp(path.join(ROOT, 'kit/web/src/styles/docs-presentation.css'), path.join(dir, 'docs-presentation.css'));
+    // Builder draws Parts with the site's own token rules (server/stage.mjs).
+    await mkdir(path.join(dir, 'web/scripts'), { recursive: true });
+    for (const file of ['token-model.mjs', 'chrome-fallbacks.mjs']) await cp(path.join(ROOT, 'kit/web/scripts', file), path.join(dir, 'web/scripts', file));
+    // The same chrome defaults as web docs; these are viewer styles, never brand token data.
+    const declarations = [...colors, ...values, ...effects].map(([name, value]) => `  ${name}: ${value};`).join('\n');
+    await writeFile(path.join(dir, 'chrome.css'), `/* Generated from kit/web/scripts/chrome-fallbacks.mjs. */\n:root {\n${declarations}\n}\n`);
+  }
   try { await unlink(path.join(dir, 'runtime.json')); } catch (e) { if (e.code !== 'ENOENT') throw e; }
   const log = await open(path.join(dir, 'server.log'), 'a');
-  const child = spawn(process.execPath, [path.join(dir, 'server/index.mjs'), String(port), ...(arg('--port') ? [] : ['prefer'])], { detached: true, stdio: ['ignore', log.fd, log.fd] });
+  const serverArgs = [String(port), ...(arg('--port') ? [] : ['prefer'])];
+  const entry = project.mode === 'project' ? path.join(ROOT, 'kit/builder/server/index.mjs') : path.join(dir, 'server/index.mjs');
+  if (project.mode === 'project') serverArgs.push('--output', output);
+  const child = spawn(process.execPath, [entry, ...serverArgs], { detached: true, stdio: ['ignore', log.fd, log.fd] });
   await log.close();
   let spawnError;
   let exited = false;

@@ -2,6 +2,7 @@ import {writeBaseline} from '../foundations/baseline.mjs';
 import {PublishError, inputFreshness, selectedInputSlug, snapshotInputs, withJobLock, writeJSON} from './files.mjs';
 import {access, mkdir, open, readFile, realpath} from 'node:fs/promises';
 import path from 'node:path';
+import {existsSync} from 'node:fs';
 import {createHash, randomUUID} from 'node:crypto';
 import {compareFoundations} from '../foundations/compare.mjs';
 import {checkWebDraft} from './verify.mjs';
@@ -127,6 +128,8 @@ async function jobFiles(outputDir,id){
 }
 export async function validatePublishRequest(outputDir,workspace,id){
  const files=await jobFiles(outputDir,id),r=await readJSON(files.requestFile),ledger=await readJSON(path.join(outputDir,'ds-create-ledger.json'));
+ // A project's job that points at another folder came in with an import from an old repo; its records are never rewritten.
+ if(r?.id===id&&(r.workspace!==workspace||r.outputDir!==outputDir)&&existsSync(path.join(workspace,'ds-create.json')))throw new Error('This job was imported. Start a new publish from Builder.');
  if(r?.id!==id||r.workspace!==workspace||r.outputDir!==outputDir||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(r.slug)||path.basename(outputDir)!==r.slug)throw new Error('Request does not belong to this workspace.');
  const approval=ledger?.foundationReview,expected=path.relative(workspace,files.requestFile);
  if(!['approved','synced'].includes(approval?.status)||approval.approvedBy!=='user'||approval.hash!==r.hash||approval.approvalSource!==expected)throw new Error('The saved request does not have the current user approval.');

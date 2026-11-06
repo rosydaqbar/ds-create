@@ -1,4 +1,5 @@
 import http from 'node:http';
+import {existsSync} from 'node:fs';
 import {mkdir, readFile, rename, unlink, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -16,8 +17,22 @@ import {readFigmaSetting, writeFigmaSetting} from './settings.mjs';
 import {createItemStore} from '../foundations/store.mjs';
 import {syncState} from '../foundations/baseline.mjs';
 import {preparedFonts} from '../client/assets/fonts/catalog.mjs';
+import {parseServerArgs} from './args.mjs';
 
-export function createManagerServer({ outputDir, workspace = path.resolve(outputDir, '../../..'), jobsOptions = {}, setupOptions = {}, codeDir }) {
+// The site's chrome defaults: next to this folder in a session's Builder copy, or in the repo.
+const fallbacks = ['../web/scripts/chrome-fallbacks.mjs', '../../web/scripts/chrome-fallbacks.mjs'].map(p => new URL(p, import.meta.url)).find(u => existsSync(fileURLToPath(u)));
+const web = fallbacks ? await import(fallbacks) : null;
+// A project's output/ sits next to ds-create.json; a workspace session's output is workspace/output/{slug}.
+const defaultWorkspace = outputDir => existsSync(path.join(outputDir, '../ds-create.json')) ? path.resolve(outputDir, '..') : path.resolve(outputDir, '../../..');
+
+export function createManagerServer({ outputDir, workspace = defaultWorkspace(outputDir), jobsOptions = {}, setupOptions = {}, codeDir }) {
+  // With codeDir the Builder runs from the engine, which has no copied viewer styles: read them from kit/web.
+  const engineAssets = new Map();
+  if (codeDir && web) {
+    const declarations = [...web.colors, ...web.values, ...web.effects].map(([name, value]) => `  ${name}: ${value};`).join('\n');
+    engineAssets.set('chrome.css', Buffer.from(`/* Generated from kit/web/scripts/chrome-fallbacks.mjs. */\n:root {\n${declarations}\n}\n`));
+    engineAssets.set('docs-presentation.css', path.resolve(codeDir, '../web/src/styles/docs-presentation.css'));
+  }
   const managerDir = codeDir || path.join(outputDir, 'manager');
   const instance = randomUUID(), csrfToken = randomBytes(24).toString('hex');
   const setup = createSetupJobs({ ...setupOptions, outputDir, workspace });
@@ -139,7 +154,7 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
         res.end(req.method === 'HEAD' ? undefined : file.bytes); return;
       }
       if (!routes.has(route)) { res.writeHead(404).end('Not found'); return; }
-      const [file, type] = routes.get(route), body = await readFile(path.join(managerDir, file));
+      const [file, type] = routes.get(route), asset = engineAssets.get(file), body = Buffer.isBuffer(asset) ? asset : await readFile(asset || path.join(managerDir, file));
       res.writeHead(200, { 'Content-Type': type }); res.end(req.method === 'HEAD' ? undefined : body);
     } catch (e) {
       // Store and template refusals carry their own status and one-sentence reason.
@@ -148,20 +163,21 @@ export function createManagerServer({ outputDir, workspace = path.resolve(output
       json(known ? e.status : 500, { error: known ? e.message : 'Could not read the current workspace. Retry after its files are saved.' });
     }
   });
-  return { server, instance, jobs, setup };
+  return { server, instance, jobs, setup, workspace };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   // --output <dir>: Builder runs from where it is installed and keeps its runtime state in <dir>/manager/.
   // Without it, the folder is derived from this file's location (a session's copied manager/).
-  const here = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), flag = process.argv.indexOf('--output');
-  const outputArg = flag > 1 ? process.argv[flag + 1] : undefined;
-  if (flag > 1 && (!outputArg || outputArg.startsWith('--'))) { console.error('--output needs a folder.'); process.exit(1); }
+  const here = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  let parsed;
+  try { parsed = parseServerArgs(process.argv.slice(2)); } catch (e) { console.error(e.message); process.exit(1); }
+  const outputArg = parsed.output;
   const outputDir = outputArg ? path.resolve(outputArg) : path.dirname(here), managerDir = path.join(outputDir, 'manager');
   await mkdir(managerDir, { recursive: true });
   const { server, instance } = createManagerServer({ outputDir, ...(outputArg ? { codeDir: here } : {}) });
   // A session keeps its address across restarts: the CLI asks for the last port and only a taken port falls back.
-  const portArg = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : 0, requested = Number(portArg), prefer = process.argv.slice(2, 4).includes('prefer');
+  const requested = parsed.port, prefer = parsed.prefer;
   let retried = false;
   server.on('error', e => { if (prefer && e.code === 'EADDRINUSE' && !retried) { retried = true; server.listen(0, '127.0.0.1'); return; } console.error(e.message); process.exitCode = 1; });
   server.on('listening', async () => {

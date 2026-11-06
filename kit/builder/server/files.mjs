@@ -152,7 +152,8 @@ export async function sessionOutput(workspace,slug){
   const output=path.join(workspace,'output');
   if(await realpath(output)!==output)throw new Error('Session must stay inside this workspace.');
   const manager=path.join(output,'manager');
-  try{if(await realpath(manager)!==manager)throw new Error('Session must stay inside this workspace.');}catch(e){if(e.code!=='ENOENT')throw e;}
+  // lstat, not realpath: a dangling symlink has no real path and must still be refused.
+  try{if((await lstat(manager)).isSymbolicLink())throw new Error('Session must stay inside this workspace.');}catch(e){if(e.code!=='ENOENT')throw e;}
   return output;
  }
  const output=path.join(workspace,'workspace/output',slug);
