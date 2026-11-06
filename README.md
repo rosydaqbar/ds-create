@@ -16,7 +16,7 @@ The skill ships with the repo in `skill/` and stays brand-agnostic. Open the wor
 
 ## Start a project
 
-One folder holds one design system. While ds-create is not published, pack it and point `new` at the tarball:
+One folder holds one design system. Until ds-create is published, run `npm pack` and pass the tarball to `ds-create new`. In a terminal:
 
 ```bash
 npm pack
@@ -25,7 +25,7 @@ cd acme
 npx --no ds-create builder
 ```
 
-`--no` makes npx use the engine installed in the project and never download a package of the same name. Then run `/ds-create builder` in your agent. Put your files in `input/`; the design system is written to `output/`. `npx --no ds-create migrate` updates an older project, `npx --no ds-create skill` rewrites its skill, and `npx --no ds-create import <old-repo> --slug <name>` brings in a session from the old `workspace/` layout.
+`--no` makes npx use the engine installed in the project and never download a package of the same name. In your agent, run `/ds-create builder`. Put your files in `input/`; the design system is written to `output/`. Run `npx --no ds-create migrate` to update an older project. Run `npx --no ds-create skill` to rewrite its skill. Run `npx --no ds-create import <old-repo> --slug <name>` to import a session from the old `workspace/` layout.
 
 The sections below describe the older `workspace/` layout, which still works in a checkout of this repo.
 
@@ -191,7 +191,7 @@ npx impeccable install --project --providers=claude -y
 
 # 4. Mandatory loading
 
-What to load before and during a build is in `workflow/INITIATOR.md` Part B §0.
+See `workflow/INITIATOR.md` Part B §0 for the files to load before and during a build.
 
 # Example: Syncium
 

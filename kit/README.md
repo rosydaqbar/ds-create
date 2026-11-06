@@ -2,13 +2,13 @@
 
 Code and templates for ds-create.
 
-## The engine runs these
+## Used by the engine
 
-- `builder/`: the Builder web app. A session copies it into `workspace/output/{slug}/manager/` and runs it there.
+- `builder/`: the Builder web app. The engine runs Builder for each project. In the older `workspace/` layout, a session copies Builder to `workspace/output/{slug}/manager/` and runs it there.
 - `mcp/`: the MCP server that lets an agent prepare and publish from Builder.
 - `tools/`: scripts for Figma, building and content checks.
 
-## Projects get copies of these
+## Copied into projects
 
 - `web/`: the documentation site template.
 - `app/`: the React Native template.

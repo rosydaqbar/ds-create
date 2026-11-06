@@ -14,7 +14,7 @@ const ACTIVE = new Set(['running', 'queued']);
 const readJson = file => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; } };
 // A job or setup copied while it was running has no owner in this project; its old pid may be alive or reused.
 function blockImportedWork(manager) {
-  const mark = {status: 'blocked', message: 'Imported while running', finished: new Date().toISOString()};
+  const mark = {status: 'blocked', message: 'Imported while a run was in progress', finished: new Date().toISOString()};
   const jobs = path.join(manager, 'jobs');
   if (existsSync(jobs)) for (const id of readdirSync(jobs)) {
     const file = path.join(jobs, id, 'status.json'), status = readJson(file);
